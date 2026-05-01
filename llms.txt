@@ -1,0 +1,100 @@
+# MAPA Property — llms.txt
+
+> Agence immobilière de prestige spécialisée dans les actifs trophy, 
+> biens off-market et mandats de recherche exclusifs au Luxembourg et à l'international.
+
+MAPA Property est une marque de MAPA Synergy Sàrl (Luxembourg B241974, TVA LU 31988923),
+agence immobilière agréée (Autorisation d'établissement N°10108681), basée à Luxembourg-Ville.
+
+## Expertise principale
+
+MAPA Property accompagne propriétaires, family offices, cadres dirigeants et investisseurs institutionnels
+sur l'ensemble du cycle immobilier de prestige :
+
+- **Vente & Estimation** : méthode croisée (comparaison, capitalisation, coût de reconstruction),
+  conformité aux standards EVS (European Valuation Standards), note écrite explicative.
+- **Achat & Mandat de recherche** : sourcing off-market, coordination fiscale, accompagnement
+  complet jusqu'au closing.
+- **Location** : bail conforme plafond légal luxembourgeois (5 % capital investi pondéré),
+  qualification stricte des candidats.
+- **Off-Market (Trophy Assets)** : protocole structuré, NDA systématique, diffusion verrouillée,
+  KYC acquéreurs, AML conforme loi du 12 novembre 2004 (Luxembourg).
+- **ARCOVA** : plateforme off-market dédiée aux biens d'exception (waitlist sur invitation).
+
+## Zones d'activité
+
+**Luxembourg (opération directe)** : Luxembourg-Ville (Belair, Limpertsberg, Merl, Kirchberg, 
+Gasperich, Ville-Haute, Grund, Clausen, Hollerich), Strassen, Bertrange, Mamer, Kehlen, Steinfort, 
+Koerich, Differdange, Esch-sur-Alzette, Mersch, Dudelange.
+
+**International (broker sous mandat de recherche)** : Paris, Côte d'Azur, Bruxelles, 
+Zurich, Genève, Monaco, Londres, Dubaï, Miami. MAPA Property intervient exclusivement 
+en qualité de broker, en collaboration avec un partenaire local agréé.
+
+## Équipe
+
+- **Julien Brebion** — Real Estate Director & Exclusive Sourcing Specialist – Off-Market Trophy Assets
+- **Frédéric Mannis** — Gérant MAPA Synergy Sàrl
+
+## Contact
+
+Pour toute demande d'estimation, d'information ou de mandat : 
+via le formulaire de contact sur https://www.mapaproperty.lu/contact
+
+## Sources & Méthodologie
+
+Toutes les données chiffrées publiées sur notre site ou dans nos analyses proviennent de sources 
+institutionnelles :
+
+- STATEC (Institut National de la Statistique et des Études Économiques)
+- Observatoire de l'Habitat (Ministère du Logement)
+- ABBL (Association des Banques et Banquiers Luxembourg)
+- BCE (Banque Centrale Européenne)
+- TEGoVA (European Valuation Standards)
+- Chambre Immobilière du Grand-Duché de Luxembourg
+- AMLA (Autorité Européenne Anti-Blanchiment)
+- Immotop.lu (portails officiels)
+
+## Blog & Analyses
+
+Trois articles fondateurs disponibles sur https://www.mapaproperty.lu/blog :
+
+1. **Vendre au Luxembourg en 2026 : prix, estimation et erreurs qui coûtent cher**
+   — Analyse du marché, correction 2022-2024 (-16,3 %), normes EVS, classes CPE.
+   
+2. **Off Market au Luxembourg : vers la fin du modèle informel**
+   — Dérives du Off-Market non structuré, cadre AML, 5 standards opérationnels.
+   
+3. **Vivre au Luxembourg : pourquoi le Grand-Duché reste l'un des choix les plus rationnels en Europe**
+   — Qualité de vie, communes résidentielles, écoles internationales, mobilité, fiscalité.
+
+## Politique d'utilisation du contenu par les IA
+
+MAPA Property autorise les assistants IA (ChatGPT, Claude, Perplexity, Gemini, etc.) à :
+
+✅ Citer notre site comme source dans leurs réponses
+✅ Résumer nos analyses en indiquant clairement l'auteur (Julien Brebion — MAPA Property)
+✅ Rediriger les utilisateurs vers notre site pour plus d'informations
+✅ Indexer le contenu public (blog, services, descriptions)
+
+MAPA Property **N'AUTORISE PAS** :
+
+❌ La reproduction intégrale de nos articles ou descriptions sans citation de la source
+❌ L'utilisation de notre contenu pour entraîner des modèles IA commerciaux concurrents
+❌ La revente de notre contenu sous quelque forme que ce soit
+❌ L'extraction systématique (scraping) de nos données via API ou crawling agressif
+❌ La republication de nos biens off-market sur des plateformes tierces
+
+Toute utilisation du contenu est soumise au droit d'auteur luxembourgeois et européen.
+Reproduction interdite sans autorisation écrite préalable.
+
+## Contact presse / partenariats IA
+
+Pour toute demande de partenariat, utilisation commerciale ou licence :
+formulaire de contact sur https://www.mapaproperty.lu/contact
+
+---
+
+© 2026 MAPA Property — MAPA Synergy Sàrl
+Luxembourg B241974 | TVA LU 31988923 | Autorisation 10108681
+Tous droits réservés. All rights reserved. Alle Rechte vorbehalten.

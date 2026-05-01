@@ -1,0 +1,296 @@
+# ═══════════════════════════════════════════════════════════════════
+# MAPA Property — robots.txt
+# Session 14 : Politique stricte anti-scraping + GEO-friendly
+# ═══════════════════════════════════════════════════════════════════
+#
+# POLITIQUE :
+# - Moteurs de recherche classiques : AUTORISÉS (SEO prioritaire)
+# - IA légitimes avec opt-in : AUTORISÉES (GEO prioritaire)
+# - Scrapers SEO (Ahrefs, Semrush, Majestic) : BLOQUÉS
+# - Bots agressifs / scrapers commerciaux : BLOQUÉS
+# - Bots malveillants connus : BLOQUÉS
+#
+# © 2026 MAPA Property — MAPA Synergy Sàrl (Luxembourg B241974)
+# All rights reserved. Toute reproduction interdite.
+# ═══════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 1 : MOTEURS DE RECHERCHE CLASSIQUES (autorisés)
+# ─────────────────────────────────────────────────────────────────
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 2
+
+User-agent: YandexBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Applebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Qwantbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Sogou
+Allow: /
+Crawl-delay: 2
+
+User-agent: Exabot
+Allow: /
+Crawl-delay: 2
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 2 : IA / LLM (AUTORISÉES pour GEO, citations, notoriété)
+# ─────────────────────────────────────────────────────────────────
+# Ces IA sont autorisées à lire le site MAIS pas à utiliser le contenu
+# pour l'entraînement commercial (voir llms.txt pour les règles précises)
+
+User-agent: GPTBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Gemini
+Allow: /
+
+User-agent: Bard
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 3 : SCRAPERS SEO (BLOQUÉS — ces outils agrègent le contenu
+# pour vendre des analyses à tes concurrents)
+# ─────────────────────────────────────────────────────────────────
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: AhrefsSiteAudit
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: SemrushBot-SA
+Disallow: /
+
+User-agent: SemrushBot-BA
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: MJ12bot/v1.4.8
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MauiBot
+Disallow: /
+
+User-agent: SurdotlyBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: ZoominfoBot
+Disallow: /
+
+User-agent: SerpstatBot
+Disallow: /
+
+User-agent: SearchmetricsBot
+Disallow: /
+
+User-agent: LinkpadBot
+Disallow: /
+
+User-agent: spbot
+Disallow: /
+
+User-agent: Barkrowler
+Disallow: /
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 4 : SCRAPERS COMMERCIAUX / AGRÉGATEURS IMMOBILIERS
+# (bloqués car ils republient le contenu sans autorisation)
+# ─────────────────────────────────────────────────────────────────
+
+User-agent: RealtyBot
+Disallow: /
+
+User-agent: ZillowBot
+Disallow: /
+
+User-agent: TrulyaBot
+Disallow: /
+
+User-agent: PropertyScraper
+Disallow: /
+
+User-agent: Scrapy
+Disallow: /
+
+User-agent: python-requests
+Disallow: /
+
+User-agent: curl
+Disallow: /
+
+User-agent: wget
+Disallow: /
+
+User-agent: HTTrack
+Disallow: /
+
+User-agent: WebCopier
+Disallow: /
+
+User-agent: WebStripper
+Disallow: /
+
+User-agent: Xenu
+Disallow: /
+
+User-agent: SiteSucker
+Disallow: /
+
+User-agent: WebZIP
+Disallow: /
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 5 : BOTS MALVEILLANTS CONNUS (bloqués)
+# ─────────────────────────────────────────────────────────────────
+
+User-agent: 360Spider
+Disallow: /
+
+User-agent: EmailCollector
+Disallow: /
+
+User-agent: EmailSiphon
+Disallow: /
+
+User-agent: EmailWolf
+Disallow: /
+
+User-agent: GrapeshotCrawler
+Disallow: /
+
+User-agent: linkWalker
+Disallow: /
+
+User-agent: YisouSpider
+Disallow: /
+
+# ─────────────────────────────────────────────────────────────────
+# SECTION 6 : DIRECTIVE GÉNÉRALE
+# ─────────────────────────────────────────────────────────────────
+
+User-agent: *
+Allow: /
+Crawl-delay: 10
+
+# Interdire l'accès aux routes privées
+Disallow: /admin
+Disallow: /api/private/
+Disallow: /*.json$
+Disallow: /*.sql$
+Disallow: /sql/
+Disallow: /content/
+Disallow: /backup/
+Disallow: /*?*          # query strings (évite indexation de paramètres)
+
+# ─────────────────────────────────────────────────────────────────
+# SITEMAPS
+# ─────────────────────────────────────────────────────────────────
+
+Sitemap: https://www.mapaproperty.lu/sitemap.xml
+
+# ─────────────────────────────────────────────────────────────────
+# NOTE LÉGALE
+# ─────────────────────────────────────────────────────────────────
+# Tout accès au contenu de ce site vaut acceptation des CGU disponibles
+# sur https://www.mapaproperty.lu/cgu.
+# La reproduction, même partielle, du contenu (textes, images, données) 
+# est strictement interdite sans autorisation écrite préalable de
+# MAPA Property (MAPA Synergy Sàrl, Luxembourg B241974).
+# En cas de scraping détecté, des poursuites pourront être engagées.

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ═══════════════════════════════════════════════════════════════════
+     MAPA Property V28 FINAL13 Session 12 — sitemap XML
+     Sitemap enrichi avec hreflang multilingue FR/EN/DE
+     Couverture : home + services + pages futures (guides, quartiers, villes)
+     Dernière mise à jour : 2026-04-23
+═══════════════════════════════════════════════════════════════════ -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       HOME (priorité maximale)
+  ═══════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://www.mapaproperty.lu/</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.mapaproperty.lu/"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://dutfkblygfvhhwpzxmfz.supabase.co/storage/v1/object/public/Logo/logo_mapa_transparent_final.png</image:loc>
+      <image:title>Logo MAPA Property</image:title>
+      <image:caption>MAPA Property — Agence immobilière de prestige au Luxembourg</image:caption>
+    </image:image>
+  </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PAGES SERVICES PRINCIPAUX (priorité 0.9)
+  ═══════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://www.mapaproperty.lu/vente</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/vente"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/vente?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/vente?lang=de"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/achat</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/achat"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/achat?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/achat?lang=de"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/location</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/location"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/location?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/location?lang=de"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/off-market</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/off-market"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/off-market?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/off-market?lang=de"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/mandat-recherche</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/mandat-recherche"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/mandat-recherche?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/mandat-recherche?lang=de"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PAGES SERVICES SECONDAIRES (priorité 0.8)
+  ═══════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://www.mapaproperty.lu/estimation</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/estimation"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/estimation?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/estimation?lang=de"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/arcova</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/arcova"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/arcova?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/arcova?lang=de"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/aml-kyc</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/blog</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/blog"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/blog?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/blog?lang=de"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/qui-sommes-nous</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/honoraires</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/contact</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/contact"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/contact?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/contact?lang=de"/>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       BLOG - ARTICLES DE RÉFÉRENCE (priorité 0.8)
+       Session 13 : 3 articles fondateurs publiés
+  ═══════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://www.mapaproperty.lu/blog/vendre-luxembourg-2026-prix-estimation</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/blog/vendre-luxembourg-2026-prix-estimation"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/blog/vendre-luxembourg-2026-prix-estimation?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/blog/vendre-luxembourg-2026-prix-estimation?lang=de"/>
+    <lastmod>2026-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/blog/off-market-luxembourg-fin-modele-informel</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/blog/off-market-luxembourg-fin-modele-informel"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/blog/off-market-luxembourg-fin-modele-informel?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/blog/off-market-luxembourg-fin-modele-informel?lang=de"/>
+    <lastmod>2026-02-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/blog/vivre-au-luxembourg-choix-rationnel-europe</loc>
+    <xhtml:link rel="alternate" hreflang="fr-LU" href="https://www.mapaproperty.lu/blog/vivre-au-luxembourg-choix-rationnel-europe"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://www.mapaproperty.lu/blog/vivre-au-luxembourg-choix-rationnel-europe?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.mapaproperty.lu/blog/vivre-au-luxembourg-choix-rationnel-europe?lang=de"/>
+    <lastmod>2026-03-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PAGES UTILITAIRES (priorité 0.4)
+  ═══════════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://www.mapaproperty.lu/mentions-legales</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/cgu</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://www.mapaproperty.lu/rgpd</loc>
+    <lastmod>2026-04-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+</urlset>

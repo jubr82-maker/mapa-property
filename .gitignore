@@ -1,0 +1,16 @@
+.DS_Store
+.netlify/
+.env
+.env.local
+.env.*.local
+node_modules/
+*.log
+.vscode/
+.idea/
+*.swp
+.cache/
+dist/
+build/
+.idea/
+Thumbs.db
+*.tmp

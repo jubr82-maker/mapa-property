@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin — MAPA Property</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Cinzel:wght@500;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./admin.css?v=s14">
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-view" class="login-wrap">
+  <div class="login-box">
+    <div class="login-brand">
+      <div class="login-label">MAPA PROPERTY</div>
+      <div class="login-title">Back-office admin</div>
+    </div>
+    <form id="login-form" class="login-form" onsubmit="return handleLogin(event)">
+      <div class="login-field">
+        <label>Email</label>
+        <input type="email" id="login-email" required autocomplete="username" placeholder="j.brebion@mapagroup.org">
+      </div>
+      <div class="login-field">
+        <label>Mot de passe</label>
+        <input type="password" id="login-password" required autocomplete="current-password">
+      </div>
+      <div id="login-error" class="login-error" style="display:none"></div>
+      <button type="submit" class="btn btn-primary btn-full">Se connecter</button>
+      <button type="button" class="btn-reset" onclick="resetPassword()">Mot de passe oublié ?</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ APP (post-login) ═══ -->
+<div id="app" style="display:none">
+
+  <!-- HEADER -->
+  <header class="admin-hd">
+    <div class="hd-left">
+      <div class="hd-label">MAPA PROPERTY</div>
+      <div class="hd-title">Back-office</div>
+    </div>
+    <div class="hd-right">
+      <a href="/" target="_blank" class="hd-link" title="Voir le site public">↗ Site public</a>
+      <span id="hd-user" class="hd-user"></span>
+      <button class="hd-logout" onclick="handleLogout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <!-- NAV -->
+  <nav class="admin-nav">
+    <button class="nav-btn active" data-tab="dashboard" onclick="showTab('dashboard')">📊 Dashboard</button>
+    <button class="nav-btn" data-tab="properties" onclick="showTab('properties')">🏠 Biens</button>
+    <button class="nav-btn" data-tab="offmarket" onclick="showTab('offmarket')">💎 Off-Market</button>
+    <button class="nav-btn" data-tab="featured" onclick="showTab('featured')">⭐ Coups de cœur</button>
+    <button class="nav-btn" data-tab="reviews" onclick="showTab('reviews')">✍️ Avis</button>
+    <button class="nav-btn" data-tab="blog" onclick="showTab('blog')">📰 Blog</button>
+    <button class="nav-btn" data-tab="leads" onclick="showTab('leads')">📥 Leads <span id="leads-badge" class="nav-badge" style="display:none"></span></button>
+    <button class="nav-btn" data-tab="mandats" onclick="showTab('mandats')">📝 Mandats <span id="mandats-badge" class="nav-badge" style="display:none"></span></button>
+    <button class="nav-btn" data-tab="arcova" onclick="showTab('arcova')">🔒 ARCOVA</button>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-main">
+    <!-- DASHBOARD -->
+    <section id="tab-dashboard" class="tab active">
+      <h1 class="tab-title">Dashboard</h1>
+      <div id="dashboard-stats" class="stats-grid">
+        <div class="stat-card"><div class="stat-lbl">Biens publiés</div><div class="stat-val" id="stat-props">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Coups de cœur</div><div class="stat-val" id="stat-featured">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Avis en attente</div><div class="stat-val" id="stat-pending-reviews">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Nouveaux leads</div><div class="stat-val" id="stat-new-leads">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Nouveaux mandats</div><div class="stat-val" id="stat-new-mandats">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Articles blog</div><div class="stat-val" id="stat-blog">—</div></div>
+      </div>
+      <h2 class="section-title">Activité récente</h2>
+      <div id="dashboard-activity" class="activity-list">
+        <div class="empty">Chargement…</div>
+      </div>
+    </section>
+
+    <!-- BIENS -->
+    <section id="tab-properties" class="tab">
+      <div class="tab-header">
+        <h1 class="tab-title">Biens</h1>
+        <div class="tab-actions">
+          <input type="search" id="props-search" placeholder="🔍 Rechercher (ref, titre, ville…)" oninput="filterProperties()">
+          <select id="props-filter-status" onchange="filterProperties()">
+            <option value="all">Tous statuts</option>
+            <option value="published">Publiés</option>
+            <option value="unpublished">Non publiés</option>
+          </select>
+          <select id="props-filter-transaction" onchange="filterProperties()">
+            <option value="all">Ventes + Locations</option>
+            <option value="sale">Ventes</option>
+            <option value="rent">Locations</option>
+          </select>
+        </div>
+      </div>
+      <div id="properties-list" class="props-grid">
+        <div class="empty">Chargement…</div>
+      </div>
+    </section>
+
+    <!-- OFF-MARKET (biens confidentiels gérés manuellement, hors Apimo) -->
+    <section id="tab-offmarket" class="tab">
+      <div class="tab-header">
+        <h1 class="tab-title">Off-Market</h1>
+        <div class="tab-actions">
+          <input type="search" id="om-search" placeholder="🔍 Rechercher (réf, titre, ville…)" oninput="filterOffmarket()">
+          <select id="om-filter-status" onchange="filterOffmarket()">
+            <option value="all">Tous statuts</option>
+            <option value="published">Publiés</option>
+            <option value="unpublished">Non publiés</option>
+          </select>
+          <button class="btn btn-primary" onclick="newOffmarket()">+ Nouveau bien off-market</button>
+        </div>
+      </div>
+      <div id="offmarket-list" class="props-grid">
+        <div class="empty">Chargement…</div>
+      </div>
+    </section>
+
+    <!-- COUPS DE CŒUR -->
+    <section id="tab-featured" class="tab">
+      <div class="tab-header">
+        <h1 class="tab-title">Coups de cœur</h1>
+        <div class="tab-actions">
+          <span class="hint">Jusqu'à 4 biens en coup de cœur. Glisser-déposer pour réordonner.</span>
+        </div>
+      </div>
+      <div id="featured-current" class="featured-current">
+        <h2 class="section-title">Coups de cœur actuels</h2>
+        <div id="featured-list" class="featured-list"><div class="empty">Chargement…</div></div>
+      </div>
+      <div id="featured-pick" class="featured-pick">
+        <h2 class="section-title">Ajouter un bien</h2>
+        <div id="featured-available" class="props-grid"><div class="empty">Chargement…</div></div>
+      </div>
+    </section>
+
+    <!-- AVIS -->
+    <section id="tab-reviews" class="tab">
+      <div class="tab-header">
+        <h1 class="tab-title">Avis clients</h1>
+        <div class="tab-actions">
+          <button class="btn btn-primary" onclick="newReview()">+ Nouvel avis</button>
+        </div>
+      </div>
+      <div id="reviews-list" class="reviews-list"><div class="empty">Chargement…</div></div>
+    </section>
+
+    <!-- BLOG -->
+    <section id="tab-blog" class="tab">
+      <div class="tab-header">
+        <h1 class="tab-title">Blog</h1>
+        <div class="tab-actions">
+          <button class="btn btn-primary" onclick="newBlogPost()">+ Nouvel article</button>
+        </div>
+      </div>
+      <div id="blog-list" class="blog-list"><div class="empty">Chargement…</div></div>
+    </section>
+
+    <!-- LEADS -->
+    <section id="tab-leads" class="tab">
+      <div class="tab-header">
+        <h1 class="tab-title">Leads (formulaires contact)</h1>
+        <div class="tab-actions">
+          <select id="leads-filter" onchange="renderLeads()">
+            <option value="new">Nouveaux</option>
+            <option value="handled">Traités</option>
+            <option value="all">Tous</option>
+          </select>
+        </div>
+      </div>
+      <div id="leads-list" class="leads-list"><div class="empty">Chargement…</div></div>
+    </section>
+
+    <!-- MANDATS -->
+    <section id="tab-mandats" class="tab">
+      <div class="tab-header">
+        <h1 class="tab-title">Demandes de mandat</h1>
+        <div class="tab-actions">
+          <button class="btn btn-primary" onclick="newMandat()">+ Nouveau mandat</button>
+        </div>
+      </div>
+      <div id="mandats-list" class="leads-list"><div class="empty">Chargement…</div></div>
+    </section>
+
+    <!-- ARCOVA -->
+    <section id="tab-arcova" class="tab">
+      <div class="tab-header">
+        <h1 class="tab-title">ARCOVA Waitlist</h1>
+      </div>
+      <div id="arcova-list" class="leads-list"><div class="empty">Chargement…</div></div>
+    </section>
+
+  </main>
+
+  <!-- MODALS -->
+  <div id="modal-backdrop" class="modal-backdrop" onclick="closeModal()" style="display:none"></div>
+  <div id="modal" class="modal-admin" style="display:none">
+    <div class="modal-hd">
+      <h2 id="modal-title">—</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body" class="modal-body"></div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast" style="display:none"></div>
+
+</div>
+
+<script src="./admin.js?v=s14"></script>
+<script src="./offmarket.js?v=s14"></script>
+</body>
+</html>

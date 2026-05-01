@@ -1,0 +1,195 @@
+# ═══════════════════════════════════════════════════════════════════
+# MAPA Property — Configuration Netlify
+# Session 14 : Sécurité RGPD + anti-scraping
+# ═══════════════════════════════════════════════════════════════════
+
+[build]
+  publish = "."
+  command = ""
+
+# ───────────────────────────────────────────────────────────────────
+# HEADERS SÉCURITÉ — Appliqués à TOUTES les pages
+# ───────────────────────────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Empêche l'embedding du site dans un iframe (anti-clickjacking)
+    X-Frame-Options = "DENY"
+    
+    # Empêche le navigateur de deviner le Content-Type (anti-MIME sniffing)
+    X-Content-Type-Options = "nosniff"
+    
+    # Protection XSS (legacy mais toujours utile pour vieux navigateurs)
+    X-XSS-Protection = "1; mode=block"
+    
+    # Force HTTPS pour 2 ans, inclut sous-domaines, préchargement dans navigateurs
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    
+    # Politique de referrer : envoie l'origine seulement en HTTPS, pas de referrer vers HTTP
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Désactive les features navigateur non utilisées (micro, caméra, géoloc, USB, paiement)
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+    
+    # Content Security Policy : limite les sources autorisées
+    # - self : ce domaine uniquement
+    # - unsafe-inline : autorise les styles inline (nécessaire pour l'app)
+    # - Supabase : pour la base de données
+    # - Unsplash/Pexels : pour les images
+    # - Google Fonts : pour les polices
+    # - Cloudflare CDN : pour les scripts libs
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://challenges.cloudflare.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com data:;
+      img-src 'self' data: blob: https://dutfkblygfvhhwpzxmfz.supabase.co https://media.apimo.pro https://images.unsplash.com https://images.pexels.com https://www.mapaproperty.lu;
+      connect-src 'self' https://dutfkblygfvhhwpzxmfz.supabase.co https://*.supabase.co https://challenges.cloudflare.com;
+      media-src 'self' https://dutfkblygfvhhwpzxmfz.supabase.co;
+      frame-src https://challenges.cloudflare.com;
+      frame-ancestors 'none';
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      upgrade-insecure-requests;
+      """
+    
+    # Empêche le navigateur Internet Explorer d'ouvrir les téléchargements
+    X-Download-Options = "noopen"
+    
+    # Anti-robots légaux : bannière dans les headers
+    X-Robots-Tag = "index, follow, max-image-preview:large, max-snippet:-1"
+    
+    # Copyright notice (juridique)
+    X-Copyright = "© 2026 MAPA Property. Toute reproduction totale ou partielle interdite. All rights reserved. Reproduction forbidden."
+
+# ───────────────────────────────────────────────────────────────────
+# HEADERS SPÉCIFIQUES POUR ASSETS STATIQUES (cache long)
+# ───────────────────────────────────────────────────────────────────
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ───────────────────────────────────────────────────────────────────
+# HEADERS POUR LE SITEMAP/ROBOTS (court cache)
+# ───────────────────────────────────────────────────────────────────
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type = "application/xml; charset=UTF-8"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/llms.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# ───────────────────────────────────────────────────────────────────
+# REDIRECTIONS — Rate limiting via headers Edge
+# ───────────────────────────────────────────────────────────────────
+# Bloque les user-agents de scrapers connus
+[[redirects]]
+  from = "/*"
+  to = "/403.html"
+  status = 403
+  conditions = {Role = ["scraper"]}
+  force = true
+  [redirects.headers]
+    User-Agent = "AhrefsBot,SemrushBot,DotBot,MJ12bot,Bytespider,PetalBot,DataForSeoBot,ZoominfoBot"
+
+# Routes publiques — pages Single Page Application
+[[redirects]]
+  from = "/achat"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/vente"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/location"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/off-market"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/arcova"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/mandat-recherche"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/estimation"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/honoraires"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/aml-kyc"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/qui-sommes-nous"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/mentions-legales"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/cgu"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/rgpd"
+  to = "/index.html"
+  status = 200

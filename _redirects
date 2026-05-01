@@ -1,0 +1,4 @@
+# MAPA Property V28 FINAL4 — Netlify SPA fallback
+# Toute URL non-matchée (ex: /vente, /achat, /qui-sommes-nous…) est servie via /index.html
+# avec un code HTTP 200 pour que le router JS (Module 3) prenne la main.
+/*    /index.html   200
