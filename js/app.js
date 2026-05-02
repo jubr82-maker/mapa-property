@@ -84,12 +84,8 @@ console.log('%c[MAPA Property] %c'+window.MAPA_BUILD,'color:#b8865a;font-weight:
           /* MAPA: bouton CTA "Envoyez-nous un e-mail" — texte localisé via i18n.
              On vérifie window.CURLANG (FR/EN/DE), fallback FR */
           var lang = (window.CURLANG || 'fr').toLowerCase();
-          var ctaLabels = {
-            fr: 'Envoyez-nous un e-mail',
-            en: 'Send us an email',
-            de: 'Senden Sie uns eine E-Mail'
-          };
-          displayText = ctaLabels[lang] || ctaLabels.fr;
+          /* MAPA: label universel 'Email' dans les 3 langues */
+          displayText = 'Email';
         } else if (label.indexOf('i18n:') === 0) {
           /* Format "i18n:cle.de.traduction" : on cherche dans I18N global, fallback fr puis cle brute */
           var key = label.substring(5);
