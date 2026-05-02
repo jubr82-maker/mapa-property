@@ -74,40 +74,69 @@
     return m[s] || categoryLabel(t);
   }
 
+  /* I18N : labels traduits selon la langue active */
+  var OM_LABELS = {
+    fr: { surf:'Surface habitable', terr:'Terrain', bed:'Chambres', bath:'Salles de bain', dpe:'Classe énergétique', type:'Type', caract:'Caractéristiques', prest:'Prestations', desc:'Description', emp:'Emplacement', loc_in:'Bien situé en', loc_after:'. Localisation précise communiquée après NDA.', fallback:'Bien d\'exception présenté en off-market strict, dont l\'identité reste protégée jusqu\'à qualification de l\'acquéreur.' },
+    en: { surf:'Living area', terr:'Land', bed:'Bedrooms', bath:'Bathrooms', dpe:'Energy class', type:'Type', caract:'Features', prest:'Amenities', desc:'Description', emp:'Location', loc_in:'Property located in', loc_after:'. Precise location disclosed after NDA.', fallback:'Exceptional property presented in strict off-market, whose identity remains protected until buyer qualification.' },
+    de: { surf:'Wohnfläche', terr:'Grundstück', bed:'Schlafzimmer', bath:'Badezimmer', dpe:'Energieklasse', type:'Typ', caract:'Merkmale', prest:'Ausstattung', desc:'Beschreibung', emp:'Lage', loc_in:'Objekt gelegen in', loc_after:'. Genaue Lage wird nach NDA mitgeteilt.', fallback:'Außergewöhnliches Objekt im strengen Off-Market-Modus präsentiert, dessen Identität bis zur Käuferqualifikation geschützt bleibt.' }
+  };
+
+  function _omGetLabels() {
+    var lang = (typeof window !== 'undefined' && window.CURLANG) || 'fr';
+    return OM_LABELS[lang] || OM_LABELS.fr;
+  }
+
+  function _omLangPick(p, field) {
+    /* Selectionne le champ Supabase dans la bonne langue avec fallback FR */
+    var lang = (typeof window !== 'undefined' && window.CURLANG) || 'fr';
+    if (lang !== 'fr' && p[field + '_' + lang] && String(p[field + '_' + lang]).trim()) {
+      return String(p[field + '_' + lang]).trim();
+    }
+    if (p[field] && String(p[field]).trim()) return String(p[field]).trim();
+    return '';
+  }
+
   function buildEditorialDescription(p) {
+    var L = _omGetLabels();
     var lines = [];
-    var pitch = (p.short_pitch && String(p.short_pitch).trim()) || '';
+    var pitch = _omLangPick(p, 'short_pitch');
     if (pitch) lines.push(pitch);
-    else lines.push('Bien d\'exception présenté en off-market strict, dont l\'identité reste protégée jusqu\'à qualification de l\'acquéreur.');
+    else lines.push(L.fallback);
     lines.push('');
     var caracs = [];
-    if (p.surface_hab)     caracs.push('Surface habitable : ±' + Number(p.surface_hab).toLocaleString('fr-FR') + ' m²');
-    if (p.surface_terrain) caracs.push('Terrain : ±' + Number(p.surface_terrain).toLocaleString('fr-FR') + ' m²');
-    if (p.bedrooms != null     && p.bedrooms !== '')  caracs.push('Chambres : ' + p.bedrooms);
-    if (p.bathrooms != null    && p.bathrooms !== '') caracs.push('Salles de bain : ' + p.bathrooms);
-    if (p.energy_class)        caracs.push('Classe énergétique : ' + p.energy_class);
-    if (p.type)                caracs.push('Type : ' + categoryLabel(p.type));
+    if (p.surface_hab)     caracs.push(L.surf + ' : ±' + Number(p.surface_hab).toLocaleString('fr-FR') + ' m²');
+    if (p.surface_terrain) caracs.push(L.terr + ' : ±' + Number(p.surface_terrain).toLocaleString('fr-FR') + ' m²');
+    if (p.bedrooms != null     && p.bedrooms !== '')  caracs.push(L.bed + ' : ' + p.bedrooms);
+    if (p.bathrooms != null    && p.bathrooms !== '') caracs.push(L.bath + ' : ' + p.bathrooms);
+    if (p.energy_class)        caracs.push(L.dpe + ' : ' + p.energy_class);
+    if (p.type)                caracs.push(L.type + ' : ' + categoryLabel(p.type));
     if (caracs.length) {
-      lines.push('Caractéristiques :');
+      lines.push(L.caract + ' :');
       caracs.forEach(function (c) { lines.push('- ' + c); });
       lines.push('');
     }
-    if (Array.isArray(p.highlights) && p.highlights.length) {
-      var hl = p.highlights.filter(function (x) { return x && String(x).trim(); });
+    /* Highlights : utiliser la version i18n stockee dans Supabase */
+    var lang = (typeof window !== 'undefined' && window.CURLANG) || 'fr';
+    var hlSource = (lang !== 'fr' && Array.isArray(p['highlights_' + lang]) && p['highlights_' + lang].length)
+                   ? p['highlights_' + lang]
+                   : (Array.isArray(p.highlights) ? p.highlights : []);
+    if (hlSource.length) {
+      var hl = hlSource.filter(function (x) { return x && String(x).trim(); });
       if (hl.length) {
-        lines.push('Prestations :');
+        lines.push(L.prest + ' :');
         hl.forEach(function (h) { lines.push('- ' + String(h).trim()); });
         lines.push('');
       }
     }
-    if (p.description && String(p.description).trim()) {
-      lines.push('Description :');
-      lines.push(String(p.description).trim());
+    var desc = _omLangPick(p, 'description');
+    if (desc) {
+      lines.push(L.desc + ' :');
+      lines.push(desc);
       lines.push('');
     }
     if (p.country_code) {
-      lines.push('Emplacement :');
-      lines.push('Bien situé en ' + countryLabel(p.country_code) + '. Localisation précise communiquée après NDA.');
+      lines.push(L.emp + ' :');
+      lines.push(L.loc_in + ' ' + countryLabel(p.country_code) + L.loc_after);
     }
     return lines.join('\n');
   }
@@ -131,8 +160,8 @@
       category_de: categoryLabelDE(p.type),
       title: titleFR,
       title_fr: titleFR,
-      title_en: titleFR,
-      title_de: titleFR,
+      title_en: (p.title_en && String(p.title_en).trim()) || titleFR,
+      title_de: (p.title_de && String(p.title_de).trim()) || titleFR,
       surface: p.surface_hab,
       bedrooms: p.bedrooms,
       bathrooms: p.bathrooms,
@@ -148,14 +177,14 @@
       price_label: priceLabel(p),
       images: img ? [img].concat(gallery) : [],
       first_image: img || '',
-      teaser: editorial,
-      teaser_fr: editorial,
-      teaser_en: editorial,
-      teaser_de: editorial,
-      description: editorial,
-      description_fr: editorial,
-      description_en: editorial,
-      description_de: editorial,
+      teaser: (p.short_pitch && String(p.short_pitch).trim()) || editorial,
+      teaser_fr: (p.short_pitch && String(p.short_pitch).trim()) || editorial,
+      teaser_en: (p.short_pitch_en && String(p.short_pitch_en).trim()) || (p.short_pitch && String(p.short_pitch).trim()) || editorial,
+      teaser_de: (p.short_pitch_de && String(p.short_pitch_de).trim()) || (p.short_pitch && String(p.short_pitch).trim()) || editorial,
+      description: (p.description && String(p.description).trim()) || editorial,
+      description_fr: (p.description && String(p.description).trim()) || editorial,
+      description_en: (p.description_en && String(p.description_en).trim()) || (p.description && String(p.description).trim()) || editorial,
+      description_de: (p.description_de && String(p.description_de).trim()) || (p.description && String(p.description).trim()) || editorial,
       _editorialDescription: editorial,
       badge: 'Off-Market',
       _supabaseId: p.id,
@@ -171,7 +200,7 @@
     var orig = window.renderOffMarketDetail;
     window.renderOffMarketDetail = function (b) {
       orig.apply(this, arguments);
-      if (!b || !b._editorialDescription) return;
+      if (!b || !b._supabaseId) return;
       if (typeof window.smartParseDescription !== 'function') return;
 
       setTimeout(function () {
@@ -190,7 +219,14 @@
           outroHtml = ps[ps.length - 1].outerHTML;
         }
 
-        var parsed = window.smartParseDescription(b._editorialDescription);
+        /* Recuperer le bien Supabase brut pour reconstruire la description dans la langue active */
+        var rawItems = (typeof _LAST_ITEMS !== 'undefined' && Array.isArray(_LAST_ITEMS)) ? _LAST_ITEMS : [];
+        var rawBien = null;
+        for (var i = 0; i < rawItems.length; i++) {
+          if (rawItems[i].id === b._supabaseId) { rawBien = rawItems[i]; break; }
+        }
+        var freshEditorial = rawBien ? buildEditorialDescription(rawBien) : (b._editorialDescription || '');
+        var parsed = window.smartParseDescription(freshEditorial);
         bdDesc.innerHTML = introHtml + parsed + outroHtml;
 
         var simCta = c.querySelector('.bd-similar-cta');
