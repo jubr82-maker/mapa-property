@@ -560,7 +560,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- ═══ CSS externalisé (v28 — split P1) ═══ -->
-<link rel="stylesheet" href="css/styles.css?v=mobile12">
+<link rel="stylesheet" href="css/styles.css?v=mobile13">
 
 <!-- ═══ Cloudflare Turnstile (anti-spam, RGPD-compliant, free plan) ═══ -->
 <!-- Site key MAPA Property : 0x4AAAAAADDxAd17up1nU0-U -->
@@ -1209,6 +1209,9 @@ ul.mand-eng-list > li::before{
       <span data-i18n="search.btn">Recherche</span>
     </button>
   </div>
+
+  <!-- V28 FINAL14 — Sur mobile : pre-selection automatique de la Recherche IA -->
+  <script>(function(){if(window.matchMedia&&window.matchMedia("(max-width: 768px)").matches){if(typeof window.szMode==="function"){window.szMode("ia");}else{document.addEventListener("DOMContentLoaded",function(){if(typeof window.szMode==="function")window.szMode("ia");});}}})();</script>
 
   <!-- Mode IA : un seul input + bouton RECHERCHE -->
   <div class="sz-ia" id="sz-pane-ia">
