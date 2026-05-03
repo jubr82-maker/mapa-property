@@ -4729,34 +4729,41 @@ body section div.jul-cx span.mp-mail.jul-c {
 }
 
 @media (max-width: 768px) {
-  /* Eyebrow "A propos" remplace par "Notre agence" */
+  /* Eyebrow "A propos" -> "Notre agence" avec trait avant + apres (style Selection MAPA) */
   .pres .p-ey {
-    font-size: 10px !important;
-    letter-spacing: .35em !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    font-family: 'Cinzel', serif !important;
+    font-size: 11px !important;
+    letter-spacing: .42em !important;
+    text-transform: uppercase !important;
+    color: var(--or) !important;
+    font-weight: 500 !important;
+    margin-bottom: 16px !important;
+    font-size: 0 !important; /* cache le texte d'origine */
   }
-  .pres .p-ey [data-i18n="apr.ey"],
-  .pres .p-ey {
-    visibility: hidden;
-    position: relative;
-  }
-  .pres .p-ey::after {
-    content: "Notre agence";
-    visibility: visible;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: max-content;
-    font-family: 'Cinzel', serif;
-    font-size: 10px;
-    letter-spacing: .35em;
-    text-transform: uppercase;
-    color: var(--or);
-    font-weight: 500;
-  }
-  /* Garder seulement le before/after barre dorees */
+  /* Trait avant */
   .pres .p-ey::before {
-    visibility: visible;
+    content: '' !important;
+    display: block !important;
+    width: 28px !important;
+    height: 1.5px !important;
+    background: var(--or) !important;
+    opacity: .55 !important;
+    flex-shrink: 0 !important;
+  }
+  /* Texte 'Notre agence' + trait apres */
+  .pres .p-ey::after {
+    content: 'Notre agence' !important;
+    display: inline-block !important;
+    font-size: 11px !important;
+    letter-spacing: .42em !important;
+    font-family: 'Cinzel', serif !important;
+    color: var(--or) !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
   }
 
   /* Titre principal compact */
@@ -4835,34 +4842,41 @@ body section div.jul-cx span.mp-mail.jul-c {
 }
 
 @media (max-width: 768px) {
-  /* Eyebrow "A propos" remplace par "Notre agence" */
+  /* Eyebrow "A propos" -> "Notre agence" avec trait avant + apres (style Selection MAPA) */
   .pres .p-ey {
-    font-size: 10px !important;
-    letter-spacing: .35em !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    font-family: 'Cinzel', serif !important;
+    font-size: 11px !important;
+    letter-spacing: .42em !important;
+    text-transform: uppercase !important;
+    color: var(--or) !important;
+    font-weight: 500 !important;
+    margin-bottom: 16px !important;
+    font-size: 0 !important; /* cache le texte d'origine */
   }
-  .pres .p-ey [data-i18n="apr.ey"],
-  .pres .p-ey {
-    visibility: hidden;
-    position: relative;
-  }
-  .pres .p-ey::after {
-    content: "Notre agence";
-    visibility: visible;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: max-content;
-    font-family: 'Cinzel', serif;
-    font-size: 10px;
-    letter-spacing: .35em;
-    text-transform: uppercase;
-    color: var(--or);
-    font-weight: 500;
-  }
-  /* Garder seulement le before/after barre dorees */
+  /* Trait avant */
   .pres .p-ey::before {
-    visibility: visible;
+    content: '' !important;
+    display: block !important;
+    width: 28px !important;
+    height: 1.5px !important;
+    background: var(--or) !important;
+    opacity: .55 !important;
+    flex-shrink: 0 !important;
+  }
+  /* Texte 'Notre agence' + trait apres */
+  .pres .p-ey::after {
+    content: 'Notre agence' !important;
+    display: inline-block !important;
+    font-size: 11px !important;
+    letter-spacing: .42em !important;
+    font-family: 'Cinzel', serif !important;
+    color: var(--or) !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
   }
 
   /* Titre principal compact */
@@ -5138,5 +5152,63 @@ body section div.jul-cx span.mp-mail.jul-c {
   /* Cacher la meta (nom + date) en bas, deja affiches en haut a gauche */
   .rev-c .rev-meta {
     display: none !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — NOTRE AGENCE EYEBROW : trait avant + texte + trait apres
+   Style identique a "SELECTION MAPA" (favoris)
+   Desktop : reste avec ::before/::after natifs
+   Mobile : 3 spans alignes pour permettre 2 traits + texte centre
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Spans caches sur desktop (le ::before/::after gere les traits) */
+.p-ey-line, .p-ey-text {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Cacher les pseudo-elements desktop */
+  .pres .p-ey::before,
+  .pres .p-ey::after {
+    display: none !important;
+    content: none !important;
+  }
+  /* Reset .pres .p-ey */
+  .pres .p-ey {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    font-size: 11px !important;
+  }
+  /* Afficher les 3 spans */
+  .p-ey-line {
+    display: block !important;
+    width: 28px !important;
+    height: 1.5px !important;
+    background: var(--or) !important;
+    opacity: .55 !important;
+    flex-shrink: 0 !important;
+  }
+  .p-ey-text {
+    display: inline !important;
+    font-family: 'Cinzel', serif !important;
+    font-size: 11px !important;
+    letter-spacing: .42em !important;
+    text-transform: uppercase !important;
+    color: var(--or) !important;
+    font-weight: 500 !important;
+    /* Texte 'À propos' remplace par 'Notre agence' via font-size:0 + ::after */
+    font-size: 0 !important;
+  }
+  .p-ey-text::after {
+    content: 'Notre agence' !important;
+    font-size: 11px !important;
+    letter-spacing: .42em !important;
+    font-family: 'Cinzel', serif !important;
+    color: var(--or) !important;
+    font-weight: 500 !important;
   }
 }
