@@ -380,7 +380,7 @@ button{font-family:inherit}
 .jul-cx{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
 .jul-c{font-family:'Raleway',sans-serif;font-size:13.5px;color:#fff;text-decoration:none;padding:10px 18px;border:1.5px solid rgba(184,148,72,.6);display:flex;align-items:center;gap:10px;transition:all .2s;font-weight:500;white-space:nowrap}
 .jul-c:hover{background:var(--or);border-color:var(--or);color:#fff}
-.jul-c svg{flex-shrink:0;opacity:1;color:var(--or3)}
+.jul-c svg{flex-shrink:0;opacity:1;color:var(--or) !important;fill:currentColor;stroke:currentColor;width:16px !important;height:16px !important}
 
 /* ═══ SERVICES (cartes 2x plus petites, hover 1.5x) ═══ */
 .svc-sec{padding:clamp(56px,7vw,96px) 0 clamp(40px,5vw,68px);background:var(--w1);border-top:1px solid var(--w2);position:relative;overflow:hidden}
@@ -4564,4 +4564,155 @@ body::before {
     max-width: 100% !important;
     text-align: center !important;
   }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — CARTE JULIEN : 3 boutons coherents (Appeler/WA/Email)
+   ───────────────────────────────────────────────────────────────────
+   Bug : icône Appeler invisible (or pale --or3 sur fond bleu marine)
+         + tailles disparates entre les 3 SVG (WA pleine forme vs autres)
+   Fix : forcer toutes les icônes en var(--or) vif, même taille 16px
+   Date : 03/05/2026 - Branche feature/mobile-fixes
+   =================================================================== */
+
+/* Forcer la couleur OR vif pour TOUTES les icones des 3 boutons */
+.jul-c svg,
+.jul-cx .mp-tel svg,
+.jul-cx .mp-wa svg,
+.jul-cx .mp-mail svg,
+.jul-cx .mp-mail-r svg{
+  width:16px !important;
+  height:16px !important;
+  color:var(--or) !important;
+  fill:currentColor !important;
+  stroke:currentColor !important;
+  flex-shrink:0 !important;
+  opacity:1 !important
+}
+
+/* Specifique WhatsApp : SVG complet utilise fill, pas de stroke */
+.jul-cx .mp-wa svg path{
+  fill:var(--or) !important;
+  stroke:none !important
+}
+
+/* Specifique Appeler/Email : SVG outline utilise stroke, fill transparent */
+.jul-cx .mp-tel svg path,
+.jul-cx .mp-mail svg path,
+.jul-cx .mp-mail svg polyline,
+.jul-cx .mp-mail-r svg path,
+.jul-cx .mp-mail-r svg polyline{
+  fill:none !important;
+  stroke:var(--or) !important
+}
+
+/* Coherence des 3 boutons : meme padding, meme gap, meme alignement */
+.jul-cx .jul-c{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:12px !important;
+  padding:12px 18px !important
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — CARTE JULIEN : cadres 3 boutons IDENTIQUES
+   Bug : <button>, <a>, <span> avaient padding/border/box-sizing
+         differents par defaut → cadres inegaux visuellement
+   Fix : reset complet + box-sizing border-box + dimensions forcees
+   Date : 03/05/2026 - Branche feature/mobile-fixes
+   ═══════════════════════════════════════════════════════════════════ */
+
+.jul-cx .jul-c,
+.jul-cx button.jul-c,
+.jul-cx a.jul-c,
+.jul-cx span.jul-c {
+  /* Reset complet */
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  background: transparent !important;
+  text-decoration: none !important;
+  outline: none !important;
+  /* Cadre identique */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 52px !important;
+  padding: 14px 20px !important;
+  border: 1.5px solid rgba(184, 148, 72, 0.6) !important;
+  border-radius: 0 !important;
+  /* Texte identique */
+  font-family: 'Raleway', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #fff !important;
+  letter-spacing: 0 !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  /* Espacement icone <-> texte */
+  gap: 12px !important;
+  /* Curseur */
+  cursor: pointer !important;
+  /* Transition */
+  transition: all 0.2s ease !important;
+}
+
+.jul-cx .jul-c:hover,
+.jul-cx button.jul-c:hover,
+.jul-cx a.jul-c:hover,
+.jul-cx span.jul-c:hover {
+  background: rgba(184, 148, 72, 0.1) !important;
+  border-color: var(--or) !important;
+}
+
+/* Le span <span class="jul-c"> avait un comportement inline par defaut */
+.jul-cx span.jul-c {
+  display: flex !important;
+}
+
+/* Le conteneur des 3 boutons : gap uniforme */
+.jul-cx {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+/* HEIGHT FIXE 56px - CARTE JULIEN - V28 FINAL14 */
+body section div.jul-cx button.mp-tel.jul-c,
+body section div.jul-cx a.mp-wa.jul-c,
+body section div.jul-cx span.mp-mail.jul-c,
+body section div.jul-cx span.mp-mail-r.jul-c {
+  height: 56px !important;
+  min-height: 56px !important;
+  max-height: 56px !important;
+  box-sizing: border-box !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+
+/* WIDTH FIXE 100% - CARTE JULIEN - V28 FINAL14 */
+body section div.jul-cx {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+body section div.jul-cx button.mp-tel.jul-c,
+body section div.jul-cx a.mp-wa.jul-c,
+body section div.jul-cx span.mp-mail.jul-c {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+  align-self: stretch !important;
+  display: flex !important;
+  box-sizing: border-box !important;
 }
