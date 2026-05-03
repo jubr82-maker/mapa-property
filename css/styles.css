@@ -4716,3 +4716,215 @@ body section div.jul-cx span.mp-mail.jul-c {
   display: flex !important;
   box-sizing: border-box !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — SECTION "NOTRE AGENCE" MOBILE ULTRA-COURTE
+   Desktop : reste inchange (longue bio + stats)
+   Mobile : version courte avec texte concis + 2 boutons
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Par defaut (desktop) : le bloc court mobile est cache */
+.p-mobile-short {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Eyebrow "A propos" remplace par "Notre agence" */
+  .pres .p-ey {
+    font-size: 10px !important;
+    letter-spacing: .35em !important;
+  }
+  .pres .p-ey [data-i18n="apr.ey"],
+  .pres .p-ey {
+    visibility: hidden;
+    position: relative;
+  }
+  .pres .p-ey::after {
+    content: "Notre agence";
+    visibility: visible;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: max-content;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--or);
+    font-weight: 500;
+  }
+  /* Garder seulement le before/after barre dorees */
+  .pres .p-ey::before {
+    visibility: visible;
+  }
+
+  /* Titre principal compact */
+  .pres .p-h {
+    font-size: 32px !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Cacher la longue bio + stats */
+  .pres .p-quote,
+  .pres .p-st {
+    display: none !important;
+  }
+
+  /* Afficher le bloc mobile-short */
+  .pres .p-mobile-short {
+    display: block !important;
+    text-align: center !important;
+    margin: 0 auto 24px !important;
+    padding: 0 20px !important;
+    max-width: 540px !important;
+  }
+  .pres .p-mobile-subtitle {
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: 22px !important;
+    font-weight: 400 !important;
+    color: var(--ink2) !important;
+    margin-bottom: 14px !important;
+  }
+  .pres .p-mobile-text {
+    font-family: 'Raleway', sans-serif !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    color: var(--ink2) !important;
+    margin: 0 !important;
+  }
+
+  /* Boutons : changer le label "En savoir plus" en "L'agence" sur mobile */
+  .pres .p-cta {
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 8px !important;
+  }
+  .pres .p-cta .btn {
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+  }
+  /* Remplacer "En savoir plus →" par "L'agence" sur mobile */
+  .pres .p-cta button[data-i18n="qui.more"] {
+    font-size: 0 !important;
+  }
+  .pres .p-cta button[data-i18n="qui.more"]::before {
+    content: "L'agence" !important;
+    font-size: 11px !important;
+    font-family: 'Cinzel', serif !important;
+    letter-spacing: .2em !important;
+    text-transform: uppercase !important;
+  }
+
+  /* Padding section reduit */
+  .pres {
+    padding: 48px 0 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — SECTION "NOTRE AGENCE" MOBILE ULTRA-COURTE
+   Desktop : reste inchange (longue bio + stats)
+   Mobile : version courte avec texte concis + 2 boutons
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Par defaut (desktop) : le bloc court mobile est cache */
+.p-mobile-short {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Eyebrow "A propos" remplace par "Notre agence" */
+  .pres .p-ey {
+    font-size: 10px !important;
+    letter-spacing: .35em !important;
+  }
+  .pres .p-ey [data-i18n="apr.ey"],
+  .pres .p-ey {
+    visibility: hidden;
+    position: relative;
+  }
+  .pres .p-ey::after {
+    content: "Notre agence";
+    visibility: visible;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: max-content;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--or);
+    font-weight: 500;
+  }
+  /* Garder seulement le before/after barre dorees */
+  .pres .p-ey::before {
+    visibility: visible;
+  }
+
+  /* Titre principal compact */
+  .pres .p-h {
+    font-size: 32px !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Cacher la longue bio + stats */
+  .pres .p-quote,
+  .pres .p-st {
+    display: none !important;
+  }
+
+  /* Afficher le bloc mobile-short */
+  .pres .p-mobile-short {
+    display: block !important;
+    text-align: center !important;
+    margin: 0 auto 24px !important;
+    padding: 0 20px !important;
+    max-width: 540px !important;
+  }
+  .pres .p-mobile-subtitle {
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: 22px !important;
+    font-weight: 400 !important;
+    color: var(--ink2) !important;
+    margin-bottom: 14px !important;
+  }
+  .pres .p-mobile-text {
+    font-family: 'Raleway', sans-serif !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    color: var(--ink2) !important;
+    margin: 0 !important;
+  }
+
+  /* Boutons : changer le label "En savoir plus" en "L'agence" sur mobile */
+  .pres .p-cta {
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 8px !important;
+  }
+  .pres .p-cta .btn {
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+  }
+  /* Remplacer "En savoir plus →" par "L'agence" sur mobile */
+  .pres .p-cta button[data-i18n="qui.more"] {
+    font-size: 0 !important;
+  }
+  .pres .p-cta button[data-i18n="qui.more"]::before {
+    content: "L'agence" !important;
+    font-size: 11px !important;
+    font-family: 'Cinzel', serif !important;
+    letter-spacing: .2em !important;
+    text-transform: uppercase !important;
+  }
+
+  /* Padding section reduit */
+  .pres {
+    padding: 48px 0 !important;
+  }
+}
