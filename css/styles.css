@@ -4986,3 +4986,53 @@ body section div.jul-cx span.mp-mail.jul-c {
     margin-bottom: 6px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — SECTION ZONES D'INTERVENTION MOBILE ULTRA-COURTE
+   Desktop : reste inchange (titre + clause + 2 boutons LU/INTL + note legale)
+   Mobile : titre + clause + 1 bouton "Marches actifs"
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Par defaut (desktop) : le bouton mobile est cache */
+.geo-mobile-cta {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Padding section reduit */
+  .geo-sec {
+    padding: 48px 0 !important;
+  }
+
+  /* Cacher la grille des 2 boutons LU/INTL et la note legale */
+  .geo-sec .geo-grid,
+  .geo-sec .geo-note {
+    display: none !important;
+  }
+
+  /* Afficher le bouton Marches actifs */
+  .geo-mobile-cta {
+    display: block !important;
+    text-align: center !important;
+    margin: 24px auto 0 !important;
+    padding: 0 20px !important;
+  }
+  .geo-mobile-cta .btn {
+    width: 100% !important;
+    max-width: 320px !important;
+  }
+
+  /* Titre plus compact */
+  .geo-sec .geo-t {
+    font-size: 28px !important;
+    line-height: 1.15 !important;
+  }
+
+  /* Clause plus aere */
+  .geo-sec .geo-clause {
+    font-size: 14.5px !important;
+    line-height: 1.6 !important;
+    padding: 0 20px !important;
+    margin-bottom: 0 !important;
+  }
+}

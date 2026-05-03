@@ -560,7 +560,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- ═══ CSS externalisé (v28 — split P1) ═══ -->
-<link rel="stylesheet" href="css/styles.css?v=mobile15">
+<link rel="stylesheet" href="css/styles.css?v=mobile16">
 
 <!-- ═══ Cloudflare Turnstile (anti-spam, RGPD-compliant, free plan) ═══ -->
 <!-- Site key MAPA Property : 0x4AAAAAADDxAd17up1nU0-U -->
@@ -1413,6 +1413,10 @@ ul.mand-eng-list > li::before{
     <h2 class="geo-t" data-i18n="geo.ti">Luxembourg &amp; International — Marchés actifs</h2>
     <div class="geo-r"></div>
     <p class="geo-clause" data-i18n="geo.clause">MAPA Property est une agence luxembourgeoise. À l'international, nous opérons exclusivement en qualité de <strong>broker, sous mandat de recherche</strong>, avec des partenaires locaux sélectionnés.</p>
+    <!-- V28 FINAL14 — Bouton mobile-only "Marches actifs" -->
+    <div class="geo-mobile-cta">
+      <button class="btn btn-navy" onclick="openSvc('m-marches')">Marchés actifs →</button>
+    </div>
     <div class="geo-grid">
       <div class="geo-col geo-clickable" onclick="navigateToPage('/marches-luxembourg',true)" role="link" tabindex="0" aria-label="Voir la sous-page Luxembourg">
         <div class="geo-col-ti">— <span data-i18n="geo.lux">Luxembourg</span> —</div>
