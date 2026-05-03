@@ -5212,3 +5212,57 @@ body section div.jul-cx span.mp-mail.jul-c {
     font-weight: 500 !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — STYLES SWIPER.JS pour avis + coups de coeur
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Conteneurs Swiper */
+.rev-swiper,
+.fav-swiper {
+  width: 100% !important;
+  padding: 10px 0 20px !important;
+  overflow: visible !important; /* permet de voir les cartes voisines partiellement */
+}
+
+.rev-swiper .swiper-wrapper,
+.fav-swiper .swiper-wrapper {
+  align-items: stretch !important;
+}
+
+.rev-swiper .swiper-slide,
+.fav-swiper .swiper-slide {
+  height: auto !important;
+  display: flex !important;
+}
+
+/* Carte avis dans Swiper : retire les anciens styles d'animation */
+.rev-swiper .rev-c {
+  width: 100% !important;
+  margin: 0 !important;
+  flex-shrink: 0;
+}
+
+/* Carte fav dans Swiper */
+.fav-swiper .fav-card {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Mobile : marges laterales pour montrer la carte suivante */
+@media (max-width: 768px) {
+  .rev-swiper,
+  .fav-swiper {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+}
+
+/* Desktop : padding plus grand */
+@media (min-width: 769px) {
+  .rev-swiper,
+  .fav-swiper {
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+  }
+}

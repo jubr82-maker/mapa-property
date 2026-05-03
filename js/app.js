@@ -1911,11 +1911,43 @@ function renderFeaturedBiens(){
     );
   }
 
-  /* Render : originaux + clones (pour le carousel auto-loop CSS animation) */
-  var html = feats.map(function(b){ return buildFavCard(b, false); }).join('') +
-             feats.map(function(b){ return buildFavCard(b, true); }).join('');
-  track.innerHTML = html;
-  console.log('[MAPA] Coups de cœur rendus :', feats.length);
+  /* V28 FINAL14 — Swiper.js wrapping pour coups de coeur */
+  var html = feats.map(function(b){
+    return '<div class="swiper-slide">' + buildFavCard(b, false) + '</div>';
+  }).join('');
+
+  /* Reorganiser le DOM : .fav-carousel > .swiper > .swiper-wrapper > .swiper-slide */
+  var carousel = document.getElementById('fav-carousel');
+  if(carousel){
+    carousel.innerHTML = '<div class="swiper fav-swiper"><div class="swiper-wrapper">' + html + '</div></div>';
+
+    function initFavSwiper(){
+      if(typeof Swiper === 'undefined'){
+        setTimeout(initFavSwiper, 100);
+        return;
+      }
+      if(window._favSwiper) window._favSwiper.destroy(true, true);
+      window._favSwiper = new Swiper('.fav-swiper', {
+        slidesPerView: 1.15,
+        spaceBetween: 18,
+        loop: feats.length > 2,
+        speed: 800,
+        autoplay: {
+          delay: 3500,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true
+        },
+        breakpoints: {
+          768: { slidesPerView: 2.2, spaceBetween: 22 },
+          1024: { slidesPerView: 3, spaceBetween: 28 },
+          1400: { slidesPerView: 4, spaceBetween: 28 }
+        }
+      });
+      console.log('[MAPA] Swiper coups de coeur initialise');
+    }
+    initFavSwiper();
+  }
+  console.log('[MAPA] Coups de coeur rendus :', feats.length);
 }
 window.renderFeaturedBiens = renderFeaturedBiens;
 
@@ -3502,8 +3534,44 @@ function renderReviews(){
       '<div class="rev-meta"><div class="rev-nm">'+esc(r.name||'Client')+'</div>'+(date?'<div class="rev-dt">'+esc(date)+'</div>':'')+'</div>'+
     '</div>';
   };
-  var html=REVIEWS.map(card).join('')+REVIEWS.map(card).join('');
-  track.innerHTML=html;
+  /* V28 FINAL14 — Swiper.js wrapping pour avis */
+  /* Wrapper chaque carte dans un swiper-slide */
+  var html = REVIEWS.map(function(r){
+    return '<div class="swiper-slide">' + card(r).replace('<div class="rev-c"', '<div class="rev-c"') + '</div>';
+  }).join('');
+
+  /* Reorganiser le DOM pour Swiper : .rev-marquee > .swiper > .swiper-wrapper > .swiper-slide */
+  var marquee = track.parentElement;
+  if(marquee){
+    marquee.innerHTML = '<div class="swiper rev-swiper"><div class="swiper-wrapper">' + html + '</div></div>';
+
+    /* Initialiser Swiper apres injection */
+    function initSwiper(){
+      if(typeof Swiper === 'undefined'){
+        setTimeout(initSwiper, 100);
+        return;
+      }
+      if(window._revSwiper) window._revSwiper.destroy(true, true);
+      window._revSwiper = new Swiper('.rev-swiper', {
+        slidesPerView: 1.15,
+        spaceBetween: 16,
+        loop: true,
+        speed: 800,
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true
+        },
+        breakpoints: {
+          768: { slidesPerView: 2.2, spaceBetween: 20 },
+          1024: { slidesPerView: 3, spaceBetween: 22 },
+          1400: { slidesPerView: 4, spaceBetween: 22 }
+        }
+      });
+      console.log('[MAPA] Swiper avis initialise');
+    }
+    initSwiper();
+  }
 }
 window.openReview=function(id){
   var r=REVIEWS.find(function(x){return String(x.id)===String(id)});
