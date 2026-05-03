@@ -5036,3 +5036,107 @@ body section div.jul-cx span.mp-mail.jul-c {
     margin-bottom: 0 !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — AVIS CLIENTS MOBILE ULTRA-COURT + SCROLL FLUIDE
+   Desktop : reste inchange (cartes 340px, animation auto, pause au hover)
+   Mobile : format compact (etoiles + nom + texte sur 1 ligne) + scroll touch fluide
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Section : padding reduit */
+  .rev {
+    padding: 48px 0 !important;
+  }
+
+  /* Sous-titre cache (trop long pour mobile) */
+  .rev .rev-s {
+    display: none !important;
+  }
+
+  /* Header avis : margin reduite */
+  .rev-hd {
+    margin-bottom: 24px !important;
+  }
+
+  /* Marquee : on autorise le scroll touch natif iOS avec snap */
+  .rev-marquee {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-behavior: smooth !important;
+    /* Cacher la scrollbar */
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  .rev-marquee::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Track : on garde l'animation MAIS on la pause au touch */
+  .rev-track {
+    animation-duration: 80s !important;
+    /* Sur mobile, le scroll touch est prioritaire et suspend l'animation */
+  }
+  /* Pause animation au touch (en plus du hover desktop) */
+  .rev-marquee:active .rev-track,
+  .rev-marquee:focus-within .rev-track {
+    animation-play-state: paused !important;
+  }
+
+  /* Carte avis : format compact horizontal */
+  .rev-c {
+    width: 85vw !important;
+    max-width: 320px !important;
+    min-height: auto !important;
+    padding: 14px 18px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+    scroll-snap-align: start !important;
+  }
+
+  /* Bloc gauche : etoiles + nom empiles */
+  .rev-c .rev-stars {
+    flex-shrink: 0 !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    font-size: 13px !important;
+    letter-spacing: 0 !important;
+    gap: 4px !important;
+    min-width: 80px !important;
+  }
+  .rev-c .rev-stars::after {
+    content: attr(data-name);
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--navy);
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  /* Texte de l'avis : 1 ligne avec scroll horizontal interne possible */
+  .rev-c .rev-tx {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: horizontal !important;
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    flex: 1 !important;
+    border-left: 1px solid var(--w2) !important;
+    padding-left: 12px !important;
+  }
+
+  /* Cacher la meta (nom + date) en bas, deja affiches en haut a gauche */
+  .rev-c .rev-meta {
+    display: none !important;
+  }
+}
