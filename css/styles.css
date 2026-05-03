@@ -4522,3 +4522,44 @@ body::before {
   height: 1px;
   overflow: hidden;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — MOBILE FIX : headers de modales (debordement capitales)
+   Bug : .mh-ey avait letter-spacing:.38em qui debordait sur petit ecran
+         + display:flex empechait wrap propre des longues capitales
+   ───────────────────────────────────────────────────────────────────
+   Date : 03/05/2026 - Branche feature/mobile-fixes
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Header de modale : padding reduit, plus respirant */
+  .mh {
+    padding: clamp(24px, 5vw, 36px) clamp(18px, 5vw, 24px) !important;
+  }
+  /* Eyebrow capitales : letter-spacing reduit + autorise le wrap */
+  .mh-ey {
+    letter-spacing: .15em !important;
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+  }
+  .mh-ey::before {
+    width: 14px !important;
+    flex-shrink: 0 !important;
+  }
+  /* Titre principal : taille reduite + word-wrap securise */
+  .mh-t {
+    font-size: clamp(28px, 8vw, 40px) !important;
+    line-height: 1.1 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+  }
+  /* Sous-titre : taille reduite + lecture confort */
+  .mh-s {
+    font-size: 14.5px !important;
+    line-height: 1.55 !important;
+    max-width: 100% !important;
+  }
+}
