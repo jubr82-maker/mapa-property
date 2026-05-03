@@ -4928,3 +4928,61 @@ body section div.jul-cx span.mp-mail.jul-c {
     padding: 48px 0 !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   V28 FINAL14 — CARTE JULIEN MOBILE ULTRA-COURTE
+   Desktop : reste inchange (photo + nom + titre complet + bio + 3 boutons)
+   Mobile : photo plus petite + nom + titre court + bio cachee + 3 boutons
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Padding section reduit */
+  .jul {
+    padding: 36px 0 !important;
+  }
+
+  /* Photo plus petite et centree */
+  .jul-av {
+    width: 90px !important;
+    height: 90px !important;
+    margin: 0 auto !important;
+  }
+
+  /* Cacher la longue bio (deja dans 'L'agence') */
+  .jul .jul-tx {
+    display: none !important;
+  }
+
+  /* Titre raccourci : "Real Estate Director · Exclusive Sourcing Specialist — Depuis 2018"
+     -> "Real Estate Director" uniquement */
+  .jul .jul-ti {
+    font-size: 0 !important;
+    margin-bottom: 16px !important;
+  }
+  .jul .jul-ti::after {
+    content: "Real Estate Director" !important;
+    font-size: 13px !important;
+    font-family: 'Raleway', sans-serif !important;
+    color: rgba(255,255,255,.95) !important;
+    font-weight: 500 !important;
+    letter-spacing: .02em !important;
+  }
+
+  /* Eyebrow centre */
+  .jul .jul-ey {
+    text-align: center !important;
+    margin-top: 16px !important;
+  }
+
+  /* Nom et titre centres */
+  .jul .jul-nm,
+  .jul .jul-ti {
+    text-align: center !important;
+  }
+
+  /* Nom plus compact */
+  .jul .jul-nm {
+    font-size: 28px !important;
+    margin-bottom: 6px !important;
+  }
+}
