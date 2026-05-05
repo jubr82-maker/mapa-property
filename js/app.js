@@ -1,16 +1,18 @@
 
-// === BCL RATES & HELPERS (fix38e) ===
+// === BCL RATES & HELPERS (fix39 - taux janvier 2026, publies 05.03.2026) ===
 window.BCL_RATES = {
   source: 'BCL',
-  label: 'taux moyen marche juin 2025',
+  label: 'taux moyen marche janvier 2026',
+  publishedAt: '2026-03-05',
   rates: {
-    variable: 3.28,
-    fixed_5: 3.20,
-    fixed_10: 3.55,
-    fixed_15: 3.65,
-    fixed_20: 3.75,
-    fixed_25: 3.85,
-    fixed_30: 4.05
+    variable: 3.01,
+    fixed_5: 3.30,
+    fixed_10: 3.52,
+    fixed_15: 3.85,
+    fixed_20: 3.68,
+    fixed_25: 3.57,
+    fixed_30: 3.86,
+    fixed_30plus: 3.87
   }
 };
 window.getBCLRate = function(years){
@@ -20,7 +22,8 @@ window.getBCLRate = function(years){
   if(years <= 15) return r.fixed_15;
   if(years <= 20) return r.fixed_20;
   if(years <= 25) return r.fixed_25;
-  return r.fixed_30;
+  if(years <= 30) return r.fixed_30;
+  return r.fixed_30plus;
 };
 window.getBCLSourceLabel = function(){
   return 'Source : BCL - ' + window.BCL_RATES.label;
