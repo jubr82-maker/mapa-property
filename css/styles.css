@@ -5266,3 +5266,370 @@ body section div.jul-cx span.mp-mail.jul-c {
     padding-right: 40px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIX25 — HEADER MOBILE : burger gauche, logo centre, langue droite
+   Mobile-only (≤ 860px) — desktop strictement inchangé
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 860px) {
+  .hd-in {
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    align-items: center !important;
+    padding: 0 16px !important;
+    gap: 8px !important;
+  }
+  .hd-l, .hd-r { display: none !important; }
+  .hd-rt { display: contents !important; }
+  #burger {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    order: -1 !important;
+  }
+  .hd-logo {
+    grid-column: 2 !important;
+    justify-self: center !important;
+    order: 0 !important;
+  }
+  .h-lang-wrap {
+    grid-column: 3 !important;
+    justify-self: end !important;
+    order: 1 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIX30 — MOBILE CTA + SOUS-ONGLETS
+   Mobile-only (≤ 768px) — desktop strictement inchangé
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* B. BOUTONS CTA : retour à la ligne + texte plus petit + padding adapté */
+@media (max-width: 768px) {
+  .btn,
+  .btn-navy,
+  .btn-or,
+  .btn-ink,
+  .btn-line,
+  .btn-out,
+  .btn-lw,
+  .btn-gold {
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 10px !important;
+    letter-spacing: .14em !important;
+    padding: 14px 20px !important;
+    min-height: 44px !important;
+    height: auto !important;
+  }
+
+  /* Boutons en pleine largeur dans les zones étroites */
+  .qui-cta-btns .btn,
+  .qui-cta-btns .btn-navy,
+  .pres .p-cta .btn,
+  .bd-cta .btn,
+  .bd-cta-row .btn {
+    width: 100% !important;
+    display: flex !important;
+  }
+
+  /* Conteneurs de boutons : passer en colonne pour éviter le débordement */
+  .qui-cta-btns,
+  .p-cta,
+  .bd-cta-row,
+  .pres .p-cta {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+}
+
+/* B-bis : iPhone étroit (≤ 400px) — encore plus petit */
+@media (max-width: 400px) {
+  .btn,
+  .btn-navy,
+  .btn-or,
+  .btn-ink,
+  .btn-line,
+  .btn-out,
+  .btn-lw,
+  .btn-gold {
+    font-size: 9.5px !important;
+    letter-spacing: .12em !important;
+    padding: 13px 16px !important;
+  }
+}
+
+/* C. SOUS-ONGLETS .ltabs : empêcher le décalage horizontal sur mobile */
+@media (max-width: 768px) {
+  .ltabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    justify-content: stretch !important;
+    border-bottom: 1px solid rgba(15,26,42,.1) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .ltab {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    padding: 12px 8px !important;
+    font-size: 9.5px !important;
+    letter-spacing: .1em !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.3 !important;
+    text-align: center !important;
+    margin-bottom: -1px !important;
+  }
+}
+
+/* C-bis : iPhone étroit — police encore plus serrée */
+@media (max-width: 400px) {
+  .ltab {
+    font-size: 9px !important;
+    letter-spacing: .08em !important;
+    padding: 11px 6px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIX30 — MOBILE CTA + SOUS-ONGLETS
+   Mobile-only (≤ 768px) — desktop strictement inchangé
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* B. BOUTONS CTA : retour à la ligne + texte plus petit + padding adapté */
+@media (max-width: 768px) {
+  .btn,
+  .btn-navy,
+  .btn-or,
+  .btn-ink,
+  .btn-line,
+  .btn-line-dark,
+  .btn-out,
+  .btn-lw,
+  .btn-gold {
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 10px !important;
+    letter-spacing: .14em !important;
+    padding: 14px 18px !important;
+    min-height: 44px !important;
+    height: auto !important;
+  }
+
+  /* Pleine largeur pour les CTA dans des zones étroites */
+  .qui-cta-btns .btn,
+  .qui-cta-btns .btn-navy,
+  .qui-cta-btns .btn-line,
+  .pres .p-cta .btn,
+  .bd-cta .btn,
+  .bd-cta-row .btn,
+  .p-cta .btn {
+    width: 100% !important;
+    display: flex !important;
+  }
+
+  /* Conteneurs de boutons : passer en colonne */
+  .qui-cta-btns,
+  .p-cta,
+  .bd-cta-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+}
+
+/* B-bis : iPhone étroit (≤ 400px) */
+@media (max-width: 400px) {
+  .btn,
+  .btn-navy,
+  .btn-or,
+  .btn-ink,
+  .btn-line,
+  .btn-line-dark,
+  .btn-out,
+  .btn-lw,
+  .btn-gold {
+    font-size: 9.5px !important;
+    letter-spacing: .12em !important;
+    padding: 13px 14px !important;
+  }
+}
+
+/* C. SOUS-ONGLETS .ltabs : arrêter le scroll horizontal qui fait "bouger" */
+@media (max-width: 768px) {
+  .ltabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: auto !important;
+    justify-content: stretch !important;
+    border-bottom: 1px solid rgba(15,26,42,.1) !important;
+    margin: 0 0 18px 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .ltab {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    padding: 12px 6px !important;
+    font-size: 9.5px !important;
+    letter-spacing: .08em !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.3 !important;
+    text-align: center !important;
+    margin-bottom: -1px !important;
+    flex-shrink: 1 !important;
+  }
+}
+
+/* C-bis : iPhone étroit */
+@media (max-width: 400px) {
+  .ltab {
+    font-size: 8.5px !important;
+    letter-spacing: .06em !important;
+    padding: 11px 4px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIX32 — SUJET 1 : icone telephone forcee a s'afficher devant Appeler
+                     (contournement decodeur mp-tel qui peut effacer le SVG)
+   FIX32 — SUJET 2 : avis sur 4 lignes (mobile/tablette) au lieu de 1
+   Date : 04/05/2026
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* SUJET 1 : icone telephone via pseudo-element ::before garanti visible
+   meme si le decodeur JS modifie l'innerHTML du bouton */
+.jul-cx button.mp-tel.jul-c {
+  position: relative !important;
+}
+.jul-cx button.mp-tel.jul-c svg {
+  display: inline-block !important;
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  fill: var(--or) !important;
+  color: var(--or) !important;
+  vertical-align: middle !important;
+  margin-right: 8px !important;
+}
+.jul-cx button.mp-tel.jul-c svg path {
+  fill: var(--or) !important;
+  stroke: none !important;
+}
+/* Filet de securite : si jamais le SVG disparait totalement (decodeur agressif),
+   un pseudo-element prend le relais avec un glyphe Unicode telephone */
+.jul-cx button.mp-tel.jul-c:not(:has(svg))::before {
+  content: "\260E" !important;
+  color: var(--or) !important;
+  font-size: 18px !important;
+  margin-right: 8px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+/* SUJET 2 : avis 4 lignes au lieu de 1 sur mobile/tablette
+   Annule la regle ligne 5141 qui clamp a 1 ligne */
+@media (max-width: 768px) {
+  .rev-c .rev-tx,
+  .rev-swiper .rev-c .rev-tx {
+    -webkit-line-clamp: 4 !important;
+    line-clamp: 4 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+  }
+  .rev-c,
+  .rev-swiper .rev-c {
+    min-height: 240px !important;
+    height: auto !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .rev-c .rev-tx,
+  .rev-swiper .rev-c .rev-tx {
+    -webkit-line-clamp: 4 !important;
+    line-clamp: 4 !important;
+    font-size: 13.5px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FIX32 — SUJET 1 : icone TELEPHONE remplie (et non outline)
+                     Annule la regle ligne 4607 qui force fill:none
+   FIX32 — SUJET 2 : avis sur 4 lignes (mobile/tablette) au lieu de 1
+   Date : 04/05/2026
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* SUJET 1 : SVG telephone -> remplir en or, PAS de stroke (le path est plein) */
+.jul-cx .mp-tel svg,
+body section div.jul-cx button.mp-tel.jul-c svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+}
+.jul-cx .mp-tel svg path,
+body section div.jul-cx button.mp-tel.jul-c svg path {
+  fill: var(--or) !important;
+  stroke: none !important;
+  opacity: 1 !important;
+}
+
+/* SUJET 2 : avis 4 lignes au lieu de 1 sur mobile/tablette */
+@media (max-width: 768px) {
+  .rev-c .rev-tx,
+  .rev-swiper .rev-c .rev-tx {
+    -webkit-line-clamp: 4 !important;
+    line-clamp: 4 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    text-overflow: ellipsis !important;
+  }
+  .rev-c,
+  .rev-swiper .rev-c {
+    min-height: 240px !important;
+    height: auto !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .rev-c .rev-tx,
+  .rev-swiper .rev-c .rev-tx {
+    -webkit-line-clamp: 4 !important;
+    line-clamp: 4 !important;
+    font-size: 13.5px !important;
+  }
+}

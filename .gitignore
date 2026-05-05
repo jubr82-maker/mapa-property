@@ -14,3 +14,8 @@ build/
 .idea/
 Thumbs.db
 *.tmp
+
+# Fichiers de backup automatiques generes pendant les patches
+*.bak
+*.bak[0-9]*
+

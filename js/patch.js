@@ -191,8 +191,25 @@
 
     var _origOpenBien=window.openBien;
     window.openBien=function(id){
+      /* FIX31 NAV-RETOUR : memoriser la page parente avant ouverture */
+      try {
+        var _curPath = window.location.pathname || '/';
+        if (_curPath.length > 1 && _curPath.charAt(_curPath.length-1) === '/') _curPath = _curPath.substring(0, _curPath.length-1);
+        if (_curPath !== '/' && typeof window.PAGE_ROUTES !== 'undefined' && window.PAGE_ROUTES[_curPath]) {
+          window._lastPageSlug = _curPath;
+        } else if (_curPath === '/') {
+          window._lastPageSlug = null;
+        }
+      } catch(e){}
       /* Appel original (remplit #bien-content + ouvre m-bien) */
       _origOpenBien(id);
+      /* FIX31 NAV-RETOUR : pousser entree history pour fleche retour */
+      try {
+        var _bid = (id || 'bien').toString().replace(/[^a-zA-Z0-9_-]/g, '');
+        if (window.history && window.history.pushState && _bid) {
+          window.history.pushState({ bien: _bid, parent: window._lastPageSlug || '/' }, '', '/bien/' + _bid);
+        }
+      } catch(e){}
 
       /* Force toujours la pleine page */
       var prevPage=document.querySelector('.modal.as-page');
@@ -250,7 +267,22 @@
 
     var _origOpenBlog=window.openBlogArticle;
     window.openBlogArticle=function(idOrSlug){
+      try {
+        var _curPath = window.location.pathname || '/';
+        if (_curPath.length > 1 && _curPath.charAt(_curPath.length-1) === '/') _curPath = _curPath.substring(0, _curPath.length-1);
+        if (_curPath === '/blog' || (_curPath !== '/' && typeof window.PAGE_ROUTES !== 'undefined' && window.PAGE_ROUTES[_curPath])) {
+          window._lastPageSlug = _curPath;
+        } else {
+          window._lastPageSlug = '/blog';
+        }
+      } catch(e){}
       _origOpenBlog(idOrSlug);
+      try {
+        var _aid = (idOrSlug || 'article').toString().replace(/[^a-zA-Z0-9_-]/g, '');
+        if (window.history && window.history.pushState && _aid) {
+          window.history.pushState({ article: _aid, parent: window._lastPageSlug || '/blog' }, '', '/article/' + _aid);
+        }
+      } catch(e){}
 
       /* Ferme la page blog liste si elle est ouverte */
       var mblog=document.getElementById('m-blog');
@@ -326,6 +358,49 @@
     setTimeout(_patchCloseMReturnHome,300);
     setTimeout(_patchCloseMReturnHome,900);
   });
+
+
+  /* FIX31 NAV-RETOUR : popstate dedie pour les routes /bien/* et /article/* */
+  window.addEventListener('popstate', function(ev) {
+    var path = window.location.pathname || '/';
+    if (path.length > 1 && path.charAt(path.length-1) === '/') path = path.substring(0, path.length-1);
+    if (path.indexOf('/bien/') === 0 || path.indexOf('/article/') === 0) {
+      return;
+    }
+    var mb = document.getElementById('m-bien');
+    var mba = document.getElementById('m-blog-art');
+    var fichOuverte = (mb && mb.classList.contains('as-page')) || (mba && mba.classList.contains('as-page'));
+    if (fichOuverte) {
+      if (mb && mb.classList.contains('as-page')) {
+        mb.classList.remove('as-page');
+        mb.classList.remove('open');
+        mb.style.zIndex = '';
+      }
+      if (mba && mba.classList.contains('as-page')) {
+        mba.classList.remove('as-page');
+        mba.classList.remove('open');
+        mba.style.zIndex = '';
+      }
+      if (path !== '/' && typeof window.PAGE_ROUTES !== 'undefined' && window.PAGE_ROUTES[path]) {
+        if (typeof window.navigateToPage === 'function') {
+          window.navigateToPage(path, false);
+          return;
+        }
+      }
+      if (typeof window.navigateToHome === 'function') {
+        window.navigateToHome(false);
+      } else {
+        document.body.classList.remove('view-page');
+        document.body.removeAttribute('data-page');
+        document.body.style.overflow = '';
+        window.scrollTo(0, 0);
+      }
+    }
+  });
+
+  if ('scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'auto';
+  }
 
   console.log('%c[MAPA] patch.js (session 2026-04-28) chargé : rendement V2 + adresse + pleine page','color:#B8865A;font-weight:bold');
 })();

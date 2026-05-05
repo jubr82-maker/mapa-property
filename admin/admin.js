@@ -509,7 +509,7 @@ async function loadRecentActivity() {
 
 const APIMO_AGENCY_ID = 3508;
 const PROPS_FILTERS = { search: '', status: 'all', transaction: 'all' };
-const MAX_FEATURED = 4;
+const MAX_FEATURED = 6;
 
 async function loadProperties() {
   const list = $('properties-list');
