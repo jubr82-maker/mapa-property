@@ -1431,11 +1431,98 @@ var LOCK_SVG='<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000
 
 /* ─── RENDU GALERIE BIENS ─── */
 var CUR_FILT='vente';  /* V28 FINAL9 : ACHETER s'ouvre sur l'onglet VENTE par défaut */
+
+/* FIX37 : filtre par famille de bien (active depuis Voir biens similaires) */
+var CUR_TYPE_FILT='all';
+var TYPE_FAMILIES={
+  appartement:['appartement','penthouse','duplex','triplex','studio','loft','rez-de-jardin','flat'],
+  maison:['maison','maison jumelee','maison mitoyenne','maison en bande','maison bi-familiale','maison bifamiliale','maison de maitre','maison de campagne','villa','chalet','fermette','ferme','manoir','chateau'],
+  immeuble:['immeuble','ensemble immobilier','immeuble de rapport'],
+  commerce:['local commercial','bureau','local et fonds de commerce','commerce','restaurant','hotel'],
+  terrain:['terrain constructible','terrain','terrain agricole','terrain a batir']
+};
+var TYPE_FAMILY_LABELS={
+  fr:{appartement:'Appartements',maison:'Maisons',immeuble:'Immeubles',commerce:'Commerces / Bureaux',terrain:'Terrains'},
+  en:{appartement:'Apartments',maison:'Houses',immeuble:'Buildings',commerce:'Commercial / Offices',terrain:'Land'},
+  de:{appartement:'Wohnungen',maison:'Häuser',immeuble:'Mehrfamilienhäuser',commerce:'Geschäft / Büros',terrain:'Grundstücke'}
+};
+function getTypeFamily(propType){
+  if(!propType)return null;
+  var pt=String(propType).toLowerCase().trim();
+  pt=pt.replace(/[éèêë]/g,'e').replace(/[àâä]/g,'a').replace(/[îï]/g,'i').replace(/[ôö]/g,'o').replace(/[ûü]/g,'u');
+  for(var fam in TYPE_FAMILIES){
+    if(TYPE_FAMILIES[fam].indexOf(pt)!==-1)return fam;
+  }
+  return null;
+}
+function getTypeFamilyLabel(famKey){
+  var L=(typeof CURLANG!=='undefined')?CURLANG:'fr';
+  var labels=TYPE_FAMILY_LABELS[L]||TYPE_FAMILY_LABELS.fr;
+  return labels[famKey]||famKey;
+}
+window.setSimilarTypeFilter=function(propType){
+  var fam=getTypeFamily(propType);
+  CUR_TYPE_FILT=fam||'all';
+  window._comingFromSimilar=true;
+};
+window.clearTypeFilter=function(){
+  CUR_TYPE_FILT='all';
+  if(typeof renderBiensInto==='function')renderBiensInto('biens-grid','biens-empty','achat');
+  if(typeof updateTypeFilterBanner==='function')updateTypeFilterBanner();
+};
+function updateTypeFilterBanner(){
+  var banner=document.getElementById('type-filter-banner');
+  if(!banner)return;
+  if(CUR_TYPE_FILT==='all'){
+    banner.style.display='none';
+    banner.innerHTML='';
+    return;
+  }
+  var L=(typeof CURLANG!=='undefined')?CURLANG:'fr';
+  var label=getTypeFamilyLabel(CUR_TYPE_FILT);
+  var prefix=(L==='en')?'Filtered: ':(L==='de')?'Gefiltert: ':'Filtre : ';
+  var only=(L==='en')?' only':(L==='de')?' nur':' uniquement';
+  banner.style.display='flex';
+  banner.innerHTML='<span style="font-family:Cinzel,serif;font-size:11px;letter-spacing:.16em;color:#1a2b44;text-transform:uppercase">'+prefix+label+only+'</span>'+
+    '<button onclick="window.clearTypeFilter()" aria-label="Retirer le filtre" style="background:transparent;border:1.5px solid #b89448;color:#1a2b44;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:14px;font-size:14px;line-height:1">×</button>';
+}
+window.updateTypeFilterBanner=updateTypeFilterBanner;
+(function(){
+  function _patchOpenSvcReset(){
+    if(typeof window.openSvc!=='function')return false;
+    if(window.openSvc.__typeFilterPatched)return true;
+    var _orig=window.openSvc;
+    window.openSvc=function(id){
+      if(id==='m-achat'){
+        if(!window._comingFromSimilar){
+          CUR_TYPE_FILT='all';
+        }
+        window._comingFromSimilar=false;
+        setTimeout(function(){
+          if(typeof updateTypeFilterBanner==='function')updateTypeFilterBanner();
+        },200);
+      }
+      return _orig(id);
+    };
+    window.openSvc.__typeFilterPatched=true;
+    return true;
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',_patchOpenSvcReset);
+  }else{
+    _patchOpenSvcReset();
+  }
+  setTimeout(_patchOpenSvcReset,300);
+  setTimeout(_patchOpenSvcReset,1000);
+  setTimeout(_patchOpenSvcReset,2000);
+})();
 window.filtBien=function(btn,f){
   var bs=document.querySelectorAll('#m-achat .bfilt');
   for(var i=0;i<bs.length;i++)bs[i].classList.remove('on');
   btn.classList.add('on');
   CUR_FILT=f;
+  CUR_TYPE_FILT="all";
+  if(typeof updateTypeFilterBanner==="function")updateTypeFilterBanner();
   renderBiensInto('biens-grid','biens-empty','achat');
 };
 
@@ -1755,6 +1842,9 @@ function dpeBadgeHtml(letter){
 }
 
 function renderBiensInto(gridId,emptyId,scope){
+  if(scope==="achat"&&typeof updateTypeFilterBanner==="function"){
+    setTimeout(updateTypeFilterBanner,0);
+  }
   var grid=document.getElementById(gridId);
   var empty=document.getElementById(emptyId);
   if(!grid)return;
@@ -1779,6 +1869,12 @@ function renderBiensInto(gridId,emptyId,scope){
     else if(CUR_FILT==='offmarket')list=base.filter(bIsOff);
     else if(CUR_FILT==='vente')list=base.filter(function(b){return!bIsRental(b)&&!bIsOff(b)});
     else list=base;
+    if(CUR_TYPE_FILT&&CUR_TYPE_FILT!=="all"){
+      list=list.filter(function(b){
+        var pt=b.property_type||b.category||b.type||"";
+        return getTypeFamily(pt)===CUR_TYPE_FILT;
+      });
+    }
   }
   if(list.length===0){
     grid.innerHTML='';grid.style.display='none';
@@ -5909,19 +6005,7 @@ window.openSimilarModal=function(){
     /* Cas 2 : aucune concordance — afficher message + 2 CTAs */
     c.innerHTML=renderSimilarEmpty(b);
   }
-  /* FIX36 : ajout note + CTA si peu de resultats */
-  try {
-    if (strictMatches.length < SIMILAR_MIN_THRESHOLD) {
-      var TS = (I18N && I18N[CURLANG]) || {};
-      var noteTxt = TS['similar.few.note'] || 'Notre sélection se limite volontairement aux biens dans une fourchette de prix comparable (±25 %), pour une mise en relation pertinente.';
-      var ctaTxt = TS['similar.few.cta'] || 'Voir l\'ensemble de nos biens dans cette catégorie →';
-      var noteHtml = '<div class="bd-sim-note" style="margin-top:24px;padding:20px 24px;background:#fafaf8;border-left:3px solid #b89448;font-family:Cormorant Garamond,serif;font-size:15px;font-style:italic;color:#3d4f63;line-height:1.55;text-align:center">' + esc(noteTxt) + '</div>' +
-        '<div style="text-align:center;margin-top:16px"><button class="btn btn-line" onclick="window.closeM(\'m-similar\');setTimeout(function(){window.openSvc(\'m-achat\');},220)" style="font-family:Cinzel,serif;font-size:11px;letter-spacing:.18em;padding:14px 28px;color:#1a2b44;background:transparent;border:1.5px solid #b89448;text-transform:uppercase;cursor:pointer">' + esc(ctaTxt) + '</button></div>';
-      var existingNote = c.querySelector('.bd-sim-note');
-      if (existingNote && existingNote.parentNode) existingNote.parentNode.removeChild(existingNote);
-      c.insertAdjacentHTML('beforeend', noteHtml);
-    }
-  } catch(e) { console.warn('[FIX36] note similar:', e); }
+
   window.openM('m-similar');
 };
 
@@ -5936,7 +6020,7 @@ function renderSimilarEmpty(b){
     '<h2 class="msi-title">'+(T['bd.similar.empty.t']||'Aucune concordance actuelle')+'</h2>'+
     '<p class="msi-empty-p">'+(T['bd.similar.empty.p']||'Aucun bien ne correspond actuellement à ces critères. Voici deux options pour poursuivre votre recherche :')+'</p>'+
     '<div class="msi-actions">'+
-      '<button class="btn btn-gold" onclick="window.showSimilarLarge()">'+
+      '<button class="btn btn-gold" onclick="(function(){var __t=(CURRENT_BIEN_FOR_SIMILAR&&(CURRENT_BIEN_FOR_SIMILAR.property_type||CURRENT_BIEN_FOR_SIMILAR.category||CURRENT_BIEN_FOR_SIMILAR.type))||\'\';window.closeM(\'m-similar\');setTimeout(function(){window.openSvc(\'m-achat\');setTimeout(function(){window.setSimilarTypeFilter(__t);if(typeof renderBiensInto===\'function\')renderBiensInto(\'biens-grid\',\'biens-empty\',\'achat\');if(typeof updateTypeFilterBanner===\'function\')updateTypeFilterBanner();},500);},220);})()">'+
         (T['bd.similar.btn.same']||'Voir les autres biens de même type')+' ('+esc(targetType)+')'+
       '</button>'+
       '<button class="btn btn-navy" onclick="window.closeM(\'m-similar\');setTimeout(function(){window.openSvc(\'m-mandat\')},220)">'+
