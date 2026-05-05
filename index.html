@@ -2647,7 +2647,7 @@ ul.mand-eng-list > li::before{
 <div id="sp" class="lpan on">
 <p class="ms-p" style="margin-bottom:18px" data-i18n="mod.sim.pret.intro">Calculez vos <strong>mensualités</strong> selon le montant, le taux et la durée.</p>
 <div class="fg"><label class="fl" data-i18n="mod.sim.pret.montant">Montant emprunté (€)</label><input class="fi" id="sm" type="number" placeholder="500 000" oninput="runSim()"></div>
-<div class="g2"><div class="fg"><label class="fl" data-i18n="mod.sim.pret.taux">Taux annuel (%)</label><input class="fi" id="st" type="number" step="0.01" placeholder="3.50" oninput="runSim()"></div><div class="fg"><label class="fl" data-i18n="mod.sim.pret.duree">Durée (années)</label><input class="fi" id="sd" type="number" placeholder="25" oninput="runSim()"></div></div>
+<div class="fg"><label class="fl">Type de taux (BCL)</label><select class="fi" id="sm-tx" onchange="updateSimTaux()" style="background:#fff"><option value="variable">Variable</option><option value="5">Fixe 5 ans</option><option value="10">Fixe 10 ans</option><option value="15">Fixe 15 ans</option><option value="20">Fixe 20 ans</option><option value="25" selected>Fixe 25 ans</option><option value="30">Fixe 30 ans</option></select></div><div class="g2"><div class="fg"><label class="fl" data-i18n="mod.sim.pret.taux">Taux annuel (%)</label><input class="fi" id="st" type="number" step="0.01" placeholder="3.85" oninput="runSim()"></div><div class="fg"><label class="fl" data-i18n="mod.sim.pret.duree">Durée (années)</label><input class="fi" id="sd" type="number" placeholder="25" oninput="runSim()"></div></div>
 <div id="sim-res" class="sr-box"></div>
 </div>
 
@@ -2661,7 +2661,7 @@ ul.mand-eng-list > li::before{
 <div id="sc" class="lpan">
 <p class="ms-p" style="margin-bottom:18px" data-i18n="mod.sim.cap.intro">Estimez votre <strong>capacité d'emprunt maximale</strong>.</p>
 <div class="fg"><label class="fl" data-i18n="mod.sim.cap.rev">Revenus nets mensuels (€)</label><input class="fi" id="cr" type="number" placeholder="8 000" oninput="runCap()"></div>
-<div class="g2"><div class="fg"><label class="fl" data-i18n="mod.sim.cap.charges">Charges mensuelles (€)</label><input class="fi" id="cc" type="number" placeholder="1 500" oninput="runCap()"></div><div class="fg"><label class="fl" data-i18n="mod.sim.cap.apport">Apport personnel (€)</label><input class="fi" id="ca" type="number" placeholder="100 000" oninput="runCap()"></div></div>
+<div class="g2"><div class="fg"><label class="fl" data-i18n="mod.sim.cap.charges">Charges mensuelles (€)</label><input class="fi" id="cc" type="number" placeholder="1 500" oninput="runCap()"></div><div class="fg"><label class="fl" data-i18n="mod.sim.cap.apport">Apport personnel (€)</label><input class="fi" id="ca" type="number" placeholder="100 000" oninput="runCap()"></div></div><div class="fg" style="margin-top:14px"><label class="fl">Durée du prêt (BCL)</label><select class="fi" id="cd" onchange="updateCapDuree()" style="background:#fff"><option value="15">15 ans</option><option value="20">20 ans</option><option value="25" selected>25 ans</option><option value="30">30 ans</option></select></div>
 <div id="cap-res" class="sr-box"></div>
 </div>
 
@@ -3548,7 +3548,7 @@ ul.mand-eng-list > li::before{
 <!-- ═══ JS externalisé (v28 — split P1) — ORDRE CRITIQUE ═══ -->
 <script src="js/supabase.js?v=mod30b"></script>
 <script src="js/i18n.js?v=fix36"></script>
-<script src="js/app.js?v=fix37d"></script>
+<script src="js/app.js?v=fix38d"></script>
 <script src="js/offmarket-public.js?v=i18nfix4"></script>
 <script src="js/patch.js?v=fix31"></script>
 </body>

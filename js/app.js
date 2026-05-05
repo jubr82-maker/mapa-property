@@ -1,3 +1,42 @@
+
+// === BCL RATES & HELPERS (fix38e) ===
+window.BCL_RATES = {
+  source: 'BCL',
+  label: 'taux moyen marche juin 2025',
+  rates: {
+    variable: 3.28,
+    fixed_5: 3.20,
+    fixed_10: 3.55,
+    fixed_15: 3.65,
+    fixed_20: 3.75,
+    fixed_25: 3.85,
+    fixed_30: 4.05
+  }
+};
+window.getBCLRate = function(years){
+  var r = window.BCL_RATES.rates;
+  if(years <= 5) return r.fixed_5;
+  if(years <= 10) return r.fixed_10;
+  if(years <= 15) return r.fixed_15;
+  if(years <= 20) return r.fixed_20;
+  if(years <= 25) return r.fixed_25;
+  return r.fixed_30;
+};
+window.getBCLSourceLabel = function(){
+  return 'Source : BCL - ' + window.BCL_RATES.label;
+};
+window.calcMensualite = function(capital, tauxAnnuel, dureeAns){
+  if(!capital || !tauxAnnuel || !dureeAns) return 0;
+  var mr = tauxAnnuel/100/12;
+  var n = dureeAns*12;
+  return capital * mr / (1 - Math.pow(1+mr, -n));
+};
+window.calcFraisNotaireLU = function(prix){
+  // ~7% au LU, dont 1% Bellegen Akt avec abattement (residence principale)
+  return Math.round(prix * 0.07);
+};
+// === FIN BCL HELPERS ===
+
 /* ═══════════════════════════════════════════════════════════════════
    MAPA Property — js/app.js
    Logique applicative du site public
@@ -5252,33 +5291,127 @@ window.runSim=function(){
   var r=document.getElementById('sim-res');
   if(!r)return;
   if(!m||!t||!d){r.style.display='none';return}
-  var mr=t/100/12,n=d*12,mens=m*mr/(1-Math.pow(1+mr,-n));
-  var tot=mens*n,intr=tot-m;
+  var mens = window.calcMensualite(m,t,d);
+  var tot = mens*d*12, intr = tot-m;
   r.style.display='block';
-  r.innerHTML='<div class="sr-v">'+fmt(Math.round(mens))+' € / mois</div><div class="sr-l">Coût total : <strong>'+fmt(Math.round(tot))+' €</strong> · Intérêts : <strong>'+fmt(Math.round(intr))+' €</strong></div>';
+  r.innerHTML='<div class="sr-v">'+fmt(Math.round(mens))+' € / mois</div><div class="sr-l">Cout total : <strong>'+fmt(Math.round(tot))+' €</strong> - Interets : <strong>'+fmt(Math.round(intr))+' €</strong></div><div style="margin-top:8px;font-size:11px;color:#888;font-style:italic">'+window.getBCLSourceLabel()+'</div>';
+};
+window.updateSimTaux = function(){
+  var sel = document.getElementById('sm-tx');
+  if(!sel) return;
+  var rate = (sel.value === 'variable') ? window.BCL_RATES.rates.variable : window.getBCLRate(parseInt(sel.value,10));
+  var inp = document.getElementById('st');
+  if(inp){ inp.value = rate.toFixed(2); window.runSim(); }
 };
 window.runRdt=function(){
   var p=+v('rp')||0,l=+v('rl')||0,c=+v('rc')||0;
   var r=document.getElementById('rdt-res');
   if(!r)return;
   if(!p||!l){r.style.display='none';return}
-  var brut=(l*12/p)*100,net=((l*12-c)/p)*100;
+  var loyerAn = l*12;
+  var brut = (loyerAn/p)*100;
+  var net = ((loyerAn-c)/p)*100;
+  var revenuImpos = Math.max(0, (loyerAn-c) * 0.65);
+  var netApresImpot = (revenuImpos / p) * 100;
   r.style.display='block';
-  var alert5=brut>5?'<br><span style="color:var(--or)">⚠ Rendement &gt; 5 % au Luxembourg — vérifiez le plafond légal.</span>':'';
-  r.innerHTML='<div class="sr-v">'+brut.toFixed(2)+' % brut · '+net.toFixed(2)+' % net</div><div class="sr-l">Loyer annuel : <strong>'+fmt(l*12)+' €</strong>'+alert5+'</div>';
+  var alert5=brut>5?'<br><span style="color:var(--or)">Attention - Rendement &gt; 5 % - verifiez le plafond legal LU (loi 2006).</span>':'';
+  r.innerHTML='<div class="sr-v">'+brut.toFixed(2)+' % brut - '+net.toFixed(2)+' % net</div><div class="sr-l">Loyer annuel : <strong>'+fmt(loyerAn)+' €</strong> - Net apres impot indicatif (abattement 35%) : <strong>'+netApresImpot.toFixed(2)+' %</strong>'+alert5+'</div>';
 };
 window.runCap=function(){
   var rv=+v('cr')||0,ch=+v('cc')||0,ap=+v('ca')||0,pr=+v('cb')||0;
   var r=document.getElementById('cap-res');
   if(!r)return;
   if(!rv){r.style.display='none';return}
-  var dispo=(rv-ch)*0.35,dur=25,taux=3.5;
-  var mr=taux/100/12,n=dur*12;
-  var cap=dispo*(1-Math.pow(1+mr,-n))/mr+ap;
-  var ok=pr&&pr<=cap;
+  var durSel = document.getElementById('cd');
+  var dur = durSel ? (parseInt(durSel.value,10)||25) : 25;
+  var taux = window.getBCLRate(dur);
+  var dispo = (rv-ch)*0.35;
+  var mr = taux/100/12, n = dur*12;
+  var cap = dispo*(1-Math.pow(1+mr,-n))/mr + ap;
+  var ok = pr && pr<=cap;
   r.style.display='block';
-  r.innerHTML='<div class="sr-v">'+fmt(Math.round(cap))+' €</div><div class="sr-l">Capacité max indicative (35 % effort, 25 ans @ 3.5 %). Mensualité disponible : <strong>'+fmt(Math.round(dispo))+' €</strong>'+(pr?'<br>Projet '+fmt(pr)+' € : <strong style="color:'+(ok?'#2d7a4f':'#b04040')+'">'+(ok?'Finançable ✓':'Au-dessus de la capacité')+'</strong>':'')+'</div>';
+  r.innerHTML='<div class="sr-v">'+fmt(Math.round(cap))+' €</div><div class="sr-l">Capacite max indicative (35 % effort, '+dur+' ans @ '+taux.toFixed(2)+' %). Mensualite disponible : <strong>'+fmt(Math.round(dispo))+' €</strong>'+(pr?'<br>Projet '+fmt(pr)+' € : <strong style="color:'+(ok?'#2d7a4f':'#b04040')+'">'+(ok?'Financable':'Au-dessus de la capacite')+'</strong>':'')+'</div><div style="margin-top:8px;font-size:11px;color:#888;font-style:italic">'+window.getBCLSourceLabel()+'</div>';
 };
+window.updateCapDuree = function(){ window.runCap(); };
+
+window.runBienSim = function(){
+  var r = document.getElementById('bsim-res');
+  if(!r) return;
+  var price = parseFloat(r.getAttribute('data-price'))||0;
+  var apport = +document.getElementById('bsim-apport').value || 0;
+  var duree = +document.getElementById('bsim-duree').value || 25;
+  var taux = +document.getElementById('bsim-taux').value || 3.85;
+  var montEmp = Math.max(0, price - apport);
+  var mens = window.calcMensualite(montEmp, taux, duree);
+  var coutCredit = (mens * duree * 12) - montEmp;
+  var fraisNot = window.calcFraisNotaireLU(price, true);
+  var coutTot = price + fraisNot + coutCredit;
+  r.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #eee;padding-bottom:8px;margin-bottom:8px"><span>Montant emprunte</span><strong>'+fmt(Math.round(montEmp))+' €</strong></div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:18px;color:#1a2b44;border-bottom:1px solid #eee;padding-bottom:8px;margin-bottom:8px"><span><strong>Mensualite estimee</strong></span><strong style="font-size:22px;color:#b89448">'+fmt(Math.round(mens))+' € / mois</strong></div>'+
+    '<div style="display:flex;justify-content:space-between"><span>Cout total du credit</span><span>'+fmt(Math.round(coutCredit))+' €</span></div>'+
+    '<div style="display:flex;justify-content:space-between"><span>Frais de notaire (~7%)</span><span>'+fmt(fraisNot)+' €</span></div>'+
+    '<div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid #eee"><span><strong>Cout total operation</strong></span><strong>'+fmt(Math.round(coutTot))+' €</strong></div>';
+};
+window.bsimUpdateTaux = function(){
+  var sel = document.getElementById('bsim-duree');
+  var inp = document.getElementById('bsim-taux');
+  if(!sel || !inp) return;
+  inp.value = window.getBCLRate(parseInt(sel.value, 10)).toFixed(2);
+};
+window.injectBienSimulator = function(){
+  var b = window.CURRENT_BIEN_FOR_SIMILAR;
+  if(!b) return;
+  if(document.getElementById('bien-sim-block')) return; // deja injecte
+  // Chercher le panneau lateral "Contactez l'agent" (colonne droite)
+  var modal = document.getElementById('m-bien');
+  if(!modal) return;
+  var side = modal.querySelector('.bd-side') || modal.querySelector('aside') || modal.querySelector('.bd-contact');
+  if(!side){
+    // Fallback : chercher le bouton Appeler et remonter
+    var appelBtn = modal.querySelector('.bd-cta-call, .btn-call, [data-action="call"]');
+    if(appelBtn) side = appelBtn.closest('.bd-side, aside, div');
+  }
+  if(!side){
+    console.warn('[bien-sim] colonne droite non trouvee');
+    return;
+  }
+  var prix = (b.price || b.prix || 0);
+  var apport = Math.round(prix * 0.20);
+  var emprunt = prix - apport;
+  var taux = window.getBCLRate(25);
+  var mens = window.calcMensualite(emprunt, taux, 25);
+  var html = '<div id="bien-sim-block" style="margin-top:18px;padding:18px;background:#f5f5f5;border-left:3px solid #B8865A;font-family:Arial,sans-serif">'
+    + '<div style="font-size:11px;letter-spacing:.15em;color:#B8865A;font-weight:600;margin-bottom:10px">SIMULATEUR DE FINANCEMENT</div>'
+    + '<div style="font-size:13px;color:#333;line-height:1.7">'
+    +   '<div>Prix : <strong>' + fmt(prix) + ' €</strong></div>'
+    +   '<div>Apport (20 %) : <strong>' + fmt(apport) + ' €</strong></div>'
+    +   '<div>Emprunt : <strong>' + fmt(emprunt) + ' €</strong></div>'
+    +   '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #ddd">Mensualite (25 ans @ ' + taux.toFixed(2) + ' %) :<br><strong style="font-size:18px;color:#3D4F63">' + fmt(Math.round(mens)) + ' € / mois</strong></div>'
+    + '</div>'
+    + '<div style="margin-top:10px;font-size:10px;color:#888;font-style:italic">' + window.getBCLSourceLabel() + '</div>'
+    + '<a href="/simulateurs" style="display:block;margin-top:12px;padding:8px;text-align:center;background:#3D4F63;color:#fff;text-decoration:none;font-size:11px;letter-spacing:.1em">SIMULATION COMPLETE →</a>'
+    + '</div>';
+  side.insertAdjacentHTML('beforeend', html);
+};
+(function(){
+  function setupObs(){
+    var mBien = document.getElementById('m-bien');
+    if(!mBien) { setTimeout(setupObs, 500); return; }
+    var obs = new MutationObserver(function(){
+      if(mBien.classList.contains('open') || mBien.classList.contains('as-page-open')){
+        setTimeout(window.injectBienSimulator, 300);
+      }
+    });
+    obs.observe(mBien, { attributes: true, attributeFilter: ['class'] });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', setupObs);
+  } else {
+    setupObs();
+  }
+})();
+
 
 /* ─── LOYER LUX (5%) ─── */
 window.calcLoyer=function(){
@@ -6735,3 +6868,7 @@ document.addEventListener('click',function(e){
     });
   }
 })();
+
+
+// Auto-injection fiche bien
+setInterval(function(){var m=document.getElementById('m-bien');if(m&&m.classList.contains('open')&&window.CURRENT_BIEN_FOR_SIMILAR&&!document.getElementById('bien-sim-block')){try{window.injectBienSimulator();}catch(e){}}},500);
