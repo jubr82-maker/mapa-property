@@ -1,26 +1,116 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   MAPA Property — Palette dorée brillante (section 5 du brief)
+   Light mode = défaut. Dark mode via class="dark" sur <html>
+   (géré par next-themes).
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:           #F5F0E6;
+  --bg-deep:      #E8DFC9;
+  --bg-soft:      #F0E9D8;
+  --ink:          #0D0F12;
+  --ink-mid:      #2C2E33;
+  --ink-soft:     #5C5E66;
+  --gold:         #C9A24E;
+  --gold-bright:  #E5C77A;
+  --gold-deep:    #8E6F30;
+  --gold-shine:   #F2D88E;
+  --accent-warm:  #B8865A;
+  --line:         rgba(13, 15, 18, 0.18);
+  --line-strong:  rgba(13, 15, 18, 0.32);
 }
 
+.dark {
+  --bg:           #0F0E0B;
+  --bg-deep:      #0A0908;
+  --bg-soft:      #1A1612;
+  --ink:          #F5F0E6;
+  --ink-mid:      #BFB59E;
+  --ink-soft:     #847B65;
+  --gold:         #E5C77A;
+  --gold-bright:  #F2D88E;
+  --gold-deep:    #C9A24E;
+  --gold-shine:   #FAE6A8;
+  --accent-warm:  #C99868;
+  --line:         rgba(245, 240, 230, 0.14);
+  --line-strong:  rgba(245, 240, 230, 0.28);
+}
+
+/* Expose les variables comme tokens Tailwind (bg-bg, text-ink, border-line, etc.) */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg:           var(--bg);
+  --color-bg-deep:      var(--bg-deep);
+  --color-bg-soft:      var(--bg-soft);
+  --color-ink:          var(--ink);
+  --color-ink-mid:      var(--ink-mid);
+  --color-ink-soft:     var(--ink-soft);
+  --color-gold:         var(--gold);
+  --color-gold-bright:  var(--gold-bright);
+  --color-gold-deep:    var(--gold-deep);
+  --color-gold-shine:   var(--gold-shine);
+  --color-accent-warm:  var(--accent-warm);
+  --color-line:         var(--line);
+  --color-line-strong:  var(--line-strong);
+
+  --font-display: var(--font-display);
+  --font-sans:    var(--font-sans);
+  --font-mono:    var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Effet "or brillant" pour CTAs et accents */
+.gold-shine-bg {
+  background: linear-gradient(
+    135deg,
+    var(--gold-deep) 0%,
+    var(--gold) 30%,
+    var(--gold-shine) 50%,
+    var(--gold-bright) 70%,
+    var(--gold) 100%
+  );
+  background-size: 200% 200%;
+  animation: shimmer 8s ease infinite;
+}
+
+.gold-text {
+  background: linear-gradient(
+    135deg,
+    var(--gold-deep),
+    var(--gold-shine),
+    var(--gold)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .gold-shine-bg {
+    animation: none;
+  }
+}
+
+html {
+  color-scheme: light dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

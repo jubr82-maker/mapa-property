@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "site_name": "MAPA Property",
+    "default_title": "MAPA Property — Luxemburger Immobilienagentur & internationaler Broker",
+    "default_description": "Luxemburger Immobilienagentur und internationaler Broker. Verkauf, Vermietung, Off-Market, Trophy Assets. Unter Mandat, im Rahmen, in Ihrem ausschließlichen Interesse."
+  },
+  "common": {
+    "language": "Sprache",
+    "theme_light": "Tagmodus",
+    "theme_dark": "Nachtmodus",
+    "loading": "Lädt…"
+  },
+  "home": {
+    "placeholder": "MAPA Property — Startseite im Aufbau."
+  }
+}
