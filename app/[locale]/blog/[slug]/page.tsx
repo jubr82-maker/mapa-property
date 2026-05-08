@@ -3,6 +3,11 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchBlogPostBySlug } from "@/lib/data";
 import { pickLang, type Locale } from "@/lib/types";
 import { BookletReader } from "@/components/blog/BookletReader";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { blogPosting, breadcrumb } from "@/lib/seo";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
 
 export async function generateMetadata({
   params,
@@ -39,9 +44,25 @@ export default async function BlogPostPage({
 
   const title = pickLang(post, "title", locale as Locale);
   const content = pickLang(post, "content", locale as Locale);
+  const excerpt = pickLang(post, "excerpt", locale as Locale);
+
+  const articleJsonLd = blogPosting({
+    title,
+    description: excerpt || title,
+    url: `${SITE_URL}/${locale}/blog/${post.slug}`,
+    image: post.cover_image ?? undefined,
+    publishedAt: post.published_at,
+    author: post.author,
+  });
+  const breadcrumbJsonLd = breadcrumb([
+    { name: "MAPA Property", url: `${SITE_URL}/${locale}` },
+    { name: "Blog", url: `${SITE_URL}/${locale}/blog` },
+    { name: title, url: `${SITE_URL}/${locale}/blog/${post.slug}` },
+  ]);
 
   return (
     <div className="px-6 pt-24 pb-16 lg:px-10 lg:pt-32">
+      <JsonLd data={[articleJsonLd, breadcrumbJsonLd]} />
       <div className="mx-auto max-w-4xl">
         <BookletReader
           title={title}

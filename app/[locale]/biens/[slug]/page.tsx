@@ -14,6 +14,11 @@ import { PropertyFinancing } from "@/components/property/PropertyFinancing";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { breadcrumb, propertyListing } from "@/lib/seo";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
 
 const formatPrice = (
   price: number | null,
@@ -78,8 +83,24 @@ export default async function PropertyPage({
     )
     .slice(0, 3);
 
+  const productJsonLd = propertyListing({
+    name: title,
+    description: description.slice(0, 300),
+    url: `${SITE_URL}/${locale}/biens/${property.slug}`,
+    image: galleryItems[0]?.url,
+    price: property.transaction === "rent" ? null : property.price,
+    city: property.city,
+    country: property.country,
+  });
+  const breadcrumbJsonLd = breadcrumb([
+    { name: "MAPA Property", url: `${SITE_URL}/${locale}` },
+    { name: "Biens", url: `${SITE_URL}/${locale}/biens` },
+    { name: title, url: `${SITE_URL}/${locale}/biens/${property.slug}` },
+  ]);
+
   return (
     <article className="pt-24 lg:pt-32">
+      <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <div className="mb-6 flex items-center justify-between gap-4 print:hidden">
           <BackButton fallback="/biens" />

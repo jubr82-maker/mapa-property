@@ -8,6 +8,8 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { realEstateAgent, personJulien, website } from "@/lib/seo";
 import "../globals.css";
 
 const display = Big_Shoulders({
@@ -42,12 +44,55 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
+  const ogImage = `${siteUrl}/og/og-${locale}.png`;
   return {
     title: t("default_title"),
     description: t("default_description"),
-    metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu",
-    ),
+    metadataBase: new URL(siteUrl),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        "fr-LU": "/fr",
+        "en-US": "/en",
+        "de-DE": "/de",
+        "x-default": "/fr",
+      },
+    },
+    openGraph: {
+      title: t("default_title"),
+      description: t("default_description"),
+      url: `/${locale}`,
+      siteName: "MAPA Property",
+      locale:
+        locale === "fr" ? "fr_LU" : locale === "de" ? "de_DE" : "en_US",
+      type: "website",
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("default_title"),
+      description: t("default_description"),
+      images: [ogImage],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+    other: {
+      "geo.region": "LU-LU",
+      "geo.position": "49.4811;6.0878",
+      ICBM: "49.4811, 6.0878",
+      "geo.placename": "Luxembourg",
+      copyright: "© 2026 MAPA Synergy Sàrl",
+      // Note: "noai" / "noimageai" sont des indicateurs informels que certains
+      // crawlers IA respectent. Aucune garantie technique.
+      "robots-noai": "noai, noimageai",
+    },
   };
 }
 
@@ -71,6 +116,7 @@ export default async function LocaleLayout({
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
     >
       <body className="min-h-dvh bg-bg text-ink antialiased">
+        <JsonLd data={[realEstateAgent(locale), personJulien(), website(locale)]} />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
