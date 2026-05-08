@@ -107,6 +107,71 @@ html {
   color-scheme: light dark;
 }
 
+.prose-mapa {
+  max-width: 65ch;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--ink-mid);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+.prose-mapa h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 2rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+}
+.prose-mapa h3 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+.prose-mapa p {
+  margin-bottom: 1.1rem;
+}
+.prose-mapa a {
+  color: var(--gold-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.prose-mapa ul,
+.prose-mapa ol {
+  margin: 1rem 0 1.25rem 1.5rem;
+}
+.prose-mapa ul {
+  list-style: disc;
+}
+.prose-mapa ol {
+  list-style: decimal;
+}
+.prose-mapa blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--gold);
+  color: var(--ink);
+  font-style: italic;
+}
+.prose-mapa img {
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+.prose-mapa code {
+  background: var(--bg-soft);
+  padding: 0.1em 0.4em;
+  border-radius: 0.25rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.9em;
+}
+
 @media print {
   @page {
     size: A4;

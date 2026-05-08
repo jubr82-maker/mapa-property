@@ -582,6 +582,48 @@
     "rate_used": "Taux utilisé",
     "limit_35pct": "Plafond endettement 35% (BCL / CSSF)"
   },
+  "about_page": {
+    "eyebrow": "Depuis 2018",
+    "title": "L'immobilier ne se vend pas. Il se confie.",
+    "intro": "MAPA Property — agence immobilière luxembourgeoise et broker international. Sous mandat, dans le cadre, dans votre intérêt exclusif.",
+    "h1_line1": "L'immobilier ne se vend pas.",
+    "h1_line2": "Il se confie.",
+    "para_1": "Il y a des transactions qui se font à la lumière. Et puis il y a celles qui se nouent dans le silence. Depuis bientôt dix ans, MAPA Property opère dans l'ombre des plus belles cessions immobilières luxembourgeoises et internationales. Nous sommes peu à le savoir. Et c'est très bien ainsi.",
+    "para_2": "Tout a commencé en 2018, dans les couloirs d'un environnement financier exigeant. Julien Brebion y apprend une discipline : la précision, la discrétion, la lecture fine des intérêts. Quand il fonde MAPA Property en 2020 à Luxembourg, ces trois mots deviennent une méthode.",
+    "para_3": "À l'image du buyer's agent américain qui défend l'acquéreur seul depuis des décennies, nous croyons que le meilleur service immobilier se construit sur un mandat de recherche. Pas un courtier qui sert deux maîtres. Un conseil qui ne défend qu'un intérêt à la fois. Cette évidence outre-Atlantique, nous l'avons fait nôtre.",
+    "para_4": "Nous travaillons avec les outils de notre époque. L'intelligence artificielle est notre alliée quotidienne — pour analyser, structurer, anticiper. Mais elle ne remplace jamais l'œil d'un conseiller dans une pièce. Notre métier, c'est la rencontre. Le reste n'est que technologie.",
+    "para_5": "Travailler ensemble est important. Protéger les intérêts de chacun par un cadre clair l'est davantage. Mandat signé, missions définies, confidentialité contractuelle. C'est ainsi que nous tissons les meilleurs partenariats. Et c'est ce qui explique notre efficacité.",
+    "para_6": "Nous sommes là depuis bientôt dix ans. Nous avons accompagné plusieurs centaines de clients — familles internationales, dirigeants, investisseurs institutionnels, family offices. La plupart vous diraient qu'ils ne nous ont jamais vus à la lumière. C'est précisément le service qu'ils sont venus chercher.",
+    "para_7": "MAPA Property est aujourd'hui une agence immobilière luxembourgeoise et un broker international. Nous couvrons 24 communes au Grand-Duché et 28 villes premium dans le monde. Nous opérons sous mandat, dans le cadre, et toujours dans l'intérêt exclusif de nos clients.",
+    "director_label": "Fondateur",
+    "cta_title": "Une conversation peut tout changer.",
+    "cta_button": "Prendre rendez-vous",
+    "copyright": "Source : MAPA Property (https://www.mapaproperty.lu) — © 2026. Tous droits réservés. Toute reproduction interdite."
+  },
+  "contact_page": {
+    "eyebrow": "Contact",
+    "title": "Une conversation peut tout changer.",
+    "intro": "Mandat de vente, recherche, accès off-market, conseil patrimonial — chaque demande est traitée personnellement par Julien Brebion sous 24 heures ouvrées.",
+    "form_title": "Écrivez-nous",
+    "call_label": "Appeler",
+    "email_label": "Écrire",
+    "hq_label": "HQ",
+    "meeting_label": "Rendez-vous",
+    "meeting_value": "Luxembourg-Ville, sur site (dans le bien visité), à votre domicile, ou en visioconférence."
+  },
+  "blog_page": {
+    "eyebrow": "Édito MAPA",
+    "title": "Insights & analyses.",
+    "intro": "Décryptages marché, fiscalité, off-market, mandats. Une lecture lente pour des décisions précises.",
+    "empty": "Aucun article publié pour le moment.",
+    "read": "Lire"
+  },
+  "booklet": {
+    "close": "Retour au blog",
+    "page": "Page",
+    "prev": "Page précédente",
+    "next": "Page suivante"
+  },
   "markets_page": {
     "eyebrow": "Marchés actifs",
     "title": "Du Grand-Duché aux marchés mondiaux.",

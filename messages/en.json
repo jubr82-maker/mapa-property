@@ -582,6 +582,48 @@
     "rate_used": "Rate used",
     "limit_35pct": "35% debt cap (BCL / CSSF)"
   },
+  "about_page": {
+    "eyebrow": "Since 2018",
+    "title": "Real estate isn't sold. It's entrusted.",
+    "intro": "MAPA Property — Luxembourg real estate agency and international broker. Under mandate, within a framework, in your sole interest.",
+    "h1_line1": "Real estate isn't sold.",
+    "h1_line2": "It's entrusted.",
+    "para_1": "There are transactions that happen in the light. And then there are those that are tied up in silence. For nearly a decade, MAPA Property has operated in the shadow of the most beautiful Luxembourg and international real estate transactions. Few of us know about it. And that's exactly how it should be.",
+    "para_2": "It all started in 2018, in the corridors of a demanding financial environment. There, Julien Brebion learned a discipline: precision, discretion, the finely tuned reading of interests. When he founded MAPA Property in 2020 in Luxembourg, those three words became a method.",
+    "para_3": "Like the American buyer's agent who has defended the buyer alone for decades, we believe the best real estate service is built on a search mandate. Not a broker serving two masters. Advice that defends only one interest at a time. This American evidence, we have made it our own.",
+    "para_4": "We work with the tools of our time. Artificial intelligence is our daily ally — to analyse, structure, anticipate. But it never replaces an advisor's eye in a room. Our craft is the meeting. The rest is just technology.",
+    "para_5": "Working together matters. Protecting each party's interests with a clear framework matters more. Signed mandate, defined missions, contractual confidentiality. This is how we build the best partnerships. And it's what explains our effectiveness.",
+    "para_6": "We have been here for nearly a decade. We have supported several hundred clients — international families, executives, institutional investors, family offices. Most would tell you they never saw us in the light. That is precisely the service they came looking for.",
+    "para_7": "MAPA Property is today a Luxembourg real estate agency and an international broker. We cover 24 municipalities in the Grand Duchy and 28 premium cities worldwide. We operate under mandate, within a framework, and always in our clients' sole interest.",
+    "director_label": "Founder",
+    "cta_title": "A conversation can change everything.",
+    "cta_button": "Book a meeting",
+    "copyright": "Source: MAPA Property (https://www.mapaproperty.lu) — © 2026. All rights reserved. Reproduction prohibited."
+  },
+  "contact_page": {
+    "eyebrow": "Contact",
+    "title": "A conversation can change everything.",
+    "intro": "Sale mandate, search, off-market access, wealth advice — every request is handled personally by Julien Brebion within 24 working hours.",
+    "form_title": "Write to us",
+    "call_label": "Call",
+    "email_label": "Email",
+    "hq_label": "HQ",
+    "meeting_label": "Meeting",
+    "meeting_value": "Luxembourg-City, on site (at the property), at your home, or by video call."
+  },
+  "blog_page": {
+    "eyebrow": "MAPA Editorial",
+    "title": "Insights & analyses.",
+    "intro": "Market decryptions, taxation, off-market, mandates. Slow reading for precise decisions.",
+    "empty": "No article published yet.",
+    "read": "Read"
+  },
+  "booklet": {
+    "close": "Back to blog",
+    "page": "Page",
+    "prev": "Previous page",
+    "next": "Next page"
+  },
   "markets_page": {
     "eyebrow": "Active markets",
     "title": "From the Grand Duchy to global cities.",
