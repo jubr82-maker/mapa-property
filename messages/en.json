@@ -291,5 +291,39 @@
     "success_eyebrow": "Request received",
     "success_title": "Thank you, your request has been registered.",
     "success_text": "Julien Brebion will personally get back to you within 24 working hours."
+  },
+  "offmarket": {
+    "eyebrow": "Off-Market",
+    "title": "The properties that aren't seen.",
+    "description": "A significant share of prestige transactions are concluded outside the open market. Under mandate and NDA, MAPA Property gives access to a confidential selection, never published online.",
+    "access_eyebrow": "Access conditions",
+    "access_title": "Three steps to discover our off-market properties",
+    "step_1_title": "Qualified request",
+    "step_1_text": "You complete the NDA form, outlining your project and criteria.",
+    "step_2_title": "Verification",
+    "step_2_text": "We validate your financial capacity and sign the contractual NDA.",
+    "step_3_title": "Discovery",
+    "step_3_text": "We send you the full file and organise viewings.",
+    "empty": "No off-market property currently published. Contact us with your criteria.",
+    "price_on_request": "Price on request",
+    "locked_eyebrow": "Protected visuals",
+    "locked_text": "Full photography accessible after NDA signature.",
+    "brief": "The brief",
+    "highlights": "Highlights",
+    "gallery": "Gallery (locked)",
+    "form_eyebrow": "Request the full file",
+    "form_title": "Access the full dossier",
+    "form_subtitle": "Under contractual NDA and verified financial capacity."
+  },
+  "nda": {
+    "project_label": "Your project",
+    "project_placeholder": "A few lines about the property sought, your acquisition horizon, your wealth situation.",
+    "nda_label": "I accept the contractual NDA terms: no disclosure to third parties, no online publication.",
+    "proof_label": "I confirm that I have the financial capacity matching the indicated price (deposit and/or bank financing).",
+    "submit": "Submit my request",
+    "error": "Please accept the NDA and confirm your financial capacity, then verify your contact details.",
+    "success_eyebrow": "NDA request received",
+    "success_title": "Your request is being validated.",
+    "success_text": "Julien Brebion will get back to you within 24 working hours with the contractual NDA and the full file."
   }
 }

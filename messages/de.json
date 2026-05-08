@@ -291,5 +291,39 @@
     "success_eyebrow": "Anfrage empfangen",
     "success_title": "Danke, Ihre Anfrage wurde registriert.",
     "success_text": "Julien Brebion meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen."
+  },
+  "offmarket": {
+    "eyebrow": "Off-Market",
+    "title": "Die Objekte, die nicht sichtbar sind.",
+    "description": "Ein erheblicher Teil hochwertiger Transaktionen wird außerhalb des offenen Marktes abgeschlossen. Unter Mandat und NDA gewährt MAPA Property Zugang zu einer vertraulichen Auswahl — niemals online veröffentlicht.",
+    "access_eyebrow": "Zugangsbedingungen",
+    "access_title": "Drei Schritte zu unseren Off-Market-Objekten",
+    "step_1_title": "Qualifizierte Anfrage",
+    "step_1_text": "Sie füllen das NDA-Formular mit Ihrem Projekt und Ihren Kriterien aus.",
+    "step_2_title": "Prüfung",
+    "step_2_text": "Wir prüfen Ihre Finanzkraft und unterzeichnen die vertragliche NDA.",
+    "step_3_title": "Vorstellung",
+    "step_3_text": "Wir übermitteln das vollständige Dossier und organisieren Besichtigungen.",
+    "empty": "Aktuell keine Off-Market-Objekte veröffentlicht. Kontaktieren Sie uns mit Ihren Kriterien.",
+    "price_on_request": "Preis auf Anfrage",
+    "locked_eyebrow": "Geschützte Bilder",
+    "locked_text": "Vollständige Fotos nach Unterzeichnung der NDA zugänglich.",
+    "brief": "Das Briefing",
+    "highlights": "Highlights",
+    "gallery": "Galerie (gesperrt)",
+    "form_eyebrow": "Vollständiges Dossier anfordern",
+    "form_title": "Zugang zum vollständigen Dossier",
+    "form_subtitle": "Unter vertraglicher NDA und geprüfter Finanzkraft."
+  },
+  "nda": {
+    "project_label": "Ihr Projekt",
+    "project_placeholder": "Einige Zeilen zum gesuchten Objekt, Ihrem Anschaffungshorizont, Ihrer Vermögenssituation.",
+    "nda_label": "Ich akzeptiere die Bedingungen der vertraglichen NDA: keine Weitergabe an Dritte, keine Online-Veröffentlichung.",
+    "proof_label": "Ich bestätige, dass meine Finanzkraft dem angegebenen Preis entspricht (Eigenkapital und/oder Bankfinanzierung).",
+    "submit": "Anfrage absenden",
+    "error": "Bitte akzeptieren Sie die NDA und bestätigen Sie Ihre Finanzkraft, dann überprüfen Sie Ihre Kontaktdaten.",
+    "success_eyebrow": "NDA-Anfrage empfangen",
+    "success_title": "Ihre Anfrage wird geprüft.",
+    "success_text": "Julien Brebion meldet sich innerhalb von 24 Werkstunden mit der vertraglichen NDA und dem vollständigen Dossier."
   }
 }

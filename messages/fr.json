@@ -291,5 +291,39 @@
     "success_eyebrow": "Demande reçue",
     "success_title": "Merci, votre demande a été enregistrée.",
     "success_text": "Julien Brebion vous recontactera personnellement sous 24 heures ouvrées."
+  },
+  "offmarket": {
+    "eyebrow": "Off-Market",
+    "title": "Les propriétés qui ne se voient pas.",
+    "description": "Une part importante des transactions de prestige se nouent en dehors du marché ouvert. Sous mandat et NDA, MAPA Property donne accès à une sélection confidentielle, jamais publiée en ligne.",
+    "access_eyebrow": "Conditions d'accès",
+    "access_title": "Trois étapes pour découvrir nos biens off-market",
+    "step_1_title": "Demande motivée",
+    "step_1_text": "Vous remplissez le formulaire NDA en précisant votre projet et vos critères.",
+    "step_2_title": "Vérification",
+    "step_2_text": "Nous validons votre capacité financière et signons le NDA contractuel.",
+    "step_3_title": "Découverte",
+    "step_3_text": "Nous vous transmettons le dossier complet et organisons les visites.",
+    "empty": "Aucun bien off-market publié actuellement. Contactez-nous pour vos critères.",
+    "price_on_request": "Prix sur demande",
+    "locked_eyebrow": "Visuels protégés",
+    "locked_text": "Photographies complètes accessibles après signature du NDA.",
+    "brief": "Le brief",
+    "highlights": "Points forts",
+    "gallery": "Galerie (verrouillée)",
+    "form_eyebrow": "Demande de dossier complet",
+    "form_title": "Accéder au dossier complet",
+    "form_subtitle": "Sous NDA contractuel et capacité financière vérifiée."
+  },
+  "nda": {
+    "project_label": "Votre projet",
+    "project_placeholder": "Quelques lignes sur le bien recherché, votre horizon d'acquisition, votre situation patrimoniale.",
+    "nda_label": "J'accepte les termes du NDA contractuel : aucune divulgation, ni aux tiers, ni publication en ligne.",
+    "proof_label": "Je confirme disposer de la capacité financière correspondant au prix indiqué (apport et/ou financement bancaire).",
+    "submit": "Envoyer ma demande",
+    "error": "Veuillez accepter le NDA et confirmer votre capacité financière, puis vérifier vos coordonnées.",
+    "success_eyebrow": "Demande NDA reçue",
+    "success_title": "Votre demande est en cours de validation.",
+    "success_text": "Julien Brebion revient vers vous sous 24 heures ouvrées avec le NDA contractuel et le dossier complet."
   }
 }
