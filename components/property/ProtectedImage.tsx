@@ -18,6 +18,7 @@ export function ProtectedImage({
       onContextMenu={(e) => e.preventDefault()}
       onDragStart={(e) => e.preventDefault()}
     >
+      {/* eslint-disable-next-line jsx-a11y/alt-text -- alt is forwarded via {...rest} */}
       <Image draggable={false} {...rest} />
       {watermark && (
         <span

@@ -65,6 +65,7 @@ export function ChatbotWidget() {
   useEffect(() => {
     if (open && messages.length === 0) {
       const greeting = getDefaultGreeting(locale, pageContext);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: seed initial assistant greeting once panel opens
       setMessages([{ role: "assistant", content: greeting }]);
     }
   }, [open, messages.length, locale, pageContext]);

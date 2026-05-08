@@ -27,6 +27,7 @@ export function useFavorites() {
   const [ids, setIds] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- intentional: hydrate from localStorage + subscribe to storage events */
   useEffect(() => {
     setIds(read());
     setHydrated(true);
@@ -38,6 +39,7 @@ export function useFavorites() {
       window.removeEventListener("storage", sync);
     };
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const toggle = useCallback((id: string) => {
     const current = read();

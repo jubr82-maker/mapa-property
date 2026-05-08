@@ -9,6 +9,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   const [mounted, setMounted] = useState(false);
   const t = useTranslations("common");
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: hydration guard for next-themes
   useEffect(() => setMounted(true), []);
 
   const current = mounted ? (resolvedTheme ?? theme) : "light";

@@ -116,6 +116,7 @@ export function BookletReader({
                 {title}
               </h1>
               {coverImage && (
+                // eslint-disable-next-line @next/next/no-img-element -- intentional: cover inside booklet, not above-the-fold LCP
                 <img
                   src={coverImage}
                   alt={title}

@@ -56,16 +56,15 @@ export default async function PropertyPage({
   const title = pickLang(property, "title", locale as Locale);
   const description = pickLang(property, "description", locale as Locale);
 
-  const galleryItems = [
-    ...images.map((img) => ({
-      type: "image" as const,
-      url: img.url,
-      alt: title,
-    })),
-  ];
+  type GalleryItem = { type: "image" | "video"; url: string; alt?: string };
+  const galleryItems: GalleryItem[] = images.map((img) => ({
+    type: "image",
+    url: img.url,
+    alt: title,
+  }));
   if (property.video_url) {
     galleryItems.push({
-      type: "video" as const,
+      type: "video",
       url: property.video_url,
       alt: title,
     });

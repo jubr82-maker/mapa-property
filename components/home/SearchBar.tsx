@@ -38,6 +38,7 @@ export function SearchBar() {
   // Pick default mode based on viewport on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: client-only viewport detection after hydration
     setMode(window.innerWidth >= 1024 ? "manual" : "ai");
   }, []);
 

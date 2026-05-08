@@ -30,7 +30,8 @@ export function FilterBar() {
   const [budget, setBudget] = useState(params.get("budget_max") ?? "");
   const [bedrooms, setBedrooms] = useState(params.get("min_bedrooms") ?? "");
 
-  // Sync state when URL changes externally
+  // Sync state when URL changes externally (e.g. user clicks suggested filter elsewhere)
+  /* eslint-disable react-hooks/set-state-in-effect -- intentional: external URL → form state sync */
   useEffect(() => {
     setCountry(params.get("country") ?? "");
     setCity(params.get("city") ?? "");
@@ -39,6 +40,7 @@ export function FilterBar() {
     setBudget(params.get("budget_max") ?? "");
     setBedrooms(params.get("min_bedrooms") ?? "");
   }, [params]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const apply = () => {
     const sp = new URLSearchParams();
