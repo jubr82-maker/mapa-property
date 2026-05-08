@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MAPA Property
 
-## Getting Started
+Site officiel — agence immobilière luxembourgeoise & broker international.
+Construit par Julien Brebion avec Claude Code (Anthropic).
 
-First, run the development server:
+- Production : `https://mapaproperty.lu`
+- Stack : Next.js 16 · TypeScript · Tailwind v4 · next-intl (FR/EN/DE) · Supabase · Vercel
+- Domaine : `mapaproperty.lu` (jamais `.com`)
+
+## Développement
 
 ```bash
+npm install
+cp .env.example .env.local   # remplir avec les vraies valeurs
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir http://localhost:3000 — redirige vers `/fr` par défaut.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables d'environnement
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Voir `.env.example`. Comportements quand une clé est absente :
 
-## Learn More
+| Variable | Absente → comportement |
+|---|---|
+| `RESEND_API_KEY` | Leads INSERT Supabase only, pas d'email envoyé |
+| `MISTRAL_API_KEY` | Chatbot Eléna utilise fallback heuristique |
+| `GROQ_API_KEY` | Pas de fallback Mistral → Groq, message gracieux si Mistral KO |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Composant Turnstile no-op, validation serveur permissive |
+| `TURNSTILE_SECRET_KEY` | Validation serveur skip (MVP-friendly) |
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run dev      # serveur dev avec Turbopack
+npm run build    # build production
+npm run start    # serveur production (après build)
+npm run lint     # ESLint strict
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architecture
 
-## Deploy on Vercel
+```
+app/[locale]/          → routing i18n FR/EN/DE
+  ├── biens/           → liste + fiche [slug]
+  ├── off-market/      → liste + fiche [id] avec NDA
+  ├── mandats/[type]/  → 5 mandats (exclusif/semi/simple/autonome/recherche)
+  ├── services/        → vendre, acheter (redirect /biens), louer, estimer,
+  │                      simulateurs, marches-actifs
+  ├── qui-sommes-nous/ → storytelling
+  ├── blog/            → liste + [slug] format livret swipable
+  ├── contact/         → form général
+  └── legal/           → mentions, cgu, cgv, rgpd, honoraires
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+app/api/               → routes serveur
+  ├── lead             → POST INSERT Supabase + Resend (TODO)
+  ├── chatbot          → POST Mistral + fallback Groq/heuristique
+  ├── estimate         → POST modèle hédoniste + aides LU
+  └── search-ia        → POST parse demande → filtres /biens
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+components/            → UI (server + client)
+i18n/                  → routing/navigation/request next-intl
+lib/                   → data (Supabase fetchers), seo, finance,
+                        legal/{mentions,cgu,cgv,rgpd,honoraires},
+                        rate-limit, mandates, markets, types, contrast
+messages/{fr,en,de}    → ~280 clés par langue
+```
+
+## Données Supabase (lecture)
+
+Tables existantes (v28, intouchées) :
+
+- `properties` (16 biens publiés)
+- `property_images` (187 photos)
+- `properties_offmarket` (off-market avec galerie verrouillée)
+- `reviews` (avis clients)
+- `blog_posts` (articles avec FAQ JSONB par langue)
+- `interest_rates` (dernière ligne BCL utilisée par simulateurs)
+
+Écriture : `leads` uniquement (forms + auto-detection chatbot).
+
+## Déploiement Vercel
+
+1. Importer le repo GitHub dans Vercel
+2. Framework preset : Next.js (auto-détecté)
+3. Variables d'environnement : copier de `.env.local` (sauf clés vides)
+4. Domain : `mapaproperty.lu` (DNS Cloudflare proxified vers Vercel)
+5. Build command : `npm run build` (par défaut)
+6. Output directory : `.next` (par défaut)
+
+DNS Cloudflare devant Vercel pour :
+- WAF (Bot Fight Mode + Rate Limiting Rules 60 req/min/IP)
+- Turnstile (clés déjà configurées)
+- Caching et anti-scraping
+
+## Sécurité
+
+- Headers : X-Frame, HSTS 2 ans, Permissions-Policy, X-Robots-Tag noai
+- Rate limit IP-based : `/api/lead` 5/min, `/api/chatbot` 30/min
+- Turnstile sur tous formulaires
+- Validation côté client + serveur
+- Source maps désactivées en prod
+
+## Licence
+
+© 2026 MAPA Synergy Sàrl. Tous droits réservés. Reproduction interdite.
