@@ -1,0 +1,700 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { luxembourgCommunes } from "@/lib/markets";
+import { formatEuro } from "@/lib/finance";
+import type { EstimateResult } from "@/lib/estimate";
+
+const PROPERTY_TYPES = [
+  "appartement",
+  "maison",
+  "penthouse",
+  "duplex",
+  "villa",
+  "immeuble",
+  "terrain",
+] as const;
+const STATES = ["to_renovate", "good", "renovated", "new"] as const;
+const ENERGIES = ["A", "B", "C", "D", "E", "F", "G", "H", "I"] as const;
+
+interface FormState {
+  country: string;
+  commune: string;
+  postal: string;
+  type: string;
+  state: (typeof STATES)[number];
+  energy: string;
+  livingSurface: string;
+  landSurface: string;
+  terraceSurface: string;
+  bedrooms: string;
+  year: string;
+  buyersCount: "1" | "2";
+  primaryAgeMax: string;
+  isPrimoLu: boolean;
+  isPrimaryResidence: boolean;
+  monthlyIncome: string;
+  monthlyCharges: string;
+  downPayment: string;
+}
+
+const initial: FormState = {
+  country: "LU",
+  commune: "",
+  postal: "",
+  type: "appartement",
+  state: "good",
+  energy: "C",
+  livingSurface: "",
+  landSurface: "",
+  terraceSurface: "",
+  bedrooms: "",
+  year: "",
+  buyersCount: "1",
+  primaryAgeMax: "",
+  isPrimoLu: false,
+  isPrimaryResidence: true,
+  monthlyIncome: "",
+  monthlyCharges: "",
+  downPayment: "",
+};
+
+export function EstimateForm() {
+  const t = useTranslations("estimate_form");
+  const tSearch = useTranslations("search");
+  const [step, setStep] = useState(1);
+  const [data, setData] = useState<FormState>(initial);
+  const [result, setResult] = useState<EstimateResult | null>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    setData((d) => ({ ...d, [key]: value }));
+  };
+
+  const submit = async () => {
+    setPending(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/estimate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          country: data.country,
+          commune: data.commune || undefined,
+          type: data.type,
+          state: data.state,
+          energy: data.energy,
+          livingSurface: Number(data.livingSurface),
+          landSurface: data.landSurface ? Number(data.landSurface) : undefined,
+          terraceSurface: data.terraceSurface
+            ? Number(data.terraceSurface)
+            : undefined,
+          bedrooms: data.bedrooms ? Number(data.bedrooms) : undefined,
+          year: data.year ? Number(data.year) : undefined,
+          buyersCount: Number(data.buyersCount) as 1 | 2,
+          primaryAgeMax: data.primaryAgeMax
+            ? Number(data.primaryAgeMax)
+            : undefined,
+          isPrimoLu: data.isPrimoLu,
+          isPrimaryResidence: data.isPrimaryResidence,
+          monthlyIncome: data.monthlyIncome
+            ? Number(data.monthlyIncome)
+            : undefined,
+          monthlyCharges: data.monthlyCharges
+            ? Number(data.monthlyCharges)
+            : undefined,
+          downPayment: data.downPayment ? Number(data.downPayment) : undefined,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const json = (await res.json()) as { result: EstimateResult };
+      setResult(json.result);
+      setStep(4);
+    } catch {
+      setError(t("error"));
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const reset = () => {
+    setData(initial);
+    setResult(null);
+    setStep(1);
+  };
+
+  if (result) {
+    return <ResultView result={result} onReset={reset} />;
+  }
+
+  return (
+    <div className="rounded-2xl border border-line bg-bg p-8 shadow-sm">
+      <Stepper current={step} t={t} />
+
+      {step === 1 && (
+        <StepWrap title={t("step1_title")} subtitle={t("step1_subtitle")}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FieldSelect
+              label={t("type")}
+              value={data.type}
+              onChange={(v) => set("type", v)}
+              options={PROPERTY_TYPES.map((p) => ({
+                value: p,
+                label: tSearch(`type_${p}`),
+              }))}
+            />
+            <FieldSelect
+              label={t("state")}
+              value={data.state}
+              onChange={(v) => set("state", v as FormState["state"])}
+              options={STATES.map((s) => ({ value: s, label: t(`state_${s}`) }))}
+            />
+            <FieldNumber
+              label={t("living_surface")}
+              value={data.livingSurface}
+              onChange={(v) => set("livingSurface", v)}
+              suffix="m²"
+              required
+            />
+            <FieldNumber
+              label={t("land_surface")}
+              value={data.landSurface}
+              onChange={(v) => set("landSurface", v)}
+              suffix="m²"
+            />
+            <FieldNumber
+              label={t("terrace_surface")}
+              value={data.terraceSurface}
+              onChange={(v) => set("terraceSurface", v)}
+              suffix="m²"
+            />
+            <FieldNumber
+              label={t("year")}
+              value={data.year}
+              onChange={(v) => set("year", v)}
+            />
+            <FieldNumber
+              label={t("bedrooms")}
+              value={data.bedrooms}
+              onChange={(v) => set("bedrooms", v)}
+            />
+            <FieldSelect
+              label={t("energy")}
+              value={data.energy}
+              onChange={(v) => set("energy", v)}
+              options={ENERGIES.map((e) => ({ value: e, label: e }))}
+            />
+          </div>
+          <NextBtn
+            onClick={() => setStep(2)}
+            disabled={!data.livingSurface || Number(data.livingSurface) <= 0}
+            t={t}
+          />
+        </StepWrap>
+      )}
+
+      {step === 2 && (
+        <StepWrap title={t("step2_title")} subtitle={t("step2_subtitle")}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FieldSelect
+              label={tSearch("country")}
+              value={data.country}
+              onChange={(v) => set("country", v)}
+              options={["LU", "FR", "BE", "DE", "CH", "MC", "ES", "PT", "IT", "AE"].map(
+                (c) => ({ value: c, label: c }),
+              )}
+            />
+            {data.country === "LU" ? (
+              <FieldSelect
+                label={t("commune")}
+                value={data.commune}
+                onChange={(v) => set("commune", v)}
+                options={[
+                  { value: "", label: tSearch("any") },
+                  ...luxembourgCommunes.map((c) => ({ value: c, label: c })),
+                ]}
+              />
+            ) : (
+              <FieldText
+                label={tSearch("city")}
+                value={data.commune}
+                onChange={(v) => set("commune", v)}
+                placeholder={tSearch("city_ph")}
+              />
+            )}
+            <FieldText
+              label={t("postal")}
+              value={data.postal}
+              onChange={(v) => set("postal", v)}
+            />
+          </div>
+          <BackNextBtn
+            onBack={() => setStep(1)}
+            onNext={() => setStep(3)}
+            t={t}
+          />
+        </StepWrap>
+      )}
+
+      {step === 3 && (
+        <StepWrap title={t("step3_title")} subtitle={t("step3_subtitle")}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FieldSelect
+              label={t("buyers")}
+              value={data.buyersCount}
+              onChange={(v) => set("buyersCount", v as "1" | "2")}
+              options={[
+                { value: "1", label: t("buyers_one") },
+                { value: "2", label: t("buyers_two") },
+              ]}
+            />
+            <FieldNumber
+              label={t("age")}
+              value={data.primaryAgeMax}
+              onChange={(v) => set("primaryAgeMax", v)}
+            />
+            <FieldNumber
+              label={t("income")}
+              value={data.monthlyIncome}
+              onChange={(v) => set("monthlyIncome", v)}
+              suffix="€/m"
+            />
+            <FieldNumber
+              label={t("charges")}
+              value={data.monthlyCharges}
+              onChange={(v) => set("monthlyCharges", v)}
+              suffix="€/m"
+            />
+            <FieldNumber
+              label={t("down_payment")}
+              value={data.downPayment}
+              onChange={(v) => set("downPayment", v)}
+              suffix="€"
+            />
+          </div>
+          <div className="mt-4 space-y-3">
+            <CheckboxField
+              checked={data.isPrimoLu}
+              onChange={(v) => set("isPrimoLu", v)}
+              label={t("primo_lu")}
+            />
+            <CheckboxField
+              checked={data.isPrimaryResidence}
+              onChange={(v) => set("isPrimaryResidence", v)}
+              label={t("primary_residence")}
+            />
+          </div>
+          {error && (
+            <p className="mt-3 rounded-md border border-accent-warm/40 bg-accent-warm/10 px-4 py-2 font-mono text-xs text-accent-warm">
+              {error}
+            </p>
+          )}
+          <BackSubmitBtn
+            onBack={() => setStep(2)}
+            onSubmit={submit}
+            pending={pending}
+            t={t}
+          />
+        </StepWrap>
+      )}
+    </div>
+  );
+}
+
+function Stepper({
+  current,
+  t,
+}: {
+  current: number;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const steps = [t("step1_label"), t("step2_label"), t("step3_label")];
+  return (
+    <ol className="mb-8 flex items-center gap-3 overflow-x-auto pb-2">
+      {steps.map((label, i) => {
+        const num = i + 1;
+        const active = num === current;
+        const done = num < current;
+        return (
+          <li key={label} className="flex items-center gap-3">
+            <span
+              className={`inline-flex size-7 items-center justify-center rounded-full text-xs font-mono ${
+                active
+                  ? "bg-ink text-bg"
+                  : done
+                    ? "bg-gold text-ink"
+                    : "border border-line text-ink-soft"
+              }`}
+            >
+              {done ? "✓" : num}
+            </span>
+            <span
+              className={`whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.25em] ${
+                active ? "text-ink" : "text-ink-soft"
+              }`}
+            >
+              {label}
+            </span>
+            {num < steps.length && (
+              <span aria-hidden className="h-px w-8 bg-line" />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function StepWrap({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <h2 className="font-display text-2xl font-bold text-ink">{title}</h2>
+      <p className="mt-1 mb-6 text-sm text-ink-mid">{subtitle}</p>
+      {children}
+    </section>
+  );
+}
+
+function FieldText({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+        {label}
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
+      />
+    </label>
+  );
+}
+
+function FieldNumber({
+  label,
+  value,
+  onChange,
+  suffix,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  suffix?: string;
+  required?: boolean;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+        {label}
+        {required && <span className="ml-1 text-gold-deep">*</span>}
+        {suffix && <span className="ml-2 text-ink-mid">{suffix}</span>}
+      </span>
+      <input
+        type="number"
+        min="0"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
+      />
+    </label>
+  );
+}
+
+function FieldSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+        {label}
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function CheckboxField({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+}) {
+  return (
+    <label className="flex items-start gap-3 text-sm leading-snug text-ink-mid">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 size-4 accent-gold-deep"
+      />
+      <span>{label}</span>
+    </label>
+  );
+}
+
+function NextBtn({
+  onClick,
+  disabled,
+  t,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div className="mt-8 flex justify-end">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
+      >
+        {t("next")} →
+      </button>
+    </div>
+  );
+}
+
+function BackNextBtn({
+  onBack,
+  onNext,
+  t,
+}: {
+  onBack: () => void;
+  onNext: () => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div className="mt-8 flex items-center justify-between">
+      <button
+        type="button"
+        onClick={onBack}
+        className="rounded-full border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold"
+      >
+        ← {t("back")}
+      </button>
+      <button
+        type="button"
+        onClick={onNext}
+        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02]"
+      >
+        {t("next")} →
+      </button>
+    </div>
+  );
+}
+
+function BackSubmitBtn({
+  onBack,
+  onSubmit,
+  pending,
+  t,
+}: {
+  onBack: () => void;
+  onSubmit: () => void;
+  pending: boolean;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div className="mt-8 flex items-center justify-between">
+      <button
+        type="button"
+        onClick={onBack}
+        className="rounded-full border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold"
+      >
+        ← {t("back")}
+      </button>
+      <button
+        type="button"
+        onClick={onSubmit}
+        disabled={pending}
+        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:opacity-50"
+      >
+        {pending ? t("computing") : t("compute")}
+      </button>
+    </div>
+  );
+}
+
+function ResultView({
+  result,
+  onReset,
+}: {
+  result: EstimateResult;
+  onReset: () => void;
+}) {
+  const t = useTranslations("estimate_form");
+  return (
+    <div className="space-y-8">
+      {/* Range */}
+      <section className="rounded-2xl border border-gold bg-gradient-to-br from-bg-soft via-bg to-bg-soft p-8">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
+          {t("range_label")}
+        </p>
+        <div className="mt-4 grid gap-6 sm:grid-cols-3">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+              {t("range_low")}
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-ink">
+              {formatEuro(result.range.low)}
+            </p>
+          </div>
+          <div className="border-x border-line px-4 sm:px-6">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold-deep">
+              {t("range_mid")}
+            </p>
+            <p className="mt-1 font-display text-4xl font-black gold-text">
+              {formatEuro(result.range.mid)}
+            </p>
+          </div>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+              {t("range_high")}
+            </p>
+            <p className="mt-1 font-display text-2xl font-bold text-ink">
+              {formatEuro(result.range.high)}
+            </p>
+          </div>
+        </div>
+        <p className="mt-4 text-xs text-ink-soft">
+          {t("price_per_sqm", {
+            value: formatEuro(result.pricePerSqm).replace(/\s/g, " "),
+          })}
+        </p>
+      </section>
+
+      {/* Financing */}
+      {result.financing && (
+        <section className="rounded-2xl border border-line bg-bg p-8">
+          <h3 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+            {t("financing_title")}
+          </h3>
+          <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Stat
+              label={t("max_borrowable")}
+              value={formatEuro(result.financing.maxBorrowable)}
+            />
+            <Stat
+              label={t("monthly_max")}
+              value={formatEuro(result.financing.monthlyPaymentMax)}
+            />
+            <Stat
+              label={t("duration")}
+              value={`${result.financing.suggestedDuration} ans`}
+            />
+            <Stat
+              label={t("rate_used")}
+              value={`${result.financing.rateUsed.toFixed(2).replace(".", ",")} %`}
+            />
+            <Stat
+              label={t("notary_fees")}
+              value={`~ ${formatEuro(result.financing.notaryFees)}`}
+            />
+          </dl>
+        </section>
+      )}
+
+      {/* Helps */}
+      {result.helps.length > 0 && (
+        <section className="rounded-2xl border border-line bg-bg-soft p-8">
+          <h3 className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
+            {t("helps_title")}
+          </h3>
+          <ul className="mt-5 space-y-4">
+            {result.helps.map((h) => (
+              <li
+                key={h.key}
+                className="rounded-xl border border-gold/30 bg-bg p-5"
+              >
+                <div className="flex items-baseline justify-between gap-4">
+                  <h4 className="font-display text-base font-bold text-ink">
+                    {t(`help_${h.key}_title`)}
+                  </h4>
+                  {h.amount && (
+                    <span className="font-display text-lg font-black gold-text">
+                      {formatEuro(h.amount)}
+                    </span>
+                  )}
+                </div>
+                <ul className="mt-3 space-y-1 text-sm text-ink-mid">
+                  {h.conditions.map((c, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span aria-hidden className="text-gold-deep">›</span>
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={onReset}
+          className="rounded-full border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold"
+        >
+          {t("restart")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+        {label}
+      </dt>
+      <dd className="mt-1 font-display text-xl font-bold text-ink">{value}</dd>
+    </div>
+  );
+}
