@@ -7,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 import "../globals.css";
 
 const display = Big_Shoulders({
@@ -82,6 +83,7 @@ export default async function LocaleLayout({
               <main className="flex-1">{children}</main>
               <Footer />
             </div>
+            <ChatbotWidget />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>
