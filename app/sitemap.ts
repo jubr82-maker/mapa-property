@@ -9,6 +9,7 @@ import { ALL_MANDATE_SLUGS } from "@/lib/mandates";
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
 const LOCALES = ["fr", "en", "de"] as const;
+const isBeta = SITE_URL.includes("beta.");
 
 const STATIC_PATHS = [
   "",
@@ -34,6 +35,9 @@ const buildAlternates = (path: string) =>
   Object.fromEntries(LOCALES.map((l) => [l, `${SITE_URL}/${l}${path}`]));
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Beta / staging : sitemap vide (pas d'indexation souhaitée).
+  if (isBeta) return [];
+
   const [properties, offmarket, blogPosts] = await Promise.all([
     fetchAllPropertiesWithCover().catch(() => []),
     fetchOffmarketList().catch(() => []),

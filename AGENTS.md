@@ -10,6 +10,12 @@ Lire `node_modules/next/dist/docs/` pour les détails. Respecter les deprecation
 
 # MAPA Property — règles projet
 
+## Stratégie de déploiement (mai 2026)
+
+- `beta.mapaproperty.lu` → cette codebase Next.js (Vercel staging, robots disallow, sitemap vide).
+- `mapaproperty.lu` → site v28 en production actuelle, **intouché** — ne pas déployer dessus.
+- Bascule planifiée après validation beta. `robots.ts` et `sitemap.ts` détectent `beta.` dans `NEXT_PUBLIC_SITE_URL` et basculent automatiquement.
+
 ## Conventions inviolables
 
 - Domaine : `mapaproperty.lu` — JAMAIS `.com`

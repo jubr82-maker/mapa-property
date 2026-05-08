@@ -3,9 +3,21 @@
 Site officiel — agence immobilière luxembourgeoise & broker international.
 Construit par Julien Brebion avec Claude Code (Anthropic).
 
-- Production : `https://mapaproperty.lu`
+## Stratégie de déploiement (mai 2026)
+
+- **`beta.mapaproperty.lu`** → cette codebase Next.js, déployée sur Vercel.
+  Privée pendant la validation : `robots.txt` retourne `Disallow: /`,
+  le sitemap est vide. À utiliser pour itérer en pré-prod.
+- **`mapaproperty.lu`** → reste sur le site **v28 actuel en production**, intouché.
+- La bascule du domaine principal vers cette nouvelle codebase se fera après
+  validation complète de la beta. À ce moment-là, mettre à jour
+  `NEXT_PUBLIC_SITE_URL=https://mapaproperty.lu` dans Vercel : `robots.ts` et
+  `sitemap.ts` détectent automatiquement la chaîne `beta.` et basculent.
+
+---
+
 - Stack : Next.js 16 · TypeScript · Tailwind v4 · next-intl (FR/EN/DE) · Supabase · Vercel
-- Domaine : `mapaproperty.lu` (jamais `.com`)
+- Domaine cible final : `mapaproperty.lu` (jamais `.com`)
 
 ## Développement
 
