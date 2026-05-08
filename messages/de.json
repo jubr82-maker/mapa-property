@@ -8,7 +8,8 @@
     "language": "Sprache",
     "theme_light": "Tagmodus",
     "theme_dark": "Nachtmodus",
-    "loading": "Lädt…"
+    "loading": "Lädt…",
+    "back": "Zurück"
   },
   "nav": {
     "buy": "Kaufen",
@@ -229,5 +230,66 @@
   },
   "home": {
     "placeholder": "MAPA Property — Startseite im Aufbau."
+  },
+  "property_list": {
+    "eyebrow": "Katalog",
+    "title": "Alle unsere Objekte",
+    "subtitle": "Filtern Sie nach Land, Stadt, Typ, Budget — oder lassen Sie sich von Eléna im Chatbot führen.",
+    "results": "Ergebnisse",
+    "result": "Ergebnis",
+    "transaction": "Transaktion",
+    "tx_sale": "Verkauf",
+    "tx_rent": "Vermietung",
+    "tx_offmarket": "Off-Market",
+    "reset": "Zurücksetzen"
+  },
+  "property": {
+    "tx_sale": "Verkauf",
+    "tx_rent": "Vermietung",
+    "tx_offmarket": "Off-Market",
+    "specs": "Eigenschaften",
+    "surface": "Gesamtfläche",
+    "living_surface": "Wohnfläche",
+    "bedrooms": "Schlafzimmer",
+    "bathrooms": "Badezimmer",
+    "energy": "Energieklasse",
+    "parking": "Parkplätze",
+    "year": "Baujahr",
+    "land_surface": "Grundstück",
+    "terrace_surface": "Terrasse",
+    "description": "Beschreibung",
+    "reviews": "Kundenstimmen",
+    "advisor": "Ihr Berater",
+    "form_eyebrow": "Informationsanfrage",
+    "form_title": "Eine Frage zu diesem Objekt?",
+    "form_subtitle": "Julien Brebion meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen.",
+    "similar": "Ähnliche Objekte",
+    "download_pdf": "Herunterladen / Drucken",
+    "request_info": "Informationen anfragen"
+  },
+  "property_financing": {
+    "eyebrow": "Indikativer Finanzierungsplan",
+    "title": "Geschätzte Monatsrate",
+    "monthly": "Rate / Monat",
+    "rate": "Festzins {years} Jahre",
+    "down": "Eigenkapital (20%)",
+    "notary": "Notarkosten",
+    "disclaimer": "Indikative Berechnung auf Basis aktueller BCL-Zinsen, 20% Eigenkapital, 25 Jahre Laufzeit, 7% Notarkosten. Nicht vertraglich bindend.",
+    "cta": "Mit dem vollständigen Rechner verfeinern"
+  },
+  "form": {
+    "first_name": "Vorname",
+    "last_name": "Nachname",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "subject": "Betreff",
+    "message": "Nachricht",
+    "submit": "Senden",
+    "submitting": "Senden…",
+    "error": "Ein Fehler ist aufgetreten. Bitte prüfen Sie Ihre Angaben und versuchen Sie es erneut.",
+    "rgpd_notice": "Ihre Daten sind vertraulich und werden ausschließlich zur Kontaktaufnahme verwendet.",
+    "success_eyebrow": "Anfrage empfangen",
+    "success_title": "Danke, Ihre Anfrage wurde registriert.",
+    "success_text": "Julien Brebion meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen."
   }
 }

@@ -8,7 +8,8 @@
     "language": "Language",
     "theme_light": "Light mode",
     "theme_dark": "Dark mode",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "back": "Back"
   },
   "nav": {
     "buy": "Buy",
@@ -229,5 +230,66 @@
   },
   "home": {
     "placeholder": "MAPA Property — homepage under construction."
+  },
+  "property_list": {
+    "eyebrow": "Catalogue",
+    "title": "All our properties",
+    "subtitle": "Filter by country, city, type, budget — or let Eléna guide you from the chatbot.",
+    "results": "results",
+    "result": "result",
+    "transaction": "Transaction",
+    "tx_sale": "Sale",
+    "tx_rent": "Rent",
+    "tx_offmarket": "Off-Market",
+    "reset": "Reset"
+  },
+  "property": {
+    "tx_sale": "Sale",
+    "tx_rent": "Rent",
+    "tx_offmarket": "Off-Market",
+    "specs": "Specifications",
+    "surface": "Total area",
+    "living_surface": "Living area",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "energy": "Energy class",
+    "parking": "Parking",
+    "year": "Year",
+    "land_surface": "Land",
+    "terrace_surface": "Terrace",
+    "description": "Description",
+    "reviews": "Client reviews",
+    "advisor": "Your advisor",
+    "form_eyebrow": "Information request",
+    "form_title": "A question about this property?",
+    "form_subtitle": "Julien Brebion will personally get back to you within 24 working hours.",
+    "similar": "Similar properties",
+    "download_pdf": "Download / Print",
+    "request_info": "Request information"
+  },
+  "property_financing": {
+    "eyebrow": "Indicative financing plan",
+    "title": "Estimated monthly payment",
+    "monthly": "Monthly",
+    "rate": "Fixed rate {years} years",
+    "down": "Deposit (20%)",
+    "notary": "Notary fees",
+    "disclaimer": "Indicative calculation based on current BCL rates, 20% deposit, 25-year term, 7% notary fees. Not contractual.",
+    "cta": "Refine with the full simulator"
+  },
+  "form": {
+    "first_name": "First name",
+    "last_name": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "subject": "Subject",
+    "message": "Message",
+    "submit": "Send",
+    "submitting": "Sending…",
+    "error": "An error occurred. Please check your details and try again.",
+    "rgpd_notice": "Your data is confidential and used only to reach back out to you.",
+    "success_eyebrow": "Request received",
+    "success_title": "Thank you, your request has been registered.",
+    "success_text": "Julien Brebion will personally get back to you within 24 working hours."
   }
 }

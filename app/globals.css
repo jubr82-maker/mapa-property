@@ -107,6 +107,31 @@ html {
   color-scheme: light dark;
 }
 
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  html, body {
+    background: #ffffff !important;
+    color: #0D0F12 !important;
+  }
+  header, footer, nav, .print\:hidden {
+    display: none !important;
+  }
+  a[href] {
+    color: inherit;
+    text-decoration: none;
+  }
+  .print\:break-before {
+    break-before: page;
+  }
+  img, video {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+}
+
 body {
   background-color: var(--bg);
   color: var(--ink);
