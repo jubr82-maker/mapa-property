@@ -11,6 +11,18 @@ const nextConfig: NextConfig = {
         hostname: "dutfkblygfvhhwpzxmfz.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "media.apimo.pro",
+      },
+      {
+        protocol: "https",
+        hostname: "*.apimo.pro",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
 };
