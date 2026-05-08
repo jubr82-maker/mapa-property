@@ -14,9 +14,9 @@ export default async function HomePage({
 function HomeContent() {
   const t = useTranslations("home");
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-8 px-6">
+    <section className="flex min-h-dvh flex-col items-center justify-center gap-8 px-6 pt-24 pb-16">
       <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
-        Setup OK · Étape 1
+        Setup OK · Étape 2
       </p>
       <h1 className="font-display text-5xl font-black tracking-tight text-ink sm:text-7xl">
         MAPA <span className="gold-text">PROPERTY</span>
@@ -26,6 +26,6 @@ function HomeContent() {
         <span className="size-2 rounded-full bg-gold" />
         Vol.I MMXXVI
       </div>
-    </main>
+    </section>
   );
 }
