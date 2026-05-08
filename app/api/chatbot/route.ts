@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildSystemPrompt } from "@/components/chatbot/chatbot-knowledge";
 import { supabaseServer } from "@/lib/supabase-server";
+import { rateLimit } from "@/lib/rate-limit";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -127,6 +128,18 @@ const tryAutoLead = async (
 };
 
 export async function POST(req: Request) {
+  const limit = rateLimit(req, {
+    windowMs: 60_000,
+    max: 30,
+    namespace: "chatbot",
+  });
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "rate_limited", retry_in_ms: limit.resetIn },
+      { status: 429 },
+    );
+  }
+
   const body = (await req.json().catch(() => ({}))) as RequestBody;
   const { messages = [], locale = "fr", pageContext = "" } = body;
 

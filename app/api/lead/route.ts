@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
+import { rateLimit } from "@/lib/rate-limit";
 import type { LeadInsert } from "@/lib/types";
 
 const verifyTurnstile = async (token: string | undefined): Promise<boolean> => {
@@ -26,6 +27,18 @@ const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
 export async function POST(req: Request) {
+  const limit = rateLimit(req, {
+    windowMs: 60_000,
+    max: 5,
+    namespace: "lead",
+  });
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "rate_limited", retry_in_ms: limit.resetIn },
+      { status: 429 },
+    );
+  }
+
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown> & {
     turnstile_token?: string;
   };
