@@ -5,27 +5,24 @@ interface LogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
   asLink?: boolean;
-  variant?: "light" | "dark";
 }
 
 const sizeMap = {
-  sm: { w: 120, h: 30 },
-  md: { w: 160, h: 40 },
-  lg: { w: 240, h: 60 },
+  sm: { w: 140, h: 32 },
+  md: { w: 210, h: 48 },
+  lg: { w: 280, h: 64 },
 };
 
 export function Logo({
   className = "",
   size = "md",
   asLink = true,
-  variant = "light",
 }: LogoProps) {
   const { w, h } = sizeMap[size];
-  const src = variant === "dark" ? "/logo-mapa-property-dark.svg" : "/logo-mapa-property.svg";
 
   const img = (
     <Image
-      src={src}
+      src="/logo-mapa-property.png"
       alt="MAPA Property"
       width={w}
       height={h}
