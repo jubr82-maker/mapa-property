@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/home/Hero";
 import { SearchBar } from "@/components/home/SearchBar";
+import { CoupsDeCoeur } from "@/components/home/CoupsDeCoeur";
 import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
 import { CoverageGrid } from "@/components/home/CoverageGrid";
 import { ServicesTable } from "@/components/home/ServicesTable";
@@ -38,6 +39,7 @@ export default async function HomePage({
     <>
       <Hero />
       <SearchBar />
+      <CoupsDeCoeur />
       <FeaturedCarousel properties={featured} locale={locale as Locale} />
       <CoverageGrid />
       <ServicesTable />

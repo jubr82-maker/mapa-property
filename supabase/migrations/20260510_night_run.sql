@@ -198,3 +198,25 @@ ALTER TABLE public.mandates_requests ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "anon_insert_mandates_requests" ON public.mandates_requests;
 CREATE POLICY "anon_insert_mandates_requests"
   ON public.mandates_requests FOR INSERT TO anon WITH CHECK (true);
+
+-- ============================================================================
+-- PHASE 5 — coups_de_coeur (carrousel home)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.coups_de_coeur (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  property_id text NOT NULL,
+  title text NOT NULL,
+  city text NOT NULL,
+  price_eur numeric NOT NULL,
+  surface_m2 numeric,
+  rooms int,
+  photo_url text NOT NULL,
+  detail_url text,
+  display_order int DEFAULT 0,
+  active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE public.coups_de_coeur ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "anon_select_coups_active" ON public.coups_de_coeur;
+CREATE POLICY "anon_select_coups_active"
+  ON public.coups_de_coeur FOR SELECT TO anon USING (active = true);
