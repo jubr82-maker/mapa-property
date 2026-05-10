@@ -9,7 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { realEstateAgent, personJulien, website } from "@/lib/seo";
+import { homepageGraph } from "@/lib/seo";
 import "../globals.css";
 
 const display = Big_Shoulders({
@@ -116,7 +116,7 @@ export default async function LocaleLayout({
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
     >
       <body className="min-h-dvh bg-bg text-ink antialiased">
-        <JsonLd data={[realEstateAgent(locale), personJulien(), website(locale)]} />
+        <JsonLd data={homepageGraph(locale)} />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

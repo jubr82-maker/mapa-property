@@ -60,8 +60,8 @@ export function Hero() {
           {t("eyebrow")}
         </p>
 
-        {/* Titre 3 lignes */}
-        <h1 className="font-display font-black leading-[0.85] tracking-[-0.02em] text-[clamp(3rem,9vw,8rem)]">
+        {/* Titre 3 lignes — taille -15%, leading 1.15 (accents OK), tracking aéré */}
+        <h1 className="font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(2.5rem,7.65vw,6.8rem)]">
           <span className="block text-white/90">{t("title_line_1")}</span>
           <span className="block text-stroke text-transparent">{t("title_line_2")}</span>
           <span className="gold-text block">{t("title_line_3")}</span>

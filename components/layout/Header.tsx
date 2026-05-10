@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
-import { LangSwitcher } from "@/components/ui/LangSwitcher";
-import { MobileMenu } from "@/components/layout/MobileMenu";
+import { HeaderBurger } from "@/components/layout/HeaderBurger";
 
 const leftDropdowns = [
   {
@@ -37,8 +36,6 @@ const rightDropdowns = [
       { href: "/services/simulateurs", key: "simulators" },
       { href: "/services/marches-actifs", key: "markets" },
       { href: "/legal/honoraires", key: "fees" },
-      { href: "/qui-sommes-nous", key: "about" },
-      { href: "/blog", key: "blog" },
     ],
   },
 ] as const;
@@ -62,8 +59,8 @@ export function Header() {
           : "border-b border-transparent bg-bg/85 backdrop-blur-sm"
       }`}
     >
-      <div className="mx-auto grid h-16 max-w-[1400px] grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6 lg:h-20 lg:grid-cols-[1fr_auto_1fr] lg:px-10">
-        {/* Left zone : Acheter / Vendre / Louer */}
+      <div className="mx-auto grid h-20 max-w-[1400px] grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:grid-cols-[1fr_auto_1fr] lg:px-10">
+        {/* Left zone : Acheter / Vendre / Louer (desktop only) */}
         <nav className="hidden items-center gap-1 lg:flex">
           {leftDropdowns.map((d) => (
             <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
@@ -76,47 +73,40 @@ export function Header() {
           </Link>
         </nav>
 
-        {/* Mobile burger left */}
-        <div className="lg:hidden">
-          <MobileMenu />
-        </div>
+        {/* Mobile spacer left (keeps logo centered) */}
+        <div className="lg:hidden" aria-hidden />
 
-        {/* Center : Logo */}
+        {/* Center : Logo (h-12 mobile / h-20 desktop) */}
         <div className="flex justify-center">
-          <Logo size="md" />
+          <Logo
+            size="lg"
+            className="!h-12 !w-auto lg:!h-20"
+          />
         </div>
 
-        {/* Right zone : Services / Off-Market / ARCOVA / Lang / Contact */}
-        <div className="hidden items-center justify-end gap-1 lg:flex">
-          {rightDropdowns.map((d) => (
-            <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
-          ))}
-          <Link
-            href="/off-market"
-            className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
-          >
-            {t("off_market")}
-          </Link>
-          <Link
-            href="/arcova"
-            className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
-          >
-            ARCOVA
-            <LockIcon />
-          </Link>
-          <LangSwitcher className="ml-2" />
-          <Link
-            href="/contact"
-            className="ml-2 inline-flex items-center gap-2 rounded-full bg-navy px-4 py-2 font-sans text-[12px] font-medium uppercase tracking-[0.08em] text-white transition-colors hover:bg-navy-deep"
-          >
-            {t("contact")}
-            <span aria-hidden>→</span>
-          </Link>
-        </div>
-
-        {/* Mobile right : LangSwitcher seul */}
-        <div className="flex items-center justify-end lg:hidden">
-          <LangSwitcher />
+        {/* Right zone : Services ▾ / Off-Market / ARCOVA 🔒 (desktop) + burger (always) */}
+        <div className="flex items-center justify-end gap-1">
+          <div className="hidden items-center gap-1 lg:flex">
+            {rightDropdowns.map((d) => (
+              <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
+            ))}
+            <Link
+              href="/off-market"
+              className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+            >
+              {t("off_market")}
+            </Link>
+            <Link
+              href="/arcova"
+              className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+            >
+              ARCOVA
+              <LockIcon />
+            </Link>
+          </div>
+          <div className="ml-2">
+            <HeaderBurger />
+          </div>
         </div>
       </div>
     </header>
