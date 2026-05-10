@@ -167,3 +167,34 @@ ALTER TABLE public.bo_audit_log ENABLE ROW LEVEL SECURITY;
 -- ============================================================================
 -- FIN DE MIGRATION
 -- ============================================================================
+
+-- ============================================================================
+-- PHASE 4 (production-ready 2026-05-10) — endpoints API forms
+-- Note : nda_requests, mandates_requests, arcova_waitlist déjà créées plus haut.
+-- Les tables dont la signature diffère sont remplacées par DROP+CREATE pour
+-- coller aux endpoints — appliqué uniquement si schema actuel incompatible.
+-- ============================================================================
+
+-- public.leads (renommé : si la version P0 utilisait first_name/last_name/type,
+-- on étend la table avec name + subject pour l'endpoint /api/contact)
+ALTER TABLE IF EXISTS public.leads
+  ADD COLUMN IF NOT EXISTS name text,
+  ADD COLUMN IF NOT EXISTS subject text,
+  ADD COLUMN IF NOT EXISTS user_agent text;
+
+-- mandates_requests (alias pluriel pour cohérence avec endpoint /api/mandate-request)
+CREATE TABLE IF NOT EXISTS public.mandates_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  email text NOT NULL,
+  phone text,
+  mandate_type text CHECK (mandate_type IN ('exclusif','semi','simple','autonome')),
+  property_address text,
+  property_type text,
+  status text DEFAULT 'pending',
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE public.mandates_requests ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "anon_insert_mandates_requests" ON public.mandates_requests;
+CREATE POLICY "anon_insert_mandates_requests"
+  ON public.mandates_requests FOR INSERT TO anon WITH CHECK (true);
