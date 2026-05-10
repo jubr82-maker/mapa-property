@@ -5,10 +5,9 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
 import { LangSwitcher } from "@/components/ui/LangSwitcher";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { MobileMenu } from "@/components/layout/MobileMenu";
 
-const dropdowns = [
+const leftDropdowns = [
   {
     label: "buy",
     items: [
@@ -20,6 +19,7 @@ const dropdowns = [
   {
     label: "sell",
     items: [
+      { href: "/services/vendre", key: "all_mandates" },
       { href: "/mandats/exclusif", key: "mandate_exclusive" },
       { href: "/mandats/semi-exclusif", key: "mandate_semi" },
       { href: "/mandats/simple", key: "mandate_simple" },
@@ -27,13 +27,9 @@ const dropdowns = [
       { href: "/services/estimer", key: "estimate" },
     ],
   },
-  {
-    label: "rent",
-    items: [
-      { href: "/biens?transaction=rent", key: "find_rental" },
-      { href: "/services/estimer", key: "estimate" },
-    ],
-  },
+] as const;
+
+const rightDropdowns = [
   {
     label: "services",
     items: [
@@ -41,14 +37,10 @@ const dropdowns = [
       { href: "/services/simulateurs", key: "simulators" },
       { href: "/services/marches-actifs", key: "markets" },
       { href: "/legal/honoraires", key: "fees" },
+      { href: "/qui-sommes-nous", key: "about" },
+      { href: "/blog", key: "blog" },
     ],
   },
-] as const;
-
-const flatLinks = [
-  { href: "/off-market", key: "off_market" },
-  { href: "/qui-sommes-nous", key: "about" },
-  { href: "/blog", key: "blog" },
 ] as const;
 
 export function Header() {
@@ -64,44 +56,67 @@ export function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         scrolled
-          ? "border-b border-line bg-bg/90 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
+          ? "border-b border-line bg-bg/95 backdrop-blur-md"
+          : "border-b border-transparent bg-bg/85 backdrop-blur-sm"
       }`}
     >
-      <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6 lg:h-[88px] lg:px-10">
-        <div className="flex items-center gap-6">
-          <Logo size="md" />
-          <span aria-hidden className="hidden h-8 w-px bg-gold/40 lg:block" />
+      <div className="mx-auto grid h-16 max-w-[1400px] grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6 lg:h-20 lg:grid-cols-[1fr_auto_1fr] lg:px-10">
+        {/* Left zone : Acheter / Vendre / Louer */}
+        <nav className="hidden items-center gap-1 lg:flex">
+          {leftDropdowns.map((d) => (
+            <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
+          ))}
+          <Link
+            href="/biens?transaction=rent"
+            className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+          >
+            {t("rent")}
+          </Link>
+        </nav>
 
-          <nav className="hidden items-center gap-1 lg:flex">
-            {dropdowns.map((d) => (
-              <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
-            ))}
-            {flatLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink-mid transition-colors hover:text-gold"
-              >
-                {t(l.key)}
-              </Link>
-            ))}
-          </nav>
+        {/* Mobile burger left */}
+        <div className="lg:hidden">
+          <MobileMenu />
         </div>
 
-        <div className="flex items-center gap-2 lg:gap-3">
-          <LangSwitcher className="hidden lg:inline-flex" />
-          <ThemeToggle />
+        {/* Center : Logo */}
+        <div className="flex justify-center">
+          <Logo size="md" />
+        </div>
+
+        {/* Right zone : Services / Off-Market / ARCOVA / Lang / Contact */}
+        <div className="hidden items-center justify-end gap-1 lg:flex">
+          {rightDropdowns.map((d) => (
+            <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
+          ))}
+          <Link
+            href="/off-market"
+            className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+          >
+            {t("off_market")}
+          </Link>
+          <Link
+            href="/arcova"
+            className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+          >
+            ARCOVA
+            <LockIcon />
+          </Link>
+          <LangSwitcher className="ml-2" />
           <Link
             href="/contact"
-            className="hidden items-center gap-2 rounded-full bg-ink px-5 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.08em] text-bg transition-colors hover:bg-gold-deep lg:inline-flex"
+            className="ml-2 inline-flex items-center gap-2 rounded-full bg-navy px-4 py-2 font-sans text-[12px] font-medium uppercase tracking-[0.08em] text-white transition-colors hover:bg-navy-deep"
           >
             {t("contact")}
             <span aria-hidden>→</span>
           </Link>
-          <MobileMenu />
+        </div>
+
+        {/* Mobile right : LangSwitcher seul */}
+        <div className="flex items-center justify-end lg:hidden">
+          <LangSwitcher />
         </div>
       </div>
     </header>
@@ -121,7 +136,7 @@ function DropdownItem({
     <div className="group relative">
       <button
         type="button"
-        className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink-mid transition-colors group-hover:text-gold"
+        className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors group-hover:text-gold"
       >
         {label}
         <svg
@@ -153,5 +168,23 @@ function DropdownItem({
         </div>
       </div>
     </div>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      className="size-3"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="5" y="11" width="14" height="9" rx="1.5" />
+      <path d="M8 11V7a4 4 0 1 1 8 0v4" />
+    </svg>
   );
 }

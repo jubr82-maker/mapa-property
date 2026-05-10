@@ -24,6 +24,7 @@
     "open_menu": "Ouvrir le menu",
     "close_menu": "Fermer le menu",
     "all_properties": "Tous les biens",
+    "all_mandates": "Tous nos mandats",
     "search_mandate": "Mandat de recherche",
     "mandate_exclusive": "Mandat Exclusif",
     "mandate_semi": "Semi-Exclusif",
@@ -623,6 +624,15 @@
     "page": "Page",
     "prev": "Page précédente",
     "next": "Page suivante"
+  },
+  "arcova": {
+    "eyebrow": "ARCOVA — Espace privé",
+    "title": "ARCOVA · l'accès privé MAPA.",
+    "intro": "Un espace contractuel réservé aux clients sous mandat MAPA Property : dossiers off-market complets, propositions confidentielles, échanges sécurisés. Sur invitation uniquement.",
+    "waitlist_title": "Demande d'accès",
+    "waitlist_text": "L'accès à ARCOVA est délivré au cas par cas, après un entretien et la signature d'un NDA contractuel. Pour rejoindre la liste d'attente, contactez Julien Brebion directement.",
+    "waitlist_cta": "Demander une invitation",
+    "legal": "Accès strictement nominatif · Confidentialité contractuelle · Audit log activé"
   },
   "markets_page": {
     "eyebrow": "Marchés actifs",

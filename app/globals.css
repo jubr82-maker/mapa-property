@@ -3,44 +3,48 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
-   MAPA Property — Palette dorée brillante (section 5 du brief)
+   MAPA Property — Palette MAPA officielle (copper FIXE)
    Light mode = défaut. Dark mode via class="dark" sur <html>
    (géré par next-themes).
    ============================================================ */
 
 :root {
-  --bg:           #F5F0E6;
-  --bg-deep:      #E8DFC9;
-  --bg-soft:      #F0E9D8;
-  --ink:          #0D0F12;
+  --bg:           #F5F2EA;        /* ivoire */
+  --bg-deep:      #E8E0D0;        /* ivoire deeper */
+  --bg-soft:      #F0EAD8;        /* élévation cards */
+  --ink:          #1A1A1A;        /* presque noir */
   --ink-mid:      #2C2E33;
-  --ink-soft:     #5C5E66;
-  --gold:         #C9A24E;
-  --gold-bright:  #E5C77A;
-  --gold-deep:    #8E6F30;
-  --gold-shine:   #F2D88E;
-  --accent-warm:  #B8865A;
-  --line:         rgba(13, 15, 18, 0.18);
-  --line-strong:  rgba(13, 15, 18, 0.32);
+  --ink-soft:     #6B6B6B;
+  --navy:         #3D4F63;        /* bleu prussien MAPA */
+  --navy-deep:    #2D3F53;        /* hover navy */
+  --gold:         #B8865A;        /* copper MAPA — FIXE, JAMAIS animé */
+  --gold-bright:  #C9986C;        /* léger éclaircissement pour hover */
+  --gold-deep:    #8E6940;        /* copper profond pour CTAs sur clair */
+  --gold-shine:   #B8865A;        /* alias copper (pas de shine) */
+  --accent-warm:  #B8865A;        /* alias */
+  --line:         rgba(26, 26, 26, 0.18);
+  --line-strong:  rgba(26, 26, 26, 0.32);
 }
 
 .dark {
   --bg:           #0F0E0B;
   --bg-deep:      #0A0908;
   --bg-soft:      #1A1612;
-  --ink:          #F5F0E6;
+  --ink:          #F5F2EA;
   --ink-mid:      #BFB59E;
   --ink-soft:     #847B65;
-  --gold:         #E5C77A;
-  --gold-bright:  #F2D88E;
-  --gold-deep:    #C9A24E;
-  --gold-shine:   #FAE6A8;
-  --accent-warm:  #C99868;
-  --line:         rgba(245, 240, 230, 0.14);
-  --line-strong:  rgba(245, 240, 230, 0.28);
+  --navy:         #5C7088;
+  --navy-deep:    #3D4F63;
+  --gold:         #C9986C;
+  --gold-bright:  #D4A37B;
+  --gold-deep:    #B8865A;
+  --gold-shine:   #C9986C;
+  --accent-warm:  #C9986C;
+  --line:         rgba(245, 242, 234, 0.14);
+  --line-strong:  rgba(245, 242, 234, 0.28);
 }
 
-/* Expose les variables comme tokens Tailwind (bg-bg, text-ink, border-line, etc.) */
+/* Expose les variables comme tokens Tailwind */
 @theme inline {
   --color-bg:           var(--bg);
   --color-bg-deep:      var(--bg-deep);
@@ -48,6 +52,8 @@
   --color-ink:          var(--ink);
   --color-ink-mid:      var(--ink-mid);
   --color-ink-soft:     var(--ink-soft);
+  --color-navy:         var(--navy);
+  --color-navy-deep:    var(--navy-deep);
   --color-gold:         var(--gold);
   --color-gold-bright:  var(--gold-bright);
   --color-gold-deep:    var(--gold-deep);
@@ -61,46 +67,19 @@
   --font-mono:    var(--font-mono);
 }
 
-/* Effet "or brillant" pour CTAs et accents */
+/* CTA copper FIXE — pas de gradient, pas d'animation, juste solid copper */
 .gold-shine-bg {
-  background: linear-gradient(
-    135deg,
-    var(--gold-deep) 0%,
-    var(--gold) 30%,
-    var(--gold-shine) 50%,
-    var(--gold-bright) 70%,
-    var(--gold) 100%
-  );
-  background-size: 200% 200%;
-  animation: shimmer 8s ease infinite;
+  background-color: var(--gold);
+  color: #FFFFFF;
+  transition: background-color 200ms ease;
+}
+.gold-shine-bg:hover {
+  background-color: var(--gold-deep);
 }
 
+/* Texte d'accent copper — solid color, pas de gradient transparent */
 .gold-text {
-  background: linear-gradient(
-    135deg,
-    var(--gold-deep),
-    var(--gold-shine),
-    var(--gold)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-@keyframes shimmer {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gold-shine-bg {
-    animation: none;
-  }
+  color: var(--gold);
 }
 
 html {
@@ -179,7 +158,7 @@ html {
   }
   html, body {
     background: #ffffff !important;
-    color: #0D0F12 !important;
+    color: #1A1A1A !important;
   }
   header, footer, nav, .print\:hidden {
     display: none !important;

@@ -24,6 +24,7 @@
     "open_menu": "Menü öffnen",
     "close_menu": "Menü schließen",
     "all_properties": "Alle Objekte",
+    "all_mandates": "Alle unsere Mandate",
     "search_mandate": "Suchmandat",
     "mandate_exclusive": "Exklusivmandat",
     "mandate_semi": "Halb-exklusiv",
@@ -623,6 +624,15 @@
     "page": "Seite",
     "prev": "Vorherige Seite",
     "next": "Nächste Seite"
+  },
+  "arcova": {
+    "eyebrow": "ARCOVA — Privater Bereich",
+    "title": "ARCOVA · der private MAPA-Zugang.",
+    "intro": "Ein vertraglicher Bereich, der MAPA-Property-Mandantskunden vorbehalten ist: vollständige Off-Market-Dossiers, vertrauliche Angebote, gesicherter Austausch. Nur auf Einladung.",
+    "waitlist_title": "Zugangsanfrage",
+    "waitlist_text": "Der Zugang zu ARCOVA wird einzelfallbezogen nach einem Gespräch und der Unterzeichnung einer vertraglichen NDA gewährt. Für die Warteliste kontaktieren Sie Julien Brebion direkt.",
+    "waitlist_cta": "Einladung anfragen",
+    "legal": "Streng namensgebundener Zugang · Vertragliche Vertraulichkeit · Audit-Log aktiv"
   },
   "markets_page": {
     "eyebrow": "Aktive Märkte",

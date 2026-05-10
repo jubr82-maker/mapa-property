@@ -109,11 +109,11 @@ export function Footer() {
           </FooterCol>
         </div>
 
-        <div className="mt-14 h-px w-full bg-gradient-to-r from-transparent via-gold to-transparent" />
+        <div className="mt-14 h-[2px] w-full bg-gold" />
 
         <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-sans text-[13px] leading-relaxed text-ink-mid">
-            © 2025-{year} MAPA Property — MAPA Synergy Sàrl
+            © {year} MAPA Property — MAPA Synergy Sàrl
             <br />
             <span className="text-ink-soft">{t("baseline")}</span>
           </p>

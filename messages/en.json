@@ -24,6 +24,7 @@
     "open_menu": "Open menu",
     "close_menu": "Close menu",
     "all_properties": "All properties",
+    "all_mandates": "All our mandates",
     "search_mandate": "Search mandate",
     "mandate_exclusive": "Exclusive mandate",
     "mandate_semi": "Semi-exclusive",
@@ -623,6 +624,15 @@
     "page": "Page",
     "prev": "Previous page",
     "next": "Next page"
+  },
+  "arcova": {
+    "eyebrow": "ARCOVA — Private space",
+    "title": "ARCOVA · the MAPA private access.",
+    "intro": "A contractual space reserved for MAPA Property mandate clients: complete off-market files, confidential proposals, secure exchanges. By invitation only.",
+    "waitlist_title": "Access request",
+    "waitlist_text": "ARCOVA access is granted case by case, after an interview and the signature of a contractual NDA. To join the waitlist, contact Julien Brebion directly.",
+    "waitlist_cta": "Request an invitation",
+    "legal": "Strictly nominative access · Contractual confidentiality · Audit log active"
   },
   "markets_page": {
     "eyebrow": "Active markets",

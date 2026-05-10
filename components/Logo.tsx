@@ -1,41 +1,40 @@
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 
 interface LogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
   asLink?: boolean;
+  variant?: "light" | "dark";
 }
 
 const sizeMap = {
-  sm: { mapa: "text-2xl", property: "text-[9px]" },
-  md: { mapa: "text-3xl", property: "text-[10px]" },
-  lg: { mapa: "text-5xl", property: "text-xs" },
+  sm: { w: 120, h: 30 },
+  md: { w: 160, h: 40 },
+  lg: { w: 240, h: 60 },
 };
 
-export function Logo({ className = "", size = "md", asLink = true }: LogoProps) {
-  const sizes = sizeMap[size];
+export function Logo({
+  className = "",
+  size = "md",
+  asLink = true,
+  variant = "light",
+}: LogoProps) {
+  const { w, h } = sizeMap[size];
+  const src = variant === "dark" ? "/logo-mapa-property-dark.svg" : "/logo-mapa-property.svg";
 
-  const content = (
-    <span className={`inline-flex flex-col items-start leading-none ${className}`}>
-      <span
-        className={`font-display font-black tracking-[-0.02em] text-ink ${sizes.mapa}`}
-      >
-        MAPA
-      </span>
-      <span
-        aria-hidden
-        className="gold-shine-bg mt-0.5 w-full self-stretch"
-        style={{ height: 2 }}
-      />
-      <span
-        className={`mt-1 font-mono uppercase tracking-[0.35em] text-ink-mid ${sizes.property}`}
-      >
-        Property
-      </span>
-    </span>
+  const img = (
+    <Image
+      src={src}
+      alt="MAPA Property"
+      width={w}
+      height={h}
+      priority
+      className={`select-none ${className}`}
+    />
   );
 
-  if (!asLink) return content;
+  if (!asLink) return img;
 
   return (
     <Link
@@ -43,7 +42,7 @@ export function Logo({ className = "", size = "md", asLink = true }: LogoProps) 
       aria-label="MAPA Property — accueil"
       className="inline-flex shrink-0 transition-opacity hover:opacity-80"
     >
-      {content}
+      {img}
     </Link>
   );
 }
