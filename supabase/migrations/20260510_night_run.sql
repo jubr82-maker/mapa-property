@@ -220,3 +220,17 @@ ALTER TABLE public.coups_de_coeur ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "anon_select_coups_active" ON public.coups_de_coeur;
 CREATE POLICY "anon_select_coups_active"
   ON public.coups_de_coeur FOR SELECT TO anon USING (active = true);
+
+-- ============================================================================
+-- PHASE 6 — interest_rates : colonnes manquantes pour cron route /api/cron/bce-rates
+-- (compatibilité avec le schéma existant + nouveau format simple {source, series, rate})
+-- ============================================================================
+ALTER TABLE IF EXISTS public.interest_rates
+  ADD COLUMN IF NOT EXISTS series text,
+  ADD COLUMN IF NOT EXISTS rate numeric,
+  ADD COLUMN IF NOT EXISTS captured_at timestamptz;
+
+-- Si la colonne observed_month est NOT NULL, le cron pourrait échouer.
+-- Rendre observed_month nullable pour tolérer les inserts du nouveau format.
+ALTER TABLE IF EXISTS public.interest_rates
+  ALTER COLUMN observed_month DROP NOT NULL;
