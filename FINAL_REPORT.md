@@ -137,3 +137,86 @@ Travail effectué d'après `~/Downloads/MASTER_BRIEF_CLAUDE_CODE.md` (autonome a
 | A8 — Virgule « Trois étapes » | ✅ | Déjà conforme dans `messages/{fr,en,de}.json` (clé `offmarket.access_title`). Variante home « Trois étapes, un cadre. » conservée (slogan rhétorique distinct, non visé par le brief). |
 
 Build production OK (`npm run build`) — 1 warning Turbopack non-bloquant sur le font override de Big Shoulders.
+
+---
+
+## 📅 2026-05-11 (suite) — PARTIE B : BO Admin Off-Market
+
+### B1 — Architecture admin
+
+- **`proxy.ts`** étend `next-intl/middleware` avec une logique de protection de `/admin/*` :
+  redirige toute requête non authentifiée vers `/admin/login` (sauf `/admin/login`
+  et `/admin/auth/callback`). Utilise `@supabase/ssr` pour lire la session via cookies.
+- **`@supabase/ssr` + `lucide-react`** ajoutés à `package.json`.
+- **`lib/supabase-ssr.ts`** (`"use client"`) : `createSupabaseBrowserClient`.
+- **`lib/supabase-ssr-server.ts`** : `createSupabaseServerClient` avec `next/headers/cookies`.
+- **`app/admin/layout.tsx`** : root layout dédié hors `[locale]` — palette MAPA fixe
+  (navy `#3D4F63`, copper `#B8865A`, ivoire `#F5EFE1`), `robots: noindex,nofollow`.
+  Sidebar gauche + header navy + bouton déconnexion. Fonts Big Shoulders + Archivo + Mono.
+- **`app/admin/login/page.tsx`** + **`AdminLoginForm.tsx`** : login email/mot de passe via Supabase Auth.
+- **`app/admin/page.tsx`** : dashboard avec stats cards (leads mois, mandats pending,
+  off-market publiés, ARCOVA, avis, blog) + 2 listes (5 derniers leads, 5 dernières demandes off-market).
+
+### B2 — Module Off-Market
+
+- **Migration SQL** `supabase/migrations/20260511_admin_offmarket.sql` (idempotent) :
+  - `ALTER properties_offmarket` ajoute `reference`, `status`, `region`, `city_real`,
+    `property_type`, `surface_terrain_ares`, `price_estimate`, `price_label`,
+    `prestations`, `features`, `photos_locked`, `exclusive_until`,
+    `signed_mandate_url`, `views_count`, `requests_count`, `last_request_at`,
+    `created_at`, `updated_at`, `created_by`. Backfill `reference` depuis
+    `internal_ref` ou auto-généré `OM-<8hex>`. Index unique + trigger `updated_at`.
+  - `VIEW properties_offmarket_public` exposant uniquement les champs publics
+    (filtrée sur `is_published=TRUE AND status='published'`, masque cover si
+    `photos_locked`).
+  - `TABLE offmarket_requests` (workflow `pending → qualified → nda_sent → nda_signed
+    → dossier_sent → visit_scheduled → rejected` + notes_admin).
+  - Trigger : à chaque INSERT dans `offmarket_requests`, bump `requests_count` et
+    set `last_request_at` sur le bien.
+  - RLS : lecture publique sur biens `published`, full access aux authentifiés.
+  - Bucket Storage `offmarket-photos` (privé) avec policies.
+  - `TABLE offmarket_audit_log` (qui/quand/quoi).
+
+- **Liste `/admin/offmarket`** (`app/admin/offmarket/page.tsx`) :
+  tableau ref / cover / titre / type / prix estimé / statut (badge) / vues /
+  demandes (lien) / actions. Filtres statut/type, recherche, bouton « + Nouveau bien ».
+
+- **Formulaire `/admin/offmarket/new` et `/admin/offmarket/[id]/edit`** :
+  composant `OffmarketForm` à 4 onglets :
+  1. Identification & Statut (référence, statut, fin d'exclusivité, mandat signé)
+  2. Localisation (pays dropdown, région, ville réelle privée, ville anonymisée)
+  3. Caractéristiques (type, surfaces avec auto-calcul ares, chambres, sdb,
+     classe énergétique, prestations tags)
+  4. Contenu & Visuel (titre, descriptions courte/complète, prix estimé/label,
+     verrouillage photos, **gestionnaire photos** : upload multi, réordonnement
+     drag-style, suppression, cover = première photo).
+  Server Actions : `createOffmarket`, `updateOffmarket`, `deleteOffmarket`,
+  `duplicateOffmarket`, `uploadOffmarketPhotos`, `reorderOffmarketPhotos`.
+  Aperçu public : bouton ouvre `/fr/off-market/[id]` en nouvel onglet.
+
+- **Demandes `/admin/offmarket/[id]/requests`** : composant `RequestRow` (collapsible)
+  avec workflow buttons (7 statuts), notes admin éditables, Server Actions
+  `updateRequestStatus` et `updateRequestNotes`.
+
+- **Vue globale `/admin/offmarket/requests`** : tableau toutes demandes,
+  filtres par statut (Tous + 7 statuts avec compteurs), liens vers le bien
+  et la fiche demande.
+
+- **Audit log** : Server Actions inscrivent toute mutation dans
+  `offmarket_audit_log` (action + user_id + détails JSON).
+
+### B2.4 — Branchement page publique
+
+- **`lib/data.ts`** : `fetchOffmarketList()` / `fetchOffmarketById()` lisent désormais
+  la VIEW `properties_offmarket_public` (avec fallback gracieux sur la table si
+  la VIEW n'est pas encore appliquée). Mapping vers le type `PropertyOffmarket`
+  conservé pour compatibilité avec le rendu existant.
+- **`/api/offmarket-request`** (nouveau) : INSERT dans `offmarket_requests` +
+  miroir dans `leads` (type `offmarket_request`) + Turnstile + honeypot + rate-limit.
+  Trigger SQL bumpe automatiquement `requests_count` et `last_request_at`.
+- **`NDAForm.tsx`** : POST sur `/api/offmarket-request` au lieu de `/api/lead`.
+
+### Build production OK
+
+`npm run build` → toutes les routes compilent (1 warning Turbopack non-bloquant
+sur le font override Big Shoulders, identique à la partie A).

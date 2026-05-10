@@ -31,20 +31,19 @@ export function NDAForm({ propertyRef, propertyTitle }: Props) {
     setStatus("submitting");
 
     const payload = {
-      first_name: String(fd.get("first_name") ?? ""),
-      last_name: String(fd.get("last_name") ?? ""),
+      prenom: String(fd.get("first_name") ?? ""),
+      nom: String(fd.get("last_name") ?? ""),
       email: String(fd.get("email") ?? ""),
-      phone: String(fd.get("phone") ?? ""),
-      message: String(fd.get("message") ?? "") +
+      telephone: String(fd.get("phone") ?? ""),
+      criteres_precis:
+        String(fd.get("message") ?? "") +
         `\n\n[NDA] Accepté · [Capacité] Confirmée · [Bien] ${propertyTitle}`,
-      type: "offmarket_request",
-      source: `offmarket:${propertyRef}`,
-      property_ref: propertyRef,
+      property_id: propertyRef,
       lang: locale,
       turnstile_token: token ?? undefined,
     };
     try {
-      const res = await fetch("/api/lead", {
+      const res = await fetch("/api/offmarket-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -65,3 +65,40 @@ La home (`app/[locale]/page.tsx`) ne contient pas de section dédiée Julien (pa
 
 ### A7 — Bouton « Retour » sur hero Off-Market : pointe vers `/`
 Le brief demande un bouton « ← RETOUR » sans préciser la destination. J'ai pointé vers la home (`/`). Si Julien veut pointer ailleurs (page précédente via history.back, ou /services), à ajuster (simple changement de `href` ou conversion en composant client `BackButton`).
+
+---
+
+## 2026-05-11 — Blockers issus de la PARTIE B
+
+### B1 — Migration SQL à appliquer manuellement
+Le projet n'est pas relié au CLI Supabase. Le fichier `supabase/migrations/20260511_admin_offmarket.sql`
+doit être copié-collé dans **Supabase Dashboard → SQL Editor** par Julien avant que
+le BO admin off-market ne soit pleinement opérationnel. Le code est idempotent
+(toutes les opérations utilisent `IF NOT EXISTS` ou `DROP … IF EXISTS` + `CREATE`).
+Tant que ce n'est pas fait :
+- la liste admin pourrait afficher des biens sans `reference` (mais le code tolère).
+- la table `offmarket_requests` n'existe pas → le formulaire NDA publique échouera côté DB.
+- la VIEW `properties_offmarket_public` n'existe pas → `lib/data.ts` tombe sur le fallback (table directe), donc la page publique fonctionne quand même mais sans le masquage `photos_locked`.
+
+### B1 — Compte admin à créer
+Aucun utilisateur Supabase Auth admin n'a été créé par cette session. Julien doit :
+1. Ouvrir Supabase Dashboard → Authentication → Users → « Add user » → email + mot de passe.
+2. Tester la connexion sur `https://<deploy>/admin/login`.
+
+### B2 — Upload photos : conversion WebP / redimensionnement non livré
+Le brief demande « redimensionnement auto en 1920px max width, conversion en WebP côté serveur ».
+Server Action `uploadOffmarketPhotos` upload le fichier **brut** dans le bucket
+`offmarket-photos` (preserves extension d'origine, public URL renvoyée par Supabase).
+Sharp n'est pas installé et le runtime Vercel impose une taille de bundle limitée.
+**Workaround** : laisser le navigateur compresser (`accept="image/*"`) ou
+ajouter `next/image` côté affichage. À itérer ultérieurement.
+
+### B2 — Email automatique sur nouvelle demande : stub
+`/api/offmarket-request` logue dans la console si `RESEND_API_KEY` absent, sinon
+**ne fait pas encore** l'envoi Resend (à câbler comme `/api/lead`). Le trigger SQL
+fait le tracking côté DB, donc rien n'est perdu — juste pas d'email instantané pour l'instant.
+
+### B2 — Kanban des demandes : non livré
+Le brief mentionne un Kanban optionnel (« Pending → Qualified → … → Closed »).
+La vue globale `/admin/offmarket/requests` reste en tableau avec filtres par statut.
+À transformer en Kanban si besoin (drag&drop entre colonnes).
