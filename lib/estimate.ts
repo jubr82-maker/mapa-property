@@ -32,16 +32,20 @@ const STATE_FACTOR: Record<string, number> = {
   new: 1.15,
 };
 
+// Coefficients CPE LU 10 niveaux (master prompt phase 3)
+// A++/A+ +8%, A +5%, B +2%, C 0% (base), D -3%, E -7%, F -12%, G -17%, H -22%, I -28%
 const ENERGY_FACTOR: Record<string, number> = {
-  A: 1.1,
-  B: 1.05,
+  "A++": 1.08,
+  "A+": 1.08,
+  A: 1.05,
+  B: 1.02,
   C: 1.0,
   D: 0.97,
   E: 0.93,
   F: 0.88,
   G: 0.83,
   H: 0.78,
-  I: 0.75,
+  I: 0.72,
 };
 
 // Communes premium LU avec multiplicateur (au-dessus du prix LU base)
@@ -210,5 +214,67 @@ export const estimateProperty = (
     pricePerSqm: Math.round(pricePerSqm),
     financing,
     helps,
+  };
+};
+
+// ============================================================================
+// Méthode rendement — Immeuble / Local commercial (phase 3 master prompt)
+// ============================================================================
+
+export interface YieldEstimateInput {
+  monthlyRentExpected: number; // €
+  capRate?: number; // 4.5% LU centre, 5.5% sud — par défaut 4.5%
+}
+
+export interface YieldEstimateResult {
+  estimatedValue: number;
+  capRateUsed: number;
+  annualRent: number;
+}
+
+export const estimateByYield = (input: YieldEstimateInput): YieldEstimateResult => {
+  const capRate = input.capRate ?? 0.045;
+  const annual = input.monthlyRentExpected * 12;
+  return {
+    estimatedValue: Math.round(annual / capRate),
+    capRateUsed: capRate,
+    annualRent: annual,
+  };
+};
+
+// Coûts annexes acquisition LU (phase 3)
+export interface AcquisitionCostsInput {
+  priceEur: number;
+  bellegenAktBuyers?: number; // 0 si pas applicable
+  mandateRate?: number; // 0.03 / 0.04 / 0.05 / 0.01 / 0
+}
+
+export interface AcquisitionCostsResult {
+  registrationDuty: number; // 7% LU
+  bellegenAktReduction: number;
+  notaryFees: number; // ~1.75%
+  mapaFees: number;
+  vatOnFees: number; // 17% LU sur honoraires
+  totalAdditional: number;
+}
+
+export const computeAcquisitionCosts = (input: AcquisitionCostsInput): AcquisitionCostsResult => {
+  const registrationDuty = input.priceEur * 0.07;
+  const bellegenAktReduction = (input.bellegenAktBuyers ?? 0) * 40000;
+  const notaryFees = input.priceEur * 0.0175;
+  const mapaFees = input.priceEur * (input.mandateRate ?? 0);
+  const vatOnFees = mapaFees * 0.17;
+  const totalAdditional =
+    Math.max(0, registrationDuty - bellegenAktReduction) +
+    notaryFees +
+    mapaFees +
+    vatOnFees;
+  return {
+    registrationDuty: Math.round(registrationDuty),
+    bellegenAktReduction: Math.round(bellegenAktReduction),
+    notaryFees: Math.round(notaryFees),
+    mapaFees: Math.round(mapaFees),
+    vatOnFees: Math.round(vatOnFees),
+    totalAdditional: Math.round(totalAdditional),
   };
 };
