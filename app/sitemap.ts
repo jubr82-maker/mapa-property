@@ -5,6 +5,7 @@ import {
   fetchOffmarketList,
 } from "@/lib/data";
 import { ALL_MANDATE_SLUGS } from "@/lib/mandates";
+import { cities } from "@/lib/cities";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -96,9 +97,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
+  const cityEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
+    cities.map((city) => ({
+      url: `${SITE_URL}/${locale}/villes/${city.slug}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+      alternates: {
+        languages: Object.fromEntries(
+          LOCALES.map((l) => [l, `${SITE_URL}/${l}/villes/${city.slug}`]),
+        ),
+      },
+    })),
+  );
+
   return [
     ...staticEntries,
     ...mandateEntries,
+    ...cityEntries,
     ...propertyEntries,
     ...offmarketEntries,
     ...blogEntries,
