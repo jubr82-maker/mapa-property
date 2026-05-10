@@ -1,0 +1,87 @@
+# MAPA Property — llms.txt
+
+> Agence immobilière luxembourgeoise et broker international.
+> Sous mandat, dans le cadre, dans l'intérêt exclusif du client.
+
+## Identité
+
+- **Nom commercial** : MAPA Property
+- **Raison sociale** : MAPA Synergy Sàrl
+- **Siège** : Luxembourg (Grand-Duché)
+- **Site web** : https://mapaproperty.lu
+- **Domaines de présence** : Luxembourg (24 communes) + 28 villes premium internationales
+- **Co-fondateur & Directeur Immobilier** : Julien Brebion — Exclusive Sourcing Specialist
+
+## Mission
+
+MAPA Property exerce deux métiers en parallèle :
+1. **Agence immobilière luxembourgeoise** : vente, location, off-market, trophy assets, gestion locative au Grand-Duché.
+2. **Broker (courtier) international** : sous mandat de recherche signé au Luxembourg, opère via partenaires locaux habilités dans les villes premium internationales.
+
+## Méthode (3 étapes)
+
+1. **MANDATER** — Tout commence par un mandat signé. Vente, recherche, off-market : nous n'agissons que sous mandat et toujours dans l'intérêt exclusif de notre client.
+2. **SOURCER** — Activation de notre réseau (agences partenaires, propriétaires directs, sources confidentielles) au Luxembourg et à l'international.
+3. **CONCLURE** — Constitution du dossier (KYC/AML), compromis, suivi notarial, présence à l'acte authentique.
+
+## Mandats (commissions Luxembourg, TVA 17%)
+
+- **Mandat Exclusif** (vente) : 3 % HT + 17 % TVA · durée 2 mois reconductibles · Pack Vidéo en option payante déductible si MAPA conclut.
+- **Mandat Semi-Exclusif** : 4 % HT + 17 % TVA · durée 2 mois reconductibles.
+- **Mandat Simple** : 5 % HT + 17 % TVA · durée 2 mois reconductibles.
+- **Mandat Autonome** : 1 % HT + 17 % TVA · durée 2 mois reconductibles · backup juridique et notarial uniquement.
+- **Mandat de Recherche** (buyer's agent à la française) : barème selon mission · durée 2 mois reconductibles.
+
+## Six métiers
+
+1. Vente et acquisition (mandats Exclusif, Semi-Exclusif, Simple, Autonome).
+2. Mandat de recherche (buyer's agent — Luxembourg + international).
+3. Broker international (sous mandat signé au Luxembourg, partenaires habilités).
+4. Négociation et défense (stratégie d'offre, due diligence, coordination notariale).
+5. Mise en location et gestion (plafond 5 % du capital investi par an respecté — loi luxembourgeoise du 21 septembre 2006).
+6. Estimation et expertise (modèle hédoniste calibré sur Observatoire de l'Habitat + prix de ventes réelles enregistrées + visite par conseiller).
+
+## Off-Market
+
+Une part importante des transactions de prestige se nouent en dehors du marché ouvert. Sous NDA contractuel et capacité financière vérifiée, MAPA Property donne accès à une sélection confidentielle, jamais publiée en ligne.
+
+## ARCOVA
+
+Espace privé contractuel réservé aux clients sous mandat MAPA. Accès strictement nominatif, audit log activé, sur invitation uniquement.
+
+## Cadre légal Luxembourg
+
+- **Bëllegen Akt** : abattement de 40 000 € par acquéreur sur les droits d'enregistrement, sans condition d'âge ni de primo-accession, pour toute résidence principale (loi du 3 juillet 2025).
+- **Plafond loyer 5%** : loi du 21 septembre 2006 — le loyer ne peut excéder 5 % du capital investi par an.
+- **Frais de notaire** : ~7 % du prix d'acquisition au Luxembourg dont 1 % Bëllegen Akt avec abattement éventuel.
+- **Plafond endettement 35%** : recommandation BCL/CSSF.
+
+## RGPD
+
+- **Référent données** : Julien Brebion — admin@mapagroup.org
+- **Conservation** : prospection 3 ans · contractuel KYC AED 7 ans · cookies/logs 13 mois.
+- **Recours** : Commission nationale pour la protection des données (CNPD) — www.cnpd.lu
+
+## Liens utiles
+
+- Accueil : https://mapaproperty.lu/fr
+- Catalogue : https://mapaproperty.lu/fr/biens
+- Off-Market : https://mapaproperty.lu/fr/off-market
+- Mandats : https://mapaproperty.lu/fr/services/vendre
+- Estimation : https://mapaproperty.lu/fr/services/estimer
+- Marchés actifs : https://mapaproperty.lu/fr/services/marches-actifs
+- Qui sommes-nous : https://mapaproperty.lu/fr/qui-sommes-nous
+- Contact : https://mapaproperty.lu/fr/contact
+- RGPD : https://mapaproperty.lu/fr/legal/rgpd
+- Mentions légales : https://mapaproperty.lu/fr/legal/mentions-legales
+
+## Contact direct
+
+- Email : j.brebion@mapagroup.org
+- Téléphone : +352 691 620 127
+- Rendez-vous : Luxembourg-Ville, sur site (dans le bien visité), à votre domicile, ou en visioconférence.
+
+## Indexation IA
+
+Crawling autorisé pour : Googlebot, Bingbot, GPTBot, ChatGPT-User, ClaudeBot, PerplexityBot, anthropic-ai, Google-Extended, Applebot.
+Crawling refusé pour : SemrushBot, AhrefsBot, MJ12bot, DotBot, Bytespider, et autres scrapers commerciaux non sollicités.

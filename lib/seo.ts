@@ -41,25 +41,46 @@ export const realEstateAgent = (locale: string) => ({
     { "@type": "Country", name: "United Arab Emirates" },
   ],
   sameAs: [
-    "https://www.linkedin.com/company/mapa-property",
-    "https://www.instagram.com/mapaproperty",
+    "https://www.linkedin.com/showcase/mapa-property/",
+    "https://www.instagram.com/mapa_property",
+    "https://www.facebook.com/people/MAPA-Property/61559121213209/",
   ],
   founder: {
     "@type": "Person",
     name: "Julien Brebion",
-    jobTitle: "Real Estate Director",
+    jobTitle: "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
   },
   foundingDate: "2020",
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "5",
+    reviewCount: "8",
+    bestRating: "5",
+    worstRating: "1",
+  },
+});
+
+export const homepageGraph = (locale: string) => ({
+  "@context": "https://schema.org",
+  "@graph": [
+    realEstateAgent(locale),
+    personJulien(),
+    website(locale),
+  ],
 });
 
 export const personJulien = () => ({
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": `${SITE_URL}#julien`,
   name: "Julien Brebion",
-  jobTitle: "Real Estate Director",
+  jobTitle: "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
   worksFor: { "@id": `${SITE_URL}#organization` },
   email: "j.brebion@mapagroup.org",
   telephone: "+352691620127",
+  sameAs: [
+    "https://www.linkedin.com/in/julien-brebion/",
+  ],
 });
 
 export const website = (locale: string) => ({

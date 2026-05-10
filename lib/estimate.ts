@@ -158,15 +158,15 @@ export const estimateProperty = (
   // Helps applicables (LU)
   const helps: EstimateResult["helps"] = [];
   if (input.country === "LU") {
-    if (input.isPrimoLu && input.isPrimaryResidence) {
+    if (input.isPrimaryResidence) {
       const buyers = input.buyersCount ?? 1;
       helps.push({
         key: "bellegen_akt",
         amount: 40000 * buyers,
         conditions: [
-          "Primo-acquéreur(s) au Luxembourg",
-          "Résidence principale",
-          `Abattement 40 000 € par personne (${buyers} personne${buyers > 1 ? "s" : ""})`,
+          "Résidence principale (loi du 3 juillet 2025)",
+          "Aucune condition d'âge ni de primo-accession",
+          `Abattement 40 000 € par acquéreur (${buyers} personne${buyers > 1 ? "s" : ""})`,
         ],
       });
     }

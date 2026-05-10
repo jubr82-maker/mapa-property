@@ -31,24 +31,19 @@ const colLegal = [
 
 const socials = [
   {
-    href: "https://www.linkedin.com/company/mapa-property",
+    href: "https://www.linkedin.com/showcase/mapa-property/",
     label: "LinkedIn",
     icon: LinkedInIcon,
   },
   {
-    href: "https://www.instagram.com/mapaproperty",
+    href: "https://www.instagram.com/mapa_property",
     label: "Instagram",
     icon: InstagramIcon,
   },
   {
-    href: "https://www.facebook.com/mapaproperty",
+    href: "https://www.facebook.com/people/MAPA-Property/61559121213209/",
     label: "Facebook",
     icon: FacebookIcon,
-  },
-  {
-    href: "https://www.tiktok.com/@mapaproperty",
-    label: "TikTok",
-    icon: TikTokIcon,
   },
 ] as const;
 
@@ -220,10 +215,3 @@ function FacebookIcon() {
   );
 }
 
-function TikTokIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
-      <path d="M16.5 3h-2.7v12.3a2.7 2.7 0 1 1-2.7-2.7c.27 0 .53.04.78.12V9.93a5.7 5.7 0 1 0 4.62 5.6V8.7a6.55 6.55 0 0 0 4.05 1.39V7.32A3.86 3.86 0 0 1 16.5 3Z" />
-    </svg>
-  );
-}

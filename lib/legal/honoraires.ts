@@ -72,7 +72,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Frais annexes (à la charge du Mandant)",
         paragraphs: [
-          "Frais d'enregistrement et de notaire : payés au notaire (~7 % au Luxembourg dont 1 % Bëllegen Akt avec abattement éventuel pour les primo-acquéreurs résidence principale).",
+          "Frais d'enregistrement et de notaire : payés au notaire (~7 % au Luxembourg). Le Bëllegen Akt est un abattement de 40 000 € par acquéreur, sans condition d'âge ni de primo-accession, pour toute résidence principale (loi du 3 juillet 2025).",
           "Frais d'huissier en cas de procédure : à la charge du Mandant.",
           "Frais de déplacement à l'international au-delà de 200 km du siège : forfait kilométrique sur devis.",
         ],
