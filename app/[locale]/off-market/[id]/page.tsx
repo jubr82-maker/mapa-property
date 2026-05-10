@@ -5,6 +5,7 @@ import { fetchOffmarketById } from "@/lib/data";
 import { BackButton } from "@/components/ui/BackButton";
 import { NDAForm } from "@/components/forms/NDAForm";
 import { FavoriteHeart } from "@/components/property/FavoriteHeart";
+import { sbUrl } from "@/lib/supabase-url";
 
 export default async function OffMarketDetailPage({
   params,
@@ -210,6 +211,25 @@ export default async function OffMarketDetailPage({
                 propertyRef={property.id}
                 propertyTitle={property.title ?? "—"}
               />
+              <div className="mt-6 flex items-center gap-3 border-t border-line pt-5">
+                <div className="relative size-14 shrink-0 overflow-hidden rounded-full border border-gold/40">
+                  <Image
+                    src={sbUrl("photos", "IMG_2461.jpg")}
+                    alt="Julien Brebion — Real Estate Director MAPA Property"
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="leading-tight">
+                  <p className="font-display text-sm font-bold text-ink">
+                    Julien Brebion
+                  </p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+                    Real Estate Director
+                  </p>
+                </div>
+              </div>
             </div>
           </aside>
         </div>

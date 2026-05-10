@@ -5,9 +5,11 @@ import { LiveClock } from "@/components/home/LiveClock";
 export function Hero() {
   const t = useTranslations("hero");
   const videoSrc = sbUrl("Videos", "mapa_showcase_new.mp4");
+  const posterSrc = sbUrl("Videos", "hero_poster.jpg");
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#070605]">
+    <section className="relative isolate min-h-[80vh] overflow-hidden bg-[#070605] lg:min-h-screen">
+      <link rel="preload" as="video" href={videoSrc} type="video/mp4" />
       {/* Video background */}
       <video
         className="absolute inset-0 size-full object-cover"
@@ -15,7 +17,8 @@ export function Hero() {
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="auto"
+        poster={posterSrc}
         aria-hidden
       >
         <source src={videoSrc} type="video/mp4" />

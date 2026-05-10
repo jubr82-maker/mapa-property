@@ -55,7 +55,7 @@ export function Footer() {
   return (
     <footer className="mt-24 border-t border-line bg-bg-soft text-ink">
       <div className="mx-auto max-w-[1400px] px-6 py-16 lg:px-10">
-        <Logo size="lg" />
+        <Logo size="lg" className="!h-20 !w-auto" />
 
         <div className="mt-12 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <FooterCol title={t("col_services")}>

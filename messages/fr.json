@@ -295,6 +295,10 @@
   },
   "offmarket": {
     "eyebrow": "Off-Market",
+    "hero_eyebrow": "Off-Market — Accès confidentiel",
+    "hero_title": "Off-Market exclusif",
+    "hero_subtitle": "Sous mandat. Sous NDA. Hors portails.",
+    "back": "Retour",
     "title": "Les propriétés qui ne se voient pas.",
     "description": "Une part importante des transactions de prestige se nouent en dehors du marché ouvert. Sous mandat et NDA, MAPA Property donne accès à une sélection confidentielle, jamais publiée en ligne.",
     "access_eyebrow": "Conditions d'accès",

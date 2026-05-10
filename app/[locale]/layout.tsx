@@ -16,7 +16,7 @@ import "../globals.css";
 const display = Big_Shoulders({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["700", "900"],
+  weight: ["500", "600", "700", "900"],
   display: "swap",
 });
 
@@ -83,6 +83,13 @@ export async function generateMetadata({
       "max-image-preview": "large",
       "max-snippet": -1,
       "max-video-preview": -1,
+    },
+    icons: {
+      icon: [
+        { url: "/logo-mapa-property.svg", type: "image/svg+xml" },
+        { url: "/favicon.ico", sizes: "any" },
+      ],
+      apple: "/apple-touch-icon.png",
     },
     other: {
       "geo.region": "LU-LU",

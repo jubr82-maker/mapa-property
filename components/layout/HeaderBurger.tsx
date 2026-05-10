@@ -7,22 +7,68 @@ import { usePathname, useRouter, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 const localeLabels: Record<(typeof routing.locales)[number], string> = {
-  fr: "Français",
-  en: "English",
-  de: "Deutsch",
+  fr: "FR",
+  en: "EN",
+  de: "DE",
 };
 
-const mobileNavItems = [
-  { href: "/biens", key: "buy" },
-  { href: "/services/vendre", key: "sell" },
-  { href: "/biens?transaction=rent", key: "rent" },
-  { href: "/services", key: "services" },
-  { href: "/off-market", key: "off_market" },
-  { href: "/arcova", label: "ARCOVA" },
-] as const;
+type SubItem = { href: string; key: string };
+type Group = {
+  id: string;
+  label: string;
+  href?: string;
+  items?: SubItem[];
+};
+
+const groups: Group[] = [
+  {
+    id: "buy",
+    label: "buy",
+    items: [
+      { href: "/biens", key: "all_properties" },
+      { href: "/mandats/recherche", key: "search_mandate" },
+      { href: "/off-market", key: "off_market" },
+    ],
+  },
+  {
+    id: "sell",
+    label: "sell",
+    items: [
+      { href: "/services/vendre", key: "all_mandates" },
+      { href: "/mandats/exclusif", key: "mandate_exclusive" },
+      { href: "/mandats/semi-exclusif", key: "mandate_semi" },
+      { href: "/mandats/simple", key: "mandate_simple" },
+      { href: "/mandats/autonome", key: "mandate_autonomous" },
+      { href: "/services/estimer", key: "estimate" },
+    ],
+  },
+  {
+    id: "rent",
+    label: "rent",
+    href: "/biens?transaction=rent",
+  },
+  {
+    id: "services",
+    label: "services",
+    items: [
+      { href: "/services/estimer", key: "estimate" },
+      { href: "/services/simulateurs", key: "simulators" },
+      { href: "/services/marches-actifs", key: "markets" },
+      { href: "/qui-sommes-nous", key: "about" },
+      { href: "/contact", key: "contact" },
+      { href: "/blog", key: "blog" },
+    ],
+  },
+  {
+    id: "off_market",
+    label: "off_market",
+    href: "/off-market",
+  },
+];
 
 export function HeaderBurger() {
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const t = useTranslations("nav");
   const locale = useLocale();
   const pathname = usePathname();
@@ -36,16 +82,22 @@ export function HeaderBurger() {
       if (e.key === "Escape") setOpen(false);
     };
     document.addEventListener("keydown", onKey);
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [open]);
 
+  const close = () => {
+    setOpen(false);
+    setExpanded(null);
+  };
+
   const switchLocale = (l: (typeof routing.locales)[number]) => {
     if (l === locale) {
-      setOpen(false);
+      close();
       return;
     }
     startTransition(() => {
@@ -54,7 +106,7 @@ export function HeaderBurger() {
         { pathname, params },
         { locale: l },
       );
-      setOpen(false);
+      close();
     });
   };
 
@@ -62,7 +114,7 @@ export function HeaderBurger() {
     <>
       <button
         type="button"
-        aria-label="Menu"
+        aria-label={t("open_menu")}
         aria-expanded={open}
         onClick={() => setOpen(true)}
         className="inline-flex size-10 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold"
@@ -72,86 +124,146 @@ export function HeaderBurger() {
         </svg>
       </button>
 
-      {open ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu"
-          className="fixed inset-0 z-[60]"
-        >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("menu")}
+        aria-hidden={!open}
+        className={`fixed inset-0 z-[9999] flex flex-col overflow-y-auto bg-bg transition-opacity duration-200 ${
+          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div className="flex items-center justify-between border-b border-line px-6 py-5 lg:px-10">
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">
+            MAPA Property
+          </span>
           <button
             type="button"
-            aria-label="Fermer le menu"
-            onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-ink/60 backdrop-blur-sm"
-          />
-          <aside className="absolute right-0 top-0 flex h-full w-full max-w-sm flex-col gap-8 overflow-y-auto bg-bg p-8 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">
-                MAPA Property
-              </span>
-              <button
-                type="button"
-                aria-label="Fermer"
-                onClick={() => setOpen(false)}
-                className="inline-flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold"
-              >
-                <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M6 6l12 12M18 6L6 18" />
-                </svg>
-              </button>
-            </div>
+            aria-label={t("close_menu")}
+            onClick={close}
+            className="inline-flex size-10 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold"
+          >
+            <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
 
-            <nav className="flex flex-col gap-6 lg:hidden">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-                Navigation
-              </p>
-              <ul className="flex flex-col gap-3">
-                {mobileNavItems.map((item) => (
-                  <li key={item.href}>
+        <nav className="flex-1 px-6 py-8 lg:px-10">
+          <ul className="space-y-1">
+            {groups.map((group) => {
+              if (group.href) {
+                return (
+                  <li key={group.id} className="border-b border-line/60">
                     <Link
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className="block py-1 font-display text-2xl font-bold text-ink transition-colors hover:text-gold"
+                      href={group.href}
+                      onClick={close}
+                      className="block py-4 font-display text-3xl font-bold uppercase tracking-wide text-ink transition-colors hover:text-gold"
                     >
-                      {"label" in item ? item.label : t(item.key)}
+                      {t(group.label)}
                     </Link>
                   </li>
-                ))}
-              </ul>
-            </nav>
+                );
+              }
+              const isExpanded = expanded === group.id;
+              return (
+                <li key={group.id} className="border-b border-line/60">
+                  <button
+                    type="button"
+                    onClick={() => setExpanded(isExpanded ? null : group.id)}
+                    aria-expanded={isExpanded}
+                    className="flex w-full items-center justify-between py-4 font-display text-3xl font-bold uppercase tracking-wide text-ink transition-colors hover:text-gold"
+                  >
+                    {t(group.label)}
+                    <svg
+                      aria-hidden
+                      viewBox="0 0 24 24"
+                      className={`size-5 text-gold transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+                  {isExpanded && group.items && (
+                    <ul className="pb-4 pl-1">
+                      {group.items.map((item) => (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            onClick={close}
+                            className="block py-2 font-sans text-base text-ink-mid transition-colors hover:text-gold"
+                          >
+                            {t(item.key)}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
 
-            <div className="flex flex-col gap-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-                Langues
-              </p>
-              <ul className="flex flex-col gap-2">
-                {routing.locales.map((l) => {
-                  const active = l === locale;
-                  return (
-                    <li key={l}>
-                      <button
-                        type="button"
-                        aria-current={active ? "true" : undefined}
-                        onClick={() => switchLocale(l)}
-                        className={`flex w-full items-center gap-3 py-2 text-left font-sans text-base transition-colors ${
-                          active ? "text-ink" : "text-ink-soft hover:text-gold"
-                        }`}
-                      >
-                        <span
-                          aria-hidden
-                          className={`inline-block size-2 rounded-full ${active ? "bg-gold" : "border border-ink-soft"}`}
-                        />
-                        {localeLabels[l]}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </aside>
-        </div>
-      ) : null}
+            <li className="border-b border-line/60">
+              <Link
+                href="/arcova"
+                onClick={close}
+                className="flex items-center gap-2 py-4 font-display text-3xl font-bold uppercase tracking-wide text-ink transition-colors hover:text-gold"
+              >
+                ARCOVA
+                <LockIcon />
+              </Link>
+            </li>
+          </ul>
+
+          <div className="mt-10">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
+              Langues
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {routing.locales.map((l) => {
+                const active = l === locale;
+                return (
+                  <li key={l}>
+                    <button
+                      type="button"
+                      aria-current={active ? "true" : undefined}
+                      onClick={() => switchLocale(l)}
+                      className={`inline-flex h-10 min-w-[3rem] items-center justify-center rounded-full border px-4 font-mono text-xs uppercase tracking-[0.2em] transition-colors ${
+                        active
+                          ? "border-gold bg-gold/10 text-gold"
+                          : "border-line text-ink-mid hover:border-gold hover:text-gold"
+                      }`}
+                    >
+                      {localeLabels[l]}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </nav>
+      </div>
     </>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      className="size-4 text-gold"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="5" y="11" width="14" height="9" rx="1.5" />
+      <path d="M8 11V7a4 4 0 1 1 8 0v4" />
+    </svg>
   );
 }

@@ -79,8 +79,8 @@ export function Header() {
         {/* Center : Logo (h-12 mobile / h-20 desktop) */}
         <div className="flex justify-center">
           <Logo
-            size="lg"
-            className="!h-12 !w-auto lg:!h-20"
+            size="md"
+            className="!h-12 !w-auto lg:!h-[70px]"
           />
         </div>
 

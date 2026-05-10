@@ -18,27 +18,36 @@ export default async function OffMarketListPage({
   return (
     <>
       <section className="relative isolate overflow-hidden">
-        <div className="relative h-[60vh] min-h-[420px] w-full">
+        <div className="relative h-[70vh] min-h-[480px] w-full">
           <Image
             src="/offmarket_hero.png"
-            alt="Off-Market"
+            alt=""
             fill
             priority
             sizes="100vw"
             className="object-cover"
           />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-b from-[#0F0E0B]/70 via-[#0F0E0B]/40 to-[#0F0E0B]/85"
-          />
-          <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-start justify-center gap-4 px-6 pt-24 lg:px-10">
+          <div aria-hidden className="absolute inset-0 bg-ink/50" />
+
+          <Link
+            href="/"
+            className="absolute right-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/30 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-white/90 backdrop-blur transition-colors hover:border-gold hover:text-gold lg:right-10 lg:top-10"
+          >
+            <span aria-hidden>←</span>
+            {t("back")}
+          </Link>
+
+          <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-start justify-center gap-5 px-6 pt-24 lg:px-10">
             <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-gold-bright/90">
-              {t("eyebrow")} — Accès confidentiel
+              {t("hero_eyebrow")}
             </p>
-            <h1 className="font-display text-5xl font-black leading-[0.95] tracking-tight text-white sm:text-6xl lg:text-7xl">
-              OFF MARKET
+            <h1 className="font-display font-bold leading-[1] tracking-tight text-white text-[clamp(3rem,7vw,5rem)]">
+              {t("hero_title")}
             </h1>
-            <p className="max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+            <p className="font-serif text-xl italic leading-relaxed text-white/85 sm:text-2xl">
+              {t("hero_subtitle")}
+            </p>
+            <p className="mt-2 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
               {t("description")}
             </p>
           </div>

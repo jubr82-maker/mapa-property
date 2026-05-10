@@ -118,3 +118,22 @@ Voir le fichier [BLOCKERS.md](./BLOCKERS.md) à la racine. Résumé :
 ---
 
 **FIN — production-ready livré (modulo blockers).**
+
+---
+
+## 📅 2026-05-11 — PARTIE A : corrections visuelles site public
+
+Travail effectué d'après `~/Downloads/MASTER_BRIEF_CLAUDE_CODE.md` (autonome avec STOP critiques).
+
+| Tâche | Statut | Détails |
+|-------|--------|---------|
+| A1 — Logo SVG officiel | ✅ | `public/logo-mapa-property.svg` copié depuis `/Users/Shared/`. `Logo.tsx` pointe vers `.svg`, tailles 70px desktop / 48px mobile / 80px footer. Metadata `icons` ajoute le SVG comme icon principal. |
+| A2 — Big Shoulders H1/H2 | ✅ | Tous les H1 du repo utilisent déjà `font-display` (variable `--font-big-shoulders` consolidée en `Big_Shoulders`). Weights étendus à `["500","600","700","900"]`. Les H2 éditoriaux restent en `font-mono` (convention design system : eyebrows). |
+| A3 — Menu burger plein écran | ✅ | `HeaderBurger.tsx` refondu : overlay `fixed inset-0 z-[9999]`, fond `bg-bg` opaque (ivoire/navy selon thème), fade-in 200ms, X en haut à droite (size-10), sous-menus dépliables (Acheter / Vendre / Services), liens directs (Louer, Off-Market, ARCOVA), sélecteur FR/EN/DE. Body scroll lock + Escape. |
+| A4 — Vidéo HERO Supabase | ✅ | `Hero.tsx` : `poster` Supabase ajouté, `preload="auto"`, `<link rel="preload">` inline, min-height `80vh` mobile / `100vh` desktop. Source vidéo `Videos/mapa_showcase_new.mp4` inchangée. |
+| A5 — Photo Julien Brebion | ✅ | Déjà branchée Supabase (`sbUrl("photos","IMG_2461.jpg")`) sur `/qui-sommes-nous`. Encart compact (photo ronde + nom + titre) ajouté dans la sidebar NDA des pages détail `/off-market/[id]`. |
+| A6 — % commissions mandats | ✅ | `lib/mandates.ts` déjà correct (Exclusif 3 % / Semi 4 % / Simple 5 % / Autonome 1 % + 17 % TVA). Affichage via `config.rate` validé sur `/services/vendre` et `/mandats/[type]`. |
+| A7 — Refonte hero Off-Market | ✅ | `app/[locale]/off-market/page.tsx` : H1 « Off-Market exclusif » (Big Shoulders 700, ≈80px desktop / 48px mobile), eyebrow copper « Off-Market — Accès confidentiel », sous-titre serif italique « Sous mandat. Sous NDA. Hors portails. », overlay 50 % noir, bouton « ← Retour » en haut à droite. Clés i18n ajoutées FR/EN/DE. |
+| A8 — Virgule « Trois étapes » | ✅ | Déjà conforme dans `messages/{fr,en,de}.json` (clé `offmarket.access_title`). Variante home « Trois étapes, un cadre. » conservée (slogan rhétorique distinct, non visé par le brief). |
+
+Build production OK (`npm run build`) — 1 warning Turbopack non-bloquant sur le font override de Big Shoulders.

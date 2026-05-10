@@ -295,6 +295,10 @@
   },
   "offmarket": {
     "eyebrow": "Off-Market",
+    "hero_eyebrow": "Off-Market — Confidential access",
+    "hero_title": "Exclusive Off-Market",
+    "hero_subtitle": "Under mandate. Under NDA. Off the portals.",
+    "back": "Back",
     "title": "The properties that aren't seen.",
     "description": "A significant share of prestige transactions are concluded outside the open market. Under mandate and NDA, MAPA Property gives access to a confidential selection, never published online.",
     "access_eyebrow": "Access conditions",

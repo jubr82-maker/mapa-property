@@ -8,9 +8,9 @@ interface LogoProps {
 }
 
 const sizeMap = {
-  sm: { w: 140, h: 32 },
-  md: { w: 210, h: 48 },
-  lg: { w: 280, h: 64 },
+  sm: { w: 96, h: 48 },
+  md: { w: 140, h: 70 },
+  lg: { w: 160, h: 80 },
 };
 
 export function Logo({
@@ -22,11 +22,12 @@ export function Logo({
 
   const img = (
     <Image
-      src="/logo-mapa-property.png"
+      src="/logo-mapa-property.svg"
       alt="MAPA Property"
       width={w}
       height={h}
       priority
+      unoptimized
       className={`select-none ${className}`}
     />
   );

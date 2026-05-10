@@ -295,6 +295,10 @@
   },
   "offmarket": {
     "eyebrow": "Off-Market",
+    "hero_eyebrow": "Off-Market — Vertraulicher Zugang",
+    "hero_title": "Exklusives Off-Market",
+    "hero_subtitle": "Mit Mandat. Unter NDA. Abseits der Portale.",
+    "back": "Zurück",
     "title": "Die Objekte, die nicht sichtbar sind.",
     "description": "Ein erheblicher Teil hochwertiger Transaktionen wird außerhalb des offenen Marktes abgeschlossen. Unter Mandat und NDA gewährt MAPA Property Zugang zu einer vertraulichen Auswahl — niemals online veröffentlicht.",
     "access_eyebrow": "Zugangsbedingungen",

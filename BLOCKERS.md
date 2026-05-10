@@ -52,3 +52,16 @@
 4. Si Vercel demande la vérification ACM, suivre l'output de la commande.
 
 **En attendant**, l'URL stable de production reste `https://mapa-property-liard.vercel.app/fr` (alias Vercel par défaut).
+
+---
+
+## 2026-05-11 — Blockers issus de la PARTIE A
+
+### A1 — favicon.ico régénéré depuis SVG : non livré
+Aucun outil de conversion image disponible localement (`magick`, `convert`, `rsvg-convert`, `ffmpeg`, `sharp` CLI introuvables). Le `public/favicon.ico` actuel reste basé sur l'ancienne version. Workaround : le SVG est déclaré en `icon` principal dans `<head>` via `metadata.icons` du `LocaleLayout` → les navigateurs modernes l'utilisent en priorité. À régénérer ultérieurement (installer ImageMagick ou utiliser Sharp script Node).
+
+### A5 — Section « À propos · Julien Brebion » sur la home : non livré
+La home (`app/[locale]/page.tsx`) ne contient pas de section dédiée Julien (par design : la séquence actuelle est Hero → SearchBar → CoupsDeCoeur → … → ContactCTA). Ajouter une section serait introduire du contenu textuel — PARTIE D du brief indique « tant que Julien n'a pas envoyé les contenus, NE PAS modifier les textes existants ». À traiter quand Julien fournira la copie.
+
+### A7 — Bouton « Retour » sur hero Off-Market : pointe vers `/`
+Le brief demande un bouton « ← RETOUR » sans préciser la destination. J'ai pointé vers la home (`/`). Si Julien veut pointer ailleurs (page précédente via history.back, ou /services), à ajuster (simple changement de `href` ou conversion en composant client `BackButton`).
