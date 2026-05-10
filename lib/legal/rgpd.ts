@@ -50,10 +50,9 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "4. Durées de conservation",
         paragraphs: [
-          "Demandes de contact non transformées : 24 mois.",
-          "Données AML/KYC : conservées 5 ans après la fin de la relation, conformément à la loi.",
-          "Logs techniques : 13 mois.",
-          "Cookies : durée maximale de 13 mois.",
+          "Données de prospection / formulaires (demandes de contact non transformées) : 3 ans à compter du dernier contact.",
+          "Données contractuelles (mandats, dossiers KYC AED, comptabilité) : 7 ans après la fin de la relation, conformément à la réglementation LBC/FT et fiscale luxembourgeoise.",
+          "Cookies et logs techniques : 13 mois maximum.",
         ],
       },
       {
@@ -91,8 +90,8 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "8. Comment exercer vos droits",
         paragraphs: [
-          "Toute demande s'exerce par email à j.brebion@mapagroup.org ou par courrier à l'adresse du siège, accompagnée d'une copie d'une pièce d'identité justifiant l'identité du demandeur.",
-          "MAPA s'engage à répondre dans un délai d'un mois, prorogeable de deux mois en cas de complexité.",
+          "Toute demande s'exerce par email à admin@mapagroup.org (référent RGPD : Julien Brebion) ou par courrier à l'adresse du siège, accompagnée d'une copie d'une pièce d'identité justifiant l'identité du demandeur.",
+          "MAPA s'engage à répondre dans un délai de 30 jours, prorogeable de deux mois en cas de complexité, conformément aux articles 6, 13, 15, 16, 17 et 21 du RGPD.",
         ],
       },
       {
@@ -153,7 +152,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "4. Retention",
         paragraphs: [
-          "Untransformed leads: 24 months. AML/KYC: 5 years post-relationship. Logs: 13 months. Cookies: max 13 months.",
+          "Prospection data / forms (untransformed leads): 3 years from last contact. Contractual data (mandates, KYC AED files, accounting): 7 years after end of relationship, per Luxembourg AML/CFT and tax regulations. Cookies and technical logs: 13 months maximum.",
         ],
       },
       {
@@ -177,7 +176,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "8. Exercise of rights",
         paragraphs: [
-          "Email j.brebion@mapagroup.org with proof of identity. Response within one month (extendable by two months for complex requests).",
+          "Email admin@mapagroup.org (GDPR contact: Julien Brebion) with proof of identity. Response within 30 days (extendable by two months for complex requests), per articles 6, 13, 15, 16, 17 and 21 GDPR.",
         ],
       },
       {
@@ -238,7 +237,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "4. Aufbewahrungsfristen",
         paragraphs: [
-          "Nicht umgewandelte Leads: 24 Monate. AML/KYC: 5 Jahre nach Beziehungsende. Logs: 13 Monate. Cookies: max. 13 Monate.",
+          "Prospektionsdaten / Formulare (nicht umgewandelte Leads): 3 Jahre ab letztem Kontakt. Vertragliche Daten (Mandate, KYC-AED-Akten, Buchhaltung): 7 Jahre nach Ende der Beziehung gemäß luxemburgischer AML/CFT- und Steuerregulierung. Cookies und technische Logs: max. 13 Monate.",
         ],
       },
       {
@@ -262,7 +261,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "8. Rechtsausübung",
         paragraphs: [
-          "E-Mail an j.brebion@mapagroup.org mit Identitätsnachweis. Antwort innerhalb eines Monats.",
+          "E-Mail an admin@mapagroup.org (DSGVO-Referent: Julien Brebion) mit Identitätsnachweis. Antwort innerhalb von 30 Tagen (verlängerbar um zwei Monate bei komplexen Anfragen), gemäß Artikel 6, 13, 15, 16, 17 und 21 DSGVO.",
         ],
       },
       {

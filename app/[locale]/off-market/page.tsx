@@ -16,18 +16,44 @@ export default async function OffMarketListPage({
   const t = await getTranslations({ locale, namespace: "offmarket" });
 
   return (
-    <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
+    <>
+      <section className="relative isolate overflow-hidden">
+        <div className="relative h-[60vh] min-h-[420px] w-full">
+          <Image
+            src="/offmarket_hero.png"
+            alt="Off-Market"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-b from-[#0F0E0B]/70 via-[#0F0E0B]/40 to-[#0F0E0B]/85"
+          />
+          <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-start justify-center gap-4 px-6 pt-24 lg:px-10">
+            <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-gold-bright/90">
+              {t("eyebrow")} — Accès confidentiel
+            </p>
+            <h1 className="font-display text-5xl font-black leading-[0.95] tracking-tight text-white sm:text-6xl lg:text-7xl">
+              OFF MARKET
+            </h1>
+            <p className="max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+              {t("description")}
+            </p>
+          </div>
+        </div>
+      </section>
+
+    <div className="px-6 pt-16 pb-20 lg:px-10 lg:pt-20 lg:pb-28">
       <div className="mx-auto max-w-[1400px]">
         <header className="mb-12 max-w-3xl">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
-            {t("eyebrow")}
+            {t("access_eyebrow")}
           </p>
-          <h1 className="mt-2 font-display text-5xl font-black leading-tight tracking-tight text-ink sm:text-6xl">
+          <h2 className="mt-2 font-display text-3xl font-black leading-tight tracking-tight text-ink sm:text-4xl">
             {t("title")}
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-mid">
-            {t("description")}
-          </p>
+          </h2>
         </header>
 
         {/* Conditions d'accès */}
@@ -72,6 +98,7 @@ export default async function OffMarketListPage({
         )}
       </div>
     </div>
+    </>
   );
 }
 

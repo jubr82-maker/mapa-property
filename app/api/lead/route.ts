@@ -1,27 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { rateLimit } from "@/lib/rate-limit";
+import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import type { LeadInsert } from "@/lib/types";
-
-const verifyTurnstile = async (token: string | undefined): Promise<boolean> => {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true; // skip when not configured (MVP)
-  if (!token) return false;
-  try {
-    const res = await fetch(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ secret, response: token }),
-      },
-    );
-    const json = (await res.json()) as { success?: boolean };
-    return Boolean(json.success);
-  } catch {
-    return false;
-  }
-};
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -50,7 +31,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_type" }, { status: 400 });
   }
 
-  const turnstileOk = await verifyTurnstile(body.turnstile_token);
+  const turnstileOk = await verifyTurnstile(body.turnstile_token, clientIp(req));
   if (!turnstileOk) {
     return NextResponse.json({ error: "turnstile_failed" }, { status: 403 });
   }

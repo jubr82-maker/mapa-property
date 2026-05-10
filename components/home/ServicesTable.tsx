@@ -1,12 +1,12 @@
 import { useTranslations } from "next-intl";
 
 const services = [
-  "valuation",
-  "search",
-  "negotiation",
   "transaction",
-  "rental",
+  "search",
   "international",
+  "negotiation",
+  "rental",
+  "valuation",
 ] as const;
 
 export function ServicesTable() {
