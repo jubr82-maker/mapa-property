@@ -90,6 +90,8 @@ WHERE is_published = TRUE AND status = 'published';
 
 -- ----------------------------------------------------------------------------
 -- 4. Table offmarket_requests — workflow demandes
+--    Robuste : si la table préexiste avec un schéma partiel, les ALTER
+--    ADD COLUMN IF NOT EXISTS comblent les manquants.
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.offmarket_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -113,6 +115,37 @@ CREATE TABLE IF NOT EXISTS public.offmarket_requests (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public.offmarket_requests
+  ADD COLUMN IF NOT EXISTS property_id UUID,
+  ADD COLUMN IF NOT EXISTS lead_id UUID,
+  ADD COLUMN IF NOT EXISTS prenom TEXT,
+  ADD COLUMN IF NOT EXISTS nom TEXT,
+  ADD COLUMN IF NOT EXISTS email TEXT,
+  ADD COLUMN IF NOT EXISTS telephone TEXT,
+  ADD COLUMN IF NOT EXISTS pays_recherche TEXT,
+  ADD COLUMN IF NOT EXISTS ville_quartier TEXT,
+  ADD COLUMN IF NOT EXISTS budget_max_eur NUMERIC(15,2),
+  ADD COLUMN IF NOT EXISTS surface_souhaitee_m2 INT,
+  ADD COLUMN IF NOT EXISTS criteres_precis TEXT,
+  ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending',
+  ADD COLUMN IF NOT EXISTS nda_url TEXT,
+  ADD COLUMN IF NOT EXISTS notes_admin TEXT,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+-- Foreign key conditionnelle (uniquement si pas déjà posée)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'offmarket_requests_property_id_fkey'
+  ) THEN
+    ALTER TABLE public.offmarket_requests
+      ADD CONSTRAINT offmarket_requests_property_id_fkey
+      FOREIGN KEY (property_id) REFERENCES public.properties_offmarket(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_offmarket_requests_property_id
   ON public.offmarket_requests (property_id);
@@ -210,16 +243,57 @@ CREATE POLICY "offmarket_photos_admin_write"
 
 -- ----------------------------------------------------------------------------
 -- 9. Table offmarket_audit_log (audit minimal)
+--    Robuste : ALTER ADD COLUMN IF NOT EXISTS comble les schémas partiels
+--    d'une éventuelle table préexistante (sessions précédentes).
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.offmarket_audit_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  property_id UUID REFERENCES public.properties_offmarket(id) ON DELETE SET NULL,
-  request_id UUID REFERENCES public.offmarket_requests(id) ON DELETE SET NULL,
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  property_id UUID,
+  request_id UUID,
+  user_id UUID,
   action TEXT NOT NULL,
   details JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public.offmarket_audit_log
+  ADD COLUMN IF NOT EXISTS property_id UUID,
+  ADD COLUMN IF NOT EXISTS request_id UUID,
+  ADD COLUMN IF NOT EXISTS user_id UUID,
+  ADD COLUMN IF NOT EXISTS action TEXT,
+  ADD COLUMN IF NOT EXISTS details JSONB,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+-- Foreign keys conditionnelles (uniquement si pas déjà posées)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'offmarket_audit_log_property_id_fkey'
+  ) THEN
+    ALTER TABLE public.offmarket_audit_log
+      ADD CONSTRAINT offmarket_audit_log_property_id_fkey
+      FOREIGN KEY (property_id) REFERENCES public.properties_offmarket(id) ON DELETE SET NULL;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'offmarket_audit_log_request_id_fkey'
+  ) THEN
+    ALTER TABLE public.offmarket_audit_log
+      ADD CONSTRAINT offmarket_audit_log_request_id_fkey
+      FOREIGN KEY (request_id) REFERENCES public.offmarket_requests(id) ON DELETE SET NULL;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'offmarket_audit_log_user_id_fkey'
+  ) THEN
+    ALTER TABLE public.offmarket_audit_log
+      ADD CONSTRAINT offmarket_audit_log_user_id_fkey
+      FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_offmarket_audit_property_id
   ON public.offmarket_audit_log (property_id);
