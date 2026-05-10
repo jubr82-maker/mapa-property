@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" role="img" aria-label="MAPA Property">
+  
+  <g font-family="Georgia, 'Times New Roman', serif" text-anchor="middle">
+    <text x="160" y="42" font-size="40" font-weight="700" letter-spacing="6" fill="#F5F2EA">MAPA</text>
+    <line x1="80" y1="50" x2="240" y2="50" stroke="#B8865A" stroke-width="1.5"/>
+    <text x="160" y="68" font-family="'Helvetica Neue', Arial, sans-serif" font-size="9" letter-spacing="6" fill="#F5F2EA">PROPERTY</text>
+  </g>
+</svg>
