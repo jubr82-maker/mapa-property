@@ -39,6 +39,16 @@
 
 **Stratégie** : laisser sur la roadmap pour pair-programming dédié. La structure SQL (tables `properties`, `reviews`, `blog_posts`, `lead_kanban_status`) est livrée dans `supabase/migrations/20260510_night_run.sql` pour que Julien puisse appliquer demain — le BO admin sera construit en interactive ensuite.
 
-## Phase 8 — Domaine beta.mapaproperty.lu
+## Phase 8 — Domaine beta.mapaproperty.lu : NON connecté
 
-**À vérifier** : statut DNS et propagation côté Apimo/Ionos. La commande `vercel domains add` peut échouer si le CNAME n'est pas pointé sur `cname.vercel-dns.com`. Si problème, Julien gère côté dashboard Apimo.
+**Diagnostic réel (10/05 15h)** :
+- `dig beta.mapaproperty.lu CNAME` → `mapaproperty-beta.netlify.app.` → **le DNS pointe vers Netlify, pas Vercel.**
+- `vercel domains add beta.mapaproperty.lu --force` → la CLI ne parvient pas à attacher le domaine.
+
+**Actions Julien requises** :
+1. Côté Apimo (ou Ionos selon registrar) : changer le CNAME de `beta.mapaproperty.lu` → cible **`cname.vercel-dns.com`** (et plus `mapaproperty-beta.netlify.app`).
+2. Attendre la propagation DNS (15 min à 24h).
+3. Ensuite : `cd /Users/MAPA_Claude_Code/Documents/Projects/mapa-property-nextjs && vercel domains add beta.mapaproperty.lu` (sans flags). Vercel détecte le CNAME et attache.
+4. Si Vercel demande la vérification ACM, suivre l'output de la commande.
+
+**En attendant**, l'URL stable de production reste `https://mapa-property-liard.vercel.app/fr` (alias Vercel par défaut).
