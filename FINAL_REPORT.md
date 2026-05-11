@@ -277,3 +277,45 @@ sur le font override Big Shoulders, identique à la partie A).
 4. `migration_documents.sql`
 
 Toutes copiées dans `/Users/Shared/` avec `chmod 644`. Toutes idempotentes.
+
+---
+
+## 📅 2026-05-11 (nuit) — Brief V3 : 12 chantiers
+
+### Commits de la session V3 (autonome complet)
+
+| Commit | Sujet |
+|--------|-------|
+| `db0b202` | fix(admin): C1 + C2 — Server Components + /admin/properties vide |
+| `d615a94` | feat(public): C3 — identité publique unifiée (Julien / Frédéric) |
+| `353f920` | feat(public): C4 + C6 — burger refondu + Journal + ARCOVA déplacé |
+| `6b9414e` | feat(home): C5 — coups de cœur unifiés Apimo + Off-Market |
+| `b081591` | feat: C8 + C9 + C10 + C11 (partiel) |
+| `661f5a2` | feat(public): C7 — fiches biens enrichies |
+
+### Périmètre livré V3
+
+**C1 Bug Server Components** ✅ — Server Actions retournent `ActionResult { ok, error }`, retry défensif si colonne manquante, message d'erreur clair côté UI.
+
+**C2 /admin/properties vide** ✅ — Migration RLS `admin_rls_properties.sql` + recherche slug/titre/ville + filtre transaction + lien "Voir ↗" fiche publique.
+
+**C3 Identité publique** ✅ — Composant `ContactButtons` (2 boutons révélant 2 contacts par catégorie : Julien principal, Frédéric/admin secondaires). Refactor : footer, ContactCTA, sidebar fiche bien. "Julien Brebion" → "Julien" partout sauf bio /qui-sommes-nous + mentions légales avec bloc Gérant Frédéric Mannis (FR/EN/DE).
+
+**C4 Logo + Vidéo Hero + Burger** ✅ — Logo SVG officiel déjà en place. Vidéo Hero déjà branchée Supabase. Burger refondu : fond navy `#0d1419 / 0.97` + backdrop blur, texte centré gros Big Shoulders, sous-menus dépliables, ContactButtons + lang switcher en bas.
+
+**C5 Coups de cœur unifiés** ✅ — `<CoupsDeCoeur />` (doublon) supprimé. `fetchHomeFeatured(6)` agrège properties (is_featured) + properties_offmarket (is_coup_de_coeur). `FeaturedCarousel` refondu en client component Embla + autoplay 4s + dots + boutons prev/next. Badge "Apimo" / "Off-Market" sur cards. Cards clicables vers /biens/[slug] ou /off-market/[id].
+
+**C6 Header ARCOVA→Off-Market + Blog→Journal** ✅ — ARCOVA retiré du header desktop. Lien "Journal" ajouté. nav.blog = "Journal" dans les 3 locales + clé nav.journal. Route `/fr/journal` créée (alias éditorial premium de /blog). Route `/fr/off-market/arcova` créée. CTA "Accéder à ARCOVA →" sur `/off-market`.
+
+**C7 Fiches biens enrichies** ✅ partiel — Biens similaires logique stricte (même type + prix ±15% + même pays, priorise même ville). Sidebar : Julien + ContactButtons, nouveau bloc CTA "Mandat de recherche" avec query params pré-remplissage, mini-simulateur financement intégré.
+
+**C8 Frais notaire par pays** ✅ — `lib/legal-fees.ts` : LU/FR/BE/DE/PT/AE avec droits enregistrement, notaire %, frais hypothécaires, aides chiffrées avec conditions + sources officielles. Helpers `computeAcquisitionCosts` + `computeMaxAidsDeduction`.
+
+**C9 Simulateur financement enrichi** ✅ — `lib/finance-sim.ts` (computeMortgage avec schéma amortissement échantillonné, fmtEur, taux par défaut par pays). Page `/fr/services/simulateurs/financement` complète : form 6 inputs + mensualité grande police + taux d'endettement (warn si >35%) + aides applicables avec liens sources + schéma amortissement + disclaimer. Composant `MiniFinanceSimulator` pour fiches biens (pré-rempli prix+pays, lien "Simuler en détail →").
+
+**C10 Durée mandats** ✅ — `lib/mandates.ts` : "2 mois reconductibles" remplacé sur les 5 mandats par "À partir de 2 mois (recommandation MAPA), reconductible tacitement, résiliable avec préavis de 15 jours".
+
+**C11 Analytics** ⚠️ partiel — `@vercel/analytics` installé, `<Analytics />` actif. Cloudflare déjà câblé (token à créer côté CF). Plausible + dashboard /admin/analytics + annonce RGPD footer reportés (BLOCKERS).
+
+**C12 3 variantes blockbuster** ⏳ reporté (design system d'une journée minimum) — BLOCKERS.
+
