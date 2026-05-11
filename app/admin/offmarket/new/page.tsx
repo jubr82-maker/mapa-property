@@ -1,5 +1,7 @@
 import { OffmarketForm } from "@/components/admin/OffmarketForm";
 
+export const dynamic = "force-dynamic";
+
 export default function NewOffmarketPage() {
   return (
     <div className="space-y-8">

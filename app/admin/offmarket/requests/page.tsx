@@ -7,6 +7,8 @@ import {
   type RequestStatus,
 } from "@/lib/admin/offmarket";
 
+export const dynamic = "force-dynamic";
+
 export default async function GlobalRequestsPage({
   searchParams,
 }: {

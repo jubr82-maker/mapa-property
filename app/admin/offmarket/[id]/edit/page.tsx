@@ -3,6 +3,8 @@ import Link from "next/link";
 import { fetchOffmarketAdminById } from "@/lib/admin/offmarket-server";
 import { OffmarketForm } from "@/components/admin/OffmarketForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditOffmarketPage({
   params,
   searchParams,

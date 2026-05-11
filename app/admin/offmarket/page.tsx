@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+
+export const dynamic = "force-dynamic";
 import {
   OFFMARKET_STATUS_LABELS,
   OFFMARKET_STATUS_TONES,

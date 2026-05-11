@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 
+export const dynamic = "force-dynamic";
+
 async function loadStats() {
   const supabase = await createSupabaseServerClient();
 

@@ -40,17 +40,25 @@ export default async function middleware(request: NextRequest) {
 
     const isPublicAdminPath = ADMIN_PUBLIC_PATHS.has(pathname);
 
+    // Anti-cache : aucune réponse admin (200, 307, redirect) ne doit
+    // être cachée par le CDN Vercel — sinon une 307 émise pour un user
+    // non-auth peut être resservie à un user auth (et inversement).
+    const noStore = (res: NextResponse) => {
+      res.headers.set("cache-control", "private, no-store, max-age=0, must-revalidate");
+      return res;
+    };
+
     if (!user && !isPublicAdminPath) {
       const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("from", pathname);
-      return NextResponse.redirect(loginUrl);
+      return noStore(NextResponse.redirect(loginUrl));
     }
 
     if (user && pathname === "/admin/login") {
-      return NextResponse.redirect(new URL("/admin", request.url));
+      return noStore(NextResponse.redirect(new URL("/admin", request.url)));
     }
 
-    return response;
+    return noStore(response);
   }
 
   return intlMiddleware(request);
