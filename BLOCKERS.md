@@ -122,3 +122,27 @@ Non câblé — API Apimo write non documentée publiquement. À traiter quand J
 ### Page /qui-sommes-nous : Julien sur la home
 Le brief V3 mentionne "Julien (sans nom)" sur la home, mais ne demande pas explicitement de section dédiée. Pas de changement nécessaire sur la home pour l'instant.
 
+---
+
+## Bug non bloquant - React Hydration Error #418
+
+**Date :** 12 mai 2026
+**Severite :** Cosmetique (console only, pas d'impact visuel)
+**Symptome :** Error: Minified React error #418 dans la console DevTools sur la home /fr
+
+**Cause probable :** mismatch hydration entre HTML serveur et HTML client.
+Candidats suspects :
+- Widget Cloudflare Turnstile (injecte un iframe avant l'hydration React)
+- Intl.NumberFormat sur les prix (locale serveur vs client)
+- Date.now() ou Math.random() dans un composant SSR
+- Composant conditionnel base sur window/document sans useEffect
+
+**Pour debugger :**
+1. cd ~/Documents/Projects/mapa-property-nextjs
+2. npm run dev
+3. Ouvrir http://localhost:3000/fr en Safari
+4. DevTools Console : l'erreur sera NON-MINIFIEE avec stack trace complete
+5. Identifier le composant fautif et corriger (souvent : wrap dans suppressHydrationWarning ou useEffect)
+
+**Statut :** A traiter en V4 (apres burger + finitions visuelles)
+
