@@ -48,6 +48,9 @@ export function OffmarketForm({
           await updateOffmarket(row.id, formData);
         }
       } catch (e) {
+        // Ne pas masquer les exceptions internes Next (redirect / notFound) —
+        // elles doivent remonter pour que Next gère la navigation.
+        if (isNextInternalError(e)) throw e;
         setError(e instanceof Error ? e.message : "Erreur inconnue");
       }
     });
@@ -364,6 +367,13 @@ export function OffmarketForm({
 const inputCls =
   "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#B8865A] focus:outline-none";
 
+function isNextInternalError(e: unknown): boolean {
+  if (!e || typeof e !== "object") return false;
+  const digest = (e as { digest?: unknown }).digest;
+  if (typeof digest !== "string") return false;
+  return digest.startsWith("NEXT_REDIRECT") || digest === "NEXT_NOT_FOUND";
+}
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
@@ -402,7 +412,12 @@ function DeleteButton({ id }: { id: string }) {
       onClick={() => {
         if (!confirm("Supprimer ce bien off-market ? Cette action est irréversible.")) return;
         startTransition(async () => {
-          await deleteOffmarket(id);
+          try {
+            await deleteOffmarket(id);
+          } catch (e) {
+            if (isNextInternalError(e)) throw e;
+            console.error(e);
+          }
         });
       }}
       className="rounded-full border border-red-200 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50"
