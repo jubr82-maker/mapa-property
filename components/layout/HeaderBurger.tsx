@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { usePathname, useRouter, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { ContactButtons } from "@/components/ContactButtons";
 
 const localeLabels: Record<(typeof routing.locales)[number], string> = {
   fr: "FR",
@@ -129,36 +130,37 @@ export function HeaderBurger() {
         aria-modal="true"
         aria-label={t("menu")}
         aria-hidden={!open}
-        className={`fixed inset-0 z-[9999] flex flex-col overflow-y-auto bg-bg transition-opacity duration-200 ${
+        className={`fixed inset-0 z-[9999] flex flex-col overflow-y-auto backdrop-blur-md transition-opacity duration-200 ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
+        style={{ backgroundColor: "rgba(13, 20, 25, 0.97)" }}
       >
-        <div className="flex items-center justify-between border-b border-line px-6 py-5 lg:px-10">
-          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-5 lg:px-10">
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/60">
             MAPA Property
           </span>
           <button
             type="button"
             aria-label={t("close_menu")}
             onClick={close}
-            className="inline-flex size-10 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold"
+            className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:border-[#B8865A] hover:text-[#B8865A]"
           >
-            <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
         </div>
 
         <nav className="flex-1 px-6 py-8 lg:px-10">
-          <ul className="space-y-1">
+          <ul className="mx-auto max-w-2xl space-y-1">
             {groups.map((group) => {
               if (group.href) {
                 return (
-                  <li key={group.id} className="border-b border-line/60">
+                  <li key={group.id} className="border-b border-white/10">
                     <Link
                       href={group.href}
                       onClick={close}
-                      className="block py-4 font-display text-3xl font-bold uppercase tracking-wide text-ink transition-colors hover:text-gold"
+                      className="block py-4 text-center font-display text-3xl font-bold uppercase tracking-wide text-white transition-colors hover:text-[#B8865A] sm:text-4xl"
                     >
                       {t(group.label)}
                     </Link>
@@ -167,18 +169,18 @@ export function HeaderBurger() {
               }
               const isExpanded = expanded === group.id;
               return (
-                <li key={group.id} className="border-b border-line/60">
+                <li key={group.id} className="border-b border-white/10">
                   <button
                     type="button"
                     onClick={() => setExpanded(isExpanded ? null : group.id)}
                     aria-expanded={isExpanded}
-                    className="flex w-full items-center justify-between py-4 font-display text-3xl font-bold uppercase tracking-wide text-ink transition-colors hover:text-gold"
+                    className="flex w-full items-center justify-center gap-3 py-4 font-display text-3xl font-bold uppercase tracking-wide text-white transition-colors hover:text-[#B8865A] sm:text-4xl"
                   >
                     {t(group.label)}
                     <svg
                       aria-hidden
                       viewBox="0 0 24 24"
-                      className={`size-5 text-gold transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                      className={`size-5 text-[#B8865A] transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -188,13 +190,13 @@ export function HeaderBurger() {
                     </svg>
                   </button>
                   {isExpanded && group.items && (
-                    <ul className="pb-4 pl-1">
+                    <ul className="pb-4 text-center">
                       {group.items.map((item) => (
                         <li key={item.href}>
                           <Link
                             href={item.href}
                             onClick={close}
-                            className="block py-2 font-sans text-base text-ink-mid transition-colors hover:text-gold"
+                            className="block py-2 font-sans text-base text-white/80 transition-colors hover:text-[#B8865A]"
                           >
                             {t(item.key)}
                           </Link>
@@ -205,44 +207,31 @@ export function HeaderBurger() {
                 </li>
               );
             })}
-
-            <li className="border-b border-line/60">
-              <Link
-                href="/arcova"
-                onClick={close}
-                className="flex items-center gap-2 py-4 font-display text-3xl font-bold uppercase tracking-wide text-ink transition-colors hover:text-gold"
-              >
-                ARCOVA
-                <LockIcon />
-              </Link>
-            </li>
           </ul>
 
-          <div className="mt-10">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-              Langues
-            </p>
-            <ul className="mt-4 flex flex-wrap gap-2">
+          <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-6">
+            <ContactButtons variant="dark" />
+
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {routing.locales.map((l) => {
                 const active = l === locale;
                 return (
-                  <li key={l}>
-                    <button
-                      type="button"
-                      aria-current={active ? "true" : undefined}
-                      onClick={() => switchLocale(l)}
-                      className={`inline-flex h-10 min-w-[3rem] items-center justify-center rounded-full border px-4 font-mono text-xs uppercase tracking-[0.2em] transition-colors ${
-                        active
-                          ? "border-gold bg-gold/10 text-gold"
-                          : "border-line text-ink-mid hover:border-gold hover:text-gold"
-                      }`}
-                    >
-                      {localeLabels[l]}
-                    </button>
-                  </li>
+                  <button
+                    key={l}
+                    type="button"
+                    aria-current={active ? "true" : undefined}
+                    onClick={() => switchLocale(l)}
+                    className={`inline-flex h-9 min-w-[3rem] items-center justify-center rounded-full border px-4 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                      active
+                        ? "border-[#B8865A] bg-[#B8865A]/10 text-[#B8865A]"
+                        : "border-white/30 text-white/70 hover:border-[#B8865A] hover:text-[#B8865A]"
+                    }`}
+                  >
+                    {localeLabels[l]}
+                  </button>
                 );
               })}
-            </ul>
+            </div>
           </div>
         </nav>
       </div>

@@ -84,7 +84,7 @@ export function Header() {
           />
         </div>
 
-        {/* Right zone : Services ▾ / Off-Market / ARCOVA 🔒 (desktop) + burger (always) */}
+        {/* Right zone : Services ▾ / Off-Market / Journal (desktop) + burger (always) */}
         <div className="flex items-center justify-end gap-1">
           <div className="hidden items-center gap-1 lg:flex">
             {rightDropdowns.map((d) => (
@@ -97,11 +97,10 @@ export function Header() {
               {t("off_market")}
             </Link>
             <Link
-              href="/arcova"
-              className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+              href="/journal"
+              className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
             >
-              ARCOVA
-              <LockIcon />
+              {t("journal")}
             </Link>
           </div>
           <div className="ml-2">
