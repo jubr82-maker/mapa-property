@@ -15,7 +15,7 @@ export default async function AdminPropertiesPage({
   let query = supabase
     .from("properties")
     .select(
-      "id,slug,transaction,country,city,title_fr,price,surface,bedrooms,energy,is_published,is_featured,featured_order,cover_image_url,property_images(url,sort)",
+      "id,slug,transaction,country,city,title_fr,price,surface,bedrooms,energy,is_published,is_featured,featured_order,property_images(url,sort)",
     )
     .order("created_at", { ascending: false })
     .limit(500);
@@ -37,7 +37,8 @@ export default async function AdminPropertiesPage({
     type Img = { url: string; sort: number | null };
     const imgs = (p.property_images as Img[] | null) ?? [];
     const sorted = [...imgs].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
-    const cover = sorted[0]?.url ?? p.cover_image_url ?? null;
+    // properties (Apimo) : cover uniquement via property_images.sort = 0.
+    const cover = sorted[0]?.url ?? null;
     return {
       id: p.id,
       slug: p.slug,

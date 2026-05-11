@@ -28,7 +28,10 @@ export interface Property {
   featured_order: number | null;
   is_published: boolean | null;
   video_url?: string | null;
-  cover_image_url?: string | null;
+  // Note : la table public.properties n'a PAS de colonne cover_image_url
+  // (les photos sont dans la table séparée property_images via property_id
+  // + sort). Voir lib/properties.ts pour les helpers getCoverImage /
+  // getAllImages.
 }
 
 export interface PropertyImage {

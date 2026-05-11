@@ -22,7 +22,9 @@ const formatPrice = (price: number | null, transaction: string) => {
 export function PropertyCard({ property, locale, priority = false }: PropertyCardProps) {
   const title = pickLang(property, "title", locale) || "—";
   const price = formatPrice(property.price, property.transaction);
-  const cover = property.cover_url ?? property.cover_image_url;
+  // La table properties n'a pas de cover_image_url ; on s'appuie uniquement
+  // sur cover_url (calculé depuis property_images via les fetchers data.ts).
+  const cover = property.cover_url;
 
   return (
     <Link

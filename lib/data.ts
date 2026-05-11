@@ -50,7 +50,7 @@ export async function fetchFeaturedPropertiesWithCover(
       .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
     return {
       ...row,
-      cover_url: sorted[0]?.url ?? row.cover_image_url ?? null,
+      cover_url: sorted[0]?.url ?? null,
     };
   });
 }
@@ -80,7 +80,7 @@ export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
   const [apimoRes, offmarketRes] = await Promise.all([
     sb
       .from("properties")
-      .select("id,slug,title_fr,city,country,price,surface,bedrooms,cover_image_url,created_at,property_images(url,sort)")
+      .select("id,slug,title_fr,city,country,price,surface,bedrooms,created_at,property_images(url,sort)")
       .eq("is_published", true)
       .eq("is_featured", true)
       .order("created_at", { ascending: false })
@@ -104,7 +104,6 @@ export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
     price: number | null;
     surface: number | null;
     bedrooms: number | null;
-    cover_image_url: string | null;
     created_at: string | null;
     property_images: { url: string; sort: number | null }[] | null;
   };
@@ -138,7 +137,7 @@ export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
       price_label: row.price
         ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(row.price) + " €"
         : null,
-      cover_url: sorted[0]?.url ?? row.cover_image_url ?? null,
+      cover_url: sorted[0]?.url ?? null,
       surface: row.surface,
       bedrooms: row.bedrooms,
       created_at: row.created_at,
@@ -195,7 +194,7 @@ export async function fetchAllPropertiesWithCover(): Promise<PropertyWithCover[]
       .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
     return {
       ...row,
-      cover_url: sorted[0]?.url ?? row.cover_image_url ?? null,
+      cover_url: sorted[0]?.url ?? null,
     };
   });
 }
