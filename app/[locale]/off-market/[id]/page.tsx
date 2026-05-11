@@ -6,6 +6,7 @@ import { BackButton } from "@/components/ui/BackButton";
 import { NDAForm } from "@/components/forms/NDAForm";
 import { FavoriteHeart } from "@/components/property/FavoriteHeart";
 import { sbUrl } from "@/lib/supabase-url";
+import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 
 export default async function OffMarketDetailPage({
   params,
@@ -58,28 +59,32 @@ export default async function OffMarketDetailPage({
         </header>
 
         {/* Cover */}
-        {property.cover_image_url && (
-          <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-bg-deep">
-            <Image
-              src={property.cover_image_url}
-              alt={property.title ?? "Off-market"}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover blur-[2px]"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-ink/40 backdrop-blur-sm">
-              <div className="text-center text-bg">
-                <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-bright">
-                  {t("locked_eyebrow")}
-                </p>
-                <p className="mt-2 max-w-md font-display text-xl font-bold">
-                  {t("locked_text")}
-                </p>
+        <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-bg-deep">
+          {property.cover_image_url ? (
+            <>
+              <Image
+                src={property.cover_image_url}
+                alt={property.title ?? "Off-market"}
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover blur-[2px]"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-ink/40 backdrop-blur-sm">
+                <div className="text-center text-bg">
+                  <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-bright">
+                    {t("locked_eyebrow")}
+                  </p>
+                  <p className="mt-2 max-w-md font-display text-xl font-bold">
+                    {t("locked_text")}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </>
+          ) : (
+            <OffmarketPlaceholder />
+          )}
+        </div>
 
         {/* Layout */}
         <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_420px]">

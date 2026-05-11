@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 
 export const dynamic = "force-dynamic";
 import {
@@ -86,13 +87,13 @@ export default async function AdminOffmarketListPage({
                       {row.reference}
                     </td>
                     <td className="px-4 py-3">
-                      {cover ? (
-                        <div className="relative h-12 w-16 overflow-hidden rounded-md bg-[#3D4F63]/10">
+                      <div className="relative h-12 w-16 overflow-hidden rounded-md bg-[#3D4F63]/10">
+                        {cover ? (
                           <Image src={cover} alt="" fill sizes="64px" className="object-cover" />
-                        </div>
-                      ) : (
-                        <div className="h-12 w-16 rounded-md bg-[#3D4F63]/10" />
-                      )}
+                        ) : (
+                          <OffmarketPlaceholder showLabel={false} />
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-[#1A1F2A]">{row.title ?? "—"}</p>

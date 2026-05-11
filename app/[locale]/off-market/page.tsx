@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchOffmarketList } from "@/lib/data";
 import type { PropertyOffmarket } from "@/lib/types";
+import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 
 export default async function OffMarketListPage({
   params,
@@ -144,7 +145,9 @@ function OffMarketTeaser({
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 90vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
-        ) : null}
+        ) : (
+          <OffmarketPlaceholder />
+        )}
         <span className="absolute right-3 top-3 rounded-full bg-ink/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-gold-bright backdrop-blur">
           OFF-MARKET
         </span>
