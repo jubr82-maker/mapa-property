@@ -7,7 +7,13 @@ import {
   OFFMARKET_STATUSES,
   OFFMARKET_STATUS_LABELS,
   PROPERTY_TYPES,
+  PROPERTY_TYPE_LABELS,
+  IMMEUBLE_SUB_TYPES,
+  IMMEUBLE_SUB_TYPE_LABELS,
+  PROFESSIONAL_TYPES,
+  RESIDENTIAL_TYPES,
   type OffmarketRow,
+  type PropertyType,
   generateOffmarketReference,
 } from "@/lib/admin/offmarket";
 import {
@@ -37,6 +43,17 @@ export function OffmarketForm({
   const [tab, setTab] = useState<Tab>("identity");
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [propertyType, setPropertyType] = useState<PropertyType>(
+    (row?.property_type as PropertyType) || "maison",
+  );
+
+  const isImmeuble = propertyType === "immeuble";
+  const isTerrain = propertyType === "terrain";
+  const showProfessionalSurfaces = ["immeuble", "bureau", "commerce", "mixte"].includes(
+    propertyType,
+  );
+  const showBedrooms = RESIDENTIAL_TYPES.includes(propertyType);
+  const showBureaux = PROFESSIONAL_TYPES.includes(propertyType);
 
   const submit = (formData: FormData) => {
     setError(null);
@@ -168,167 +185,376 @@ export function OffmarketForm({
       )}
 
       {tab === "specs" && (
-        <Section title="Caractéristiques">
-          <Field label="Type">
-            <select
-              name="property_type"
-              defaultValue={row?.property_type ?? "maison"}
-              className={inputCls + " capitalize"}
-              required
-            >
-              {PROPERTY_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Surface habitable (m²)">
-            <input
-              name="surface_habitable"
-              type="number"
-              min="0"
-              defaultValue={
-                row?.surface_habitable ?? row?.surface_hab ?? ""
+        <div className="space-y-6">
+          <Section title="Type">
+            <Field label="Type principal">
+              <select
+                name="property_type"
+                value={propertyType}
+                onChange={(e) => setPropertyType(e.target.value as PropertyType)}
+                className={inputCls}
+                required
+              >
+                {PROPERTY_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {PROPERTY_TYPE_LABELS[t]}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            {isImmeuble && (
+              <Field label="Sous-type d'immeuble">
+                <select
+                  name="sub_type"
+                  defaultValue={row?.sub_type ?? "rapport"}
+                  className={inputCls}
+                >
+                  {IMMEUBLE_SUB_TYPES.map((s) => (
+                    <option key={s} value={s}>
+                      {IMMEUBLE_SUB_TYPE_LABELS[s]}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+            <Field label="Classe énergétique">
+              <select
+                name="classe_energetique"
+                defaultValue={row?.classe_energetique ?? row?.energy_class ?? ""}
+                className={inputCls}
+              >
+                <option value="">—</option>
+                {["A+", "A", "B", "C", "D", "E", "F", "G", "H", "I"].map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </Section>
+
+          <Section title="Surfaces">
+            {!isTerrain && (
+              <Field label="Surface habitable (m²)">
+                <input
+                  name="surface_habitable"
+                  type="number"
+                  min="0"
+                  defaultValue={row?.surface_habitable ?? row?.surface_hab ?? ""}
+                  className={inputCls}
+                />
+              </Field>
+            )}
+            {showProfessionalSurfaces && (
+              <>
+                <Field label="Surface utile (m²)">
+                  <input
+                    name="surface_utile"
+                    type="number"
+                    min="0"
+                    defaultValue={row?.surface_utile ?? ""}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Surface pondérée (m²)">
+                  <input
+                    name="surface_ponderee"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    defaultValue={row?.surface_ponderee ?? ""}
+                    className={inputCls}
+                  />
+                </Field>
+              </>
+            )}
+            <Field
+              label="Surface terrain (m²)"
+              hint={
+                row?.surface_terrain
+                  ? `= ${(row.surface_terrain / 100).toFixed(2)} ares`
+                  : "1 are = 100 m²"
               }
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Surface terrain (m²)">
-            <input
-              name="surface_terrain"
-              type="number"
-              min="0"
-              defaultValue={row?.surface_terrain ?? ""}
-              className={inputCls}
-            />
-            {row?.surface_terrain ? (
-              <p className="mt-1 text-xs text-[#3D4F63]/60">
-                = {(row.surface_terrain / 100).toFixed(2)} ares
-              </p>
-            ) : null}
-          </Field>
-          <Field label="Chambres">
-            <input
-              name="chambres"
-              type="number"
-              min="0"
-              defaultValue={row?.chambres ?? row?.bedrooms ?? ""}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Salles de bain">
-            <input
-              name="salles_de_bain"
-              type="number"
-              min="0"
-              defaultValue={row?.salles_de_bain ?? row?.bathrooms ?? ""}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Classe énergétique">
-            <select
-              name="classe_energetique"
-              defaultValue={row?.classe_energetique ?? row?.energy_class ?? ""}
-              className={inputCls}
             >
-              <option value="">—</option>
-              {["A+", "A", "B", "C", "D", "E", "F", "G", "H", "I"].map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field
-            label="Prestations"
-            hint="Séparées par des virgules ou retours à la ligne."
-          >
-            <textarea
-              name="prestations"
-              rows={3}
-              defaultValue={(row?.prestations ?? row?.highlights ?? []).join(", ")}
-              className={inputCls + " font-sans"}
-              placeholder="Piscine, Garage, Ascenseur, Cave, Terrasse…"
-            />
-          </Field>
-        </Section>
+              <input
+                name="surface_terrain"
+                type="number"
+                min="0"
+                defaultValue={row?.surface_terrain ?? ""}
+                className={inputCls}
+              />
+            </Field>
+          </Section>
+
+          {!isTerrain && (
+            <Section title="Pièces">
+              {showBedrooms && (
+                <Field label="Chambres">
+                  <input
+                    name="chambres"
+                    type="number"
+                    min="0"
+                    defaultValue={row?.chambres ?? row?.bedrooms ?? ""}
+                    className={inputCls}
+                  />
+                </Field>
+              )}
+              {showBureaux && (
+                <Field label="Bureaux">
+                  <input
+                    name="bureaux"
+                    type="number"
+                    min="0"
+                    defaultValue={row?.bureaux ?? ""}
+                    className={inputCls}
+                  />
+                </Field>
+              )}
+              <Field label="Salles de bain">
+                <input
+                  name="salles_de_bain"
+                  type="number"
+                  min="0"
+                  defaultValue={row?.salles_de_bain ?? row?.bathrooms ?? ""}
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Salles de douche">
+                <input
+                  name="douches"
+                  type="number"
+                  min="0"
+                  defaultValue={row?.douches ?? ""}
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="WC séparés">
+                <input
+                  name="wc"
+                  type="number"
+                  min="0"
+                  defaultValue={row?.wc ?? ""}
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Locaux de stockage">
+                <input
+                  name="locaux_stockage"
+                  type="number"
+                  min="0"
+                  defaultValue={row?.locaux_stockage ?? ""}
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Buanderie">
+                <Toggle name="buanderie" defaultChecked={!!row?.buanderie} />
+              </Field>
+              <Field label="Dressing">
+                <Toggle name="dressing" defaultChecked={!!row?.dressing} />
+              </Field>
+              <Field label="Cuisine">
+                <Toggle name="cuisine" defaultChecked={!!row?.cuisine} />
+              </Field>
+              <Field label="Cuisine — surface (m²)">
+                <input
+                  name="cuisine_m2"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue={row?.cuisine_m2 ?? ""}
+                  className={inputCls}
+                />
+              </Field>
+            </Section>
+          )}
+
+          <Section title="Extérieurs">
+            <Field label="Terrasse — surface (m²)">
+              <input
+                name="terrasse_m2"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={row?.terrasse_m2 ?? ""}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Balcon — surface (m²)">
+              <input
+                name="balcon_m2"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={row?.balcon_m2 ?? ""}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Jardin — surface (m²)">
+              <input
+                name="jardin_m2"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={row?.jardin_m2 ?? ""}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Piscine">
+              <Toggle name="has_piscine" defaultChecked={!!row?.has_piscine} />
+            </Field>
+          </Section>
+
+          <Section title="Stationnement">
+            <Field label="Parking extérieur">
+              <input
+                name="parking_exterieur"
+                type="number"
+                min="0"
+                defaultValue={row?.parking_exterieur ?? ""}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Parking intérieur">
+              <input
+                name="parking_interieur"
+                type="number"
+                min="0"
+                defaultValue={row?.parking_interieur ?? ""}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Box">
+              <input
+                name="box"
+                type="number"
+                min="0"
+                defaultValue={row?.box ?? ""}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Garage">
+              <input
+                name="garage"
+                type="number"
+                min="0"
+                defaultValue={row?.garage ?? ""}
+                className={inputCls}
+              />
+            </Field>
+          </Section>
+
+          <Section title="Prestations libres">
+            <div className="md:col-span-2">
+              <Field
+                label="Prestations (tags libres)"
+                hint="Séparées par des virgules ou retours à la ligne."
+              >
+                <textarea
+                  name="prestations"
+                  rows={3}
+                  defaultValue={(row?.prestations ?? row?.highlights ?? []).join(", ")}
+                  className={inputCls + " font-sans"}
+                  placeholder="Ascenseur, Cave, Cheminée, Vue dégagée…"
+                />
+              </Field>
+            </div>
+          </Section>
+        </div>
       )}
 
       {tab === "content" && (
-        <Section title="Contenu & Visuel">
-          <Field label="Titre">
-            <input
-              name="title"
-              defaultValue={row?.title ?? ""}
-              required
-              className={inputCls}
-            />
-          </Field>
-          <Field
-            label="Description courte"
-            hint="Aperçu public — 200 caractères max."
-          >
-            <textarea
-              name="short_description"
-              rows={3}
-              maxLength={200}
-              defaultValue={row?.short_description ?? row?.short_pitch ?? ""}
-              className={inputCls + " font-sans"}
-            />
-          </Field>
-          <Field
-            label="Description complète"
-            hint="Accessible après NDA signé."
-          >
-            <textarea
-              name="full_description"
-              rows={6}
-              defaultValue={row?.full_description ?? row?.description ?? ""}
-              className={inputCls + " font-sans"}
-            />
-          </Field>
-          <Field
-            label="Prix estimé (€)"
-            hint="Privé — visible uniquement après NDA."
-          >
-            <input
-              name="price_estimate"
-              type="number"
-              min="0"
-              step="1000"
-              defaultValue={row?.price_estimate ?? ""}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Label prix public">
-            <input
-              name="price_label"
-              defaultValue={row?.price_label ?? row?.price_display ?? "Prix sur demande"}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Verrouiller les photos">
-            <label className="inline-flex items-center gap-2 text-sm">
+        <div className="space-y-6">
+          <Section title="Contenu rédactionnel">
+            <Field label="Titre">
               <input
-                type="checkbox"
-                name="photos_locked"
-                defaultChecked={row?.photos_locked ?? true}
-                className="size-4 rounded border-[#3D4F63]/30"
+                name="title"
+                defaultValue={row?.title ?? ""}
+                required
+                className={inputCls}
               />
-              <span>Afficher cadenas même après NDA</span>
-            </label>
-          </Field>
+            </Field>
+            <Field
+              label="Description courte"
+              hint="Aperçu public — 200 caractères max."
+            >
+              <textarea
+                name="short_description"
+                rows={3}
+                maxLength={200}
+                defaultValue={row?.short_description ?? row?.short_pitch ?? ""}
+                className={inputCls + " font-sans"}
+              />
+            </Field>
+            <div className="md:col-span-2">
+              <Field
+                label="Description complète"
+                hint="Accessible après NDA signé."
+              >
+                <textarea
+                  name="full_description"
+                  rows={6}
+                  defaultValue={row?.full_description ?? row?.description ?? ""}
+                  className={inputCls + " font-sans"}
+                />
+              </Field>
+            </div>
+          </Section>
+
+          <PriceSection row={row} />
+
+          <Section title="Composition de l'immeuble" >
+            <div className="md:col-span-2">
+              <p className="text-sm text-[#3D4F63]/70">
+                Détaillez la composition uniquement si le bien est de type
+                Immeuble (rapport / mixte / bureaux / commercial / habitation).
+                Les totaux sont affichés au visiteur publiquement ; le détail
+                ne s&apos;ouvre qu&apos;après NDA.
+              </p>
+              <CompositionEditor
+                defaultCommerces={(row?.composition_commerces as CommerceRow[]) ?? []}
+                defaultBureaux={(row?.composition_bureaux as BureauRow[]) ?? []}
+                defaultLogements={(row?.composition_logements as LogementRow[]) ?? []}
+              />
+            </div>
+          </Section>
+
+          <Section title="Diffusion publique">
+            <Field
+              label="Position dans la liste (1 = premier affiché)"
+              hint="Plus le chiffre est bas, plus le bien apparaît haut dans la liste publique. Laisse 100 si tu veux qu'il soit en ordre neutre."
+            >
+              <input
+                name="display_order"
+                type="number"
+                min="1"
+                defaultValue={row?.display_order ?? 100}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Coup de cœur (apparaît sur la home)">
+              <Toggle name="is_coup_de_coeur" defaultChecked={!!row?.is_coup_de_coeur} />
+            </Field>
+            <Field label="Verrouiller les photos">
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="photos_locked"
+                  defaultChecked={row?.photos_locked ?? true}
+                  className="size-4 rounded border-[#3D4F63]/30 accent-[#B8865A]"
+                />
+                <span>Cadenas même après NDA</span>
+              </label>
+            </Field>
+          </Section>
 
           {mode === "edit" && row && (
-            <div className="md:col-span-2">
-              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
-                Photos
-              </p>
-              <PhotosManager id={row.id} photos={photos} />
-            </div>
+            <Section title="Photos">
+              <div className="md:col-span-2">
+                <PhotosManager id={row.id} photos={photos} />
+              </div>
+            </Section>
           )}
-        </Section>
+        </div>
       )}
 
       {error && (
@@ -366,6 +592,520 @@ export function OffmarketForm({
 
 const inputCls =
   "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#B8865A] focus:outline-none";
+
+// ─── Prix : 4 modes d'affichage ────────────────────────────────────────────
+type PriceMode = "exact" | "range" | "custom" | "on_request";
+
+function PriceSection({ row }: { row: OffmarketRow | null }) {
+  const initial: PriceMode = (row?.price_mode as PriceMode) ||
+    (row?.price_estimate ? "exact" : "on_request");
+  const [mode, setMode] = useState<PriceMode>(initial);
+
+  return (
+    <Section title="Prix">
+      <div className="md:col-span-2">
+        <Field label="Mode d'affichage du prix">
+          <select
+            name="price_mode"
+            value={mode}
+            onChange={(e) => setMode(e.target.value as PriceMode)}
+            className={inputCls}
+          >
+            <option value="exact">Afficher le prix exact</option>
+            <option value="range">Afficher une fourchette</option>
+            <option value="custom">Texte personnalisé</option>
+            <option value="on_request">Sur demande</option>
+          </select>
+        </Field>
+      </div>
+
+      {mode === "exact" && (
+        <Field
+          label="Prix exact (€)"
+          hint="Affiché publiquement formaté en euros."
+        >
+          <input
+            name="price_estimate"
+            type="number"
+            min="0"
+            step="1000"
+            defaultValue={row?.price_estimate ?? ""}
+            className={inputCls}
+          />
+        </Field>
+      )}
+
+      {mode === "range" && (
+        <>
+          <Field label="Prix min (€)">
+            <input
+              name="price_min"
+              type="number"
+              min="0"
+              step="1000"
+              defaultValue={row?.price_min ?? ""}
+              className={inputCls}
+            />
+          </Field>
+          <Field label="Prix max (€)">
+            <input
+              name="price_max"
+              type="number"
+              min="0"
+              step="1000"
+              defaultValue={row?.price_max ?? ""}
+              className={inputCls}
+            />
+          </Field>
+        </>
+      )}
+
+      {mode === "custom" && (
+        <div className="md:col-span-2">
+          <Field
+            label="Texte personnalisé"
+            hint="Exemple : « À partir de 4,5 M€ »"
+          >
+            <input
+              name="price_custom_text"
+              defaultValue={row?.price_custom_text ?? ""}
+              className={inputCls}
+            />
+          </Field>
+        </div>
+      )}
+
+      {/* Champ caché toujours présent pour preserver la valeur DB privée */}
+      {mode !== "exact" && row?.price_estimate != null && (
+        <input type="hidden" name="price_estimate" value={row.price_estimate} />
+      )}
+    </Section>
+  );
+}
+
+// ─── Composition immeuble (3 arrays JSONB) ────────────────────────────────
+type CommerceRow = {
+  nom: string;
+  surface_m2: number;
+  type: "restauration" | "retail" | "services" | "autre";
+};
+
+type BureauRow = {
+  etage: string;
+  surface_m2: number;
+  type: "plateau_ouvert" | "bureaux_separes" | "mixte";
+};
+
+type LogementRow = {
+  etage: string;
+  surface_m2: number;
+  chambres: number;
+  type: "T1" | "T2" | "T3" | "T4" | "T5+" | "studio";
+};
+
+function CompositionEditor({
+  defaultCommerces,
+  defaultBureaux,
+  defaultLogements,
+}: {
+  defaultCommerces: CommerceRow[];
+  defaultBureaux: BureauRow[];
+  defaultLogements: LogementRow[];
+}) {
+  const [commerces, setCommerces] = useState<CommerceRow[]>(defaultCommerces);
+  const [bureaux, setBureaux] = useState<BureauRow[]>(defaultBureaux);
+  const [logements, setLogements] = useState<LogementRow[]>(defaultLogements);
+  const [openSection, setOpenSection] = useState<string | null>(null);
+
+  return (
+    <div className="mt-4 space-y-3">
+      <CollapsibleTable
+        title="Commerces"
+        count={commerces.length}
+        open={openSection === "commerces"}
+        onToggle={() =>
+          setOpenSection(openSection === "commerces" ? null : "commerces")
+        }
+      >
+        <CommercesTable rows={commerces} setRows={setCommerces} />
+      </CollapsibleTable>
+      <CollapsibleTable
+        title="Bureaux"
+        count={bureaux.length}
+        open={openSection === "bureaux"}
+        onToggle={() =>
+          setOpenSection(openSection === "bureaux" ? null : "bureaux")
+        }
+      >
+        <BureauxTable rows={bureaux} setRows={setBureaux} />
+      </CollapsibleTable>
+      <CollapsibleTable
+        title="Logements"
+        count={logements.length}
+        open={openSection === "logements"}
+        onToggle={() =>
+          setOpenSection(openSection === "logements" ? null : "logements")
+        }
+      >
+        <LogementsTable rows={logements} setRows={setLogements} />
+      </CollapsibleTable>
+
+      <input type="hidden" name="composition_commerces" value={JSON.stringify(commerces)} />
+      <input type="hidden" name="composition_bureaux" value={JSON.stringify(bureaux)} />
+      <input type="hidden" name="composition_logements" value={JSON.stringify(logements)} />
+    </div>
+  );
+}
+
+function CollapsibleTable({
+  title,
+  count,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  count: number;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-[#3D4F63]/15 bg-white">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="font-display text-base font-bold text-[#3D4F63]">
+          {title}{" "}
+          <span className="ml-2 font-mono text-[10px] text-[#3D4F63]/60">
+            ({count})
+          </span>
+        </span>
+        <span className="font-mono text-xs text-[#3D4F63]/60">
+          {open ? "▴" : "▾"}
+        </span>
+      </button>
+      {open && <div className="border-t border-[#3D4F63]/10 p-4">{children}</div>}
+    </div>
+  );
+}
+
+function CommercesTable({
+  rows,
+  setRows,
+}: {
+  rows: CommerceRow[];
+  setRows: (r: CommerceRow[]) => void;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
+          <tr>
+            <th className="px-3 py-2">Nom</th>
+            <th className="px-3 py-2 text-right">Surface (m²)</th>
+            <th className="px-3 py-2">Type</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className="border-t border-[#3D4F63]/10">
+              <td className="px-3 py-2">
+                <input
+                  type="text"
+                  value={r.nom}
+                  onChange={(e) =>
+                    setRows(rows.map((x, j) => (j === i ? { ...x, nom: e.target.value } : x)))
+                  }
+                  className={inputCls + " py-1"}
+                />
+              </td>
+              <td className="px-3 py-2">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={r.surface_m2}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, surface_m2: Number(e.target.value) || 0 } : x,
+                      ),
+                    )
+                  }
+                  className={inputCls + " py-1 text-right"}
+                />
+              </td>
+              <td className="px-3 py-2">
+                <select
+                  value={r.type}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, type: e.target.value as CommerceRow["type"] } : x,
+                      ),
+                    )
+                  }
+                  className={inputCls + " py-1"}
+                >
+                  <option value="restauration">Restauration</option>
+                  <option value="retail">Retail</option>
+                  <option value="services">Services</option>
+                  <option value="autre">Autre</option>
+                </select>
+              </td>
+              <td className="px-3 py-2 text-right">
+                <button
+                  type="button"
+                  onClick={() => setRows(rows.filter((_, j) => j !== i))}
+                  className="rounded border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
+                >
+                  ✕
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <button
+        type="button"
+        onClick={() =>
+          setRows([
+            ...rows,
+            { nom: "", surface_m2: 0, type: "retail" as CommerceRow["type"] },
+          ])
+        }
+        className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+      >
+        + Ajouter un commerce
+      </button>
+    </div>
+  );
+}
+
+function BureauxTable({
+  rows,
+  setRows,
+}: {
+  rows: BureauRow[];
+  setRows: (r: BureauRow[]) => void;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
+          <tr>
+            <th className="px-3 py-2">Étage</th>
+            <th className="px-3 py-2 text-right">Surface (m²)</th>
+            <th className="px-3 py-2">Type</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className="border-t border-[#3D4F63]/10">
+              <td className="px-3 py-2">
+                <input
+                  type="text"
+                  value={r.etage}
+                  onChange={(e) =>
+                    setRows(rows.map((x, j) => (j === i ? { ...x, etage: e.target.value } : x)))
+                  }
+                  className={inputCls + " py-1"}
+                />
+              </td>
+              <td className="px-3 py-2">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={r.surface_m2}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, surface_m2: Number(e.target.value) || 0 } : x,
+                      ),
+                    )
+                  }
+                  className={inputCls + " py-1 text-right"}
+                />
+              </td>
+              <td className="px-3 py-2">
+                <select
+                  value={r.type}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, type: e.target.value as BureauRow["type"] } : x,
+                      ),
+                    )
+                  }
+                  className={inputCls + " py-1"}
+                >
+                  <option value="plateau_ouvert">Plateau ouvert</option>
+                  <option value="bureaux_separes">Bureaux séparés</option>
+                  <option value="mixte">Mixte</option>
+                </select>
+              </td>
+              <td className="px-3 py-2 text-right">
+                <button
+                  type="button"
+                  onClick={() => setRows(rows.filter((_, j) => j !== i))}
+                  className="rounded border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
+                >
+                  ✕
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <button
+        type="button"
+        onClick={() =>
+          setRows([...rows, { etage: "", surface_m2: 0, type: "plateau_ouvert" }])
+        }
+        className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+      >
+        + Ajouter un plateau de bureaux
+      </button>
+    </div>
+  );
+}
+
+function LogementsTable({
+  rows,
+  setRows,
+}: {
+  rows: LogementRow[];
+  setRows: (r: LogementRow[]) => void;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
+          <tr>
+            <th className="px-3 py-2">Étage</th>
+            <th className="px-3 py-2 text-right">Surface (m²)</th>
+            <th className="px-3 py-2">Type</th>
+            <th className="px-3 py-2 text-right">Chambres</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className="border-t border-[#3D4F63]/10">
+              <td className="px-3 py-2">
+                <input
+                  type="text"
+                  value={r.etage}
+                  onChange={(e) =>
+                    setRows(rows.map((x, j) => (j === i ? { ...x, etage: e.target.value } : x)))
+                  }
+                  className={inputCls + " py-1"}
+                />
+              </td>
+              <td className="px-3 py-2">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={r.surface_m2}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, surface_m2: Number(e.target.value) || 0 } : x,
+                      ),
+                    )
+                  }
+                  className={inputCls + " py-1 text-right"}
+                />
+              </td>
+              <td className="px-3 py-2">
+                <select
+                  value={r.type}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, type: e.target.value as LogementRow["type"] } : x,
+                      ),
+                    )
+                  }
+                  className={inputCls + " py-1"}
+                >
+                  {(["studio", "T1", "T2", "T3", "T4", "T5+"] as const).map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </td>
+              <td className="px-3 py-2">
+                <input
+                  type="number"
+                  min="0"
+                  value={r.chambres}
+                  onChange={(e) =>
+                    setRows(
+                      rows.map((x, j) =>
+                        j === i ? { ...x, chambres: Number(e.target.value) || 0 } : x,
+                      ),
+                    )
+                  }
+                  className={inputCls + " py-1 text-right"}
+                />
+              </td>
+              <td className="px-3 py-2 text-right">
+                <button
+                  type="button"
+                  onClick={() => setRows(rows.filter((_, j) => j !== i))}
+                  className="rounded border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
+                >
+                  ✕
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <button
+        type="button"
+        onClick={() =>
+          setRows([
+            ...rows,
+            { etage: "", surface_m2: 0, type: "T2", chambres: 1 },
+          ])
+        }
+        className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+      >
+        + Ajouter un logement
+      </button>
+    </div>
+  );
+}
+
+function Toggle({
+  name,
+  defaultChecked,
+}: {
+  name: string;
+  defaultChecked?: boolean;
+}) {
+  return (
+    <label className="inline-flex cursor-pointer items-center gap-2">
+      <input
+        type="checkbox"
+        name={name}
+        defaultChecked={defaultChecked}
+        className="size-4 rounded border-[#3D4F63]/30 accent-[#B8865A]"
+      />
+      <span className="text-sm text-[#3D4F63]/80">Activé</span>
+    </label>
+  );
+}
 
 function isNextInternalError(e: unknown): boolean {
   if (!e || typeof e !== "object") return false;

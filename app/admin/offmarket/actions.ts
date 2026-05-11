@@ -33,6 +33,136 @@ function arr(value: FormDataEntryValue | null): string[] {
     .filter(Boolean);
 }
 
+function bool(value: FormDataEntryValue | null): boolean {
+  return value === "on" || value === "true";
+}
+
+function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, status: OffmarketStatus, reference: string) {
+  const surfaceTerrain = num(formData.get("surface_terrain"));
+  const priceMode = (str(formData.get("price_mode")) ?? "exact") as
+    | "exact"
+    | "range"
+    | "custom"
+    | "on_request";
+  const priceLabelByMode = computePriceLabel(priceMode, formData);
+
+  return {
+    reference,
+    status,
+    title: str(formData.get("title")) ?? "Sans titre",
+    internal_ref: reference,
+    property_type: propertyType,
+    sub_type: str(formData.get("sub_type")),
+    country: str(formData.get("country")) ?? "LU",
+    region: str(formData.get("region")),
+    city_label: str(formData.get("city_anonymized")) ?? "Confidentiel",
+    city_real: str(formData.get("city_real")),
+
+    // Surfaces
+    surface_hab: num(formData.get("surface_habitable")),
+    surface_utile: num(formData.get("surface_utile")),
+    surface_ponderee: num(formData.get("surface_ponderee")),
+    surface_terrain: surfaceTerrain,
+    surface_terrain_ares: surfaceTerrain ? surfaceTerrain / 100 : null,
+
+    // Pièces
+    bedrooms: num(formData.get("chambres")),
+    bureaux: num(formData.get("bureaux")),
+    bathrooms: num(formData.get("salles_de_bain")),
+    douches: num(formData.get("douches")),
+    wc: num(formData.get("wc")),
+    locaux_stockage: num(formData.get("locaux_stockage")),
+    buanderie: bool(formData.get("buanderie")),
+    dressing: bool(formData.get("dressing")),
+    cuisine: bool(formData.get("cuisine")),
+    cuisine_m2: num(formData.get("cuisine_m2")),
+
+    // Extérieurs
+    terrasse_m2: num(formData.get("terrasse_m2")),
+    balcon_m2: num(formData.get("balcon_m2")),
+    jardin_m2: num(formData.get("jardin_m2")),
+    has_piscine: bool(formData.get("has_piscine")),
+
+    // Stationnement
+    parking_exterieur: num(formData.get("parking_exterieur")),
+    parking_interieur: num(formData.get("parking_interieur")),
+    box: num(formData.get("box")),
+    garage: num(formData.get("garage")),
+
+    // Énergie + prestations
+    energy_class: str(formData.get("classe_energetique")),
+    highlights: arr(formData.get("prestations")),
+    prestations: arr(formData.get("prestations")),
+
+    // Prix : mode + champs liés
+    price_mode: priceMode,
+    price_estimate: num(formData.get("price_estimate")),
+    price_min: num(formData.get("price_min")),
+    price_max: num(formData.get("price_max")),
+    price_custom_text: str(formData.get("price_custom_text")),
+    price_label: priceLabelByMode,
+    price_display: priceLabelByMode,
+
+    // Contenu
+    short_pitch: str(formData.get("short_description")),
+    description: str(formData.get("full_description")),
+
+    // Workflow
+    photos_locked: bool(formData.get("photos_locked")),
+    is_published: status === "published",
+    exclusive_until: str(formData.get("exclusive_until")),
+    display_order: num(formData.get("display_order")) ?? 100,
+    is_coup_de_coeur: bool(formData.get("is_coup_de_coeur")),
+  };
+}
+
+function parseCompositionFromFormData(formData: FormData): {
+  composition_commerces: unknown[];
+  composition_bureaux: unknown[];
+  composition_logements: unknown[];
+} {
+  const parse = (key: string): unknown[] => {
+    const raw = str(formData.get(key));
+    if (!raw) return [];
+    try {
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  };
+  return {
+    composition_commerces: parse("composition_commerces"),
+    composition_bureaux: parse("composition_bureaux"),
+    composition_logements: parse("composition_logements"),
+  };
+}
+
+function computePriceLabel(
+  mode: "exact" | "range" | "custom" | "on_request",
+  formData: FormData,
+): string {
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n) + " €";
+
+  if (mode === "exact") {
+    const estimate = num(formData.get("price_estimate"));
+    return estimate ? fmt(estimate) : "Prix sur demande";
+  }
+  if (mode === "range") {
+    const min = num(formData.get("price_min"));
+    const max = num(formData.get("price_max"));
+    if (min && max) return `${fmt(min)} – ${fmt(max)}`;
+    if (min) return `À partir de ${fmt(min)}`;
+    if (max) return `Jusqu'à ${fmt(max)}`;
+    return "Prix sur demande";
+  }
+  if (mode === "custom") {
+    return str(formData.get("price_custom_text")) ?? "Prix sur demande";
+  }
+  return "Prix sur demande";
+}
+
 async function audit(
   propertyId: string | null,
   action: string,
@@ -74,36 +204,14 @@ export async function createOffmarket(formData: FormData) {
     : "draft";
 
   const reference = str(formData.get("reference")) ?? generateOffmarketReference();
-  const surfaceTerrain = num(formData.get("surface_terrain"));
-
   const payload = {
-    reference,
-    status,
-    title: str(formData.get("title")) ?? "Sans titre",
-    internal_ref: reference,
-    property_type: propertyType,
-    country: str(formData.get("country")) ?? "LU",
-    region: str(formData.get("region")),
-    city_label: str(formData.get("city_anonymized")) ?? "Confidentiel",
-    city_real: str(formData.get("city_real")),
-    surface_hab: num(formData.get("surface_habitable")),
-    surface_terrain: surfaceTerrain,
-    surface_terrain_ares: surfaceTerrain ? surfaceTerrain / 100 : null,
-    bedrooms: num(formData.get("chambres")),
-    bathrooms: num(formData.get("salles_de_bain")),
-    energy_class: str(formData.get("classe_energetique")),
-    price_estimate: num(formData.get("price_estimate")),
-    price_label: str(formData.get("price_label")) ?? "Prix sur demande",
-    price_display: str(formData.get("price_label")) ?? "Prix sur demande",
-    short_pitch: str(formData.get("short_description")),
-    description: str(formData.get("full_description")),
-    highlights: arr(formData.get("prestations")),
-    prestations: arr(formData.get("prestations")),
-    photos_locked: formData.get("photos_locked") === "on",
-    is_published: status === "published",
-    exclusive_until: str(formData.get("exclusive_until")),
+    ...buildOffmarketPayload(formData, propertyType, status, reference),
     created_by: user.id,
   };
+
+  // Composition immeuble (3 arrays JSONB)
+  const composition = parseCompositionFromFormData(formData);
+  Object.assign(payload, composition);
 
   const { data, error } = await supabase
     .from("properties_offmarket")
@@ -141,35 +249,9 @@ export async function updateOffmarket(id: string, formData: FormData) {
     : "draft";
 
   const reference = str(formData.get("reference")) ?? generateOffmarketReference();
-  const surfaceTerrain = num(formData.get("surface_terrain"));
-
-  const payload = {
-    reference,
-    status,
-    title: str(formData.get("title")) ?? "Sans titre",
-    internal_ref: reference,
-    property_type: propertyType,
-    country: str(formData.get("country")) ?? "LU",
-    region: str(formData.get("region")),
-    city_label: str(formData.get("city_anonymized")) ?? "Confidentiel",
-    city_real: str(formData.get("city_real")),
-    surface_hab: num(formData.get("surface_habitable")),
-    surface_terrain: surfaceTerrain,
-    surface_terrain_ares: surfaceTerrain ? surfaceTerrain / 100 : null,
-    bedrooms: num(formData.get("chambres")),
-    bathrooms: num(formData.get("salles_de_bain")),
-    energy_class: str(formData.get("classe_energetique")),
-    price_estimate: num(formData.get("price_estimate")),
-    price_label: str(formData.get("price_label")) ?? "Prix sur demande",
-    price_display: str(formData.get("price_label")) ?? "Prix sur demande",
-    short_pitch: str(formData.get("short_description")),
-    description: str(formData.get("full_description")),
-    highlights: arr(formData.get("prestations")),
-    prestations: arr(formData.get("prestations")),
-    photos_locked: formData.get("photos_locked") === "on",
-    is_published: status === "published",
-    exclusive_until: str(formData.get("exclusive_until")),
-  };
+  const payload = buildOffmarketPayload(formData, propertyType, status, reference);
+  const composition = parseCompositionFromFormData(formData);
+  Object.assign(payload, composition);
 
   const { error } = await supabase
     .from("properties_offmarket")

@@ -23,15 +23,75 @@ export const OFFMARKET_STATUS_TONES: Record<OffmarketStatus, string> = {
 
 export const PROPERTY_TYPES = [
   "maison",
+  "villa",
   "appartement",
-  "immeuble",
+  "penthouse",
+  "duplex",
   "terrain",
+  "immeuble",
   "bureau",
   "commerce",
+  "hotel_particulier",
   "mixte",
 ] as const;
 
 export type PropertyType = (typeof PROPERTY_TYPES)[number];
+
+export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
+  maison: "Maison",
+  villa: "Villa",
+  appartement: "Appartement",
+  penthouse: "Penthouse",
+  duplex: "Duplex",
+  terrain: "Terrain",
+  immeuble: "Immeuble",
+  bureau: "Bureau",
+  commerce: "Local commercial",
+  hotel_particulier: "Hôtel particulier",
+  mixte: "Mixte",
+};
+
+export const IMMEUBLE_SUB_TYPES = [
+  "rapport",
+  "mixte",
+  "bureaux",
+  "commercial",
+  "habitation",
+] as const;
+
+export type ImmeubleSubType = (typeof IMMEUBLE_SUB_TYPES)[number];
+
+export const IMMEUBLE_SUB_TYPE_LABELS: Record<ImmeubleSubType, string> = {
+  rapport: "Immeuble de rapport",
+  mixte: "Immeuble mixte",
+  bureaux: "Immeuble de bureaux",
+  commercial: "Immeuble commercial",
+  habitation: "Immeuble d'habitation",
+};
+
+export const RESIDENTIAL_TYPES: PropertyType[] = [
+  "maison",
+  "villa",
+  "appartement",
+  "penthouse",
+  "duplex",
+  "hotel_particulier",
+];
+
+export const PROFESSIONAL_TYPES: PropertyType[] = [
+  "immeuble",
+  "bureau",
+  "commerce",
+  "mixte",
+];
+
+export const TYPES_WITH_LAND: PropertyType[] = [
+  "maison",
+  "villa",
+  "terrain",
+  "immeuble",
+  "hotel_particulier",
+];
 
 export const REQUEST_STATUSES = [
   "pending",
@@ -106,6 +166,38 @@ export interface OffmarketRow {
   last_request_at: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // Enrichissement 2026-05-11
+  sub_type: string | null;
+  surface_utile: number | null;
+  surface_ponderee: number | null;
+  bureaux: number | null;
+  wc: number | null;
+  douches: number | null;
+  cuisine: boolean | null;
+  cuisine_m2: number | null;
+  locaux_stockage: number | null;
+  buanderie: boolean | null;
+  dressing: boolean | null;
+  terrasse_m2: number | null;
+  balcon_m2: number | null;
+  jardin_m2: number | null;
+  has_piscine: boolean | null;
+  parking_exterieur: number | null;
+  parking_interieur: number | null;
+  box: number | null;
+  garage: number | null;
+
+  // CHANTIER 3 BIS
+  display_order: number | null;
+  is_coup_de_coeur: boolean | null;
+  price_mode: string | null;
+  price_min: number | null;
+  price_max: number | null;
+  price_custom_text: string | null;
+  composition_commerces: unknown;
+  composition_bureaux: unknown;
+  composition_logements: unknown;
 }
 
 export function generateOffmarketReference() {
