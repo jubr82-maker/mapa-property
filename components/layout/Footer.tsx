@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
+import { ContactButtons } from "@/components/ContactButtons";
 
 const colServices = [
   { href: "/services/vendre", key: "sell" },
@@ -75,12 +76,9 @@ export function Footer() {
           </FooterCol>
 
           <FooterCol title={t("col_contact")}>
-            <ContactRow label={t("call")} value="+352 691 620 127" href="tel:+352691620127" />
-            <ContactRow
-              label={t("email")}
-              value="j.brebion@mapagroup.org"
-              href="mailto:j.brebion@mapagroup.org"
-            />
+            <li>
+              <ContactButtons className="!flex-col !items-stretch" />
+            </li>
             <li className="text-sm leading-relaxed text-ink-mid">
               <span className="block font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
                 {t("hq")}

@@ -115,10 +115,10 @@ export function ChatbotWidget() {
           role: "assistant",
           content:
             locale === "en"
-              ? "An error occurred. Please contact Julien Brebion: +352 691 620 127."
+              ? "An error occurred. Please contact Julien: +352 691 620 127."
               : locale === "de"
-                ? "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie Julien Brebion: +352 691 620 127."
-                : "Une erreur est survenue. Contactez Julien Brebion : +352 691 620 127.",
+                ? "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie Julien: +352 691 620 127."
+                : "Une erreur est survenue. Contactez Julien : +352 691 620 127.",
         },
       ]);
     } finally {

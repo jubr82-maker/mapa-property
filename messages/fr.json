@@ -210,7 +210,7 @@
   },
   "quote_band": {
     "text": "Travailler ensemble est important. Protéger les intérêts de chacun par un cadre clair l'est davantage.",
-    "attribution": "Julien Brebion, Real Estate Director"
+    "attribution": "Julien, Real Estate Director"
   },
   "reviews_home": {
     "eyebrow": "Ils nous ont fait confiance",
@@ -224,7 +224,7 @@
   "contact_cta": {
     "eyebrow": "Une conversation peut tout changer",
     "title": "Parlons de votre projet.",
-    "description": "Mandat de vente, recherche d'un bien, accès off-market, conseil patrimonial — chaque demande est traitée personnellement par Julien Brebion.",
+    "description": "Mandat de vente, recherche d'un bien, accès off-market, conseil patrimonial — chaque demande est traitée personnellement par Julien.",
     "call_label": "Appeler directement",
     "email_label": "Écrire un email",
     "cta": "Prendre rendez-vous"
@@ -263,7 +263,7 @@
     "advisor": "Votre conseiller",
     "form_eyebrow": "Demande d'information",
     "form_title": "Une question sur ce bien ?",
-    "form_subtitle": "Julien Brebion vous recontacte personnellement sous 24 heures ouvrées.",
+    "form_subtitle": "Julien vous recontacte personnellement sous 24 heures ouvrées.",
     "similar": "Biens similaires",
     "download_pdf": "Télécharger / Imprimer",
     "request_info": "Demander des informations"
@@ -291,7 +291,7 @@
     "rgpd_notice": "Vos données sont confidentielles et utilisées uniquement pour vous recontacter.",
     "success_eyebrow": "Demande reçue",
     "success_title": "Merci, votre demande a été enregistrée.",
-    "success_text": "Julien Brebion vous recontactera personnellement sous 24 heures ouvrées."
+    "success_text": "Julien vous recontactera personnellement sous 24 heures ouvrées."
   },
   "offmarket": {
     "eyebrow": "Off-Market",
@@ -329,7 +329,7 @@
     "error": "Veuillez accepter le NDA et confirmer votre capacité financière, puis vérifier vos coordonnées.",
     "success_eyebrow": "Demande NDA reçue",
     "success_title": "Votre demande est en cours de validation.",
-    "success_text": "Julien Brebion revient vers vous sous 24 heures ouvrées avec le NDA contractuel et le dossier complet."
+    "success_text": "Julien revient vers vous sous 24 heures ouvrées avec le NDA contractuel et le dossier complet."
   },
   "mandate_common": {
     "eyebrow": "Mandat",
@@ -347,7 +347,7 @@
     "label_autonome": "Autonome",
     "label_recherche": "Recherche",
     "form_eyebrow": "Démarrer",
-    "form_subtitle": "Julien Brebion vous recontacte personnellement sous 24 heures ouvrées."
+    "form_subtitle": "Julien vous recontacte personnellement sous 24 heures ouvrées."
   },
   "mandate_exclusif": {
     "title": "Mandat Exclusif",
@@ -606,7 +606,7 @@
   "contact_page": {
     "eyebrow": "Contact",
     "title": "Une conversation peut tout changer.",
-    "intro": "Mandat de vente, recherche, accès off-market, conseil patrimonial — chaque demande est traitée personnellement par Julien Brebion sous 24 heures ouvrées.",
+    "intro": "Mandat de vente, recherche, accès off-market, conseil patrimonial — chaque demande est traitée personnellement par Julien sous 24 heures ouvrées.",
     "form_title": "Écrivez-nous",
     "call_label": "Appeler",
     "email_label": "Écrire",
@@ -632,7 +632,7 @@
     "title": "ARCOVA · l'accès privé MAPA.",
     "intro": "Un espace contractuel réservé aux clients sous mandat MAPA Property : dossiers off-market complets, propositions confidentielles, échanges sécurisés. Sur invitation uniquement.",
     "waitlist_title": "Demande d'accès",
-    "waitlist_text": "L'accès à ARCOVA est délivré au cas par cas, après un entretien et la signature d'un NDA contractuel. Pour rejoindre la liste d'attente, contactez Julien Brebion directement.",
+    "waitlist_text": "L'accès à ARCOVA est délivré au cas par cas, après un entretien et la signature d'un NDA contractuel. Pour rejoindre la liste d'attente, contactez Julien directement.",
     "waitlist_cta": "Demander une invitation",
     "legal": "Accès strictement nominatif · Confidentialité contractuelle · Audit log activé"
   },

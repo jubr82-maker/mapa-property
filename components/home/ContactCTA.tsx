@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { ContactButtons } from "@/components/ContactButtons";
 
 export function ContactCTA() {
   const t = useTranslations("contact_cta");
@@ -23,38 +24,7 @@ export function ContactCTA() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <a
-              href="tel:+352691620127"
-              className="flex items-center justify-between gap-4 rounded-xl border border-bg/15 px-5 py-4 transition-colors hover:border-gold"
-            >
-              <div>
-                <span className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bg/60">
-                  {t("call_label")}
-                </span>
-                <span className="font-display text-xl font-bold">
-                  +352 691 620 127
-                </span>
-              </div>
-              <span aria-hidden className="text-gold-bright">
-                →
-              </span>
-            </a>
-            <a
-              href="mailto:j.brebion@mapagroup.org"
-              className="flex items-center justify-between gap-4 rounded-xl border border-bg/15 px-5 py-4 transition-colors hover:border-gold"
-            >
-              <div>
-                <span className="block font-mono text-[10px] uppercase tracking-[0.3em] text-bg/60">
-                  {t("email_label")}
-                </span>
-                <span className="font-display text-base font-bold">
-                  j.brebion@mapagroup.org
-                </span>
-              </div>
-              <span aria-hidden className="text-gold-bright">
-                →
-              </span>
-            </a>
+            <ContactButtons variant="dark" />
             <Link
               href="/contact"
               className="gold-shine-bg inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02]"

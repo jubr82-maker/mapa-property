@@ -39,9 +39,17 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Directeur de la publication",
         paragraphs: [
-          "Julien Brebion, gérant et Real Estate Director.",
+          "Julien Brebion, Real Estate Director.",
           "Téléphone : +352 691 620 127.",
           "Email : j.brebion@mapagroup.org.",
+        ],
+      },
+      {
+        heading: "Gérant",
+        paragraphs: [
+          "Frédéric Mannis.",
+          "Téléphone : +352 691 113 018.",
+          "Email : contact@mapagroup.org.",
         ],
       },
       {
@@ -112,8 +120,15 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Publication director",
         paragraphs: [
-          "Julien Brebion, manager and Real Estate Director.",
+          "Julien Brebion, Real Estate Director.",
           "+352 691 620 127 — j.brebion@mapagroup.org.",
+        ],
+      },
+      {
+        heading: "Manager",
+        paragraphs: [
+          "Frédéric Mannis.",
+          "+352 691 113 018 — contact@mapagroup.org.",
         ],
       },
       {
@@ -165,8 +180,15 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Verantwortlich",
         paragraphs: [
-          "Julien Brebion, Geschäftsführer und Real Estate Director.",
+          "Julien Brebion, Real Estate Director.",
           "+352 691 620 127 — j.brebion@mapagroup.org.",
+        ],
+      },
+      {
+        heading: "Geschäftsführer",
+        paragraphs: [
+          "Frédéric Mannis.",
+          "+352 691 113 018 — contact@mapagroup.org.",
         ],
       },
       {

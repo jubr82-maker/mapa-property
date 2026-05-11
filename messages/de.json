@@ -210,7 +210,7 @@
   },
   "quote_band": {
     "text": "Zusammenarbeiten ist wichtig. Den Schutz der Interessen jedes Einzelnen durch einen klaren Rahmen zu gewährleisten ist noch wichtiger.",
-    "attribution": "Julien Brebion, Real Estate Director"
+    "attribution": "Julien, Real Estate Director"
   },
   "reviews_home": {
     "eyebrow": "Sie haben uns vertraut",
@@ -224,7 +224,7 @@
   "contact_cta": {
     "eyebrow": "Ein Gespräch kann alles verändern",
     "title": "Sprechen wir über Ihr Projekt.",
-    "description": "Verkaufsmandat, Suchmandat, Off-Market-Zugang, Vermögensberatung — jede Anfrage wird persönlich von Julien Brebion betreut.",
+    "description": "Verkaufsmandat, Suchmandat, Off-Market-Zugang, Vermögensberatung — jede Anfrage wird persönlich von Julien betreut.",
     "call_label": "Direkt anrufen",
     "email_label": "E-Mail schreiben",
     "cta": "Termin vereinbaren"
@@ -263,7 +263,7 @@
     "advisor": "Ihr Berater",
     "form_eyebrow": "Informationsanfrage",
     "form_title": "Eine Frage zu diesem Objekt?",
-    "form_subtitle": "Julien Brebion meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen.",
+    "form_subtitle": "Julien meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen.",
     "similar": "Ähnliche Objekte",
     "download_pdf": "Herunterladen / Drucken",
     "request_info": "Informationen anfragen"
@@ -291,7 +291,7 @@
     "rgpd_notice": "Ihre Daten sind vertraulich und werden ausschließlich zur Kontaktaufnahme verwendet.",
     "success_eyebrow": "Anfrage empfangen",
     "success_title": "Danke, Ihre Anfrage wurde registriert.",
-    "success_text": "Julien Brebion meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen."
+    "success_text": "Julien meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen."
   },
   "offmarket": {
     "eyebrow": "Off-Market",
@@ -329,7 +329,7 @@
     "error": "Bitte akzeptieren Sie die NDA und bestätigen Sie Ihre Finanzkraft, dann überprüfen Sie Ihre Kontaktdaten.",
     "success_eyebrow": "NDA-Anfrage empfangen",
     "success_title": "Ihre Anfrage wird geprüft.",
-    "success_text": "Julien Brebion meldet sich innerhalb von 24 Werkstunden mit der vertraglichen NDA und dem vollständigen Dossier."
+    "success_text": "Julien meldet sich innerhalb von 24 Werkstunden mit der vertraglichen NDA und dem vollständigen Dossier."
   },
   "mandate_common": {
     "eyebrow": "Mandat",
@@ -347,7 +347,7 @@
     "label_autonome": "Autonom",
     "label_recherche": "Suchmandat",
     "form_eyebrow": "Starten",
-    "form_subtitle": "Julien Brebion meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen."
+    "form_subtitle": "Julien meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen."
   },
   "mandate_exclusif": {
     "title": "Exklusivmandat",
@@ -606,7 +606,7 @@
   "contact_page": {
     "eyebrow": "Kontakt",
     "title": "Ein Gespräch kann alles verändern.",
-    "intro": "Verkaufsmandat, Suche, Off-Market-Zugang, Vermögensberatung — jede Anfrage wird persönlich von Julien Brebion innerhalb von 24 Werkstunden bearbeitet.",
+    "intro": "Verkaufsmandat, Suche, Off-Market-Zugang, Vermögensberatung — jede Anfrage wird persönlich von Julien innerhalb von 24 Werkstunden bearbeitet.",
     "form_title": "Schreiben Sie uns",
     "call_label": "Anrufen",
     "email_label": "E-Mail",
@@ -632,7 +632,7 @@
     "title": "ARCOVA · der private MAPA-Zugang.",
     "intro": "Ein vertraglicher Bereich, der MAPA-Property-Mandantskunden vorbehalten ist: vollständige Off-Market-Dossiers, vertrauliche Angebote, gesicherter Austausch. Nur auf Einladung.",
     "waitlist_title": "Zugangsanfrage",
-    "waitlist_text": "Der Zugang zu ARCOVA wird einzelfallbezogen nach einem Gespräch und der Unterzeichnung einer vertraglichen NDA gewährt. Für die Warteliste kontaktieren Sie Julien Brebion direkt.",
+    "waitlist_text": "Der Zugang zu ARCOVA wird einzelfallbezogen nach einem Gespräch und der Unterzeichnung einer vertraglichen NDA gewährt. Für die Warteliste kontaktieren Sie Julien direkt.",
     "waitlist_cta": "Einladung anfragen",
     "legal": "Streng namensgebundener Zugang · Vertragliche Vertraulichkeit · Audit-Log aktiv"
   },

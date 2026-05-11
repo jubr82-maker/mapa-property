@@ -8,7 +8,7 @@ const KNOWLEDGE_FR = `
 - Nom commercial : MAPA Property (entité légale : MAPA Synergy Sàrl).
 - Domaine : mapaproperty.lu (jamais .com).
 - Fondation : 2018 (activité), 2020 (constitution société).
-- Real Estate Director : Julien Brebion.
+- Real Estate Director : Julien.
 - Téléphone : +352 691 620 127. Email : j.brebion@mapagroup.org.
 - HQ public : Luxembourg (l'adresse Dudelange n'apparaît que dans les pages légales).
 - RDV : Luxembourg-Ville, sur site dans le bien visité, à votre domicile, ou en visioconférence.
@@ -96,7 +96,7 @@ const KNOWLEDGE_EN = `
 - Trade name: MAPA Property (legal entity: MAPA Synergy Sàrl).
 - Domain: mapaproperty.lu (never .com).
 - Founded: 2018 (activity), 2020 (entity).
-- Real Estate Director: Julien Brebion.
+- Real Estate Director: Julien.
 - Phone: +352 691 620 127. Email: j.brebion@mapagroup.org.
 - HQ: Luxembourg (the Dudelange address only appears in legal pages).
 - Meetings: Luxembourg-City, on site, at your home, or by video call.
@@ -152,7 +152,7 @@ const KNOWLEDGE_DE = `
 - Geschäftsname: MAPA Property (Rechtsträger: MAPA Synergy Sàrl).
 - Domain: mapaproperty.lu (nie .com).
 - Gegründet: 2018 (Tätigkeit), 2020 (Gesellschaft).
-- Real Estate Director: Julien Brebion.
+- Real Estate Director: Julien.
 - Telefon: +352 691 620 127. E-Mail: j.brebion@mapagroup.org.
 - HQ: Luxemburg (Dudelange nur im Impressum).
 - Termine: Luxemburg-Stadt, vor Ort, zu Hause oder Videogespräch.
@@ -207,7 +207,7 @@ export const getKnowledge = (locale: string): string => {
 };
 
 export const buildSystemPrompt = (locale: string, pageContext?: string) => {
-  const base = `Tu es Eléna, assistante virtuelle de MAPA Property, agence immobilière luxembourgeoise et broker international (Julien Brebion, Real Estate Director, depuis 2018).
+  const base = `Tu es Eléna, assistante virtuelle de MAPA Property, agence immobilière luxembourgeoise et broker international (Julien, Real Estate Director, depuis 2018).
 
 LANGUE : réponds STRICTEMENT en ${locale === "en" ? "anglais" : locale === "de" ? "allemand" : "français"}.
 

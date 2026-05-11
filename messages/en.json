@@ -210,7 +210,7 @@
   },
   "quote_band": {
     "text": "Working together matters. Protecting each party's interest with a clear framework matters more.",
-    "attribution": "Julien Brebion, Real Estate Director"
+    "attribution": "Julien, Real Estate Director"
   },
   "reviews_home": {
     "eyebrow": "They trusted us",
@@ -224,7 +224,7 @@
   "contact_cta": {
     "eyebrow": "A conversation can change everything",
     "title": "Let's talk about your project.",
-    "description": "Sale mandate, property search, off-market access, wealth advice — every request is handled personally by Julien Brebion.",
+    "description": "Sale mandate, property search, off-market access, wealth advice — every request is handled personally by Julien.",
     "call_label": "Call directly",
     "email_label": "Send an email",
     "cta": "Book a meeting"
@@ -263,7 +263,7 @@
     "advisor": "Your advisor",
     "form_eyebrow": "Information request",
     "form_title": "A question about this property?",
-    "form_subtitle": "Julien Brebion will personally get back to you within 24 working hours.",
+    "form_subtitle": "Julien will personally get back to you within 24 working hours.",
     "similar": "Similar properties",
     "download_pdf": "Download / Print",
     "request_info": "Request information"
@@ -291,7 +291,7 @@
     "rgpd_notice": "Your data is confidential and used only to reach back out to you.",
     "success_eyebrow": "Request received",
     "success_title": "Thank you, your request has been registered.",
-    "success_text": "Julien Brebion will personally get back to you within 24 working hours."
+    "success_text": "Julien will personally get back to you within 24 working hours."
   },
   "offmarket": {
     "eyebrow": "Off-Market",
@@ -329,7 +329,7 @@
     "error": "Please accept the NDA and confirm your financial capacity, then verify your contact details.",
     "success_eyebrow": "NDA request received",
     "success_title": "Your request is being validated.",
-    "success_text": "Julien Brebion will get back to you within 24 working hours with the contractual NDA and the full file."
+    "success_text": "Julien will get back to you within 24 working hours with the contractual NDA and the full file."
   },
   "mandate_common": {
     "eyebrow": "Mandate",
@@ -347,7 +347,7 @@
     "label_autonome": "Autonomous",
     "label_recherche": "Search",
     "form_eyebrow": "Get started",
-    "form_subtitle": "Julien Brebion will personally get back to you within 24 working hours."
+    "form_subtitle": "Julien will personally get back to you within 24 working hours."
   },
   "mandate_exclusif": {
     "title": "Exclusive Mandate",
@@ -606,7 +606,7 @@
   "contact_page": {
     "eyebrow": "Contact",
     "title": "A conversation can change everything.",
-    "intro": "Sale mandate, search, off-market access, wealth advice — every request is handled personally by Julien Brebion within 24 working hours.",
+    "intro": "Sale mandate, search, off-market access, wealth advice — every request is handled personally by Julien within 24 working hours.",
     "form_title": "Write to us",
     "call_label": "Call",
     "email_label": "Email",
@@ -632,7 +632,7 @@
     "title": "ARCOVA · the MAPA private access.",
     "intro": "A contractual space reserved for MAPA Property mandate clients: complete off-market files, confidential proposals, secure exchanges. By invitation only.",
     "waitlist_title": "Access request",
-    "waitlist_text": "ARCOVA access is granted case by case, after an interview and the signature of a contractual NDA. To join the waitlist, contact Julien Brebion directly.",
+    "waitlist_text": "ARCOVA access is granted case by case, after an interview and the signature of a contractual NDA. To join the waitlist, contact Julien directly.",
     "waitlist_cta": "Request an invitation",
     "legal": "Strictly nominative access · Contractual confidentiality · Audit log active"
   },
