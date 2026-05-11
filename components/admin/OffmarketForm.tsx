@@ -59,16 +59,24 @@ export function OffmarketForm({
     setError(null);
     startTransition(async () => {
       try {
-        if (mode === "create") {
-          await createOffmarket(formData);
-        } else if (row) {
-          await updateOffmarket(row.id, formData);
+        const result =
+          mode === "create"
+            ? await createOffmarket(formData)
+            : row
+              ? await updateOffmarket(row.id, formData)
+              : null;
+        if (result && !result.ok) {
+          setError(result.error);
         }
       } catch (e) {
         // Ne pas masquer les exceptions internes Next (redirect / notFound) —
         // elles doivent remonter pour que Next gère la navigation.
         if (isNextInternalError(e)) throw e;
-        setError(e instanceof Error ? e.message : "Erreur inconnue");
+        setError(
+          e instanceof Error
+            ? `Erreur réseau : ${e.message}. Vérifie ta connexion et réessaie.`
+            : "Erreur réseau inconnue. Vérifie ta connexion.",
+        );
       }
     });
   };

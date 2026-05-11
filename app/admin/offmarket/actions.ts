@@ -11,6 +11,103 @@ import {
   type RequestStatus,
 } from "@/lib/admin/offmarket";
 
+// Colonnes potentiellement absentes selon l'état d'application des migrations.
+// Si Postgres remonte "column does not exist" sur l'une d'elles, on la retire
+// du payload et on réessaie — permet au BO de fonctionner même si Julien
+// n'a pas encore appliqué les dernières migrations SQL.
+const OPTIONAL_OFFMARKET_COLUMNS = [
+  "sub_type",
+  "surface_utile",
+  "surface_ponderee",
+  "bureaux",
+  "wc",
+  "douches",
+  "cuisine",
+  "cuisine_m2",
+  "locaux_stockage",
+  "buanderie",
+  "dressing",
+  "terrasse_m2",
+  "balcon_m2",
+  "jardin_m2",
+  "has_piscine",
+  "parking_exterieur",
+  "parking_interieur",
+  "box",
+  "garage",
+  "price_mode",
+  "price_min",
+  "price_max",
+  "price_custom_text",
+  "is_coup_de_coeur",
+  "composition_commerces",
+  "composition_bureaux",
+  "composition_logements",
+  "prestations",
+  "features",
+  "photo_urls",
+  "exclusive_until",
+  "signed_mandate_url",
+  "city_real",
+  "region",
+  "surface_terrain_ares",
+  "price_estimate",
+  "price_label",
+  "reference",
+  "status",
+  "property_type",
+  "photos_locked",
+];
+
+function extractMissingColumn(err: unknown): string | null {
+  const msg = err instanceof Error ? err.message : String(err);
+  const m = msg.match(/column "?([a-z_]+)"? .* does not exist/i);
+  return m?.[1] ?? null;
+}
+
+async function insertWithRetry(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  table: string,
+  payload: Record<string, unknown>,
+) {
+  let attempt = { ...payload };
+  for (let i = 0; i < 10; i++) {
+    const { data, error } = await supabase.from(table).insert(attempt).select("id").single();
+    if (!error) return { data, error: null };
+    const col = extractMissingColumn(error);
+    if (col && OPTIONAL_OFFMARKET_COLUMNS.includes(col)) {
+      console.warn(`[insertWithRetry] colonne ${col} absente — retry sans`);
+      delete attempt[col];
+      continue;
+    }
+    return { data: null, error };
+  }
+  return { data: null, error: new Error("Trop de tentatives") };
+}
+
+async function updateWithRetry(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  table: string,
+  payload: Record<string, unknown>,
+  id: string,
+) {
+  let attempt = { ...payload };
+  for (let i = 0; i < 10; i++) {
+    const { error } = await supabase.from(table).update(attempt).eq("id", id);
+    if (!error) return { error: null };
+    const col = extractMissingColumn(error);
+    if (col && OPTIONAL_OFFMARKET_COLUMNS.includes(col)) {
+      console.warn(`[updateWithRetry] colonne ${col} absente — retry sans`);
+      delete attempt[col];
+      continue;
+    }
+    return { error };
+  }
+  return { error: new Error("Trop de tentatives") };
+}
+
+export type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
+
 const ALLOWED_STATUSES: OffmarketStatus[] = ["draft", "published", "sold", "withdrawn"];
 
 function num(value: FormDataEntryValue | null): number | null {
@@ -184,16 +281,18 @@ async function audit(
   }
 }
 
-export async function createOffmarket(formData: FormData) {
+export async function createOffmarket(formData: FormData): Promise<ActionResult> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/login");
+  if (!user) {
+    redirect("/admin/login");
+  }
 
   const propertyType = str(formData.get("property_type")) as PropertyType | null;
   if (!propertyType || !PROPERTY_TYPES.includes(propertyType)) {
-    throw new Error("Type de bien invalide.");
+    return { ok: false, error: "Type de bien invalide." };
   }
 
   const requestedStatus = str(formData.get("status"));
@@ -204,24 +303,21 @@ export async function createOffmarket(formData: FormData) {
     : "draft";
 
   const reference = str(formData.get("reference")) ?? generateOffmarketReference();
-  const payload = {
+  const payload: Record<string, unknown> = {
     ...buildOffmarketPayload(formData, propertyType, status, reference),
-    created_by: user.id,
+    created_by: user!.id,
   };
 
-  // Composition immeuble (3 arrays JSONB)
-  const composition = parseCompositionFromFormData(formData);
-  Object.assign(payload, composition);
+  Object.assign(payload, parseCompositionFromFormData(formData));
 
-  const { data, error } = await supabase
-    .from("properties_offmarket")
-    .insert(payload)
-    .select("id")
-    .single();
+  const { data, error } = await insertWithRetry(supabase, "properties_offmarket", payload);
 
-  if (error) {
+  if (error || !data) {
     console.error("[admin] createOffmarket", error);
-    throw new Error(error.message);
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Erreur d'enregistrement (vérifier que toutes les migrations SQL sont appliquées).",
+    };
   }
 
   await audit(data.id, "offmarket.create", { reference, status });
@@ -229,7 +325,7 @@ export async function createOffmarket(formData: FormData) {
   redirect(`/admin/offmarket/${data.id}/edit?created=1`);
 }
 
-export async function updateOffmarket(id: string, formData: FormData) {
+export async function updateOffmarket(id: string, formData: FormData): Promise<ActionResult> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -238,7 +334,7 @@ export async function updateOffmarket(id: string, formData: FormData) {
 
   const propertyType = str(formData.get("property_type")) as PropertyType | null;
   if (!propertyType || !PROPERTY_TYPES.includes(propertyType)) {
-    throw new Error("Type de bien invalide.");
+    return { ok: false, error: "Type de bien invalide." };
   }
 
   const requestedStatus = str(formData.get("status"));
@@ -249,18 +345,17 @@ export async function updateOffmarket(id: string, formData: FormData) {
     : "draft";
 
   const reference = str(formData.get("reference")) ?? generateOffmarketReference();
-  const payload = buildOffmarketPayload(formData, propertyType, status, reference);
-  const composition = parseCompositionFromFormData(formData);
-  Object.assign(payload, composition);
+  const payload: Record<string, unknown> = buildOffmarketPayload(formData, propertyType, status, reference);
+  Object.assign(payload, parseCompositionFromFormData(formData));
 
-  const { error } = await supabase
-    .from("properties_offmarket")
-    .update(payload)
-    .eq("id", id);
+  const { error } = await updateWithRetry(supabase, "properties_offmarket", payload, id);
 
   if (error) {
     console.error("[admin] updateOffmarket", error);
-    throw new Error(error.message);
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Erreur d'enregistrement (vérifier que toutes les migrations SQL sont appliquées).",
+    };
   }
 
   await audit(id, "offmarket.update", { reference, status });
@@ -268,6 +363,7 @@ export async function updateOffmarket(id: string, formData: FormData) {
   revalidatePath(`/admin/offmarket/${id}/edit`);
   revalidatePath("/fr/off-market");
   revalidatePath(`/fr/off-market/${id}`);
+  return { ok: true, id };
 }
 
 export async function deleteOffmarket(id: string) {

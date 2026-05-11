@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminPropertiesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ featured?: string }>;
+  searchParams: Promise<{ featured?: string; q?: string; transaction?: string }>;
 }) {
   const sp = await searchParams;
   const supabase = await createSupabaseServerClient();
@@ -21,9 +21,19 @@ export default async function AdminPropertiesPage({
     .limit(500);
 
   if (sp.featured === "1") query = query.eq("is_featured", true);
+  if (sp.transaction) query = query.eq("transaction", sp.transaction);
 
-  const { data } = await query;
-  const rows = (data ?? []).map((p) => {
+  const { data, error } = await query;
+  if (error) {
+    console.error("[admin/properties] query error:", error);
+  }
+  const filtered = (data ?? []).filter((p) => {
+    if (!sp.q) return true;
+    const needle = sp.q.toLowerCase();
+    const hay = `${p.slug ?? ""} ${p.title_fr ?? ""} ${p.city ?? ""}`.toLowerCase();
+    return hay.includes(needle);
+  });
+  const rows = filtered.map((p) => {
     type Img = { url: string; sort: number | null };
     const imgs = (p.property_images as Img[] | null) ?? [];
     const sorted = [...imgs].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
@@ -59,6 +69,13 @@ export default async function AdminPropertiesPage({
             {rows.length} bien{rows.length > 1 ? "s" : ""} synchronisé{rows.length > 1 ? "s" : ""}
             {" "}— lecture seule, sauf <em>is_published</em> et <em>is_featured</em>.
           </p>
+          {error && (
+            <p className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              Lecture impossible : {error.message}. Vérifie que la migration
+              <code className="mx-1 rounded bg-white px-1 font-mono text-xs">20260511_admin_rls_properties.sql</code>
+              a bien été appliquée dans Supabase.
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           <Link

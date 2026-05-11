@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
   setPropertyPublished,
@@ -24,7 +26,38 @@ type Row = {
 };
 
 export function PropertiesTable({ rows }: { rows: Row[] }) {
+  const router = useRouter();
+  const sp = useSearchParams();
+  const [, startTransition] = useTransition();
+
+  const setParam = (key: string, value: string) => {
+    const next = new URLSearchParams(sp.toString());
+    if (value) next.set(key, value);
+    else next.delete(key);
+    startTransition(() => router.replace(`/admin/properties?${next.toString()}`));
+  };
+
   return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#3D4F63]/15 bg-white p-4">
+        <input
+          type="search"
+          placeholder="Recherche slug / titre / ville…"
+          defaultValue={sp.get("q") ?? ""}
+          onChange={(e) => setParam("q", e.target.value)}
+          className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+        />
+        <select
+          value={sp.get("transaction") ?? ""}
+          onChange={(e) => setParam("transaction", e.target.value)}
+          className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm"
+        >
+          <option value="">Toutes transactions</option>
+          <option value="sale">Vente</option>
+          <option value="rent">Location</option>
+        </select>
+      </div>
+
     <div className="overflow-x-auto rounded-2xl border border-[#3D4F63]/15 bg-white">
       <table className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
@@ -37,12 +70,13 @@ export function PropertiesTable({ rows }: { rows: Row[] }) {
             <th className="px-4 py-3 text-right">Surface · CH</th>
             <th className="px-4 py-3 text-center">Publié</th>
             <th className="px-4 py-3 text-center">Coup de cœur</th>
+            <th />
           </tr>
         </thead>
         <tbody className="divide-y divide-[#3D4F63]/10">
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={8} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
+              <td colSpan={9} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
                 Aucun bien.
               </td>
             </tr>
@@ -51,6 +85,7 @@ export function PropertiesTable({ rows }: { rows: Row[] }) {
           )}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }
@@ -103,6 +138,17 @@ function PropertyRow({ row }: { row: Row }) {
       </td>
       <td className="px-4 py-3 text-center">
         <Switch checked={feat} onChange={onFeat} busy={busy} />
+      </td>
+      <td className="px-4 py-3 text-right">
+        {row.slug && (
+          <Link
+            href={`/fr/biens/${row.slug}`}
+            target="_blank"
+            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+          >
+            Voir ↗
+          </Link>
+        )}
       </td>
     </tr>
   );
