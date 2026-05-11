@@ -14,6 +14,9 @@ import { PropertyFinancing } from "@/components/property/PropertyFinancing";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
+import { ContactButtons } from "@/components/ContactButtons";
+import { MiniFinanceSimulator } from "@/components/property/MiniFinanceSimulator";
+import { Link as IntlLink } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumb, propertyListing } from "@/lib/seo";
 
@@ -73,14 +76,36 @@ export default async function PropertyPage({
   const rate =
     rates?.rates?.fixed_25 ?? rates?.rates?.fixed_20 ?? rates?.rates?.fixed_30 ?? 3.6;
 
-  const similar = allProperties
-    .filter(
-      (p) =>
-        p.id !== property.id &&
-        p.transaction === property.transaction &&
-        (p.country === property.country || p.city === property.city),
-    )
-    .slice(0, 3);
+  // Biens similaires — logique stricte V3 : même type + prix ±15% +
+  // même pays (idéalement même ville), excluant le bien actuel.
+  const price = property.price ?? 0;
+  const minPrice = price ? price * 0.85 : 0;
+  const maxPrice = price ? price * 1.15 : Number.POSITIVE_INFINITY;
+  type AnyProperty = (typeof allProperties)[number] & { property_type?: string | null };
+  const propertyType =
+    (property as AnyProperty).property_type ?? property.badge ?? null;
+
+  const similarAll = allProperties.filter((p) => {
+    if (p.id === property.id) return false;
+    if (p.transaction !== property.transaction) return false;
+    // Pays minimum, ville en bonus de match
+    if (p.country !== property.country) return false;
+    // Même type si disponible
+    const pt = (p as AnyProperty).property_type ?? p.badge ?? null;
+    if (propertyType && pt && pt !== propertyType) return false;
+    // Prix ±15% si on a un prix de référence
+    if (price && p.price) {
+      if (p.price < minPrice || p.price > maxPrice) return false;
+    }
+    return true;
+  });
+  // Priorise même ville en tête
+  similarAll.sort((a, b) => {
+    const sameCityA = a.city === property.city ? 1 : 0;
+    const sameCityB = b.city === property.city ? 1 : 0;
+    return sameCityB - sameCityA;
+  });
+  const similar = similarAll.slice(0, 4);
 
   const productJsonLd = propertyListing({
     name: title,
@@ -248,24 +273,42 @@ export default async function PropertyPage({
                 {t("advisor")}
               </p>
               <p className="mt-2 font-display text-xl font-bold text-ink">
-                Julien Brebion
+                Julien
               </p>
               <p className="text-sm text-ink-mid">Real Estate Director</p>
-              <div className="mt-4 space-y-2">
-                <a
-                  href="tel:+352691620127"
-                  className="block text-sm text-ink-mid hover:text-gold"
-                >
-                  +352 691 620 127
-                </a>
-                <a
-                  href="mailto:j.brebion@mapagroup.org"
-                  className="block text-sm text-ink-mid hover:text-gold"
-                >
-                  j.brebion@mapagroup.org
-                </a>
+              <div className="mt-4">
+                <ContactButtons variant="compact" className="!flex-col !items-stretch" />
               </div>
             </div>
+
+            {/* CTA Mandat de recherche */}
+            <div className="rounded-xl border border-gold/40 bg-bg p-6">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
+                Mandat de recherche
+              </p>
+              <p className="mt-2 font-display text-base font-bold leading-snug text-ink">
+                Vous cherchez un bien similaire ?
+              </p>
+              <p className="mt-2 text-sm text-ink-mid">
+                Confiez-nous votre recherche. Nous mobilisons nos canaux —
+                marché ouvert, off-market et réseau privé.
+              </p>
+              <IntlLink
+                href={`/mandats/recherche?ref=${property.slug}&type=${propertyType ?? ""}&country=${property.country ?? ""}`}
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-deep px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-bg transition-colors hover:bg-gold"
+              >
+                Demander un mandat de recherche →
+              </IntlLink>
+            </div>
+
+            {/* Mini-simulateur financement */}
+            {price > 0 && property.transaction !== "rent" && (
+              <MiniFinanceSimulator
+                price={price}
+                country={(property.country as "LU" | "FR" | "BE" | "DE" | "PT" | "AE") || "LU"}
+                variant="compact"
+              />
+            )}
           </aside>
         </div>
 
