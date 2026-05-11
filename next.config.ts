@@ -8,8 +8,12 @@ const csp = [
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https: blob:",
+  // media-src indispensable pour la vidéo hero Supabase (cross-origin).
+  // Sans cette directive, le fallback default-src 'self' bloque toute
+  // ressource <video> hors origine, ce qui causait le hero noir.
+  "media-src 'self' https://*.supabase.co https: blob: data:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://sdw-wsrest.ecb.europa.eu https://cloudflareinsights.com",
+  "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://sdw-wsrest.ecb.europa.eu https://cloudflareinsights.com https://api.qrserver.com",
   "frame-src https://challenges.cloudflare.com",
   "object-src 'none'",
   "base-uri 'self'",

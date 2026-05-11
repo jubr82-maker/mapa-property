@@ -5,12 +5,14 @@ import { LiveClock } from "@/components/home/LiveClock";
 export function Hero() {
   const t = useTranslations("hero");
   const videoSrc = sbUrl("Videos", "mapa_showcase_new.mp4");
-  const posterSrc = sbUrl("Videos", "hero_poster.jpg");
 
   return (
     <section className="relative isolate min-h-[80vh] overflow-hidden bg-[#070605] lg:min-h-screen">
       <link rel="preload" as="video" href={videoSrc} type="video/mp4" />
-      {/* Video background */}
+      {/* Video background — bucket Supabase "Videos" (majuscule).
+          CSP media-src 'self' https://*.supabase.co indispensable
+          (cf. next.config.ts). Pas de poster externe : le bg #070605
+          joue le rôle de placeholder le temps du buffering. */}
       <video
         className="absolute inset-0 size-full object-cover"
         autoPlay
@@ -18,7 +20,6 @@ export function Hero() {
         loop
         playsInline
         preload="auto"
-        poster={posterSrc}
         aria-hidden
       >
         <source src={videoSrc} type="video/mp4" />
