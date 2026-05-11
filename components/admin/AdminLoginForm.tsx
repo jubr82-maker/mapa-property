@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-ssr";
+import { TwoFactorPrompt } from "@/components/admin/TwoFactorPrompt";
 
 export function AdminLoginForm({
   searchParamsPromise,
@@ -16,6 +18,7 @@ export function AdminLoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,9 +34,27 @@ export function AdminLoginForm({
       setBusy(false);
       return;
     }
+    // Vérifier si un facteur 2FA est requis avant l'accès admin.
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.nextLevel === "aal2" && aal.nextLevel !== aal.currentLevel) {
+      setMfaRequired(true);
+      setBusy(false);
+      return;
+    }
     router.replace(from);
     router.refresh();
   };
+
+  if (mfaRequired) {
+    return (
+      <TwoFactorPrompt
+        onSuccess={() => {
+          router.replace(from);
+          router.refresh();
+        }}
+      />
+    );
+  }
 
   return (
     <form onSubmit={submit} className="space-y-4">
@@ -83,6 +104,14 @@ export function AdminLoginForm({
       >
         {busy ? "Connexion…" : "Se connecter"}
       </button>
+      <div className="text-center">
+        <Link
+          href="/admin/forgot-password"
+          className="font-mono text-xs uppercase tracking-[0.2em] text-[#B8865A] hover:underline"
+        >
+          Mot de passe oublié ?
+        </Link>
+      </div>
     </form>
   );
 }

@@ -5,7 +5,12 @@ import { routing } from "./i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
 
-const ADMIN_PUBLIC_PATHS = new Set(["/admin/login", "/admin/auth/callback"]);
+const ADMIN_PUBLIC_PATHS = new Set([
+  "/admin/login",
+  "/admin/auth/callback",
+  "/admin/forgot-password",
+  "/admin/reset-password",
+]);
 
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
