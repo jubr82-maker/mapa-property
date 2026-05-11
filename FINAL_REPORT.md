@@ -220,3 +220,60 @@ Build production OK (`npm run build`) — 1 warning Turbopack non-bloquant sur l
 
 `npm run build` → toutes les routes compilent (1 warning Turbopack non-bloquant
 sur le font override Big Shoulders, identique à la partie A).
+
+---
+
+## 📅 2026-05-11 (soir) — CHANTIERS 1-4 livrés
+
+### Récap des commits (mode autonome, 4 chantiers + 1 commit fix)
+
+| Commit | Sujet |
+|--------|-------|
+| `be5a1bb` | fix(admin): ne plus masquer les NEXT_REDIRECT côté formulaire offmarket |
+| `63ae39e` | feat(admin): auth améliorée — forgot/reset password + 2FA TOTP |
+| `7cc9b23` | feat(admin): off-market enrichi (CHANTIER 3 + 3 BIS) |
+| `600f638` | feat(public): placeholder off-market sur cards sans photo |
+| `991f98d` | feat(admin): partie C — 9 modules BO opérationnels |
+
+### Périmètre livré
+
+**CHANTIER 1** — Bug encart rouge « An error occurred in the Server Components render » : `OffmarketForm.submit` ne masque plus les exceptions internes Next (NEXT_REDIRECT, NEXT_NOT_FOUND). Helper `isNextInternalError` re-throw pour laisser Next gérer la navigation.
+
+**CHANTIER 2** — Auth admin enrichie :
+- `/admin/forgot-password` + `/admin/reset-password` (Supabase Auth `resetPasswordForEmail` / `updateUser`).
+- Lien « Mot de passe oublié ? » sous le formulaire login.
+- 2FA TOTP via Supabase Auth MFA — enrôlement QR code + validation 6 chiffres dans `/admin/settings`, challenge `TwoFactorPrompt` au login si aal2 requis.
+- `/admin/settings` complet : password / 2FA / placeholder Passkey / coordonnées agence / sous-traitants RGPD.
+- SMTP Resend : doc complète dans BLOCKERS (Julien doit basculer côté Dashboard).
+
+**CHANTIER 3 + 3 BIS** — Off-market enrichi :
+- Migration SQL `20260511_offmarket_enrich.sql` : sub_type, surfaces utile/pondérée, bureaux, wc, douches, cuisine + m², locaux_stockage, buanderie, dressing, terrasse_m2, balcon_m2, jardin_m2, has_piscine, parking_exterieur/interieur, box, garage.
+- Migration SQL `20260511_offmarket_composition.sql` : 3 arrays JSONB composition (commerces/bureaux/logements) + price_mode/min/max/custom_text + is_coup_de_coeur.
+- VIEW publique `properties_offmarket_public` mise à jour pour exposer les nouveaux champs.
+- `PROPERTY_TYPES` étendu à 11 entrées (Maison, Villa, Apt, Penthouse, Duplex, Terrain, Immeuble, Bureau, Commerce, Hôtel particulier, Mixte) avec helpers RESIDENTIAL/PROFESSIONAL/WITH_LAND.
+- `IMMEUBLE_SUB_TYPES` : rapport, mixte, bureaux, commercial, habitation — révélé si type = Immeuble.
+- Formulaire CRUD off-market : onglet Caractéristiques découpé en 6 sous-sections (Type, Surfaces, Pièces, Extérieurs, Stationnement, Prestations) avec affichage conditionnel par type.
+- Onglet Contenu : sélecteur de prix 4 modes (exact / range / custom / on_request) avec champs conditionnels et calcul automatique du price_label ; éditeur CompositionEditor 3 sous-tableaux collapsibles ; champ display_order renommé « Position dans la liste (1 = premier affiché) » + hint ; toggle is_coup_de_coeur.
+- `OffmarketPlaceholder` SVG (gradient sombre + cadenas doré + label OFF MARKET Big Shoulders copper) utilisé sur 3 emplacements (liste publique / détail public / vignette admin).
+
+**CHANTIER 4** — Modules C complets remplaçant les ModuleComingSoon :
+- C1 Dashboard (inchangé)
+- C2 Leads — table filtrable + workflow 5 statuts + notes admin (Server Actions)
+- C3 Mandats — table read-only avec budget/délai/statut
+- C4 ARCOVA — filtres rôle + statut + export CSV client
+- C5 Avis — CRUD complet (list + new + edit) avec étoiles, langue, toggle publié
+- C6 Blog — CRUD multilingue avec onglets FR/EN/DE, slug auto, catégorie, image cover URL
+- C7 Documents — migration SQL `20260511_documents.sql` + bucket Storage + upload via Server Action + toggle public + suppression
+- C8 Properties (Apimo) — read-only sauf 2 toggles is_published/is_featured avec switches custom + filtre « Coups de cœur uniquement »
+- C9 Settings (livré CHANTIER 2)
+
+### Build production OK
+`npm run build` — toutes les routes compilent. 1 warning Turbopack non-bloquant (font override Big Shoulders) identique aux sessions précédentes.
+
+### Migrations SQL à appliquer (par Julien dans Supabase Dashboard)
+1. `migration_offmarket.sql` (déjà appliquée)
+2. `migration_offmarket_enrich.sql`
+3. `migration_offmarket_composition.sql`
+4. `migration_documents.sql`
+
+Toutes copiées dans `/Users/Shared/` avec `chmod 644`. Toutes idempotentes.

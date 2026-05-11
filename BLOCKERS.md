@@ -102,3 +102,70 @@ fait le tracking côté DB, donc rien n'est perdu — juste pas d'email instanta
 Le brief mentionne un Kanban optionnel (« Pending → Qualified → … → Closed »).
 La vue globale `/admin/offmarket/requests` reste en tableau avec filtres par statut.
 À transformer en Kanban si besoin (drag&drop entre colonnes).
+
+---
+
+## 2026-05-11 (soir) — Blockers cumulés après CHANTIERS 1-4
+
+### Actions manuelles Julien — Supabase Dashboard
+
+#### Migrations SQL à appliquer dans l'ordre (SQL Editor)
+1. **`migration_offmarket.sql`** (déjà fait par Julien lors du test admin)
+2. **`migration_offmarket_enrich.sql`** : ajout des champs sub_type / surfaces pro / pièces détaillées / extérieurs / parking. **Indispensable** pour le nouveau formulaire CRUD off-market.
+3. **`migration_offmarket_composition.sql`** : composition_commerces / bureaux / logements (JSONB) + price_mode/min/max/custom_text + is_coup_de_coeur. **Indispensable** pour la section composition immeuble mixte + sélecteur prix.
+4. **`migration_documents.sql`** : table documents + bucket Storage. **Indispensable** pour le module /admin/documents.
+
+Tous les fichiers sont copiés dans `/Users/Shared/migration_*.sql` (chmod 644). Tous idempotents.
+
+#### Compte admin Supabase Auth
+À créer manuellement : Authentication → Users → Add user → `admin@mapagroup.org` (ou autre) + mot de passe initial. Le user peut ensuite changer son mot de passe via `/admin/settings`.
+
+#### Configuration SMTP Resend (urgence — limite Supabase 2 mails/h)
+Le SMTP par défaut Supabase est plafonné à **2 emails / heure** ce qui bloque actuellement les flux forgot-password / magic-link / invite. À remplacer par Resend.
+
+**Étapes côté Resend** :
+1. Aller sur https://resend.com → Domains → Add Domain → `mapaproperty.lu` (ou `mapagroup.org`).
+2. Ajouter les enregistrements DNS demandés (DKIM, SPF, return-path) dans Cloudflare.
+3. Attendre la vérification (~5-15 min).
+4. API Keys → Create API Key → noter la clé `re_...`.
+5. Créer les 3 templates HTML brandés MAPA dans Resend → Email Templates :
+   - `password_recovery` (avec lien `{{ .ConfirmationURL }}`)
+   - `magic_link` (avec lien `{{ .ConfirmationURL }}`)
+   - `invite` (avec lien `{{ .ConfirmationURL }}`)
+   Brand : logo SVG MAPA en haut centré, filet copper #B8865A, footer legal MAPA Synergy Sàrl.
+
+**Étapes côté Supabase Dashboard** :
+1. Project Settings → Auth → SMTP Settings → enable Custom SMTP.
+2. Host : `smtp.resend.com`, Port : `465`, Username : `resend`, Password : la clé API `re_...`.
+3. Sender email : `noreply@mapaproperty.lu` (ou autre validé sur Resend).
+4. Sender name : `MAPA Property`.
+5. Email Templates → password recovery / magic link / invite → coller le HTML des templates Resend (ou utiliser une syntaxe templating compatible Supabase).
+
+Tant que ce n'est pas fait : flux password reset peut envoyer 2/h max, ce qui bloque le test.
+
+#### Activation 2FA (recommandé, pas critique)
+Une fois connecté à `/admin/settings`, section « Double authentification » → cliquer « Activer la 2FA » → scanner le QR code dans 1Password / Authy / Google Authenticator → saisir le code 6 chiffres → validé.
+
+### Limitations livraison BO Admin Partie C
+
+#### C2 Leads — push manuel Apimo non livré
+Le bouton "Push manuel vers Apimo" n'est pas câblé (API Apimo write requiert des credentials + endpoint spécifique non documenté dans le brief). Pour l'instant, le workflow status + notes admin sont opérationnels, mais le push vers Apimo doit être fait manuellement par Julien depuis l'admin Apimo.
+
+#### C3 Mandates — upload mandat signé PDF non livré
+Le formulaire admin lit la liste, mais l'upload du PDF du mandat signé n'est pas livré (besoin d'une table `mandate_documents` ou colonne `signed_mandate_url` dans `mandate_requests` + UI upload). À ajouter dans une prochaine itération.
+
+#### C5 Reviews — drag & drop pour ordre carrousel non livré
+L'ordre du carrousel home suit la date `review_date` décroissante. Le drag & drop nécessite l'ajout d'une colonne `display_order` à la table reviews + UI dnd-kit. Reporté.
+
+#### C6 Blog — éditeur TipTap / preview live non livré
+Champ contenu en `<textarea>` (Markdown), pas d'éditeur riche TipTap. Suffit pour la rédaction directe ; à enrichir si Julien veut du WYSIWYG.
+
+### Bug bonus non corrigé : Coups de cœur unifiés Apimo + Off-market
+Le brief V2 demande un module `/admin/featured` qui mélange biens Apimo (is_featured) et biens Off-Market (is_coup_de_coeur) dans une UI unique, limité à 6 entrées. Pour l'instant :
+- Toggle `is_featured` Apimo se fait dans `/admin/properties` (lecture seule sauf 2 switches).
+- Toggle `is_coup_de_coeur` Off-Market se fait dans `/admin/offmarket/[id]/edit` (formulaire complet).
+
+Le carrousel home `<FeaturedCarousel />` lit uniquement la table `properties`. Pour que les off-market `is_coup_de_coeur` apparaissent côté home, il faut un fetcher combiné (`fetchHomeFeatured`) qui fait l'union des deux sources et retourne un type pivot. Reporté.
+
+### CHANTIER 2 — WebAuthn / Passkey non livré
+L'implémentation Passkey (Touch ID / Face ID) nécessite un service WebAuthn côté serveur (génération de challenge, vérification de signature, validation de l'attestation) — soit avec le package `@simplewebauthn/server` + une table dédiée `user_passkeys`, soit avec la nouvelle feature passkeys de Supabase Auth (en beta). Une placeholder section figure dans `/admin/settings` pour expliquer le report. À traiter en pair-programming avec Julien quand les flux MFA TOTP sont validés.
