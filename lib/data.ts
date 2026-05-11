@@ -55,6 +55,129 @@ export async function fetchFeaturedPropertiesWithCover(
   });
 }
 
+// Coups de cœur unifiés (CHANTIER 5 V3) : Apimo is_featured + Off-Market
+// is_coup_de_coeur, limité à 6, classés par created_at DESC. Type pivot
+// "HomeFeatured" pour permettre des liens distincts (/biens/[slug] vs
+// /off-market/[id]).
+export type HomeFeatured = {
+  id: string;
+  kind: "apimo" | "offmarket";
+  slug: string | null;
+  title: string | null;
+  city: string | null;
+  country: string | null;
+  price: number | null;
+  price_label: string | null;
+  cover_url: string | null;
+  surface: number | null;
+  bedrooms: number | null;
+  created_at: string | null;
+};
+
+export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
+  const sb = supabaseServer();
+
+  const [apimoRes, offmarketRes] = await Promise.all([
+    sb
+      .from("properties")
+      .select("id,slug,title_fr,city,country,price,surface,bedrooms,cover_image_url,created_at,property_images(url,sort)")
+      .eq("is_published", true)
+      .eq("is_featured", true)
+      .order("created_at", { ascending: false })
+      .limit(limit),
+    sb
+      .from("properties_offmarket")
+      .select("id,reference,title,city_label,country,price_label,price_display,surface_hab,bedrooms,cover_image_url,created_at,is_coup_de_coeur,is_published,status")
+      .order("created_at", { ascending: false })
+      .limit(limit),
+  ]);
+
+  if (apimoRes.error) console.error("[data] fetchHomeFeatured apimo", apimoRes.error.message);
+  if (offmarketRes.error) console.error("[data] fetchHomeFeatured offmarket", offmarketRes.error.message);
+
+  type ApimoRow = {
+    id: string;
+    slug: string | null;
+    title_fr: string | null;
+    city: string | null;
+    country: string | null;
+    price: number | null;
+    surface: number | null;
+    bedrooms: number | null;
+    cover_image_url: string | null;
+    created_at: string | null;
+    property_images: { url: string; sort: number | null }[] | null;
+  };
+  type OffmarketRow = {
+    id: string;
+    reference: string | null;
+    title: string | null;
+    city_label: string | null;
+    country: string | null;
+    price_label: string | null;
+    price_display: string | null;
+    surface_hab: number | null;
+    bedrooms: number | null;
+    cover_image_url: string | null;
+    created_at: string | null;
+    is_coup_de_coeur: boolean | null;
+    is_published: boolean | null;
+    status: string | null;
+  };
+
+  const apimo: HomeFeatured[] = ((apimoRes.data as ApimoRow[] | null) ?? []).map((row) => {
+    const sorted = (row.property_images ?? []).slice().sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
+    return {
+      id: row.id,
+      kind: "apimo",
+      slug: row.slug,
+      title: row.title_fr,
+      city: row.city,
+      country: row.country,
+      price: row.price,
+      price_label: row.price
+        ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(row.price) + " €"
+        : null,
+      cover_url: sorted[0]?.url ?? row.cover_image_url ?? null,
+      surface: row.surface,
+      bedrooms: row.bedrooms,
+      created_at: row.created_at,
+    };
+  });
+
+  const offmarket: HomeFeatured[] = ((offmarketRes.data as OffmarketRow[] | null) ?? [])
+    .filter(
+      (row) =>
+        row.is_coup_de_coeur === true &&
+        row.is_published === true &&
+        row.status === "published",
+    )
+    .map((row) => ({
+      id: row.id,
+      kind: "offmarket",
+      slug: row.reference,
+      title: row.title,
+      city: row.city_label,
+      country: row.country,
+      price: null,
+      price_label: row.price_label ?? row.price_display ?? "Prix sur demande",
+      cover_url: row.cover_image_url,
+      surface: row.surface_hab,
+      bedrooms: row.bedrooms,
+      created_at: row.created_at,
+    }));
+
+  const all = [...apimo, ...offmarket]
+    .sort((a, b) => {
+      const ad = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bd = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return bd - ad;
+    })
+    .slice(0, limit);
+
+  return all;
+}
+
 export async function fetchAllPropertiesWithCover(): Promise<PropertyWithCover[]> {
   const sb = supabaseServer();
   const { data, error } = await sb

@@ -1,7 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/home/Hero";
 import { SearchBar } from "@/components/home/SearchBar";
-import { CoupsDeCoeur } from "@/components/home/CoupsDeCoeur";
 import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
 import { CoverageGrid } from "@/components/home/CoverageGrid";
 import { ServicesTable } from "@/components/home/ServicesTable";
@@ -15,7 +14,7 @@ import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
 import { ContactCTA } from "@/components/home/ContactCTA";
 import {
-  fetchFeaturedPropertiesWithCover,
+  fetchHomeFeatured,
   fetchLatestBlogPosts,
   fetchPublishedReviews,
 } from "@/lib/data";
@@ -30,7 +29,7 @@ export default async function HomePage({
   setRequestLocale(locale);
 
   const [featured, reviews, blogPosts] = await Promise.all([
-    fetchFeaturedPropertiesWithCover(6),
+    fetchHomeFeatured(6),
     fetchPublishedReviews(8),
     fetchLatestBlogPosts(3),
   ]);
@@ -39,8 +38,7 @@ export default async function HomePage({
     <>
       <Hero />
       <SearchBar />
-      <CoupsDeCoeur />
-      <FeaturedCarousel properties={featured} locale={locale as Locale} />
+      <FeaturedCarousel items={featured} />
       <CoverageGrid />
       <ServicesTable />
       <OffMarketBand />
