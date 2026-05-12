@@ -1,16 +1,36 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import {
-  computeAcquisitionCost,
-} from "@/lib/acquisition/country-rules";
+import { useLocale } from "next-intl";
+import { computeAcquisitionCost } from "@/lib/acquisition/country-rules";
 import type {
   AcquisitionInput,
   AcquisitionResult,
-  CountryCode,
 } from "@/lib/acquisition/types";
 import { computeMortgage, computeDebtRatio, fmtEur } from "@/lib/finance-sim";
+import {
+  AcquisitionDisclaimerModal,
+  hasAcceptedDisclaimer,
+} from "./AcquisitionDisclaimerModal";
+
+const DISCLAIMER_EVENT = "mp-disclaimer-acquisition-change";
+
+function subscribeDisclaimer(callback: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", callback);
+  window.addEventListener(DISCLAIMER_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(DISCLAIMER_EVENT, callback);
+  };
+}
+function getDisclaimerSnapshot(): boolean {
+  return hasAcceptedDisclaimer();
+}
+function getDisclaimerServerSnapshot(): boolean {
+  return false;
+}
 
 interface Props {
   price: number;
@@ -22,12 +42,9 @@ interface Props {
 }
 
 const DURATIONS = [10, 15, 20, 25, 30] as const;
+const COPPER = "#B8865A";
 
-const SUPPORTED_CODES: CountryCode[] = [
-  "LU", "FR", "BE", "DE", "MC", "CH", "IT", "ES", "PT",
-];
-
-const COUNTRY_LABEL: Record<CountryCode, string> = {
+const COUNTRY_LABEL: Record<string, string> = {
   LU: "Luxembourg",
   FR: "France",
   BE: "Belgique",
@@ -40,38 +57,46 @@ const COUNTRY_LABEL: Record<CountryCode, string> = {
 };
 
 /** Normalise un string Apimo / saisie libre vers un CountryCode. */
-function normalizeCountry(input: string | null | undefined): CountryCode | null {
-  if (!input) return null;
-  const k = input.trim().toUpperCase();
-  if ((SUPPORTED_CODES as string[]).includes(k)) return k as CountryCode;
-
-  const NAMES: Record<string, CountryCode> = {
+function mapCountry(raw: string): string {
+  const c = (raw ?? "").toUpperCase().trim();
+  const aliases: Record<string, string> = {
     LUXEMBOURG: "LU",
     LUXEMBURG: "LU",
     "GRAND-DUCHÉ DE LUXEMBOURG": "LU",
     "GRAND DUCHE DE LUXEMBOURG": "LU",
+    LU: "LU",
     FRANCE: "FR",
+    FR: "FR",
     BELGIQUE: "BE",
     BELGIUM: "BE",
     BELGIË: "BE",
     BELGIE: "BE",
+    BE: "BE",
     ALLEMAGNE: "DE",
     GERMANY: "DE",
     DEUTSCHLAND: "DE",
+    DE: "DE",
     MONACO: "MC",
+    MC: "MC",
     SUISSE: "CH",
-    SCHWEIZ: "CH",
     SWITZERLAND: "CH",
+    SCHWEIZ: "CH",
+    CH: "CH",
     ITALIE: "IT",
     ITALY: "IT",
     ITALIA: "IT",
+    IT: "IT",
     ESPAGNE: "ES",
     SPAIN: "ES",
     ESPAÑA: "ES",
+    ES: "ES",
     PORTUGAL: "PT",
+    PT: "PT",
   };
-  return NAMES[k] ?? null;
+  return aliases[c] ?? c;
 }
+
+const SUPPORTED_CODES = ["LU", "FR", "BE", "DE", "MC", "CH", "IT", "ES", "PT"];
 
 export function AcquisitionSimulator({
   price,
@@ -80,13 +105,16 @@ export function AcquisitionSimulator({
   variant = "default",
 }: Props) {
   const isCompact = variant === "compact";
-  const normalized = normalizeCountry(country);
+  const code = mapCountry(country);
+  const isSupported = SUPPORTED_CODES.includes(code);
 
   // ── Cas pays non normalisable : message clair, pas de calcul ──
-  if (!normalized) {
+  if (!isSupported) {
     return (
       <section
-        className={`rounded-2xl border border-line bg-bg-soft p-5 ${isCompact ? "" : "sm:p-7"}`}
+        className={`rounded-2xl border border-line bg-bg-soft p-5 ${
+          isCompact ? "" : "sm:p-7"
+        }`}
       >
         <header className="mb-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
@@ -97,15 +125,31 @@ export function AcquisitionSimulator({
           </h3>
         </header>
         <p className="text-sm leading-relaxed text-ink-mid">
-          Le simulateur de financement n&apos;est pas encore disponible pour ce
-          pays. Contactez-nous pour une estimation personnalisée.
+          Le simulateur de coûts d&apos;acquisition n&apos;est pas encore
+          disponible pour ce pays. MAPA Property vous propose une analyse
+          personnalisée avec ses partenaires locaux.
         </p>
-        <Link
-          href="/contact"
-          className="mt-5 inline-flex items-center gap-2 rounded-full bg-gold-deep px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-bg transition-colors hover:bg-gold"
-        >
-          Nous contacter →
-        </Link>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <a
+            href="tel:+352691620127"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: COPPER }}
+          >
+            +352 691 620 127
+          </a>
+          <a
+            href="mailto:j.brebion@mapagroup.org"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
+          >
+            Email
+          </a>
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
+          >
+            Contact
+          </Link>
+        </div>
       </section>
     );
   }
@@ -113,7 +157,7 @@ export function AcquisitionSimulator({
   return (
     <SimulatorActive
       price={price}
-      country={normalized}
+      country={code}
       city={city ?? ""}
       isCompact={isCompact}
     />
@@ -127,18 +171,34 @@ function SimulatorActive({
   isCompact,
 }: {
   price: number;
-  country: CountryCode;
+  country: string;
   city: string;
   isCompact: boolean;
 }) {
+  const locale = useLocale();
+
+  // ── Gate disclaimer ──
+  // useSyncExternalStore : lecture côté client de localStorage, pas de mismatch
+  // d'hydration (le snapshot serveur retourne false) et pas de setState dans
+  // un useEffect (la doc React 19 recommande ce pattern pour les stores ext.).
+  const accepted = useSyncExternalStore(
+    subscribeDisclaimer,
+    getDisclaimerSnapshot,
+    getDisclaimerServerSnapshot,
+  );
+  const handleAccept = useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event(DISCLAIMER_EVENT));
+    }
+  }, []);
+
   // ── Profil acquéreur ──
   const [downPct, setDownPct] = useState(20);
   const [duration, setDuration] = useState<number>(25);
   const [isFirstTimeBuyer, setIsFirstTimeBuyer] = useState(false);
   const [isFamily, setIsFamily] = useState(false);
   const [propertyType, setPropertyType] = useState<"new" | "old">("old");
-  const [usage, setUsage] =
-    useState<AcquisitionInput["usage"]>("primary");
+  const [usage, setUsage] = useState<AcquisitionInput["usage"]>("primary");
   const [isResident, setIsResident] = useState<boolean>(true);
 
   const input: AcquisitionInput = {
@@ -158,11 +218,20 @@ function SimulatorActive({
   const result: AcquisitionResult = useMemo(
     () => computeAcquisitionCost(input),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [price, country, city, propertyType, usage, isResident, isFirstTimeBuyer, isFamily, downPct],
+    [
+      price,
+      country,
+      city,
+      propertyType,
+      usage,
+      isResident,
+      isFirstTimeBuyer,
+      isFamily,
+      downPct,
+    ],
   );
 
   const downPayment = Math.round((price * downPct) / 100);
-  // Taux indicatif simplifié (l'ancien moteur le portait — on garde un défaut neutre).
   const rate = 3.5;
 
   const mortgage = useMemo(
@@ -179,15 +248,26 @@ function SimulatorActive({
   const incomeRequired = mortgage.monthlyPayment / 0.35;
   const debtRatio = computeDebtRatio(mortgage.monthlyPayment, incomeRequired);
 
-  // ── Cas notCovered : pays supporté côté UI mais pas encore implémenté (CH/IT/ES/PT)
+  // ── Cas notCovered : pays supporté côté UI mais pas encore implémenté ou Lex Koller CH
   if (result.notCovered) {
     return (
       <section
-        className={`rounded-2xl border border-line bg-bg-soft p-5 ${isCompact ? "" : "sm:p-7"}`}
+        className={`rounded-2xl border border-line bg-bg-soft p-5 ${
+          isCompact ? "" : "sm:p-7"
+        }`}
       >
+        {!accepted && (
+          <AcquisitionDisclaimerModal
+            onAccept={handleAccept}
+            locale={locale}
+          />
+        )}
         <header className="mb-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-            Plan de financement · {COUNTRY_LABEL[country]}
+          <p
+            className="font-mono text-[10px] uppercase tracking-[0.3em]"
+            style={{ color: COPPER }}
+          >
+            Plan de financement · {COUNTRY_LABEL[country] ?? country}
           </p>
           <h3 className="mt-1 font-display text-lg font-bold text-ink">
             Estimation personnalisée disponible sur demande
@@ -196,229 +276,334 @@ function SimulatorActive({
         <p className="text-sm leading-relaxed text-ink-mid">
           {result.contactMessage}
         </p>
-        <Link
-          href="/contact"
-          className="mt-5 inline-flex items-center gap-2 rounded-full bg-gold-deep px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-bg transition-colors hover:bg-gold"
-        >
-          Nous contacter →
-        </Link>
-        <p className="mt-5 rounded-md border border-yellow-400 bg-yellow-50 px-3 py-2 text-[11px] leading-snug text-ink-mid">
+        <div className="mt-5 flex flex-wrap gap-2">
+          <a
+            href="tel:+352691620127"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: COPPER }}
+          >
+            +352 691 620 127
+          </a>
+          <a
+            href="mailto:j.brebion@mapagroup.org"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
+          >
+            Email
+          </a>
+          <Link
+            href={`/${locale}/contact`}
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
+          >
+            Contact
+          </Link>
+        </div>
+        <p className="mt-5 rounded-md border border-yellow-400 bg-yellow-50 px-3 py-2 text-[11px] leading-relaxed text-ink-mid dark:bg-yellow-900/10">
           {result.legalNotice.shortDisclaimer}
         </p>
       </section>
     );
   }
 
+  // ── Note importante isolée (lineItem amount === 0)
+  const noteImportante = result.lineItems.find(
+    (li) => li.amount === 0 && li.label === "Note importante",
+  );
+  const lineItemsToDisplay = result.lineItems.filter(
+    (li) => !(li.amount === 0 && li.label === "Note importante"),
+  );
+
   return (
     <section
-      className={`rounded-2xl border border-gold/30 bg-bg-soft p-5 ${isCompact ? "" : "sm:p-7"}`}
+      className={`rounded-2xl border border-line bg-bg-soft p-5 ${
+        isCompact ? "" : "sm:p-7"
+      }`}
+      style={{ borderColor: `${COPPER}33` }}
     >
+      {!accepted && (
+        <AcquisitionDisclaimerModal
+          onAccept={handleAccept}
+          locale={locale}
+        />
+      )}
+
       <header className="mb-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
-          Plan de financement · {COUNTRY_LABEL[country]}
+        <p
+          className="font-mono text-[10px] uppercase tracking-[0.3em]"
+          style={{ color: COPPER }}
+        >
+          Plan de financement · {COUNTRY_LABEL[country] ?? country}
           {result.region ? ` · ${result.region}` : ""}
         </p>
         <h3 className="mt-1 font-display text-lg font-bold text-ink">
-          Mensualité, frais et aides applicables
+          Coût d&apos;acquisition, mensualité et aides applicables
         </h3>
       </header>
 
-      {/* Sliders & paramètres */}
-      <div className="mt-4 space-y-4">
-        <label className="block">
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-              Apport
-            </span>
-            <span className="font-mono text-xs font-semibold text-ink">
-              {downPct}% · {fmtEur(downPayment)}
-            </span>
-          </div>
-          <input
-            type="range"
-            min={10}
-            max={50}
-            step={5}
-            value={downPct}
-            onChange={(e) => setDownPct(Number(e.target.value))}
-            className="mt-2 block w-full accent-gold-deep"
-          />
-        </label>
-
-        <label className="block">
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-            Durée
-          </span>
-          <select
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-            className="mt-1 block w-full rounded-md border border-line bg-bg px-3 py-2 font-mono text-sm"
-          >
-            {DURATIONS.map((d) => (
-              <option key={d} value={d}>
-                {d} ans
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <fieldset className="grid grid-cols-2 gap-2">
-          <CheckboxField
-            checked={isFirstTimeBuyer}
-            onChange={setIsFirstTimeBuyer}
-            label="Primo-accédant"
-          />
-          <CheckboxField
-            checked={isFamily}
-            onChange={setIsFamily}
-            label="Couple / famille"
-          />
-          <CheckboxField
-            checked={propertyType === "new"}
-            onChange={(v) => setPropertyType(v ? "new" : "old")}
-            label="Bien neuf / VEFA"
-          />
-          <CheckboxField
-            checked={isResident}
-            onChange={setIsResident}
-            label="Résident fiscal"
-          />
-        </fieldset>
-
-        <fieldset className="space-y-2 text-sm">
-          <legend className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-            Usage du bien
-          </legend>
-          <div className="flex flex-wrap gap-4">
-            <RadioField
-              name="acq-usage"
-              value="primary"
-              current={usage}
-              onChange={setUsage}
-              label="Résidence principale"
-            />
-            <RadioField
-              name="acq-usage"
-              value="secondary"
-              current={usage}
-              onChange={setUsage}
-              label="Résidence secondaire"
-            />
-            <RadioField
-              name="acq-usage"
-              value="investment"
-              current={usage}
-              onChange={setUsage}
-              label="Investissement locatif"
-            />
-          </div>
-        </fieldset>
-      </div>
-
-      {/* Avertissements moteur */}
-      {result.warnings.length > 0 && (
-        <ul className="mt-4 space-y-1.5">
-          {result.warnings.map((w, i) => (
-            <li
-              key={i}
-              className="rounded-md border border-line bg-bg/50 px-3 py-2 text-[11px] leading-snug text-ink-soft"
-            >
-              {w}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* Récapitulatif */}
-      <dl className="mt-6 grid gap-3 text-sm">
-        <Row label="Prix du bien" value={fmtEur(price)} />
-
-        {/* Line items détaillés du moteur */}
-        <div className="rounded-lg border border-line bg-bg p-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-            Détail des frais d&apos;acquisition
+      {!accepted ? (
+        <div className="rounded-xl border border-line bg-bg p-6 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">
+            Acceptez les conditions pour voir l&apos;estimation
           </p>
-          <ul className="mt-2 space-y-2">
-            {result.lineItems.map((li, i) => (
-              <li key={i} className="text-xs text-ink-mid">
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="font-medium text-ink">{li.label}</span>
-                  {li.amount !== 0 && (
-                    <span
-                      className={`font-mono text-xs font-semibold ${li.amount < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-ink"}`}
-                    >
-                      {li.amount < 0 ? "− " : ""}
-                      {fmtEur(Math.abs(li.amount))}
-                    </span>
-                  )}
-                </div>
-                {li.notes && (
-                  <p className="mt-0.5 text-[11px] leading-snug text-ink-soft">
-                    {li.notes}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
         </div>
+      ) : (
+        <>
+          {/* Sliders & paramètres */}
+          <div className="space-y-4">
+            <label className="block">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+                  Apport
+                </span>
+                <span className="font-mono text-xs font-semibold text-ink">
+                  {downPct}% · {fmtEur(downPayment)}
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={50}
+                step={5}
+                value={downPct}
+                onChange={(e) => setDownPct(Number(e.target.value))}
+                className="mt-2 block w-full"
+                style={{ accentColor: COPPER }}
+              />
+            </label>
 
-        <Row
-          label="Total frais d'acquisition"
-          value={fmtEur(result.totalCost)}
-          hint={`${result.totalCostPercent.toFixed(2).replace(".", ",")} % du prix`}
-          accent
-        />
-        <Row
-          label="Capital emprunté (estimé)"
-          value={fmtEur(mortgage.borrowedAmount)}
-        />
-        <Row
-          label="Mensualité estimée"
-          value={fmtEur(mortgage.monthlyPayment)}
-          hint={`taux indicatif ${rate.toFixed(2)} % · ${duration} ans`}
-        />
-        <Row
-          label="Coût total acquisition"
-          value={fmtEur(price + result.totalCost)}
-        />
-        <Row
-          label="Revenu mensuel requis (35%)"
-          value={fmtEur(incomeRequired)}
-          hint={`taux d'endettement cible ${debtRatio.toFixed(0)} %`}
-        />
-      </dl>
+            <label className="block">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+                Durée
+              </span>
+              <select
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                className="mt-1 block w-full rounded-md border border-line bg-bg px-3 py-2 font-mono text-sm text-ink"
+              >
+                {DURATIONS.map((d) => (
+                  <option key={d} value={d}>
+                    {d} ans
+                  </option>
+                ))}
+              </select>
+            </label>
 
-      {/* Sources & disclaimer */}
-      <div className="mt-5 space-y-3 border-t border-line pt-4">
-        {result.sources.length > 0 && (
-          <details className="text-[11px] text-ink-soft">
-            <summary className="cursor-pointer font-mono uppercase tracking-[0.15em] text-ink-soft hover:text-ink">
-              Sources officielles ({result.sources.length})
-            </summary>
-            <ul className="mt-2 space-y-1">
-              {result.sources.map((s) => (
-                <li key={s.url}>
-                  <a
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gold-deep underline-offset-2 hover:underline"
-                  >
-                    {s.label}
-                  </a>
-                  <span className="ml-1 text-ink-soft/70">
-                    · vérifié {s.verifiedDate}
-                  </span>
+            <fieldset className="grid grid-cols-2 gap-2">
+              <CheckboxField
+                checked={isFirstTimeBuyer}
+                onChange={setIsFirstTimeBuyer}
+                label="Primo-accédant"
+              />
+              <CheckboxField
+                checked={isFamily}
+                onChange={setIsFamily}
+                label="Couple / famille"
+              />
+              <CheckboxField
+                checked={propertyType === "new"}
+                onChange={(v) => setPropertyType(v ? "new" : "old")}
+                label="Bien neuf / VEFA"
+              />
+              <CheckboxField
+                checked={isResident}
+                onChange={setIsResident}
+                label="Résident fiscal"
+              />
+            </fieldset>
+
+            <fieldset className="space-y-2 text-sm">
+              <legend className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+                Usage du bien
+              </legend>
+              <div className="flex flex-wrap gap-4">
+                <RadioField
+                  name="acq-usage"
+                  value="primary"
+                  current={usage}
+                  onChange={setUsage}
+                  label="Résidence principale"
+                />
+                <RadioField
+                  name="acq-usage"
+                  value="secondary"
+                  current={usage}
+                  onChange={setUsage}
+                  label="Résidence secondaire"
+                />
+                <RadioField
+                  name="acq-usage"
+                  value="investment"
+                  current={usage}
+                  onChange={setUsage}
+                  label="Investissement locatif"
+                />
+              </div>
+            </fieldset>
+          </div>
+
+          {/* Détail line items */}
+          <div className="mt-6 rounded-xl border border-line bg-bg p-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+              Détail des frais d&apos;acquisition
+            </p>
+            <ul className="mt-3 space-y-2.5">
+              {lineItemsToDisplay.map((li, i) => (
+                <li key={i} className="text-sm text-ink-mid">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="font-medium text-ink">{li.label}</span>
+                    <span className="flex items-baseline gap-2">
+                      {typeof li.rate === "number" && (
+                        <span className="font-mono text-[10px] text-ink-soft">
+                          {li.rate.toFixed(2).replace(/\.?0+$/, "")} %
+                        </span>
+                      )}
+                      {li.amount !== 0 && (
+                        <span
+                          className={`font-mono text-xs font-semibold ${
+                            li.amount < 0
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-ink"
+                          }`}
+                        >
+                          {li.amount < 0 ? "− " : ""}
+                          {fmtEur(Math.abs(li.amount))}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  {li.notes && (
+                    <p className="mt-0.5 text-[11px] italic leading-snug text-ink-soft">
+                      {li.notes}
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>
-          </details>
-        )}
+          </div>
 
-        <p className="rounded-md border border-yellow-400 bg-yellow-50 px-3 py-2 text-[11px] leading-relaxed text-ink-mid">
-          {result.legalNotice.shortDisclaimer}
-        </p>
-      </div>
+          {/* Note importante — carte spéciale */}
+          {noteImportante?.notes && (
+            <aside
+              className="mt-4 rounded-xl border bg-bg-soft p-4"
+              style={{ borderColor: `${COPPER}55` }}
+            >
+              <p
+                className="font-mono text-[10px] uppercase tracking-[0.3em]"
+                style={{ color: COPPER }}
+              >
+                {noteImportante.label}
+              </p>
+              <p className="mt-1.5 text-xs leading-relaxed text-ink-mid">
+                {noteImportante.notes}
+              </p>
+            </aside>
+          )}
+
+          {/* Total mis en avant */}
+          <div
+            className="mt-5 rounded-xl border bg-bg p-5"
+            style={{ borderColor: `${COPPER}55` }}
+          >
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+                Total frais d&apos;acquisition
+              </p>
+              <p className="font-mono text-[10px] text-ink-soft">
+                {result.totalCostPercent.toFixed(2).replace(".", ",")} % du prix
+              </p>
+            </div>
+            <p
+              className="mt-2 font-display text-3xl font-black tracking-tight"
+              style={{ color: COPPER }}
+            >
+              {fmtEur(result.totalCost)}
+            </p>
+          </div>
+
+          {/* Récapitulatif financement */}
+          <dl className="mt-5 grid gap-3 text-sm">
+            <Row label="Prix du bien" value={fmtEur(price)} />
+            <Row
+              label="Capital emprunté (estimé)"
+              value={fmtEur(mortgage.borrowedAmount)}
+            />
+            <Row
+              label="Mensualité estimée"
+              value={fmtEur(mortgage.monthlyPayment)}
+              hint={`taux indicatif ${rate.toFixed(2)} % · ${duration} ans`}
+            />
+            <Row
+              label="Coût total acquisition"
+              value={fmtEur(price + result.totalCost)}
+            />
+            <Row
+              label="Revenu mensuel requis (35%)"
+              value={fmtEur(incomeRequired)}
+              hint={`taux d'endettement cible ${debtRatio.toFixed(0)} %`}
+            />
+          </dl>
+
+          {/* Warnings */}
+          {result.warnings.length > 0 && (
+            <ul className="mt-5 space-y-2 rounded-md border border-yellow-400 bg-yellow-50 p-3 dark:bg-yellow-900/10">
+              {result.warnings.map((w, i) => (
+                <li
+                  key={i}
+                  className="flex gap-2 text-[11px] leading-relaxed text-ink-mid"
+                >
+                  <span aria-hidden className="select-none">⚠️</span>
+                  <span>{w}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Disclaimer permanent (legalNotice.shortDisclaimer) */}
+          <p className="mt-5 rounded-md border border-yellow-400 bg-yellow-50 px-3 py-2 text-xs leading-relaxed text-ink-mid dark:bg-yellow-900/10">
+            {result.legalNotice.shortDisclaimer}
+          </p>
+
+          {/* Sources officielles */}
+          {result.sources.length > 0 && (
+            <div className="mt-5 border-t border-line pt-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
+                Sources officielles ({result.sources.length})
+              </p>
+              <ul className="mt-2 space-y-1.5">
+                {result.sources.map((s) => (
+                  <li
+                    key={s.url}
+                    className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5"
+                  >
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-[11px] uppercase tracking-wide underline-offset-2 hover:underline"
+                      style={{ color: COPPER }}
+                    >
+                      {s.label} ↗
+                    </a>
+                    <span className="font-mono text-[10px] text-ink-soft/70">
+                      · vérifié {s.verifiedDate}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Footer — mentions complètes */}
+          <div className="mt-5 border-t border-line pt-4 text-right">
+            <Link
+              href={`/${locale}/mentions-acquisition`}
+              className="font-mono text-[11px] uppercase tracking-[0.2em] underline-offset-2 hover:underline"
+              style={{ color: COPPER }}
+            >
+              Mentions légales complètes →
+            </Link>
+          </div>
+        </>
+      )}
     </section>
   );
 }
@@ -429,12 +614,10 @@ function Row({
   label,
   value,
   hint,
-  accent,
 }: {
   label: string;
   value: string;
   hint?: string;
-  accent?: boolean;
 }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
@@ -442,15 +625,7 @@ function Row({
         {label}
       </dt>
       <dd className="text-right">
-        <span
-          className={
-            accent
-              ? "font-display text-xl font-bold gold-text"
-              : "font-display text-base font-bold text-ink"
-          }
-        >
-          {value}
-        </span>
+        <span className="font-display text-base font-bold text-ink">{value}</span>
         {hint && (
           <span className="block text-[10px] text-ink-soft/80">{hint}</span>
         )}
@@ -474,7 +649,8 @@ function CheckboxField({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-3.5 w-3.5 accent-gold-deep"
+        className="h-3.5 w-3.5"
+        style={{ accentColor: COPPER }}
       />
       <span>{label}</span>
     </label>
@@ -502,7 +678,8 @@ function RadioField<T extends string>({
         value={value}
         checked={current === value}
         onChange={() => onChange(value)}
-        className="h-3.5 w-3.5 accent-gold-deep"
+        className="h-3.5 w-3.5"
+        style={{ accentColor: COPPER }}
       />
       <span>{label}</span>
     </label>
