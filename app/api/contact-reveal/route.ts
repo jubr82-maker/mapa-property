@@ -14,11 +14,12 @@ interface RevealBody {
   token?: string;
 }
 
-// Fallback hardcodé conforme à AGENTS.md (graceful degradation).
-// L'objectif est que ces valeurs viennent des env vars Vercel en prod
-// pour qu'elles ne soient PAS dans le code source public.
-const FALLBACK_PHONE = "+352 691 620 127";
-const FALLBACK_EMAIL = "j.brebion@mapagroup.org";
+// Fallback placeholders. Les vraies coordonnées DOIVENT venir des env vars
+// Vercel `MAPA_PHONE` et `MAPA_EMAIL` (RGPD : pas de PII dans le repo public).
+// Si l'env var n'est pas configurée, on retourne un message renvoyant
+// l'utilisateur vers les mentions légales — source unique légalement obligatoire.
+const FALLBACK_PHONE = "Voir mentions légales";
+const FALLBACK_EMAIL = "Voir mentions légales";
 
 export async function POST(req: Request) {
   const ip = clientIp(req) ?? "unknown";
