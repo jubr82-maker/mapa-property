@@ -13,10 +13,12 @@ import {
   Building2,
   Users,
   Settings,
+  BarChart3,
 } from "lucide-react";
 
 const items = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, match: "exact" as const },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3, match: "prefix" as const },
   { href: "/admin/offmarket", label: "Off-Market", icon: Lock, match: "prefix" as const },
   { href: "/admin/leads", label: "Leads", icon: Mail, match: "prefix" as const },
   { href: "/admin/mandats-recherche", label: "Mandats", icon: FileText, match: "prefix" as const },

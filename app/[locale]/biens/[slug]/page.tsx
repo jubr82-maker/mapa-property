@@ -15,6 +15,7 @@ import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
 import { ContactButtons } from "@/components/ContactButtons";
 import { MiniFinanceSimulator } from "@/components/property/MiniFinanceSimulator";
+import { PropertyViewTracker } from "@/components/property/PropertyViewTracker";
 import { Link as IntlLink } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumb, propertyListing } from "@/lib/seo";
@@ -132,6 +133,7 @@ export default async function PropertyPage({
 
   return (
     <article className="pt-24 lg:pt-32">
+      <PropertyViewTracker propertyId={property.id} />
       <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <div className="mb-6 flex items-center justify-between gap-4 print:hidden">
