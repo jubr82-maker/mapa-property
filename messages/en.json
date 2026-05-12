@@ -230,6 +230,12 @@
     "email_label": "Send an email",
     "cta": "Book a meeting"
   },
+  "contact": {
+    "call_button": "Call",
+    "email_button": "Email",
+    "loading": "Loading…",
+    "error": "Try again shortly"
+  },
   "home": {
     "placeholder": "MAPA Property — homepage under construction."
   },

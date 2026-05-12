@@ -230,6 +230,12 @@
     "email_label": "Écrire un email",
     "cta": "Prendre rendez-vous"
   },
+  "contact": {
+    "call_button": "Appeler",
+    "email_button": "Écrire",
+    "loading": "Chargement…",
+    "error": "Réessayez dans un instant"
+  },
   "home": {
     "placeholder": "MAPA Property — page d'accueil en construction."
   },
