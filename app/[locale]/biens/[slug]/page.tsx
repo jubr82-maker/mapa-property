@@ -2,7 +2,6 @@ import { notFound, redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import {
   fetchAllPropertiesWithCover,
-  fetchLatestInterestRates,
   fetchOffmarketById,
   fetchPropertyByIdOrSlug,
   fetchPropertyImages,
@@ -11,7 +10,6 @@ import {
 import { pickLang, type Locale } from "@/lib/types";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
 import { PropertyActions } from "@/components/property/PropertyActions";
-import { PropertyFinancing } from "@/components/property/PropertyFinancing";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
@@ -62,10 +60,9 @@ export default async function PropertyPage({
     notFound();
   }
 
-  const [images, reviews, rates, allProperties] = await Promise.all([
+  const [images, reviews, allProperties] = await Promise.all([
     fetchPropertyImages(property.id),
     fetchPublishedReviews(3),
-    fetchLatestInterestRates(),
     fetchAllPropertiesWithCover(),
   ]);
 
@@ -86,9 +83,6 @@ export default async function PropertyPage({
       alt: title,
     });
   }
-
-  const rate =
-    rates?.rates?.fixed_25 ?? rates?.rates?.fixed_20 ?? rates?.rates?.fixed_30 ?? 3.6;
 
   // Biens similaires — logique stricte V3 : même type + prix ±15% +
   // même pays (idéalement même ville), excluant le bien actuel.
@@ -278,10 +272,6 @@ export default async function PropertyPage({
 
           {/* Sidebar */}
           <aside className="space-y-6">
-            {property.price && property.transaction !== "rent" && (
-              <PropertyFinancing price={property.price} rate={Number(rate)} />
-            )}
-
             <div className="rounded-xl border border-line bg-bg-soft p-6">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
                 {t("advisor")}
