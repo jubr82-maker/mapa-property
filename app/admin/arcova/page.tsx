@@ -12,7 +12,7 @@ export default async function AdminArcovaPage({
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from("arcova_waitlist")
-    .select("id,created_at,first_name,last_name,email,company,role,message,status")
+    .select("id,email,first_name,last_name,phone,company,role,message,status,created_at,notes")
     .order("created_at", { ascending: false });
 
   if (sp.role) query = query.eq("role", sp.role);

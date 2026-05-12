@@ -5,17 +5,19 @@ import { useTransition } from "react";
 
 type Item = {
   id: string;
-  created_at: string;
+  email: string;
   first_name: string | null;
   last_name: string | null;
-  email: string;
+  phone: string | null;
   company: string | null;
   role: string | null;
   message: string | null;
   status: string | null;
+  created_at: string;
+  notes: string | null;
 };
 
-const STATUSES = ["pending", "invited", "accepted", "declined"];
+const STATUSES = ["pending", "contacted", "done"];
 
 export function ArcovaTable({ items }: { items: Item[] }) {
   const router = useRouter();
@@ -31,13 +33,13 @@ export function ArcovaTable({ items }: { items: Item[] }) {
 
   const exportCsv = () => {
     const lines = [
-      ["Date", "Prénom", "Nom", "Email", "Entreprise", "Rôle", "Statut", "Message"].join(","),
+      ["Date", "Email", "Nom", "Téléphone", "Entreprise", "Rôle", "Statut", "Message"].join(","),
       ...items.map((i) =>
         [
           new Date(i.created_at).toISOString(),
-          i.first_name ?? "",
-          i.last_name ?? "",
           i.email,
+          [i.first_name, i.last_name].filter(Boolean).join(" "),
+          i.phone ?? "",
           i.company ?? "",
           i.role ?? "",
           i.status ?? "",
@@ -91,17 +93,18 @@ export function ArcovaTable({ items }: { items: Item[] }) {
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
               <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Nom</th>
               <th className="px-4 py-3">Email</th>
+              <th className="px-4 py-3">Nom</th>
               <th className="px-4 py-3">Entreprise</th>
               <th className="px-4 py-3">Rôle</th>
+              <th className="px-4 py-3">Message</th>
               <th className="px-4 py-3">Statut</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#3D4F63]/10">
             {items.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
+                <td colSpan={7} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
                   Aucune inscription.
                 </td>
               </tr>
@@ -115,12 +118,21 @@ export function ArcovaTable({ items }: { items: Item[] }) {
                       year: "numeric",
                     })}
                   </td>
+                  <td className="px-4 py-3">{i.email}</td>
                   <td className="px-4 py-3">
                     {[i.first_name, i.last_name].filter(Boolean).join(" ") || "—"}
                   </td>
-                  <td className="px-4 py-3">{i.email}</td>
                   <td className="px-4 py-3 text-xs text-[#3D4F63]/80">{i.company ?? "—"}</td>
                   <td className="px-4 py-3 text-xs text-[#3D4F63]/80">{i.role ?? "—"}</td>
+                  <td className="px-4 py-3 text-xs text-[#3D4F63]/80">
+                    {i.message ? (
+                      <span className="line-clamp-2 max-w-[28ch]" title={i.message}>
+                        {i.message}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <span className="rounded-full bg-[#3D4F63]/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]">
                       {i.status ?? "pending"}
