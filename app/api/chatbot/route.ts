@@ -120,7 +120,6 @@ const tryAutoLead = async (
       type: "chatbot",
       source: `chatbot:${pageContext || "home"}`,
       lang: locale,
-      status: "new",
     });
   } catch {
     // silent fail — chatbot continues even if insert fails
