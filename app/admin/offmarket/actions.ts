@@ -531,3 +531,123 @@ export async function updateRequestNotes(requestId: string, notes: string) {
   }
   revalidatePath("/admin/offmarket/requests");
 }
+
+// ============================================================================
+// Workflow admin générique sur la table `offmarket_requests`.
+// Aligné EXACTEMENT sur app/admin/leads/actions.ts (Agent 13, Phase A-quater).
+// COHABITATION : `workflow_status` est ajouté en parallèle de `status` (métier
+// off-market : pending, qualified, nda_sent, …) sans le remplacer. Idem pour
+// `admin_notes` qui coexiste avec `notes_admin`.
+// Dégrade gracieusement si la migration 20260512_admin_workflow_offmarket.sql
+// n'est pas encore appliquée : remonte l'erreur Supabase telle quelle.
+// ============================================================================
+
+type WorkflowHistoryEntry = {
+  at: string;
+  from?: string;
+  to?: string;
+  reason?: string | null;
+  note?: string;
+};
+
+const WORKFLOW_TABLE = "offmarket_requests";
+const WORKFLOW_LIST_ROUTE = "/admin/offmarket/requests";
+
+export async function updateRequestWorkflowStatus(
+  id: string,
+  newStatus: string,
+  reason?: string,
+) {
+  const sb = await createSupabaseServerClient();
+
+  const { data: current } = await sb
+    .from(WORKFLOW_TABLE)
+    .select("workflow_status, workflow_history, property_id")
+    .eq("id", id)
+    .maybeSingle();
+
+  const history: WorkflowHistoryEntry[] = Array.isArray(
+    (current as { workflow_history?: unknown } | null)?.workflow_history,
+  )
+    ? ((current as { workflow_history: WorkflowHistoryEntry[] })
+        .workflow_history)
+    : [];
+
+  history.push({
+    at: new Date().toISOString(),
+    from:
+      (current as { workflow_status?: string } | null)?.workflow_status ??
+      "unknown",
+    to: newStatus,
+    reason: reason ?? null,
+  });
+
+  const { error } = await sb
+    .from(WORKFLOW_TABLE)
+    .update({ workflow_status: newStatus, workflow_history: history })
+    .eq("id", id);
+
+  if (error) throw new Error(error.message);
+
+  const propertyId = (current as { property_id?: string } | null)?.property_id;
+  revalidatePath(WORKFLOW_LIST_ROUTE);
+  revalidatePath(`${WORKFLOW_LIST_ROUTE}/${id}`);
+  if (propertyId) {
+    revalidatePath(`/admin/offmarket/${propertyId}/requests`);
+  }
+}
+
+export async function addRequestAdminNote(id: string, noteText: string) {
+  const trimmed = noteText.trim();
+  if (!trimmed) return;
+
+  const sb = await createSupabaseServerClient();
+
+  const { data: current } = await sb
+    .from(WORKFLOW_TABLE)
+    .select("workflow_history, property_id")
+    .eq("id", id)
+    .maybeSingle();
+
+  const history: WorkflowHistoryEntry[] = Array.isArray(
+    (current as { workflow_history?: unknown } | null)?.workflow_history,
+  )
+    ? ((current as { workflow_history: WorkflowHistoryEntry[] })
+        .workflow_history)
+    : [];
+
+  history.push({ at: new Date().toISOString(), note: trimmed });
+
+  const { error } = await sb
+    .from(WORKFLOW_TABLE)
+    .update({ workflow_history: history, admin_notes: trimmed })
+    .eq("id", id);
+
+  if (error) throw new Error(error.message);
+
+  const propertyId = (current as { property_id?: string } | null)?.property_id;
+  revalidatePath(`${WORKFLOW_LIST_ROUTE}/${id}`);
+  if (propertyId) {
+    revalidatePath(`/admin/offmarket/${propertyId}/requests`);
+  }
+}
+
+export async function setRequestNextFollowUp(
+  id: string,
+  date: string | null,
+) {
+  const sb = await createSupabaseServerClient();
+  const { data, error } = await sb
+    .from(WORKFLOW_TABLE)
+    .update({ next_follow_up: date })
+    .eq("id", id)
+    .select("property_id")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  revalidatePath(`${WORKFLOW_LIST_ROUTE}/${id}`);
+  revalidatePath(WORKFLOW_LIST_ROUTE);
+  const propertyId = (data as { property_id?: string } | null)?.property_id;
+  if (propertyId) {
+    revalidatePath(`/admin/offmarket/${propertyId}/requests`);
+  }
+}
