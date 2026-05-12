@@ -103,7 +103,7 @@ export function Header() {
               {t("journal")}
             </Link>
           </div>
-          <div className="ml-2">
+          <div className="ml-2 lg:hidden">
             <HeaderBurger />
           </div>
         </div>
