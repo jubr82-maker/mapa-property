@@ -1,3 +1,18 @@
+// Endpoint d'insertion des leads (formulaires publics).
+//
+// Ordre INVIOLABLE des opérations (voir bug UX 2026-05-12) :
+//   1. rate limit         → 429
+//   2. parsing body       → catch silent
+//   3. validation données → 400 (invalid_email / missing_type)
+//   4. verifyTurnstile    → 403 (turnstile_failed)
+//   5. INSERT Supabase    → 500 (db_error) si Postgres rejette
+//   6. 200 ok             → succès
+//
+// Tout INSERT doit se faire APRÈS le passage du captcha. Le front-end
+// (components/forms/ContactForm.tsx) doit désactiver le submit tant que
+// le widget Turnstile n'a pas fourni de token, sinon le serveur répond 403
+// avant d'atteindre l'INSERT et l'utilisateur croit avoir échoué alors
+// qu'aucune ligne n'a été créée.
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { rateLimit } from "@/lib/rate-limit";
