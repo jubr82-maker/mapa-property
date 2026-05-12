@@ -1,9 +1,10 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import {
   fetchAllPropertiesWithCover,
   fetchLatestInterestRates,
-  fetchPropertyBySlug,
+  fetchOffmarketById,
+  fetchPropertyByIdOrSlug,
   fetchPropertyImages,
   fetchPublishedReviews,
 } from "@/lib/data";
@@ -45,8 +46,21 @@ export default async function PropertyPage({
   const { locale, slug } = await params;
   setRequestLocale(locale);
 
-  const property = await fetchPropertyBySlug(slug);
-  if (!property) notFound();
+  // 1) Résolution Apimo : slug textuel, UUID ou apimo_ref numérique.
+  const property = await fetchPropertyByIdOrSlug(slug);
+
+  // 2) Fallback off-market : si l'identifiant est un UUID Supabase
+  //    pointant vers un bien off-market, on redirige vers la bonne route
+  //    (les linkers défaillants envoient parfois ici).
+  if (!property) {
+    const UUID_RE =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (UUID_RE.test(slug)) {
+      const off = await fetchOffmarketById(slug);
+      if (off) redirect(`/${locale}/off-market/${off.id}`);
+    }
+    notFound();
+  }
 
   const [images, reviews, rates, allProperties] = await Promise.all([
     fetchPropertyImages(property.id),

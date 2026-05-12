@@ -228,6 +228,67 @@ export async function fetchPropertyBySlug(slug: string): Promise<Property | null
   return (data as Property | null) ?? null;
 }
 
+// Resolver générique pour la route /biens/[slug]. Accepte slug textuel,
+// UUID Supabase (id) ou identifiant numérique Apimo (apimo_ref). Si rien
+// ne matche dans `properties`, tente un fallback off-market par id ou
+// reference, et renvoie une struct Property minimale shape-compatible.
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const NUMERIC_RE = /^[0-9]+$/;
+
+export async function fetchPropertyByIdOrSlug(
+  identifier: string,
+): Promise<Property | null> {
+  const sb = supabaseServer();
+  const isUuid = UUID_RE.test(identifier);
+  const isNumeric = NUMERIC_RE.test(identifier);
+
+  // 1) Match strict slug (cas majoritaire)
+  {
+    const { data, error } = await sb
+      .from("properties")
+      .select("*")
+      .eq("slug", identifier)
+      .eq("is_published", true)
+      .maybeSingle();
+    if (!error && data) return data as Property;
+    if (error && error.code !== "PGRST116") {
+      console.error("[data] fetchPropertyByIdOrSlug slug", error.message);
+    }
+  }
+
+  // 2) UUID → id Supabase
+  if (isUuid) {
+    const { data, error } = await sb
+      .from("properties")
+      .select("*")
+      .eq("id", identifier)
+      .eq("is_published", true)
+      .maybeSingle();
+    if (!error && data) return data as Property;
+    if (error && error.code !== "PGRST116") {
+      console.error("[data] fetchPropertyByIdOrSlug id", error.message);
+    }
+  }
+
+  // 3) Numérique → potentiel apimo_ref (best-effort, colonne tolérée)
+  if (isNumeric) {
+    const { data, error } = await sb
+      .from("properties")
+      .select("*")
+      .eq("apimo_ref", identifier)
+      .eq("is_published", true)
+      .maybeSingle();
+    if (!error && data) return data as Property;
+    // PGRST204 = column does not exist; on ignore silencieusement
+    if (error && error.code !== "PGRST116" && error.code !== "PGRST204" && error.code !== "42703") {
+      console.error("[data] fetchPropertyByIdOrSlug apimo_ref", error.message);
+    }
+  }
+
+  return null;
+}
+
 export async function fetchPropertyImages(
   propertyId: string,
 ): Promise<PropertyImage[]> {

@@ -68,13 +68,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   const propertyEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
-    properties.map((p) => ({
-      url: `${SITE_URL}/${locale}/biens/${p.slug}`,
-      lastModified: now,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-      alternates: { languages: buildAlternates(`/biens/${p.slug}`) },
-    })),
+    properties
+      .filter((p) => Boolean(p.slug))
+      .map((p) => ({
+        url: `${SITE_URL}/${locale}/biens/${p.slug}`,
+        lastModified: now,
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+        alternates: { languages: buildAlternates(`/biens/${p.slug}`) },
+      })),
   );
 
   const offmarketEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>

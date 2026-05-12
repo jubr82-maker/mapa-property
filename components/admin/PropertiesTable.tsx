@@ -140,15 +140,13 @@ function PropertyRow({ row }: { row: Row }) {
         <Switch checked={feat} onChange={onFeat} busy={busy} />
       </td>
       <td className="px-4 py-3 text-right">
-        {row.slug && (
-          <Link
-            href={`/fr/biens/${row.slug}`}
-            target="_blank"
-            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
-          >
-            Voir ↗
-          </Link>
-        )}
+        <Link
+          href={`/fr/biens/${row.slug || row.id}`}
+          target="_blank"
+          className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+        >
+          Voir ↗
+        </Link>
       </td>
     </tr>
   );

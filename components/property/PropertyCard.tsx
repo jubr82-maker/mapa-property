@@ -26,9 +26,13 @@ export function PropertyCard({ property, locale, priority = false }: PropertyCar
   // sur cover_url (calculé depuis property_images via les fetchers data.ts).
   const cover = property.cover_url;
 
+  // Fallback sur id si slug manquant : la route /biens/[slug] sait résoudre
+  // un UUID via fetchPropertyByIdOrSlug, donc on évite un lien cassé.
+  const target = property.slug || property.id;
+
   return (
     <Link
-      href={`/biens/${property.slug}`}
+      href={`/biens/${target}`}
       className="group flex h-full flex-col overflow-hidden rounded-xl border border-line bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
