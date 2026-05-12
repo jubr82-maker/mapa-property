@@ -266,6 +266,7 @@
     "land_surface": "Land",
     "terrace_surface": "Terrace",
     "description": "Description",
+    "video": "Property video",
     "reviews": "Client reviews",
     "advisor": "Your advisor",
     "form_eyebrow": "Information request",

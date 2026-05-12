@@ -15,10 +15,14 @@ import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
 import { ContactButtons } from "@/components/ContactButtons";
 import { MiniFinanceSimulator } from "@/components/property/MiniFinanceSimulator";
+import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
 import { PropertyViewTracker } from "@/components/property/PropertyViewTracker";
 import { Link as IntlLink } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumb, propertyListing } from "@/lib/seo";
+
+// ISR — régénération toutes les 60s (Agent 16, perf LCP).
+export const revalidate = 60;
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -72,18 +76,12 @@ export default async function PropertyPage({
   const description = pickLang(property, "description", locale as Locale);
 
   type GalleryItem = { type: "image" | "video"; url: string; alt?: string };
+  // Galerie photos uniquement — la vidéo est isolée en pleine largeur (cf. <section> ci-dessous).
   const galleryItems: GalleryItem[] = images.map((img) => ({
     type: "image",
     url: img.url,
     alt: title,
   }));
-  if (property.video_url) {
-    galleryItems.push({
-      type: "video",
-      url: property.video_url,
-      alt: title,
-    });
-  }
 
   // Biens similaires — logique stricte V3 : même type + prix ±15% +
   // même pays (idéalement même ville), excluant le bien actuel.
@@ -163,6 +161,23 @@ export default async function PropertyPage({
         {/* Gallery */}
         <PropertyGallery items={galleryItems} title={title} />
 
+        {/* Vidéo de présentation (isolée, pleine largeur 16:9) */}
+        {property.video_url && (
+          <section className="mt-12">
+            <p className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+              {t("video")}
+            </p>
+            <video
+              controls
+              preload="metadata"
+              className="aspect-video w-full rounded-2xl bg-bg-soft"
+              poster={galleryItems[0]?.url}
+            >
+              <source src={property.video_url} />
+            </video>
+          </section>
+        )}
+
         {/* Main grid */}
         <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_360px]">
           <div className="space-y-12">
@@ -228,17 +243,13 @@ export default async function PropertyPage({
               </dl>
             </section>
 
-            {/* Description */}
+            {/* Description (magazine éditorial) */}
             {description && (
               <section>
-                <h2 className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+                <h2 className="mb-6 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
                   {t("description")}
                 </h2>
-                <div className="space-y-4 text-base leading-relaxed text-ink-mid">
-                  {description.split(/\n\s*\n/).map((para, i) => (
-                    <p key={i}>{para}</p>
-                  ))}
-                </div>
+                <PropertyMagazineDescription description={description} />
               </section>
             )}
 
