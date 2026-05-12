@@ -183,3 +183,152 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* ============================================================
+   Magazine editorial — fiche bien
+   Rendu type Architectural Digest / Cabana / Sotheby's :
+   lead italic + lettrine copper, chapitres ascendants avec filet
+   copper, corps confortable (line-height généreux), conclusion
+   en small caps.
+   #B8865A = copper MAPA fixe (toléré pour cet éditorial).
+   ============================================================ */
+
+.magazine {
+  /* Espacement vertical interne mesuré pour cadence éditoriale */
+  padding-top: 1rem;
+}
+
+.magazine-intro {
+  position: relative;
+}
+
+.magazine-lead {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.15rem, 1.6vw, 1.35rem);
+  line-height: 1.65;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ink);
+  text-wrap: pretty;
+  hanging-punctuation: first last;
+  margin: 0 0 1.25em;
+}
+
+/* Lettrine sur le premier paragraphe du lead */
+.magazine-lead::first-letter {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(4.5rem, 8vw, 6rem);
+  float: left;
+  line-height: 0.85;
+  padding-right: 0.12em;
+  padding-top: 0.08em;
+  color: #B8865A;
+  font-weight: 500;
+  font-style: normal;
+}
+
+/* Paragraphes de l'intro qui suivent le lead (sans lettrine) */
+.magazine-lead-cont {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+  line-height: 1.7;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ink-mid);
+  text-wrap: pretty;
+  margin: 0 0 1.25em;
+}
+
+.magazine-chapters {
+  margin-top: 3.5rem;
+}
+
+.magazine-chapter {
+  margin-top: 3rem;
+}
+.magazine-chapter:first-child {
+  margin-top: 0;
+}
+
+/* Titre de chapitre : filet copper + small caps tracking */
+.magazine-h2 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 1.5rem;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(0.78rem, 1.1vw, 0.92rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #B8865A;
+}
+.magazine-h2-rule {
+  flex: 0 0 2.5rem;
+  height: 1px;
+  background: #B8865A;
+  opacity: 0.55;
+}
+.magazine-h2-text {
+  white-space: nowrap;
+}
+.magazine-h2::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--line);
+}
+
+/* Corps des chapitres : justifié sur grand écran, ragged sur mobile */
+.magazine-body {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  color: var(--ink);
+  margin: 0 0 1.35em;
+  text-wrap: pretty;
+  hyphens: auto;
+}
+.magazine-body:last-child {
+  margin-bottom: 0;
+}
+@media (min-width: 768px) {
+  .magazine-body {
+    text-align: justify;
+  }
+}
+
+/* Première lettre des body paragraphes : capital fin (pas une lettrine,
+   juste un poids différentiel discret) */
+.magazine-chapter .magazine-body:first-of-type::first-letter {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.magazine-conclusion {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+@media print {
+  .magazine {
+    max-width: none;
+  }
+  .magazine-lead::first-letter {
+    color: #B8865A !important;
+  }
+  .magazine-h2,
+  .magazine-h2-rule {
+    color: #8E6940 !important;
+    background: #8E6940 !important;
+  }
+}

@@ -1,54 +1,68 @@
 /**
  * PropertyMagazineDescription
- * Affichage éditorial "magazine" (type Architectural Digest) :
- * - 1er paragraphe = lead en italic font-display
- * - paragraphes suivants en colonne lisible (max-width 720px, leading 1.8)
- * - lettrine sur le 1er paragraphe non-lead (copper #B8865A, exception au token CSS)
  *
- * Server Component. Ne rend rien si description vide.
+ * Rendu éditorial niveau Architectural Digest / Cabana / Sotheby's :
+ *   - intro en italique font-display avec lettrine copper sur la 1re lettre
+ *   - chapitres structurés (titre tracking étendu, filet copper, corps justifié)
+ *   - conclusion optionnelle en small caps
+ *
+ * Server Component (aucun hook). Reçoit soit le texte brut, soit une
+ * `parsed: ParsedDescription` déjà calculée en amont (recommandé pour partager
+ * le parsing avec d'autres composants ou la SEO).
+ *
+ * Les classes utilitaires `.magazine-*` sont définies dans app/globals.css.
  */
+import {
+  parseApimoDescription,
+  type ParsedDescription,
+} from "@/lib/property-description-parser";
+
 interface Props {
   description: string;
+  parsed?: ParsedDescription;
 }
 
-export function PropertyMagazineDescription({ description }: Props) {
-  const paragraphs = description
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+export function PropertyMagazineDescription({ description, parsed }: Props) {
+  const data: ParsedDescription = parsed ?? parseApimoDescription(description);
 
-  if (paragraphs.length === 0) return null;
-
-  // Si un seul paragraphe, on l'affiche en lead + lettrine sur lui-même.
-  if (paragraphs.length === 1) {
-    return (
-      <div className="magazine-content mx-auto max-w-[720px]">
-        <p className="text-base leading-[1.8] text-ink-mid first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-[4rem] first-letter:font-bold first-letter:leading-[0.8] first-letter:text-[#B8865A]">
-          {paragraphs[0]}
-        </p>
-      </div>
-    );
-  }
-
-  const [lead, ...rest] = paragraphs;
+  if (!data.intro && data.chapters.length === 0) return null;
 
   return (
-    <div className="magazine-content mx-auto max-w-[720px]">
-      <p className="font-display text-[1.3rem] italic leading-snug text-ink-mid">
-        {lead}
-      </p>
-      {rest.map((para, i) => (
-        <p
-          key={i}
-          className={
-            i === 0
-              ? "mt-6 text-base leading-[1.8] text-ink-mid first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-[4rem] first-letter:font-bold first-letter:leading-[0.8] first-letter:text-[#B8865A]"
-              : "mt-6 text-base leading-[1.8] text-ink-mid"
-          }
-        >
-          {para}
-        </p>
-      ))}
+    <div className="magazine mx-auto max-w-[720px]">
+      {data.intro && (
+        <div className="magazine-intro">
+          {data.intro.split(/\n\s*\n/).map((para, i) => (
+            <p
+              key={`intro-${i}`}
+              className={i === 0 ? "magazine-lead" : "magazine-lead-cont"}
+            >
+              {para}
+            </p>
+          ))}
+        </div>
+      )}
+
+      {data.chapters.length > 0 && (
+        <div className="magazine-chapters">
+          {data.chapters.map((c, i) => (
+            <section key={`ch-${i}`} className="magazine-chapter">
+              <h3 className="magazine-h2">
+                <span aria-hidden className="magazine-h2-rule" />
+                <span className="magazine-h2-text">{c.title}</span>
+              </h3>
+              {c.body.split(/\n\s*\n/).map((para, j) => (
+                <p key={`p-${j}`} className="magazine-body">
+                  {para}
+                </p>
+              ))}
+            </section>
+          ))}
+        </div>
+      )}
+
+      {data.conclusion && (
+        <p className="magazine-conclusion">{data.conclusion}</p>
+      )}
     </div>
   );
 }

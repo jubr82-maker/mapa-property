@@ -17,6 +17,7 @@ import { ContactButtons } from "@/components/ContactButtons";
 import { MiniFinanceSimulator } from "@/components/property/MiniFinanceSimulator";
 import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
 import { PropertyViewTracker } from "@/components/property/PropertyViewTracker";
+import { parseApimoDescription } from "@/lib/property-description-parser";
 import { Link as IntlLink } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumb, propertyListing } from "@/lib/seo";
@@ -74,6 +75,7 @@ export default async function PropertyPage({
   const t = await getTranslations({ locale, namespace: "property" });
   const title = pickLang(property, "title", locale as Locale);
   const description = pickLang(property, "description", locale as Locale);
+  const parsedDescription = parseApimoDescription(description);
 
   type GalleryItem = { type: "image" | "video"; url: string; alt?: string };
   // Galerie photos uniquement — la vidéo est isolée en pleine largeur (cf. <section> ci-dessous).
@@ -244,12 +246,15 @@ export default async function PropertyPage({
             </section>
 
             {/* Description (magazine éditorial) */}
-            {description && (
+            {description && (parsedDescription.intro || parsedDescription.chapters.length > 0) && (
               <section>
                 <h2 className="mb-6 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
                   {t("description")}
                 </h2>
-                <PropertyMagazineDescription description={description} />
+                <PropertyMagazineDescription
+                  description={description}
+                  parsed={parsedDescription}
+                />
               </section>
             )}
 
