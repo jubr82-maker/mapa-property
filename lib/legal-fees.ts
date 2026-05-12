@@ -39,7 +39,7 @@ export const LEGAL_FEES: Record<CountryCode, CountryFees> = {
       {
         name: "Bëllegen Akt",
         amount_per_person: 40000,
-        conditions: "Première acquisition + résidence principale + âge 18+",
+        conditions: "Résidence principale (occupation 2 ans, 4 ans VEFA), sans condition d'âge ni de primo-accession",
         legal_ref: "Loi du 3 juillet 2025 (définitif)",
         source_url: "https://logement.public.lu/fr/aides-logement/bellegen-akt.html",
       },

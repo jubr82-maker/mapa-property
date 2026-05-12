@@ -143,7 +143,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Ancillary fees (Mandant's expense)",
         paragraphs: [
-          "Notary fees ~7% in Luxembourg, including 1% Bëllegen Akt (rebate for first-time buyer / primary residence).",
+          "Notary fees ~7% in Luxembourg. The Bëllegen Akt is a €40,000 rebate per buyer on registration duty, for any primary residence (law of 3 July 2025, no age or first-time buyer condition).",
           "Bailiff fees if proceedings.",
           "International travel beyond 200 km from HQ: per-quote.",
         ],
@@ -214,7 +214,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Nebenkosten (zu Lasten des Mandanten)",
         paragraphs: [
-          "Notarkosten ~7 % in Luxemburg, davon 1 % Bëllegen Akt (Rabatt bei Erstkauf / Hauptwohnsitz).",
+          "Notarkosten ~7 % in Luxemburg. Der Bëllegen Akt ist ein Rabatt von 40 000 € pro Käufer auf die Eintragungsgebühr für jeden Hauptwohnsitz (Gesetz vom 3. Juli 2025, ohne Alters- oder Erstkäufer-Bedingung).",
           "Gerichtsvollzieherkosten bei Verfahren.",
           "Internationale Reisen über 200 km vom Sitz: auf Angebot.",
         ],
