@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
 import { HeaderBurger } from "@/components/layout/HeaderBurger";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 
 const leftDropdowns = [
   {
@@ -102,6 +103,9 @@ export function Header() {
             >
               {t("journal")}
             </Link>
+            <div className="ml-2 border-l border-line pl-3">
+              <LanguageSwitcher variant="light" />
+            </div>
           </div>
           <div className="ml-2 lg:hidden">
             <HeaderBurger />

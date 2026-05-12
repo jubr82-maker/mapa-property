@@ -1,17 +1,10 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
-import { usePathname, useRouter, Link } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ContactButtons } from "@/components/ContactButtons";
-
-const localeLabels: Record<(typeof routing.locales)[number], string> = {
-  fr: "FR",
-  en: "EN",
-  de: "DE",
-};
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 
 type SubItem = { href: string; key: string };
 type Group = {
@@ -71,11 +64,6 @@ export function HeaderBurger() {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const t = useTranslations("nav");
-  const locale = useLocale();
-  const pathname = usePathname();
-  const router = useRouter();
-  const params = useParams();
-  const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (!open) return;
@@ -94,21 +82,6 @@ export function HeaderBurger() {
   const close = () => {
     setOpen(false);
     setExpanded(null);
-  };
-
-  const switchLocale = (l: (typeof routing.locales)[number]) => {
-    if (l === locale) {
-      close();
-      return;
-    }
-    startTransition(() => {
-      router.replace(
-        // @ts-expect-error pathname & params typed loosely
-        { pathname, params },
-        { locale: l },
-      );
-      close();
-    });
   };
 
   return (
@@ -212,26 +185,7 @@ export function HeaderBurger() {
           <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-6">
             <ContactButtons variant="dark" />
 
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {routing.locales.map((l) => {
-                const active = l === locale;
-                return (
-                  <button
-                    key={l}
-                    type="button"
-                    aria-current={active ? "true" : undefined}
-                    onClick={() => switchLocale(l)}
-                    className={`inline-flex h-9 min-w-[3rem] items-center justify-center rounded-full border px-4 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
-                      active
-                        ? "border-[#B8865A] bg-[#B8865A]/10 text-[#B8865A]"
-                        : "border-white/30 text-white/70 hover:border-[#B8865A] hover:text-[#B8865A]"
-                    }`}
-                  >
-                    {localeLabels[l]}
-                  </button>
-                );
-              })}
-            </div>
+            <LanguageSwitcher variant="dark" onSwitched={close} />
           </div>
         </nav>
       </div>
