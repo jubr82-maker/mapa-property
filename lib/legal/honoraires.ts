@@ -26,10 +26,10 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Mandats de vente",
         paragraphs: [
-          "Mandat Exclusif : 3,5 % HT du prix net vendeur. Pack Vidéo inclus.",
-          "Mandat Semi-Exclusif : 4,0 % HT du prix net vendeur. Pack Vidéo en option.",
-          "Mandat Simple : 4,5 % HT du prix net vendeur.",
-          "Mandat Autonome : forfait sur devis (assistance ponctuelle, audit juridique, coordination notariale).",
+          "Mandat Exclusif : 3 % HT du prix net vendeur. Pack Vidéo inclus.",
+          "Mandat Semi-Exclusif : 4 % HT du prix net vendeur. Pack Vidéo en option.",
+          "Mandat Simple : 5 % HT du prix net vendeur.",
+          "Mandat Autonome : 1 % HT du prix net vendeur (backup juridique et notarial, assistance ponctuelle).",
         ],
       },
       {
@@ -98,10 +98,10 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Sale mandates",
         paragraphs: [
-          "Exclusive: 3.5% (excl. VAT) of net seller price. Video Pack included.",
-          "Semi-Exclusive: 4.0%. Video Pack optional.",
-          "Simple: 4.5%.",
-          "Autonomous: à la carte quote.",
+          "Exclusive: 3% (excl. VAT) of net seller price. Video Pack included.",
+          "Semi-Exclusive: 4%. Video Pack optional.",
+          "Simple: 5%.",
+          "Autonomous: 1% (excl. VAT) of net seller price (legal and notarial backup, à la carte assistance).",
         ],
       },
       {
@@ -169,10 +169,10 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Verkaufsmandate",
         paragraphs: [
-          "Exklusiv: 3,5 % zzgl. MwSt. des Nettoverkäuferpreises. Videopaket inklusive.",
-          "Halb-Exklusiv: 4,0 %. Videopaket optional.",
-          "Einfach: 4,5 %.",
-          "Autonom: maßgeschneidertes Angebot.",
+          "Exklusiv: 3 % zzgl. MwSt. des Nettoverkäuferpreises. Videopaket inklusive.",
+          "Halb-Exklusiv: 4 %. Videopaket optional.",
+          "Einfach: 5 %.",
+          "Autonom: 1 % zzgl. MwSt. (juristische und notarielle Rückendeckung, punktuelle Unterstützung).",
         ],
       },
       {

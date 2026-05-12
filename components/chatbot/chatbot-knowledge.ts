@@ -15,10 +15,10 @@ const KNOWLEDGE_FR = `
 - Statut : agence immobilière luxembourgeoise + broker (courtier) international.
 
 ## 4 mandats de vente
-- Mandat Exclusif (3,5 % HT) : engagement réciproque maximal. Pack Vidéo inclus. Diffusion off-market puis publique. Le plus performant.
-- Mandat Semi-Exclusif (4,0 %) : vous gardez votre cercle privé, MAPA mobilise ses canaux. Pack Vidéo en option.
-- Mandat Simple (4,5 %) : aucune exclusivité, plusieurs agences possibles. Honoraires majorés.
-- Mandat Autonome : vous pilotez vous-même, MAPA en backup juridique et notarial. Forfait sur devis.
+- Mandat Exclusif (3 % HT) : engagement réciproque maximal. Pack Vidéo inclus. Diffusion off-market puis publique. Le plus performant.
+- Mandat Semi-Exclusif (4 % HT) : vous gardez votre cercle privé, MAPA mobilise ses canaux. Pack Vidéo en option.
+- Mandat Simple (5 % HT) : aucune exclusivité, plusieurs agences possibles. Honoraires majorés.
+- Mandat Autonome (1 % HT) : vous pilotez vous-même, MAPA en backup juridique et notarial.
 
 ## Mandat de recherche (buyer's agent à la française)
 - 1 % à 3 % HT du prix d'acquisition selon juridiction et complexité.
@@ -33,7 +33,7 @@ const KNOWLEDGE_FR = `
 - Sanction en cas de divulgation : dommages-intérêts forfaitaires + poursuites.
 
 ## Honoraires (résumé)
-- Vente : 3,5 / 4,0 / 4,5 % HT selon mandat + autonome sur devis.
+- Vente : 3 / 4 / 5 % HT selon mandat (Exclusif / Semi-Exclusif / Simple) + Autonome 1 % HT.
 - Recherche : 1-3 % HT.
 - Location : 1 mois de loyer HT (mise en location) + 6-8 % HT (gestion locative).
 - Estimation indicative : gratuite via le simulateur du site.
@@ -103,10 +103,10 @@ const KNOWLEDGE_EN = `
 - Status: Luxembourg real estate agency + international broker.
 
 ## 4 sale mandates
-- Exclusive (3.5%): max mutual commitment, Video Pack included, off-market then public.
-- Semi-Exclusive (4.0%): you keep your private circle, MAPA mobilises channels.
-- Simple (4.5%): no exclusivity, multiple agencies possible. Higher fees.
-- Autonomous: you drive, MAPA legal/notarial backup. Quote-based.
+- Exclusive (3%): max mutual commitment, Video Pack included, off-market then public.
+- Semi-Exclusive (4%): you keep your private circle, MAPA mobilises channels.
+- Simple (5%): no exclusivity, multiple agencies possible. Higher fees.
+- Autonomous (1%): you drive, MAPA legal/notarial backup.
 
 ## Search mandate (buyer's agent)
 - 1% to 3% (excl. VAT) of acquisition price, by jurisdiction and complexity.
@@ -120,7 +120,7 @@ const KNOWLEDGE_EN = `
 - Disclosure penalty: lump-sum damages + proceedings.
 
 ## Fees (summary)
-- Sale: 3.5 / 4.0 / 4.5% (excl. VAT) by mandate + autonomous quote.
+- Sale: 3 / 4 / 5% (excl. VAT) by mandate (Exclusive / Semi-Exclusive / Simple) + Autonomous 1%.
 - Search: 1-3%.
 - Rental: 1 month rent (letting) + 6-8% (management).
 - Indicative valuation: free online.
@@ -159,10 +159,10 @@ const KNOWLEDGE_DE = `
 - Status: Luxemburger Immobilienagentur + internationaler Broker.
 
 ## 4 Verkaufsmandate
-- Exklusiv (3,5%): max gegenseitiges Engagement, Videopaket inklusive.
-- Halb-Exklusiv (4,0%): privater Kreis bleibt, MAPA aktiviert Kanäle.
-- Einfach (4,5%): keine Exklusivität.
-- Autonom: Sie steuern, MAPA Rückendeckung. Auf Angebot.
+- Exklusiv (3%): max gegenseitiges Engagement, Videopaket inklusive.
+- Halb-Exklusiv (4%): privater Kreis bleibt, MAPA aktiviert Kanäle.
+- Einfach (5%): keine Exklusivität.
+- Autonom (1%): Sie steuern, MAPA Rückendeckung.
 
 ## Suchmandat
 - 1% bis 3% (zzgl. MwSt.) je Jurisdiktion.
@@ -175,7 +175,7 @@ const KNOWLEDGE_DE = `
 - Nie online veröffentlicht.
 
 ## Honorare
-- Verkauf: 3,5 / 4,0 / 4,5% + Autonom auf Angebot.
+- Verkauf: 3 / 4 / 5 % (Exklusiv / Halb-Exklusiv / Einfach) + Autonom 1 %.
 - Suche: 1-3%.
 - Vermietung: 1 Monatsmiete + 6-8% Verwaltung.
 - Bewertung: kostenlos online.

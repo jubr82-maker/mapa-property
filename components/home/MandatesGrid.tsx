@@ -3,10 +3,10 @@ import { Link } from "@/i18n/navigation";
 import { HoverFlipCard } from "@/components/ui/HoverFlipCard";
 
 const mandates = [
-  { key: "exclusive", href: "/mandats/exclusif", rate: "3,5%" },
-  { key: "semi", href: "/mandats/semi-exclusif", rate: "4,0%" },
-  { key: "simple", href: "/mandats/simple", rate: "4,5%" },
-  { key: "autonomous", href: "/mandats/autonome", rate: "—" },
+  { key: "exclusive", href: "/mandats/exclusif", rate: "3%" },
+  { key: "semi", href: "/mandats/semi-exclusif", rate: "4%" },
+  { key: "simple", href: "/mandats/simple", rate: "5%" },
+  { key: "autonomous", href: "/mandats/autonome", rate: "1%" },
 ] as const;
 
 export function MandatesGrid() {
