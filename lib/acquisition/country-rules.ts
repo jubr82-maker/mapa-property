@@ -9,6 +9,10 @@ import { computeFrance } from './countries/france';
 import { computeBelgium } from './countries/belgium';
 import { computeGermany } from './countries/germany';
 import { computeMonaco } from './countries/monaco';
+import { computeSwitzerland } from './countries/switzerland';
+import { computeItaly } from './countries/italy';
+import { computeSpain } from './countries/spain';
+import { computePortugal } from './countries/portugal';
 
 const SUPPORTED: CountryCode[] = [
   'LU', 'FR', 'BE', 'DE', 'MC', 'CH', 'IT', 'ES', 'PT',
@@ -38,21 +42,17 @@ export function computeAcquisitionCost(
     case 'MC':
       result = computeMonaco(input);
       break;
-    // TODO X2 : remplacer notCoveredResult par computeSwitzerland(input)
     case 'CH':
-      result = notCoveredResult(input.countryCode);
+      result = computeSwitzerland(input);
       break;
-    // TODO X2 : remplacer notCoveredResult par computeItaly(input)
     case 'IT':
-      result = notCoveredResult(input.countryCode);
+      result = computeItaly(input);
       break;
-    // TODO X2 : remplacer notCoveredResult par computeSpain(input)
     case 'ES':
-      result = notCoveredResult(input.countryCode);
+      result = computeSpain(input);
       break;
-    // TODO X2 : remplacer notCoveredResult par computePortugal(input)
     case 'PT':
-      result = notCoveredResult(input.countryCode);
+      result = computePortugal(input);
       break;
     default:
       result = notCoveredResult(input.countryCode);

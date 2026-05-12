@@ -144,50 +144,94 @@ const CITY_REGION_MAP: Record<string, { country: string; region: string }> = {
     ].map((c) => [c, { country: 'IT', region: 'Italia' }]),
   ),
 
-  // ── ES — CCAA (préparé pour X2) ────────────────────────────────────────
+  // ── ES — CCAA (raffinées par X2) ───────────────────────────────────────
   ...Object.fromEntries(
-    ['madrid', 'pozuelo', 'las rozas', 'majadahonda']
+    ['madrid', 'pozuelo', 'las rozas', 'majadahonda', 'alcobendas', 'getafe', 'mostoles', 'alcala de henares']
       .map((c) => [c, { country: 'ES', region: 'Madrid' }]),
   ),
   ...Object.fromEntries(
-    ['barcelona', 'sitges', 'castelldefels', 'sant cugat']
+    ['barcelona', 'sitges', 'castelldefels', 'sant cugat', 'girona', 'gerona', 'tarragona', 'lleida', 'lerida']
       .map((c) => [c, { country: 'ES', region: 'Cataluña' }]),
   ),
   ...Object.fromEntries(
-    ['valencia', 'alicante', 'benidorm', 'denia', 'javea']
+    ['valencia', 'alicante', 'benidorm', 'denia', 'javea', 'castellon', 'gandia', 'torrevieja', 'altea']
       .map((c) => [c, { country: 'ES', region: 'Comunidad Valenciana' }]),
   ),
   ...Object.fromEntries(
-    ['sevilla', 'malaga', 'marbella', 'estepona', 'mijas', 'sotogrande', 'benahavis']
+    ['sevilla', 'malaga', 'marbella', 'estepona', 'mijas', 'sotogrande', 'benahavis', 'cordoba', 'granada', 'almeria', 'cadiz', 'jerez', 'huelva']
       .map((c) => [c, { country: 'ES', region: 'Andalucía' }]),
   ),
   ...Object.fromEntries(
-    ['bilbao', 'san sebastian', 'donostia']
+    ['bilbao', 'san sebastian', 'donostia', 'vitoria', 'vitoria-gasteiz']
       .map((c) => [c, { country: 'ES', region: 'País Vasco' }]),
   ),
   ...Object.fromEntries(
-    ['palma', 'ibiza', 'mallorca', 'menorca', 'formentera']
+    ['palma', 'ibiza', 'mallorca', 'menorca', 'formentera', 'mahon', 'palma de mallorca']
       .map((c) => [c, { country: 'ES', region: 'Baleares' }]),
   ),
   ...Object.fromEntries(
-    ['las palmas', 'santa cruz de tenerife', 'adeje']
+    ['las palmas', 'santa cruz de tenerife', 'adeje', 'arona', 'puerto de la cruz', 'maspalomas']
       .map((c) => [c, { country: 'ES', region: 'Canarias' }]),
   ),
+  ...Object.fromEntries(
+    ['pamplona', 'iruna']
+      .map((c) => [c, { country: 'ES', region: 'Navarra' }]),
+  ),
+  ...Object.fromEntries(
+    ['zaragoza', 'huesca', 'teruel']
+      .map((c) => [c, { country: 'ES', region: 'Aragón' }]),
+  ),
+  ...Object.fromEntries(
+    ['oviedo', 'gijon', 'aviles']
+      .map((c) => [c, { country: 'ES', region: 'Asturias' }]),
+  ),
+  ...Object.fromEntries(
+    ['valladolid', 'salamanca', 'leon', 'burgos', 'segovia', 'avila', 'soria', 'palencia', 'zamora']
+      .map((c) => [c, { country: 'ES', region: 'Castilla y León' }]),
+  ),
+  ...Object.fromEntries(
+    ['toledo', 'albacete', 'ciudad real', 'cuenca', 'guadalajara']
+      .map((c) => [c, { country: 'ES', region: 'Castilla-La Mancha' }]),
+  ),
+  ...Object.fromEntries(
+    ['caceres', 'badajoz', 'merida']
+      .map((c) => [c, { country: 'ES', region: 'Extremadura' }]),
+  ),
+  ...Object.fromEntries(
+    ['santiago de compostela', 'a coruna', 'la coruna', 'vigo', 'pontevedra', 'ourense', 'lugo']
+      .map((c) => [c, { country: 'ES', region: 'Galicia' }]),
+  ),
+  ...Object.fromEntries(
+    ['murcia', 'cartagena', 'lorca']
+      .map((c) => [c, { country: 'ES', region: 'Murcia' }]),
+  ),
+  ...Object.fromEntries(
+    ['santander', 'torrelavega']
+      .map((c) => [c, { country: 'ES', region: 'Cantabria' }]),
+  ),
+  ...Object.fromEntries(
+    ['logrono', 'logrono']
+      .map((c) => [c, { country: 'ES', region: 'La Rioja' }]),
+  ),
+  'ceuta': { country: 'ES', region: 'Ceuta' },
+  'melilla': { country: 'ES', region: 'Melilla' },
 
-  // ── PT — préparé pour X2 ───────────────────────────────────────────────
+  // ── PT — Continente / Madeira / Açores (raffinées par X2) ──────────────
   ...Object.fromEntries(
     [
       'lisboa', 'lisbonne', 'cascais', 'estoril', 'sintra', 'oeiras', 'porto',
       'vila nova de gaia', 'braga', 'coimbra', 'aveiro', 'faro', 'albufeira',
-      'lagos', 'vilamoura', 'quinta do lago',
+      'lagos', 'vilamoura', 'quinta do lago', 'almada', 'amadora', 'setubal',
+      'evora', 'tavira', 'portimao', 'loule', 'guimaraes', 'matosinhos',
+      'leiria', 'viseu', 'castelo branco', 'vila real', 'braganca', 'beja',
     ].map((c) => [c, { country: 'PT', region: 'Continente' }]),
   ),
   ...Object.fromEntries(
-    ['funchal', 'camara de lobos']
+    ['funchal', 'camara de lobos', 'machico', 'santa cruz', 'ribeira brava', 'porto santo']
       .map((c) => [c, { country: 'PT', region: 'Madeira' }]),
   ),
   ...Object.fromEntries(
-    ['ponta delgada', 'angra do heroismo']
+    ['ponta delgada', 'angra do heroismo', 'horta', 'praia da vitoria', 'ribeira grande', 'lagoa']
       .map((c) => [c, { country: 'PT', region: 'Açores' }]),
   ),
 };

@@ -27,6 +27,23 @@
     "MC": [
       { "label": "Gouvernement Monaco", "url": "https://www.gouv.mc/", "verifiedDate": "2026-05-12" },
       { "label": "Chambre Immobilière Monégasque", "url": "https://www.cim.mc/", "verifiedDate": "2026-05-12" }
+    ],
+    "CH": [
+      { "label": "LFAIE (Lex Koller) — BJ", "url": "https://www.bj.admin.ch/", "verifiedDate": "2026-05-12" },
+      { "label": "Confédération suisse", "url": "https://www.admin.ch/", "verifiedDate": "2026-05-12" },
+      { "label": "État de Genève", "url": "https://www.ge.ch/", "verifiedDate": "2026-05-12" }
+    ],
+    "IT": [
+      { "label": "Agenzia delle Entrate — Guida Acquisto Casa", "url": "https://www.agenziaentrate.gov.it/", "verifiedDate": "2026-05-12" },
+      { "label": "Ministero dell'Economia e delle Finanze", "url": "https://www.mef.gov.it/", "verifiedDate": "2026-05-12" }
+    ],
+    "ES": [
+      { "label": "Agencia Tributaria", "url": "https://sede.agenciatributaria.gob.es/", "verifiedDate": "2026-05-12" },
+      { "label": "BOE (Boletín Oficial del Estado)", "url": "https://www.boe.es/", "verifiedDate": "2026-05-12" }
+    ],
+    "PT": [
+      { "label": "Autoridade Tributária — Portal das Finanças", "url": "https://www.portaldasfinancas.gov.pt/", "verifiedDate": "2026-05-12" },
+      { "label": "Banco de Portugal", "url": "https://www.bportugal.pt/", "verifiedDate": "2026-05-12" }
     ]
   }
 }
