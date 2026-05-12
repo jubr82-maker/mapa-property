@@ -7,7 +7,7 @@ import { routing } from "@/i18n/routing";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
+import { ChatbotWidgetLoader } from "@/components/chatbot/ChatbotWidgetLoader";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -125,6 +125,23 @@ export default async function LocaleLayout({
       suppressHydrationWarning
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
     >
+      <head>
+        {/* Connexions critiques pré-établies — LCP : images Apimo (cover fiches)
+            et Supabase (vidéo hero + images storage). Le preconnect avec
+            crossOrigin couvre le fetch des images cross-origin. */}
+        <link rel="dns-prefetch" href="https://media.apimo.pro" />
+        <link rel="dns-prefetch" href="https://dutfkblygfvhhwpzxmfz.supabase.co" />
+        <link
+          rel="preconnect"
+          href="https://media.apimo.pro"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://dutfkblygfvhhwpzxmfz.supabase.co"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="min-h-dvh bg-bg text-ink antialiased">
         <JsonLd data={homepageGraph(locale)} />
         <ThemeProvider
@@ -139,7 +156,7 @@ export default async function LocaleLayout({
               <main className="flex-1">{children}</main>
               <Footer />
             </div>
-            <ChatbotWidget />
+            <ChatbotWidgetLoader />
           </NextIntlClientProvider>
         </ThemeProvider>
         <Analytics />
