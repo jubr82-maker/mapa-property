@@ -1,39 +1,262 @@
+import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
-import { ArcovaTable } from "@/components/admin/ArcovaTable";
+import {
+  WorkflowBadge,
+  WORKFLOW_STATUSES,
+  type WorkflowStatus,
+} from "@/components/admin/WorkflowBadge";
 
 export const dynamic = "force-dynamic";
+
+type SearchParams = {
+  tab?: string;
+  q?: string;
+  role?: string;
+};
+
+type ArcovaRow = {
+  id: string;
+  created_at: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string | null;
+  company: string | null;
+  role: string | null;
+  message: string | null;
+  status: string | null;
+  notes: string | null;
+  workflow_status?: string | null;
+  next_follow_up?: string | null;
+};
+
+const TABS: { key: string; label: string }[] = [
+  { key: "new", label: "Nouveau" },
+  { key: "in_progress", label: "En cours" },
+  { key: "on_hold", label: "En suspens" },
+  { key: "validated", label: "Validé" },
+  { key: "rejected", label: "Exclu" },
+  { key: "completed", label: "Traités" },
+  { key: "all", label: "Tous" },
+];
+
+function isPast(dateStr: string | null | undefined): boolean {
+  if (!dateStr) return false;
+  try {
+    const d = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return d.getTime() < today.getTime();
+  } catch {
+    return false;
+  }
+}
 
 export default async function AdminArcovaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ role?: string; status?: string }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
+  const tab = sp.tab && TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
   const supabase = await createSupabaseServerClient();
-  let query = supabase
+
+  let migrationApplied = true;
+  let items: ArcovaRow[] = [];
+
+  const tryNew = await supabase
     .from("arcova_waitlist")
-    .select("id,email,first_name,last_name,phone,company,role,message,status,created_at,notes")
-    .order("created_at", { ascending: false });
+    .select(
+      "id,email,first_name,last_name,phone,company,role,message,status,created_at,notes,workflow_status,next_follow_up",
+    )
+    .order("created_at", { ascending: false })
+    .limit(500);
 
-  if (sp.role) query = query.eq("role", sp.role);
-  if (sp.status) query = query.eq("status", sp.status);
+  if (tryNew.error) {
+    migrationApplied = false;
+    const fallback = await supabase
+      .from("arcova_waitlist")
+      .select(
+        "id,email,first_name,last_name,phone,company,role,message,status,created_at,notes",
+      )
+      .order("created_at", { ascending: false })
+      .limit(500);
+    items = (fallback.data ?? []) as ArcovaRow[];
+  } else {
+    items = (tryNew.data ?? []) as ArcovaRow[];
+  }
 
-  const { data: items } = await query;
+  // Compteurs
+  const counts: Record<string, number> = { all: items.length };
+  for (const s of WORKFLOW_STATUSES) counts[s] = 0;
+  for (const it of items) {
+    const ws = (it.workflow_status as WorkflowStatus | null) ?? "new";
+    if (counts[ws] !== undefined) counts[ws]++;
+  }
+
+  let filtered = items;
+  if (migrationApplied && tab !== "all") {
+    filtered = filtered.filter((i) => (i.workflow_status ?? "new") === tab);
+  }
+  if (sp.role) {
+    const needle = sp.role.toLowerCase();
+    filtered = filtered.filter((i) =>
+      (i.role ?? "").toLowerCase().includes(needle),
+    );
+  }
+  if (sp.q) {
+    const needle = sp.q.toLowerCase();
+    filtered = filtered.filter((i) => {
+      const hay = `${i.email} ${i.first_name ?? ""} ${i.last_name ?? ""} ${i.company ?? ""}`.toLowerCase();
+      return hay.includes(needle);
+    });
+  }
+
+  const buildTabHref = (key: string) => {
+    const params = new URLSearchParams();
+    params.set("tab", key);
+    if (sp.q) params.set("q", sp.q);
+    if (sp.role) params.set("role", sp.role);
+    return `/admin/arcova?${params.toString()}`;
+  };
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
-          Console MAPA
-        </p>
-        <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
-          ARCOVA Waitlist
-        </h1>
-        <p className="mt-1 text-sm text-[#3D4F63]/70">
-          {items?.length ?? 0} inscription{(items?.length ?? 0) > 1 ? "s" : ""}
-        </p>
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+            Console MAPA
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
+            ARCOVA Waitlist
+          </h1>
+          <p className="mt-1 text-sm text-[#3D4F63]/70">
+            {filtered.length} inscription{filtered.length > 1 ? "s" : ""}{" "}
+            affichée{filtered.length > 1 ? "s" : ""} · {items.length} au total
+          </p>
+        </div>
       </header>
-      <ArcovaTable items={items ?? []} />
+
+      {!migrationApplied && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-700">
+            Migration en attente
+          </p>
+          <p className="mt-1">
+            Les colonnes <code className="font-mono">workflow_status</code>,{" "}
+            <code className="font-mono">admin_notes</code>,{" "}
+            <code className="font-mono">next_follow_up</code> et{" "}
+            <code className="font-mono">workflow_history</code> n&apos;existent
+            pas encore. Applique{" "}
+            <code className="font-mono">
+              supabase/migrations/20260512_admin_workflow_arcova.sql
+            </code>{" "}
+            dans le SQL Editor Supabase pour activer les sous-onglets. En
+            attendant, vue &laquo;&nbsp;Tous&nbsp;&raquo; uniquement.
+          </p>
+        </div>
+      )}
+
+      <nav className="flex flex-wrap items-center gap-2">
+        {TABS.map((t) => {
+          const active = tab === t.key;
+          const count = counts[t.key] ?? 0;
+          const disabled = !migrationApplied && t.key !== "all";
+          return (
+            <Link
+              key={t.key}
+              href={disabled ? "#" : buildTabHref(t.key)}
+              aria-disabled={disabled}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
+                active
+                  ? "bg-[#3D4F63] text-[#F5EFE1]"
+                  : disabled
+                    ? "cursor-not-allowed border border-[#3D4F63]/10 text-[#3D4F63]/40"
+                    : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+              }`}
+            >
+              <span>{t.label}</span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] ${
+                  active
+                    ? "bg-[#F5EFE1]/20 text-[#F5EFE1]"
+                    : "bg-[#3D4F63]/10 text-[#3D4F63]/70"
+                }`}
+              >
+                {count}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <section className="rounded-2xl border border-[#3D4F63]/15 bg-white">
+        <header className="border-b border-[#3D4F63]/10 px-4 py-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
+            Liste ({filtered.length})
+          </p>
+        </header>
+        <ul className="divide-y divide-[#3D4F63]/10">
+          {filtered.length === 0 && (
+            <li className="px-4 py-6 text-center text-sm text-[#3D4F63]/60">
+              Aucune inscription pour cette sélection.
+            </li>
+          )}
+          {filtered.slice(0, 100).map((i) => {
+            const fullName = [i.first_name, i.last_name]
+              .filter(Boolean)
+              .join(" ");
+            const ws = (i.workflow_status as WorkflowStatus | null) ?? "new";
+            const followUpPast = isPast(i.next_follow_up);
+            return (
+              <li
+                key={`arcova-${i.id}`}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <WorkflowBadge status={ws} />
+                  <div>
+                    <p className="text-sm font-medium text-[#1A1F2A]">
+                      {fullName || i.email}
+                    </p>
+                    <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#3D4F63]/60">
+                      {i.email}
+                      {i.company && ` · ${i.company}`}
+                      {i.role && ` · ${i.role}`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
+                    {new Date(i.created_at).toLocaleDateString("fr-FR", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                  {i.next_follow_up && (
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] ${
+                        followUpPast
+                          ? "bg-red-100 text-red-700 ring-1 ring-inset ring-red-300"
+                          : "bg-[#B8865A]/15 text-[#B8865A]"
+                      }`}
+                    >
+                      Suivi : {i.next_follow_up}
+                    </span>
+                  )}
+                  <Link
+                    href={`/admin/arcova/${i.id}`}
+                    className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+                  >
+                    Voir
+                  </Link>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
     </div>
   );
 }
