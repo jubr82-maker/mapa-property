@@ -3,26 +3,86 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  computeAcquisition,
-  normalizeCountry,
-  type BuyerProfile,
-} from "@/lib/acquisition";
+  computeAcquisitionCost,
+} from "@/lib/acquisition/country-rules";
+import type {
+  AcquisitionInput,
+  AcquisitionResult,
+  CountryCode,
+} from "@/lib/acquisition/types";
 import { computeMortgage, computeDebtRatio, fmtEur } from "@/lib/finance-sim";
 
 interface Props {
   price: number;
   /** Accepte n'importe quel string Apimo (ex. "Luxembourg", "LU", "Dubaï"). */
   country: string;
+  /** Ville Apimo, utilisée pour déduire région / Land / département. */
+  city?: string;
   variant?: "default" | "compact";
 }
 
 const DURATIONS = [10, 15, 20, 25, 30] as const;
 
-export function AcquisitionSimulator({ price, country, variant = "default" }: Props) {
+const SUPPORTED_CODES: CountryCode[] = [
+  "LU", "FR", "BE", "DE", "MC", "CH", "IT", "ES", "PT",
+];
+
+const COUNTRY_LABEL: Record<CountryCode, string> = {
+  LU: "Luxembourg",
+  FR: "France",
+  BE: "Belgique",
+  DE: "Allemagne",
+  MC: "Monaco",
+  CH: "Suisse",
+  IT: "Italie",
+  ES: "Espagne",
+  PT: "Portugal",
+};
+
+/** Normalise un string Apimo / saisie libre vers un CountryCode. */
+function normalizeCountry(input: string | null | undefined): CountryCode | null {
+  if (!input) return null;
+  const k = input.trim().toUpperCase();
+  if ((SUPPORTED_CODES as string[]).includes(k)) return k as CountryCode;
+
+  const NAMES: Record<string, CountryCode> = {
+    LUXEMBOURG: "LU",
+    LUXEMBURG: "LU",
+    "GRAND-DUCHÉ DE LUXEMBOURG": "LU",
+    "GRAND DUCHE DE LUXEMBOURG": "LU",
+    FRANCE: "FR",
+    BELGIQUE: "BE",
+    BELGIUM: "BE",
+    BELGIË: "BE",
+    BELGIE: "BE",
+    ALLEMAGNE: "DE",
+    GERMANY: "DE",
+    DEUTSCHLAND: "DE",
+    MONACO: "MC",
+    SUISSE: "CH",
+    SCHWEIZ: "CH",
+    SWITZERLAND: "CH",
+    ITALIE: "IT",
+    ITALY: "IT",
+    ITALIA: "IT",
+    ESPAGNE: "ES",
+    SPAIN: "ES",
+    ESPAÑA: "ES",
+    PORTUGAL: "PT",
+  };
+  return NAMES[k] ?? null;
+}
+
+export function AcquisitionSimulator({
+  price,
+  country,
+  city,
+  variant = "default",
+}: Props) {
   const isCompact = variant === "compact";
   const normalized = normalizeCountry(country);
 
-  // ── Cas pays non supporté : message clair, pas de calcul ──
+  // ── Cas pays non normalisable : message clair, pas de calcul ──
   if (!normalized) {
     return (
       <section
@@ -54,6 +114,7 @@ export function AcquisitionSimulator({ price, country, variant = "default" }: Pr
     <SimulatorActive
       price={price}
       country={normalized}
+      city={city ?? ""}
       isCompact={isCompact}
     />
   );
@@ -62,39 +123,47 @@ export function AcquisitionSimulator({ price, country, variant = "default" }: Pr
 function SimulatorActive({
   price,
   country,
+  city,
   isCompact,
 }: {
   price: number;
-  country: NonNullable<ReturnType<typeof normalizeCountry>>;
+  country: CountryCode;
+  city: string;
   isCompact: boolean;
 }) {
   // ── Profil acquéreur ──
   const [downPct, setDownPct] = useState(20);
   const [duration, setDuration] = useState<number>(25);
-  const [primoAccedant, setPrimoAccedant] = useState(false);
-  const [couple, setCouple] = useState(false);
-  const [usage, setUsage] = useState<BuyerProfile["usage"]>("residence");
-  const [residentStatus, setResidentStatus] =
-    useState<BuyerProfile["residentStatus"]>("resident");
-  const [isNeuf, setIsNeuf] = useState(false);
+  const [isFirstTimeBuyer, setIsFirstTimeBuyer] = useState(false);
+  const [isFamily, setIsFamily] = useState(false);
+  const [propertyType, setPropertyType] = useState<"new" | "old">("old");
+  const [usage, setUsage] =
+    useState<AcquisitionInput["usage"]>("primary");
+  const [isResident, setIsResident] = useState<boolean>(true);
 
-  const profile: BuyerProfile = {
-    country,
-    primoAccedant,
-    couple,
+  const input: AcquisitionInput = {
+    countryCode: country,
+    city,
+    price,
+    propertyType,
     usage,
-    residentStatus,
-    isNeuf,
+    buyerProfile: {
+      isResident,
+      isFirstTimeBuyer,
+      isFamily,
+    },
+    downPaymentPercent: downPct,
   };
 
-  const result = useMemo(
-    () => computeAcquisition(profile, price),
+  const result: AcquisitionResult = useMemo(
+    () => computeAcquisitionCost(input),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [price, country, primoAccedant, couple, usage, residentStatus, isNeuf],
+    [price, country, city, propertyType, usage, isResident, isFirstTimeBuyer, isFamily, downPct],
   );
 
   const downPayment = Math.round((price * downPct) / 100);
-  const rate = result.financing.typicalRateAnnual * 100;
+  // Taux indicatif simplifié (l'ancien moteur le portait — on garde un défaut neutre).
+  const rate = 3.5;
 
   const mortgage = useMemo(
     () =>
@@ -110,7 +179,35 @@ function SimulatorActive({
   const incomeRequired = mortgage.monthlyPayment / 0.35;
   const debtRatio = computeDebtRatio(mortgage.monthlyPayment, incomeRequired);
 
-  const isHorsUE = country === "AE";
+  // ── Cas notCovered : pays supporté côté UI mais pas encore implémenté (CH/IT/ES/PT)
+  if (result.notCovered) {
+    return (
+      <section
+        className={`rounded-2xl border border-line bg-bg-soft p-5 ${isCompact ? "" : "sm:p-7"}`}
+      >
+        <header className="mb-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
+            Plan de financement · {COUNTRY_LABEL[country]}
+          </p>
+          <h3 className="mt-1 font-display text-lg font-bold text-ink">
+            Estimation personnalisée disponible sur demande
+          </h3>
+        </header>
+        <p className="text-sm leading-relaxed text-ink-mid">
+          {result.contactMessage}
+        </p>
+        <Link
+          href="/contact"
+          className="mt-5 inline-flex items-center gap-2 rounded-full bg-gold-deep px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-bg transition-colors hover:bg-gold"
+        >
+          Nous contacter →
+        </Link>
+        <p className="mt-5 rounded-md border border-yellow-400 bg-yellow-50 px-3 py-2 text-[11px] leading-snug text-ink-mid">
+          {result.legalNotice.shortDisclaimer}
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -119,27 +216,12 @@ function SimulatorActive({
       <header className="mb-4">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
           Plan de financement · {COUNTRY_LABEL[country]}
+          {result.region ? ` · ${result.region}` : ""}
         </p>
         <h3 className="mt-1 font-display text-lg font-bold text-ink">
           Mensualité, frais et aides applicables
         </h3>
       </header>
-
-      {/* Banners contextuels */}
-      {isHorsUE && (
-        <Banner tone="info">
-          L&apos;acquisition d&apos;un bien hors Union européenne est
-          généralement financée par les banques locales du pays concerné
-          (ici Émirats arabes unis). Les aides d&apos;État européennes ne
-          s&apos;appliquent pas.
-        </Banner>
-      )}
-      {residentStatus === "non_resident" && (
-        <Banner tone="warn">
-          Conditions de financement non-résident : LTV plafonné, taux
-          généralement +1 à +2 points par rapport à un résident.
-        </Banner>
-      )}
 
       {/* Sliders & paramètres */}
       <div className="mt-4 space-y-4">
@@ -172,9 +254,7 @@ function SimulatorActive({
             onChange={(e) => setDuration(Number(e.target.value))}
             className="mt-1 block w-full rounded-md border border-line bg-bg px-3 py-2 font-mono text-sm"
           >
-            {DURATIONS.filter(
-              (d) => d <= result.financing.maxDurationYears,
-            ).map((d) => (
+            {DURATIONS.map((d) => (
               <option key={d} value={d}>
                 {d} ans
               </option>
@@ -184,19 +264,24 @@ function SimulatorActive({
 
         <fieldset className="grid grid-cols-2 gap-2">
           <CheckboxField
-            checked={primoAccedant}
-            onChange={setPrimoAccedant}
+            checked={isFirstTimeBuyer}
+            onChange={setIsFirstTimeBuyer}
             label="Primo-accédant"
           />
           <CheckboxField
-            checked={couple}
-            onChange={setCouple}
-            label="Couple acquéreur"
+            checked={isFamily}
+            onChange={setIsFamily}
+            label="Couple / famille"
           />
           <CheckboxField
-            checked={isNeuf}
-            onChange={setIsNeuf}
+            checked={propertyType === "new"}
+            onChange={(v) => setPropertyType(v ? "new" : "old")}
             label="Bien neuf / VEFA"
+          />
+          <CheckboxField
+            checked={isResident}
+            onChange={setIsResident}
+            label="Résident fiscal"
           />
         </fieldset>
 
@@ -207,46 +292,24 @@ function SimulatorActive({
           <div className="flex flex-wrap gap-4">
             <RadioField
               name="acq-usage"
-              value="residence"
+              value="primary"
               current={usage}
               onChange={setUsage}
               label="Résidence principale"
             />
             <RadioField
               name="acq-usage"
-              value="locatif"
+              value="secondary"
               current={usage}
               onChange={setUsage}
-              label="Locatif"
+              label="Résidence secondaire"
             />
             <RadioField
               name="acq-usage"
-              value="secondaire"
+              value="investment"
               current={usage}
               onChange={setUsage}
-              label="Secondaire"
-            />
-          </div>
-        </fieldset>
-
-        <fieldset className="space-y-2 text-sm">
-          <legend className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-            Statut fiscal
-          </legend>
-          <div className="flex flex-wrap gap-4">
-            <RadioField
-              name="acq-resident"
-              value="resident"
-              current={residentStatus}
-              onChange={setResidentStatus}
-              label={`Résident ${COUNTRY_LABEL[country]}`}
-            />
-            <RadioField
-              name="acq-resident"
-              value="non_resident"
-              current={residentStatus}
-              onChange={setResidentStatus}
-              label="Non-résident"
+              label="Investissement locatif"
             />
           </div>
         </fieldset>
@@ -269,79 +332,54 @@ function SimulatorActive({
       {/* Récapitulatif */}
       <dl className="mt-6 grid gap-3 text-sm">
         <Row label="Prix du bien" value={fmtEur(price)} />
-        <Row
-          label="Frais d'acquisition bruts"
-          value={fmtEur(result.grossFees.total)}
-          hint={[
-            result.grossFees.registrationOrTransferTax > 0
-              ? `droits ${fmtEur(result.grossFees.registrationOrTransferTax)}`
-              : null,
-            result.grossFees.notary > 0
-              ? `notaire/trustee ${fmtEur(result.grossFees.notary)}`
-              : null,
-            result.grossFees.mortgage > 0
-              ? `hypothèque ${fmtEur(result.grossFees.mortgage)}`
-              : null,
-            result.grossFees.other
-              ? `autres ${fmtEur(result.grossFees.other)}`
-              : null,
-          ]
-            .filter(Boolean)
-            .join(" + ")}
-        />
 
-        {result.aids.length > 0 && (
-          <div className="rounded-lg border border-gold/30 bg-bg p-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gold-deep">
-              Aides d&apos;État applicables
-            </p>
-            <ul className="mt-2 space-y-2">
-              {result.aids.map((a) => (
-                <li key={a.id} className="text-xs text-ink-mid">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-medium text-ink">{a.name}</span>
-                    {a.amount > 0 && (
-                      <span className="font-mono text-xs font-semibold text-gold-deep">
-                        − {fmtEur(a.amount)}
-                      </span>
-                    )}
-                  </div>
+        {/* Line items détaillés du moteur */}
+        <div className="rounded-lg border border-line bg-bg p-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+            Détail des frais d&apos;acquisition
+          </p>
+          <ul className="mt-2 space-y-2">
+            {result.lineItems.map((li, i) => (
+              <li key={i} className="text-xs text-ink-mid">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="font-medium text-ink">{li.label}</span>
+                  {li.amount !== 0 && (
+                    <span
+                      className={`font-mono text-xs font-semibold ${li.amount < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-ink"}`}
+                    >
+                      {li.amount < 0 ? "− " : ""}
+                      {fmtEur(Math.abs(li.amount))}
+                    </span>
+                  )}
+                </div>
+                {li.notes && (
                   <p className="mt-0.5 text-[11px] leading-snug text-ink-soft">
-                    {a.description}
+                    {li.notes}
                   </p>
-                  <p className="mt-1 text-[10px] text-ink-soft">
-                    Conditions remplies : {a.conditionsMet.join(" · ")}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <Row
-          label="Frais d'acquisition nets"
-          value={fmtEur(result.netFees)}
-          hint={
-            result.netFees < result.grossFees.total
-              ? `Économie · ${fmtEur(result.grossFees.total - result.netFees)}`
-              : undefined
-          }
-          hintAccent={result.netFees < result.grossFees.total}
+          label="Total frais d'acquisition"
+          value={fmtEur(result.totalCost)}
+          hint={`${result.totalCostPercent.toFixed(2).replace(".", ",")} % du prix`}
+          accent
         />
         <Row
           label="Capital emprunté (estimé)"
           value={fmtEur(mortgage.borrowedAmount)}
-          hint={`LTV max ${Math.round(result.financing.maxLTV * 100)}%`}
         />
         <Row
           label="Mensualité estimée"
           value={fmtEur(mortgage.monthlyPayment)}
           hint={`taux indicatif ${rate.toFixed(2)} % · ${duration} ans`}
-          accent
         />
         <Row
-          label="Coût total acquisition (net)"
-          value={fmtEur(result.totalAcquisitionNet)}
+          label="Coût total acquisition"
+          value={fmtEur(price + result.totalCost)}
         />
         <Row
           label="Revenu mensuel requis (35%)"
@@ -351,10 +389,7 @@ function SimulatorActive({
       </dl>
 
       {/* Sources & disclaimer */}
-      <div className="mt-5 space-y-2 border-t border-line pt-4">
-        <p className="text-[11px] leading-relaxed text-ink-soft">
-          {result.disclaimer}
-        </p>
+      <div className="mt-5 space-y-3 border-t border-line pt-4">
         {result.sources.length > 0 && (
           <details className="text-[11px] text-ink-soft">
             <summary className="cursor-pointer font-mono uppercase tracking-[0.15em] text-ink-soft hover:text-ink">
@@ -369,68 +404,36 @@ function SimulatorActive({
                     rel="noopener noreferrer"
                     className="text-gold-deep underline-offset-2 hover:underline"
                   >
-                    {s.name}
+                    {s.label}
                   </a>
                   <span className="ml-1 text-ink-soft/70">
-                    · vérifié {s.lastVerified}
+                    · vérifié {s.verifiedDate}
                   </span>
                 </li>
               ))}
             </ul>
           </details>
         )}
+
+        <p className="rounded-md border border-yellow-400 bg-yellow-50 px-3 py-2 text-[11px] leading-relaxed text-ink-mid">
+          {result.legalNotice.shortDisclaimer}
+        </p>
       </div>
     </section>
   );
 }
 
-// ─── Labels ────────────────────────────────────────────────────────────────
-
-const COUNTRY_LABEL: Record<
-  NonNullable<ReturnType<typeof normalizeCountry>>,
-  string
-> = {
-  LU: "Luxembourg",
-  FR: "France",
-  BE: "Belgique",
-  DE: "Allemagne",
-  PT: "Portugal",
-  AE: "Émirats arabes unis",
-};
-
 // ─── Sous-composants ──────────────────────────────────────────────────────
-
-function Banner({
-  tone,
-  children,
-}: {
-  tone: "info" | "warn";
-  children: React.ReactNode;
-}) {
-  const cls =
-    tone === "warn"
-      ? "border-gold/40 bg-gold/5 text-ink"
-      : "border-line bg-bg text-ink-mid";
-  return (
-    <div
-      className={`mb-2 rounded-md border px-3 py-2 text-[11px] leading-snug ${cls}`}
-    >
-      {children}
-    </div>
-  );
-}
 
 function Row({
   label,
   value,
   hint,
-  hintAccent,
   accent,
 }: {
   label: string;
   value: string;
   hint?: string;
-  hintAccent?: boolean;
   accent?: boolean;
 }) {
   return (
@@ -449,11 +452,7 @@ function Row({
           {value}
         </span>
         {hint && (
-          <span
-            className={`block text-[10px] ${hintAccent ? "text-emerald-600 dark:text-emerald-400" : "text-ink-soft/80"}`}
-          >
-            {hint}
-          </span>
+          <span className="block text-[10px] text-ink-soft/80">{hint}</span>
         )}
       </dd>
     </div>

@@ -328,6 +328,7 @@ export default async function PropertyPage({
               <AcquisitionSimulator
                 price={price}
                 country={property.country ?? "LU"}
+                city={property.city ?? ""}
                 variant="compact"
               />
             )}

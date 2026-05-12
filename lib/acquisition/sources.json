@@ -1,135 +1,32 @@
 {
-  "lastVerified": "2026-05-12",
-  "LU": {
-    "bellegen_akt": {
-      "name": "logement.public.lu — Bëllegen Akt",
-      "url": "https://logement.public.lu/fr/aides-logement/bellegen-akt.html",
-      "lastVerified": "2026-05-12"
-    },
-    "law_2025_07_03": {
-      "name": "Loi du 3 juillet 2025 portant modification des droits d'enregistrement",
-      "url": "https://legilux.public.lu/eli/etat/leg/loi/2025/07/03/",
-      "lastVerified": "2026-05-12"
-    },
-    "tva_3pct": {
-      "name": "Administration de l'Enregistrement — TVA logement 3%",
-      "url": "https://pfi.public.lu/fr/aides-financieres/tva-logement.html",
-      "lastVerified": "2026-05-12"
-    },
-    "bcl_macroprudential": {
-      "name": "Banque centrale du Luxembourg — mesures macroprudentielles LTV",
-      "url": "https://www.bcl.lu/",
-      "lastVerified": "2026-05-12"
-    },
-    "cssf_reg_20_05": {
-      "name": "CSSF — Règlement 20-05 LTV résidence principale",
-      "url": "https://www.cssf.lu/fr/Document/reglement-cssf-n-20-05/",
-      "lastVerified": "2026-05-12"
-    }
-  },
-  "FR": {
-    "droits_mutation": {
-      "name": "service-public.fr — Frais de notaire et droits de mutation",
-      "url": "https://www.service-public.fr/particuliers/vosdroits/F10871",
-      "lastVerified": "2026-05-12"
-    },
-    "tva_immo": {
-      "name": "economie.gouv.fr — TVA immobilière 5,5% / 20%",
-      "url": "https://www.economie.gouv.fr/particuliers/tva-immobiliere",
-      "lastVerified": "2026-05-12"
-    },
-    "ptz_2026": {
-      "name": "service-public.fr — PTZ 2026 (prolongation au 31/12/2027)",
-      "url": "https://www.service-public.fr/particuliers/vosdroits/F10793",
-      "lastVerified": "2026-05-12"
-    },
-    "hcsf": {
-      "name": "Banque de France — HCSF endettement 35%",
-      "url": "https://www.banque-france.fr/fr/stabilite-financiere/haut-conseil-stabilite-financiere-hcsf",
-      "lastVerified": "2026-05-12"
-    }
-  },
-  "BE": {
-    "bruxelles_droits": {
-      "name": "fiscalite.brussels — Droits d'enregistrement Région bruxelloise",
-      "url": "https://fiscalite.brussels/droits-denregistrement",
-      "lastVerified": "2026-05-12"
-    },
-    "wallonie_droits": {
-      "name": "wallonie.be — Droits d'enregistrement Région wallonne",
-      "url": "https://finances.wallonie.be/home/fiscalite/droits-denregistrement.html",
-      "lastVerified": "2026-05-12"
-    },
-    "flandre_droits": {
-      "name": "vlaanderen.be — Registratiebelasting (3% RP unique)",
-      "url": "https://www.vlaanderen.be/registratiebelasting-bij-de-aankoop-van-een-woning",
-      "lastVerified": "2026-05-12"
-    },
-    "nbb_ltv": {
-      "name": "Banque nationale de Belgique — LTV macroprudentiel",
-      "url": "https://www.nbb.be/fr/stabilite-financiere/politique-macroprudentielle",
-      "lastVerified": "2026-05-12"
-    }
-  },
-  "DE": {
-    "grunderwerbsteuer": {
-      "name": "BMWSB — Grunderwerbsteuer par Land",
-      "url": "https://www.bmwsb.bund.de/Webs/BMWSB/DE/themen/bauen/wohnungsbau/grunderwerbsteuer/grunderwerbsteuer-node.html",
-      "lastVerified": "2026-05-12"
-    },
-    "notarkosten": {
-      "name": "GNotKG — Gerichts- und Notarkostengesetz",
-      "url": "https://www.gesetze-im-internet.de/gnotkg/",
-      "lastVerified": "2026-05-12"
-    },
-    "kfw_124": {
-      "name": "KfW — Wohneigentumsprogramm 124",
-      "url": "https://www.kfw.de/inlandsfoerderung/Privatpersonen/Bestandsimmobilien/F%C3%B6rderprodukte/Wohneigentumsprogramm-(124)/",
-      "lastVerified": "2026-05-12"
-    },
-    "bundesbank_ltv": {
-      "name": "Bundesbank — Wohnimmobilienfinanzierung",
-      "url": "https://www.bundesbank.de/de/aufgaben/bankenaufsicht/einzelaspekte/wohnimmobilien",
-      "lastVerified": "2026-05-12"
-    }
-  },
-  "PT": {
-    "imt": {
-      "name": "Portal das Finanças — IMT (Imposto Municipal sobre Transmissões)",
-      "url": "https://www.portaldasfinancas.gov.pt/at/html/index.html",
-      "lastVerified": "2026-05-12"
-    },
-    "imt_table_2025": {
-      "name": "AT — Tabelas práticas IMT 2025 (continente)",
-      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimt_rep/Pages/codigo-do-imt-indice.aspx",
-      "lastVerified": "2026-05-12"
-    },
-    "bportugal_ltv": {
-      "name": "Banco de Portugal — Recomendação macroprudencial crédito habitação",
-      "url": "https://www.bportugal.pt/comunicado/recomendacao-macroprudencial-no-ambito-dos-novos-creditos-celebrados-com",
-      "lastVerified": "2026-05-12"
-    }
-  },
-  "AE": {
-    "dld_fee": {
-      "name": "Dubai Land Department — Transfer Fees",
-      "url": "https://dubailand.gov.ae/en/eservices/fees/",
-      "lastVerified": "2026-05-12"
-    },
-    "centralbank_ltv": {
-      "name": "Central Bank of UAE — Regulations Regarding Mortgage Loans (Notice 31/2013)",
-      "url": "https://www.centralbank.ae/en/cbuae-amf/regulations/",
-      "lastVerified": "2026-05-12"
-    },
-    "golden_visa": {
-      "name": "u.ae — Golden visa for real estate investors",
-      "url": "https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/golden-visa",
-      "lastVerified": "2026-05-12"
-    },
-    "rera_commission": {
-      "name": "RERA / Dubai Land Department — Real estate broker commission",
-      "url": "https://dubailand.gov.ae/en/eservices/real-estate-services/",
-      "lastVerified": "2026-05-12"
-    }
+  "lastUpdated": "2026-05-12",
+  "countries": {
+    "LU": [
+      { "label": "Portail Logement Luxembourg", "url": "https://logement.public.lu/", "verifiedDate": "2026-05-12" },
+      { "label": "Guichet Public — Bëllegen Akt", "url": "https://guichet.public.lu/fr/citoyens/logement/achat-vente-location/achat-bien-immobilier.html", "verifiedDate": "2026-05-12" },
+      { "label": "Administration de l'Enregistrement et des Domaines (AED)", "url": "https://pfi.public.lu/", "verifiedDate": "2026-05-12" }
+    ],
+    "FR": [
+      { "label": "Service-Public.fr — Droits de mutation", "url": "https://www.service-public.fr/particuliers/vosdroits/F10871", "verifiedDate": "2026-05-12" },
+      { "label": "impots.gouv.fr", "url": "https://www.impots.gouv.fr/", "verifiedDate": "2026-05-12" },
+      { "label": "HCSF", "url": "https://www.economie.gouv.fr/hcsf", "verifiedDate": "2026-05-12" },
+      { "label": "Notaires de France", "url": "https://www.notaires.fr/", "verifiedDate": "2026-05-12" }
+    ],
+    "BE": [
+      { "label": "SPF Finances", "url": "https://finances.belgium.be/", "verifiedDate": "2026-05-12" },
+      { "label": "Fiscalité Bruxelles", "url": "https://fiscalite.brussels/", "verifiedDate": "2026-05-12" },
+      { "label": "Vlaamse Belastingdienst", "url": "https://www.vlaanderen.be/", "verifiedDate": "2026-05-12" },
+      { "label": "Service Public de Wallonie", "url": "https://www.wallonie.be/", "verifiedDate": "2026-05-12" },
+      { "label": "Notaire.be", "url": "https://www.notaire.be/", "verifiedDate": "2026-05-12" }
+    ],
+    "DE": [
+      { "label": "Bundesfinanzministerium", "url": "https://www.bundesfinanzministerium.de/", "verifiedDate": "2026-05-12" },
+      { "label": "BMWSB Wohnen", "url": "https://www.bmwsb.bund.de/", "verifiedDate": "2026-05-12" },
+      { "label": "KfW", "url": "https://www.kfw.de/", "verifiedDate": "2026-05-12" }
+    ],
+    "MC": [
+      { "label": "Gouvernement Monaco", "url": "https://www.gouv.mc/", "verifiedDate": "2026-05-12" },
+      { "label": "Chambre Immobilière Monégasque", "url": "https://www.cim.mc/", "verifiedDate": "2026-05-12" }
+    ]
   }
 }
