@@ -76,7 +76,7 @@ const fallbackReply = (locale: string, lastUser: string): string => {
     if (/(off.?market|nda)/.test(lower))
       return "Off-market access requires a contractual NDA and verified financial capacity. I'd be glad to put you in touch with Julien — please use the contact buttons on the site.";
     if (/(fee|honor|price|cost)/.test(lower))
-      return "Sale mandates: Exclusive 3.5%, Semi 4.0%, Simple 4.5%, Autonomous on quote. Search mandate 1-3%. Full details on the Fees page.";
+      return "Sale mandates: Exclusive 3%, Semi-Exclusive 4%, Simple 5%, Autonomous 1% (excl. VAT). Search mandate 1-3%. Full details on the Fees page.";
     if (/(mandat|exclusive|search)/.test(lower))
       return "We offer 4 sale mandates (Exclusive, Semi, Simple, Autonomous) and a Search mandate. Each defines the engagement and fees.";
     return "Thank you for your message. The chatbot AI is not yet active here — for an immediate response, contact Julien via the contact buttons available on the site.";
@@ -85,13 +85,13 @@ const fallbackReply = (locale: string, lastUser: string): string => {
     if (/(off.?market|nda)/.test(lower))
       return "Der Off-Market-Zugang erfordert eine vertragliche NDA und geprüfte Finanzkraft. Ich kann Sie gerne mit Julien verbinden — nutzen Sie bitte die Kontakt-Buttons auf der Website.";
     if (/(honorar|preis|kost)/.test(lower))
-      return "Verkaufsmandate: Exklusiv 3,5%, Halb 4,0%, Einfach 4,5%, Autonom auf Angebot. Suchmandat 1-3%. Details auf der Honorare-Seite.";
+      return "Verkaufsmandate: Exklusiv 3 %, Halb-Exklusiv 4 %, Einfach 5 %, Autonom 1 % (zzgl. MwSt.). Suchmandat 1-3 %. Details auf der Honorare-Seite.";
     return "Danke für Ihre Nachricht. Der KI-Chatbot ist hier noch nicht aktiv — für eine sofortige Antwort kontaktieren Sie bitte Julien über die Kontakt-Buttons auf der Website.";
   }
   if (/(off.?market|nda)/.test(lower))
     return "L'accès off-market nécessite un NDA contractuel et une capacité financière vérifiée. Je vous mets volontiers en relation avec Julien — utilisez les boutons de contact disponibles sur le site.";
   if (/(honorair|prix|tarif|coût|cout)/.test(lower))
-    return "Mandats de vente : Exclusif 3,5 %, Semi 4,0 %, Simple 4,5 %, Autonome sur devis. Mandat de recherche 1-3 %. Détails sur la page Honoraires.";
+    return "Mandats de vente : Exclusif 3 %, Semi-Exclusif 4 %, Simple 5 %, Autonome 1 % (HT). Mandat de recherche 1-3 %. Détails sur la page Honoraires.";
   if (/(mandat|exclusif|recherche)/.test(lower))
     return "Nous proposons 4 mandats de vente (Exclusif, Semi, Simple, Autonome) et un mandat de recherche. Chacun définit l'engagement et les honoraires.";
   if (/(estim|valeur|prix|combien)/.test(lower))
