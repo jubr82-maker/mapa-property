@@ -17,9 +17,9 @@ async function loadStats() {
         .select("id", { count: "exact", head: true })
         .gte("created_at", monthStart.toISOString()),
       supabase
-        .from("mandate_requests")
+        .from("mandats_recherche")
         .select("id", { count: "exact", head: true })
-        .eq("status", "pending"),
+        .eq("status", "draft"),
       supabase
         .from("properties_offmarket")
         .select("id", { count: "exact", head: true })
@@ -64,7 +64,7 @@ export default async function AdminDashboardPage() {
 
   const cards = [
     { label: "Leads ce mois", value: stats.leadsMonth, href: "/admin/leads" },
-    { label: "Mandats en attente", value: stats.mandatesActive, href: "/admin/mandates" },
+    { label: "Mandats en attente", value: stats.mandatesActive, href: "/admin/mandats-recherche" },
     { label: "Off-Market publiés", value: stats.offmarketActive, href: "/admin/offmarket" },
     { label: "ARCOVA waitlist", value: stats.arcovaTotal, href: "/admin/arcova" },
     { label: "Avis publiés", value: stats.reviewsPublished, href: "/admin/reviews" },

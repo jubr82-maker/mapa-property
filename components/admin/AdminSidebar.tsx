@@ -19,7 +19,7 @@ const items = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, match: "exact" as const },
   { href: "/admin/offmarket", label: "Off-Market", icon: Lock, match: "prefix" as const },
   { href: "/admin/leads", label: "Leads", icon: Mail, match: "prefix" as const },
-  { href: "/admin/mandates", label: "Mandats", icon: FileText, match: "prefix" as const },
+  { href: "/admin/mandats-recherche", label: "Mandats", icon: FileText, match: "prefix" as const },
   { href: "/admin/arcova", label: "ARCOVA", icon: Users, match: "prefix" as const },
   { href: "/admin/reviews", label: "Avis", icon: Star, match: "prefix" as const },
   { href: "/admin/blog", label: "Blog", icon: BookText, match: "prefix" as const },
