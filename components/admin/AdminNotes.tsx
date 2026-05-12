@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { addAdminNote, setNextFollowUp } from "@/app/admin/leads/actions";
+import {
+  addAdminNote as addLeadAdminNote,
+  setNextFollowUp as setLeadNextFollowUp,
+} from "@/app/admin/leads/actions";
+
+type AddNoteAction = (id: string, noteText: string) => Promise<void>;
+type SetFollowUpAction = (id: string, date: string | null) => Promise<void>;
 
 type HistoryEntry = {
   at: string;
@@ -29,11 +35,22 @@ export function AdminNotes({
   leadId,
   history,
   initialFollowUp,
+  addNoteAction,
+  setFollowUpAction,
 }: {
   leadId: string;
   history: HistoryEntry[];
   initialFollowUp: string | null;
+  /**
+   * Server Actions custom. Si omises, ciblent /admin/leads (compat
+   * ascendante). Pour réutiliser sur mandats_recherche / arcova_waitlist /
+   * offmarket_requests, passer les actions du module concerné.
+   */
+  addNoteAction?: AddNoteAction;
+  setFollowUpAction?: SetFollowUpAction;
 }) {
+  const addAdminNote = addNoteAction ?? addLeadAdminNote;
+  const setNextFollowUp = setFollowUpAction ?? setLeadNextFollowUp;
   const [note, setNote] = useState("");
   const [followUp, setFollowUp] = useState(initialFollowUp ?? "");
   const [error, setError] = useState<string | null>(null);

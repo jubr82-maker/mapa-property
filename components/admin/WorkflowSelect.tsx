@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateWorkflowStatus } from "@/app/admin/leads/actions";
+import { updateWorkflowStatus as updateLeadWorkflowStatus } from "@/app/admin/leads/actions";
 import {
   WORKFLOW_STATUSES,
   WORKFLOW_LABELS,
@@ -9,13 +9,28 @@ import {
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
 
+// Signature des Server Actions workflow (alignée sur leads/actions.ts)
+type UpdateWorkflowAction = (
+  id: string,
+  newStatus: string,
+  reason?: string,
+) => Promise<void>;
+
 export function WorkflowSelect({
   leadId,
   initialStatus,
+  action,
 }: {
   leadId: string;
   initialStatus: string | null | undefined;
+  /**
+   * Server Action à appeler. Si omise, on cible /admin/leads (compat
+   * ascendante). Pour réutiliser sur mandats_recherche / arcova_waitlist /
+   * offmarket_requests, passer l'action depuis le module concerné.
+   */
+  action?: UpdateWorkflowAction;
 }) {
+  const updateWorkflowStatus = action ?? updateLeadWorkflowStatus;
   const [status, setStatus] = useState<WorkflowStatus>(
     (initialStatus && WORKFLOW_STATUSES.includes(initialStatus as WorkflowStatus)
       ? (initialStatus as WorkflowStatus)
