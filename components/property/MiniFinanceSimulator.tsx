@@ -17,17 +17,20 @@ interface Props {
 }
 
 export function MiniFinanceSimulator({ price, country, variant = "default" }: Props) {
+  // Apimo peut envoyer "Luxembourg" ou un code non listé : fallback LU pour
+  // éviter le crash si la clé n'est pas dans LEGAL_FEES.
+  const safeCountry: CountryCode = LEGAL_FEES[country] ? country : "LU";
   const [downPayment, setDownPayment] = useState(Math.round(price * 0.2));
   const [duration, setDuration] = useState(25);
-  const rate = DEFAULT_RATES_BY_COUNTRY[country] ?? 3.85;
-  const fees = LEGAL_FEES[country];
+  const rate = DEFAULT_RATES_BY_COUNTRY[safeCountry] ?? 3.85;
+  const fees = LEGAL_FEES[safeCountry];
 
   const mortgage = useMemo(
     () => computeMortgage({ price, downPayment, rateAnnual: rate, durationYears: duration }),
     [price, downPayment, rate, duration],
   );
 
-  const acquisition = useMemo(() => computeAcquisitionCosts(price, country), [price, country]);
+  const acquisition = useMemo(() => computeAcquisitionCosts(price, safeCountry), [price, safeCountry]);
 
   // Hypothèse revenu : taux d'endettement 35% max → revenu mensuel requis
   const incomeRequired = mortgage.monthlyPayment / 0.35;
