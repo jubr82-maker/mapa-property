@@ -16,8 +16,9 @@ export const realEstateAgent = (locale: string) => ({
       : locale === "de"
         ? "Luxemburger Immobilienagentur und internationaler Broker."
         : "Agence immobilière luxembourgeoise et broker international.",
-  email: "j.brebion@mapagroup.org",
-  telephone: "+352691620127",
+  // RGPD : email + téléphone retirés du JSON-LD public.
+  // Coordonnées disponibles via la page "Mentions légales" (obligation légale)
+  // et via le composant <ContactButtons /> côté UI.
   address: {
     "@type": "PostalAddress",
     addressLocality: "Luxembourg",
@@ -47,7 +48,7 @@ export const realEstateAgent = (locale: string) => ({
   ],
   founder: {
     "@type": "Person",
-    name: "Julien Brebion",
+    name: "Julien",
     jobTitle: "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
   },
   foundingDate: "2020",
@@ -73,11 +74,10 @@ export const personJulien = () => ({
   "@context": "https://schema.org",
   "@type": "Person",
   "@id": `${SITE_URL}#julien`,
-  name: "Julien Brebion",
+  name: "Julien",
   jobTitle: "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
   worksFor: { "@id": `${SITE_URL}#organization` },
-  email: "j.brebion@mapagroup.org",
-  telephone: "+352691620127",
+  // RGPD : email + téléphone retirés du JSON-LD public.
   sameAs: [
     "https://www.linkedin.com/in/julien-brebion/",
   ],
@@ -164,7 +164,7 @@ export const blogPosting = (p: BlogJsonLdInput) => ({
   image: p.image,
   datePublished: p.publishedAt,
   dateModified: p.publishedAt,
-  author: { "@type": "Person", name: p.author ?? "Julien Brebion" },
+  author: { "@type": "Person", name: p.author ?? "Julien" },
   publisher: { "@id": `${SITE_URL}#organization` },
   mainEntityOfPage: p.url,
 });

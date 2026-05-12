@@ -74,7 +74,7 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
           />
         </Field>
         <Field label="Auteur">
-          <input name="author" defaultValue={post?.author ?? "Julien Brebion"} className={inputCls} />
+          <input name="author" defaultValue={post?.author ?? "Julien"} className={inputCls} />
         </Field>
         <Field label="Image cover (URL)" hint="Upload manuellement dans Supabase Storage et coller l'URL publique.">
           <input

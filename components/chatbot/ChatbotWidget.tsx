@@ -115,10 +115,10 @@ export function ChatbotWidget() {
           role: "assistant",
           content:
             locale === "en"
-              ? "An error occurred. Please contact Julien: +352 691 620 127."
+              ? "An error occurred. Please contact Julien via the contact buttons on the site."
               : locale === "de"
-                ? "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie Julien: +352 691 620 127."
-                : "Une erreur est survenue. Contactez Julien : +352 691 620 127.",
+                ? "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie Julien über die Kontakt-Buttons auf der Website."
+                : "Une erreur est survenue. Contactez Julien via les boutons de contact disponibles sur le site.",
         },
       ]);
     } finally {

@@ -9,7 +9,7 @@ const KNOWLEDGE_FR = `
 - Domaine : mapaproperty.lu (jamais .com).
 - Fondation : 2018 (activité), 2020 (constitution société).
 - Real Estate Director : Julien.
-- Téléphone : +352 691 620 127. Email : j.brebion@mapagroup.org.
+- Coordonnées directes (téléphone, email) : disponibles via les boutons de contact présents sur le site. Ne jamais divulguer ni numéro de téléphone ni adresse email en clair dans la conversation.
 - HQ public : Luxembourg (l'adresse Dudelange n'apparaît que dans les pages légales).
 - RDV : Luxembourg-Ville, sur site dans le bien visité, à votre domicile, ou en visioconférence.
 - Statut : agence immobilière luxembourgeoise + broker (courtier) international.
@@ -97,7 +97,7 @@ const KNOWLEDGE_EN = `
 - Domain: mapaproperty.lu (never .com).
 - Founded: 2018 (activity), 2020 (entity).
 - Real Estate Director: Julien.
-- Phone: +352 691 620 127. Email: j.brebion@mapagroup.org.
+- Direct contact details (phone, email): available via the contact buttons on the website. Never disclose a raw phone number or email address in the conversation.
 - HQ: Luxembourg (the Dudelange address only appears in legal pages).
 - Meetings: Luxembourg-City, on site, at your home, or by video call.
 - Status: Luxembourg real estate agency + international broker.
@@ -153,7 +153,7 @@ const KNOWLEDGE_DE = `
 - Domain: mapaproperty.lu (nie .com).
 - Gegründet: 2018 (Tätigkeit), 2020 (Gesellschaft).
 - Real Estate Director: Julien.
-- Telefon: +352 691 620 127. E-Mail: j.brebion@mapagroup.org.
+- Direkte Kontaktdaten (Telefon, E-Mail): verfügbar über die Kontakt-Buttons auf der Website. Niemals eine Telefonnummer oder E-Mail-Adresse im Klartext im Chat preisgeben.
 - HQ: Luxemburg (Dudelange nur im Impressum).
 - Termine: Luxemburg-Stadt, vor Ort, zu Hause oder Videogespräch.
 - Status: Luxemburger Immobilienagentur + internationaler Broker.
@@ -215,7 +215,7 @@ TON : professionnel, chaleureux, précis, jamais insistant. Comme un concierge d
 
 RÈGLES STRICTES :
 - Tu connais TOUT sur MAPA Property (cf. base ci-dessous).
-- Si tu ne sais pas, tu proposes le contact direct : +352 691 620 127 / j.brebion@mapagroup.org.
+- Si tu ne sais pas, tu invites l'utilisateur à utiliser les boutons de contact présents sur le site (jamais de téléphone ni email en clair dans la conversation).
 - Tu n'inventes JAMAIS un bien, un prix, ou un détail légal.
 - Pour toute question fiscale précise, tu rediriges vers un notaire.
 - Tu encourages doucement la prise de RDV ou le dépôt d'un mandat.

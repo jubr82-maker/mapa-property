@@ -27,13 +27,15 @@ export default async function AdminSettingsPage() {
           Coordonnées agence
         </h2>
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-          <Info label="Téléphone" value="+352 691 620 127" />
-          <Info label="Email" value="j.brebion@mapagroup.org" />
+          <Info label="Téléphone" value="Voir mentions légales (source unique)" />
+          <Info label="Email" value="Voir mentions légales (source unique)" />
           <Info label="Notification admin" value="admin@mapagroup.org" />
           <Info label="Siège (privé)" value="Dudelange, Luxembourg" />
         </dl>
         <p className="mt-3 text-xs text-[#3D4F63]/60">
-          Lecture seule. Modifiable uniquement via le code (mentions légales).
+          Lecture seule. Les coordonnées Julien / Frédéric ne sont plus
+          dupliquées : source unique = <code>lib/legal/mentions.ts</code>.
+          Diffusion publique uniquement via le composant <code>&lt;ContactButtons /&gt;</code>.
         </p>
       </section>
 

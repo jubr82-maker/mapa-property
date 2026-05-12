@@ -220,7 +220,7 @@ export default async function OffMarketDetailPage({
                 <div className="relative size-14 shrink-0 overflow-hidden rounded-full border border-gold/40">
                   <Image
                     src={sbUrl("photos", "IMG_2461.jpg")}
-                    alt="Julien Brebion — Real Estate Director MAPA Property"
+                    alt="Julien — Real Estate Director MAPA Property"
                     fill
                     sizes="56px"
                     className="object-cover"
@@ -228,7 +228,7 @@ export default async function OffMarketDetailPage({
                 </div>
                 <div className="leading-tight">
                   <p className="font-display text-sm font-bold text-ink">
-                    Julien Brebion
+                    Julien
                   </p>
                   <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
                     Real Estate Director

@@ -1,5 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ContactForm } from "@/components/forms/ContactForm";
+import { ContactButtons } from "@/components/ContactButtons";
 
 export default async function ContactPage({
   params,
@@ -35,12 +36,14 @@ export default async function ContactPage({
           </section>
 
           <aside className="space-y-5">
-            <ContactBlock label={t("call_label")} value="+352 691 620 127" href="tel:+352691620127" />
-            <ContactBlock
-              label={t("email_label")}
-              value="j.brebion@mapagroup.org"
-              href="mailto:j.brebion@mapagroup.org"
-            />
+            <div className="rounded-xl border border-line bg-bg p-5">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
+                {t("call_label")} · {t("email_label")}
+              </p>
+              <div className="mt-3">
+                <ContactButtons />
+              </div>
+            </div>
             <div className="rounded-xl border border-line bg-bg p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
                 {t("hq_label")}
@@ -61,27 +64,5 @@ export default async function ContactPage({
         </div>
       </div>
     </div>
-  );
-}
-
-function ContactBlock({
-  label,
-  value,
-  href,
-}: {
-  label: string;
-  value: string;
-  href: string;
-}) {
-  return (
-    <a
-      href={href}
-      className="block rounded-xl border border-line bg-bg p-5 transition-colors hover:border-gold"
-    >
-      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-        {label}
-      </p>
-      <p className="mt-2 font-display text-lg font-bold text-ink">{value}</p>
-    </a>
   );
 }
