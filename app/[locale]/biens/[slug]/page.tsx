@@ -14,7 +14,7 @@ import { PropertyCard } from "@/components/property/PropertyCard";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
 import { ContactButtons } from "@/components/ContactButtons";
-import { MiniFinanceSimulator } from "@/components/property/MiniFinanceSimulator";
+import { AcquisitionSimulator } from "@/components/property/AcquisitionSimulator";
 import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
 import { PropertyViewTracker } from "@/components/property/PropertyViewTracker";
 import { parseApimoDescription } from "@/lib/property-description-parser";
@@ -323,11 +323,11 @@ export default async function PropertyPage({
               </IntlLink>
             </div>
 
-            {/* Mini-simulateur financement */}
+            {/* Simulateur d'acquisition par pays */}
             {price > 0 && property.transaction !== "rent" && (
-              <MiniFinanceSimulator
+              <AcquisitionSimulator
                 price={price}
-                country={(property.country as "LU" | "FR" | "BE" | "DE" | "PT" | "AE") || "LU"}
+                country={property.country ?? "LU"}
                 variant="compact"
               />
             )}
