@@ -7,36 +7,51 @@ import { checkHoneypot } from "@/lib/honeypot";
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
+const str = (v: unknown) => (typeof v === "string" ? v : undefined);
+const strArr = (v: unknown) =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : undefined;
+
 export async function POST(req: Request) {
   const limit = rateLimit(req, { windowMs: 60_000, max: 5, namespace: "nda" });
   if (!limit.ok) return NextResponse.json({ error: "rate_limited" }, { status: 429 });
 
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown> & {
     captchaToken?: string;
+    turnstile_token?: string;
     honeypot?: string;
   };
 
   if (!checkHoneypot(body.honeypot as string | undefined)) {
     return NextResponse.json({ ok: true }, { status: 200 });
   }
-  if (!isEmail(body.email) || typeof body.name !== "string") {
+
+  // Compat : accepter `full_name` OU `name` (legacy) pour le nom complet
+  const fullName = str(body.full_name) ?? str(body.name);
+  if (!isEmail(body.email) || !fullName) {
     return NextResponse.json({ error: "invalid_input" }, { status: 400 });
   }
 
-  const ok = await verifyTurnstile(body.captchaToken, clientIp(req));
+  const captchaToken = (body.captchaToken ?? body.turnstile_token) as string | undefined;
+  const ok = await verifyTurnstile(captchaToken, clientIp(req));
   if (!ok) return NextResponse.json({ error: "turnstile_failed" }, { status: 403 });
 
   const sb = supabaseServer();
   const { error, data } = await sb
     .from("nda_requests")
     .insert({
-      name: body.name,
+      civility: str(body.civility) ?? null,
+      full_name: fullName,
       email: body.email,
-      phone: typeof body.phone === "string" ? body.phone : undefined,
-      project_type: typeof body.projectType === "string" ? body.projectType : undefined,
-      budget_min: typeof body.budgetMin === "number" ? body.budgetMin : undefined,
-      budget_max: typeof body.budgetMax === "number" ? body.budgetMax : undefined,
-      areas: Array.isArray(body.areas) ? body.areas : undefined,
+      phone: str(body.phone) ?? null,
+      capacity_range: str(body.capacity_range) ?? null,
+      property_types: strArr(body.property_types) ?? null,
+      zones: str(body.zones) ?? null,
+      timeline: str(body.timeline) ?? null,
+      nda_accepted: typeof body.nda_accepted === "boolean" ? body.nda_accepted : false,
+      source_ip: clientIp(req),
+      user_agent: req.headers.get("user-agent") ?? null,
+      lang: str(body.lang) ?? null,
+      status: "pending",
     } as never)
     .select("id")
     .single();
