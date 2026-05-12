@@ -4,25 +4,28 @@ import { LiveClock } from "@/components/home/LiveClock";
 
 export function Hero() {
   const t = useTranslations("hero");
-  const videoSrc = sbUrl("Videos", "mapa_showcase_new.mp4");
+  const videoDesktop = sbUrl("Videos", "mapa_showcase_desktop.mp4");
+  const videoMobile = sbUrl("Videos", "mapa_showcase_mobile.mp4");
 
   return (
     <section className="relative isolate min-h-[80vh] overflow-hidden bg-[#070605] lg:min-h-screen">
-      <link rel="preload" as="video" href={videoSrc} type="video/mp4" />
       {/* Video background — bucket Supabase "Videos" (majuscule).
           CSP media-src 'self' https://*.supabase.co indispensable
           (cf. next.config.ts). Pas de poster externe : le bg #070605
-          joue le rôle de placeholder le temps du buffering. */}
+          joue le rôle de placeholder le temps du buffering.
+          Servi en deux variantes responsive (desktop 4.7MB / mobile 3.1MB)
+          + preload="metadata" pour réduire l'Egress Supabase ~70%. */}
       <video
         className="absolute inset-0 size-full object-cover"
         autoPlay
         muted
         loop
         playsInline
-        preload="auto"
+        preload="metadata"
         aria-hidden
       >
-        <source src={videoSrc} type="video/mp4" />
+        <source src={videoDesktop} type="video/mp4" media="(min-width: 1024px)" />
+        <source src={videoMobile} type="video/mp4" />
       </video>
 
       {/* Gradient overlay (ink → transparent → ink 60%) */}
