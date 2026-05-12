@@ -1,5 +1,6 @@
 import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
@@ -71,4 +72,15 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
 };
 
-export default withNextIntl(nextConfig);
+const withIntl = withNextIntl(nextConfig);
+
+// Sentry n'est activé qu'avec SENTRY_AUTH_TOKEN présent (scaffolding sinon).
+const finalConfig = process.env.SENTRY_AUTH_TOKEN
+  ? withSentryConfig(withIntl, {
+      silent: true,
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+    })
+  : withIntl;
+
+export default finalConfig;

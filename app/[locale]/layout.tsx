@@ -10,6 +10,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { homepageGraph } from "@/lib/seo";
 import "../globals.css";
@@ -142,6 +143,7 @@ export default async function LocaleLayout({
           </NextIntlClientProvider>
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
         {process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN ? (
           <Script
             src="https://static.cloudflareinsights.com/beacon.min.js"
