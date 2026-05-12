@@ -240,7 +240,6 @@ export async function fetchPropertyByIdOrSlug(
   identifier: string,
 ): Promise<Property | null> {
   const sb = supabaseServer();
-  const isUuid = UUID_RE.test(identifier);
   const isNumeric = NUMERIC_RE.test(identifier);
 
   // 1) Match strict slug (cas majoritaire)
@@ -257,8 +256,10 @@ export async function fetchPropertyByIdOrSlug(
     }
   }
 
-  // 2) UUID → id Supabase
-  if (isUuid) {
+  // 2) Match direct sur `id` (UUID Supabase ou identifiant Apimo numérique
+  //    stocké en text). Si Postgres rejette le format (22P02 invalid_text_
+  //    representation pour un UUID strict), on ignore silencieusement.
+  {
     const { data, error } = await sb
       .from("properties")
       .select("*")
@@ -266,23 +267,30 @@ export async function fetchPropertyByIdOrSlug(
       .eq("is_published", true)
       .maybeSingle();
     if (!error && data) return data as Property;
-    if (error && error.code !== "PGRST116") {
+    if (error && error.code !== "PGRST116" && error.code !== "22P02") {
       console.error("[data] fetchPropertyByIdOrSlug id", error.message);
     }
   }
 
-  // 3) Numérique → potentiel apimo_ref (best-effort, colonne tolérée)
+  // 3) Numérique → potentiel apimo_ref / apimo_id (best-effort, colonnes
+  //    tolérées : PGRST204 / 42703 si la colonne n'existe pas).
   if (isNumeric) {
-    const { data, error } = await sb
-      .from("properties")
-      .select("*")
-      .eq("apimo_ref", identifier)
-      .eq("is_published", true)
-      .maybeSingle();
-    if (!error && data) return data as Property;
-    // PGRST204 = column does not exist; on ignore silencieusement
-    if (error && error.code !== "PGRST116" && error.code !== "PGRST204" && error.code !== "42703") {
-      console.error("[data] fetchPropertyByIdOrSlug apimo_ref", error.message);
+    for (const col of ["apimo_ref", "apimo_id"] as const) {
+      const { data, error } = await sb
+        .from("properties")
+        .select("*")
+        .eq(col, identifier)
+        .eq("is_published", true)
+        .maybeSingle();
+      if (!error && data) return data as Property;
+      if (
+        error &&
+        error.code !== "PGRST116" &&
+        error.code !== "PGRST204" &&
+        error.code !== "42703"
+      ) {
+        console.error(`[data] fetchPropertyByIdOrSlug ${col}`, error.message);
+      }
     }
   }
 
