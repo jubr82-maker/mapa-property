@@ -7,10 +7,11 @@ interface LogoProps {
   asLink?: boolean;
 }
 
+// Ratio source PNG : 1080×247 ≈ 4.37:1 (logo horizontal officiel MAPA).
 const sizeMap = {
-  sm: { w: 96, h: 48 },
-  md: { w: 140, h: 70 },
-  lg: { w: 160, h: 80 },
+  sm: { w: 140, h: 32 },
+  md: { w: 200, h: 46 },
+  lg: { w: 280, h: 64 },
 };
 
 export function Logo({
@@ -22,7 +23,7 @@ export function Logo({
 
   const img = (
     <Image
-      src="/logo-mapa-property.svg"
+      src="/logo-mapa-property.png"
       alt="MAPA Property"
       width={w}
       height={h}
