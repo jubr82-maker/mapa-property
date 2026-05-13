@@ -1,24 +1,142 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import {
   Activity,
   ArrowUpRight,
   BarChart3,
   Building2,
+  Cloud,
   Eye,
   FileSignature,
   Flame,
   Gauge,
+  Globe,
   Heart,
   LineChart,
   Mail,
+  Search,
   ShieldCheck,
+  Smartphone,
   Sparkles,
   Users,
+  Zap,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { AnalyticsHealthPill } from "@/components/admin/AnalyticsHealthPill";
+import { KpiCard } from "@/components/admin/analytics/KpiCard";
+import { TokenMissingCard } from "@/components/admin/analytics/TokenMissingCard";
+import { TopList } from "@/components/admin/analytics/TopList";
+import { PieChart } from "@/components/admin/analytics/PieChart";
+import { LineChart as AnalyticsLineChart } from "@/components/admin/analytics/LineChart";
 
 export const dynamic = "force-dynamic";
+
+// ---------------------------------------------------------------------------
+// Types renvoyés par les routes API
+// ---------------------------------------------------------------------------
+
+type GaMissing = {
+  ok: false;
+  reason: "missing_token" | "api_error" | "package_missing" | "unauthorized";
+  configUrl?: string;
+  instructions?: string;
+  message?: string;
+};
+
+type GaOk = {
+  ok: true;
+  sessions7d: number;
+  sessions30d: number;
+  topPages: { key: string; value: number }[];
+  topCountries: { key: string; value: number }[];
+  mobileVsDesktop: { mobile: number; desktop: number; tablet: number };
+  conversionDaily: { key: string; value: number }[];
+};
+
+type VercelOk = {
+  ok: true;
+  webVitals: { lcp: number | null; fid: number | null; cls: number | null; inp: number | null };
+  totalViews: number;
+  topReferrers: { key: string; value: number }[];
+  topPages: { key: string; value: number }[];
+};
+
+type CloudflareOk = {
+  ok: true;
+  requests: number;
+  bandwidth: number;
+  cacheHit: number;
+  threats: number;
+  daily: { date: string; requests: number; threats: number }[];
+};
+
+type SupabaseAnalyticsOk = {
+  ok: true;
+  leadsCount30d: number;
+  conversionDaily: { date: string; count: number }[];
+  topProperties: { id: string; label: string; count: number; href: string | null }[];
+  topSearchTerms: { key: string; value: number }[];
+  viewsAvailable: boolean;
+  searchLogsAvailable: boolean;
+};
+
+type ApiResponse<TOk> = TOk | GaMissing;
+
+async function fetchInternal<T>(path: string): Promise<T | null> {
+  try {
+    const h = await headers();
+    const host = h.get("host") ?? "localhost:3000";
+    const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+    const cookie = h.get("cookie") ?? "";
+    const res = await fetch(`${proto}://${host}${path}`, {
+      headers: { cookie },
+      cache: "no-store",
+    });
+    if (!res.ok && res.status !== 200) {
+      // 401/etc → on continue, on traite côté caller
+    }
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+async function loadExternalAnalytics() {
+  const [ga4, vercel, cloudflare, supa] = await Promise.all([
+    fetchInternal<ApiResponse<GaOk>>("/api/admin/analytics/ga4"),
+    fetchInternal<ApiResponse<VercelOk>>("/api/admin/analytics/vercel"),
+    fetchInternal<ApiResponse<CloudflareOk>>("/api/admin/analytics/cloudflare"),
+    fetchInternal<ApiResponse<SupabaseAnalyticsOk>>("/api/admin/analytics/supabase"),
+  ]);
+  return { ga4, vercel, cloudflare, supa };
+}
+
+function formatBytes(b: number): string {
+  if (b < 1024) return `${b} B`;
+  if (b < 1024 ** 2) return `${(b / 1024).toFixed(1)} KB`;
+  if (b < 1024 ** 3) return `${(b / 1024 ** 2).toFixed(1)} MB`;
+  if (b < 1024 ** 4) return `${(b / 1024 ** 3).toFixed(2)} GB`;
+  return `${(b / 1024 ** 4).toFixed(2)} TB`;
+}
+
+// Seuils Google Core Web Vitals
+function vitalColor(metric: "lcp" | "fid" | "cls" | "inp", value: number | null): string {
+  if (value === null) return "text-[#3D4F63]/50";
+  const thresholds: Record<typeof metric, [number, number]> = {
+    lcp: [2500, 4000],
+    fid: [100, 300],
+    cls: [0.1, 0.25],
+    inp: [200, 500],
+  };
+  const [good, poor] = thresholds[metric];
+  if (value <= good) return "text-[#3F8F62]";
+  if (value <= poor) return "text-[#B8865A]";
+  return "text-[#C2604B]";
+}
+
+function vitalUnit(metric: "lcp" | "fid" | "cls" | "inp"): string {
+  return metric === "cls" ? "" : "ms";
+}
 
 // ---------------------------------------------------------------------------
 // Types & helpers
@@ -546,7 +664,16 @@ function Leads12mLine({ byMonth }: { byMonth: Record<string, number> }) {
 // ---------------------------------------------------------------------------
 
 export default async function AdminAnalyticsPage() {
-  const data = await loadAnalytics();
+  const [data, ext] = await Promise.all([loadAnalytics(), loadExternalAnalytics()]);
+  const { ga4, vercel, cloudflare, supa } = ext;
+
+  const ga4Ok = ga4 && ga4.ok === true ? (ga4 as GaOk) : null;
+  const ga4Missing = ga4 && ga4.ok === false ? (ga4 as GaMissing) : null;
+  const vercelOk = vercel && vercel.ok === true ? (vercel as VercelOk) : null;
+  const vercelMissing = vercel && vercel.ok === false ? (vercel as GaMissing) : null;
+  const cfOk = cloudflare && cloudflare.ok === true ? (cloudflare as CloudflareOk) : null;
+  const cfMissing = cloudflare && cloudflare.ok === false ? (cloudflare as GaMissing) : null;
+  const supaOk = supa && supa.ok === true ? (supa as SupabaseAnalyticsOk) : null;
 
   return (
     <div className="space-y-12">
@@ -562,6 +689,35 @@ export default async function AdminAnalyticsPage() {
           Données rafraîchies à chaque visite.
         </p>
       </header>
+
+      {/* ===================================================== KPIs PRINCIPAUX */}
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <KpiCard
+          label="Sessions · 30 j (GA4)"
+          value={ga4Ok ? ga4Ok.sessions30d : null}
+          Icon={Globe}
+          hint={ga4Ok ? undefined : "Configurer GA4_PROPERTY_ID"}
+        />
+        <KpiCard
+          label="Conversions · 30 j"
+          value={supaOk ? supaOk.leadsCount30d : null}
+          Icon={Mail}
+          hint="Leads Supabase"
+        />
+        <KpiCard
+          label="Requêtes · 30 j (CF)"
+          value={cfOk ? cfOk.requests : null}
+          Icon={Cloud}
+          hint={cfOk ? undefined : "Configurer Cloudflare"}
+        />
+        <KpiCard
+          label="LCP médian (Vercel)"
+          value={vercelOk?.webVitals.lcp ?? null}
+          Icon={Zap}
+          unit="ms"
+          hint={vercelOk ? undefined : "Configurer Vercel API"}
+        />
+      </section>
 
       {/* ------------------------------------------------------ A. Trafic */}
       <section className="space-y-6">
@@ -848,6 +1004,253 @@ export default async function AdminAnalyticsPage() {
             </p>
           </article>
         </div>
+      </section>
+
+      {/* =================================================== E. Google Analytics 4 */}
+      <section className="space-y-6">
+        <SectionHeader eyebrow="Section E" title="Trafic GA4" Icon={Globe} />
+
+        {ga4Missing && ga4Missing.reason === "missing_token" ? (
+          <TokenMissingCard
+            title="Google Analytics 4 Data API"
+            envVars={["GA4_PROPERTY_ID", "GA4_SERVICE_ACCOUNT_KEY"]}
+            configUrl={ga4Missing.configUrl ?? "https://console.cloud.google.com/iam-admin/serviceaccounts"}
+            instructions={ga4Missing.instructions}
+          />
+        ) : ga4Missing ? (
+          <div className="rounded-lg border border-[#C2604B]/30 bg-white p-6 text-sm text-[#C2604B]">
+            Erreur GA4 : {ga4Missing.message ?? ga4Missing.reason}
+          </div>
+        ) : ga4Ok ? (
+          <>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <KpiCard label="Sessions · 7 j" value={ga4Ok.sessions7d} Icon={Activity} />
+              <KpiCard label="Sessions · 30 j" value={ga4Ok.sessions30d} Icon={Globe} />
+              <KpiCard
+                label="Mobile · 30 j"
+                value={ga4Ok.mobileVsDesktop.mobile}
+                Icon={Smartphone}
+              />
+              <KpiCard
+                label="Desktop · 30 j"
+                value={ga4Ok.mobileVsDesktop.desktop}
+                Icon={BarChart3}
+              />
+            </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+                <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">Top pages</h3>
+                <TopList items={ga4Ok.topPages.slice(0, 10)} unit="vues" />
+              </article>
+              <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+                <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">Top pays</h3>
+                <TopList items={ga4Ok.topCountries.slice(0, 10)} unit="sessions" />
+              </article>
+            </div>
+            <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+              <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">
+                Mobile vs Desktop · 30 j
+              </h3>
+              <PieChart
+                slices={[
+                  { key: "mobile", value: ga4Ok.mobileVsDesktop.mobile, color: "#B8865A" },
+                  { key: "desktop", value: ga4Ok.mobileVsDesktop.desktop, color: "#3D4F63" },
+                  { key: "tablet", value: ga4Ok.mobileVsDesktop.tablet, color: "#5B7B9E" },
+                ]}
+                totalLabel="Sessions"
+              />
+            </article>
+          </>
+        ) : (
+          <p className="text-sm text-[#3D4F63]/60">Chargement GA4…</p>
+        )}
+      </section>
+
+      {/* =================================================== F. Vercel Web Vitals */}
+      <section className="space-y-6">
+        <SectionHeader eyebrow="Section F" title="Web Vitals (Vercel)" Icon={Zap} />
+
+        {vercelMissing && vercelMissing.reason === "missing_token" ? (
+          <TokenMissingCard
+            title="Vercel REST API · Web Insights"
+            envVars={["VERCEL_API_TOKEN", "VERCEL_PROJECT_ID"]}
+            configUrl={vercelMissing.configUrl ?? "https://vercel.com/account/tokens"}
+            instructions={vercelMissing.instructions}
+          />
+        ) : vercelMissing ? (
+          <div className="rounded-lg border border-[#B8865A]/40 bg-white p-6 text-sm text-[#3D4F63]/70">
+            API Vercel indisponible : {vercelMissing.message ?? vercelMissing.reason}. Consulter
+            le dashboard Vercel directement.
+          </div>
+        ) : vercelOk ? (
+          <>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
+                  LCP (p75)
+                </p>
+                <p
+                  className={`mt-3 font-display text-4xl font-bold ${vitalColor("lcp", vercelOk.webVitals.lcp)}`}
+                >
+                  {vercelOk.webVitals.lcp ?? "—"}
+                  <span className="ml-1 text-base font-normal">{vitalUnit("lcp")}</span>
+                </p>
+                <p className="mt-2 text-xs text-[#3D4F63]/60">≤ 2500 ms = bon</p>
+              </div>
+              <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
+                  FID (p75)
+                </p>
+                <p
+                  className={`mt-3 font-display text-4xl font-bold ${vitalColor("fid", vercelOk.webVitals.fid)}`}
+                >
+                  {vercelOk.webVitals.fid ?? "—"}
+                  <span className="ml-1 text-base font-normal">{vitalUnit("fid")}</span>
+                </p>
+                <p className="mt-2 text-xs text-[#3D4F63]/60">≤ 100 ms = bon</p>
+              </div>
+              <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
+                  CLS (p75)
+                </p>
+                <p
+                  className={`mt-3 font-display text-4xl font-bold ${vitalColor("cls", vercelOk.webVitals.cls)}`}
+                >
+                  {vercelOk.webVitals.cls ?? "—"}
+                </p>
+                <p className="mt-2 text-xs text-[#3D4F63]/60">≤ 0.1 = bon</p>
+              </div>
+              <KpiCard
+                label="Pages vues · 30 j"
+                value={vercelOk.totalViews}
+                Icon={Eye}
+              />
+            </div>
+            {vercelOk.topReferrers.length > 0 || vercelOk.topPages.length > 0 ? (
+              <div className="grid gap-6 lg:grid-cols-2">
+                {vercelOk.topReferrers.length > 0 ? (
+                  <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+                    <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">
+                      Top referrers
+                    </h3>
+                    <TopList items={vercelOk.topReferrers} unit="visites" />
+                  </article>
+                ) : null}
+                {vercelOk.topPages.length > 0 ? (
+                  <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+                    <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">
+                      Top pages (Vercel)
+                    </h3>
+                    <TopList items={vercelOk.topPages} unit="vues" />
+                  </article>
+                ) : null}
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <p className="text-sm text-[#3D4F63]/60">Chargement Vercel…</p>
+        )}
+      </section>
+
+      {/* =================================================== G. Cloudflare */}
+      <section className="space-y-6">
+        <SectionHeader eyebrow="Section G" title="Cloudflare · 30 j" Icon={Cloud} />
+
+        {cfMissing && cfMissing.reason === "missing_token" ? (
+          <TokenMissingCard
+            title="Cloudflare GraphQL Analytics"
+            envVars={["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_ZONE_ID"]}
+            configUrl={cfMissing.configUrl ?? "https://dash.cloudflare.com/profile/api-tokens"}
+            instructions={cfMissing.instructions}
+          />
+        ) : cfMissing ? (
+          <div className="rounded-lg border border-[#C2604B]/30 bg-white p-6 text-sm text-[#C2604B]">
+            Erreur Cloudflare : {cfMissing.message ?? cfMissing.reason}
+          </div>
+        ) : cfOk ? (
+          <>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <KpiCard label="Requêtes · 30 j" value={cfOk.requests} Icon={Activity} />
+              <KpiCard
+                label="Bande passante"
+                value={formatBytes(cfOk.bandwidth)}
+                Icon={Cloud}
+              />
+              <KpiCard
+                label="Cache hit"
+                value={cfOk.cacheHit}
+                Icon={Zap}
+                unit="%"
+              />
+              <KpiCard
+                label="Menaces bloquées"
+                value={cfOk.threats}
+                Icon={ShieldCheck}
+              />
+            </div>
+            {cfOk.daily.length > 0 ? (
+              <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+                <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">
+                  Requêtes journalières
+                </h3>
+                <AnalyticsLineChart
+                  data={cfOk.daily.map((d) => ({ date: d.date, value: d.requests }))}
+                  label="requêtes"
+                />
+              </article>
+            ) : null}
+          </>
+        ) : (
+          <p className="text-sm text-[#3D4F63]/60">Chargement Cloudflare…</p>
+        )}
+      </section>
+
+      {/* =================================================== H. Supabase · agrégats */}
+      <section className="space-y-6">
+        <SectionHeader eyebrow="Section H" title="Conversion & recherches" Icon={Search} />
+
+        {supaOk ? (
+          <>
+            <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+              <header className="mb-6">
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
+                  Conversion daily · 30 j
+                </p>
+                <h3 className="mt-1 font-display text-lg font-bold text-[#3D4F63]">
+                  Leads par jour
+                </h3>
+              </header>
+              <AnalyticsLineChart
+                data={supaOk.conversionDaily.map((d) => ({ date: d.date, value: d.count }))}
+                label="leads"
+              />
+            </article>
+
+            <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+              <header className="mb-4 flex items-center justify-between">
+                <h3 className="font-display text-lg font-bold text-[#3D4F63]">
+                  Top recherches IA
+                </h3>
+                <Search className="size-5 text-[#B8865A]" />
+              </header>
+              {supaOk.searchLogsAvailable ? (
+                <TopList
+                  items={supaOk.topSearchTerms}
+                  unit="requêtes"
+                  emptyLabel="Aucune recherche enregistrée."
+                />
+              ) : (
+                <p className="rounded-md border border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-4 text-sm text-[#3D4F63]/70">
+                  Table <code className="font-mono text-xs">chatbot_logs</code> absente.
+                  Activer en créant la table dans Supabase pour suivre les requêtes
+                  utilisateur du chatbot Eléna.
+                </p>
+              )}
+            </article>
+          </>
+        ) : (
+          <p className="text-sm text-[#3D4F63]/60">Chargement Supabase…</p>
+        )}
       </section>
     </div>
   );
