@@ -14,26 +14,26 @@ export function BlogTeaser({ posts, locale }: Props) {
   if (posts.length === 0) return null;
 
   return (
-    <section className="bg-bg-soft px-6 py-20 lg:px-10 lg:py-28">
+    <section className="bg-bg-soft px-6 py-6 md:py-20 lg:px-10 lg:py-28">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-12 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-12">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
               {t("eyebrow")}
             </p>
-            <h2 className="mt-2 font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-5xl">
+            <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
               {t("title")}
             </h2>
           </div>
           <Link
             href="/blog"
-            className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-gold-deep hover:text-gold"
+            className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-deep hover:text-gold md:text-xs"
           >
             {t("see_all")} →
           </Link>
         </header>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
           {posts.map((post) => {
             const title = pickLang(post, "title", locale);
             const excerpt = pickLang(post, "excerpt", locale);

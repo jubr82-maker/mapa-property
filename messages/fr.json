@@ -56,7 +56,12 @@
     "fees_pdf": "Honoraires PDF",
     "cookies": "Politique cookies",
     "baseline": "Agence immobilière au Luxembourg · Broker international",
-    "micro_legal": "MAPA Property · Agence immobilière au Luxembourg · Broker (courtier) international · Contactez-nous pour toute prise de rendez-vous."
+    "micro_legal": "MAPA Property · Agence immobilière au Luxembourg · Broker (courtier) international · Contactez-nous pour toute prise de rendez-vous.",
+    "cta_eyebrow": "Passer à l'action",
+    "cta_title": "Vous vendez ou cherchez ?",
+    "cta_subtitle": "Confiez-nous votre projet sous mandat — vente exclusive ou recherche sur-mesure, Luxembourg et international.",
+    "cta_exclusive": "Mandat Exclusif",
+    "cta_search": "Mandat Recherche"
   },
   "hero": {
     "pill": "Lux. & Intl.",
@@ -176,6 +181,30 @@
     "autonomous_title": "Autonome",
     "autonomous_text": "Pour les vendeurs qui souhaitent gérer eux-mêmes les visites. 1% HT + 17% TVA, durée 2 mois reconductibles — backup juridique et notarial."
   },
+  "mandates_premium": {
+    "eyebrow": "Nos mandats phares",
+    "title": "Vendre ou chercher avec MAPA.",
+    "subtitle": "Deux mandats premium pour deux missions critiques : défendre votre bien à la vente ou chasser pour vous le bien rare.",
+    "rate_suffix": "HT + 17% TVA",
+    "exclusive_badge": "⭐ PREMIUM",
+    "exclusive_title": "Mandat Exclusif",
+    "exclusive_rate": "3% HT",
+    "exclusive_promise": "Votre bien défendu avec les meilleurs outils MAPA. Conseil premium, exclusivité MAPA, marketing dédié.",
+    "exclusive_bullet_1": "Exclusivité MAPA — un seul interlocuteur",
+    "exclusive_bullet_2": "Marketing premium et reportage photo HDR",
+    "exclusive_bullet_3": "Négociation et défense de votre prix",
+    "exclusive_bullet_4": "Suivi dédié jusqu'à l'acte authentique",
+    "exclusive_cta": "Découvrir le Mandat Exclusif",
+    "search_badge": "🎯 SUR-MESURE",
+    "search_title": "Mandat de Recherche",
+    "search_promise": "Trouvons ensemble le bien rare. Nous chassons pour vous au Luxembourg et à l'international.",
+    "search_bullet_1": "Briefing premium et cahier des charges",
+    "search_bullet_2": "Accès off-market et réseau confidentiel",
+    "search_bullet_3": "Négociation dans votre intérêt exclusif",
+    "search_bullet_4": "Accompagnement complet jusqu'au notaire",
+    "search_cta": "Découvrir le Mandat de Recherche",
+    "footer_note": "Autres formules disponibles : Semi-Exclusif (4% HT) · Simple (5% HT) · Autonome (1% HT)"
+  },
   "markets_home": {
     "eyebrow": "Marchés actifs",
     "title": "Du Grand-Duché aux marchés mondiaux",
@@ -186,7 +215,10 @@
     "international": "International",
     "cities": "villes",
     "international_text": "28 villes premium, du bassin méditerranéen aux Émirats et aux Amériques.",
-    "see_all": "Découvrir tous les marchés"
+    "see_all": "Découvrir tous les marchés",
+    "markets_compact_title": "Nos marchés actifs",
+    "markets_compact_subtitle": "Luxembourg · International",
+    "markets_compact_cta": "Voir tous nos marchés actifs"
   },
   "stats": {
     "eyebrow": "Chiffres clés",

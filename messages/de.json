@@ -56,7 +56,12 @@
     "fees_pdf": "Honorare (PDF)",
     "cookies": "Cookie-Richtlinie",
     "baseline": "Luxemburger Immobilienagentur · Internationaler Broker",
-    "micro_legal": "MAPA Property · Luxemburger Immobilienagentur · Internationaler Broker · Kontaktieren Sie uns für einen Termin."
+    "micro_legal": "MAPA Property · Luxemburger Immobilienagentur · Internationaler Broker · Kontaktieren Sie uns für einen Termin.",
+    "cta_eyebrow": "Aktiv werden",
+    "cta_title": "Verkaufen oder suchen?",
+    "cta_subtitle": "Vertrauen Sie uns Ihr Projekt unter Mandat an — Exklusivverkauf oder maßgeschneiderte Suche, in Luxemburg und international.",
+    "cta_exclusive": "Exklusivmandat",
+    "cta_search": "Suchmandat"
   },
   "hero": {
     "pill": "Lux. & Intl.",
@@ -176,6 +181,30 @@
     "autonomous_title": "Autonom",
     "autonomous_text": "Für Verkäufer, die Besichtigungen selbst organisieren möchten. 1% zzgl. 17% MwSt., 2 Monate verlängerbar — juristische und notarielle Rückendeckung."
   },
+  "mandates_premium": {
+    "eyebrow": "Unsere Premium-Mandate",
+    "title": "Verkaufen oder suchen mit MAPA.",
+    "subtitle": "Zwei Premium-Mandate für zwei zentrale Aufgaben: Ihr Objekt beim Verkauf verteidigen oder die rare Immobilie für Sie finden.",
+    "rate_suffix": "zzgl. 17% MwSt.",
+    "exclusive_badge": "⭐ PREMIUM",
+    "exclusive_title": "Exklusivmandat",
+    "exclusive_rate": "3% netto",
+    "exclusive_promise": "Ihr Objekt mit den besten MAPA-Werkzeugen verteidigt. Premium-Beratung, MAPA-Exklusivität, dediziertes Marketing.",
+    "exclusive_bullet_1": "MAPA-Exklusivität — ein einziger Ansprechpartner",
+    "exclusive_bullet_2": "Premium-Marketing und HDR-Fotoreportage",
+    "exclusive_bullet_3": "Verhandlung und Verteidigung Ihres Preises",
+    "exclusive_bullet_4": "Dedizierte Begleitung bis zur notariellen Urkunde",
+    "exclusive_cta": "Exklusivmandat entdecken",
+    "search_badge": "🎯 MASSGESCHNEIDERT",
+    "search_title": "Suchmandat",
+    "search_promise": "Finden wir gemeinsam die seltene Immobilie. Wir suchen für Sie in Luxemburg und international.",
+    "search_bullet_1": "Premium-Briefing und Anforderungsprofil",
+    "search_bullet_2": "Off-Market-Zugang und vertrauliches Netzwerk",
+    "search_bullet_3": "Verhandlung in Ihrem exklusiven Interesse",
+    "search_bullet_4": "Vollständige Begleitung bis zum Notar",
+    "search_cta": "Suchmandat entdecken",
+    "footer_note": "Weitere Formate verfügbar: Halb-Exklusiv (4% netto) · Einfach (5% netto) · Autonom (1% netto)"
+  },
   "markets_home": {
     "eyebrow": "Aktive Märkte",
     "title": "Vom Großherzogtum zu globalen Städten",
@@ -186,7 +215,10 @@
     "international": "International",
     "cities": "Städte",
     "international_text": "28 Premium-Städte, vom Mittelmeerraum über die VAE bis nach Amerika.",
-    "see_all": "Alle Märkte entdecken"
+    "see_all": "Alle Märkte entdecken",
+    "markets_compact_title": "Unsere aktiven Märkte",
+    "markets_compact_subtitle": "Luxemburg · International",
+    "markets_compact_cta": "Alle aktiven Märkte ansehen"
   },
   "stats": {
     "eyebrow": "Kennzahlen",

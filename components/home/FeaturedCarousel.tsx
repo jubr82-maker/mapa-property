@@ -42,24 +42,24 @@ export function FeaturedCarousel({ items }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <section className="px-6 py-20 lg:px-10 lg:py-28">
+    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-28">
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-10">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
               {t("eyebrow")}
             </p>
-            <h2 className="mt-2 font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-5xl">
+            <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
               {t("title")}
             </h2>
-            <p className="mt-3 max-w-xl text-base text-ink-mid">{t("subtitle")}</p>
+            <p className="mt-3 max-w-xl text-xs text-ink-mid md:text-base">{t("subtitle")}</p>
           </div>
           <div className="flex items-center gap-3">
             <CarouselButton dir="prev" onClick={() => emblaApi?.scrollPrev()} />
             <CarouselButton dir="next" onClick={() => emblaApi?.scrollNext()} />
             <Link
               href="/biens"
-              className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-gold-deep transition-colors hover:text-gold"
+              className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-deep transition-colors hover:text-gold md:text-xs"
             >
               {t("see_all")} →
             </Link>
@@ -67,7 +67,7 @@ export function FeaturedCarousel({ items }: Props) {
         </div>
 
         <div ref={emblaRef} className="overflow-hidden">
-          <div className="flex gap-5">
+          <div className="flex gap-3 md:gap-5">
             {items.map((item) => (
               <article
                 key={`${item.kind}-${item.id}`}

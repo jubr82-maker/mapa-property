@@ -53,34 +53,34 @@ export function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 mx-auto flex min-h-[88dvh] max-w-[1400px] flex-col items-start justify-center gap-8 px-6 pt-32 pb-24 lg:px-10">
+      <div className="relative z-10 mx-auto flex min-h-[88dvh] max-w-[1400px] flex-col items-start justify-center gap-4 px-6 pt-24 pb-16 md:gap-8 md:pt-32 md:pb-24 lg:px-10">
         {/* Pill or */}
         <div className="inline-flex items-center gap-2 rounded-full border border-gold/60 bg-black/30 px-3 py-1 backdrop-blur-sm">
           <span className="size-1.5 rounded-full bg-gold-bright" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright">
+          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-gold-bright md:text-[10px]">
             {t("pill")}
           </span>
         </div>
 
         {/* Eyebrow */}
-        <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-white/70 sm:text-xs">
+        <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/70 sm:text-xs">
           {t("eyebrow")}
         </p>
 
         {/* Titre 3 lignes — taille -15%, leading 1.15 (accents OK), tracking aéré */}
-        <h1 className="font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(2.5rem,7.65vw,6.8rem)]">
+        <h1 className="font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]">
           <span className="block text-white/90">{t("title_line_1")}</span>
           <span className="block text-stroke text-transparent">{t("title_line_2")}</span>
           <span className="gold-text block">{t("title_line_3")}</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
+        <p className="max-w-xl text-xs leading-relaxed text-white/80 md:text-lg lg:text-xl">
           {t("subtitle")}
         </p>
 
         {/* Meta row */}
-        <ul className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[10px] uppercase tracking-[0.3em] text-white/60">
+        <ul className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[9px] uppercase tracking-[0.3em] text-white/60 md:gap-x-6 md:text-[10px]">
           <li>{t("meta_catalog")}</li>
           <li aria-hidden className="text-gold/60">·</li>
           <li>{t("meta_segments")}</li>

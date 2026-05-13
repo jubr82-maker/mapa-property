@@ -13,19 +13,19 @@ export function MandatesGrid() {
   const t = useTranslations("mandates_home");
 
   return (
-    <section className="bg-bg-soft px-6 py-20 lg:px-10 lg:py-28">
+    <section className="bg-bg-soft px-6 py-6 md:py-20 lg:px-10 lg:py-28">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-12 max-w-2xl">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+        <header className="mb-6 max-w-2xl md:mb-12">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
             {t("eyebrow")}
           </p>
-          <h2 className="mt-2 font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-5xl">
+          <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
             {t("title")}
           </h2>
-          <p className="mt-3 text-base text-ink-mid">{t("subtitle")}</p>
+          <p className="mt-3 text-xs text-ink-mid md:text-base">{t("subtitle")}</p>
         </header>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-4">
           {mandates.map((m) => (
             <HoverFlipCard
               key={m.key}

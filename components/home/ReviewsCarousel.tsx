@@ -11,31 +11,31 @@ export function ReviewsCarousel({ reviews }: Props) {
   if (reviews.length === 0) return null;
 
   return (
-    <section className="px-6 py-20 lg:px-10 lg:py-28">
+    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-28">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-12 max-w-2xl">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+        <header className="mb-6 max-w-2xl md:mb-12">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
             {t("eyebrow")}
           </p>
-          <h2 className="mt-2 font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-5xl">
+          <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
             {t("title")}
           </h2>
         </header>
 
         <div className="-mx-6 overflow-x-auto pb-4 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:-mx-10">
-          <ul className="flex w-max gap-5 px-6 lg:px-10">
+          <ul className="flex w-max gap-3 px-6 md:gap-5 lg:px-10">
             {reviews.map((r) => (
               <li
                 key={r.id}
                 className="w-[80vw] max-w-md shrink-0 snap-center sm:w-[420px]"
               >
-                <article className="flex h-full flex-col gap-5 rounded-xl border border-line bg-bg p-6">
+                <article className="flex h-full flex-col gap-3 rounded-xl border border-line bg-bg p-4 md:gap-5 md:p-6">
                   <Stars rating={r.rating ?? 5} />
-                  <blockquote className="text-base leading-relaxed text-ink-mid">
+                  <blockquote className="text-xs leading-relaxed text-ink-mid md:text-base">
                     “{r.comment ?? ""}”
                   </blockquote>
-                  <footer className="mt-auto flex items-center justify-between border-t border-line pt-4">
-                    <span className="font-display text-sm font-bold text-ink">
+                  <footer className="mt-auto flex items-center justify-between border-t border-line pt-3 md:pt-4">
+                    <span className="font-display text-xs font-bold text-ink md:text-sm">
                       {r.name ?? "—"}
                     </span>
                     {r.review_date && (

@@ -56,7 +56,12 @@
     "fees_pdf": "Fees (PDF)",
     "cookies": "Cookies policy",
     "baseline": "Luxembourg real estate agency · International broker",
-    "micro_legal": "MAPA Property · Luxembourg real estate agency · International broker · Contact us to book an appointment."
+    "micro_legal": "MAPA Property · Luxembourg real estate agency · International broker · Contact us to book an appointment.",
+    "cta_eyebrow": "Take action",
+    "cta_title": "Selling or searching?",
+    "cta_subtitle": "Entrust us with your project under mandate — exclusive sale or bespoke search, in Luxembourg and internationally.",
+    "cta_exclusive": "Exclusive Mandate",
+    "cta_search": "Search Mandate"
   },
   "hero": {
     "pill": "Lux. & Intl.",
@@ -176,6 +181,30 @@
     "autonomous_title": "Autonomous",
     "autonomous_text": "For sellers who wish to manage their own viewings. 1% excl. VAT + 17% VAT, 2-month renewable term — legal and notarial backup."
   },
+  "mandates_premium": {
+    "eyebrow": "Our flagship mandates",
+    "title": "Sell or search with MAPA.",
+    "subtitle": "Two premium mandates for two critical missions: defending your property at sale or hunting the rare asset for you.",
+    "rate_suffix": "excl. VAT + 17% VAT",
+    "exclusive_badge": "⭐ PREMIUM",
+    "exclusive_title": "Exclusive Mandate",
+    "exclusive_rate": "3% excl. VAT",
+    "exclusive_promise": "Your property defended with MAPA's best tools. Premium advisory, MAPA exclusivity, dedicated marketing.",
+    "exclusive_bullet_1": "MAPA exclusivity — one single point of contact",
+    "exclusive_bullet_2": "Premium marketing and HDR photo reportage",
+    "exclusive_bullet_3": "Negotiation and defence of your price",
+    "exclusive_bullet_4": "Dedicated follow-up through to the notarial deed",
+    "exclusive_cta": "Discover the Exclusive Mandate",
+    "search_badge": "🎯 BESPOKE",
+    "search_title": "Search Mandate",
+    "search_promise": "Let's find the rare asset together. We hunt for you in Luxembourg and internationally.",
+    "search_bullet_1": "Premium briefing and specification sheet",
+    "search_bullet_2": "Off-market access and confidential network",
+    "search_bullet_3": "Negotiation in your exclusive interest",
+    "search_bullet_4": "Full support through to the notary",
+    "search_cta": "Discover the Search Mandate",
+    "footer_note": "Other formats available: Semi-Exclusive (4% excl. VAT) · Simple (5% excl. VAT) · Autonomous (1% excl. VAT)"
+  },
   "markets_home": {
     "eyebrow": "Active markets",
     "title": "From the Grand Duchy to global cities",
@@ -186,7 +215,10 @@
     "international": "International",
     "cities": "cities",
     "international_text": "28 premium cities, from the Mediterranean basin to the UAE and the Americas.",
-    "see_all": "Discover all markets"
+    "see_all": "Discover all markets",
+    "markets_compact_title": "Our active markets",
+    "markets_compact_subtitle": "Luxembourg · International",
+    "markets_compact_cta": "View all active markets"
   },
   "stats": {
     "eyebrow": "Key figures",

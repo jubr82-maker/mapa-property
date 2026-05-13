@@ -6,24 +6,24 @@ export function ContactCTA() {
   const t = useTranslations("contact_cta");
 
   return (
-    <section className="px-6 py-24 lg:px-10 lg:py-32">
-      <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-2xl border border-line bg-ink p-10 text-bg sm:p-16">
+    <section className="px-6 py-6 md:py-24 lg:px-10 lg:py-32">
+      <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-2xl border border-line bg-ink p-5 text-bg md:p-10 lg:p-16">
         <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-gold/15 blur-3xl" />
 
-        <div className="relative grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+        <div className="relative grid gap-5 md:gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-center">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-bright">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:text-xs">
               {t("eyebrow")}
             </p>
-            <h2 className="mt-3 font-display text-4xl font-black leading-tight tracking-tight sm:text-6xl">
+            <h2 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
               {t("title")}
             </h2>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-bg/80">
+            <p className="mt-3 max-w-xl text-xs leading-relaxed text-bg/80 md:mt-5 md:text-base">
               {t("description")}
             </p>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 md:gap-4">
             <ContactButtons variant="dark" />
             <Link
               href="/contact"
