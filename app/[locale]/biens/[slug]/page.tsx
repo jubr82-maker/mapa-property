@@ -13,7 +13,7 @@ import { PropertyActions } from "@/components/property/PropertyActions";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
-import { ContactButtons } from "@/components/ContactButtons";
+import { ContactReveal } from "@/components/contact-reveal";
 import { AcquisitionSimulator } from "@/components/property/AcquisitionSimulator";
 import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
 import { PropertyViewTracker } from "@/components/property/PropertyViewTracker";
@@ -294,44 +294,17 @@ export default async function PropertyPage({
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
                 {t("advisor")}
               </p>
-              {/* Conseiller 1 — Julien Brebion */}
+              {/* Bloc conseiller unique — pas de noms exposés en SSR (anti-scraping) */}
               <div className="mt-2">
-                <p className="font-display text-lg font-bold text-ink">
-                  Julien Brebion
+                <h3 className="font-display text-lg font-bold text-ink">
+                  {t("advisor_block_title")}
+                </h3>
+                <p className="mt-1 text-sm text-ink-mid">
+                  {t("advisor_block_roles")}
                 </p>
-                <p className="text-sm text-ink-mid">Real Estate Director</p>
-                <div className="mt-3">
-                  <ContactButtons
-                    variant="compact"
-                    target="julien"
-                    showEmail={false}
-                    className="!flex-col !items-stretch"
-                  />
+                <div className="mt-4">
+                  <ContactReveal variant="sidebar" align="left" />
                 </div>
-              </div>
-              {/* Conseiller 2 — Frédéric Mannis */}
-              <div className="mt-5 border-t border-line pt-5">
-                <p className="font-display text-lg font-bold text-ink">
-                  Frédéric Mannis
-                </p>
-                <p className="text-sm text-ink-mid">Gérant — Co-fondateur</p>
-                <div className="mt-3">
-                  <ContactButtons
-                    variant="compact"
-                    target="frederic"
-                    showEmail={false}
-                    className="!flex-col !items-stretch"
-                  />
-                </div>
-              </div>
-              {/* Email partagé — Julien Brebion */}
-              <div className="mt-5 border-t border-line pt-5">
-                <ContactButtons
-                  variant="compact"
-                  showPhone={false}
-                  showPhoneFrederic={false}
-                  className="!flex-col !items-stretch"
-                />
               </div>
             </div>
 

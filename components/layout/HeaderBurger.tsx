@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { ContactButtons } from "@/components/ContactButtons";
+import { ContactReveal } from "@/components/contact-reveal";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 
 type SubItem = { href: string; key: string };
@@ -202,7 +202,7 @@ export function HeaderBurger() {
           </ul>
 
           <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-6">
-            <ContactButtons variant="dark" />
+            <ContactReveal variant="compact" align="center" theme="dark" />
 
             <LanguageSwitcher variant="dark" onSwitched={close} />
           </div>

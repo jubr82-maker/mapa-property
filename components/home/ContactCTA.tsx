@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { ContactButtons } from "@/components/ContactButtons";
+import { ContactReveal } from "@/components/contact-reveal";
 import { siteContent } from "@/lib/site-content";
 
 export async function ContactCTA({ locale }: { locale: string }) {
@@ -33,7 +33,7 @@ export async function ContactCTA({ locale }: { locale: string }) {
           </div>
 
           <div className="flex flex-col gap-3 md:gap-4">
-            <ContactButtons variant="dark" />
+            <ContactReveal variant="full" align="center" theme="dark" />
             <Link
               href="/contact"
               className="gold-shine-bg inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02]"

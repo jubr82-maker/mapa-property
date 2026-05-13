@@ -2,7 +2,7 @@ import Image from "next/image";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { sbUrl } from "@/lib/supabase-url";
-import { ContactButtons } from "@/components/ContactButtons";
+import { ContactReveal } from "@/components/contact-reveal";
 
 export async function generateMetadata({
   params,
@@ -72,7 +72,7 @@ export default async function AboutPage({
                 </p>
                 <p className="text-sm text-ink-mid">Real Estate Director</p>
                 <div className="mt-4">
-                  <ContactButtons variant="compact" />
+                  <ContactReveal variant="sidebar" align="left" />
                 </div>
               </div>
             </div>

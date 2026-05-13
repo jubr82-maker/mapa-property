@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
-import { ContactButtons } from "@/components/ContactButtons";
+import { ContactReveal } from "@/components/contact-reveal";
 
 const colServices = [
   { href: "/services/vendre", key: "sell" },
@@ -115,7 +115,7 @@ export function Footer() {
 
           <FooterCol title={t("col_contact")}>
             <li>
-              <ContactButtons className="!flex-col !items-stretch" />
+              <ContactReveal variant="full" align="left" />
             </li>
             <li className="text-sm leading-relaxed text-ink-mid">
               <span className="block font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">

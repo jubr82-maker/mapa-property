@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { ContactButtons } from "@/components/ContactButtons";
+import { ContactReveal } from "@/components/contact-reveal";
 
 export async function generateMetadata({
   params,
@@ -133,7 +133,7 @@ export default async function MentionsAcquisitionPage({
             {t("contact_block_intro")}
           </p>
           <div className="mt-4">
-            <ContactButtons variant="default" />
+            <ContactReveal variant="full" align="left" />
           </div>
         </section>
 

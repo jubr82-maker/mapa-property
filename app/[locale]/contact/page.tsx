@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ContactForm } from "@/components/forms/ContactForm";
-import { ContactButtons } from "@/components/ContactButtons";
+import { ContactReveal } from "@/components/contact-reveal";
 
 export default async function ContactPage({
   params,
@@ -41,7 +41,7 @@ export default async function ContactPage({
                 {t("call_label")} · {t("email_label")}
               </p>
               <div className="mt-3">
-                <ContactButtons />
+                <ContactReveal variant="full" align="left" />
               </div>
             </div>
             <div className="rounded-xl border border-line bg-bg p-5">
