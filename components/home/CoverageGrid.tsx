@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { HoverFlipCard } from "@/components/ui/HoverFlipCard";
 
@@ -20,8 +23,21 @@ const typologies = [
   },
 ] as const;
 
+type TypoKey = (typeof typologies)[number]["key"];
+
 export function CoverageGrid() {
   const t = useTranslations("coverage");
+  const [expandedKey, setExpandedKey] = useState<TypoKey | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(hover: none), (max-width: 767px)");
+    const update = () => setIsMobile(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
 
   return (
     <section className="bg-bg-soft px-6 py-6 md:py-20 lg:px-10 lg:py-28">
@@ -37,45 +53,81 @@ export function CoverageGrid() {
         </header>
 
         <div className="grid gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-4">
-          {typologies.map((typo) => (
-            <HoverFlipCard
-              key={typo.key}
-              height="h-72"
-              front={
-                <div className="flex size-full flex-col justify-between rounded-xl border border-line bg-bg p-6">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
-                    {t(`${typo.key}_label`)}
-                  </span>
-                  <h3 className="font-display text-3xl font-black leading-tight text-ink">
-                    {t(`${typo.key}_title`)}
-                  </h3>
-                  <span className="self-end font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-                    {t("hover_hint")} →
-                  </span>
-                </div>
-              }
-              back={
-                <div className="flex size-full flex-col gap-3 rounded-xl border border-gold bg-ink p-6 text-bg">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright">
-                    {t(`${typo.key}_label`)}
-                  </span>
-                  <h3 className="font-display text-2xl font-black leading-tight">
-                    {t(`${typo.key}_title`)}
-                  </h3>
-                  <ul className="mt-2 space-y-1.5 text-sm text-bg/85">
-                    {typo.items.map((it) => (
-                      <li key={it} className="flex gap-2 leading-snug">
-                        <span aria-hidden className="text-gold-bright">
-                          ›
-                        </span>
-                        {t(it)}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              }
-            />
-          ))}
+          {typologies.map((typo) => {
+            const isFlipped = isMobile && expandedKey === typo.key;
+            return (
+              <HoverFlipCard
+                key={typo.key}
+                height="h-52 md:h-64"
+                flipped={isMobile ? expandedKey === typo.key : undefined}
+                onFlipToggle={
+                  isMobile
+                    ? () =>
+                        setExpandedKey((prev) =>
+                          prev === typo.key ? null : typo.key,
+                        )
+                    : undefined
+                }
+                ariaLabel={`${t(`${typo.key}_title`)} — ${
+                  isFlipped ? t("show_less") : t("show_more")
+                }`}
+                front={
+                  <div className="flex size-full flex-col justify-between rounded-xl border border-line bg-bg p-5 md:p-6">
+                    <span className="font-mono text-[10px] font-light uppercase tracking-[0.3em] text-gold-deep">
+                      {t(`${typo.key}_label`)}
+                    </span>
+                    <h3 className="font-display text-2xl font-black leading-tight text-ink md:text-3xl">
+                      {t(`${typo.key}_title`)}
+                    </h3>
+                    {/* Desktop: hint discret "Survolez →" */}
+                    <span className="hidden self-end font-mono text-xs uppercase tracking-[0.25em] text-ink-soft md:block">
+                      {t("hover_hint")} →
+                    </span>
+                    {/* Mobile: CTA accordéon "+" / VOIR PLUS */}
+                    <span className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.25em] text-gold-deep md:hidden">
+                      <span>{t("show_more")}</span>
+                      <span
+                        aria-hidden
+                        className="flex size-6 items-center justify-center rounded-full border border-gold/60 text-base leading-none"
+                      >
+                        +
+                      </span>
+                    </span>
+                  </div>
+                }
+                back={
+                  <div className="flex size-full flex-col gap-2 rounded-xl border border-gold bg-ink p-5 text-bg md:gap-3 md:p-6">
+                    <span className="font-mono text-[10px] font-light uppercase tracking-[0.3em] text-gold-bright">
+                      {t(`${typo.key}_label`)}
+                    </span>
+                    <h3 className="font-display text-xl font-black leading-tight md:text-2xl">
+                      {t(`${typo.key}_title`)}
+                    </h3>
+                    <ul className="mt-1 space-y-1 text-xs text-bg/85 md:mt-2 md:space-y-1.5 md:text-sm">
+                      {typo.items.map((it) => (
+                        <li key={it} className="flex gap-2 leading-snug">
+                          <span aria-hidden className="text-gold-bright">
+                            ›
+                          </span>
+                          {t(it)}
+                        </li>
+                      ))}
+                    </ul>
+                    {/* Mobile: CTA fermer "−" / FERMER */}
+                    <span className="mt-auto flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.25em] text-gold-bright md:hidden">
+                      <span>{t("show_less")}</span>
+                      <span
+                        aria-hidden
+                        className="flex size-6 items-center justify-center rounded-full border border-gold-bright/60 text-base leading-none"
+                      >
+                        −
+                      </span>
+                    </span>
+                  </div>
+                }
+              />
+            );
+          })}
         </div>
       </div>
     </section>

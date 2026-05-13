@@ -114,6 +114,8 @@
     "title": "Four asset families",
     "subtitle": "Four families, one standard.",
     "hover_hint": "Hover",
+    "show_more": "Show more",
+    "show_less": "Close",
     "luxembourg_label": "Local",
     "luxembourg_title": "Luxembourg residential",
     "luxembourg_1": "Apartments in town and premium municipalities",

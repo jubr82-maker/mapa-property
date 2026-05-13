@@ -114,6 +114,8 @@
     "title": "Quatre familles d'actifs",
     "subtitle": "Quatre familles, une seule exigence.",
     "hover_hint": "Survolez",
+    "show_more": "Voir plus",
+    "show_less": "Fermer",
     "luxembourg_label": "Local",
     "luxembourg_title": "Luxembourg résidentiel",
     "luxembourg_1": "Appartements en ville et communes premium",
