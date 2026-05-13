@@ -56,6 +56,44 @@ export function Footer() {
   return (
     <footer className="mt-24 border-t border-line bg-bg-soft text-ink">
       <div className="mx-auto max-w-[1400px] px-6 py-16 lg:px-10">
+        {/* CTA mandats — bloc gradient copper/bleu */}
+        <div
+          className="mb-14 grid gap-6 overflow-hidden rounded-2xl p-8 text-white shadow-md md:grid-cols-[1fr_auto] md:items-center md:p-10"
+          style={{
+            backgroundImage:
+              "linear-gradient(135deg, #B8865A 0%, #8B6635 45%, #3D4F63 100%)",
+          }}
+        >
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/80">
+              {t("cta_eyebrow")}
+            </p>
+            <h3 className="mt-2 font-display text-2xl font-black leading-tight text-white md:text-4xl">
+              {t("cta_title")}
+            </h3>
+            <p className="mt-2 max-w-xl text-sm text-white/85 md:text-base">
+              {t("cta_subtitle")}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3 md:flex-col md:items-stretch">
+            <Link
+              href="/mandats/exclusif"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] shadow-md transition-transform hover:scale-[1.02]"
+              style={{ color: "#8B6635" }}
+            >
+              {t("cta_exclusive")}
+              <span aria-hidden>→</span>
+            </Link>
+            <Link
+              href="/mandats/recherche"
+              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/80 px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-white/10"
+            >
+              {t("cta_search")}
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </div>
+
         <Logo size="lg" className="!h-20 !w-auto" />
 
         <div className="mt-12 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">

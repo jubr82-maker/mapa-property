@@ -22,6 +22,8 @@ const STATIC_PATHS = [
   "/services/estimer",
   "/services/simulateurs",
   "/services/marches-actifs",
+  "/services/mandat-exclusif",
+  "/services/mandat-recherche",
   "/qui-sommes-nous",
   "/blog",
   "/contact",

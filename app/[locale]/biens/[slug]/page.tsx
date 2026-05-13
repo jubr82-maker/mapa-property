@@ -335,6 +335,33 @@ export default async function PropertyPage({
               </div>
             </div>
 
+            {/* CTA Mandat Exclusif — vendeurs */}
+            <div
+              className="overflow-hidden rounded-xl p-5 text-white shadow-sm"
+              style={{
+                backgroundImage:
+                  "linear-gradient(135deg, #B8865A 0%, #8B6635 100%)",
+              }}
+            >
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/80">
+                Mandat Exclusif
+              </p>
+              <p className="mt-2 font-display text-base font-bold leading-snug text-white">
+                Vous vendez un bien d&apos;exception ?
+              </p>
+              <p className="mt-2 text-xs text-white/85">
+                3% HT + 17% TVA. Marketing premium, exclusivité MAPA,
+                négociation et suivi dédiés.
+              </p>
+              <IntlLink
+                href="/mandats/exclusif"
+                className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] shadow-sm transition-transform hover:scale-[1.02]"
+                style={{ color: "#8B6635" }}
+              >
+                Découvrir le Mandat Exclusif →
+              </IntlLink>
+            </div>
+
             {/* CTA Mandat de recherche */}
             <div className="rounded-xl border border-gold/40 bg-bg p-6">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">

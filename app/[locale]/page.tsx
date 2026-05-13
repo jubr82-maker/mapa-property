@@ -5,6 +5,7 @@ import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
 import { CoverageGrid } from "@/components/home/CoverageGrid";
 import { ServicesTable } from "@/components/home/ServicesTable";
 import { OffMarketBand } from "@/components/home/OffMarketBand";
+import { MandatesPremium } from "@/components/home/MandatesPremium";
 import { MandatesGrid } from "@/components/home/MandatesGrid";
 import { MarketsSection } from "@/components/home/MarketsSection";
 import { StatsBand } from "@/components/home/StatsBand";
@@ -41,6 +42,7 @@ export default async function HomePage({
       <FeaturedCarousel items={featured} />
       <CoverageGrid />
       <ServicesTable />
+      <MandatesPremium />
       <OffMarketBand />
       <MandatesGrid />
       <MarketsSection />

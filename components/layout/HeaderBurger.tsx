@@ -38,6 +38,17 @@ const groups: Group[] = [
     ],
   },
   {
+    id: "mandates",
+    label: "mandates",
+    items: [
+      { href: "/mandats/exclusif", key: "mandate_exclusive" },
+      { href: "/mandats/recherche", key: "search_mandate" },
+      { href: "/mandats/semi-exclusif", key: "mandate_semi" },
+      { href: "/mandats/simple", key: "mandate_simple" },
+      { href: "/mandats/autonome", key: "mandate_autonomous" },
+    ],
+  },
+  {
     id: "rent",
     label: "rent",
     href: "/biens?transaction=rent",
