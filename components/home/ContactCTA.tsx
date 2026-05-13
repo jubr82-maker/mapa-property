@@ -1,9 +1,18 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ContactButtons } from "@/components/ContactButtons";
+import { siteContent } from "@/lib/site-content";
 
-export function ContactCTA() {
-  const t = useTranslations("contact_cta");
+export async function ContactCTA({ locale }: { locale: string }) {
+  const t = await getTranslations({ locale, namespace: "contact_cta" });
+
+  // CMS overlay (site_content) — fallback sur next-intl.
+  const [eyebrow, title, description, cta] = await Promise.all([
+    siteContent("home.contact_cta.eyebrow", locale, t("eyebrow")),
+    siteContent("home.contact_cta.title", locale, t("title")),
+    siteContent("home.contact_cta.description", locale, t("description")),
+    siteContent("home.contact_cta.cta", locale, t("cta")),
+  ]);
 
   return (
     <section className="px-6 py-6 md:py-24 lg:px-10 lg:py-32">
@@ -13,13 +22,13 @@ export function ContactCTA() {
         <div className="relative grid gap-5 md:gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-center">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:text-xs">
-              {t("eyebrow")}
+              {eyebrow}
             </p>
             <h2 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
-              {t("title")}
+              {title}
             </h2>
             <p className="mt-3 max-w-xl text-xs leading-relaxed text-bg/80 md:mt-5 md:text-base">
-              {t("description")}
+              {description}
             </p>
           </div>
 
@@ -29,7 +38,7 @@ export function ContactCTA() {
               href="/contact"
               className="gold-shine-bg inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02]"
             >
-              {t("cta")}
+              {cta}
               <span aria-hidden>→</span>
             </Link>
           </div>

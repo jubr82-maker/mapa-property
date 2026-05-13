@@ -13,6 +13,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { homepageGraph } from "@/lib/seo";
+import { siteDesignTokens } from "@/lib/site-content";
 import "../globals.css";
 
 const display = Big_Shoulders({
@@ -119,6 +120,22 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
 
+  // CMS design tokens — override les couleurs racine via :root inline.
+  // Les fonts restent gérées par next/font/google (Big Shoulders / Archivo /
+  // JetBrains Mono ci-dessus). TODO: dynamic font loading later — pour
+  // l'instant l'éditeur peut changer le token_value côté admin mais
+  // l'affichage n'est pas encore relié (chargement de Google Fonts en
+  // runtime à faire dans une phase ultérieure).
+  const tokens = await siteDesignTokens();
+  const colorOverrides: Record<string, string> = {};
+  for (const [k, v] of Object.entries(tokens.color ?? {})) {
+    // token_key "gold" → CSS var "--gold"
+    colorOverrides[`--${k}`] = v;
+  }
+  const cssOverride = Object.entries(colorOverrides)
+    .map(([k, v]) => `${k}:${v};`)
+    .join("");
+
   return (
     <html
       lang={locale}
@@ -126,6 +143,9 @@ export default async function LocaleLayout({
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
     >
       <head>
+        {cssOverride ? (
+          <style dangerouslySetInnerHTML={{ __html: `:root{${cssOverride}}` }} />
+        ) : null}
         {/* Connexions critiques pré-établies — LCP : images Apimo (cover fiches)
             et Supabase (vidéo hero + images storage). Le preconnect avec
             crossOrigin couvre le fetch des images cross-origin. */}

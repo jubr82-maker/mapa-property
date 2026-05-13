@@ -15,6 +15,7 @@ import {
   Settings,
   BarChart3,
   Gauge,
+  LayoutTemplate,
 } from "lucide-react";
 
 const items = [
@@ -29,6 +30,7 @@ const items = [
   { href: "/admin/blog", label: "Blog", icon: BookText, match: "prefix" as const },
   { href: "/admin/documents", label: "Documents", icon: FolderArchive, match: "prefix" as const },
   { href: "/admin/properties", label: "Properties (Apimo)", icon: Building2, match: "prefix" as const },
+  { href: "/admin/contenu", label: "Contenu", icon: LayoutTemplate, match: "prefix" as const },
   { href: "/admin/settings", label: "Paramètres", icon: Settings, match: "prefix" as const },
 ];
 

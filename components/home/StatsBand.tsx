@@ -1,4 +1,5 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { siteContent } from "@/lib/site-content";
 
 const stats = [
   { key: "experience", value: "8+", suffix: "y" },
@@ -7,21 +8,36 @@ const stats = [
   { key: "transactions", value: "100s", suffix: "" },
 ] as const;
 
-export function StatsBand() {
-  const t = useTranslations("stats");
+export async function StatsBand({ locale }: { locale: string }) {
+  const t = await getTranslations({ locale, namespace: "stats" });
+
+  // CMS overlay (site_content) — fallback sur next-intl.
+  // 1 fetch eyebrow + 2 fetch (label/text) par stat.
+  const [eyebrow, labels] = await Promise.all([
+    siteContent("home.stats.eyebrow", locale, t("eyebrow")),
+    Promise.all(
+      stats.map(async (s) => {
+        const [label, text] = await Promise.all([
+          siteContent(`home.stats.${s.key}_label`, locale, t(`${s.key}_label`)),
+          siteContent(`home.stats.${s.key}_text`, locale, t(`${s.key}_text`)),
+        ]);
+        return { key: s.key, value: s.value, suffix: s.suffix, label, text };
+      }),
+    ),
+  ]);
 
   return (
     <section className="bg-ink px-6 py-6 text-bg md:py-20 lg:px-10 lg:py-24">
       <div className="mx-auto max-w-[1400px]">
         <p className="mb-6 max-w-xl font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:mb-12 md:text-xs">
-          {t("eyebrow")}
+          {eyebrow}
         </p>
 
         <div className="grid gap-5 sm:grid-cols-2 md:gap-10 lg:grid-cols-4">
-          {stats.map((s) => (
+          {labels.map((s) => (
             <div key={s.key} className="border-t border-bg/15 pt-4 md:pt-6">
               <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-bg/50 md:text-[10px]">
-                {t(`${s.key}_label`)}
+                {s.label}
               </p>
               <p className="mt-2 font-display text-4xl font-black leading-none tracking-tight md:mt-3 md:text-6xl">
                 <span className="gold-text">{s.value}</span>
@@ -32,7 +48,7 @@ export function StatsBand() {
                 )}
               </p>
               <p className="mt-2 text-xs leading-relaxed text-bg/70 md:mt-3 md:text-sm">
-                {t(`${s.key}_text`)}
+                {s.text}
               </p>
             </div>
           ))}

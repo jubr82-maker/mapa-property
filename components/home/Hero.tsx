@@ -1,9 +1,37 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { sbUrl } from "@/lib/supabase-url";
+import { siteContent } from "@/lib/site-content";
 import { LiveClock } from "@/components/home/LiveClock";
 
-export function Hero() {
-  const t = useTranslations("hero");
+export async function Hero({ locale }: { locale: string }) {
+  const t = await getTranslations({ locale, namespace: "hero" });
+  // CMS overlay (site_content) — fallback sur next-intl si la table
+  // est vide ou la migration absente. Cf. lib/site-content.ts.
+  const [
+    pill,
+    eyebrow,
+    titleLine1,
+    titleLine2,
+    titleLine3,
+    subtitle,
+    metaCatalog,
+    metaSegments,
+    metaCoverage,
+    metaStatus,
+    scroll,
+  ] = await Promise.all([
+    siteContent("home.hero.pill", locale, t("pill")),
+    siteContent("home.hero.eyebrow", locale, t("eyebrow")),
+    siteContent("home.hero.title_line_1", locale, t("title_line_1")),
+    siteContent("home.hero.title_line_2", locale, t("title_line_2")),
+    siteContent("home.hero.title_line_3", locale, t("title_line_3")),
+    siteContent("home.hero.subtitle", locale, t("subtitle")),
+    siteContent("home.hero.meta_catalog", locale, t("meta_catalog")),
+    siteContent("home.hero.meta_segments", locale, t("meta_segments")),
+    siteContent("home.hero.meta_coverage", locale, t("meta_coverage")),
+    siteContent("home.hero.meta_status", locale, t("meta_status")),
+    siteContent("home.hero.scroll", locale, t("scroll")),
+  ]);
   const videoDesktop = sbUrl("Videos", "mapa_showcase_desktop.mp4");
   const videoMobile = sbUrl("Videos", "mapa_showcase_mobile.mp4");
 
@@ -58,38 +86,38 @@ export function Hero() {
         <div className="inline-flex items-center gap-2 rounded-full border border-gold/60 bg-black/30 px-3 py-1 backdrop-blur-sm">
           <span className="size-1.5 rounded-full bg-gold-bright" />
           <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-gold-bright md:text-[10px]">
-            {t("pill")}
+            {pill}
           </span>
         </div>
 
         {/* Eyebrow */}
         <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/70 sm:text-xs">
-          {t("eyebrow")}
+          {eyebrow}
         </p>
 
         {/* Titre 3 lignes — taille -15%, leading 1.15 (accents OK), tracking aéré */}
         <h1 className="font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]">
-          <span className="block text-white/90">{t("title_line_1")}</span>
-          <span className="block text-stroke text-transparent">{t("title_line_2")}</span>
-          <span className="gold-text block">{t("title_line_3")}</span>
+          <span className="block text-white/90">{titleLine1}</span>
+          <span className="block text-stroke text-transparent">{titleLine2}</span>
+          <span className="gold-text block">{titleLine3}</span>
         </h1>
 
         {/* Subtitle */}
         <p className="max-w-xl text-xs leading-relaxed text-white/80 md:text-lg lg:text-xl">
-          {t("subtitle")}
+          {subtitle}
         </p>
 
         {/* Meta row */}
         <ul className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[9px] uppercase tracking-[0.3em] text-white/60 md:gap-x-6 md:text-[10px]">
-          <li>{t("meta_catalog")}</li>
+          <li>{metaCatalog}</li>
           <li aria-hidden className="text-gold/60">·</li>
-          <li>{t("meta_segments")}</li>
+          <li>{metaSegments}</li>
           <li aria-hidden className="text-gold/60">·</li>
-          <li>{t("meta_coverage")}</li>
+          <li>{metaCoverage}</li>
           <li aria-hidden className="text-gold/60">·</li>
           <li className="inline-flex items-center gap-2">
             <span className="size-1.5 animate-pulse rounded-full bg-gold-bright" />
-            {t("meta_status")}
+            {metaStatus}
           </li>
         </ul>
       </div>
@@ -97,11 +125,11 @@ export function Hero() {
       {/* Scroll indicator */}
       <a
         href="#search"
-        aria-label={t("scroll")}
+        aria-label={scroll}
         className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 text-white/70 transition-colors hover:text-gold-bright"
       >
         <span className="font-mono text-[10px] uppercase tracking-[0.3em]">
-          {t("scroll")}
+          {scroll}
         </span>
         <span aria-hidden className="mt-2 block animate-bounce text-center">
           ↓

@@ -37,7 +37,7 @@ export default async function HomePage({
 
   return (
     <>
-      <Hero />
+      <Hero locale={locale} />
       <SearchBar />
       <FeaturedCarousel items={featured} />
       <CoverageGrid />
@@ -46,12 +46,12 @@ export default async function HomePage({
       <OffMarketBand />
       <MandatesGrid />
       <MarketsSection />
-      <StatsBand />
+      <StatsBand locale={locale} />
       <ProcessTable />
       <QuoteBand />
       <ReviewsCarousel reviews={reviews} />
       <BlogTeaser posts={blogPosts} locale={locale as Locale} />
-      <ContactCTA />
+      <ContactCTA locale={locale} />
     </>
   );
 }
