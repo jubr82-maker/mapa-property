@@ -8,9 +8,11 @@ const SUSPECT_UA =
   /curl|wget|python-requests|Go-http-client|HTTPie|Apache-HttpClient|libwww|scrapy|httpclient|axios\/|node-fetch|Java\//i;
 
 type RevealType = "phone" | "email";
+type RevealTarget = "julien" | "frederic";
 
 interface RevealBody {
   type?: RevealType;
+  target?: RevealTarget;
   token?: string;
 }
 
@@ -59,11 +61,15 @@ export async function POST(req: Request) {
     }
   }
 
-  const phone = process.env.MAPA_PHONE ?? FALLBACK_PHONE;
+  const target: RevealTarget = body.target === "frederic" ? "frederic" : "julien";
+  const phone =
+    target === "frederic"
+      ? (process.env.MAPA_PHONE_FREDERIC ?? FALLBACK_PHONE)
+      : (process.env.MAPA_PHONE ?? FALLBACK_PHONE);
   const email = process.env.MAPA_EMAIL ?? FALLBACK_EMAIL;
 
   console.log(
-    `[contact-reveal] ${body.type} revealed to ${ip} (UA: ${ua.slice(0, 80)})`,
+    `[contact-reveal] ${body.type}/${target} revealed to ${ip} (UA: ${ua.slice(0, 80)})`,
   );
 
   if (body.type === "phone") {

@@ -23,6 +23,7 @@ const DURATIONS = [10, 15, 20, 25, 30] as const;
 const COPPER = "#B8865A";
 
 const MAPA_PHONE = process.env.NEXT_PUBLIC_MAPA_PHONE;
+const MAPA_PHONE_FREDERIC = process.env.NEXT_PUBLIC_MAPA_PHONE_FREDERIC;
 const MAPA_EMAIL = process.env.NEXT_PUBLIC_MAPA_EMAIL;
 
 const COUNTRY_LABEL: Record<string, string> = {
@@ -103,7 +104,16 @@ function ContactButtonsRow({ locale }: { locale: string }) {
           className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90"
           style={{ backgroundColor: COPPER }}
         >
-          Appeler
+          Julien Brebion
+        </a>
+      )}
+      {MAPA_PHONE_FREDERIC && (
+        <a
+          href={`tel:${MAPA_PHONE_FREDERIC}`}
+          className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: COPPER }}
+        >
+          Frédéric Mannis
         </a>
       )}
       {MAPA_EMAIL && (

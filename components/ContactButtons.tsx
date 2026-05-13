@@ -4,12 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 type Mode = "phone" | "email";
+type Target = "julien" | "frederic";
 
 interface ContactButtonsProps {
   variant?: "default" | "compact" | "dark";
   className?: string;
+  /** Affiche le bouton "Appeler Julien Brebion" (défaut true). */
   showPhone?: boolean;
+  /** Affiche le bouton "Écrire" (email Julien) (défaut true). */
   showEmail?: boolean;
+  /** Affiche le bouton "Appeler Frédéric Mannis" (défaut true). */
+  showPhoneFrederic?: boolean;
+  /** Si défini, n'affiche QUE les boutons du conseiller donné. */
+  target?: Target;
 }
 
 interface RevealResponse {
@@ -27,10 +34,18 @@ export function ContactButtons({
   className = "",
   showPhone = true,
   showEmail = true,
+  showPhoneFrederic = true,
+  target,
 }: ContactButtonsProps) {
   const t = useTranslations("contact");
-  const [loading, setLoading] = useState<Mode | null>(null);
+  // Loading state combine mode + target ("phone:julien", "phone:frederic", "email")
+  const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Si target défini, on filtre les boutons affichés
+  const displayJulienPhone = showPhone && (!target || target === "julien");
+  const displayFrederic = showPhoneFrederic && (!target || target === "frederic");
+  const displayEmail = showEmail && (!target || target === "julien");
   const mountAtRef = useRef<number>(0);
   const honeypotRef = useRef<HTMLInputElement | null>(null);
 
@@ -45,28 +60,27 @@ export function ContactButtons({
     return () => clearTimeout(id);
   }, [error]);
 
-  async function reveal(type: Mode) {
+  async function reveal(type: Mode, revealTarget: Target = "julien") {
     if (loading) return;
     setError(null);
 
-    // 1) Honeypot: si rempli, c'est un bot. On simule un succès silencieux.
     if (honeypotRef.current?.value && honeypotRef.current.value.trim() !== "") {
       return;
     }
 
-    // 2) Délai mount → clic
     const elapsed = Date.now() - mountAtRef.current;
     if (elapsed < MIN_CLICK_DELAY_MS) {
       setError(t("error"));
       return;
     }
 
-    setLoading(type);
+    const key = type === "email" ? "email" : `phone:${revealTarget}`;
+    setLoading(key);
     try {
       const res = await fetch("/api/contact-reveal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type }),
+        body: JSON.stringify({ type, target: revealTarget }),
       });
 
       if (!res.ok) {
@@ -110,25 +124,45 @@ export function ContactButtons({
         defaultValue=""
       />
 
-      {showPhone && (
+      {displayJulienPhone && (
         <RevealButton
-          label={loading === "phone" ? t("loading") : t("call_button")}
+          label={
+            loading === "phone:julien"
+              ? t("loading")
+              : `${t("call_button")} Julien Brebion`
+          }
           icon="phone"
-          loading={loading === "phone"}
+          loading={loading === "phone:julien"}
           disabled={loading !== null}
-          onClick={() => reveal("phone")}
+          onClick={() => reveal("phone", "julien")}
           baseCls={btnBase}
           compact={isCompact}
         />
       )}
 
-      {showEmail && (
+      {displayFrederic && (
+        <RevealButton
+          label={
+            loading === "phone:frederic"
+              ? t("loading")
+              : `${t("call_button")} Frédéric Mannis`
+          }
+          icon="phone"
+          loading={loading === "phone:frederic"}
+          disabled={loading !== null}
+          onClick={() => reveal("phone", "frederic")}
+          baseCls={btnBase}
+          compact={isCompact}
+        />
+      )}
+
+      {displayEmail && (
         <RevealButton
           label={loading === "email" ? t("loading") : t("email_button")}
           icon="mail"
           loading={loading === "email"}
           disabled={loading !== null}
-          onClick={() => reveal("email")}
+          onClick={() => reveal("email", "julien")}
           baseCls={btnBase}
           compact={isCompact}
         />

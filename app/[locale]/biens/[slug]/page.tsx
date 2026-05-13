@@ -294,12 +294,44 @@ export default async function PropertyPage({
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
                 {t("advisor")}
               </p>
-              <p className="mt-2 font-display text-xl font-bold text-ink">
-                Julien
-              </p>
-              <p className="text-sm text-ink-mid">Real Estate Director</p>
-              <div className="mt-4">
-                <ContactButtons variant="compact" className="!flex-col !items-stretch" />
+              {/* Conseiller 1 — Julien Brebion */}
+              <div className="mt-2">
+                <p className="font-display text-lg font-bold text-ink">
+                  Julien Brebion
+                </p>
+                <p className="text-sm text-ink-mid">Real Estate Director</p>
+                <div className="mt-3">
+                  <ContactButtons
+                    variant="compact"
+                    target="julien"
+                    showEmail={false}
+                    className="!flex-col !items-stretch"
+                  />
+                </div>
+              </div>
+              {/* Conseiller 2 — Frédéric Mannis */}
+              <div className="mt-5 border-t border-line pt-5">
+                <p className="font-display text-lg font-bold text-ink">
+                  Frédéric Mannis
+                </p>
+                <p className="text-sm text-ink-mid">Gérant — Co-fondateur</p>
+                <div className="mt-3">
+                  <ContactButtons
+                    variant="compact"
+                    target="frederic"
+                    showEmail={false}
+                    className="!flex-col !items-stretch"
+                  />
+                </div>
+              </div>
+              {/* Email partagé — Julien Brebion */}
+              <div className="mt-5 border-t border-line pt-5">
+                <ContactButtons
+                  variant="compact"
+                  showPhone={false}
+                  showPhoneFrederic={false}
+                  className="!flex-col !items-stretch"
+                />
               </div>
             </div>
 
