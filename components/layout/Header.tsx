@@ -61,39 +61,44 @@ export function Header() {
           : "border-b border-transparent bg-bg/85 backdrop-blur-sm"
       }`}
     >
-      <div className="mx-auto grid h-20 max-w-[1400px] grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:grid-cols-[1fr_auto_1fr] lg:px-10">
-        {/* Left zone : Acheter / Vendre / Louer (desktop only) */}
-        <nav className="hidden items-center gap-1 lg:flex">
-          {leftDropdowns.map((d) => (
-            <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
-          ))}
-          <Link
-            href="/mandats/exclusif"
-            className="ml-1 border-b-2 px-3 py-2 font-sans text-[13px] font-semibold uppercase tracking-[0.05em] transition-colors hover:text-gold"
-            style={{ color: "#B8865A", borderColor: "#B8865A" }}
-          >
-            {t("mandates")}
-          </Link>
-          <Link
-            href="/biens?transaction=rent"
-            className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
-          >
-            {t("rent")}
-          </Link>
-        </nav>
-
-        {/* Mobile spacer left (keeps logo centered) */}
-        <div className="lg:hidden" aria-hidden />
-
-        {/* Center : Logo (h-12 mobile / h-20 desktop) */}
-        <div className="flex justify-center">
+      <div className="mx-auto grid h-20 max-w-[1400px] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:grid-cols-[1fr_auto_1fr] lg:px-10">
+        {/* Slot 1 — Logo gauche mobile / Nav desktop */}
+        <div className="flex items-center gap-1">
+          {/* Logo mobile (à gauche) */}
           <Logo
             size="md"
-            className="!h-12 !w-auto lg:!h-[70px]"
+            className="!h-12 !w-auto lg:hidden"
+          />
+          {/* Nav desktop only */}
+          <nav className="hidden items-center gap-1 lg:flex">
+            {leftDropdowns.map((d) => (
+              <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
+            ))}
+            <Link
+              href="/mandats/exclusif"
+              className="ml-1 border-b-2 px-3 py-2 font-sans text-[13px] font-semibold uppercase tracking-[0.05em] transition-colors hover:text-gold"
+              style={{ color: "#B8865A", borderColor: "#B8865A" }}
+            >
+              {t("mandates")}
+            </Link>
+            <Link
+              href="/biens?transaction=rent"
+              className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+            >
+              {t("rent")}
+            </Link>
+          </nav>
+        </div>
+
+        {/* Slot 2 — Logo centré desktop (caché mobile) */}
+        <div className="hidden lg:flex lg:justify-center">
+          <Logo
+            size="md"
+            className="!h-[70px] !w-auto"
           />
         </div>
 
-        {/* Right zone : Services ▾ / Off-Market / Journal (desktop) + burger (always) */}
+        {/* Slot 3 — Right zone : Services ▾ / Off-Market / Journal (desktop) + burger (always) */}
         <div className="flex items-center justify-end gap-1">
           <div className="hidden items-center gap-1 lg:flex">
             {rightDropdowns.map((d) => (
