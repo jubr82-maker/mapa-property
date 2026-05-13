@@ -23,7 +23,7 @@ export function Logo({
 
   const img = (
     <Image
-      src="/logo-mapa-property.png"
+      src="/logo-mapa-property-mono.png"
       alt="MAPA Property"
       width={w}
       height={h}
