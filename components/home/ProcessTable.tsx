@@ -19,11 +19,11 @@ export function ProcessTable() {
 
         <ol className="grid divide-y divide-line border-y border-line lg:grid-cols-3 lg:divide-x lg:divide-y-0">
           {steps.map((s, idx) => (
-            <li key={s} className="flex flex-col gap-3 py-5 md:gap-4 md:py-8 lg:px-8">
-              <span className="font-display text-4xl font-black leading-none gold-text md:text-7xl">
+            <li key={s} className="flex flex-col gap-3 py-5 md:gap-3 md:py-6 lg:px-8">
+              <span className="font-display text-5xl font-black leading-none gold-text md:text-6xl">
                 0{idx + 1}
               </span>
-              <h3 className="font-display text-base font-bold text-ink md:text-2xl">
+              <h3 className="font-display text-xl font-medium text-ink md:text-2xl">
                 {t(`step_${s}_title`)}
               </h3>
               <p className="text-xs leading-relaxed text-ink-mid md:text-sm">
