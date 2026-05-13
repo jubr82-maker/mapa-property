@@ -2,6 +2,7 @@ import Image from "next/image";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { sbUrl } from "@/lib/supabase-url";
+import { ContactButtons } from "@/components/ContactButtons";
 
 export async function generateMetadata({
   params,
@@ -70,19 +71,8 @@ export default async function AboutPage({
                   Julien Brebion
                 </p>
                 <p className="text-sm text-ink-mid">Real Estate Director</p>
-                <div className="mt-4 space-y-1.5">
-                  <a
-                    href="tel:+352691620127"
-                    className="block text-sm text-ink-mid hover:text-gold"
-                  >
-                    +352 691 620 127
-                  </a>
-                  <a
-                    href="mailto:j.brebion@mapagroup.org"
-                    className="block text-sm text-ink-mid hover:text-gold"
-                  >
-                    j.brebion@mapagroup.org
-                  </a>
+                <div className="mt-4">
+                  <ContactButtons variant="compact" />
                 </div>
               </div>
             </div>

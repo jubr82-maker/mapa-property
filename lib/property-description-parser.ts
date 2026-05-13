@@ -1,18 +1,22 @@
 /**
  * Apimo property description parser
  *
- * Reçoit une description brute (texte multi-paragraphe + parfois bullets en
- * début de ligne) et produit une structure éditoriale "magazine" :
- *   - intro (lead, premier paragraphe)
- *   - chapters (titre + corps)
- *   - conclusion (optionnel)
+ * Reçoit une description brute (souvent une longue ligne continue côté Apimo)
+ * et produit :
+ *   1. Une structure éditoriale typée `ParsedDescription` (intro + chapters + conclusion)
+ *   2. Un rendu HTML prêt-à-l'emploi (`html`) avec h3/h4/ul/ol sécurisé (texte échappé)
  *
- * Effet de bord : strippe systématiquement les informations de contact
- * (téléphones, emails, URLs, mentions "Tél.", "Email :", etc.) afin que
- * l'agent ait son propre bloc de contact, et que la fiche reste éditoriale.
+ * Effet de bord — stripping :
+ *   - Téléphones, emails, URLs, mentions "Tél." / "Email :" / "Contact :"
+ *   - Phrases marketing en fin ("Pour une estimation gratuite...", "Consultez nos autres biens...")
+ *   - Texte tronqué ("veuillez nous er", "Pour toute information supplémentaire...")
  *
- * La signature publique `parseApimoDescription(rawText)` est stable.
+ * La détection s'appuie sur des marqueurs INLINE multilingues (FR/EN/DE) :
+ *   "Caractéristiques principales :", "Disposition :", "Distribution des pièces de nuit :",
+ *   "Commodités :", "Main features:", "Hauptmerkmale:", etc.
  */
+
+// ─── Types ────────────────────────────────────────────────────────────────
 
 export type Chapter = { title: string; body: string };
 
@@ -20,66 +24,102 @@ export type ParsedDescription = {
   intro: string;
   chapters: Chapter[];
   conclusion?: string;
+  /** HTML pré-rendu (texte échappé, balises sûres uniquement). */
+  html: string;
 };
 
-// Mots-clés FR / EN / DE pour détecter le début d'un chapitre.
-// Match en début de ligne (insensible à la casse) — le parser teste sur la
-// première version "clean" du paragraphe.
-const CHAPTER_KEYWORDS: Array<{ keys: RegExp; title: string }> = [
-  { keys: /^(cuisine|kitchen|küche)/i, title: "Cuisine" },
+// ─── Échappement HTML (XSS-safe) ──────────────────────────────────────────
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// ─── Marqueurs de section inline (FR/EN/DE) ───────────────────────────────
+// Niveau H3 (section principale)
+const H3_MARKERS: Array<{ pattern: RegExp; title: string }> = [
   {
-    keys: /^(salle[s]?\s+de\s+bain|salle[s]?\s+d['’]eau|bathroom|badezimmer)/i,
-    title: "Salles de bain",
+    pattern: /\b(?:caractéristiques\s+principales|principales\s+caractéristiques|main\s+features|key\s+features|hauptmerkmale|merkmale)\s*:/gi,
+    title: "Caractéristiques principales",
   },
   {
-    keys: /^(chambre[s]?|bedroom|schlafzimmer)/i,
-    title: "Chambres",
+    pattern: /\b(?:disposition|agencement|layout|floor\s+plan|aufteilung|raumaufteilung|grundriss)\s*:/gi,
+    title: "Disposition",
   },
   {
-    keys: /^(salon|séjour|sejour|living|wohnzimmer|pièce[s]?\s+de\s+vie)/i,
-    title: "Salon & séjour",
+    pattern: /\b(?:commodités\s+du\s+quartier|amenities\s+nearby|umgebung)\s*:/gi,
+    title: "Commodités du quartier",
   },
   {
-    keys: /^(extérieur|exterieur|jardin|exterior|garden|außen|aussen|garten|terrasse|terrace|piscine|pool)/i,
-    title: "Extérieurs",
-  },
-  {
-    keys: /^(sécurité|securite|security|sicherheit)/i,
-    title: "Sécurité",
-  },
-  {
-    keys: /^(confort|équipement[s]?|equipement[s]?|features|comfort|ausstattung)/i,
-    title: "Confort & équipements",
-  },
-  {
-    keys: /^(localisation|emplacement|environnement|quartier|location|standort|lage|umgebung)/i,
-    title: "Localisation",
-  },
-  {
-    keys: /^(commodité[s]?|commodite[s]?|amenities|annehmlichkeiten|services)/i,
+    pattern: /\b(?:commodités|amenities|facilities|annehmlichkeiten|einrichtungen)\s*:/gi,
     title: "Commodités",
   },
   {
-    keys: /^(construction|matériau[x]?|materiau[x]?|bau|baujahr)/i,
-    title: "Construction",
+    pattern: /\b(?:sécurité|security|sicherheit)\s*:/gi,
+    title: "Sécurité",
   },
   {
-    keys: /^(énergie|energie|energy|dpe|performance\s+énergétique|performance\s+energetique)/i,
+    pattern: /\b(?:équipements?|features|comfort|ausstattung)\s*:/gi,
+    title: "Équipements",
+  },
+  {
+    pattern: /\b(?:localisation|emplacement|environnement|location|standort|lage)\s*:/gi,
+    title: "Localisation",
+  },
+  {
+    pattern: /\b(?:énergie|performance\s+énergétique|energy|dpe|energieeffizienz)\s*:/gi,
     title: "Énergie & performance",
-  },
-  {
-    keys: /^(garage|parking|stationnement|stellplatz)/i,
-    title: "Garage & stationnement",
-  },
-  {
-    keys: /^(sous[\s-]?sol|cave|cellar|keller)/i,
-    title: "Sous-sol & rangements",
   },
 ];
 
-// Regex de strip — ordre important (téléphones avant chiffres simples).
+// Niveau H4 (sous-section)
+const H4_MARKERS: Array<{ pattern: RegExp; title: string }> = [
+  {
+    pattern: /\b(?:distribution\s+des\s+pièces\s+de\s+nuit|night\s+zone|schlafbereich)\s*:/gi,
+    title: "Distribution des pièces de nuit",
+  },
+  {
+    pattern: /\b(?:distribution\s+des\s+pièces\s+de\s+vie|day\s+zone|reception\s+rooms|wohnbereich)\s*:/gi,
+    title: "Distribution des pièces de vie",
+  },
+  {
+    pattern: /\b(?:distribution|raumverteilung)\s*:/gi,
+    title: "Distribution",
+  },
+  {
+    pattern: /\b(?:hall\s+d['’]entrée|entrance\s+hall|eingangshalle)\s*:/gi,
+    title: "Hall d'entrée",
+  },
+  {
+    pattern: /\b(?:cuisine|kitchen|küche)\s*:/gi,
+    title: "Cuisine",
+  },
+  {
+    pattern: /\b(?:salle[s]?\s+de\s+bain|bathroom|badezimmer)\s*:/gi,
+    title: "Salles de bain",
+  },
+  {
+    pattern: /\b(?:chambres|bedrooms|schlafzimmer)\s*:/gi,
+    title: "Chambres",
+  },
+  {
+    pattern: /\b(?:salon|séjour|living|wohnzimmer)\s*:/gi,
+    title: "Salon",
+  },
+  {
+    pattern: /\b(?:extérieur[s]?|jardin|exterior|garden|garten|terrasse[s]?)\s*:/gi,
+    title: "Extérieurs",
+  },
+];
+
+// ─── Stripping ────────────────────────────────────────────────────────────
+
 const STRIP_REGEXES: RegExp[] = [
-  // Téléphones internationaux (ex : +352 621 23 45 67, 06.12.34.56.78)
+  // Téléphones internationaux
   /\+?\(?\d{1,4}\)?[\s.\-/]?\d{2,4}[\s.\-/]?\d{2,4}[\s.\-/]?\d{2,4}(?:[\s.\-/]?\d{2,4})?\b/g,
   // Emails
   /[\w.+\-]+@[\w-]+\.[\w.\-]+/g,
@@ -87,108 +127,250 @@ const STRIP_REGEXES: RegExp[] = [
   /https?:\/\/\S+/g,
   // URLs www. sans http
   /\bwww\.[\w.\-]+(?:\/\S*)?/g,
-  // Préfixes de contact à supprimer (FR/EN/DE)
+  // Préfixes de contact (FR/EN/DE)
   /\b(?:tél|tel|téléphone|telephone|phone|telefon|portable|mobile|gsm|fax)\.?\s*:?\s*/gi,
   /\b(?:e[\s-]?mail|courriel|email|mail)\s*:?\s*/gi,
-  /\b(?:contact|joindre|contactez(?:-nous)?|kontakt)\s*(?:nous|moi)?\s*:?\s*/gi,
 ];
 
-const cleanLine = (s: string): string => {
-  let cleaned = s;
-  for (const re of STRIP_REGEXES) cleaned = cleaned.replace(re, " ");
-  // Tirets de listing en début ("- ", "• ", "* ", "› ")
-  cleaned = cleaned.replace(/^[\s]*[-•*›–—][\s]+/, "");
-  // Espaces multiples & ponctuation orpheline
-  cleaned = cleaned.replace(/\s+/g, " ").replace(/\s+([.,;:!?])/g, "$1").trim();
-  // Ponctuation pure (";" "," "...") → vide
-  if (!/[a-zA-ZÀ-ÿ]/.test(cleaned)) return "";
-  // Coquilles fréquentes : ":" final isolé
-  cleaned = cleaned.replace(/[\s:;,]+$/, (m) =>
-    /[.!?]/.test(m) ? m : "",
-  );
-  return cleaned;
-};
+// Phrases marketing à supprimer en fin de description (Apimo boilerplate)
+const MARKETING_PHRASES: RegExp[] = [
+  /Pour\s+une\s+estimation\s+immobilière\s+(?:gratuite|rapide)[^.]*\.?/gi,
+  /notre\s+agence\s+s['’]engage\s+à\s+mettre\s+en\s+valeur[^.]*\.?/gi,
+  /Consultez\s+nos\s+autres\s+biens\s+sur\s+notre\s+site\.?/gi,
+  /Pour\s+toute\s+information\s+supplémentaire[^.]*$/gi,
+  /veuillez\s+nous\s+(?:contacter\s+)?(?:er\s+)?à\s+l['’]adresse\s+suivante[^.]*$/gi,
+  /Visit\s+our\s+other\s+properties[^.]*\.?/gi,
+  /For\s+more\s+information[^.]*$/gi,
+  /Kontaktieren\s+Sie\s+uns[^.]*$/gi,
+];
 
-// Détection grossière d'une "conclusion" type "Contactez-nous", "Visite sur RDV"
-// déjà strippée du contact lui-même → ne garde que des invitations claires.
-const CONCLUSION_HINTS = /\b(visite\s+sur\s+(?:rendez-vous|rdv)|prenez\s+rendez-vous|nous\s+vous\s+invitons|contactez[\s-]?(?:nous|moi|notre\s+agence)|book\s+a\s+viewing|terminvereinbarung)/i;
+function stripContactAndMarketing(text: string): string {
+  let cleaned = text;
+  for (const re of STRIP_REGEXES) cleaned = cleaned.replace(re, " ");
+  for (const re of MARKETING_PHRASES) cleaned = cleaned.replace(re, " ");
+  // Doubles espaces et ponctuation orpheline
+  cleaned = cleaned
+    .replace(/\s+/g, " ")
+    .replace(/\s+([.,;:!?])/g, "$1")
+    .replace(/«\s+/g, "« ")
+    .replace(/\s+»/g, " »")
+    .trim();
+  return cleaned;
+}
+
+// ─── Splitting inline → paragraphes structurés ────────────────────────────
+// Tokens internes pour repérer les sections après remplacement.
+const H3_TOKEN = "H3";
+const H4_TOKEN = "H4";
+
+function injectSectionTokens(text: string): string {
+  let out = text;
+  // H4 d'abord (les "Distribution des pièces de nuit :" sont plus spécifiques que "Distribution :")
+  for (const m of H4_MARKERS) {
+    out = out.replace(m.pattern, `\n\n${H4_TOKEN}${m.title}\n`);
+  }
+  for (const m of H3_MARKERS) {
+    out = out.replace(m.pattern, `\n\n${H3_TOKEN}${m.title}\n`);
+  }
+  return out;
+}
+
+// Détecte les bullets inline ("- xxx", " 1. xxx", " 2. xxx") et insère des \n
+// pour qu'ils soient ensuite splittables.
+function injectBulletNewlines(text: string): string {
+  let out = text;
+  // " - " ou " – " (tiret moyen) au milieu d'une phrase → bullet
+  out = out.replace(/\s+[-–]\s+/g, "\n- ");
+  // " N. " (numérotation latine) → numbered list
+  out = out.replace(/(?<=\S)\s+(\d{1,2})\.\s+/g, "\n$1. ");
+  // " • " bullet UTF-8
+  out = out.replace(/\s+•\s+/g, "\n• ");
+  return out;
+}
+
+// ─── Conclusion détection (visite RDV / contactez-nous) ───────────────────
+const CONCLUSION_HINTS = /\b(visite\s+sur\s+(?:rendez-vous|rdv)|prenez\s+rendez-vous|book\s+a\s+viewing|terminvereinbarung)/i;
+
+// ─── Parsing principal ────────────────────────────────────────────────────
+
+type Block =
+  | { kind: "h3" | "h4"; title: string }
+  | { kind: "bullet"; text: string }
+  | { kind: "numbered"; index: number; text: string }
+  | { kind: "p"; text: string };
+
+function parseBlocks(text: string): Block[] {
+  const blocks: Block[] = [];
+  const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+
+  for (const line of lines) {
+    if (line.startsWith(H3_TOKEN)) {
+      blocks.push({ kind: "h3", title: line.slice(H3_TOKEN.length).trim() });
+      continue;
+    }
+    if (line.startsWith(H4_TOKEN)) {
+      blocks.push({ kind: "h4", title: line.slice(H4_TOKEN.length).trim() });
+      continue;
+    }
+    const bulletMatch = line.match(/^[-–•]\s+(.+)$/);
+    if (bulletMatch) {
+      blocks.push({ kind: "bullet", text: bulletMatch[1].trim() });
+      continue;
+    }
+    const numberedMatch = line.match(/^(\d{1,2})\.\s+(.+)$/);
+    if (numberedMatch) {
+      blocks.push({
+        kind: "numbered",
+        index: parseInt(numberedMatch[1], 10),
+        text: numberedMatch[2].trim(),
+      });
+      continue;
+    }
+    blocks.push({ kind: "p", text: line });
+  }
+  return blocks;
+}
+
+// Regroupe les bullets / numbered consécutifs en ul/ol HTML, et formate les
+// "Label : valeur" en `<strong>Label</strong> : valeur` dans les listes.
+function blocksToHtml(blocks: Block[]): string {
+  const out: string[] = [];
+  let i = 0;
+  while (i < blocks.length) {
+    const b = blocks[i];
+
+    if (b.kind === "h3") {
+      out.push(`<h3>${escapeHtml(b.title)}</h3>`);
+      i++;
+      continue;
+    }
+    if (b.kind === "h4") {
+      out.push(`<h4>${escapeHtml(b.title)}</h4>`);
+      i++;
+      continue;
+    }
+    if (b.kind === "bullet") {
+      const items: string[] = [];
+      while (i < blocks.length && blocks[i].kind === "bullet") {
+        const txt = (blocks[i] as { kind: "bullet"; text: string }).text;
+        items.push(`<li>${formatListItem(txt)}</li>`);
+        i++;
+      }
+      out.push(`<ul>${items.join("")}</ul>`);
+      continue;
+    }
+    if (b.kind === "numbered") {
+      const items: string[] = [];
+      while (i < blocks.length && blocks[i].kind === "numbered") {
+        const txt = (blocks[i] as { kind: "numbered"; text: string }).text;
+        items.push(`<li>${formatListItem(txt)}</li>`);
+        i++;
+      }
+      out.push(`<ol>${items.join("")}</ol>`);
+      continue;
+    }
+    if (b.kind === "p") {
+      out.push(`<p>${escapeHtml(b.text)}</p>`);
+      i++;
+      continue;
+    }
+    i++;
+  }
+  return out.join("");
+}
+
+// "Surface habitable: 524m²" → "<strong>Surface habitable</strong> : 524m²"
+function formatListItem(text: string): string {
+  const m = text.match(/^([A-ZÀ-ÿ][\w\s'’-]{1,40}?)\s*[:：]\s*(.+)$/);
+  if (m) {
+    return `<strong>${escapeHtml(m[1].trim())}</strong> : ${escapeHtml(m[2].trim())}`;
+  }
+  return escapeHtml(text);
+}
+
+// ─── API publique ─────────────────────────────────────────────────────────
 
 export function parseApimoDescription(
   rawText: string | null | undefined,
 ): ParsedDescription {
-  if (!rawText) return { intro: "", chapters: [] };
+  if (!rawText) return { intro: "", chapters: [], html: "" };
 
-  // Découpage en paragraphes : tout double saut OU saut + tiret de liste.
-  // On normalise d'abord les sauts CRLF.
-  const normalized = rawText.replace(/\r\n?/g, "\n");
+  // 1. Normaliser les sauts de ligne et caractères
+  let working = rawText.replace(/\r\n?/g, "\n");
+  // Normaliser quotes typographiques (déjà courantes, on garde "/«»)
+  working = working.replace(/“|”/g, '"');
 
-  const paragraphs = normalized
-    .split(/\n+/)
-    .map(cleanLine)
-    .filter((p) => p.length > 0);
+  // 2. Stripping global (contact + marketing)
+  working = stripContactAndMarketing(working);
 
-  if (paragraphs.length === 0) return { intro: "", chapters: [] };
+  // 3. Injecter les tokens de section (h3/h4) à partir des marqueurs inline
+  working = injectSectionTokens(working);
 
-  // Un seul paragraphe → tout en intro (le composant gère la lettrine).
-  if (paragraphs.length === 1) {
-    return { intro: paragraphs[0], chapters: [] };
-  }
+  // 4. Convertir les bullets inline en lignes
+  working = injectBulletNewlines(working);
 
-  // Intro = 1er paragraphe (s'il est court : on prend les 2 premiers si le
-  // premier fait < 140 caractères et que le 2e ne match aucun keyword).
-  let introIdx = 1;
-  let intro = paragraphs[0];
-  if (
-    paragraphs[0].length < 140 &&
-    paragraphs[1] &&
-    !CHAPTER_KEYWORDS.some((c) => c.keys.test(paragraphs[1]))
-  ) {
-    intro = paragraphs[0] + "\n\n" + paragraphs[1];
-    introIdx = 2;
-  }
+  // 5. Parser en blocs structurés
+  const blocks = parseBlocks(working);
+  if (blocks.length === 0) return { intro: "", chapters: [], html: "" };
 
-  // Chapitres
-  const chapters: Chapter[] = [];
-  let current: Chapter | null = null;
+  // 6. Extraire intro (tous les blocks "p" avant le 1er h3/h4)
+  let firstSectionIdx = blocks.findIndex(
+    (b) => b.kind === "h3" || b.kind === "h4",
+  );
+  if (firstSectionIdx === -1) firstSectionIdx = blocks.length;
+
+  const introBlocks = blocks.slice(0, firstSectionIdx);
+  const sectionBlocks = blocks.slice(firstSectionIdx);
+
+  const introText = introBlocks
+    .filter((b) => b.kind === "p")
+    .map((b) => (b as { text: string }).text)
+    .join("\n\n");
+
+  // 7. Détection conclusion (dernier paragraphe match CONCLUSION_HINTS)
   let conclusion: string | undefined;
-
-  for (let i = introIdx; i < paragraphs.length; i++) {
-    const p = paragraphs[i];
-    const isLast = i === paragraphs.length - 1;
-
-    // Conclusion détectée en fin de description : on l'isole.
-    if (isLast && CONCLUSION_HINTS.test(p)) {
-      if (current) {
-        chapters.push(current);
-        current = null;
-      }
-      conclusion = p;
-      continue;
-    }
-
-    const matched = CHAPTER_KEYWORDS.find((c) => c.keys.test(p));
-    if (matched) {
-      if (current) chapters.push(current);
-      current = { title: matched.title, body: p };
-    } else if (current) {
-      current.body += "\n\n" + p;
-    } else {
-      // Pas de chapitre déclaré encore et plus d'intro à enrichir → chapitre
-      // générique "Le bien" pour ne pas perdre de contenu.
-      current = { title: "Le bien", body: p };
+  if (sectionBlocks.length > 0) {
+    const last = sectionBlocks[sectionBlocks.length - 1];
+    if (last.kind === "p" && CONCLUSION_HINTS.test(last.text)) {
+      conclusion = last.text;
+      sectionBlocks.pop();
     }
   }
-  if (current) chapters.push(current);
 
-  // Si on n'a obtenu qu'un seul chapitre "Le bien" sans titre éditorial,
-  // on le repasse en suite de l'intro (évite la double-section sans relief).
-  if (
-    chapters.length === 1 &&
-    chapters[0].title === "Le bien" &&
-    !conclusion
-  ) {
-    return { intro: intro + "\n\n" + chapters[0].body, chapters: [] };
+  // 8. Construire chapters (compat avec consumers existants)
+  const chapters: Chapter[] = [];
+  let currentChapter: Chapter | null = null;
+  for (const b of sectionBlocks) {
+    if (b.kind === "h3") {
+      if (currentChapter) chapters.push(currentChapter);
+      currentChapter = { title: b.title, body: "" };
+    } else if (b.kind === "h4") {
+      if (currentChapter) currentChapter.body += `\n${b.title}\n`;
+      else currentChapter = { title: b.title, body: "" };
+    } else if (b.kind === "p") {
+      if (currentChapter) currentChapter.body += "\n" + b.text;
+      else currentChapter = { title: "Description", body: b.text };
+    } else if (b.kind === "bullet" || b.kind === "numbered") {
+      if (currentChapter) currentChapter.body += "\n- " + (b as { text: string }).text;
+      else currentChapter = { title: "Description", body: "- " + (b as { text: string }).text };
+    }
   }
+  if (currentChapter) chapters.push(currentChapter);
 
-  return { intro, chapters, conclusion };
+  // 9. Construire le HTML final (intro + sections + conclusion)
+  const introHtml = introText
+    ? `<p class="intro">${escapeHtml(introText.replace(/\n\n/g, " "))}</p>`
+    : "";
+  const sectionsHtml = blocksToHtml(sectionBlocks);
+  const conclusionHtml = conclusion
+    ? `<p class="conclusion">${escapeHtml(conclusion)}</p>`
+    : "";
+  const html = `${introHtml}${sectionsHtml}${conclusionHtml}`;
+
+  return {
+    intro: introText,
+    chapters,
+    conclusion,
+    html,
+  };
 }

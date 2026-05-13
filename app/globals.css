@@ -332,3 +332,125 @@ body {
     background: #8E6940 !important;
   }
 }
+
+/* ============================================================
+   Magazine — rendu HTML structuré (.magazine-content)
+   Le parser génère h3/h4/ul/ol/p + p.intro + p.conclusion.
+   ============================================================ */
+
+.magazine-content > p.intro {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.15rem, 1.6vw, 1.35rem);
+  line-height: 1.65;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--ink);
+  text-wrap: pretty;
+  hanging-punctuation: first last;
+  margin: 0 0 2.5rem;
+}
+.magazine-content > p.intro::first-letter {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(4.5rem, 8vw, 6rem);
+  float: left;
+  line-height: 0.85;
+  padding-right: 0.12em;
+  padding-top: 0.08em;
+  color: #B8865A;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.magazine-content h3 {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #B8865A;
+  margin: 3.5rem 0 1.25rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(184, 134, 90, 0.35);
+}
+
+.magazine-content h4 {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 2rem 0 0.75rem;
+}
+
+.magazine-content p {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  color: var(--ink);
+  margin: 0 0 1.35em;
+  text-wrap: pretty;
+  hyphens: auto;
+}
+@media (min-width: 768px) {
+  .magazine-content > p:not(.intro):not(.conclusion) {
+    text-align: justify;
+  }
+}
+
+.magazine-content ul,
+.magazine-content ol {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--ink);
+  list-style-position: outside;
+  padding-left: 1.5rem;
+  margin: 0 0 1.5rem;
+}
+.magazine-content ul { list-style-type: none; }
+.magazine-content ul > li::before {
+  content: "·";
+  color: #B8865A;
+  font-weight: 700;
+  display: inline-block;
+  width: 1rem;
+  margin-left: -1rem;
+}
+.magazine-content ol { list-style-type: decimal; }
+.magazine-content ol > li::marker {
+  color: #B8865A;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 500;
+}
+.magazine-content li {
+  margin-bottom: 0.55rem;
+}
+.magazine-content li strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.magazine-content > p.conclusion {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+@media print {
+  .magazine-content h3 {
+    color: #8E6940 !important;
+    border-bottom-color: #8E6940 !important;
+  }
+  .magazine-content > p.intro::first-letter {
+    color: #B8865A !important;
+  }
+}

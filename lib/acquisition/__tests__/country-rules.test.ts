@@ -57,7 +57,10 @@ describe('Acquisition cost engine', () => {
     const result = computeAcquisitionCost({ ...baseInput, countryCode: 'US' });
     expect(result.notCovered).toBe(true);
     expect(result.contactMessage).toContain('MAPA Property');
-    expect(result.contactMessage).toContain('+352 691 620 127');
+    expect(result.contactMessage).toContain('partenaires locaux');
+    // RGPD : le numéro perso ne doit JAMAIS être dans le contactMessage public
+    expect(result.contactMessage).not.toContain('+352 691 620 127');
+    expect(result.contactMessage).not.toContain('j.brebion@');
   });
 
   it('apport <20% adds warning', () => {

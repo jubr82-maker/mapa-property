@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ContactButtons } from "@/components/ContactButtons";
 
 export async function generateMetadata({
   params,
@@ -131,28 +132,9 @@ export default async function MentionsAcquisitionPage({
           <p className="mt-2 text-sm leading-relaxed text-ink-mid">
             {t("contact_block_intro")}
           </p>
-          <ul className="mt-4 space-y-2 text-sm">
-            <li>
-              <span className="text-ink-soft">{t("contact_block_phone_label")} :</span>{" "}
-              <a
-                href="tel:+352691620127"
-                className="font-mono font-semibold hover:underline"
-                style={{ color: "#B8865A" }}
-              >
-                +352 691 620 127
-              </a>
-            </li>
-            <li>
-              <span className="text-ink-soft">{t("contact_block_email_label")} :</span>{" "}
-              <a
-                href="mailto:j.brebion@mapagroup.org"
-                className="font-mono font-semibold hover:underline"
-                style={{ color: "#B8865A" }}
-              >
-                j.brebion@mapagroup.org
-              </a>
-            </li>
-          </ul>
+          <div className="mt-4">
+            <ContactButtons variant="default" />
+          </div>
         </section>
 
         <p className="mt-12 font-mono text-[11px] leading-relaxed text-ink-soft">

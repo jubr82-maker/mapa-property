@@ -90,7 +90,7 @@ export function notCoveredResult(countryCode: string): AcquisitionResult {
     sources: [],
     legalNotice: { ...DEFAULT_LEGAL_NOTICE },
     notCovered: true,
-    contactMessage: `Pour une acquisition immobilière dans ce pays (${countryCode}), MAPA Property vous propose une analyse complète personnalisée avec ses partenaires locaux. Contactez-nous : +352 691 620 127 | j.brebion@mapagroup.org`,
+    contactMessage: `Le simulateur de coûts d'acquisition n'est pas encore disponible pour ce pays. MAPA Property vous propose une analyse personnalisée avec ses partenaires locaux.`,
   };
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { computeAcquisitionCost } from "@/lib/acquisition/country-rules";
@@ -9,28 +9,6 @@ import type {
   AcquisitionResult,
 } from "@/lib/acquisition/types";
 import { computeMortgage, computeDebtRatio, fmtEur } from "@/lib/finance-sim";
-import {
-  AcquisitionDisclaimerModal,
-  hasAcceptedDisclaimer,
-} from "./AcquisitionDisclaimerModal";
-
-const DISCLAIMER_EVENT = "mp-disclaimer-acquisition-change";
-
-function subscribeDisclaimer(callback: () => void): () => void {
-  if (typeof window === "undefined") return () => {};
-  window.addEventListener("storage", callback);
-  window.addEventListener(DISCLAIMER_EVENT, callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener(DISCLAIMER_EVENT, callback);
-  };
-}
-function getDisclaimerSnapshot(): boolean {
-  return hasAcceptedDisclaimer();
-}
-function getDisclaimerServerSnapshot(): boolean {
-  return false;
-}
 
 interface Props {
   price: number;
@@ -44,6 +22,9 @@ interface Props {
 const DURATIONS = [10, 15, 20, 25, 30] as const;
 const COPPER = "#B8865A";
 
+const MAPA_PHONE = process.env.NEXT_PUBLIC_MAPA_PHONE;
+const MAPA_EMAIL = process.env.NEXT_PUBLIC_MAPA_EMAIL;
+
 const COUNTRY_LABEL: Record<string, string> = {
   LU: "Luxembourg",
   FR: "France",
@@ -56,7 +37,6 @@ const COUNTRY_LABEL: Record<string, string> = {
   PT: "Portugal",
 };
 
-/** Normalise un string Apimo / saisie libre vers un CountryCode. */
 function mapCountry(raw: string): string {
   const c = (raw ?? "").toUpperCase().trim();
   const aliases: Record<string, string> = {
@@ -98,17 +78,75 @@ function mapCountry(raw: string): string {
 
 const SUPPORTED_CODES = ["LU", "FR", "BE", "DE", "MC", "CH", "IT", "ES", "PT"];
 
+/** Disclaimer minimaliste affiché sous le résultat. */
+function MinimalDisclaimer({ locale }: { locale: string }) {
+  return (
+    <p className="mt-4 text-xs italic leading-relaxed text-ink-soft">
+      Estimation indicative basée sur la réglementation 2026.{" "}
+      <Link
+        href={`/${locale}/mentions-acquisition`}
+        className="underline-offset-2 hover:underline"
+      >
+        Mentions légales
+      </Link>
+    </p>
+  );
+}
+
+/** Boutons de contact : utilisent les ENV vars, n'affichent jamais le numéro. */
+function ContactButtonsRow({ locale }: { locale: string }) {
+  return (
+    <div className="mt-5 flex flex-wrap gap-2">
+      {MAPA_PHONE && (
+        <a
+          href={`tel:${MAPA_PHONE}`}
+          className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: COPPER }}
+        >
+          Appeler
+        </a>
+      )}
+      {MAPA_EMAIL && (
+        <a
+          href={`mailto:${MAPA_EMAIL}`}
+          className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
+        >
+          Écrire
+        </a>
+      )}
+      <Link
+        href={`/${locale}/contact`}
+        className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
+      >
+        Contact
+      </Link>
+    </div>
+  );
+}
+
 export function AcquisitionSimulator({
   price,
   country,
   city,
   variant = "default",
 }: Props) {
+  const locale = useLocale();
   const isCompact = variant === "compact";
   const code = mapCountry(country);
   const isSupported = SUPPORTED_CODES.includes(code);
 
-  // ── Cas pays non normalisable : message clair, pas de calcul ──
+  // Migration silencieuse — purge l'ancien flag localStorage du modal supprimé.
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem("mp_disclaimer_acquisition_accepted_v1");
+      } catch {
+        /* noop */
+      }
+    }
+  }, []);
+
+  // Cas pays non normalisable : message clair, pas de calcul.
   if (!isSupported) {
     return (
       <section
@@ -129,27 +167,8 @@ export function AcquisitionSimulator({
           disponible pour ce pays. MAPA Property vous propose une analyse
           personnalisée avec ses partenaires locaux.
         </p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          <a
-            href="tel:+352691620127"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: COPPER }}
-          >
-            +352 691 620 127
-          </a>
-          <a
-            href="mailto:j.brebion@mapagroup.org"
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
-          >
-            Email
-          </a>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
-          >
-            Contact
-          </Link>
-        </div>
+        <ContactButtonsRow locale={locale} />
+        <MinimalDisclaimer locale={locale} />
       </section>
     );
   }
@@ -160,6 +179,7 @@ export function AcquisitionSimulator({
       country={code}
       city={city ?? ""}
       isCompact={isCompact}
+      locale={locale}
     />
   );
 }
@@ -169,30 +189,14 @@ function SimulatorActive({
   country,
   city,
   isCompact,
+  locale,
 }: {
   price: number;
   country: string;
   city: string;
   isCompact: boolean;
+  locale: string;
 }) {
-  const locale = useLocale();
-
-  // ── Gate disclaimer ──
-  // useSyncExternalStore : lecture côté client de localStorage, pas de mismatch
-  // d'hydration (le snapshot serveur retourne false) et pas de setState dans
-  // un useEffect (la doc React 19 recommande ce pattern pour les stores ext.).
-  const accepted = useSyncExternalStore(
-    subscribeDisclaimer,
-    getDisclaimerSnapshot,
-    getDisclaimerServerSnapshot,
-  );
-  const handleAccept = useCallback(() => {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event(DISCLAIMER_EVENT));
-    }
-  }, []);
-
-  // ── Profil acquéreur ──
   const [downPct, setDownPct] = useState(20);
   const [duration, setDuration] = useState<number>(25);
   const [isFirstTimeBuyer, setIsFirstTimeBuyer] = useState(false);
@@ -248,7 +252,7 @@ function SimulatorActive({
   const incomeRequired = mortgage.monthlyPayment / 0.35;
   const debtRatio = computeDebtRatio(mortgage.monthlyPayment, incomeRequired);
 
-  // ── Cas notCovered : pays supporté côté UI mais pas encore implémenté ou Lex Koller CH
+  // Cas notCovered (pays supporté côté UI mais non calculé — eg. Lex Koller CH)
   if (result.notCovered) {
     return (
       <section
@@ -256,12 +260,6 @@ function SimulatorActive({
           isCompact ? "" : "sm:p-7"
         }`}
       >
-        {!accepted && (
-          <AcquisitionDisclaimerModal
-            onAccept={handleAccept}
-            locale={locale}
-          />
-        )}
         <header className="mb-3">
           <p
             className="font-mono text-[10px] uppercase tracking-[0.3em]"
@@ -276,35 +274,12 @@ function SimulatorActive({
         <p className="text-sm leading-relaxed text-ink-mid">
           {result.contactMessage}
         </p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          <a
-            href="tel:+352691620127"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: COPPER }}
-          >
-            +352 691 620 127
-          </a>
-          <a
-            href="mailto:j.brebion@mapagroup.org"
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
-          >
-            Email
-          </a>
-          <Link
-            href={`/${locale}/contact`}
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
-          >
-            Contact
-          </Link>
-        </div>
-        <p className="mt-5 rounded-md border border-yellow-400 bg-yellow-50 px-3 py-2 text-[11px] leading-relaxed text-ink-mid dark:bg-yellow-900/10">
-          {result.legalNotice.shortDisclaimer}
-        </p>
+        <ContactButtonsRow locale={locale} />
+        <MinimalDisclaimer locale={locale} />
       </section>
     );
   }
 
-  // ── Note importante isolée (lineItem amount === 0)
   const noteImportante = result.lineItems.find(
     (li) => li.amount === 0 && li.label === "Note importante",
   );
@@ -319,13 +294,6 @@ function SimulatorActive({
       }`}
       style={{ borderColor: `${COPPER}33` }}
     >
-      {!accepted && (
-        <AcquisitionDisclaimerModal
-          onAccept={handleAccept}
-          locale={locale}
-        />
-      )}
-
       <header className="mb-4">
         <p
           className="font-mono text-[10px] uppercase tracking-[0.3em]"
@@ -339,271 +307,211 @@ function SimulatorActive({
         </h3>
       </header>
 
-      {!accepted ? (
-        <div className="rounded-xl border border-line bg-bg p-6 text-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">
-            Acceptez les conditions pour voir l&apos;estimation
+      <div className="space-y-4">
+        <label className="block">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+              Apport
+            </span>
+            <span className="font-mono text-xs font-semibold text-ink">
+              {downPct}% · {fmtEur(downPayment)}
+            </span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={50}
+            step={5}
+            value={downPct}
+            onChange={(e) => setDownPct(Number(e.target.value))}
+            className="mt-2 block w-full"
+            style={{ accentColor: COPPER }}
+          />
+        </label>
+
+        <label className="block">
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+            Durée
+          </span>
+          <select
+            value={duration}
+            onChange={(e) => setDuration(Number(e.target.value))}
+            className="mt-1 block w-full rounded-md border border-line bg-bg px-3 py-2 font-mono text-sm text-ink"
+          >
+            {DURATIONS.map((d) => (
+              <option key={d} value={d}>
+                {d} ans
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <fieldset className="grid grid-cols-2 gap-2">
+          <CheckboxField
+            checked={isFirstTimeBuyer}
+            onChange={setIsFirstTimeBuyer}
+            label="Primo-accédant"
+          />
+          <CheckboxField
+            checked={isFamily}
+            onChange={setIsFamily}
+            label="Couple / famille"
+          />
+          <CheckboxField
+            checked={propertyType === "new"}
+            onChange={(v) => setPropertyType(v ? "new" : "old")}
+            label="Bien neuf / VEFA"
+          />
+          <CheckboxField
+            checked={isResident}
+            onChange={setIsResident}
+            label="Résident fiscal"
+          />
+        </fieldset>
+
+        <fieldset className="space-y-2 text-sm">
+          <legend className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+            Usage du bien
+          </legend>
+          <div className="flex flex-wrap gap-4">
+            <RadioField
+              name="acq-usage"
+              value="primary"
+              current={usage}
+              onChange={setUsage}
+              label="Résidence principale"
+            />
+            <RadioField
+              name="acq-usage"
+              value="secondary"
+              current={usage}
+              onChange={setUsage}
+              label="Résidence secondaire"
+            />
+            <RadioField
+              name="acq-usage"
+              value="investment"
+              current={usage}
+              onChange={setUsage}
+              label="Investissement locatif"
+            />
+          </div>
+        </fieldset>
+      </div>
+
+      <div className="mt-6 rounded-xl border border-line bg-bg p-4">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+          Détail des frais d&apos;acquisition
+        </p>
+        <ul className="mt-3 space-y-2.5">
+          {lineItemsToDisplay.map((li, i) => (
+            <li key={i} className="text-sm text-ink-mid">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="font-medium text-ink">{li.label}</span>
+                <span className="flex items-baseline gap-2">
+                  {typeof li.rate === "number" && (
+                    <span className="font-mono text-[10px] text-ink-soft">
+                      {li.rate.toFixed(2).replace(/\.?0+$/, "")} %
+                    </span>
+                  )}
+                  {li.amount !== 0 && (
+                    <span
+                      className={`font-mono text-xs font-semibold ${
+                        li.amount < 0
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-ink"
+                      }`}
+                    >
+                      {li.amount < 0 ? "− " : ""}
+                      {fmtEur(Math.abs(li.amount))}
+                    </span>
+                  )}
+                </span>
+              </div>
+              {li.notes && (
+                <p className="mt-0.5 text-[11px] italic leading-snug text-ink-soft">
+                  {li.notes}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {noteImportante?.notes && (
+        <aside
+          className="mt-4 rounded-xl border bg-bg-soft p-4"
+          style={{ borderColor: `${COPPER}55` }}
+        >
+          <p
+            className="font-mono text-[10px] uppercase tracking-[0.3em]"
+            style={{ color: COPPER }}
+          >
+            {noteImportante.label}
+          </p>
+          <p className="mt-1.5 text-xs leading-relaxed text-ink-mid">
+            {noteImportante.notes}
+          </p>
+        </aside>
+      )}
+
+      <div
+        className="mt-5 rounded-xl border bg-bg p-5"
+        style={{ borderColor: `${COPPER}55` }}
+      >
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+            Total frais d&apos;acquisition
+          </p>
+          <p className="font-mono text-[10px] text-ink-soft">
+            {result.totalCostPercent.toFixed(2).replace(".", ",")} % du prix
           </p>
         </div>
-      ) : (
-        <>
-          {/* Sliders & paramètres */}
-          <div className="space-y-4">
-            <label className="block">
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-                  Apport
-                </span>
-                <span className="font-mono text-xs font-semibold text-ink">
-                  {downPct}% · {fmtEur(downPayment)}
-                </span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={50}
-                step={5}
-                value={downPct}
-                onChange={(e) => setDownPct(Number(e.target.value))}
-                className="mt-2 block w-full"
-                style={{ accentColor: COPPER }}
-              />
-            </label>
+        <p
+          className="mt-2 font-display text-3xl font-black tracking-tight"
+          style={{ color: COPPER }}
+        >
+          {fmtEur(result.totalCost)}
+        </p>
+      </div>
 
-            <label className="block">
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-                Durée
-              </span>
-              <select
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value))}
-                className="mt-1 block w-full rounded-md border border-line bg-bg px-3 py-2 font-mono text-sm text-ink"
-              >
-                {DURATIONS.map((d) => (
-                  <option key={d} value={d}>
-                    {d} ans
-                  </option>
-                ))}
-              </select>
-            </label>
+      <dl className="mt-5 grid gap-3 text-sm">
+        <Row label="Prix du bien" value={fmtEur(price)} />
+        <Row
+          label="Capital emprunté (estimé)"
+          value={fmtEur(mortgage.borrowedAmount)}
+        />
+        <Row
+          label="Mensualité estimée"
+          value={fmtEur(mortgage.monthlyPayment)}
+          hint={`taux indicatif ${rate.toFixed(2)} % · ${duration} ans`}
+        />
+        <Row
+          label="Coût total acquisition"
+          value={fmtEur(price + result.totalCost)}
+        />
+        <Row
+          label="Revenu mensuel requis (35%)"
+          value={fmtEur(incomeRequired)}
+          hint={`taux d'endettement cible ${debtRatio.toFixed(0)} %`}
+        />
+      </dl>
 
-            <fieldset className="grid grid-cols-2 gap-2">
-              <CheckboxField
-                checked={isFirstTimeBuyer}
-                onChange={setIsFirstTimeBuyer}
-                label="Primo-accédant"
-              />
-              <CheckboxField
-                checked={isFamily}
-                onChange={setIsFamily}
-                label="Couple / famille"
-              />
-              <CheckboxField
-                checked={propertyType === "new"}
-                onChange={(v) => setPropertyType(v ? "new" : "old")}
-                label="Bien neuf / VEFA"
-              />
-              <CheckboxField
-                checked={isResident}
-                onChange={setIsResident}
-                label="Résident fiscal"
-              />
-            </fieldset>
-
-            <fieldset className="space-y-2 text-sm">
-              <legend className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-                Usage du bien
-              </legend>
-              <div className="flex flex-wrap gap-4">
-                <RadioField
-                  name="acq-usage"
-                  value="primary"
-                  current={usage}
-                  onChange={setUsage}
-                  label="Résidence principale"
-                />
-                <RadioField
-                  name="acq-usage"
-                  value="secondary"
-                  current={usage}
-                  onChange={setUsage}
-                  label="Résidence secondaire"
-                />
-                <RadioField
-                  name="acq-usage"
-                  value="investment"
-                  current={usage}
-                  onChange={setUsage}
-                  label="Investissement locatif"
-                />
-              </div>
-            </fieldset>
-          </div>
-
-          {/* Détail line items */}
-          <div className="mt-6 rounded-xl border border-line bg-bg p-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-              Détail des frais d&apos;acquisition
-            </p>
-            <ul className="mt-3 space-y-2.5">
-              {lineItemsToDisplay.map((li, i) => (
-                <li key={i} className="text-sm text-ink-mid">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-medium text-ink">{li.label}</span>
-                    <span className="flex items-baseline gap-2">
-                      {typeof li.rate === "number" && (
-                        <span className="font-mono text-[10px] text-ink-soft">
-                          {li.rate.toFixed(2).replace(/\.?0+$/, "")} %
-                        </span>
-                      )}
-                      {li.amount !== 0 && (
-                        <span
-                          className={`font-mono text-xs font-semibold ${
-                            li.amount < 0
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-ink"
-                          }`}
-                        >
-                          {li.amount < 0 ? "− " : ""}
-                          {fmtEur(Math.abs(li.amount))}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                  {li.notes && (
-                    <p className="mt-0.5 text-[11px] italic leading-snug text-ink-soft">
-                      {li.notes}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Note importante — carte spéciale */}
-          {noteImportante?.notes && (
-            <aside
-              className="mt-4 rounded-xl border bg-bg-soft p-4"
-              style={{ borderColor: `${COPPER}55` }}
+      {result.warnings.length > 0 && (
+        <ul className="mt-5 space-y-2 rounded-md border border-yellow-400 bg-yellow-50 p-3 dark:bg-yellow-900/10">
+          {result.warnings.map((w, i) => (
+            <li
+              key={i}
+              className="flex gap-2 text-[11px] leading-relaxed text-ink-mid"
             >
-              <p
-                className="font-mono text-[10px] uppercase tracking-[0.3em]"
-                style={{ color: COPPER }}
-              >
-                {noteImportante.label}
-              </p>
-              <p className="mt-1.5 text-xs leading-relaxed text-ink-mid">
-                {noteImportante.notes}
-              </p>
-            </aside>
-          )}
-
-          {/* Total mis en avant */}
-          <div
-            className="mt-5 rounded-xl border bg-bg p-5"
-            style={{ borderColor: `${COPPER}55` }}
-          >
-            <div className="flex items-baseline justify-between gap-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
-                Total frais d&apos;acquisition
-              </p>
-              <p className="font-mono text-[10px] text-ink-soft">
-                {result.totalCostPercent.toFixed(2).replace(".", ",")} % du prix
-              </p>
-            </div>
-            <p
-              className="mt-2 font-display text-3xl font-black tracking-tight"
-              style={{ color: COPPER }}
-            >
-              {fmtEur(result.totalCost)}
-            </p>
-          </div>
-
-          {/* Récapitulatif financement */}
-          <dl className="mt-5 grid gap-3 text-sm">
-            <Row label="Prix du bien" value={fmtEur(price)} />
-            <Row
-              label="Capital emprunté (estimé)"
-              value={fmtEur(mortgage.borrowedAmount)}
-            />
-            <Row
-              label="Mensualité estimée"
-              value={fmtEur(mortgage.monthlyPayment)}
-              hint={`taux indicatif ${rate.toFixed(2)} % · ${duration} ans`}
-            />
-            <Row
-              label="Coût total acquisition"
-              value={fmtEur(price + result.totalCost)}
-            />
-            <Row
-              label="Revenu mensuel requis (35%)"
-              value={fmtEur(incomeRequired)}
-              hint={`taux d'endettement cible ${debtRatio.toFixed(0)} %`}
-            />
-          </dl>
-
-          {/* Warnings */}
-          {result.warnings.length > 0 && (
-            <ul className="mt-5 space-y-2 rounded-md border border-yellow-400 bg-yellow-50 p-3 dark:bg-yellow-900/10">
-              {result.warnings.map((w, i) => (
-                <li
-                  key={i}
-                  className="flex gap-2 text-[11px] leading-relaxed text-ink-mid"
-                >
-                  <span aria-hidden className="select-none">⚠️</span>
-                  <span>{w}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Disclaimer permanent (legalNotice.shortDisclaimer) */}
-          <p className="mt-5 rounded-md border border-yellow-400 bg-yellow-50 px-3 py-2 text-xs leading-relaxed text-ink-mid dark:bg-yellow-900/10">
-            {result.legalNotice.shortDisclaimer}
-          </p>
-
-          {/* Sources officielles */}
-          {result.sources.length > 0 && (
-            <div className="mt-5 border-t border-line pt-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-                Sources officielles ({result.sources.length})
-              </p>
-              <ul className="mt-2 space-y-1.5">
-                {result.sources.map((s) => (
-                  <li
-                    key={s.url}
-                    className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5"
-                  >
-                    <a
-                      href={s.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-[11px] uppercase tracking-wide underline-offset-2 hover:underline"
-                      style={{ color: COPPER }}
-                    >
-                      {s.label} ↗
-                    </a>
-                    <span className="font-mono text-[10px] text-ink-soft/70">
-                      · vérifié {s.verifiedDate}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Footer — mentions complètes */}
-          <div className="mt-5 border-t border-line pt-4 text-right">
-            <Link
-              href={`/${locale}/mentions-acquisition`}
-              className="font-mono text-[11px] uppercase tracking-[0.2em] underline-offset-2 hover:underline"
-              style={{ color: COPPER }}
-            >
-              Mentions légales complètes →
-            </Link>
-          </div>
-        </>
+              <span aria-hidden className="select-none">⚠️</span>
+              <span>{w}</span>
+            </li>
+          ))}
+        </ul>
       )}
+
+      <MinimalDisclaimer locale={locale} />
     </section>
   );
 }
