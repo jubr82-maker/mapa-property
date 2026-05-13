@@ -15,7 +15,7 @@ export async function ContactCTA({ locale }: { locale: string }) {
   ]);
 
   return (
-    <section className="px-6 py-6 md:py-24 lg:px-10 lg:py-32">
+    <section className="px-6 py-6 md:py-16 lg:px-10 lg:py-20">
       <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-2xl border border-line bg-ink p-5 text-bg md:p-10 lg:p-16">
         <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-gold/15 blur-3xl" />
 
@@ -24,7 +24,7 @@ export async function ContactCTA({ locale }: { locale: string }) {
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:text-xs">
               {eyebrow}
             </p>
-            <h2 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
+            <h2 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight md:text-5xl">
               {title}
             </h2>
             <p className="mt-3 max-w-xl text-xs leading-relaxed text-bg/80 md:mt-5 md:text-base">

@@ -6,7 +6,7 @@ export function ProcessTable() {
   const t = useTranslations("process");
 
   return (
-    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-28">
+    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
         <header className="mb-6 max-w-2xl md:mb-12">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">

@@ -5,7 +5,7 @@ export function OffMarketBand() {
   const t = useTranslations("offmarket_band");
 
   return (
-    <section className="relative overflow-hidden bg-ink px-6 py-6 text-bg md:py-20 lg:px-10 lg:py-28">
+    <section className="relative overflow-hidden bg-ink px-6 py-6 text-bg md:py-20 lg:px-10 lg:py-20">
       <div className="pointer-events-none absolute -right-32 -top-32 size-96 rounded-full bg-gold/15 blur-3xl" />
       <div className="pointer-events-none absolute -left-32 -bottom-32 size-96 rounded-full bg-accent-warm/10 blur-3xl" />
 
