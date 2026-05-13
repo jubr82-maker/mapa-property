@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
 import { HeaderBurger } from "@/components/layout/HeaderBurger";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const leftDropdowns = [
   {
@@ -110,8 +111,9 @@ export function Header() {
             >
               {t("journal")}
             </Link>
-            <div className="ml-2 border-l border-line pl-3">
+            <div className="ml-2 flex items-center gap-2 border-l border-line pl-3">
               <LanguageSwitcher variant="light" />
+              <ThemeToggle />
             </div>
           </div>
           <div className="ml-2 lg:hidden">
