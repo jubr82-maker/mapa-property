@@ -1,22 +1,90 @@
+"use client";
+
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { MandateDetailModal, type MandateModalData } from "@/components/MandateDetailModal";
+
+type MandateId = "exclusif" | "semi" | "simple" | "autonome";
+
+type MandateCard = {
+  id: MandateId;
+  slug: string;
+  accent: string;
+  accentDark: string;
+  isFeatured: boolean;
+};
+
+const CARDS: MandateCard[] = [
+  {
+    id: "exclusif",
+    slug: "exclusif",
+    accent: "#B8865A",
+    accentDark: "#8B6635",
+    isFeatured: true,
+  },
+  {
+    id: "semi",
+    slug: "semi-exclusif",
+    accent: "#3D4F63",
+    accentDark: "#2A3848",
+    isFeatured: false,
+  },
+  {
+    id: "simple",
+    slug: "simple",
+    accent: "#3D4F63",
+    accentDark: "#2A3848",
+    isFeatured: false,
+  },
+  {
+    id: "autonome",
+    slug: "autonome",
+    accent: "#3D4F63",
+    accentDark: "#2A3848",
+    isFeatured: false,
+  },
+];
 
 export function MandatesPremium() {
   const t = useTranslations("mandates_premium");
+  const [openId, setOpenId] = useState<MandateId | null>(null);
 
-  const exclusiveBullets = [
-    t("exclusive_bullet_1"),
-    t("exclusive_bullet_2"),
-    t("exclusive_bullet_3"),
-    t("exclusive_bullet_4"),
-  ];
+  const cards = CARDS.map((card) => {
+    const ns = card.id; // exclusif | semi | simple | autonome
+    const bullets = [
+      t(`${ns}.bullet_1`),
+      t(`${ns}.bullet_2`),
+      t(`${ns}.bullet_3`),
+      t(`${ns}.bullet_4`),
+    ];
+    return {
+      ...card,
+      eyebrow: t(`${ns}.eyebrow`),
+      title: t(`${ns}.title`),
+      rate: t(`${ns}.rate`),
+      rateSuffix: t(`${ns}.rate_suffix`),
+      shortDesc: t(`${ns}.short_desc`),
+      longDesc: t(`${ns}.long_desc`),
+      bullets,
+    };
+  });
 
-  const searchBullets = [
-    t("search_bullet_1"),
-    t("search_bullet_2"),
-    t("search_bullet_3"),
-    t("search_bullet_4"),
-  ];
+  const activeCard = cards.find((c) => c.id === openId) ?? null;
+  const modalData: MandateModalData | null = activeCard
+    ? {
+        id: activeCard.id,
+        eyebrow: activeCard.eyebrow,
+        title: activeCard.title,
+        rate: activeCard.rate,
+        rateSuffix: activeCard.rateSuffix,
+        longDesc: activeCard.longDesc,
+        bullets: activeCard.bullets,
+        ctaHref: `/mandats/${activeCard.slug}`,
+        ctaLabel: t("modal_cta"),
+        closeLabel: t("modal_close"),
+        accent: activeCard.accent,
+      }
+    : null;
 
   return (
     <section className="px-6 py-6 md:py-20 lg:px-10">
@@ -33,117 +101,76 @@ export function MandatesPremium() {
           </p>
         </header>
 
-        <div className="grid gap-3 md:gap-6 md:grid-cols-2">
-          {/* Carte Mandat Exclusif — gradient copper */}
-          <article
-            className="relative flex flex-col gap-4 overflow-hidden rounded-2xl p-6 text-white shadow-lg md:p-10"
-            style={{
-              backgroundImage:
-                "linear-gradient(135deg, #B8865A 0%, #8B6635 100%)",
-            }}
-          >
-            <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-white/10 blur-3xl" />
+        <div className="grid gap-3 md:grid-cols-2 md:gap-5 lg:grid-cols-4">
+          {cards.map((card) => {
+            const isCopper = card.isFeatured;
+            return (
+              <article
+                key={card.id}
+                className="relative flex h-[280px] flex-col gap-3 overflow-hidden rounded-2xl p-5 text-white shadow-lg md:h-[320px] md:p-6"
+                style={{
+                  backgroundImage: `linear-gradient(135deg, ${card.accent} 0%, ${card.accentDark} 100%)`,
+                  border: isCopper ? undefined : "2px solid #B8865A",
+                }}
+              >
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full blur-3xl"
+                  style={{
+                    backgroundColor: isCopper
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(184, 134, 90, 0.15)",
+                  }}
+                />
 
-            <span className="relative inline-flex w-fit items-center font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-white">
-              {t("exclusive_badge")}
-            </span>
+                <span
+                  className="relative inline-flex w-fit items-center font-mono text-[10px] font-semibold uppercase tracking-[0.3em]"
+                  style={{ color: isCopper ? "#ffffff" : "#B8865A" }}
+                >
+                  {card.eyebrow}
+                </span>
 
-            <h3 className="relative font-display text-3xl font-black leading-tight text-white md:text-5xl">
-              {t("exclusive_title")}
-            </h3>
+                <h3 className="relative font-display text-2xl font-black leading-tight text-white md:text-3xl">
+                  {card.title}
+                </h3>
 
-            <div className="relative flex items-baseline gap-3">
-              <span className="font-display text-4xl font-black text-white md:text-6xl">
-                {t("exclusive_rate")}
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/80">
-                {t("rate_suffix")}
-              </span>
-            </div>
-
-            <p className="relative text-sm leading-relaxed text-white/90 md:text-base">
-              {t("exclusive_promise")}
-            </p>
-
-            <ul className="relative grid gap-2 text-sm text-white/90">
-              {exclusiveBullets.map((b, i) => (
-                <li key={i} className="flex items-start gap-3">
+                <div className="relative flex items-baseline gap-2">
                   <span
-                    aria-hidden
-                    className="mt-1 inline-block size-1.5 shrink-0 rounded-full bg-white"
-                  />
-                  <span>{b}</span>
-                </li>
-              ))}
-            </ul>
+                    className="font-display text-4xl font-black md:text-5xl"
+                    style={{ color: isCopper ? "#ffffff" : "#B8865A" }}
+                  >
+                    {card.rate}
+                  </span>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/75 md:text-[10px]">
+                    {card.rateSuffix}
+                  </span>
+                </div>
 
-            <Link
-              href="/mandats/exclusif"
-              className="relative mt-2 inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-ink shadow-md transition-transform hover:scale-[1.02] md:px-6"
-              style={{ color: "#8B6635" }}
-            >
-              {t("exclusive_cta")}
-              <span aria-hidden>→</span>
-            </Link>
-          </article>
+                <p className="relative line-clamp-2 text-xs leading-relaxed text-white/85 md:text-sm">
+                  {card.shortDesc}
+                </p>
 
-          {/* Carte Mandat de Recherche — gradient bleu + accents copper */}
-          <article
-            className="relative flex flex-col gap-4 overflow-hidden rounded-2xl border-2 p-6 text-white shadow-lg md:p-10"
-            style={{
-              backgroundImage:
-                "linear-gradient(135deg, #3D4F63 0%, #2A3848 100%)",
-              borderColor: "#B8865A",
-            }}
-          >
-            <div
-              className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full blur-3xl"
-              style={{ backgroundColor: "rgba(184, 134, 90, 0.15)" }}
-            />
-
-            <span
-              className="relative inline-flex w-fit items-center font-mono text-[11px] font-semibold uppercase tracking-[0.3em]"
-              style={{ color: "#B8865A" }}
-            >
-              {t("search_badge")}
-            </span>
-
-            <h3 className="relative font-display text-3xl font-black leading-tight text-white md:text-5xl">
-              {t("search_title")}
-            </h3>
-
-            <p className="relative text-sm leading-relaxed text-white/90 md:text-base">
-              {t("search_promise")}
-            </p>
-
-            <ul className="relative grid gap-2 text-sm text-white/90">
-              {searchBullets.map((b, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <span
-                    aria-hidden
-                    className="mt-1 inline-block size-1.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: "#B8865A" }}
-                  />
-                  <span>{b}</span>
-                </li>
-              ))}
-            </ul>
-
-            <Link
-              href="/mandats/recherche"
-              className="relative mt-2 inline-flex w-fit items-center gap-2 rounded-full px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white shadow-md transition-all hover:bg-gold hover:text-ink md:px-6"
-              style={{ backgroundColor: "#B8865A" }}
-            >
-              {t("search_cta")}
-              <span aria-hidden>→</span>
-            </Link>
-          </article>
+                <button
+                  type="button"
+                  onClick={() => setOpenId(card.id)}
+                  className="relative mt-auto inline-flex w-fit items-center gap-2 rounded-full border border-white/40 bg-white/0 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-white transition-all hover:border-white hover:bg-white/10 md:text-[11px]"
+                  aria-haspopup="dialog"
+                  aria-expanded={openId === card.id}
+                >
+                  {t("more_info")}
+                  <span aria-hidden>→</span>
+                </button>
+              </article>
+            );
+          })}
         </div>
-
-        <p className="mt-6 text-center font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft md:mt-8">
-          {t("footer_note")}
-        </p>
       </div>
+
+      <MandateDetailModal
+        mandate={modalData}
+        open={openId !== null}
+        onClose={() => setOpenId(null)}
+      />
     </section>
   );
 }
