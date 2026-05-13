@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ContactButtons } from "@/components/ContactButtons";
@@ -63,7 +64,13 @@ const groups: Group[] = [
 export function HeaderBurger() {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const t = useTranslations("nav");
+
+  // Portal monté seulement côté client → évite hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -98,7 +105,8 @@ export function HeaderBurger() {
         </svg>
       </button>
 
-      <div
+      {mounted && createPortal(
+        <div
         role="dialog"
         aria-modal="true"
         aria-label={t("menu")}
@@ -188,7 +196,9 @@ export function HeaderBurger() {
             <LanguageSwitcher variant="dark" onSwitched={close} />
           </div>
         </nav>
-      </div>
+      </div>,
+      document.body,
+      )}
     </>
   );
 }

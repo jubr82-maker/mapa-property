@@ -365,7 +365,9 @@ export function parseApimoDescription(
   const conclusionHtml = conclusion
     ? `<p class="conclusion">${escapeHtml(conclusion)}</p>`
     : "";
-  const html = `${introHtml}${sectionsHtml}${conclusionHtml}`;
+  const html = stripResidualTokens(
+    `${introHtml}${sectionsHtml}${conclusionHtml}`,
+  );
 
   return {
     intro: introText,
@@ -373,4 +375,13 @@ export function parseApimoDescription(
     conclusion,
     html,
   };
+}
+
+// Filet de sécurité ultime : strip toute sentinelle U+0001/U+0002 résiduelle
+// ET toute occurrence "H3"/"H4" littérale collée au texte qui aurait échappé
+// au parsing (regex futures, cas non couverts, descriptions corrompues).
+function stripResidualTokens(html: string): string {
+  return html
+    .replace(/[]/g, "")
+    .replace(/(?<![<\/a-zA-Z0-9])H[34](?=[A-ZÀ-ÿ])/g, "");
 }
