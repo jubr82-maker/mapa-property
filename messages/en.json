@@ -573,13 +573,13 @@
   "estimate_form": {
     "step1_label": "The property",
     "step2_label": "Location",
-    "step3_label": "Acquisition",
+    "step3_label": "Contact",
     "step1_title": "Describe the property",
     "step1_subtitle": "Surface, type, condition, energy class.",
     "step2_title": "Where is it?",
     "step2_subtitle": "Country and municipality mainly; postal code helps refine.",
-    "step3_title": "Your acquisition profile",
-    "step3_subtitle": "To personalise the financing plan and applicable aids.",
+    "step3_title": "Receive your estimate",
+    "step3_subtitle": "So we can send you the price range and follow up personally.",
     "type": "Type",
     "state": "Condition",
     "state_to_renovate": "To renovate",
@@ -624,7 +624,10 @@
     "help_bellegen_akt_title": "Bëllegen Akt (registration duty rebate)",
     "help_vat_reduced_title": "Reduced VAT 3% (new build, primary residence)",
     "help_state_aid_title": "State housing aid",
-    "help_climate_loan_title": "Climate loan (renovation)"
+    "help_climate_loan_title": "Climate loan (renovation)",
+    "contact_email": "Email",
+    "contact_phone": "Phone",
+    "contact_consent": "I agree to be contacted by MAPA Property regarding this estimate."
   },
   "simulators_page": {
     "eyebrow": "Financial tools",
@@ -763,5 +766,18 @@
     "contact_block_phone_label": "Phone",
     "contact_block_email_label": "Email",
     "copyright": "© 2026 MAPA SYNERGY Sàrl — MAPA Property. All rights reserved. Reproduction prohibited."
+  },
+  "rendement_locatif": {
+    "eyebrow": "RENTAL YIELD",
+    "title": "Compute the net yield of your investment",
+    "intro": "Module currently being finalised. For a precise rental yield calculation on a Luxembourg or international property, contact our Real Estate Director.",
+    "coming_label": "Coming soon",
+    "coming_title": "The simulator will include:",
+    "feature_1": "Gross and net yield (notary, agency, works, property tax)",
+    "feature_2": "Monthly cash flow after mortgage instalment",
+    "feature_3": "Projected IRR over 10, 15 and 20 years",
+    "feature_4": "Comparison with the Luxembourg 10-year bond yield",
+    "cta": "Request a personalised calculation",
+    "source": "Source: BCL / Statec / ABBL"
   }
 }

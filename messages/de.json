@@ -573,13 +573,13 @@
   "estimate_form": {
     "step1_label": "Das Objekt",
     "step2_label": "Lage",
-    "step3_label": "Erwerb",
+    "step3_label": "Kontakt",
     "step1_title": "Beschreiben Sie das Objekt",
     "step1_subtitle": "Fläche, Typ, Zustand, Energieklasse.",
     "step2_title": "Wo liegt es?",
     "step2_subtitle": "Hauptsächlich Land und Gemeinde; die PLZ hilft, präziser zu werden.",
-    "step3_title": "Ihr Erwerbsprofil",
-    "step3_subtitle": "Zur Personalisierung des Finanzierungsplans und der anwendbaren Hilfen.",
+    "step3_title": "Erhalten Sie Ihre Schätzung",
+    "step3_subtitle": "Damit wir Ihnen die Preisspanne übermitteln und Sie persönlich begleiten können.",
     "type": "Typ",
     "state": "Zustand",
     "state_to_renovate": "Renovierungsbedürftig",
@@ -624,7 +624,10 @@
     "help_bellegen_akt_title": "Bëllegen Akt (Eintragungsgebührenrabatt)",
     "help_vat_reduced_title": "Reduzierter MwSt-Satz 3% (Neubau, Hauptwohnsitz)",
     "help_state_aid_title": "Staatliche Wohnungsbeihilfe",
-    "help_climate_loan_title": "Klima-Darlehen (Renovierung)"
+    "help_climate_loan_title": "Klima-Darlehen (Renovierung)",
+    "contact_email": "E-Mail",
+    "contact_phone": "Telefon",
+    "contact_consent": "Ich willige ein, von MAPA Property zu dieser Schätzung kontaktiert zu werden."
   },
   "simulators_page": {
     "eyebrow": "Finanzwerkzeuge",
@@ -763,5 +766,18 @@
     "contact_block_phone_label": "Telefon",
     "contact_block_email_label": "E-Mail",
     "copyright": "© 2026 MAPA SYNERGY Sàrl — MAPA Property. Alle Rechte vorbehalten. Vervielfältigung untersagt."
+  },
+  "rendement_locatif": {
+    "eyebrow": "MIETRENDITE",
+    "title": "Berechnen Sie die Nettorendite Ihrer Investition",
+    "intro": "Modul wird derzeit fertiggestellt. Für eine präzise Mietrenditeberechnung in Luxemburg oder international wenden Sie sich an unseren Real Estate Director.",
+    "coming_label": "Bald verfügbar",
+    "coming_title": "Der Simulator wird umfassen:",
+    "feature_1": "Brutto- und Nettorendite (Notar, Agentur, Arbeiten, Grundsteuer)",
+    "feature_2": "Monatlicher Cashflow nach Hypothekenrate",
+    "feature_3": "Projizierte IRR über 10, 15 und 20 Jahre",
+    "feature_4": "Vergleich mit der luxemburgischen 10-jährigen Staatsanleihe",
+    "cta": "Persönliche Berechnung anfragen",
+    "source": "Quelle: BCL / Statec / ABBL"
   }
 }

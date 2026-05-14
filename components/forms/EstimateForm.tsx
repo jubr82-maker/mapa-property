@@ -30,13 +30,10 @@ interface FormState {
   terraceSurface: string;
   bedrooms: string;
   year: string;
-  buyersCount: "1" | "2";
-  primaryAgeMax: string;
-  isPrimoLu: boolean;
-  isPrimaryResidence: boolean;
-  monthlyIncome: string;
-  monthlyCharges: string;
-  downPayment: string;
+  // Step 3 — coordonnées client (pour livraison résultat + suivi)
+  contactEmail: string;
+  contactPhone: string;
+  contactConsent: boolean;
 }
 
 const initial: FormState = {
@@ -51,13 +48,9 @@ const initial: FormState = {
   terraceSurface: "",
   bedrooms: "",
   year: "",
-  buyersCount: "1",
-  primaryAgeMax: "",
-  isPrimoLu: false,
-  isPrimaryResidence: true,
-  monthlyIncome: "",
-  monthlyCharges: "",
-  downPayment: "",
+  contactEmail: "",
+  contactPhone: "",
+  contactConsent: false,
 };
 
 export function EstimateForm() {
@@ -93,19 +86,9 @@ export function EstimateForm() {
             : undefined,
           bedrooms: data.bedrooms ? Number(data.bedrooms) : undefined,
           year: data.year ? Number(data.year) : undefined,
-          buyersCount: Number(data.buyersCount) as 1 | 2,
-          primaryAgeMax: data.primaryAgeMax
-            ? Number(data.primaryAgeMax)
-            : undefined,
-          isPrimoLu: data.isPrimoLu,
-          isPrimaryResidence: data.isPrimaryResidence,
-          monthlyIncome: data.monthlyIncome
-            ? Number(data.monthlyIncome)
-            : undefined,
-          monthlyCharges: data.monthlyCharges
-            ? Number(data.monthlyCharges)
-            : undefined,
-          downPayment: data.downPayment ? Number(data.downPayment) : undefined,
+          // Coordonnées : on les passe pour qu'un lead soit créé côté serveur si présent
+          contactEmail: data.contactEmail || undefined,
+          contactPhone: data.contactPhone || undefined,
         }),
       });
       if (!res.ok) throw new Error();
@@ -241,49 +224,28 @@ export function EstimateForm() {
       {step === 3 && (
         <StepWrap title={t("step3_title")} subtitle={t("step3_subtitle")}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FieldSelect
-              label={t("buyers")}
-              value={data.buyersCount}
-              onChange={(v) => set("buyersCount", v as "1" | "2")}
-              options={[
-                { value: "1", label: t("buyers_one") },
-                { value: "2", label: t("buyers_two") },
-              ]}
+            <FieldText
+              type="email"
+              label={t("contact_email")}
+              value={data.contactEmail}
+              onChange={(v) => set("contactEmail", v)}
+              placeholder="vous@exemple.com"
+              autoComplete="email"
             />
-            <FieldNumber
-              label={t("age")}
-              value={data.primaryAgeMax}
-              onChange={(v) => set("primaryAgeMax", v)}
-            />
-            <FieldNumber
-              label={t("income")}
-              value={data.monthlyIncome}
-              onChange={(v) => set("monthlyIncome", v)}
-              suffix="€/m"
-            />
-            <FieldNumber
-              label={t("charges")}
-              value={data.monthlyCharges}
-              onChange={(v) => set("monthlyCharges", v)}
-              suffix="€/m"
-            />
-            <FieldNumber
-              label={t("down_payment")}
-              value={data.downPayment}
-              onChange={(v) => set("downPayment", v)}
-              suffix="€"
+            <FieldText
+              type="tel"
+              label={t("contact_phone")}
+              value={data.contactPhone}
+              onChange={(v) => set("contactPhone", v)}
+              placeholder="+352 ..."
+              autoComplete="tel"
             />
           </div>
-          <div className="mt-4 space-y-3">
+          <div className="mt-4">
             <CheckboxField
-              checked={data.isPrimoLu}
-              onChange={(v) => set("isPrimoLu", v)}
-              label={t("primo_lu")}
-            />
-            <CheckboxField
-              checked={data.isPrimaryResidence}
-              onChange={(v) => set("isPrimaryResidence", v)}
-              label={t("primary_residence")}
+              checked={data.contactConsent}
+              onChange={(v) => set("contactConsent", v)}
+              label={t("contact_consent")}
             />
           </div>
           {error && (
@@ -296,6 +258,7 @@ export function EstimateForm() {
             onSubmit={submit}
             pending={pending}
             t={t}
+            disabled={!data.contactConsent || !data.contactEmail}
           />
         </StepWrap>
       )}
@@ -370,11 +333,15 @@ function FieldText({
   value,
   onChange,
   placeholder,
+  type = "text",
+  autoComplete,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  type?: "text" | "email" | "tel";
+  autoComplete?: string;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
@@ -382,10 +349,11 @@ function FieldText({
         {label}
       </span>
       <input
-        type="text"
+        type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        autoComplete={autoComplete}
         className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
       />
     </label>
@@ -533,11 +501,13 @@ function BackSubmitBtn({
   onSubmit,
   pending,
   t,
+  disabled = false,
 }: {
   onBack: () => void;
   onSubmit: () => void;
   pending: boolean;
   t: ReturnType<typeof useTranslations>;
+  disabled?: boolean;
 }) {
   return (
     <div className="mt-8 flex items-center justify-between">
@@ -551,8 +521,8 @@ function BackSubmitBtn({
       <button
         type="button"
         onClick={onSubmit}
-        disabled={pending}
-        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:opacity-50"
+        disabled={pending || disabled}
+        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {pending ? t("computing") : t("compute")}
       </button>

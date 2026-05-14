@@ -573,13 +573,13 @@
   "estimate_form": {
     "step1_label": "Le bien",
     "step2_label": "Localisation",
-    "step3_label": "Acquisition",
+    "step3_label": "Coordonnées",
     "step1_title": "Décrivez le bien",
     "step1_subtitle": "Surface, type, état, classe énergie.",
     "step2_title": "Où se trouve-t-il ?",
     "step2_subtitle": "Pays et commune principalement, le code postal aide à affiner.",
-    "step3_title": "Votre projet d'acquisition",
-    "step3_subtitle": "Pour personnaliser le plan de financement et les aides applicables.",
+    "step3_title": "Recevez votre estimation",
+    "step3_subtitle": "Pour vous transmettre la fourchette de prix et un suivi personnalisé.",
     "type": "Type",
     "state": "État général",
     "state_to_renovate": "À rénover",
@@ -624,7 +624,10 @@
     "help_bellegen_akt_title": "Bëllegen Akt (abattement droits d'enregistrement)",
     "help_vat_reduced_title": "TVA réduite 3% (logement neuf, résidence principale)",
     "help_state_aid_title": "Aide étatique au logement",
-    "help_climate_loan_title": "Prêt climatique (rénovation)"
+    "help_climate_loan_title": "Prêt climatique (rénovation)",
+    "contact_email": "Email",
+    "contact_phone": "Téléphone",
+    "contact_consent": "J'accepte d'être contacté(e) par MAPA Property au sujet de cette estimation."
   },
   "simulators_page": {
     "eyebrow": "Outils financiers",
@@ -763,5 +766,18 @@
     "contact_block_phone_label": "Téléphone",
     "contact_block_email_label": "Email",
     "copyright": "© 2026 MAPA SYNERGY Sàrl — MAPA Property. Tous droits réservés. Toute reproduction interdite."
+  },
+  "rendement_locatif": {
+    "eyebrow": "RENDEMENT LOCATIF",
+    "title": "Calculez le rendement net de votre investissement",
+    "intro": "Module en cours de finalisation. Pour un calcul de rendement locatif précis sur un bien Luxembourg ou international, contactez notre Real Estate Director.",
+    "coming_label": "Bientôt disponible",
+    "coming_title": "Le simulateur incluera :",
+    "feature_1": "Rendement brut et net (frais notaire, agence, travaux, taxe foncière)",
+    "feature_2": "Cash-flow mensuel après mensualité crédit",
+    "feature_3": "TRI projeté sur 10, 15 et 20 ans",
+    "feature_4": "Comparaison avec l'obligation 10 ans Luxembourg pour benchmark",
+    "cta": "Demander un calcul personnalisé",
+    "source": "Données BCL / Statec / ABBL"
   }
 }
