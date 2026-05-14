@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { MandateDetailModal, type MandateModalData } from "@/components/MandateDetailModal";
+import { track } from "@/lib/tracking/track";
 
 type MandateId = "exclusif" | "semi" | "simple" | "autonome";
 
@@ -150,7 +151,14 @@ export function MandatesPremium() {
 
                 <button
                   type="button"
-                  onClick={() => setOpenId(card.id)}
+                  onClick={() => {
+                    track("cta_click", {
+                      label: "mandate_modal_open",
+                      mandate_id: card.id,
+                      featured: card.isFeatured,
+                    });
+                    setOpenId(card.id);
+                  }}
                   className={`relative mt-auto inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors md:text-[11px] ${
                     isFeatured
                       ? "border-bg/40 text-bg hover:border-bg hover:bg-bg/10"

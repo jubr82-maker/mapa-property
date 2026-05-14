@@ -133,7 +133,12 @@ export default async function PropertyPage({
 
   return (
     <article className="pt-24 lg:pt-32">
-      <PropertyViewTracker propertyId={property.id} />
+      <PropertyViewTracker
+        propertyId={property.id}
+        commune={property.city ?? undefined}
+        price={property.price}
+        offmarket={false}
+      />
       <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <div className="mb-6 flex items-center justify-between gap-4 print:hidden">

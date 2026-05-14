@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Turnstile } from "@/components/ui/Turnstile";
+import { track } from "@/lib/tracking/track";
 
 interface Props {
   propertyRef: string;
@@ -50,6 +51,10 @@ export function NDAForm({ propertyRef, propertyTitle }: Props) {
       });
       if (!res.ok) throw new Error();
       setStatus("success");
+      track("form_submit", {
+        form: "offmarket_request",
+        property_id: propertyRef,
+      });
       e.currentTarget.reset();
     } catch {
       setStatus("error");

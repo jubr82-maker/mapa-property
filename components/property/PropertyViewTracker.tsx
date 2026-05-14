@@ -2,12 +2,28 @@
 
 import { useEffect } from "react";
 import { useLocale } from "next-intl";
+import { track } from "@/lib/tracking/track";
+
+interface Props {
+  propertyId: string;
+  type?: string;
+  commune?: string;
+  price?: number | null;
+  offmarket?: boolean;
+}
 
 /**
- * Composant invisible qui ping `/api/track-view` au montage.
- * Anti-doublon assuré côté DB (unique index sur (property_id, visitor_hash, day)).
+ * Composant invisible qui :
+ *  - ping `/api/track-view` (compteur vues bien — anti-doublon DB)
+ *  - fire `property_view` dans le système d'events unifié (`/api/track`)
  */
-export function PropertyViewTracker({ propertyId }: { propertyId: string }) {
+export function PropertyViewTracker({
+  propertyId,
+  type,
+  commune,
+  price,
+  offmarket,
+}: Props) {
   const locale = useLocale();
 
   useEffect(() => {
@@ -20,7 +36,15 @@ export function PropertyViewTracker({ propertyId }: { propertyId: string }) {
     }).catch(() => {
       /* silent */
     });
-  }, [propertyId, locale]);
+
+    track("property_view", {
+      property_id: propertyId,
+      type: type ?? undefined,
+      commune: commune ?? undefined,
+      price: price ?? undefined,
+      offmarket: offmarket ?? undefined,
+    });
+  }, [propertyId, locale, type, commune, price, offmarket]);
 
   return null;
 }

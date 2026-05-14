@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { track } from "@/lib/tracking/track";
 
 type Variant = "compact" | "full" | "sidebar";
 type Align = "left" | "center" | "right";
@@ -71,22 +72,26 @@ export function ContactReveal({
   function handleReveal() {
     if (!guard()) return;
     setRevealed(true);
+    track("contact_reveal", { variant, target: "reveal" });
   }
 
   function callJulien() {
     if (!guard()) return;
+    track("contact_reveal", { variant, target: "call_julien" });
     const tel = buildPhone(PHONE_JULIEN_PARTS).replace(/\s/g, "");
     window.location.href = `tel:${tel}`;
   }
 
   function callFrederic() {
     if (!guard()) return;
+    track("contact_reveal", { variant, target: "call_frederic" });
     const tel = buildPhone(PHONE_FREDERIC_PARTS).replace(/\s/g, "");
     window.location.href = `tel:${tel}`;
   }
 
   function writeEmail() {
     if (!guard()) return;
+    track("contact_reveal", { variant, target: "email" });
     const email = buildEmail();
     window.location.href = `mailto:${email}`;
   }

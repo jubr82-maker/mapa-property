@@ -8,6 +8,7 @@ import {
   LUXEMBOURG_COMMUNES_PRICES,
   VDL_QUARTIERS_PRICES,
 } from "@/lib/data/luxembourg-prices";
+import { track } from "@/lib/tracking/track";
 
 const PROPERTY_TYPES = [
   "appartement",
@@ -98,9 +99,24 @@ export function EstimateForm() {
         }),
       });
       if (!res.ok) throw new Error();
-      const json = (await res.json()) as { result: EstimateResult };
+      const json = (await res.json()) as {
+        result: EstimateResult;
+        engine?: string;
+        confidence?: string;
+      };
       setResult(json.result);
       setStep(4);
+      track("estimation_compute", {
+        country: data.country,
+        type: data.type,
+        commune: data.commune || undefined,
+        quartier: data.quartier || undefined,
+        living_surface: Number(data.livingSurface) || undefined,
+        engine: json.engine,
+        confidence: json.confidence,
+        price_mid: json.result?.range?.mid,
+        has_contact: Boolean(data.contactEmail || data.contactPhone),
+      });
     } catch {
       setError(t("error"));
     } finally {
