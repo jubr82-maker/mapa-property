@@ -18,37 +18,32 @@ export default async function OffMarketListPage({
 
   return (
     <>
-      <section className="relative isolate overflow-hidden">
+      <section className="relative isolate overflow-hidden bg-ink">
+        {/* Bordure interne or subtile (effet plaque) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-3 rounded-sm ring-1 ring-gold/40 sm:inset-6 lg:inset-10"
+        />
         <div className="relative h-[70vh] min-h-[480px] w-full">
-          <Image
-            src="/offmarket_hero.png"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-          <div aria-hidden className="absolute inset-0 bg-ink/50" />
-
           <Link
             href="/"
-            className="absolute right-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/30 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-white/90 backdrop-blur transition-colors hover:border-gold hover:text-gold lg:right-10 lg:top-10"
+            className="absolute right-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-bg/30 bg-bg/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-bg/90 backdrop-blur transition-colors hover:border-gold hover:text-gold lg:right-10 lg:top-10"
           >
             <span aria-hidden>←</span>
             {t("back")}
           </Link>
 
           <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-start justify-center gap-5 px-6 pt-24 lg:px-10">
-            <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-gold-bright/90">
+            <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-gold">
               {t("hero_eyebrow")}
             </p>
-            <h1 className="font-display font-bold leading-[1] tracking-tight text-white text-[clamp(3rem,7vw,5rem)]">
+            <h1 className="font-display font-bold leading-[1] tracking-tight text-bg text-[clamp(3rem,7vw,5rem)]">
               {t("hero_title")}
             </h1>
-            <p className="font-serif text-xl italic leading-relaxed text-white/85 sm:text-2xl">
+            <p className="font-serif text-xl italic leading-relaxed text-bg/85 sm:text-2xl">
               {t("hero_subtitle")}
             </p>
-            <p className="mt-2 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
+            <p className="mt-2 max-w-2xl text-base leading-relaxed text-bg/70 sm:text-lg">
               {t("description")}
             </p>
           </div>
@@ -67,7 +62,7 @@ export default async function OffMarketListPage({
         </header>
 
         {/* Conditions d'accès */}
-        <section className="mb-14 rounded-2xl border border-gold/40 bg-gradient-to-br from-bg-soft via-bg to-bg-soft p-8">
+        <section className="mb-14 rounded-2xl border border-gold/40 bg-bg-soft p-8">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
             {t("access_eyebrow")}
           </p>

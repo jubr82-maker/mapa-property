@@ -19,7 +19,7 @@ export function OffmarketPlaceholder({
         width="80"
         height="80"
         fill="none"
-        stroke="#B8865A"
+        stroke="#C8A04A"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -31,7 +31,7 @@ export function OffmarketPlaceholder({
         <p
           className="mt-4 font-display"
           style={{
-            color: "#B8865A",
+            color: "#C8A04A",
             letterSpacing: "0.3em",
             fontSize: "18px",
             fontWeight: 700,

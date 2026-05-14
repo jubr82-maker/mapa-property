@@ -77,7 +77,7 @@ export function Header() {
             <Link
               href="/mandats/exclusif"
               className="ml-1 border-b-2 px-3 py-2 font-sans text-[13px] font-semibold uppercase tracking-[0.05em] transition-colors hover:text-gold"
-              style={{ color: "#B8865A", borderColor: "#B8865A" }}
+              style={{ color: "#C8A04A", borderColor: "#C8A04A" }}
             >
               {t("mandates")}
             </Link>

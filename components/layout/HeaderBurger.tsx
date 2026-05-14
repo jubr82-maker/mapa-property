@@ -135,7 +135,7 @@ export function HeaderBurger() {
             type="button"
             aria-label={t("close_menu")}
             onClick={close}
-            className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:border-[#B8865A] hover:text-[#B8865A]"
+            className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:border-[#C8A04A] hover:text-[#C8A04A]"
           >
             <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -152,7 +152,7 @@ export function HeaderBurger() {
                     <Link
                       href={group.href}
                       onClick={close}
-                      className="block py-4 text-center font-display text-3xl font-bold uppercase tracking-wide text-white transition-colors hover:text-[#B8865A] sm:text-4xl"
+                      className="block py-4 text-center font-display text-3xl font-bold uppercase tracking-wide text-white transition-colors hover:text-[#C8A04A] sm:text-4xl"
                     >
                       {t(group.label)}
                     </Link>
@@ -166,13 +166,13 @@ export function HeaderBurger() {
                     type="button"
                     onClick={() => setExpanded(isExpanded ? null : group.id)}
                     aria-expanded={isExpanded}
-                    className="flex w-full items-center justify-center gap-3 py-4 font-display text-3xl font-bold uppercase tracking-wide text-white transition-colors hover:text-[#B8865A] sm:text-4xl"
+                    className="flex w-full items-center justify-center gap-3 py-4 font-display text-3xl font-bold uppercase tracking-wide text-white transition-colors hover:text-[#C8A04A] sm:text-4xl"
                   >
                     {t(group.label)}
                     <svg
                       aria-hidden
                       viewBox="0 0 24 24"
-                      className={`size-5 text-[#B8865A] transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                      className={`size-5 text-[#C8A04A] transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -188,7 +188,7 @@ export function HeaderBurger() {
                           <Link
                             href={item.href}
                             onClick={close}
-                            className="block py-2 font-sans text-base text-white/80 transition-colors hover:text-[#B8865A]"
+                            className="block py-2 font-sans text-base text-white/80 transition-colors hover:text-[#C8A04A]"
                           >
                             {t(item.key)}
                           </Link>

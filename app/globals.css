@@ -9,39 +9,41 @@
    ============================================================ */
 
 :root {
-  --bg:           #F5F2EA;        /* ivoire */
-  --bg-deep:      #E8E0D0;        /* ivoire deeper */
-  --bg-soft:      #F0EAD8;        /* élévation cards */
-  --ink:          #1A1A1A;        /* presque noir */
+  /* Light mode — moins de beige, plus de blanc */
+  --bg:           #FAFAFA;        /* blanc très légèrement chaud (papier premium) */
+  --bg-deep:      #EDEDED;        /* gris très clair pour élévation */
+  --bg-soft:      #F2F0EC;        /* crème très subtil — réserve pour cards */
+  --ink:          #0F0F10;        /* noir vrai (anthracite très foncé) */
   --ink-mid:      #2C2E33;
   --ink-soft:     #6B6B6B;
-  --navy:         #3D4F63;        /* bleu prussien MAPA */
-  --navy-deep:    #2D3F53;        /* hover navy */
-  --gold:         #B8865A;        /* copper MAPA — FIXE, JAMAIS animé */
-  --gold-bright:  #C9986C;        /* léger éclaircissement pour hover */
-  --gold-deep:    #8E6940;        /* copper profond pour CTAs sur clair */
-  --gold-shine:   #B8865A;        /* alias copper (pas de shine) */
-  --accent-warm:  #B8865A;        /* alias */
-  --line:         rgba(26, 26, 26, 0.18);
-  --line-strong:  rgba(26, 26, 26, 0.32);
+  --navy:         #3D4F63;        /* bleu prussien MAPA — conservé pour secondaire */
+  --navy-deep:    #2D3F53;
+  --gold:         #C8A04A;        /* or vif — plus jaune que copper, plus de présence */
+  --gold-bright:  #E0BE60;        /* or éclatant pour hover/highlights */
+  --gold-deep:    #9E7B2A;        /* or chaud profond pour CTAs sur clair */
+  --gold-shine:   #C8A04A;
+  --accent-warm:  #C8A04A;
+  --line:         rgba(15, 15, 16, 0.14);
+  --line-strong:  rgba(15, 15, 16, 0.26);
 }
 
 .dark {
-  --bg:           #0F0E0B;
-  --bg-deep:      #0A0908;
-  --bg-soft:      #1A1612;
-  --ink:          #F5F2EA;
-  --ink-mid:      #BFB59E;
-  --ink-soft:     #847B65;
+  /* Dark mode — noir/anthracite vrai (zéro brun) */
+  --bg:           #0A0A0A;        /* noir vrai */
+  --bg-deep:      #000000;        /* noir pur */
+  --bg-soft:      #161616;        /* anthracite (pour élévation cards en dark) */
+  --ink:          #FAFAFA;        /* presque blanc */
+  --ink-mid:      #BCBCBC;
+  --ink-soft:     #7A7A7A;
   --navy:         #5C7088;
   --navy-deep:    #3D4F63;
-  --gold:         #C9986C;
-  --gold-bright:  #D4A37B;
-  --gold-deep:    #B8865A;
-  --gold-shine:   #C9986C;
-  --accent-warm:  #C9986C;
-  --line:         rgba(245, 242, 234, 0.14);
-  --line-strong:  rgba(245, 242, 234, 0.28);
+  --gold:         #E0BE60;        /* or vif éclairé pour fond sombre */
+  --gold-bright:  #F0D580;
+  --gold-deep:    #C8A04A;
+  --gold-shine:   #E0BE60;
+  --accent-warm:  #E0BE60;
+  --line:         rgba(250, 250, 250, 0.14);
+  --line-strong:  rgba(250, 250, 250, 0.28);
 }
 
 /* Expose les variables comme tokens Tailwind */

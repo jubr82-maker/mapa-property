@@ -21,7 +21,7 @@ interface Props {
 }
 
 const DURATIONS = [10, 15, 20, 25, 30] as const;
-const COPPER = "#B8865A";
+const COPPER = "#C8A04A";
 
 const COUNTRY_LABEL: Record<string, string> = {
   LU: "Luxembourg",

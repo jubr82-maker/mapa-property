@@ -18,13 +18,13 @@ export function MarketsSection() {
           <div className="text-center">
             <h2
               className="font-display text-2xl font-black leading-tight tracking-tight"
-              style={{ color: "#B8865A" }}
+              style={{ color: "#C8A04A" }}
             >
               {t("markets_compact_title")}
             </h2>
             <p
               className="mt-2 font-display text-base italic"
-              style={{ color: "#B8865A" }}
+              style={{ color: "#C8A04A" }}
             >
               {t("markets_compact_subtitle")}
             </p>

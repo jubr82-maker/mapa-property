@@ -18,8 +18,8 @@ const CARDS: MandateCard[] = [
   {
     id: "exclusif",
     slug: "exclusif",
-    accent: "#B8865A",
-    accentDark: "#8B6635",
+    accent: "#C8A04A",
+    accentDark: "#9E7B2A",
     isFeatured: true,
   },
   {
@@ -103,57 +103,59 @@ export function MandatesPremium() {
 
         <div className="grid gap-3 md:grid-cols-2 md:gap-5 lg:grid-cols-4">
           {cards.map((card) => {
-            const isCopper = card.isFeatured;
+            const isFeatured = card.isFeatured;
+            // Monochrome luxe : Featured = fond ink + bordure or épaisse,
+            // standard = fond bg-soft + bordure or fine
             return (
               <article
                 key={card.id}
-                className="relative flex h-[280px] flex-col gap-3 overflow-hidden rounded-2xl p-5 text-white shadow-lg md:h-[320px] md:p-6"
-                style={{
-                  backgroundImage: `linear-gradient(135deg, ${card.accent} 0%, ${card.accentDark} 100%)`,
-                  border: isCopper ? undefined : "2px solid #B8865A",
-                }}
+                className={`relative flex h-[280px] flex-col gap-3 overflow-hidden rounded-2xl p-5 shadow-sm md:h-[320px] md:p-6 ${
+                  isFeatured
+                    ? "border-2 border-gold bg-ink text-bg"
+                    : "border border-line bg-bg-soft text-ink hover:border-gold/60"
+                } transition-colors`}
               >
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full blur-3xl"
-                  style={{
-                    backgroundColor: isCopper
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(184, 134, 90, 0.15)",
-                  }}
-                />
-
                 <span
-                  className="relative inline-flex w-fit items-center font-mono text-[10px] font-semibold uppercase tracking-[0.3em]"
-                  style={{ color: isCopper ? "#ffffff" : "#B8865A" }}
+                  className={`relative inline-flex w-fit items-center font-mono text-[10px] font-semibold uppercase tracking-[0.3em] ${
+                    isFeatured ? "text-gold-bright" : "text-gold-deep"
+                  }`}
                 >
                   {card.eyebrow}
                 </span>
 
-                <h3 className="relative font-display text-2xl font-black leading-tight text-white md:text-3xl">
+                <h3 className={`relative font-display text-2xl font-black leading-tight md:text-3xl ${
+                  isFeatured ? "text-bg" : "text-ink"
+                }`}>
                   {card.title}
                 </h3>
 
                 <div className="relative flex items-baseline gap-2">
-                  <span
-                    className="font-display text-4xl font-black md:text-5xl"
-                    style={{ color: isCopper ? "#ffffff" : "#B8865A" }}
-                  >
+                  <span className={`font-display text-4xl font-black md:text-5xl ${
+                    isFeatured ? "text-gold-bright" : "text-gold"
+                  }`}>
                     {card.rate}
                   </span>
-                  <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/75 md:text-[10px]">
+                  <span className={`font-mono text-[9px] uppercase tracking-[0.2em] md:text-[10px] ${
+                    isFeatured ? "text-bg/70" : "text-ink-soft"
+                  }`}>
                     {card.rateSuffix}
                   </span>
                 </div>
 
-                <p className="relative line-clamp-2 text-xs leading-relaxed text-white/85 md:text-sm">
+                <p className={`relative line-clamp-2 text-xs leading-relaxed md:text-sm ${
+                  isFeatured ? "text-bg/85" : "text-ink-mid"
+                }`}>
                   {card.shortDesc}
                 </p>
 
                 <button
                   type="button"
                   onClick={() => setOpenId(card.id)}
-                  className="relative mt-auto inline-flex w-fit items-center gap-2 rounded-full border border-white/40 bg-white/0 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-white transition-all hover:border-white hover:bg-white/10 md:text-[11px]"
+                  className={`relative mt-auto inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors md:text-[11px] ${
+                    isFeatured
+                      ? "border-bg/40 text-bg hover:border-bg hover:bg-bg/10"
+                      : "border-gold/50 text-gold-deep hover:border-gold hover:bg-gold/5"
+                  }`}
                   aria-haspopup="dialog"
                   aria-expanded={openId === card.id}
                 >
