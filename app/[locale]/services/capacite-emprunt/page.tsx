@@ -1,20 +1,47 @@
-import { redirect } from "next/navigation";
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import { BorrowingCapacitySimulator } from "@/components/simulators/BorrowingCapacitySimulator";
 
-/**
- * Alias /services/capacite-emprunt → /services/simulateurs/financement.
- * Le simulateur de financement existant (FinancingSimulator) couvre déjà
- * les inputs revenus / charges / apport / durée / taux + outputs mensualité,
- * frais d'acquisition, taux d'endettement et aides applicables 6 pays.
- *
- * URL canonique conservée pour ne pas casser les liens existants (sitemap,
- * Header dropdown, page services/simulateurs). Cette route est l'alias public
- * "Capacité d'emprunt" demandé par le brief mission de mai 2026.
- */
-export default async function CapaciteEmpruntAlias({
+export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}/services/simulateurs/financement`);
+  const t = await getTranslations({ locale, namespace: "borrowing_capacity" });
+  return {
+    title: t("meta_title"),
+    description: t("meta_description"),
+  };
 }
+
+export default async function CapaciteEmpruntPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "borrowing_capacity" });
+
+  return (
+    <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
+      <div className="mx-auto max-w-5xl">
+        <header className="mb-10 text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
+            {t("eyebrow")}
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-6xl">
+            {t("title")}
+          </h1>
+          <p className="mt-5 mx-auto max-w-2xl text-base leading-relaxed text-ink-mid">
+            {t("intro")}
+          </p>
+        </header>
+
+        <BorrowingCapacitySimulator />
+      </div>
+    </div>
+  );
+}
+
+export const dynamic = "force-dynamic";
