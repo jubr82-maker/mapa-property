@@ -627,7 +627,8 @@
     "help_climate_loan_title": "Climate loan (renovation)",
     "contact_email": "Email",
     "contact_phone": "Phone",
-    "contact_consent": "I agree to be contacted by MAPA Property regarding this estimate."
+    "contact_consent": "I agree to be contacted by MAPA Property regarding this estimate.",
+    "quartier": "Neighbourhood (Luxembourg City)"
   },
   "simulators_page": {
     "eyebrow": "Financial tools",

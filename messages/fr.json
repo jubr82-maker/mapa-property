@@ -627,7 +627,8 @@
     "help_climate_loan_title": "Prêt climatique (rénovation)",
     "contact_email": "Email",
     "contact_phone": "Téléphone",
-    "contact_consent": "J'accepte d'être contacté(e) par MAPA Property au sujet de cette estimation."
+    "contact_consent": "J'accepte d'être contacté(e) par MAPA Property au sujet de cette estimation.",
+    "quartier": "Quartier (Luxembourg-Ville)"
   },
   "simulators_page": {
     "eyebrow": "Outils financiers",

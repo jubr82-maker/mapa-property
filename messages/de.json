@@ -627,7 +627,8 @@
     "help_climate_loan_title": "Klima-Darlehen (Renovierung)",
     "contact_email": "E-Mail",
     "contact_phone": "Telefon",
-    "contact_consent": "Ich willige ein, von MAPA Property zu dieser Schätzung kontaktiert zu werden."
+    "contact_consent": "Ich willige ein, von MAPA Property zu dieser Schätzung kontaktiert zu werden.",
+    "quartier": "Stadtteil (Luxemburg-Stadt)"
   },
   "simulators_page": {
     "eyebrow": "Finanzwerkzeuge",

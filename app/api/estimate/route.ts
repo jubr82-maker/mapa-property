@@ -54,7 +54,7 @@ function hashIp(ip: string): string {
  * Le moteur EVS est utilisé UNIQUEMENT pour country='LU'. Pour les autres pays,
  * on retombe sur l'ancien moteur hédoniste (qui couvre 10 pays).
  */
-function mapToEvsInputs(body: EstimateInput): EstimationInputs | null {
+function mapToEvsInputs(body: EstimateInput & { quartier?: string }): EstimationInputs | null {
   if (body.country !== "LU") return null;
   if (!body.commune || !body.type || !body.state || !body.livingSurface) return null;
 
@@ -67,6 +67,7 @@ function mapToEvsInputs(body: EstimateInput): EstimationInputs | null {
   return {
     type: t as PropertyType,
     commune: body.commune,
+    quartier: body.quartier, // 25 quartiers VDL si commune = Luxembourg
     surfaceLiving: Number(body.livingSurface),
     surfaceLand: body.landSurface ? Number(body.landSurface) : undefined,
     bedrooms: body.bedrooms ? Number(body.bedrooms) : undefined,
@@ -79,6 +80,7 @@ function mapToEvsInputs(body: EstimateInput): EstimationInputs | null {
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as Partial<EstimateInput> & {
+    quartier?: string;
     contactEmail?: string;
     contactPhone?: string;
     sessionId?: string;
@@ -102,7 +104,7 @@ export async function POST(req: Request) {
   const ipHash = hashIp(ip);
 
   // Tente le moteur EVS pour LU résidentiel.
-  const evsInputs = mapToEvsInputs(body as EstimateInput);
+  const evsInputs = mapToEvsInputs(body as EstimateInput & { quartier?: string });
   if (evsInputs) {
     try {
       const evs = estimateEvs(evsInputs);

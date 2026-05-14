@@ -9,10 +9,10 @@
    ============================================================ */
 
 :root {
-  /* Light mode — moins de beige, plus de blanc */
-  --bg:           #FAFAFA;        /* blanc très légèrement chaud (papier premium) */
-  --bg-deep:      #EDEDED;        /* gris très clair pour élévation */
-  --bg-soft:      #F2F0EC;        /* crème très subtil — réserve pour cards */
+  /* Light mode — blanc franc (plus de beige) */
+  --bg:           #FFFFFF;        /* blanc pur */
+  --bg-deep:      #F5F5F5;        /* gris très clair pour élévation */
+  --bg-soft:      #FAFAFA;        /* presque blanc pour cards */
   --ink:          #0F0F10;        /* noir vrai (anthracite très foncé) */
   --ink-mid:      #2C2E33;
   --ink-soft:     #6B6B6B;

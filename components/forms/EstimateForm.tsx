@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { luxembourgCommunes } from "@/lib/markets";
 import { formatEuro } from "@/lib/finance";
 import type { EstimateResult } from "@/lib/estimate";
+import {
+  LUXEMBOURG_COMMUNES_PRICES,
+  VDL_QUARTIERS_PRICES,
+} from "@/lib/data/luxembourg-prices";
 
 const PROPERTY_TYPES = [
   "appartement",
@@ -21,6 +24,7 @@ const ENERGIES = ["A", "B", "C", "D", "E", "F", "G", "H", "I"] as const;
 interface FormState {
   country: string;
   commune: string;
+  quartier: string; // si commune = Luxembourg (25 quartiers VDL)
   postal: string;
   type: string;
   state: (typeof STATES)[number];
@@ -39,6 +43,7 @@ interface FormState {
 const initial: FormState = {
   country: "LU",
   commune: "",
+  quartier: "",
   postal: "",
   type: "appartement",
   state: "good",
@@ -76,6 +81,7 @@ export function EstimateForm() {
         body: JSON.stringify({
           country: data.country,
           commune: data.commune || undefined,
+          quartier: data.quartier || undefined,
           type: data.type,
           state: data.state,
           energy: data.energy,
@@ -190,15 +196,38 @@ export function EstimateForm() {
               )}
             />
             {data.country === "LU" ? (
-              <FieldSelect
-                label={t("commune")}
-                value={data.commune}
-                onChange={(v) => set("commune", v)}
-                options={[
-                  { value: "", label: tSearch("any") },
-                  ...luxembourgCommunes.map((c) => ({ value: c, label: c })),
-                ]}
-              />
+              <>
+                <FieldSelect
+                  label={t("commune")}
+                  value={data.commune}
+                  onChange={(v) => {
+                    set("commune", v);
+                    // reset quartier si on quitte Luxembourg
+                    if (v !== "Luxembourg") set("quartier", "");
+                  }}
+                  options={[
+                    { value: "", label: tSearch("any") },
+                    ...LUXEMBOURG_COMMUNES_PRICES.map((r) => ({
+                      value: r.commune,
+                      label: r.commune,
+                    })),
+                  ]}
+                />
+                {data.commune === "Luxembourg" && (
+                  <FieldSelect
+                    label={t("quartier") || "Quartier (Luxembourg-Ville)"}
+                    value={data.quartier}
+                    onChange={(v) => set("quartier", v)}
+                    options={[
+                      { value: "", label: tSearch("any") },
+                      ...VDL_QUARTIERS_PRICES.map((q) => ({
+                        value: q.quartier,
+                        label: q.quartier,
+                      })),
+                    ]}
+                  />
+                )}
+              </>
             ) : (
               <FieldText
                 label={tSearch("city")}
