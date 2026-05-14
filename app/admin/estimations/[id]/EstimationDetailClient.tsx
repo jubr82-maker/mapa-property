@@ -1,0 +1,386 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+
+type MethodKey =
+  | "sales_comparison"
+  | "hedonic"
+  | "income_capitalization"
+  | "depreciated_replacement"
+  | "statec_reference";
+
+type Status = "new" | "in_progress" | "avis_sent" | "mandate_signed" | "closed";
+
+interface MethodResult {
+  applicable: boolean;
+  price: number | null;
+  details: Record<string, unknown>;
+  warnings: string[];
+}
+
+interface Props {
+  id: string;
+  status: Status;
+  notes: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  consent: boolean;
+  methods: Record<string, MethodResult>;
+  weightsInitial: Record<string, number>;
+  statusLabels: Record<string, string>;
+  methodLabels: Record<string, string>;
+}
+
+const METHOD_ORDER: MethodKey[] = [
+  "hedonic",
+  "statec_reference",
+  "sales_comparison",
+  "depreciated_replacement",
+  "income_capitalization",
+];
+
+const STATUS_FLOW: Status[] = [
+  "new",
+  "in_progress",
+  "avis_sent",
+  "mandate_signed",
+  "closed",
+];
+
+function fmtPrice(n: number | null) {
+  if (n == null) return "—";
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(n);
+}
+
+function roundDisplay(n: number) {
+  return Math.round(n / 10000) * 10000;
+}
+
+export function EstimationDetailClient({
+  id,
+  status: initialStatus,
+  notes: initialNotes,
+  contactEmail,
+  contactPhone,
+  consent,
+  methods,
+  weightsInitial,
+  statusLabels,
+  methodLabels,
+}: Props) {
+  const router = useRouter();
+  const [status, setStatus] = useState<Status>(initialStatus);
+  const [notes, setNotes] = useState(initialNotes ?? "");
+  const [weights, setWeights] = useState<Record<MethodKey, number>>({
+    sales_comparison: weightsInitial.sales_comparison ?? 0.2,
+    hedonic: weightsInitial.hedonic ?? 0.35,
+    income_capitalization: weightsInitial.income_capitalization ?? 0.05,
+    depreciated_replacement: weightsInitial.depreciated_replacement ?? 0.1,
+    statec_reference: weightsInitial.statec_reference ?? 0.3,
+  });
+  const [saving, setSaving] = useState(false);
+  const [savedMsg, setSavedMsg] = useState<string | null>(null);
+
+  const recomputed = useMemo(() => {
+    const applicable = METHOD_ORDER.filter(
+      (k) => methods[k]?.applicable && methods[k]?.price != null,
+    );
+    const totalW = applicable.reduce((s, k) => s + weights[k], 0);
+    if (totalW === 0) return { weighted: 0, low: 0, mid: 0, high: 0 };
+    let weighted = 0;
+    for (const k of applicable) {
+      const w = weights[k] / totalW;
+      weighted += (methods[k].price as number) * w;
+    }
+    weighted = Math.round(weighted);
+    // Fourchette indicative ±10% (MEDIUM par défaut sur ajustement custom)
+    return {
+      weighted,
+      low: roundDisplay(weighted * 0.9),
+      mid: roundDisplay(weighted),
+      high: roundDisplay(weighted * 1.1),
+    };
+  }, [methods, weights]);
+
+  async function patchEstimation(payload: Record<string, unknown>) {
+    setSaving(true);
+    setSavedMsg(null);
+    try {
+      const res = await fetch(`/api/admin/estimations/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        setSavedMsg(`Erreur : ${txt}`);
+        return;
+      }
+      setSavedMsg("Enregistré");
+      router.refresh();
+    } catch (e) {
+      setSavedMsg(`Erreur réseau : ${(e as Error).message}`);
+    } finally {
+      setSaving(false);
+      setTimeout(() => setSavedMsg(null), 4000);
+    }
+  }
+
+  function setSliderValue(k: MethodKey, v: number) {
+    setWeights((prev) => ({ ...prev, [k]: v }));
+  }
+
+  function resetDefaultWeights() {
+    setWeights({
+      sales_comparison: 0.2,
+      hedonic: 0.35,
+      income_capitalization: 0.05,
+      depreciated_replacement: 0.1,
+      statec_reference: 0.3,
+    });
+  }
+
+  return (
+    <>
+      {/* Bloc contact + workflow */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-5">
+          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+            Contact client
+          </h2>
+          <dl className="space-y-2 text-sm">
+            <div className="flex justify-between gap-3">
+              <dt className="text-[#1A1F2A]/60">Email</dt>
+              <dd className="font-medium text-[#1A1F2A]">
+                {contactEmail ? (
+                  <a className="underline hover:text-[#9E7B2A]" href={`mailto:${contactEmail}`}>
+                    {contactEmail}
+                  </a>
+                ) : (
+                  "—"
+                )}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-[#1A1F2A]/60">Téléphone</dt>
+              <dd className="font-mono text-[#1A1F2A]">
+                {contactPhone ? (
+                  <a className="underline hover:text-[#9E7B2A]" href={`tel:${contactPhone}`}>
+                    {contactPhone}
+                  </a>
+                ) : (
+                  "—"
+                )}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-[#1A1F2A]/60">Consentement RGPD</dt>
+              <dd className={consent ? "text-emerald-700" : "text-red-700"}>
+                {consent ? "✓ obtenu" : "✗ non obtenu"}
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-5">
+          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+            Workflow
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {STATUS_FLOW.map((s) => {
+              const isActive = s === status;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  disabled={saving || isActive}
+                  onClick={() => {
+                    setStatus(s);
+                    patchEstimation({ status: s });
+                  }}
+                  className={`rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors ${
+                    isActive
+                      ? "border-[#9E7B2A] bg-[#9E7B2A] text-white"
+                      : "border-[#3D4F63]/30 bg-white text-[#3D4F63] hover:border-[#9E7B2A] hover:text-[#9E7B2A]"
+                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  {statusLabels[s]}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-4">
+            <label className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+              Notes internes
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onBlur={() => {
+                if (notes !== (initialNotes ?? "")) {
+                  patchEstimation({ notes });
+                }
+              }}
+              rows={3}
+              placeholder="RDV programmé, contact établi, à relancer le…"
+              className="mt-1 w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 text-sm text-[#1A1F2A] focus:border-[#9E7B2A] focus:outline-none"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Cards des 5 méthodes */}
+      <section>
+        <h2 className="mb-4 font-display text-lg font-bold text-[#1A1F2A]">
+          Les 5 méthodes croisées (EVS / TEGoVA)
+        </h2>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {METHOD_ORDER.map((k) => {
+            const m = methods[k];
+            if (!m) return null;
+            return (
+              <article
+                key={k}
+                className={`rounded-lg border p-4 ${
+                  m.applicable
+                    ? "border-[#3D4F63]/20 bg-white"
+                    : "border-[#3D4F63]/10 bg-[#F5EFE1]/40"
+                }`}
+              >
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+                  {methodLabels[k]}
+                </p>
+                <p
+                  className={`mt-2 font-display text-xl font-bold ${
+                    m.applicable ? "text-[#9E7B2A]" : "text-[#1A1F2A]/30"
+                  }`}
+                >
+                  {m.applicable ? fmtPrice(m.price) : "Non applicable"}
+                </p>
+                {!m.applicable && (
+                  <p className="mt-2 text-xs italic text-[#1A1F2A]/60">
+                    {(m.details as { reason?: string })?.reason ?? "—"}
+                  </p>
+                )}
+                {m.applicable && m.details && (
+                  <details className="mt-3">
+                    <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60 hover:text-[#9E7B2A]">
+                      Détails
+                    </summary>
+                    <pre className="mt-2 max-h-48 overflow-auto rounded bg-[#F5EFE1]/40 p-2 text-[10px] text-[#1A1F2A]/80">
+                      {JSON.stringify(m.details, null, 2)}
+                    </pre>
+                  </details>
+                )}
+                {m.warnings.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-[10px] text-amber-700">
+                    {m.warnings.map((w, i) => (
+                      <li key={i}>⚠ {w}</li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Sliders re-pondération */}
+      <section className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
+        <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="font-display text-lg font-bold text-[#1A1F2A]">
+              Ajustement de la pondération
+            </h2>
+            <p className="mt-1 text-xs text-[#1A1F2A]/60">
+              Les poids sont renormalisés sur les méthodes applicables. Recalcul
+              live, ne modifie pas la fourchette client tant que tu n'enregistres
+              pas.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={resetDefaultWeights}
+            className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60 hover:text-[#9E7B2A]"
+          >
+            Reset défaut (35/30/20/10/5%)
+          </button>
+        </header>
+        <div className="grid gap-4 md:grid-cols-2">
+          {METHOD_ORDER.map((k) => {
+            const applicable = methods[k]?.applicable;
+            return (
+              <div key={k}>
+                <div className="flex items-center justify-between text-sm">
+                  <label
+                    className={`font-mono text-[11px] uppercase tracking-widest ${
+                      applicable ? "text-[#3D4F63]" : "text-[#1A1F2A]/30"
+                    }`}
+                  >
+                    {methodLabels[k]}
+                    {!applicable && " (non applicable)"}
+                  </label>
+                  <span className="font-mono text-xs text-[#9E7B2A]">
+                    {(weights[k] * 100).toFixed(0)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={weights[k]}
+                  disabled={!applicable}
+                  onChange={(e) => setSliderValue(k, Number(e.target.value))}
+                  className="mt-1 w-full accent-[#9E7B2A] disabled:opacity-30"
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[#3D4F63]/10 pt-4">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+              Nouvelle fourchette (avec ces poids)
+            </p>
+            <p className="mt-1 font-display text-xl font-bold text-[#9E7B2A]">
+              {fmtPrice(recomputed.mid)}
+            </p>
+            <p className="font-mono text-[10px] text-[#1A1F2A]/60">
+              {fmtPrice(recomputed.low)} – {fmtPrice(recomputed.high)}
+              {" · "}weighted brut {fmtPrice(recomputed.weighted)}
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() =>
+              patchEstimation({
+                weights_used: weights,
+                client_output_override: {
+                  price_low: recomputed.low,
+                  price_mid: recomputed.mid,
+                  price_high: recomputed.high,
+                },
+              })
+            }
+            className="rounded-md bg-[#9E7B2A] px-5 py-2 font-mono text-[11px] uppercase tracking-widest text-white hover:bg-[#9E7B2A]/90 disabled:opacity-50"
+          >
+            {saving ? "Enregistrement…" : "Enregistrer pondération"}
+          </button>
+        </div>
+        {savedMsg && (
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-emerald-700">
+            {savedMsg}
+          </p>
+        )}
+      </section>
+    </>
+  );
+}

@@ -114,17 +114,28 @@ export default async function AdminEstimationsPage() {
                 energy?: string;
               };
               return (
-                <tr key={r.id} className="border-t border-[#3D4F63]/10 hover:bg-[#F5EFE1]/40">
+                <tr
+                  key={r.id}
+                  className="cursor-pointer border-t border-[#3D4F63]/10 transition-colors hover:bg-[#F5EFE1]/40"
+                  onClick={undefined}
+                >
                   <td className="px-4 py-3 font-mono text-[11px] text-[#1A1F2A]/70 whitespace-nowrap">
-                    {fmtDate(r.created_at)}
+                    <Link
+                      href={`/admin/estimations/${r.id}`}
+                      className="hover:text-[#9E7B2A] hover:underline"
+                    >
+                      {fmtDate(r.created_at)}
+                    </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="font-medium text-[#1A1F2A]">
-                      {inputs.type ?? "—"} · {inputs.commune ?? inputs.country ?? "—"}
-                    </div>
-                    <div className="text-xs text-[#1A1F2A]/60">
-                      {inputs.livingSurface ?? "—"} m² · {inputs.state ?? "—"} · CPE {inputs.energy ?? "—"}
-                    </div>
+                    <Link href={`/admin/estimations/${r.id}`} className="block hover:text-[#9E7B2A]">
+                      <div className="font-medium text-[#1A1F2A]">
+                        {inputs.type ?? "—"} · {inputs.commune ?? inputs.country ?? "—"}
+                      </div>
+                      <div className="text-xs text-[#1A1F2A]/60">
+                        {inputs.livingSurface ?? "—"} m² · {inputs.state ?? "—"} · CPE {inputs.energy ?? "—"}
+                      </div>
+                    </Link>
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <div className="font-display text-base font-bold text-[#9E7B2A]">
@@ -195,8 +206,8 @@ export default async function AdminEstimationsPage() {
       </div>
 
       <p className="font-mono text-[10px] uppercase tracking-widest text-[#1A1F2A]/40">
-        Vue détail (5 méthodes croisées + ajustement pondération + génération Avis de Valeur PDF)
-        → Phase 4 V2, à venir.
+        Cliquez sur une ligne pour ouvrir la vue détail (5 méthodes, ajustement pondération, workflow).
+        Génération PDF Avis de Valeur → Phase 5 (session dédiée).
       </p>
     </div>
   );
