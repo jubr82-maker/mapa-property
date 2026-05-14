@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { createHash } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 import { estimateProperty, type EstimateInput, type EstimateResult } from "@/lib/estimate";
 import { fetchLatestInterestRates } from "@/lib/data";
 import {
@@ -8,6 +10,44 @@ import {
   type PropertyState,
   type PropertyType,
 } from "@/lib/estimation/engine";
+
+/** Best-effort persistance dans estimation_requests. Silencieux en cas d'échec. */
+async function persistEstimationRequest(args: {
+  inputs: unknown;
+  client_output: unknown;
+  internal_output: unknown;
+  engine: string;
+  contact_email?: string;
+  contact_phone?: string;
+  session_id?: string;
+  ip_hash?: string;
+  locale?: string;
+}) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return;
+  try {
+    const supabase = createClient(url, key);
+    await supabase.from("estimation_requests").insert({
+      inputs: args.inputs,
+      client_output: args.client_output,
+      internal_output: args.internal_output,
+      engine: args.engine,
+      contact_email: args.contact_email ?? null,
+      contact_phone: args.contact_phone ?? null,
+      session_id: args.session_id ?? null,
+      ip_hash: args.ip_hash ?? null,
+      locale: args.locale ?? null,
+    });
+  } catch (err) {
+    console.error("[api/estimate] persist failed:", err);
+  }
+}
+
+function hashIp(ip: string): string {
+  const salt = process.env.TRACKING_IP_SALT ?? "mapa_default_salt_change_me_2026";
+  return createHash("sha256").update(ip + salt).digest("hex").slice(0, 32);
+}
 
 /**
  * Mapping EstimateInput (legacy, multi-pays) → EstimationInputs (nouveau moteur EVS LU).
@@ -41,6 +81,8 @@ export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as Partial<EstimateInput> & {
     contactEmail?: string;
     contactPhone?: string;
+    sessionId?: string;
+    locale?: string;
   };
 
   if (
@@ -53,6 +95,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    "0.0.0.0";
+  const ipHash = hashIp(ip);
+
   // Tente le moteur EVS pour LU résidentiel.
   const evsInputs = mapToEvsInputs(body as EstimateInput);
   if (evsInputs) {
@@ -61,8 +109,6 @@ export async function POST(req: Request) {
       const pricePerSqm = Math.round(
         evs.internal_output.weighted_price / evsInputs.surfaceLiving,
       );
-      // Adapter au format EstimateResult attendu par le tunnel public.
-      // financing + helps : volontairement null/[] — déplacés sur /services/capacite-emprunt.
       const result: EstimateResult = {
         range: {
           low: evs.client_output.price_low,
@@ -73,8 +119,20 @@ export async function POST(req: Request) {
         financing: null,
         helps: [],
       };
-      // TODO V2 : si SUPABASE_SERVICE_ROLE_KEY dispo, persister evs.internal_output
-      // dans table estimation_requests pour le BO admin (Phase 4).
+
+      // Persistance audit trail (best-effort)
+      void persistEstimationRequest({
+        inputs: body,
+        client_output: evs.client_output,
+        internal_output: evs.internal_output,
+        engine: "evs_5_methods",
+        contact_email: body.contactEmail,
+        contact_phone: body.contactPhone,
+        session_id: body.sessionId,
+        ip_hash: ipHash,
+        locale: body.locale,
+      });
+
       return NextResponse.json({
         result,
         rate: null,
@@ -96,6 +154,18 @@ export async function POST(req: Request) {
     3.6;
 
   const result = estimateProperty(body as EstimateInput, Number(rate));
+
+  void persistEstimationRequest({
+    inputs: body,
+    client_output: result.range,
+    internal_output: { rate_used: rate, helps: result.helps, financing: result.financing },
+    engine: "hedonic_legacy",
+    contact_email: body.contactEmail,
+    contact_phone: body.contactPhone,
+    session_id: body.sessionId,
+    ip_hash: ipHash,
+    locale: body.locale,
+  });
 
   return NextResponse.json({ result, rate, engine: "hedonic_legacy" });
 }

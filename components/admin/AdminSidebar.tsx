@@ -16,6 +16,7 @@ import {
   BarChart3,
   Gauge,
   LayoutTemplate,
+  Calculator,
 } from "lucide-react";
 
 const items = [
@@ -23,6 +24,7 @@ const items = [
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3, match: "prefix" as const },
   { href: "/admin/performance", label: "Performance", icon: Gauge, match: "prefix" as const },
   { href: "/admin/offmarket", label: "Off-Market", icon: Lock, match: "prefix" as const },
+  { href: "/admin/estimations", label: "Estimations EVS", icon: Calculator, match: "prefix" as const },
   { href: "/admin/leads", label: "Leads", icon: Mail, match: "prefix" as const },
   { href: "/admin/mandats-recherche", label: "Mandats", icon: FileText, match: "prefix" as const },
   { href: "/admin/arcova", label: "ARCOVA", icon: Users, match: "prefix" as const },
