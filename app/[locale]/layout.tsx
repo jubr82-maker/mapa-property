@@ -5,6 +5,8 @@ import { Big_Shoulders, Archivo, JetBrains_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { TrackPageView } from "@/components/tracking/TrackPageView";
+import { Suspense } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ChatbotWidgetLoader } from "@/components/chatbot/ChatbotWidgetLoader";
@@ -171,6 +173,9 @@ export default async function LocaleLayout({
           disableTransitionOnChange
         >
           <NextIntlClientProvider locale={locale} messages={messages}>
+            <Suspense fallback={null}>
+              <TrackPageView />
+            </Suspense>
             <Header />
             <div className="flex min-h-dvh flex-col">
               <main className="flex-1">{children}</main>
