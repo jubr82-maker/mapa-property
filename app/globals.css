@@ -14,7 +14,7 @@
   --bg-deep:      #F5F5F5;        /* gris très clair pour élévation */
   --bg-soft:      #FAFAFA;        /* presque blanc pour cards */
   --bg-warm:      #FAF6EE;        /* off-white chaud TRÈS subtil — surfaces "warm" sélectives (DisclaimerLegal, etc.), jamais fond principal */
-  --ink:          #0F0F10;        /* noir vrai (anthracite très foncé) */
+  --ink:          #1A1F2A;        /* texte body — Decision 2 : #1A1F2A (jour) ↔ #FFFFFF (nuit) */
   --ink-mid:      #2C2E33;
   --ink-soft:     #6B6B6B;
   --navy:         #3D4F63;        /* bleu prussien MAPA — conservé pour secondaire */
@@ -26,15 +26,26 @@
   --accent-warm:  #C8A04A;
   --line:         rgba(15, 15, 16, 0.14);
   --line-strong:  rgba(15, 15, 16, 0.26);
+
+  /* ── Tokens sémantiques — langage visuel MAPA (Decision 2) ──
+     Inversion gérée UNIQUEMENT par le binding :root/.dark.
+     Aucune logique "if dark" en composant. */
+  --copper:         #B8865A;                 /* accent copper FIXE — identique jour/nuit */
+  --bg-base:        var(--bg);               /* fond principal              #FFFFFF (jour) */
+  --bg-contrast:    #1A1F2A;                 /* sections premium hero/off-market/mandats */
+  --text-base:      var(--ink);              /* texte body */
+  --text-contrast:  #FFFFFF;                 /* texte sur --bg-contrast */
+  --text-muted:     rgba(26, 31, 42, 0.6);   /* ink/60% */
+  --border-subtle:  rgba(26, 31, 42, 0.08);  /* ink/8% — bordures cards */
 }
 
 .dark {
   /* Dark mode — noir/anthracite vrai (zéro brun) */
-  --bg:           #0A0A0A;        /* noir vrai */
-  --bg-deep:      #000000;        /* noir pur */
-  --bg-soft:      #161616;        /* anthracite (pour élévation cards en dark) */
-  --bg-warm:      #1C1814;        /* anthracite chaud TRÈS subtil — équivalent dark de --bg-warm */
-  --ink:          #FAFAFA;        /* presque blanc */
+  --bg:           #1A1F2A;        /* fond principal nuit — Decision 2 (anthracite bleuté, plus noir pur) */
+  --bg-deep:      #10131A;        /* élévation basse (sous le fond) */
+  --bg-soft:      #232936;        /* anthracite élevé (cards en dark) */
+  --bg-warm:      #20242E;        /* surface chaude TRÈS subtile — équivalent dark de --bg-warm */
+  --ink:          #FFFFFF;        /* texte body nuit — Decision 2 */
   --ink-mid:      #BCBCBC;
   --ink-soft:     #7A7A7A;
   --navy:         #5C7088;
@@ -46,6 +57,15 @@
   --accent-warm:  #E0BE60;
   --line:         rgba(250, 250, 250, 0.14);
   --line-strong:  rgba(250, 250, 250, 0.28);
+
+  /* ── Tokens sémantiques — inversion nuit (Decision 2) ── */
+  --copper:         #B8865A;                  /* INCHANGÉ — accent constant 2 modes */
+  --bg-base:        var(--bg);                /* #1A1F2A (nuit) */
+  --bg-contrast:    #FFFFFF;                  /* inversion : sections premium claires en nuit */
+  --text-base:      var(--ink);
+  --text-contrast:  #1A1F2A;
+  --text-muted:     rgba(255, 255, 255, 0.6); /* white/60% */
+  --border-subtle:  rgba(255, 255, 255, 0.08);/* white/8% */
 }
 
 /* Expose les variables comme tokens Tailwind */
@@ -66,6 +86,14 @@
   --color-accent-warm:  var(--accent-warm);
   --color-line:         var(--line);
   --color-line-strong:  var(--line-strong);
+
+  /* Tokens sémantiques exposés en utilitaires Tailwind v4.
+     --bg-base/--text-base = alias de bg/ink (déjà exposés) — documentés, pas de doublon d'utilitaire. */
+  --color-copper:          var(--copper);
+  --color-bg-contrast:     var(--bg-contrast);
+  --color-text-contrast:   var(--text-contrast);
+  --color-text-muted:      var(--text-muted);
+  --color-border-subtle:   var(--border-subtle);
 
   --font-display: var(--font-display);
   --font-sans:    var(--font-sans);
