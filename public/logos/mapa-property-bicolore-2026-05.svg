@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 160" width="320" height="160" role="img" aria-label="MAPA Property">
+  <title>MAPA Property</title>
+  <desc>Logo MAPA Property bicolore 2026-05 : wordmark en currentColor (ink #1A1F2A en clair / blanc en sombre, via token), filet copper #B8865A FIXE entre MAPA et PROPERTY (largeur = largeur wordmark). Reprend la signature des documents MAPA.</desc>
+
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders:wght@600;700&amp;display=swap');
+      .mapa-main {
+        font-family: 'Big Shoulders', 'Big Shoulders Display', Impact, 'Arial Black', sans-serif;
+        font-weight: 700;
+        font-size: 72px;
+        fill: currentColor;
+        letter-spacing: 4px;
+      }
+      .mapa-sub {
+        font-family: 'Big Shoulders', 'Big Shoulders Display', Impact, 'Arial Black', sans-serif;
+        font-weight: 600;
+        font-size: 22px;
+        fill: currentColor;
+        letter-spacing: 14px;
+      }
+    </style>
+  </defs>
+
+  <!-- Wordmark — currentColor (hérite du token texte : ink / blanc) -->
+  <text x="160" y="80" class="mapa-main" text-anchor="middle">MAPA</text>
+
+  <!-- Filet copper signature — FIXE sur les 2 modes -->
+  <line x1="80" y1="100" x2="240" y2="100" stroke="#B8865A" stroke-width="1.4"/>
+
+  <text x="167" y="128" class="mapa-sub" text-anchor="middle">PROPERTY</text>
+</svg>
