@@ -74,7 +74,7 @@ export function CoverageGrid() {
                   isFlipped ? t("show_less") : t("show_more")
                 }`}
                 front={
-                  <div className="flex size-full flex-col justify-between rounded-xl border border-line bg-bg p-5 md:p-6">
+                  <div className="flex size-full flex-col justify-between rounded-xl border border-border-subtle bg-bg p-5 md:p-6">
                     <span className="font-mono text-[10px] font-light uppercase tracking-[0.3em] text-gold-deep">
                       {t(`${typo.key}_label`)}
                     </span>

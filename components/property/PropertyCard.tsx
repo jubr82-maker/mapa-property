@@ -33,7 +33,7 @@ export function PropertyCard({ property, locale, priority = false }: PropertyCar
   return (
     <Link
       href={`/biens/${target}`}
-      className="group flex h-full flex-col overflow-hidden rounded-xl border border-line bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
+      className="group flex h-full flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
         {cover ? (

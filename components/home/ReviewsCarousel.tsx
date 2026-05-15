@@ -31,7 +31,7 @@ export function ReviewsCarousel({ reviews }: Props) {
                 key={r.id}
                 className="w-[80vw] max-w-md shrink-0 snap-center sm:w-[420px]"
               >
-                <article className="flex h-full flex-col gap-3 rounded-xl border border-line bg-bg p-4 md:gap-5 md:p-6">
+                <article className="flex h-full flex-col gap-3 rounded-xl border border-border-subtle bg-bg p-4 md:gap-5 md:p-6">
                   <Stars rating={r.rating ?? 5} />
                   <blockquote className="text-xs leading-relaxed text-ink-mid md:text-base">
                     “{r.comment ?? ""}”

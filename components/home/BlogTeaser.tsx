@@ -43,7 +43,7 @@ export function BlogTeaser({ posts, locale }: Props) {
               <Link
                 key={post.id}
                 href={`/blog/${post.slug}`}
-                className="group flex flex-col overflow-hidden rounded-xl border border-line bg-bg transition-colors hover:border-gold"
+                className="group flex flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg transition-colors hover:border-gold"
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
                   {post.cover_image ? (

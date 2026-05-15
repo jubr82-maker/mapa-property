@@ -112,7 +112,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border-subtle bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
         {item.cover_url ? (

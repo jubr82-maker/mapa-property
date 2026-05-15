@@ -113,7 +113,7 @@ export function MandatesPremium() {
                 className={`relative flex h-[280px] flex-col gap-3 overflow-hidden rounded-2xl p-5 shadow-sm md:h-[320px] md:p-6 ${
                   isFeatured
                     ? "border-2 border-gold bg-ink text-bg"
-                    : "border border-line bg-bg-soft text-ink hover:border-gold/60"
+                    : "border border-border-subtle bg-bg-soft text-ink hover:border-gold/60"
                 } transition-colors`}
               >
                 <span
