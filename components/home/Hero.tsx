@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { sbUrl } from "@/lib/supabase-url";
 import { siteContent } from "@/lib/site-content";
 import { LiveClock } from "@/components/home/LiveClock";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 
 export async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: "hero" });
@@ -101,6 +102,8 @@ export async function Hero({ locale }: { locale: string }) {
           <span className="block text-stroke text-transparent">{titleLine2}</span>
           <span className="gold-text block">{titleLine3}</span>
         </h1>
+
+        <SignatureLine />
 
         {/* Subtitle */}
         <p className="max-w-xl text-xs leading-relaxed text-white/80 md:text-lg lg:text-xl">

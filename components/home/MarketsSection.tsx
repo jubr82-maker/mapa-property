@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { internationalRegions, luxembourgCommunes } from "@/lib/markets";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 
 export function MarketsSection() {
   const t = useTranslations("markets_home");
@@ -77,6 +78,7 @@ function DesktopMarkets({
         <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
           {t("title")}
         </h2>
+        <SignatureLine />
         <p className="mt-3 text-base text-ink-mid">{t("subtitle")}</p>
       </header>
 

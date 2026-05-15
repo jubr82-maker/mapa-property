@@ -7,6 +7,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useCallback, useEffect, useState } from "react";
 import type { HomeFeatured } from "@/lib/data";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 
 interface Props {
   items: HomeFeatured[];
@@ -52,6 +53,7 @@ export function FeaturedCarousel({ items }: Props) {
             <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
               {t("title")}
             </h2>
+            <SignatureLine />
             <p className="mt-3 max-w-xl text-xs text-ink-mid md:text-base">{t("subtitle")}</p>
           </div>
           <div className="flex items-center gap-3">

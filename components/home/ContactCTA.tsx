@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
 import { siteContent } from "@/lib/site-content";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 
 export async function ContactCTA({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: "contact_cta" });
@@ -27,6 +28,7 @@ export async function ContactCTA({ locale }: { locale: string }) {
             <h2 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight md:text-5xl">
               {title}
             </h2>
+            <SignatureLine />
             <p className="mt-3 max-w-xl text-xs leading-relaxed text-bg/80 md:mt-5 md:text-base">
               {description}
             </p>

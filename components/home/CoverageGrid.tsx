@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { HoverFlipCard } from "@/components/ui/HoverFlipCard";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 
 const typologies = [
   {
@@ -49,6 +50,7 @@ export function CoverageGrid() {
           <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
             {t("title")}
           </h2>
+          <SignatureLine />
           <p className="mt-3 text-xs text-ink-mid md:text-base">{t("subtitle")}</p>
         </header>
 

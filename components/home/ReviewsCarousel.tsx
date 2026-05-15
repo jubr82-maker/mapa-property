@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import type { Review } from "@/lib/types";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 
 interface Props {
   reviews: Review[];
@@ -20,6 +21,7 @@ export function ReviewsCarousel({ reviews }: Props) {
           <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
             {t("title")}
           </h2>
+          <SignatureLine />
         </header>
 
         <div className="-mx-6 overflow-x-auto pb-4 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:-mx-10">

@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { pickLang, type BlogPost, type Locale } from "@/lib/types";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 
 interface Props {
   posts: BlogPost[];
@@ -24,6 +25,7 @@ export function BlogTeaser({ posts, locale }: Props) {
             <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
               {t("title")}
             </h2>
+            <SignatureLine />
           </div>
           <Link
             href="/blog"
