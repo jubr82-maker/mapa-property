@@ -10,9 +10,10 @@
 
 :root {
   /* Light mode — blanc franc (plus de beige) */
-  --bg:           #FFFFFF;        /* blanc pur */
+  --bg:           #FFFFFF;        /* blanc pur — alignement luxe intl (Christie's/Sotheby's/Knight Frank) */
   --bg-deep:      #F5F5F5;        /* gris très clair pour élévation */
   --bg-soft:      #FAFAFA;        /* presque blanc pour cards */
+  --bg-warm:      #FAF6EE;        /* off-white chaud TRÈS subtil — surfaces "warm" sélectives (DisclaimerLegal, etc.), jamais fond principal */
   --ink:          #0F0F10;        /* noir vrai (anthracite très foncé) */
   --ink-mid:      #2C2E33;
   --ink-soft:     #6B6B6B;
@@ -32,6 +33,7 @@
   --bg:           #0A0A0A;        /* noir vrai */
   --bg-deep:      #000000;        /* noir pur */
   --bg-soft:      #161616;        /* anthracite (pour élévation cards en dark) */
+  --bg-warm:      #1C1814;        /* anthracite chaud TRÈS subtil — équivalent dark de --bg-warm */
   --ink:          #FAFAFA;        /* presque blanc */
   --ink-mid:      #BCBCBC;
   --ink-soft:     #7A7A7A;
@@ -51,6 +53,7 @@
   --color-bg:           var(--bg);
   --color-bg-deep:      var(--bg-deep);
   --color-bg-soft:      var(--bg-soft);
+  --color-bg-warm:      var(--bg-warm);
   --color-ink:          var(--ink);
   --color-ink-mid:      var(--ink-mid);
   --color-ink-soft:     var(--ink-soft);
