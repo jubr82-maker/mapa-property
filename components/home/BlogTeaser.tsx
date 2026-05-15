@@ -15,7 +15,7 @@ export function BlogTeaser({ posts, locale }: Props) {
   if (posts.length === 0) return null;
 
   return (
-    <section className="bg-bg-soft px-6 py-6 md:py-20 lg:px-10 lg:py-20">
+    <section className="bg-bg px-6 py-6 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
         <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-12">
           <div>

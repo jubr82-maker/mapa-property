@@ -4,7 +4,7 @@ export function QuoteBand() {
   const t = useTranslations("quote_band");
 
   return (
-    <section className="bg-bg-soft px-6 py-6 md:py-24 lg:px-10 lg:py-32">
+    <section className="bg-bg px-6 py-6 md:py-24 lg:px-10 lg:py-32">
       <div className="mx-auto max-w-3xl text-center">
         <span aria-hidden className="font-display text-5xl text-gold-deep md:text-7xl">
           “
