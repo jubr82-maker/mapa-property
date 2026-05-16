@@ -1,75 +1,79 @@
 import Image from "next/image";
-import { cn } from "@/lib/utils";
 
 /**
- * MAPA Property — Logo officiel
+ * MAPA Property — Logo officiel (intact)
  * ---------------------------------------------------------
- * Composé d'un symbole (flamme stylisée copper) + wordmark
- * "MAPA PROPERTY" rendu en HTML via la font display du site
- * (Big Shoulders). Total chargement : ~4 KB (PNG 64px) + font
- * déjà préchargée. Recolorable via prop `tone` ou data-tone.
+ * Logo original Julien Brebion : symbole flamme copper +
+ * wordmark "MAPA PROPERTY" dans la typo originale.
+ * Pas de reconstruction, pas de typo substituée.
  *
- * Remplace l'ancien logo SVG (325 KB) — gain 99%.
+ * - Light mode : copper + ink (par défaut)
+ * - Dark mode : copper + blanc (auto via prop tone="auto")
+ *
+ * Total : ~7 KB par chargement (96px). Source 325 KB → gain 98%.
  */
 
 type LogoProps = {
-  /** Taille du symbole en px (le wordmark s'adapte) */
-  size?: 24 | 32 | 40 | 48 | 56 | 64;
-  /** Ton du wordmark — symbole TOUJOURS copper */
-  tone?: "ink" | "white" | "auto";
-  /** Affiche seulement le symbole (favicon, signature) */
-  symbolOnly?: boolean;
-  /** Affiche seulement le wordmark (footer texte) */
-  wordmarkOnly?: boolean;
+  /** Hauteur en px. La largeur s'adapte au ratio natif (~1.63:1) */
+  height?: 32 | 40 | 48 | 56 | 64 | 80 | 96;
+  /** "auto" = bascule light/dark via CSS class. "light"/"dark" force */
+  tone?: "auto" | "light" | "dark";
   className?: string;
+  priority?: boolean;
 };
 
 export function Logo({
-  size = 40,
+  height = 48,
   tone = "auto",
-  symbolOnly = false,
-  wordmarkOnly = false,
-  className,
+  className = "",
+  priority = false,
 }: LogoProps) {
-  // Symbole : sourcé en copper 128px, sera affiché à `size` via Next/Image
-  const symbol = !wordmarkOnly && (
-    <Image
-      src="/logos/mapa-symbol-copper-128.png"
-      alt=""
-      width={size}
-      height={Math.round(size * (103 / 128))}
-      priority
-      className="shrink-0"
-    />
-  );
+  // Choix de l'asset selon le mode demandé
+  // Ratio natif du logo: 579×355 → 1.631
+  const ratio = 579 / 355;
+  const width = Math.round(height * ratio);
 
-  // Wordmark : en font-display (Big Shoulders), tracking serré, mode bicolore
-  const wordmark = !symbolOnly && (
-    <span
-      className={cn(
-        "font-display font-semibold leading-none tracking-[0.06em]",
-        // Couleur auto = ink en light / white en dark (CSS vars)
-        tone === "ink" && "text-ink",
-        tone === "white" && "text-white",
-        tone === "auto" && "text-ink dark:text-white",
-      )}
-      style={{
-        fontSize: `${Math.round(size * 0.55)}px`,
-      }}
-    >
-      MAPA <span className="font-normal opacity-75">PROPERTY</span>
-    </span>
-  );
+  // Pour "auto" : on superpose les deux et CSS gère la visibilité via dark:
+  if (tone === "auto") {
+    return (
+      <span
+        className={`inline-block ${className}`}
+        style={{ width, height, position: "relative" }}
+      >
+        <Image
+          src="/logos/mapa-logo-master.png"
+          alt="MAPA Property"
+          width={width}
+          height={height}
+          priority={priority}
+          className="block dark:hidden"
+        />
+        <Image
+          src="/logos/mapa-logo-dark-h96.png"
+          alt="MAPA Property"
+          width={width}
+          height={height}
+          priority={priority}
+          className="hidden dark:block absolute inset-0"
+        />
+      </span>
+    );
+  }
+
+  // Mode forcé
+  const src =
+    tone === "dark"
+      ? "/logos/mapa-logo-dark-h96.png"
+      : "/logos/mapa-logo-master.png";
 
   return (
-    <div
-      className={cn(
-        "inline-flex items-center gap-2.5",
-        className,
-      )}
-    >
-      {symbol}
-      {wordmark}
-    </div>
+    <Image
+      src={src}
+      alt="MAPA Property"
+      width={width}
+      height={height}
+      priority={priority}
+      className={className}
+    />
   );
 }

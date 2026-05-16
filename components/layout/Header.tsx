@@ -65,7 +65,7 @@ export function Header() {
         {/* Slot 1 — Logo gauche mobile / Nav desktop */}
         <div className="flex items-center gap-1">
           {/* Logo mobile (à gauche) */}
-          <Logo size={32} tone="auto" className="lg:hidden" />
+          <Logo height={32} tone="auto" className="lg:hidden" />
           {/* Nav desktop only */}
           <nav className="hidden items-center gap-1 lg:flex">
             {leftDropdowns.map((d) => (
@@ -89,7 +89,7 @@ export function Header() {
 
         {/* Slot 2 — Logo centré desktop (caché mobile) */}
         <div className="hidden lg:flex lg:justify-center">
-          <Logo size={48} tone="auto" />
+          <Logo height={48} tone="auto" priority />
         </div>
 
         {/* Slot 3 — Right zone : Services ▾ / Off-Market / Journal (desktop) + burger (always) */}

@@ -87,7 +87,7 @@ export function Footer() {
           </div>
         </div>
 
-        <Logo size={56} tone="auto" />
+        <Logo height={56} tone="auto" />
 
         <div className="mt-12 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <FooterCol title={t("col_services")}>
