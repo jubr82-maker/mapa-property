@@ -8,7 +8,7 @@ import Image from "next/image";
  * Pas de reconstruction, pas de typo substituée.
  *
  * - Light mode : copper + ink (par défaut)
- * - Dark mode : copper + blanc (auto via prop tone="auto")
+ * - Dark mode : symbole copper + wordmark doré chaud #D4A55A (BUG 9 — plus de blanc)
  *
  * Total : ~7 KB par chargement (96px). Source 325 KB → gain 98%.
  */
@@ -49,7 +49,7 @@ export function Logo({
           className="block dark:hidden"
         />
         <Image
-          src="/logos/mapa-logo-dark-h96.png"
+          src="/logos/mapa-logo-gold-h96.png"
           alt="MAPA Property"
           width={width}
           height={height}
@@ -63,7 +63,7 @@ export function Logo({
   // Mode forcé
   const src =
     tone === "dark"
-      ? "/logos/mapa-logo-dark-h96.png"
+      ? "/logos/mapa-logo-gold-h96.png"
       : "/logos/mapa-logo-master.png";
 
   return (
