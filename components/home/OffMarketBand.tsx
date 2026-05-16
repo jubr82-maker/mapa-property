@@ -6,8 +6,8 @@ export function OffMarketBand() {
 
   return (
     <section className="relative overflow-hidden bg-bg-contrast px-6 py-6 text-text-contrast md:py-20 lg:px-10 lg:py-20">
-      <div className="pointer-events-none absolute -right-32 -top-32 size-96 rounded-full bg-gold/15 blur-3xl" />
-      <div className="pointer-events-none absolute -left-32 -bottom-32 size-96 rounded-full bg-accent-warm/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 -top-32 size-48 rounded-full bg-gold/15 blur-3xl" />
+      <div className="pointer-events-none absolute -left-32 -bottom-32 size-48 rounded-full bg-accent-warm/10 blur-3xl" />
 
       <div className="relative mx-auto grid max-w-[1400px] gap-3 md:gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end">
         <div>

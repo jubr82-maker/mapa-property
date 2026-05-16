@@ -160,10 +160,10 @@ function Bracket({ position }: { position: Position }) {
   }[position];
   return (
     <span
-      className={`absolute ${positionMap[position]} size-10 ${rotate} text-gold-bright`}
+      className={`absolute ${positionMap[position]} size-5 ${rotate} text-gold-bright`}
     >
-      <span className="absolute left-0 top-0 h-px w-10 bg-current" />
-      <span className="absolute left-0 top-0 h-10 w-px bg-current" />
+      <span className="absolute left-0 top-0 h-px w-5 bg-current" />
+      <span className="absolute left-0 top-0 h-5 w-px bg-current" />
     </span>
   );
 }
