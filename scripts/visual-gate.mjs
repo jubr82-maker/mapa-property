@@ -66,18 +66,17 @@ const results = [];
 const browser = await chromium.launch();
 try {
   for (const vp of VIEWPORTS) {
-    const context = await browser.newContext({
-      ...(vp.viewport ? { viewport: vp.viewport } : {}),
-      ...(vp.userAgent ? { userAgent: vp.userAgent } : {}),
-      ...(vp.deviceScaleFactor ? { deviceScaleFactor: vp.deviceScaleFactor } : {}),
-      ...(vp.isMobile ? { isMobile: vp.isMobile, hasTouch: true } : {}),
-    });
+    const deviceOpts = { ...vp };
+    delete deviceOpts.name;
     for (const mode of MODES) {
-      await context.emulateMedia({ colorScheme: mode });
+      // colorScheme = option de contexte Playwright (PAS context.emulateMedia)
+      const context = await browser.newContext({ ...deviceOpts, colorScheme: mode });
       for (const locale of LOCALES) {
         for (const route of ROUTES) {
           const url = `${BASE_URL}/${locale}${route === "/" ? "" : route}`;
           const page = await context.newPage();
+          const pageErrors = [];
+          page.on("pageerror", (e) => pageErrors.push(String(e.message).split("\n")[0]));
           let status = 0;
           let verdict = "OK";
           let detail = "";
@@ -88,13 +87,24 @@ try {
             });
             status = resp ? resp.status() : 0;
             await page.waitForTimeout(2500); // hydratation/paint
-            const errText = await page
-              .locator(
-                "text=/this page could.?n.?t load|Application error|Internal Server Error|404|500/i",
-              )
-              .count();
+            // Détection FIABLE (pas de match "404"/"500" en clair — prix/surfaces
+            // contiennent ces chiffres). On juge sur : status HTTP, overlay
+            // d'erreur Next dev, ou un composant d'erreur (titre/role=alert).
+            // Erreur d'app dans un heading/role=alert : texte ANCRÉ (ne matche
+            // pas les chiffres de prix/surfaces) ; pas de check 'nextjs-portal'
+            // (toujours présent en dev). Crash JS = pageerror non catché.
+            const appErr = await page
+              .locator('h1, h2, [role="alert"]')
+              .filter({
+                hasText:
+                  /application error|this page could.?n.?t load|internal server error|something went wrong|une erreur (s.?est|est) produite/i,
+              })
+              .count()
+              .catch(() => 0);
+            detail = (await page.title().catch(() => "")).slice(0, 60);
             if (status >= 400) { verdict = "CRASH"; detail = `HTTP ${status}`; }
-            else if (errText > 0) { verdict = "CRASH"; detail = "error-boundary"; }
+            else if (pageErrors.length > 0) { verdict = "CRASH"; detail = `JS: ${pageErrors[0]}`.slice(0, 70); }
+            else if (appErr > 0) { verdict = "CRASH"; detail = "error-component"; }
           } catch (e) {
             verdict = "CRASH";
             detail = String(e.message ?? e).split("\n")[0];
@@ -111,8 +121,8 @@ try {
           await page.close();
         }
       }
+      await context.close();
     }
-    await context.close();
   }
 } finally {
   await browser.close();
