@@ -17,7 +17,7 @@ export async function ContactCTA({ locale }: { locale: string }) {
 
   return (
     <section className="px-6 py-6 md:py-16 lg:px-10 lg:py-20">
-      <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-2xl border border-line bg-ink p-5 text-bg md:p-10 lg:p-16">
+      <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-2xl border border-line bg-bg-contrast p-5 text-text-contrast md:p-10 lg:p-16">
         <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-gold/15 blur-3xl" />
 
         <div className="relative grid gap-5 md:gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-center">
@@ -29,7 +29,7 @@ export async function ContactCTA({ locale }: { locale: string }) {
               {title}
             </h2>
             <SignatureLine />
-            <p className="mt-3 max-w-xl text-xs leading-relaxed text-bg/80 md:mt-5 md:text-base">
+            <p className="mt-3 max-w-xl text-xs leading-relaxed text-text-contrast/80 md:mt-5 md:text-base">
               {description}
             </p>
           </div>

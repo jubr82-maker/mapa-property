@@ -5,7 +5,7 @@ export function OffMarketBand() {
   const t = useTranslations("offmarket_band");
 
   return (
-    <section className="relative overflow-hidden bg-ink px-6 py-6 text-bg md:py-20 lg:px-10 lg:py-20">
+    <section className="relative overflow-hidden bg-bg-contrast px-6 py-6 text-text-contrast md:py-20 lg:px-10 lg:py-20">
       <div className="pointer-events-none absolute -right-32 -top-32 size-96 rounded-full bg-gold/15 blur-3xl" />
       <div className="pointer-events-none absolute -left-32 -bottom-32 size-96 rounded-full bg-accent-warm/10 blur-3xl" />
 
@@ -17,13 +17,13 @@ export function OffMarketBand() {
           <h2 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
             {t("title")}
           </h2>
-          <p className="mt-3 max-w-xl text-xs leading-relaxed text-bg/80 md:mt-5 md:text-base">
+          <p className="mt-3 max-w-xl text-xs leading-relaxed text-text-contrast/80 md:mt-5 md:text-base">
             {t("description")}
           </p>
         </div>
 
         <div className="flex flex-col gap-3 md:gap-4 lg:items-end">
-          <ul className="space-y-2 font-mono text-[10px] uppercase tracking-[0.2em] text-bg/70 md:space-y-3 md:text-xs">
+          <ul className="space-y-2 font-mono text-[10px] uppercase tracking-[0.2em] text-text-contrast/70 md:space-y-3 md:text-xs">
             <li className="flex items-center gap-3 lg:justify-end">
               <span className="size-1.5 rounded-full bg-gold-bright" />
               {t("benefit_1")}

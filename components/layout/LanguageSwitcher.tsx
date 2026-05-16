@@ -76,7 +76,7 @@ export function LanguageSwitcher({ variant = "light", onSwitched }: Props) {
       }`;
 
   const menuClass = isDark
-    ? `absolute right-0 top-full z-50 mt-2 min-w-[5rem] overflow-hidden rounded-xl border border-white/15 bg-ink/95 shadow-lg backdrop-blur-md transition-all duration-200 ${
+    ? `absolute right-0 top-full z-50 mt-2 min-w-[5rem] overflow-hidden rounded-xl border border-white/15 bg-bg-contrast/95 shadow-lg backdrop-blur-md transition-all duration-200 ${
         open
           ? "pointer-events-auto translate-y-0 opacity-100"
           : "pointer-events-none -translate-y-1 opacity-0"

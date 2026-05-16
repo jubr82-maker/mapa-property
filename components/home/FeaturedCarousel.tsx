@@ -136,7 +136,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
           className={`absolute right-3 top-3 rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] backdrop-blur ${
             item.kind === "offmarket"
               ? "bg-gold-deep text-bg"
-              : "bg-ink/70 text-bg/90"
+              : "bg-bg-contrast/70 text-text-contrast/90"
           }`}
         >
           {item.kind === "offmarket" ? "Off-Market" : "Apimo"}

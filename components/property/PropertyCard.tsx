@@ -51,7 +51,7 @@ export function PropertyCard({ property, locale, priority = false }: PropertyCar
           </div>
         )}
         {property.badge && (
-          <span className="absolute left-3 top-3 rounded-full bg-ink/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-bg backdrop-blur">
+          <span className="absolute left-3 top-3 rounded-full bg-bg-contrast/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-text-contrast backdrop-blur">
             {property.badge}
           </span>
         )}

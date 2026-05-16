@@ -32,9 +32,9 @@
      Aucune logique "if dark" en composant. */
   --copper:         #B8865A;                 /* accent copper FIXE — identique jour/nuit */
   --bg-base:        var(--bg);               /* fond principal              #FFFFFF (jour) */
-  --bg-contrast:    #1A1F2A;                 /* sections premium hero/off-market/mandats */
+  --bg-contrast:    #1A1F2A;                 /* FIGÉ jour=nuit — surface premium (fix BUG H/I) */
   --text-base:      var(--ink);              /* texte body */
-  --text-contrast:  #FFFFFF;                 /* texte sur --bg-contrast */
+  --text-contrast:  #FFFFFF;                 /* FIGÉ jour=nuit — texte sur surface premium */
   --text-muted:     rgba(26, 31, 42, 0.6);   /* ink/60% */
   --border-subtle:  rgba(26, 31, 42, 0.08);  /* ink/8% — bordures cards */
 }
@@ -61,9 +61,9 @@
   /* ── Tokens sémantiques — inversion nuit (Decision 2) ── */
   --copper:         #B8865A;                  /* INCHANGÉ — accent constant 2 modes */
   --bg-base:        var(--bg);                /* #1A1F2A (nuit) */
-  --bg-contrast:    #FFFFFF;                  /* inversion : sections premium claires en nuit */
+  --bg-contrast:    #1A1F2A;                  /* FIGÉ jour=nuit — surface premium, ne s'inverse JAMAIS (fix BUG H/I 2026-05-16) */
   --text-base:      var(--ink);
-  --text-contrast:  #1A1F2A;
+  --text-contrast:  #FFFFFF;                  /* FIGÉ jour=nuit (fix BUG H/I) */
   --text-muted:     rgba(255, 255, 255, 0.6); /* white/60% */
   --border-subtle:  rgba(255, 255, 255, 0.08);/* white/8% */
 }

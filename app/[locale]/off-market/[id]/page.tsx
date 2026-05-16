@@ -70,8 +70,8 @@ export default async function OffMarketDetailPage({
                 sizes="100vw"
                 className="object-cover blur-[2px]"
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-ink/40 backdrop-blur-sm">
-                <div className="text-center text-bg">
+              <div className="absolute inset-0 flex items-center justify-center bg-bg-contrast/40 backdrop-blur-sm">
+                <div className="text-center text-text-contrast">
                   <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-bright">
                     {t("locked_eyebrow")}
                   </p>
@@ -189,7 +189,7 @@ export default async function OffMarketDetailPage({
                         sizes="(min-width:1024px) 25vw, 50vw"
                         className="object-cover blur-md scale-105"
                       />
-                      <div className="absolute inset-0 flex items-center justify-center bg-ink/30 font-mono text-[10px] uppercase tracking-[0.3em] text-bg/80">
+                      <div className="absolute inset-0 flex items-center justify-center bg-bg-contrast/30 font-mono text-[10px] uppercase tracking-[0.3em] text-text-contrast/80">
                         🔒 NDA
                       </div>
                     </div>

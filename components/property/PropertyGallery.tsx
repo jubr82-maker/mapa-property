@@ -97,7 +97,7 @@ export function PropertyGallery({ items, title }: Props) {
                     className="object-cover"
                   />
                 ) : (
-                  <span className="flex size-full items-center justify-center bg-ink text-bg">
+                  <span className="flex size-full items-center justify-center bg-bg-contrast text-text-contrast">
                     ▶
                   </span>
                 )}
@@ -108,12 +108,12 @@ export function PropertyGallery({ items, title }: Props) {
       </div>
 
       {lightbox && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-ink/95 p-4 backdrop-blur">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-bg-contrast/95 p-4 backdrop-blur">
           <button
             type="button"
             onClick={() => setLightbox(false)}
             aria-label="Fermer"
-            className="absolute right-4 top-4 inline-flex size-12 items-center justify-center rounded-full border border-bg/30 text-bg transition-colors hover:border-gold hover:text-gold"
+            className="absolute right-4 top-4 inline-flex size-12 items-center justify-center rounded-full border border-text-contrast/30 text-text-contrast transition-colors hover:border-gold hover:text-gold"
           >
             <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -126,7 +126,7 @@ export function PropertyGallery({ items, title }: Props) {
                 type="button"
                 onClick={() => setActive((a) => (a - 1 + items.length) % items.length)}
                 aria-label="Précédent"
-                className="absolute left-4 top-1/2 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-bg/30 text-bg transition-colors hover:border-gold hover:text-gold"
+                className="absolute left-4 top-1/2 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-text-contrast/30 text-text-contrast transition-colors hover:border-gold hover:text-gold"
               >
                 ←
               </button>
@@ -134,7 +134,7 @@ export function PropertyGallery({ items, title }: Props) {
                 type="button"
                 onClick={() => setActive((a) => (a + 1) % items.length)}
                 aria-label="Suivant"
-                className="absolute right-4 top-1/2 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-bg/30 text-bg transition-colors hover:border-gold hover:text-gold"
+                className="absolute right-4 top-1/2 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-text-contrast/30 text-text-contrast transition-colors hover:border-gold hover:text-gold"
               >
                 →
               </button>
@@ -161,7 +161,7 @@ export function PropertyGallery({ items, title }: Props) {
             )}
           </div>
 
-          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.3em] text-bg/70">
+          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.3em] text-text-contrast/70">
             {active + 1} / {items.length}
           </span>
         </div>

@@ -112,7 +112,7 @@ export function MandatesPremium() {
                 key={card.id}
                 className={`relative flex h-[280px] flex-col gap-3 overflow-hidden rounded-2xl p-5 shadow-sm md:h-[320px] md:p-6 ${
                   isFeatured
-                    ? "border-2 border-gold bg-ink text-bg"
+                    ? "border-2 border-gold bg-bg-contrast text-text-contrast"
                     : "border border-border-subtle bg-bg-soft text-ink hover:border-gold/60"
                 } transition-colors`}
               >
@@ -125,7 +125,7 @@ export function MandatesPremium() {
                 </span>
 
                 <h3 className={`relative font-display text-2xl font-black leading-tight md:text-3xl ${
-                  isFeatured ? "text-bg" : "text-ink"
+                  isFeatured ? "text-text-contrast" : "text-ink"
                 }`}>
                   {card.title}
                 </h3>
@@ -137,14 +137,14 @@ export function MandatesPremium() {
                     {card.rate}
                   </span>
                   <span className={`font-mono text-[9px] uppercase tracking-[0.2em] md:text-[10px] ${
-                    isFeatured ? "text-bg/70" : "text-ink-soft"
+                    isFeatured ? "text-text-contrast/70" : "text-ink-soft"
                   }`}>
                     {card.rateSuffix}
                   </span>
                 </div>
 
                 <p className={`relative line-clamp-2 text-xs leading-relaxed md:text-sm ${
-                  isFeatured ? "text-bg/85" : "text-ink-mid"
+                  isFeatured ? "text-text-contrast/85" : "text-ink-mid"
                 }`}>
                   {card.shortDesc}
                 </p>
@@ -161,7 +161,7 @@ export function MandatesPremium() {
                   }}
                   className={`relative mt-auto inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors md:text-[11px] ${
                     isFeatured
-                      ? "border-bg/40 text-bg hover:border-bg hover:bg-bg/10"
+                      ? "border-text-contrast/40 text-text-contrast hover:border-text-contrast hover:bg-text-contrast/10"
                       : "border-gold/50 text-gold-deep hover:border-gold hover:bg-gold/5"
                   }`}
                   aria-haspopup="dialog"

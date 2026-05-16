@@ -18,7 +18,7 @@ export default async function OffMarketListPage({
 
   return (
     <>
-      <section className="relative isolate overflow-hidden bg-ink">
+      <section className="relative isolate overflow-hidden bg-bg-contrast">
         {/* Bordure interne or subtile (effet plaque) */}
         <div
           aria-hidden
@@ -165,7 +165,7 @@ function OffMarketTeaser({
         ) : (
           <OffmarketPlaceholder />
         )}
-        <span className="absolute right-3 top-3 rounded-full bg-ink/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-gold-bright backdrop-blur">
+        <span className="absolute right-3 top-3 rounded-full bg-bg-contrast/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-gold-bright backdrop-blur">
           OFF-MARKET
         </span>
       </div>

@@ -57,15 +57,15 @@ export function Footer() {
     <footer className="mt-24 border-t border-line bg-bg-soft text-ink">
       <div className="mx-auto max-w-[1400px] px-6 py-16 lg:px-10">
         {/* CTA mandats — monochrome noir + accents or */}
-        <div className="mb-14 grid gap-6 overflow-hidden rounded-2xl border border-gold/30 bg-ink p-8 text-bg shadow-md md:grid-cols-[1fr_auto] md:items-center md:p-10">
+        <div className="mb-14 grid gap-6 overflow-hidden rounded-2xl border border-gold/30 bg-bg-contrast p-8 text-text-contrast shadow-md md:grid-cols-[1fr_auto] md:items-center md:p-10">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-gold">
               {t("cta_eyebrow")}
             </p>
-            <h3 className="mt-2 font-display text-2xl font-black leading-tight text-bg md:text-4xl">
+            <h3 className="mt-2 font-display text-2xl font-black leading-tight text-text-contrast md:text-4xl">
               {t("cta_title")}
             </h3>
-            <p className="mt-2 max-w-xl text-sm text-bg/80 md:text-base">
+            <p className="mt-2 max-w-xl text-sm text-text-contrast/80 md:text-base">
               {t("cta_subtitle")}
             </p>
           </div>

@@ -98,14 +98,14 @@ export function CoverageGrid() {
                   </div>
                 }
                 back={
-                  <div className="flex size-full flex-col gap-2 rounded-xl border border-gold bg-ink p-5 text-bg md:gap-3 md:p-6">
+                  <div className="flex size-full flex-col gap-2 rounded-xl border border-gold bg-bg-contrast p-5 text-text-contrast md:gap-3 md:p-6">
                     <span className="font-mono text-[10px] font-light uppercase tracking-[0.3em] text-gold-bright">
                       {t(`${typo.key}_label`)}
                     </span>
                     <h3 className="font-display text-xl font-black leading-tight md:text-2xl">
                       {t(`${typo.key}_title`)}
                     </h3>
-                    <ul className="mt-1 space-y-1 text-xs text-bg/85 md:mt-2 md:space-y-1.5 md:text-sm">
+                    <ul className="mt-1 space-y-1 text-xs text-text-contrast/85 md:mt-2 md:space-y-1.5 md:text-sm">
                       {typo.items.map((it) => (
                         <li key={it} className="flex gap-2 leading-snug">
                           <span aria-hidden className="text-gold-bright">

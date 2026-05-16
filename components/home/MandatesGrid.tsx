@@ -51,16 +51,16 @@ export function MandatesGrid() {
                 </div>
               }
               back={
-                <div className="flex size-full flex-col gap-3 rounded-xl border border-gold bg-ink p-6 text-bg">
+                <div className="flex size-full flex-col gap-3 rounded-xl border border-gold bg-bg-contrast p-6 text-text-contrast">
                   <h3 className="font-display text-2xl font-black leading-tight">
                     {t(`${m.key}_title`)}
                   </h3>
-                  <p className="text-sm leading-relaxed text-bg/80">
+                  <p className="text-sm leading-relaxed text-text-contrast/80">
                     {t(`${m.key}_text`)}
                   </p>
                   <Link
                     href={m.href}
-                    className="mt-auto inline-flex items-center gap-2 self-start font-mono text-[11px] uppercase tracking-[0.2em] text-gold-bright hover:text-bg"
+                    className="mt-auto inline-flex items-center gap-2 self-start font-mono text-[11px] uppercase tracking-[0.2em] text-gold-bright hover:text-text-contrast"
                   >
                     {t("learn_more")} →
                   </Link>
