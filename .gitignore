@@ -43,3 +43,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .claude/
+
+# qa visual-gate screenshots (binaires lourds — rapports .md conservés)
+/docs/qa/screenshots-*/
