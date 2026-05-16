@@ -64,8 +64,14 @@ export function Header() {
       <div className="mx-auto grid h-20 max-w-[1400px] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:grid-cols-[1fr_auto_1fr] lg:px-10">
         {/* Slot 1 — Logo gauche mobile / Nav desktop */}
         <div className="flex items-center gap-1">
-          {/* Logo mobile (à gauche) */}
-          <Logo height={32} tone="auto" className="lg:hidden" />
+          {/* Logo mobile (à gauche) — cliquable vers l'accueil */}
+          <Link
+            href="/"
+            aria-label={`MAPA Property — ${t("home")}`}
+            className="inline-flex shrink-0 transition-opacity hover:opacity-80 lg:hidden"
+          >
+            <Logo height={32} tone="auto" />
+          </Link>
           {/* Nav desktop only */}
           <nav className="hidden items-center gap-1 lg:flex">
             {leftDropdowns.map((d) => (
@@ -89,7 +95,13 @@ export function Header() {
 
         {/* Slot 2 — Logo centré desktop (caché mobile) */}
         <div className="hidden lg:flex lg:justify-center">
-          <Logo height={48} tone="auto" priority />
+          <Link
+            href="/"
+            aria-label={`MAPA Property — ${t("home")}`}
+            className="inline-flex shrink-0 transition-opacity hover:opacity-80"
+          >
+            <Logo height={48} tone="auto" priority />
+          </Link>
         </div>
 
         {/* Slot 3 — Right zone : Services ▾ / Off-Market / Journal (desktop) + burger (always) */}
