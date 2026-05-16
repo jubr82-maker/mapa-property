@@ -39,7 +39,11 @@
   --border-subtle:  rgba(26, 31, 42, 0.08);  /* ink/8% — bordures cards */
 }
 
-.dark {
+/* `:root.dark` (spécificité 0,2,0) et NON `.dark` (0,1,0) : sinon le
+   <style>:root{…}</style> injecté par les design tokens CMS
+   (app/[locale]/layout.tsx) — même spécificité, source plus tardive —
+   écrase les overrides dark et le mode nuit n'inverse jamais. */
+:root.dark {
   /* Dark mode — noir/anthracite vrai (zéro brun) */
   --bg:           #1A1F2A;        /* fond principal nuit — Decision 2 (anthracite bleuté, plus noir pur) */
   --bg-deep:      #10131A;        /* élévation basse (sous le fond) */
