@@ -70,7 +70,7 @@ export function Header() {
             aria-label={`MAPA Property — ${t("home")}`}
             className="inline-flex shrink-0 transition-opacity hover:opacity-80 lg:hidden"
           >
-            <Logo height={32} tone="auto" />
+            <Logo height={64} tone="auto" />
           </Link>
           {/* Nav desktop only */}
           <nav className="hidden items-center gap-1 lg:flex">
@@ -100,7 +100,7 @@ export function Header() {
             aria-label={`MAPA Property — ${t("home")}`}
             className="inline-flex shrink-0 transition-opacity hover:opacity-80"
           >
-            <Logo height={48} tone="auto" priority />
+            <Logo height={96} tone="auto" priority />
           </Link>
         </div>
 

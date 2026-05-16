@@ -182,7 +182,8 @@
     "simple_title": "Simple",
     "simple_text": "Pour les biens recherchés où plusieurs canaux peuvent être actifs en parallèle. 5% HT + 17% TVA, durée 2 mois reconductibles.",
     "autonomous_title": "Autonome",
-    "autonomous_text": "Pour les vendeurs qui souhaitent gérer eux-mêmes les visites. 1% HT + 17% TVA, durée 2 mois reconductibles — backup juridique et notarial."
+    "autonomous_text": "Pour les vendeurs qui souhaitent gérer eux-mêmes les visites. 1% HT + 17% TVA, durée 2 mois reconductibles — backup juridique et notarial.",
+    "featured_badge": "Phare"
   },
   "mandates_premium": {
     "eyebrow": "Nos mandats phares",

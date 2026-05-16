@@ -3,64 +3,97 @@ import { Link } from "@/i18n/navigation";
 import { HoverFlipCard } from "@/components/ui/HoverFlipCard";
 
 const mandates = [
-  { key: "exclusive", href: "/mandats/exclusif", rate: "3%" },
-  { key: "semi", href: "/mandats/semi-exclusif", rate: "4%" },
-  { key: "simple", href: "/mandats/simple", rate: "5%" },
-  { key: "autonomous", href: "/mandats/autonome", rate: "1%" },
+  { key: "exclusive", href: "/mandats/exclusif", rate: "3%", featured: true },
+  { key: "semi", href: "/mandats/semi-exclusif", rate: "4%", featured: false },
+  { key: "simple", href: "/mandats/simple", rate: "5%", featured: false },
+  { key: "autonomous", href: "/mandats/autonome", rate: "1%", featured: false },
 ] as const;
 
 export function MandatesGrid() {
   const t = useTranslations("mandates_home");
 
   return (
-    <section className="bg-bg px-6 py-6 md:py-20 lg:px-10 lg:py-28">
+    <section className="bg-bg px-6 py-6 md:py-16 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-6 max-w-2xl md:mb-12">
+        <header className="mb-5 max-w-2xl md:mb-8">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
             {t("eyebrow")}
           </p>
-          <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
+          <h2 className="mt-2 font-display text-xl font-black leading-tight tracking-tight text-ink md:text-3xl">
             {t("title")}
           </h2>
-          <p className="mt-3 text-xs text-ink-mid md:text-base">{t("subtitle")}</p>
+          <p className="mt-2 text-xs text-ink-mid md:text-sm">{t("subtitle")}</p>
         </header>
 
-        <div className="grid gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-4">
+        <div className="grid gap-2 sm:grid-cols-2 md:gap-3 lg:grid-cols-4">
           {mandates.map((m) => (
             <HoverFlipCard
               key={m.key}
-              height="h-80"
+              height="h-44 md:h-48"
               front={
-                <div className="flex size-full flex-col justify-between rounded-xl border border-line bg-bg p-6">
+                <div
+                  className={`relative flex size-full flex-col justify-between rounded-lg p-3 md:p-4 ${
+                    m.featured
+                      ? "border-2 border-gold bg-bg-contrast text-text-contrast"
+                      : "border border-border-subtle bg-bg"
+                  }`}
+                >
+                  {m.featured && (
+                    <span className="absolute -top-2 left-3 rounded-full bg-gold px-2 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.2em] text-bg">
+                      {t("featured_badge")}
+                    </span>
+                  )}
                   <div>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
+                    <span
+                      className={`font-mono text-[9px] uppercase tracking-[0.25em] ${
+                        m.featured ? "text-gold-bright" : "text-gold-deep"
+                      }`}
+                    >
                       {t("type_label")}
                     </span>
-                    <h3 className="mt-2 font-display text-3xl font-black leading-tight text-ink">
+                    <h3
+                      className={`mt-1 font-display text-lg font-black leading-tight md:text-xl ${
+                        m.featured ? "text-text-contrast" : "text-ink"
+                      }`}
+                    >
                       {t(`${m.key}_title`)}
                     </h3>
                   </div>
                   <div>
-                    <span className="block font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
+                    <span
+                      className={`block font-mono text-[8px] uppercase tracking-[0.25em] ${
+                        m.featured ? "text-text-contrast/60" : "text-ink-soft"
+                      }`}
+                    >
                       {t("rate_label")}
                     </span>
-                    <span className="mt-1 block gold-text font-display text-3xl font-black">
+                    <span
+                      className={`mt-0.5 block font-display text-2xl font-black md:text-3xl ${
+                        m.featured ? "text-gold-bright" : "gold-text"
+                      }`}
+                    >
                       {m.rate}
                     </span>
                   </div>
                 </div>
               }
               back={
-                <div className="flex size-full flex-col gap-3 rounded-xl border border-gold bg-bg-contrast p-6 text-text-contrast">
-                  <h3 className="font-display text-2xl font-black leading-tight">
+                <div
+                  className={`flex size-full flex-col gap-1.5 rounded-lg p-3 md:p-4 ${
+                    m.featured
+                      ? "border-2 border-gold bg-bg-contrast text-text-contrast"
+                      : "border border-gold bg-bg-contrast text-text-contrast"
+                  }`}
+                >
+                  <h3 className="font-display text-base font-black leading-tight md:text-lg">
                     {t(`${m.key}_title`)}
                   </h3>
-                  <p className="text-sm leading-relaxed text-text-contrast/80">
+                  <p className="text-[11px] leading-snug text-text-contrast/80 md:text-xs">
                     {t(`${m.key}_text`)}
                   </p>
                   <Link
                     href={m.href}
-                    className="mt-auto inline-flex items-center gap-2 self-start font-mono text-[11px] uppercase tracking-[0.2em] text-gold-bright hover:text-text-contrast"
+                    className="mt-auto inline-flex items-center gap-1 self-start font-mono text-[9px] uppercase tracking-[0.2em] text-gold-bright hover:text-text-contrast md:text-[10px]"
                   >
                     {t("learn_more")} →
                   </Link>
