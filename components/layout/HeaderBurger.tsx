@@ -150,6 +150,11 @@ export function HeaderBurger() {
           </div>
         </div>
 
+        {/* BUG 4 : langues en haut, sous la barre titre, avant la nav */}
+        <div className="border-b border-white/10 px-6 py-4 lg:px-10">
+          <LanguageSwitcher variant="dark" onSwitched={close} />
+        </div>
+
         <nav className="flex-1 px-6 py-8 lg:px-10">
           <ul className="mx-auto max-w-2xl space-y-1">
             {groups.map((group) => {
@@ -159,7 +164,7 @@ export function HeaderBurger() {
                     <Link
                       href={group.href}
                       onClick={close}
-                      className="block py-4 text-center font-display text-3xl font-bold uppercase tracking-wide text-white transition-colors hover:text-[#C8A04A] sm:text-4xl"
+                      className="block py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-white transition-colors hover:text-[#C8A04A] sm:text-2xl"
                     >
                       {t(group.label)}
                     </Link>
@@ -173,7 +178,7 @@ export function HeaderBurger() {
                     type="button"
                     onClick={() => setExpanded(isExpanded ? null : group.id)}
                     aria-expanded={isExpanded}
-                    className="flex w-full items-center justify-center gap-3 py-4 font-display text-3xl font-bold uppercase tracking-wide text-white transition-colors hover:text-[#C8A04A] sm:text-4xl"
+                    className="flex w-full items-center justify-between gap-3 py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-white transition-colors hover:text-[#C8A04A] sm:text-2xl"
                   >
                     {t(group.label)}
                     <svg
@@ -189,7 +194,7 @@ export function HeaderBurger() {
                     </svg>
                   </button>
                   {isExpanded && group.items && (
-                    <ul className="pb-4 text-center">
+                    <ul className="pb-4 pl-1 text-left">
                       {group.items.map((item) => (
                         <li key={item.href}>
                           <Link
@@ -208,10 +213,8 @@ export function HeaderBurger() {
             })}
           </ul>
 
-          <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-6">
-            <ContactReveal variant="compact" align="center" theme="dark" />
-
-            <LanguageSwitcher variant="dark" onSwitched={close} />
+          <div className="mx-auto mt-10 flex max-w-2xl flex-col items-start gap-6">
+            <ContactReveal variant="compact" align="left" theme="dark" />
           </div>
         </nav>
       </div>,
