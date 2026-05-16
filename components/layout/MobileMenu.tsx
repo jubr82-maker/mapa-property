@@ -111,6 +111,12 @@ export function MobileMenu() {
             </button>
           </div>
 
+          {/* Accès rapide langue + thème — haut du drawer (BUG F) */}
+          <div className="flex items-center justify-between gap-4 border-b border-line px-6 py-4">
+            <LangSwitcher />
+            <ThemeToggle />
+          </div>
+
           <nav className="flex-1 overflow-y-auto px-6 py-8">
             <ul className="space-y-8">
               {navGroups.map((group) => (
@@ -151,11 +157,6 @@ export function MobileMenu() {
               </li>
             </ul>
           </nav>
-
-          <div className="flex items-center justify-between gap-4 border-t border-line bg-bg-soft px-6 py-5">
-            <LangSwitcher />
-            <ThemeToggle />
-          </div>
         </aside>
       </div>
     </>
