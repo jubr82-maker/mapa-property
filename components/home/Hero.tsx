@@ -37,7 +37,7 @@ export async function Hero({ locale }: { locale: string }) {
   const videoMobile = sbUrl("Videos", "mapa_showcase_mobile.mp4");
 
   return (
-    <section className="relative isolate min-h-[80vh] overflow-hidden bg-[#070605] lg:min-h-screen">
+    <section className="relative isolate min-h-[66vh] overflow-hidden bg-[#070605] lg:min-h-screen">
       {/* Video background — bucket Supabase "Videos" (majuscule).
           CSP media-src 'self' https://*.supabase.co indispensable
           (cf. next.config.ts). Pas de poster externe : le bg #070605
@@ -82,7 +82,7 @@ export async function Hero({ locale }: { locale: string }) {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 mx-auto flex min-h-[88dvh] max-w-[1400px] flex-col items-start justify-center gap-4 px-6 pt-24 pb-16 md:gap-8 md:pt-32 md:pb-24 lg:px-10">
+      <div className="relative z-10 mx-auto flex min-h-[62vh] max-w-[1400px] flex-col items-start justify-center gap-4 px-6 pt-24 pb-16 md:gap-8 md:pt-32 md:pb-24 lg:min-h-[88dvh] lg:px-10">
         {/* Pill or */}
         <div className="inline-flex items-center gap-2 rounded-full border border-gold/60 bg-black/30 px-3 py-1 backdrop-blur-sm">
           <span className="size-1.5 rounded-full bg-gold-bright" />
