@@ -61,17 +61,12 @@ export function Header() {
           : "border-b border-transparent bg-bg/85 backdrop-blur-sm"
       }`}
     >
-      <div className="mx-auto grid h-20 max-w-[1400px] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:grid-cols-[1fr_auto_1fr] lg:px-10">
-        {/* Slot 1 — Logo gauche mobile / Nav desktop */}
-        <div className="flex items-center gap-1">
-          {/* Logo mobile (à gauche) — cliquable vers l'accueil */}
-          <Link
-            href="/"
-            aria-label={`MAPA Property — ${t("home")}`}
-            className="inline-flex shrink-0 transition-opacity hover:opacity-80 lg:hidden"
-          >
-            <Logo height={64} tone="auto" />
-          </Link>
+      <div className="mx-auto grid h-20 max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:px-10">
+        {/* Slot GAUCHE — burger (mobile) / nav (desktop) */}
+        <div className="flex items-center justify-start gap-1">
+          <div className="lg:hidden">
+            <HeaderBurger />
+          </div>
           {/* Nav desktop only */}
           <nav className="hidden items-center gap-1 lg:flex">
             {leftDropdowns.map((d) => (
@@ -93,18 +88,23 @@ export function Header() {
           </nav>
         </div>
 
-        {/* Slot 2 — Logo centré desktop (caché mobile) */}
-        <div className="hidden lg:flex lg:justify-center">
+        {/* Slot CENTRE — logo centré sur TOUS supports (BUG 10) */}
+        <div className="flex justify-center">
           <Link
             href="/"
             aria-label={`MAPA Property — ${t("home")}`}
             className="inline-flex shrink-0 transition-opacity hover:opacity-80"
           >
-            <Logo height={96} tone="auto" priority />
+            <span className="lg:hidden">
+              <Logo height={56} tone="auto" priority />
+            </span>
+            <span className="hidden lg:inline-block">
+              <Logo height={96} tone="auto" priority />
+            </span>
           </Link>
         </div>
 
-        {/* Slot 3 — Right zone : Services ▾ / Off-Market / Journal (desktop) + burger (always) */}
+        {/* Slot DROITE — nav desktop ; vide sur mobile */}
         <div className="flex items-center justify-end gap-1">
           <div className="hidden items-center gap-1 lg:flex">
             {rightDropdowns.map((d) => (
@@ -126,9 +126,6 @@ export function Header() {
               <LanguageSwitcher variant="light" />
               <ThemeToggle />
             </div>
-          </div>
-          <div className="ml-2 lg:hidden">
-            <HeaderBurger />
           </div>
         </div>
       </div>
