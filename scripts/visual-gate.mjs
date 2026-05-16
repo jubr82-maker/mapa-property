@@ -32,6 +32,7 @@ const VP_FILTER = arg("--vp="); // undefined => tous
 
 const SLUG_BIEN = process.env.SLUG_BIEN ?? "";
 const SLUG_BLOG = process.env.SLUG_BLOG ?? "";
+const SLUG_VILLE = process.env.SLUG_VILLE ?? "luxembourg-ville"; // slug réel (lib/cities.ts) — PHASE C
 
 const ALL_ROUTES = [
   "/", "/biens", SLUG_BIEN && `/biens/${SLUG_BIEN}`,
@@ -39,8 +40,8 @@ const ALL_ROUTES = [
   "/mandats/recherche", "/services/estimer", "/services/louer",
   "/services/vendre", "/services/rendement-locatif",
   "/services/marches-actifs", "/services/simulateurs",
-  "/villes/luxembourg", "/blog", SLUG_BLOG && `/blog/${SLUG_BLOG}`,
-  "/journal", SLUG_BLOG && `/journal/${SLUG_BLOG}`,
+  `/villes/${SLUG_VILLE}`, "/blog", SLUG_BLOG && `/blog/${SLUG_BLOG}`,
+  "/journal", // PHASE C : pas de /journal/[slug] — route inexistante by design (articles sous /blog/[slug])
   "/contact", "/qui-sommes-nous", "/mentions-acquisition",
   "/legal/mentions-legales",
 ].filter(Boolean);
@@ -53,7 +54,16 @@ const SMOKE_ROUTES = [
 const ROUTES = SMOKE ? SMOKE_ROUTES : ALL_ROUTES;
 
 let VIEWPORTS = [
-  { name: "iphone14pro", ...devices["iPhone 14 Pro"] },
+  {
+    // Viewport référence Julien — iPhone 17 Pro Max (pas de preset Playwright)
+    name: "iphone17promax",
+    viewport: { width: 440, height: 956 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    userAgent:
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+  },
   { name: "desktop1440", viewport: { width: 1440, height: 900 } },
 ];
 if (VP_FILTER) VIEWPORTS = VIEWPORTS.filter((v) => v.name === VP_FILTER);
@@ -71,6 +81,13 @@ try {
     for (const mode of MODES) {
       // colorScheme = option de contexte Playwright (PAS context.emulateMedia)
       const context = await browser.newContext({ ...deviceOpts, colorScheme: mode });
+      // CRITIQUE : l'app utilise next-themes en stratégie CLASS (.dark) avec
+      // defaultTheme=light. colorScheme media seul NE déclenche PAS .dark.
+      // On écrit localStorage 'theme' (lu par next-themes au mount) => screenshots
+      // réellement en dark. (Sans ça : light==dark, faux "zéro différence".)
+      await context.addInitScript((m) => {
+        try { localStorage.setItem("theme", m); } catch {}
+      }, mode);
       for (const locale of LOCALES) {
         for (const route of ROUTES) {
           const url = `${BASE_URL}/${locale}${route === "/" ? "" : route}`;
