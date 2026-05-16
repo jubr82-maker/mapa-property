@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Logo } from "@/components/Logo";
+import { Logo } from "@/components/brand/Logo";
 import { HeaderBurger } from "@/components/layout/HeaderBurger";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -65,10 +65,7 @@ export function Header() {
         {/* Slot 1 — Logo gauche mobile / Nav desktop */}
         <div className="flex items-center gap-1">
           {/* Logo mobile (à gauche) */}
-          <Logo
-            size="md"
-            className="!h-12 !w-auto lg:hidden"
-          />
+          <Logo size={32} tone="auto" className="lg:hidden" />
           {/* Nav desktop only */}
           <nav className="hidden items-center gap-1 lg:flex">
             {leftDropdowns.map((d) => (
@@ -92,10 +89,7 @@ export function Header() {
 
         {/* Slot 2 — Logo centré desktop (caché mobile) */}
         <div className="hidden lg:flex lg:justify-center">
-          <Logo
-            size="md"
-            className="!h-[70px] !w-auto"
-          />
+          <Logo size={48} tone="auto" />
         </div>
 
         {/* Slot 3 — Right zone : Services ▾ / Off-Market / Journal (desktop) + burger (always) */}

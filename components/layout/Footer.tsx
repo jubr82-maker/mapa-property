@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Logo } from "@/components/Logo";
+import { Logo } from "@/components/brand/Logo";
 import { ContactReveal } from "@/components/contact-reveal";
 
 const colServices = [
@@ -87,7 +87,7 @@ export function Footer() {
           </div>
         </div>
 
-        <Logo size="lg" className="!h-20 !w-auto" />
+        <Logo size={56} tone="auto" />
 
         <div className="mt-12 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <FooterCol title={t("col_services")}>
