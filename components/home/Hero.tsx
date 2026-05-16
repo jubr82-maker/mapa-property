@@ -99,7 +99,7 @@ export async function Hero({ locale }: { locale: string }) {
         {/* Titre 3 lignes — taille -15%, leading 1.15 (accents OK), tracking aéré */}
         <h1 className="font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]">
           <span className="block text-white/90">{titleLine1}</span>
-          <span className="block text-stroke text-transparent">{titleLine2}</span>
+          <span className="block text-white">{titleLine2}</span>
           <span className="gold-text block">{titleLine3}</span>
         </h1>
 
@@ -138,12 +138,6 @@ export async function Hero({ locale }: { locale: string }) {
           ↓
         </span>
       </a>
-
-      <style>{`
-        .text-stroke {
-          -webkit-text-stroke: 1.5px rgba(255,255,255,0.85);
-        }
-      `}</style>
     </section>
   );
 }
