@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 type SubItem = { href: string; key: string };
 type Group = {
@@ -131,16 +132,22 @@ export function HeaderBurger() {
           <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/60">
             MAPA Property
           </span>
-          <button
-            type="button"
-            aria-label={t("close_menu")}
-            onClick={close}
-            className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:border-[#C8A04A] hover:text-[#C8A04A]"
-          >
-            <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* BUG 1 : toggle jour/nuit fonctionnel dans le VRAI menu mobile
+                (HeaderBurger ; MobileMenu était mort). Styles forcés (!)
+                pour le drawer sombre. */}
+            <ThemeToggle className="!size-10 !border-white/30 !text-white hover:!border-[#C8A04A] hover:!text-[#C8A04A]" />
+            <button
+              type="button"
+              aria-label={t("close_menu")}
+              onClick={close}
+              className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:border-[#C8A04A] hover:text-[#C8A04A]"
+            >
+              <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <nav className="flex-1 px-6 py-8 lg:px-10">
