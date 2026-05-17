@@ -89,6 +89,7 @@ export function OffmarketForm({
 
   return (
     <form action={submit} className="space-y-8">
+      <input type="hidden" name="property_type" value={propertyType} />
       <nav className="flex flex-wrap gap-2 border-b border-[#3D4F63]/15 pb-3">
         {TABS.map((t) => (
           <button
@@ -197,7 +198,7 @@ export function OffmarketForm({
           <Section title="Type">
             <Field label="Type principal">
               <select
-                name="property_type"
+                name="property_type_select"
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value as PropertyType)}
                 className={inputCls}
