@@ -245,8 +245,6 @@ function buildOffmarketUpdatePayload(
   // prendre la valeur recalculée de naive, jamais existing (sinon figées/stale).
   const ALWAYS_FROM_NAIVE = new Set([
     "surface_terrain_ares",
-    "price_label",
-    "price_display",
     "is_published",
     "type",
   ]);

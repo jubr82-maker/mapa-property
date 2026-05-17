@@ -53,6 +53,11 @@ export interface PropertyOffmarket {
   bathrooms: number | null;
   energy_class: string | null;
   price_display: string | null;
+  price_mode: string | null;
+  price_estimate: number | null;
+  price_min: number | null;
+  price_max: number | null;
+  price_custom_text: string | null;
   short_pitch: string | null;
   description: string | null;
   highlights: string[] | null;

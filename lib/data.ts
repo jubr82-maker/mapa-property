@@ -341,8 +341,10 @@ export async function fetchOffmarketById(
 ): Promise<PropertyOffmarket | null> {
   const sb = supabaseServer();
   const { data, error } = await sb
-    .from("properties_offmarket_public")
+    .from("properties_offmarket")
     .select("*")
+    .eq("is_published", true)
+    .eq("status", "published")
     .eq("id", id)
     .maybeSingle();
   if (error || !data) {
@@ -403,6 +405,11 @@ function mapPublicRows(rows: unknown[] | null): PropertyOffmarket[] {
       gallery_urls: (r.gallery_urls as string[] | null) ?? null,
       is_published: true,
       display_order: (r.display_order as number | null) ?? null,
+      price_mode: (r.price_mode as string | null) ?? null,
+      price_estimate: (r.price_estimate as number | null) ?? null,
+      price_min: (r.price_min as number | null) ?? null,
+      price_max: (r.price_max as number | null) ?? null,
+      price_custom_text: (r.price_custom_text as string | null) ?? null,
     };
   });
 }
