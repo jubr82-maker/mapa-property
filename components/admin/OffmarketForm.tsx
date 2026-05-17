@@ -24,13 +24,13 @@ import {
   deleteOffmarket,
 } from "@/app/admin/offmarket/actions";
 
-type Tab = "identity" | "location" | "specs" | "content";
+type Tab = "location" | "specs" | "content" | "identity";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "identity", label: "Identification & Statut" },
-  { id: "location", label: "Localisation" },
-  { id: "specs", label: "Caractéristiques" },
-  { id: "content", label: "Contenu & Visuel" },
+  { id: "location", label: "1 · Localisation" },
+  { id: "specs", label: "2 · Caractéristiques" },
+  { id: "content", label: "3 · Contenu & Visuel" },
+  { id: "identity", label: "4 · Identification & Publication" },
 ];
 
 export function OffmarketForm({
@@ -40,7 +40,9 @@ export function OffmarketForm({
   row: OffmarketRow | null;
   mode: "create" | "edit";
 }) {
-  const [tab, setTab] = useState<Tab>("identity");
+  const [tab, setTab] = useState<Tab>(mode === "create" ? "location" : "identity");
+  // En création : on commence par Localisation (workflow 1→4).
+  // En édition : on ouvre sur Identification pour basculer brouillon ↔ publié rapidement.
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [propertyType, setPropertyType] = useState<PropertyType>(
@@ -108,20 +110,32 @@ export function OffmarketForm({
       </nav>
 
       {tab === "identity" && (
-        <Section title="Identification & Statut">
-          <Field label="Référence" hint="Auto-générée. Modifiable.">
+        <Section title="Identification & Publication">
+          <div className="md:col-span-2">
+            <PublishGuard row={row} mode={mode} />
+          </div>
+          <Field label="Référence" hint="Auto-générée à la création. Modifiable.">
             <input
               name="reference"
               defaultValue={ref}
               required
-              className={inputCls}
+              readOnly={mode === "edit"}
+              className={inputCls + (mode === "edit" ? " bg-[#F5EFE1] cursor-not-allowed" : "")}
             />
           </Field>
-          <Field label="Statut">
+          <Field
+            label="Statut"
+            hint={
+              mode === "create"
+                ? "Une fiche neuve reste en brouillon — vous pourrez publier après avoir rempli tous les onglets."
+                : "Passez en « Publié » uniquement quand titre, type, localisation et prix sont renseignés."
+            }
+          >
             <select
               name="status"
-              defaultValue={row?.status ?? "draft"}
-              className={inputCls}
+              defaultValue={mode === "create" ? "draft" : (row?.status ?? "draft")}
+              disabled={mode === "create"}
+              className={inputCls + (mode === "create" ? " bg-[#F5EFE1] cursor-not-allowed" : "")}
             >
               {OFFMARKET_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -1121,6 +1135,70 @@ function isNextInternalError(e: unknown): boolean {
   const digest = (e as { digest?: unknown }).digest;
   if (typeof digest !== "string") return false;
   return digest.startsWith("NEXT_REDIRECT") || digest === "NEXT_NOT_FOUND";
+}
+
+function PublishGuard({
+  row,
+  mode,
+}: {
+  row: OffmarketRow | null;
+  mode: "create" | "edit";
+}) {
+  if (mode === "create") {
+    return (
+      <div className="rounded-xl border border-[#B8865A]/30 bg-[#B8865A]/5 px-4 py-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#B8865A]">
+          Étape 4 sur 4 — Publication
+        </p>
+        <p className="mt-2 text-sm text-[#3D4F63]">
+          Cette fiche sera créée en <strong>brouillon</strong>. Cliquez sur
+          « Créer le bien », puis re-ouvrez-la pour la passer en
+          « Publié » une fois les onglets 1, 2 et 3 remplis.
+        </p>
+      </div>
+    );
+  }
+
+  const missing: string[] = [];
+  if (!row?.title) missing.push("Titre");
+  if (!row?.property_type) missing.push("Type de bien");
+  if (!row?.country) missing.push("Pays");
+  const hasPriceInfo =
+    row?.price_estimate ||
+    row?.price_min ||
+    row?.price_custom_text ||
+    row?.price_mode === "on_request";
+  if (!hasPriceInfo) missing.push("Prix (ou mode « Sur demande »)");
+
+  if (missing.length === 0) {
+    return (
+      <div className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-700">
+          Prêt pour publication
+        </p>
+        <p className="mt-2 text-sm text-emerald-900">
+          Tous les champs critiques sont renseignés. Vous pouvez passer
+          le statut en « Publié » et enregistrer.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-700">
+        Publication bloquée — champs manquants
+      </p>
+      <ul className="mt-2 list-disc pl-5 text-sm text-amber-900">
+        {missing.map((m) => (
+          <li key={m}>{m}</li>
+        ))}
+      </ul>
+      <p className="mt-2 text-sm text-amber-900">
+        Complétez les onglets 1 à 3 avant de passer cette fiche en « Publié ».
+      </p>
+    </div>
+  );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
