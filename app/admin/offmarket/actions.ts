@@ -213,6 +213,47 @@ function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, s
   };
 }
 
+// ─── Update payload (non destructif) ─────────────────────────────────────────
+// Construit un payload UPDATE qui ne contient QUE les champs réellement
+// présents dans formData. Les onglets démontés ne wipent plus les colonnes
+// hors-onglet. La reference est conservée depuis existing, jamais régénérée.
+function buildOffmarketUpdatePayload(
+  formData: FormData,
+  existing: Record<string, unknown>,
+  propertyType: PropertyType,
+  status: OffmarketStatus,
+): Record<string, unknown> {
+  // Génère le payload "naïf" (avec fallbacks destructifs)
+  const naive: Record<string, unknown> = buildOffmarketPayload(formData, propertyType, status, String(existing.reference ?? ""));
+
+  // Liste des champs qu'on doit comparer entre formData et existing.
+  // Pour chaque champ : si la clé n'est PAS présente dans formData, on garde
+  // existing[key] au lieu d'écraser avec le fallback.
+  const payload: Record<string, unknown> = {};
+  for (const key of Object.keys(naive)) {
+    const formHasKey = formData.has(key);
+    if (formHasKey) {
+      payload[key] = naive[key];
+    } else if (key in existing) {
+      payload[key] = existing[key];
+    }
+    // sinon : on n'ajoute rien (Supabase ne touche pas la colonne)
+  }
+
+  // reference : TOUJOURS utiliser existing.reference en édition
+  // (sécurité même si formData.has("reference") par accident)
+  if (existing.reference) {
+    payload.reference = existing.reference;
+    payload.internal_ref = existing.reference;
+  }
+
+  // status : toujours utiliser la valeur résolue côté action
+  payload.status = status;
+  payload.property_type = propertyType;
+
+  return payload;
+}
+
 function parseCompositionFromFormData(formData: FormData): {
   composition_commerces: unknown[];
   composition_bureaux: unknown[];
@@ -372,7 +413,21 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
   }
 
   const reference = str(formData.get("reference")) ?? generateOffmarketReference();
-  const payload: Record<string, unknown> = buildOffmarketPayload(formData, propertyType, status, reference);
+  // Lecture de la row existante pour merge non destructif
+  const { data: existing, error: fetchErr } = await supabase
+    .from("properties_offmarket")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (fetchErr || !existing) {
+    return { ok: false, error: "Fiche introuvable ou inaccessible. Rechargez la page." };
+  }
+  const payload = buildOffmarketUpdatePayload(
+    formData,
+    existing as Record<string, unknown>,
+    propertyType,
+    status,
+  );
   Object.assign(payload, parseCompositionFromFormData(formData));
 
   const { error } = await updateWithRetry(supabase, "properties_offmarket", payload, id);
