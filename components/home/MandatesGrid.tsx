@@ -19,7 +19,7 @@ export function MandatesGrid() {
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
             {t("eyebrow")}
           </p>
-          <h2 className="mt-2 font-display text-xl font-black leading-tight tracking-tight text-ink md:text-3xl">
+          <h2 className="mt-2 t-h2">
             {t("title")}
           </h2>
           <p className="mt-2 text-xs text-ink-mid md:text-sm">{t("subtitle")}</p>

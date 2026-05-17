@@ -25,7 +25,7 @@ export async function ContactCTA({ locale }: { locale: string }) {
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:text-xs">
               {eyebrow}
             </p>
-            <h2 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight md:text-5xl">
+            <h2 className="mt-3 t-h2-contrast">
               {title}
             </h2>
             <SignatureLine />

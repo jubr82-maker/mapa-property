@@ -14,7 +14,7 @@ export function OffMarketBand() {
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:text-xs">
             {t("eyebrow")}
           </p>
-          <h2 className="mt-3 font-display text-2xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
+          <h2 className="mt-3 t-h2-contrast">
             {t("title")}
           </h2>
           <p className="mt-3 max-w-xl text-xs leading-relaxed text-text-contrast/80 md:mt-5 md:text-base">
