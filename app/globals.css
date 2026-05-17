@@ -123,6 +123,59 @@ html {
   color-scheme: light dark;
 }
 
+/* ============================================================
+   Échelle typographique canonique MAPA (BUG 3)
+   Source unique de vérité — sobre, éditorial (Christie's /
+   Sotheby's / Knight Frank). Couleurs via tokens → inversion
+   light/dark automatique. Remplace les classes ad-hoc
+   (text-Nxl/font-black/hex en dur) sur les titres.
+   ============================================================ */
+.t-eyebrow {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--ink-soft);
+}
+.t-h1 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.t-h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(1.6rem, 3.4vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.t-h3 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(1.15rem, 2vw, 1.6rem);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.t-h4 {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.t-body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink-mid);
+}
+
 .prose-mapa {
   max-width: 65ch;
   margin-left: auto;

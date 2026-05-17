@@ -75,7 +75,7 @@ function DesktopMarkets({
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
           {t("eyebrow")}
         </p>
-        <h2 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight text-ink md:text-5xl">
+        <h2 className="mt-2 t-h2">
           {t("title")}
         </h2>
         <SignatureLine />
