@@ -149,6 +149,7 @@ function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, s
     title: str(formData.get("title")) ?? "Sans titre",
     internal_ref: reference,
     property_type: propertyType,
+    type: propertyType,
     sub_type: str(formData.get("sub_type")),
     country: str(formData.get("country")) ?? "LU",
     region: str(formData.get("region")),
@@ -226,13 +227,44 @@ function buildOffmarketUpdatePayload(
   // Génère le payload "naïf" (avec fallbacks destructifs)
   const naive: Record<string, unknown> = buildOffmarketPayload(formData, propertyType, status, String(existing.reference ?? ""));
 
+  // Map des colonnes DB qui sont écrites depuis un champ form au nom différent.
+  // Sans ça, formData.has(columnKey) renvoie false → la valeur de l'édition
+  // est ignorée et on garde stupidement existing.
+  const COLUMN_TO_FORM_FIELD: Record<string, string> = {
+    city_label: "city_anonymized",
+    surface_hab: "surface_habitable",
+    bedrooms: "chambres",
+    bathrooms: "salles_de_bain",
+    energy_class: "classe_energetique",
+    highlights: "prestations",
+    short_pitch: "short_description",
+    description: "full_description",
+  };
+
+  // Clés purement calculées (pas de champ form correspondant) : il faut TOUJOURS
+  // prendre la valeur recalculée de naive, jamais existing (sinon figées/stale).
+  const ALWAYS_FROM_NAIVE = new Set([
+    "surface_terrain_ares",
+    "price_label",
+    "price_display",
+    "is_published",
+    "type",
+  ]);
+
   // Liste des champs qu'on doit comparer entre formData et existing.
   // Pour chaque champ : si la clé n'est PAS présente dans formData, on garde
   // existing[key] au lieu d'écraser avec le fallback.
   const payload: Record<string, unknown> = {};
   for (const key of Object.keys(naive)) {
-    const formHasKey = formData.has(key);
-    if (formHasKey) {
+    // Clés purement calculées : toujours la valeur fraîche de naive.
+    if (ALWAYS_FROM_NAIVE.has(key)) {
+      payload[key] = naive[key];
+      continue;
+    }
+    // Pour les autres, tester la présence du champ form (avec mapping si besoin).
+    const formField = COLUMN_TO_FORM_FIELD[key] ?? key;
+    const formHasField = formData.has(formField);
+    if (formHasField) {
       payload[key] = naive[key];
     } else if (key in existing) {
       payload[key] = existing[key];
@@ -250,6 +282,7 @@ function buildOffmarketUpdatePayload(
   // status : toujours utiliser la valeur résolue côté action
   payload.status = status;
   payload.property_type = propertyType;
+  payload.type = propertyType;
 
   return payload;
 }
