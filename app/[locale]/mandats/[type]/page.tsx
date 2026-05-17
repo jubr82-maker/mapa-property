@@ -58,7 +58,7 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
               {tCommon("eyebrow")}
             </p>
-            <h1 className="mt-2 font-display text-5xl font-black leading-[0.95] tracking-tight text-ink sm:text-7xl">
+            <h1 className="mt-2 t-h1">
               {t("title")}
             </h1>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-mid sm:text-lg">
@@ -98,7 +98,7 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
                 <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
                   0{i + 1}
                 </span>
-                <h3 className="mt-2 font-display text-lg font-bold text-ink">
+                <h3 className="mt-2 t-h3">
                   {t(`highlight_${i + 1}_title`)}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink-mid">
@@ -151,7 +151,7 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
 
         {/* Process / when to choose */}
         <section className="mb-16 rounded-2xl border border-line bg-bg p-8">
-          <h2 className="font-display text-2xl font-bold text-ink sm:text-3xl">
+          <h2 className="t-h2">
             {t("when_title")}
           </h2>
           <p className="mt-3 max-w-3xl text-base leading-relaxed text-ink-mid">
@@ -184,7 +184,7 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
               {tCommon("form_eyebrow")}
             </p>
-            <h2 className="mt-2 font-display text-3xl font-black leading-tight text-ink sm:text-4xl">
+            <h2 className="mt-2 t-h2">
               {config.formCta}
             </h2>
             <p className="mt-3 text-base text-ink-mid">{tCommon("form_subtitle")}</p>

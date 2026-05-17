@@ -30,7 +30,7 @@ export default async function CapaciteEmpruntPage({
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
             {t("eyebrow")}
           </p>
-          <h1 className="mt-2 font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-6xl">
+          <h1 className="mt-2 t-h1">
             {t("title")}
           </h1>
           <p className="mt-5 mx-auto max-w-2xl text-base leading-relaxed text-ink-mid">

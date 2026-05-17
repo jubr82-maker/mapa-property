@@ -28,13 +28,13 @@ function ArcovaContent() {
       <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">
         <LockIcon /> {t("eyebrow")}
       </div>
-      <h1 className="font-display text-4xl font-black leading-[1.05] tracking-tight text-ink sm:text-5xl">
+      <h1 className="t-h1">
         {t("title")}
       </h1>
       <p className="mt-6 text-lg leading-relaxed text-ink-mid">{t("intro")}</p>
 
       <div className="mt-12 rounded-lg border border-line bg-bg-soft p-8">
-        <h2 className="font-display text-xl font-bold text-ink">{t("waitlist_title")}</h2>
+        <h2 className="t-h3">{t("waitlist_title")}</h2>
         <p className="mt-3 text-sm leading-relaxed text-ink-mid">{t("waitlist_text")}</p>
         <Link
           href="/contact"

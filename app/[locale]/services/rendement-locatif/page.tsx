@@ -16,7 +16,7 @@ export default async function RendementLocatifPage({
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
           {t("eyebrow")}
         </p>
-        <h1 className="mt-2 font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-6xl">
+        <h1 className="mt-2 t-h1">
           {t("title")}
         </h1>
         <p className="mt-6 text-base leading-relaxed text-ink-mid md:text-lg">
@@ -27,7 +27,7 @@ export default async function RendementLocatifPage({
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
             {t("coming_label")}
           </p>
-          <h2 className="mt-2 font-display text-2xl font-bold text-ink">
+          <h2 className="mt-2 t-h2">
             {t("coming_title")}
           </h2>
           <ul className="mt-4 space-y-2 text-sm text-ink-mid">

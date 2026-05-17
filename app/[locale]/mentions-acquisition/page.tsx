@@ -64,7 +64,7 @@ export default async function MentionsAcquisitionPage({
           >
             {t("eyebrow")}
           </p>
-          <h1 className="mt-2 font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-5xl">
+          <h1 className="mt-2 t-h1">
             {t("title")}
           </h1>
           <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
@@ -81,7 +81,7 @@ export default async function MentionsAcquisitionPage({
               key={s.titleKey}
               className="space-y-3 text-sm leading-relaxed text-ink-mid"
             >
-              <h2 className="font-display text-xl font-bold text-ink">
+              <h2 className="t-h3">
                 {t(s.titleKey)}
               </h2>
               <p className="whitespace-pre-line">{t(s.bodyKey)}</p>
@@ -91,7 +91,7 @@ export default async function MentionsAcquisitionPage({
 
         {/* Bloc société MAPA SYNERGY Sàrl */}
         <section className="mt-12 rounded-xl border border-line bg-bg-soft p-6">
-          <h2 className="font-display text-lg font-bold text-ink">
+          <h2 className="t-h3">
             {t("company_block_title")}
           </h2>
           <ul className="mt-3 space-y-1 font-mono text-xs text-ink-mid">
@@ -126,7 +126,7 @@ export default async function MentionsAcquisitionPage({
 
         {/* Bloc contact */}
         <section className="mt-8 rounded-xl border border-line bg-bg p-6">
-          <h2 className="font-display text-lg font-bold text-ink">
+          <h2 className="t-h3">
             {t("contact_block_title")}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-mid">

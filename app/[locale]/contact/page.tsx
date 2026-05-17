@@ -19,7 +19,7 @@ export default async function ContactPage({
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
             {t("eyebrow")}
           </p>
-          <h1 className="mt-2 font-display text-5xl font-black leading-tight tracking-tight text-ink sm:text-7xl">
+          <h1 className="mt-2 t-h1">
             {t("title")}
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-mid sm:text-lg">
@@ -29,7 +29,7 @@ export default async function ContactPage({
 
         <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
           <section className="rounded-2xl border border-line bg-bg-soft p-8 sm:p-10">
-            <h2 className="mb-6 font-display text-2xl font-bold text-ink">
+            <h2 className="mb-6 t-h2">
               {t("form_title")}
             </h2>
             <ContactForm type="general_contact" source="contact" showSubject />

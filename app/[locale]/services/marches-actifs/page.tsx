@@ -23,14 +23,14 @@ export default async function ActiveMarketsPage({
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
             {t("eyebrow")}
           </p>
-          <h1 className="mt-2 font-display text-5xl font-black leading-tight tracking-tight text-ink sm:text-7xl">
+          <h1 className="mt-2 t-h1">
             {t("title")}
           </h1>
         </header>
 
         {/* Founding text — section 13 du brief */}
         <section className="mb-16 max-w-3xl space-y-4 text-base leading-relaxed text-ink-mid">
-          <p className="font-display text-xl font-bold text-ink">
+          <p className="t-h3">
             {t("found_p1")}
           </p>
           <p>{t("found_p2")}</p>
@@ -45,7 +45,7 @@ export default async function ActiveMarketsPage({
           {/* Luxembourg */}
           <section className="rounded-xl border border-line bg-bg p-8">
             <div className="flex items-baseline justify-between">
-              <h2 className="font-display text-3xl font-bold text-ink">
+              <h2 className="t-h2">
                 Luxembourg
               </h2>
               <span className="font-mono text-xs uppercase tracking-[0.2em] text-gold-deep">
@@ -70,7 +70,7 @@ export default async function ActiveMarketsPage({
           {/* International */}
           <section className="rounded-xl border border-line bg-bg p-8">
             <div className="flex items-baseline justify-between">
-              <h2 className="font-display text-3xl font-bold text-ink">
+              <h2 className="t-h2">
                 International
               </h2>
               <span className="font-mono text-xs uppercase tracking-[0.2em] text-gold-deep">

@@ -45,7 +45,7 @@ export default async function OffMarketDetailPage({
               </>
             )}
           </div>
-          <h1 className="mt-3 font-display text-4xl font-black leading-[0.95] tracking-tight text-ink sm:text-6xl">
+          <h1 className="mt-3 t-h1">
             {property.title ?? "—"}
           </h1>
           <p className="mt-3 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
@@ -208,7 +208,7 @@ export default async function OffMarketDetailPage({
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
                 {t("form_eyebrow")}
               </p>
-              <h2 className="mt-2 font-display text-2xl font-bold leading-tight text-ink">
+              <h2 className="mt-2 t-h2">
                 {t("form_title")}
               </h2>
               <p className="mt-2 mb-6 text-sm text-ink-mid">{t("form_subtitle")}</p>

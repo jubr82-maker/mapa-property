@@ -30,7 +30,7 @@ export default async function SellPage({
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
             {t("eyebrow")}
           </p>
-          <h1 className="mt-2 font-display text-5xl font-black leading-tight tracking-tight text-ink sm:text-7xl">
+          <h1 className="mt-2 t-h1">
             {t("title")}
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink-mid sm:text-lg">
@@ -49,7 +49,7 @@ export default async function SellPage({
                 <span className="font-display text-5xl font-black gold-text">
                   0{i + 1}
                 </span>
-                <h3 className="mt-4 font-display text-xl font-bold text-ink">
+                <h3 className="mt-4 t-h3">
                   {t(`step_${s}_title`)}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink-mid">
@@ -99,7 +99,7 @@ export default async function SellPage({
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
                 {t("estimate_eyebrow")}
               </p>
-              <h2 className="mt-2 font-display text-3xl font-black leading-tight text-ink sm:text-4xl">
+              <h2 className="mt-2 t-h2">
                 {t("estimate_title")}
               </h2>
               <p className="mt-3 text-base text-ink-mid">{t("estimate_text")}</p>

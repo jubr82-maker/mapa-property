@@ -31,7 +31,7 @@ export default async function AboutPage({
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
             {t("eyebrow")}
           </p>
-          <h1 className="mt-4 font-display text-5xl font-black leading-[0.95] tracking-tight text-ink sm:text-7xl">
+          <h1 className="mt-4 t-h1">
             <span className="block">{t("h1_line1")}</span>
             <span className="block gold-text">{t("h1_line2")}</span>
           </h1>

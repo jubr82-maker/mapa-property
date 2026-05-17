@@ -145,7 +145,7 @@ export default async function VillePage({
             {city.country === "LU" ? "Luxembourg" : city.country}
             {city.region ? ` · ${city.region}` : null}
           </p>
-          <h1 className="mt-3 font-display text-5xl font-black leading-[1.05] tracking-tight text-ink sm:text-6xl">
+          <h1 className="mt-3 t-h1">
             {city.name[loc]}
           </h1>
         </header>
@@ -182,7 +182,7 @@ export default async function VillePage({
 
         {city.schools && city.schools.length > 0 ? (
           <section className="mt-12">
-            <h2 className="font-display text-2xl font-bold text-ink">{t.schools}</h2>
+            <h2 className="t-h2">{t.schools}</h2>
             <ul className="mt-4 space-y-2">
               {city.schools.map((s) => (
                 <li key={s} className="text-base leading-relaxed text-ink-mid">
@@ -194,7 +194,7 @@ export default async function VillePage({
         ) : null}
 
         <section className="mt-12">
-          <h2 className="font-display text-2xl font-bold text-ink">{t.highlights}</h2>
+          <h2 className="t-h2">{t.highlights}</h2>
           <ul className="mt-4 space-y-2">
             {city.highlights.map((h) => (
               <li key={h} className="text-base leading-relaxed text-ink-mid">

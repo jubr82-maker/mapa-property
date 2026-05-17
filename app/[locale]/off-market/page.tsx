@@ -37,7 +37,7 @@ export default async function OffMarketListPage({
             <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-gold">
               {t("hero_eyebrow")}
             </p>
-            <h1 className="font-display font-bold leading-[1] tracking-tight text-bg text-[clamp(3rem,7vw,5rem)]">
+            <h1 className="t-h1-contrast">
               {t("hero_title")}
             </h1>
             <p className="font-serif text-xl italic leading-relaxed text-bg/85 sm:text-2xl">
@@ -56,7 +56,7 @@ export default async function OffMarketListPage({
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
             {t("access_eyebrow")}
           </p>
-          <h2 className="mt-2 font-display text-3xl font-black leading-tight tracking-tight text-ink sm:text-4xl">
+          <h2 className="mt-2 t-h2">
             {t("title")}
           </h2>
         </header>
@@ -66,7 +66,7 @@ export default async function OffMarketListPage({
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
             {t("access_eyebrow")}
           </p>
-          <h2 className="mt-2 font-display text-2xl font-bold text-ink">
+          <h2 className="mt-2 t-h2">
             {t("access_title")}
           </h2>
           <ul className="mt-6 grid gap-4 sm:grid-cols-3">

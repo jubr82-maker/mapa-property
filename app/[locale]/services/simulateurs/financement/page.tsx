@@ -28,7 +28,7 @@ export default async function FinancingPage({
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
             Simulateur de financement
           </p>
-          <h1 className="mt-2 font-display text-5xl font-black leading-tight tracking-tight text-ink sm:text-7xl">
+          <h1 className="mt-2 t-h1">
             Votre acquisition, chiffrée.
           </h1>
           <p className="mt-4 text-base leading-relaxed text-ink-mid">

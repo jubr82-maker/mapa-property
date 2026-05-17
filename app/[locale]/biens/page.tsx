@@ -87,7 +87,7 @@ export default async function PropertiesPage({
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
             {t("eyebrow")}
           </p>
-          <h1 className="mt-2 font-display text-5xl font-black leading-tight tracking-tight text-ink sm:text-6xl">
+          <h1 className="mt-2 t-h1">
             {t("title")}
           </h1>
           <p className="mt-3 text-base text-ink-mid">{t("subtitle")}</p>

@@ -152,7 +152,7 @@ export default async function PropertyPage({
             {[property.country, property.city].filter(Boolean).join(" · ")}
             {property.badge && <> · <span className="text-gold-deep">{property.badge}</span></>}
           </p>
-          <h1 className="mt-3 font-display text-4xl font-black leading-[0.95] tracking-tight text-ink sm:text-6xl">
+          <h1 className="mt-3 t-h1">
             {title || "—"}
           </h1>
           <div className="mt-4 flex flex-wrap items-baseline gap-x-6 gap-y-2">
@@ -301,7 +301,7 @@ export default async function PropertyPage({
               </p>
               {/* Bloc conseiller unique — pas de noms exposés en SSR (anti-scraping) */}
               <div className="mt-2">
-                <h3 className="font-display text-lg font-bold text-ink">
+                <h3 className="t-h3">
                   {t("advisor_block_title")}
                 </h3>
                 <p className="mt-1 text-sm text-ink-mid">
@@ -381,7 +381,7 @@ export default async function PropertyPage({
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
               {t("form_eyebrow")}
             </p>
-            <h2 className="mt-2 font-display text-3xl font-black leading-tight text-ink sm:text-4xl">
+            <h2 className="mt-2 t-h2">
               {t("form_title")}
             </h2>
             <p className="mt-3 text-base text-ink-mid">{t("form_subtitle")}</p>

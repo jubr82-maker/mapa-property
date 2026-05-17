@@ -25,7 +25,7 @@ export default async function JournalIndexPage({
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
             {t("eyebrow")}
           </p>
-          <h1 className="mt-2 font-display text-5xl font-black leading-tight tracking-tight text-ink sm:text-7xl">
+          <h1 className="mt-2 t-h1">
             Le Journal
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-mid">
