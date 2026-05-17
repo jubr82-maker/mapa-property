@@ -281,6 +281,43 @@ async function audit(
   }
 }
 
+// ─── Publication guard ──────────────────────────────────────────────────────
+// Empêche qu'une fiche off-market puisse passer en status='published' sans
+// les champs critiques (title, country, info prix). Doublure serveur de la
+// protection UI en place dans OffmarketForm.tsx (commit c96a03d).
+function validatePublishGuard(
+  formData: FormData,
+  status: OffmarketStatus,
+): { ok: true } | { ok: false; error: string } {
+  if (status !== "published") return { ok: true };
+
+  const missing: string[] = [];
+  const title = str(formData.get("title"));
+  if (!title) missing.push("Titre");
+
+  const country = str(formData.get("country"));
+  if (!country) missing.push("Pays");
+
+  const priceMode = str(formData.get("price_mode"));
+  const priceEstimate = str(formData.get("price_estimate"));
+  const priceMin = str(formData.get("price_min"));
+  const priceCustom = str(formData.get("price_custom_text"));
+  const hasPriceInfo =
+    priceMode === "on_request" ||
+    !!priceEstimate ||
+    !!priceMin ||
+    !!priceCustom;
+  if (!hasPriceInfo) missing.push("Prix (ou mode « Sur demande »)");
+
+  if (missing.length > 0) {
+    return {
+      ok: false,
+      error: `Publication bloquée — champ(s) manquant(s) : ${missing.join(", ")}. La fiche reste en brouillon jusqu'à complétion.`,
+    };
+  }
+  return { ok: true };
+}
+
 export async function createOffmarket(formData: FormData): Promise<ActionResult> {
   const supabase = await createSupabaseServerClient();
   const {
@@ -301,6 +338,10 @@ export async function createOffmarket(formData: FormData): Promise<ActionResult>
   )
     ? (requestedStatus as OffmarketStatus)
     : "draft";
+
+  // Garde serveur — refuse status='published' sans champs critiques
+  const guard = validatePublishGuard(formData, status);
+  if (!guard.ok) return { ok: false, error: guard.error };
 
   const reference = str(formData.get("reference")) ?? generateOffmarketReference();
   const payload: Record<string, unknown> = {
@@ -343,6 +384,10 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
   )
     ? (requestedStatus as OffmarketStatus)
     : "draft";
+
+  // Garde serveur — refuse status='published' sans champs critiques
+  const guard = validatePublishGuard(formData, status);
+  if (!guard.ok) return { ok: false, error: guard.error };
 
   const reference = str(formData.get("reference")) ?? generateOffmarketReference();
   const payload: Record<string, unknown> = buildOffmarketPayload(formData, propertyType, status, reference);
