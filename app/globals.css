@@ -146,6 +146,14 @@ html {
   letter-spacing: -0.015em;
   color: var(--ink);
 }
+.t-h1-contrast {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  color: var(--text-contrast);
+}
 .t-h2 {
   font-family: var(--font-display), system-ui, sans-serif;
   font-size: clamp(1.6rem, 3.4vw, 2.75rem);
