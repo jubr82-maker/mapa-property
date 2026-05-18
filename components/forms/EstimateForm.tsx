@@ -164,18 +164,21 @@ export function EstimateForm() {
               onChange={(v) => set("state", v as FormState["state"])}
               options={STATES.map((s) => ({ value: s, label: t(`state_${s}`) }))}
             />
+            {/* BUG T4 : pour un terrain, la surface utile est la
+                surface de terrain (pas d'habitable). */}
             <FieldNumber
               label={t("living_surface")}
               value={data.livingSurface}
               onChange={(v) => set("livingSurface", v)}
               suffix="m²"
-              required
+              required={data.type !== "terrain"}
             />
             <FieldNumber
               label={t("land_surface")}
               value={data.landSurface}
               onChange={(v) => set("landSurface", v)}
               suffix="m²"
+              required={data.type === "terrain"}
             />
             <FieldNumber
               label={t("terrace_surface")}
@@ -202,7 +205,11 @@ export function EstimateForm() {
           </div>
           <NextBtn
             onClick={() => setStep(2)}
-            disabled={!data.livingSurface || Number(data.livingSurface) <= 0}
+            disabled={
+              data.type === "terrain"
+                ? !data.landSurface || Number(data.landSurface) <= 0
+                : !data.livingSurface || Number(data.livingSurface) <= 0
+            }
             t={t}
           />
         </StepWrap>

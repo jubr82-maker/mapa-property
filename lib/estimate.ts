@@ -112,13 +112,20 @@ export const estimateProperty = (
   const pricePerSqm =
     base * typeFactor * stateFactor * energyFactor * communeMultiplier;
 
-  const baseValue = pricePerSqm * input.livingSurface;
+  // BUG T4 : un terrain n'a pas de surface habitable — sa valeur =
+  // surface du terrain × prix/m² (TYPE_FACTOR.terrain encode déjà la
+  // décote foncier vs bâti, pas de coef ancillaire 0.15 ici).
+  const isLand = input.type === "terrain";
+  const baseValue = isLand
+    ? pricePerSqm * (input.landSurface ?? 0)
+    : pricePerSqm * input.livingSurface;
   const landValue =
-    input.landSurface && input.type !== "appartement"
+    !isLand && input.landSurface && input.type !== "appartement"
       ? input.landSurface * pricePerSqm * 0.15
       : 0;
-  const terraceValue =
-    (input.terraceSurface ?? 0) * pricePerSqm * 0.4;
+  const terraceValue = isLand
+    ? 0
+    : (input.terraceSurface ?? 0) * pricePerSqm * 0.4;
 
   const mid = Math.round(baseValue + landValue + terraceValue);
   const range = {

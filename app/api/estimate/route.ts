@@ -109,12 +109,18 @@ export async function POST(req: Request) {
   const rgpdConsentAt =
     body.rgpdConsent === true ? new Date().toISOString() : undefined;
 
+  // BUG T4 : un terrain n'a pas de surface habitable — la surface
+  // utile est la surface de terrain. On valide la bonne selon le type.
+  const isLand = body.type === "terrain";
+  const usefulSurface = isLand
+    ? Number(body.landSurface)
+    : Number(body.livingSurface);
   if (
     !body.country ||
     !body.type ||
     !body.state ||
-    !body.livingSurface ||
-    Number(body.livingSurface) <= 0
+    !usefulSurface ||
+    usefulSurface <= 0
   ) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
