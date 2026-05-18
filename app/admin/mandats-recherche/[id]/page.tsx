@@ -217,18 +217,10 @@ export default async function AdminMandatDetailPage({
             </div>
           )}
 
-          {/* Placeholder Phase B */}
-          <div className="rounded-xl border border-dashed border-[#3D4F63]/25 bg-[#F5EFE1]/40 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-              Action Phase B
-            </p>
-            <p className="mt-2 text-sm text-[#3D4F63]/80">
-              Convertir ce mandat en propriété cherchée active —{" "}
-              <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#B8865A]">
-                Disponible en Phase B
-              </span>
-            </p>
-          </div>
+          {/* BUG 8 : placeholder « Action Phase B » masqué — bloc inerte
+              (aucune action) qui paraissait cassé. Le finir = écrire
+              dans `properties` (table en lecture seule, interdit
+              CLAUDE.md). Backlog : docs/admin/PHASE_B_BACKLOG_2026-05-18.md */}
         </div>
 
         <aside className="space-y-5">
