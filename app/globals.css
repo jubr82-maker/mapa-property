@@ -192,6 +192,22 @@ html {
   color: var(--ink-mid);
 }
 
+/* ── Logo : recolore le master en or chaud en mode nuit (BUG A) ──
+   L'asset gold dédié (mapa-logo-gold-h96.png) est corrompu (base64
+   inline tronqué → décodage vide → invisible "noir sur noir").
+   Solution sans asset : on garde le master (copper + ink, prouvé bon)
+   et on le teinte en or via filtre CSS classe-based — SSR-safe, pas
+   de useTheme/flash. :root.dark (spécificité 0,2,0) pour battre le
+   :root{} CMS injecté, comme pour les tokens. */
+.logo-auto {
+  display: block;
+}
+:root.dark .logo-auto,
+.logo-gold {
+  filter: brightness(0) saturate(100%) invert(74%) sepia(38%)
+    saturate(560%) hue-rotate(346deg) brightness(92%) contrast(88%);
+}
+
 .prose-mapa {
   max-width: 65ch;
   margin-left: auto;

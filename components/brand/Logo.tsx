@@ -33,47 +33,22 @@ export function Logo({
   const ratio = 579 / 355;
   const width = Math.round(height * ratio);
 
-  // Pour "auto" : on superpose les deux et CSS gère la visibilité via dark:
-  if (tone === "auto") {
-    return (
-      <span
-        className={`inline-block ${className}`}
-        style={{ width, height, position: "relative" }}
-      >
-        <Image
-          src="/logos/mapa-logo-master.png"
-          alt="MAPA Property"
-          width={width}
-          height={height}
-          priority={priority}
-          className="block dark:hidden"
-        />
-        <Image
-          src="/logos/mapa-logo-gold-h96.png"
-          alt="MAPA Property"
-          width={width}
-          height={height}
-          priority={priority}
-          className="hidden dark:block absolute inset-0"
-        />
-      </span>
-    );
-  }
-
-  // Mode forcé
-  const src =
-    tone === "dark"
-      ? "/logos/mapa-logo-gold-h96.png"
-      : "/logos/mapa-logo-master.png";
+  // BUG A : un seul asset (master, prouvé bon). En nuit, recoloration or
+  // chaud via filtre CSS classe-based (.logo-auto + :root.dark dans
+  // globals.css) — SSR-safe, pas de useTheme/flash, pas de dépendance à
+  // l'asset gold corrompu. tone="dark"/"light" forcés : .logo-gold force
+  // le filtre indépendamment du thème.
+  const toneClass =
+    tone === "auto" ? "logo-auto" : tone === "dark" ? "logo-gold" : "";
 
   return (
     <Image
-      src={src}
+      src="/logos/mapa-logo-master.png"
       alt="MAPA Property"
       width={width}
       height={height}
       priority={priority}
-      className={className}
+      className={`${toneClass} ${className}`.trim()}
     />
   );
 }
