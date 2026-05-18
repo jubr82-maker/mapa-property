@@ -59,7 +59,8 @@ export function BookletReader({
                 {primaryTag}
               </span>
             )}
-            <h1 className="font-display text-2xl font-black leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl">
+            {/* NAV6 : titre mobile réduit (-50% : text-2xl -> text-xl). */}
+            <h1 className="font-display text-xl font-black leading-[1.1] tracking-tight text-ink sm:text-5xl lg:text-6xl">
               {title}
             </h1>
             {coverImage && (

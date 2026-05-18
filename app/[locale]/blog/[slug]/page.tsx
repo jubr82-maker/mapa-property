@@ -63,7 +63,9 @@ export default async function BlogPostPage({
   return (
     <div className="px-6 pt-24 pb-16 lg:px-10 lg:pt-32">
       <JsonLd data={[articleJsonLd, breadcrumbJsonLd]} />
-      <div className="mx-auto max-w-4xl">
+      {/* NAV6 : sur Mac le conteneur respire (90% viewport) ; le texte
+          reste lisible (prose-mapa cappe à 65ch en interne). */}
+      <div className="mx-auto max-w-4xl lg:max-w-[90vw] xl:max-w-[1400px]">
         <BookletReader
           title={title}
           coverImage={post.cover_image}
