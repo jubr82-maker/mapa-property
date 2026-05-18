@@ -61,7 +61,9 @@ export function Header() {
           : "border-b border-transparent bg-bg/85 backdrop-blur-sm"
       }`}
     >
-      <div className="mx-auto grid h-20 max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:px-10">
+      {/* BUG T8 : header élargi 1400 -> 1600px (logo inchangé 56/96px,
+          la nav respire et s'éloigne du centre). */}
+      <div className="mx-auto grid h-20 max-w-[1600px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:px-10">
         {/* Slot GAUCHE — burger (mobile) / nav (desktop) */}
         <div className="flex items-center justify-start gap-1">
           <div className="lg:hidden">
