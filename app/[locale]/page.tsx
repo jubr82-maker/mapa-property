@@ -12,7 +12,6 @@ import { ProcessTable } from "@/components/home/ProcessTable";
 import { QuoteBand } from "@/components/home/QuoteBand";
 import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
-import { ContactCTA } from "@/components/home/ContactCTA";
 import {
   fetchHomeFeatured,
   fetchLatestBlogPosts,
@@ -49,7 +48,8 @@ export default async function HomePage({
       <QuoteBand />
       <ReviewsCarousel reviews={reviews} />
       <BlogTeaser posts={blogPosts} locale={locale as Locale} />
-      <ContactCTA locale={locale} />
+      {/* NAV8 : ContactCTA « Une conversation peut tout changer »
+          retiré (doublon du CTA footer « Passer à l'action »). */}
     </>
   );
 }
