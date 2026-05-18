@@ -16,6 +16,10 @@ type Group = {
   items?: SubItem[];
 };
 
+// NAV1 : même architecture que le header desktop —
+// ACHETER · VENDRE · LOUER · OFF-MARKET · SERVICES · JOURNAL.
+// Onglet MANDATS supprimé (tout est dans VENDRE) ; "Off-Market"
+// retiré du sous-menu ACHETER (doublon, désormais onglet principal).
 const groups: Group[] = [
   {
     id: "buy",
@@ -23,7 +27,6 @@ const groups: Group[] = [
     items: [
       { href: "/biens", key: "all_properties" },
       { href: "/mandats/recherche", key: "search_mandate" },
-      { href: "/off-market", key: "off_market" },
     ],
   },
   {
@@ -39,20 +42,14 @@ const groups: Group[] = [
     ],
   },
   {
-    id: "mandates",
-    label: "mandates",
-    items: [
-      { href: "/mandats/exclusif", key: "mandate_exclusive" },
-      { href: "/mandats/recherche", key: "search_mandate" },
-      { href: "/mandats/semi-exclusif", key: "mandate_semi" },
-      { href: "/mandats/simple", key: "mandate_simple" },
-      { href: "/mandats/autonome", key: "mandate_autonomous" },
-    ],
-  },
-  {
     id: "rent",
     label: "rent",
     href: "/biens?transaction=rent",
+  },
+  {
+    id: "off_market",
+    label: "off_market",
+    href: "/off-market",
   },
   {
     id: "services",
@@ -67,9 +64,9 @@ const groups: Group[] = [
     ],
   },
   {
-    id: "off_market",
-    label: "off_market",
-    href: "/off-market",
+    id: "journal",
+    label: "journal",
+    href: "/journal",
   },
 ];
 

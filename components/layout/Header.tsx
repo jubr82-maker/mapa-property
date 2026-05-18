@@ -14,7 +14,7 @@ const leftDropdowns = [
     items: [
       { href: "/biens", key: "all_properties" },
       { href: "/mandats/recherche", key: "search_mandate" },
-      { href: "/off-market", key: "off_market" },
+      // NAV1 : "Off-Market" retiré (doublon — désormais onglet principal).
     ],
   },
   {
@@ -71,16 +71,11 @@ export function Header() {
           </div>
           {/* Nav desktop only */}
           <nav className="hidden items-center gap-1 lg:flex">
+            {/* NAV1 : onglet MANDATS retiré (tout est dans VENDRE).
+                Ordre avant logo : ACHETER, VENDRE, LOUER. */}
             {leftDropdowns.map((d) => (
               <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
             ))}
-            <Link
-              href="/mandats/exclusif"
-              className="ml-1 border-b-2 px-3 py-2 font-sans text-[13px] font-semibold uppercase tracking-[0.05em] transition-colors hover:text-gold"
-              style={{ color: "#C8A04A", borderColor: "#C8A04A" }}
-            >
-              {t("mandates")}
-            </Link>
             <Link
               href="/biens?transaction=rent"
               className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
@@ -109,15 +104,16 @@ export function Header() {
         {/* Slot DROITE — nav desktop ; vide sur mobile */}
         <div className="flex items-center justify-end gap-1">
           <div className="hidden items-center gap-1 lg:flex">
-            {rightDropdowns.map((d) => (
-              <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
-            ))}
+            {/* NAV1 : ordre après logo — OFF-MARKET, SERVICES, JOURNAL. */}
             <Link
               href="/off-market"
               className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
             >
               {t("off_market")}
             </Link>
+            {rightDropdowns.map((d) => (
+              <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
+            ))}
             <Link
               href="/journal"
               className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
