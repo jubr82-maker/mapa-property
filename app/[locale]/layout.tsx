@@ -163,6 +163,14 @@ export default async function LocaleLayout({
           href="https://dutfkblygfvhhwpzxmfz.supabase.co"
           crossOrigin="anonymous"
         />
+        {/* POL1 : preconnect Turnstile — stabilise/accélère le 1er
+            rendu du widget (moins de flicker au mount). */}
+        <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+        <link
+          rel="preconnect"
+          href="https://challenges.cloudflare.com"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className="min-h-dvh bg-bg text-ink antialiased">
         <JsonLd data={homepageGraph(locale)} />
