@@ -1,4 +1,5 @@
 import { supabaseServer } from "./supabase-server";
+import { getLocalizedField } from "./i18n-field";
 import type {
   BlogPost,
   InterestRates,
@@ -74,23 +75,51 @@ export type HomeFeatured = {
   created_at: string | null;
 };
 
-export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
+export async function fetchHomeFeatured(
+  limit = 6,
+  locale = "fr",
+): Promise<HomeFeatured[]> {
   const sb = supabaseServer();
 
-  const [apimoRes, offmarketRes] = await Promise.all([
+  // BUG T5 : titres localisés. `properties` (Apimo) a title_fr/_en/_de.
+  // `properties_offmarket` n'a que `title` tant que la migration
+  // 20260518_offmarket_i18n_titles n'est pas appliquée → select
+  // résilient (on retente sans title_en/_de si colonnes absentes).
+  const offmarketCols =
+    "id,reference,title,title_en,title_de,city_label,country,price_label,price_display,surface_hab,bedrooms,cover_image_url,created_at,is_coup_de_coeur,is_published,status";
+  const offmarketColsLegacy =
+    "id,reference,title,city_label,country,price_label,price_display,surface_hab,bedrooms,cover_image_url,created_at,is_coup_de_coeur,is_published,status";
+
+  let [apimoRes, offmarketRes] = await Promise.all([
     sb
       .from("properties")
-      .select("id,slug,title_fr,city,country,price,surface,bedrooms,created_at,property_images(url,sort)")
+      .select("id,slug,title_fr,title_en,title_de,city,country,price,surface,bedrooms,created_at,property_images(url,sort)")
       .eq("is_published", true)
       .eq("is_featured", true)
       .order("created_at", { ascending: false })
       .limit(limit),
     sb
       .from("properties_offmarket")
-      .select("id,reference,title,city_label,country,price_label,price_display,surface_hab,bedrooms,cover_image_url,created_at,is_coup_de_coeur,is_published,status")
+      .select(offmarketCols)
       .order("created_at", { ascending: false })
       .limit(limit),
   ]);
+
+  if (
+    offmarketRes.error &&
+    (offmarketRes.error.code === "42703" ||
+      offmarketRes.error.code === "PGRST204" ||
+      /title_(en|de)/i.test(offmarketRes.error.message))
+  ) {
+    // Colonnes i18n offmarket pas encore migrées : fallback FR.
+    // (Le select legacy infère une shape sans title_en/_de ; on
+    // recolle au type du select i18n — mapPublicRows tolère l'absence.)
+    offmarketRes = (await sb
+      .from("properties_offmarket")
+      .select(offmarketColsLegacy)
+      .order("created_at", { ascending: false })
+      .limit(limit)) as typeof offmarketRes;
+  }
 
   if (apimoRes.error) console.error("[data] fetchHomeFeatured apimo", apimoRes.error.message);
   if (offmarketRes.error) console.error("[data] fetchHomeFeatured offmarket", offmarketRes.error.message);
@@ -99,6 +128,8 @@ export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
     id: string;
     slug: string | null;
     title_fr: string | null;
+    title_en: string | null;
+    title_de: string | null;
     city: string | null;
     country: string | null;
     price: number | null;
@@ -111,6 +142,8 @@ export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
     id: string;
     reference: string | null;
     title: string | null;
+    title_en?: string | null;
+    title_de?: string | null;
     city_label: string | null;
     country: string | null;
     price_label: string | null;
@@ -130,7 +163,7 @@ export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
       id: row.id,
       kind: "apimo",
       slug: row.slug,
-      title: row.title_fr,
+      title: getLocalizedField(row, "title", locale) || row.title_fr,
       city: row.city,
       country: row.country,
       price: row.price,
@@ -155,7 +188,7 @@ export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
       id: row.id,
       kind: "offmarket",
       slug: row.reference,
-      title: row.title,
+      title: getLocalizedField(row, "title", locale) || row.title,
       city: row.city_label,
       country: row.country,
       price: null,
@@ -341,7 +374,9 @@ export async function fetchPropertyImages(
   return safeArray<PropertyImage>(data as PropertyImage[] | null);
 }
 
-export async function fetchOffmarketList(): Promise<PropertyOffmarket[]> {
+export async function fetchOffmarketList(
+  locale = "fr",
+): Promise<PropertyOffmarket[]> {
   const sb = supabaseServer();
   // Lecture publique via VIEW (champs non-confidentiels uniquement).
   const { data, error } = await sb
@@ -359,13 +394,14 @@ export async function fetchOffmarketList(): Promise<PropertyOffmarket[]> {
       console.error("[data] fetchOffmarketList", error.message);
       return [];
     }
-    return mapPublicRows(fallback.data);
+    return mapPublicRows(fallback.data, locale);
   }
-  return mapPublicRows(data);
+  return mapPublicRows(data, locale);
 }
 
 export async function fetchOffmarketById(
   id: string,
+  locale = "fr",
 ): Promise<PropertyOffmarket | null> {
   const sb = supabaseServer();
   const { data, error } = await sb
@@ -386,18 +422,26 @@ export async function fetchOffmarketById(
       if (error) console.error("[data] fetchOffmarketById", error.message);
       return null;
     }
-    return mapPublicRows([fallback.data])[0] ?? null;
+    return mapPublicRows([fallback.data], locale)[0] ?? null;
   }
-  return mapPublicRows([data])[0] ?? null;
+  return mapPublicRows([data], locale)[0] ?? null;
 }
 
-function mapPublicRows(rows: unknown[] | null): PropertyOffmarket[] {
+function mapPublicRows(
+  rows: unknown[] | null,
+  locale = "fr",
+): PropertyOffmarket[] {
   if (!rows) return [];
   return rows.map((raw) => {
     const r = raw as Record<string, unknown>;
     return {
       id: String(r.id ?? ""),
-      title: (r.title as string | null) ?? null,
+      // BUG T5 : titre localisé si title_en/title_de présents (migration
+      // 20260518_offmarket_i18n_titles), sinon fallback FR.
+      title:
+        getLocalizedField(r, "title", locale) ||
+        (r.title as string | null) ||
+        null,
       internal_ref: (r.reference as string | null) ?? (r.internal_ref as string | null) ?? null,
       country: (r.country as string | null) ?? null,
       city_label:

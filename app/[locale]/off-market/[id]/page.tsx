@@ -20,7 +20,7 @@ export default async function OffMarketDetailPage({
   const { locale, id } = await params;
   setRequestLocale(locale);
 
-  const property = await fetchOffmarketById(id);
+  const property = await fetchOffmarketById(id, locale);
   if (!property) notFound();
 
   const t = await getTranslations({ locale, namespace: "offmarket" });

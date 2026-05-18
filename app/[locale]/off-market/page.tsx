@@ -12,7 +12,7 @@ export default async function OffMarketListPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const list = await fetchOffmarketList();
+  const list = await fetchOffmarketList(locale);
   const t = await getTranslations({ locale, namespace: "offmarket" });
 
   return (

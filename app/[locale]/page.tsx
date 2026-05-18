@@ -29,7 +29,7 @@ export default async function HomePage({
   setRequestLocale(locale);
 
   const [featured, reviews, blogPosts] = await Promise.all([
-    fetchHomeFeatured(6),
+    fetchHomeFeatured(6, locale),
     fetchPublishedReviews(8),
     fetchLatestBlogPosts(3),
   ]);
