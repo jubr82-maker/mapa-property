@@ -9,7 +9,6 @@ import { MandatesGrid } from "@/components/home/MandatesGrid";
 import { MarketsSection } from "@/components/home/MarketsSection";
 import { StatsBand } from "@/components/home/StatsBand";
 import { ProcessTable } from "@/components/home/ProcessTable";
-import { QuoteBand } from "@/components/home/QuoteBand";
 import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
 import {
@@ -45,7 +44,8 @@ export default async function HomePage({
       <MarketsSection />
       <StatsBand locale={locale} />
       <ProcessTable />
-      <QuoteBand />
+      {/* NAV7 : « mot fondateur » (QuoteBand) retiré — à réécrire avec
+          Julien (cf. docs/qa/COPY_REWRITES_TODO.md). */}
       <ReviewsCarousel reviews={reviews} />
       <BlogTeaser posts={blogPosts} locale={locale as Locale} />
       {/* NAV8 : ContactCTA « Une conversation peut tout changer »

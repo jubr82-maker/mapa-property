@@ -294,7 +294,7 @@
   "contact_cta": {
     "eyebrow": "A conversation can change everything",
     "title": "Let's talk about your project.",
-    "description": "Sale mandate, property search, off-market access, wealth advice — every request is handled personally by Julien.",
+    "description": "Sale mandate, property search, off-market access, wealth advice — every request is handled personally by MAPA Property.",
     "call_label": "Call directly",
     "email_label": "Send an email",
     "cta": "Book a meeting"
@@ -343,7 +343,7 @@
     "advisor_block_roles": "Real Estate Director · Managing Partner",
     "form_eyebrow": "Information request",
     "form_title": "A question about this property?",
-    "form_subtitle": "Julien will personally get back to you within 24 working hours.",
+    "form_subtitle": "MAPA Property will personally get back to you within 24 working hours.",
     "similar": "Similar properties",
     "download_pdf": "Download / Print",
     "request_info": "Request information"
@@ -375,7 +375,7 @@
     "rgpd_notice": "Your data is confidential and used only to reach back out to you.",
     "success_eyebrow": "Request received",
     "success_title": "Thank you, your request has been registered.",
-    "success_text": "Julien will personally get back to you within 24 working hours."
+    "success_text": "MAPA Property will personally get back to you within 24 working hours."
   },
   "offmarket": {
     "eyebrow": "Off-Market",
@@ -438,7 +438,7 @@
     "label_autonome": "Autonomous",
     "label_recherche": "Search",
     "form_eyebrow": "Get started",
-    "form_subtitle": "Julien will personally get back to you within 24 working hours.",
+    "form_subtitle": "MAPA Property will personally get back to you within 24 working hours.",
     "reco_label": "Our recommendation",
     "reco_text": "The exclusive mandate remains our recommendation. The Luxembourg market is small; listing the same property with several agencies exposes it on the same platforms and signals a rushed sale — often unfavourable in negotiation."
   },
@@ -703,7 +703,7 @@
   "contact_page": {
     "eyebrow": "Contact",
     "title": "A conversation can change everything.",
-    "intro": "Sale mandate, search, off-market access, wealth advice — every request is handled personally by Julien within 24 working hours.",
+    "intro": "Sale mandate, search, off-market access, wealth advice — every request is handled personally by MAPA Property within 24 working hours.",
     "form_title": "Write to us",
     "call_label": "Call",
     "email_label": "Email",
@@ -729,7 +729,7 @@
     "title": "ARCOVA · the MAPA private access.",
     "intro": "A contractual space reserved for MAPA Property mandate clients: complete off-market files, confidential proposals, secure exchanges. By invitation only.",
     "waitlist_title": "Access request",
-    "waitlist_text": "ARCOVA access is granted case by case, after an interview and the signature of a contractual NDA. To join the waitlist, contact Julien directly.",
+    "waitlist_text": "ARCOVA access is granted case by case, after an interview and the signature of a contractual NDA. To join the waitlist, contact us directly.",
     "waitlist_cta": "Request an invitation",
     "legal": "Strictly nominative access · Contractual confidentiality · Audit log active"
   },

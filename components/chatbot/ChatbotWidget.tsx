@@ -115,10 +115,10 @@ export function ChatbotWidget() {
           role: "assistant",
           content:
             locale === "en"
-              ? "An error occurred. Please contact Julien via the contact buttons on the site."
+              ? "An error occurred. Please contact us via the contact buttons on the site."
               : locale === "de"
-                ? "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie Julien über die Kontakt-Buttons auf der Website."
-                : "Une erreur est survenue. Contactez Julien via les boutons de contact disponibles sur le site.",
+                ? "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie uns über die Kontakt-Buttons auf der Website."
+                : "Une erreur est survenue. Contactez-nous via les boutons de contact disponibles sur le site.",
         },
       ]);
     } finally {
