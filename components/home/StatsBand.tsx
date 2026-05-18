@@ -39,7 +39,9 @@ export async function StatsBand({ locale }: { locale: string }) {
               <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-text-contrast/50 md:text-[10px]">
                 {s.label}
               </p>
-              <p className="mt-2 font-display text-4xl font-black leading-none tracking-tight md:mt-3 md:text-6xl">
+              {/* NAV4 : taille des chiffres réduite ~50%
+                  (text-4xl/6xl -> text-2xl/3xl). */}
+              <p className="mt-2 font-display text-2xl font-black leading-none tracking-tight md:mt-3 md:text-3xl">
                 <span className="gold-text">{s.value}</span>
                 {s.suffix && (
                   <span className="ml-2 font-mono text-xs font-medium text-text-contrast/50 md:text-base">
