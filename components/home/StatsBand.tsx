@@ -1,10 +1,20 @@
 import { getTranslations } from "next-intl/server";
 import { siteContent } from "@/lib/site-content";
+import { luxembourgCommunes, internationalRegions } from "@/lib/markets";
+
+// Compteurs dérivés de la couverture réelle (lib/markets) — restent
+// justes quand la liste des communes/villes évolue (demande Julien :
+// couvrir toutes les grandes communes du pays).
+const COMMUNES_COUNT = luxembourgCommunes.length;
+const CITIES_COUNT = internationalRegions.reduce(
+  (acc, r) => acc + r.cities.length,
+  0,
+);
 
 const stats = [
   { key: "experience", value: "8+", suffix: "y" },
-  { key: "communes", value: "24", suffix: "LU" },
-  { key: "cities", value: "28", suffix: "INTL" },
+  { key: "communes", value: `${COMMUNES_COUNT}`, suffix: "LU" },
+  { key: "cities", value: `${CITIES_COUNT}`, suffix: "INTL" },
   { key: "transactions", value: "100s", suffix: "" },
 ] as const;
 
