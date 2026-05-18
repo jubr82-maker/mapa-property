@@ -16,7 +16,7 @@ export async function ContactCTA({ locale }: { locale: string }) {
   ]);
 
   return (
-    <section className="px-6 py-6 md:py-16 lg:px-10 lg:py-20">
+    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-20">
       <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-2xl border border-line bg-bg-contrast p-5 text-text-contrast md:p-10 lg:p-16">
         <div className="pointer-events-none absolute -right-20 -top-20 size-36 rounded-full bg-gold/15 blur-3xl" />
 

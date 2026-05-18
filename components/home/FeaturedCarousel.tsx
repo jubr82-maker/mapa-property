@@ -43,7 +43,7 @@ export function FeaturedCarousel({ items }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-28">
+    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-10">
           <div>

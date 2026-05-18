@@ -27,7 +27,7 @@ export async function StatsBand({ locale }: { locale: string }) {
   ]);
 
   return (
-    <section className="bg-bg-contrast px-6 py-6 text-text-contrast md:py-20 lg:px-10 lg:py-24">
+    <section className="bg-bg-contrast px-6 py-6 text-text-contrast md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
         <p className="mb-6 max-w-xl font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:mb-12 md:text-xs">
           {eyebrow}
