@@ -8,6 +8,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { useCallback, useEffect, useState } from "react";
 import type { HomeFeatured } from "@/lib/data";
 import { SignatureLine } from "@/components/ui/SignatureLine";
+import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 
 interface Props {
   items: HomeFeatured[];
@@ -102,12 +103,13 @@ export function FeaturedCarousel({ items }: Props) {
 }
 
 function FeaturedCard({ item }: { item: HomeFeatured }) {
-  const href =
-    item.kind === "offmarket"
-      ? `/off-market/${item.id}`
-      : item.slug
-        ? `/biens/${item.slug}`
-        : "/biens";
+  const tOff = useTranslations("offmarket");
+  const isOffmarket = item.kind === "offmarket";
+  const href = isOffmarket
+    ? `/off-market/${item.id}`
+    : item.slug
+      ? `/biens/${item.slug}`
+      : "/biens";
 
   return (
     <Link
@@ -115,7 +117,15 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border-subtle bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
-        {item.cover_url ? (
+        {isOffmarket ? (
+          /* Cover confidentiel standardisé (BUG 2) — jamais le visuel
+             réel d'un bien off-market, même si une image custom existe. */
+          <OffmarketPlaceholder
+            compact
+            title={tOff("cover_title")}
+            subtitle={tOff("cover_subtitle")}
+          />
+        ) : item.cover_url ? (
           <Image
             src={item.cover_url}
             alt={item.title ?? ""}
@@ -134,12 +144,12 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
         )}
         <span
           className={`absolute right-3 top-3 rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] backdrop-blur ${
-            item.kind === "offmarket"
+            isOffmarket
               ? "bg-gold-deep text-bg"
               : "bg-bg-contrast/70 text-text-contrast/90"
           }`}
         >
-          {item.kind === "offmarket" ? "Off-Market" : "Apimo"}
+          {isOffmarket ? "Off-Market" : "Apimo"}
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5">

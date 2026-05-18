@@ -60,32 +60,13 @@ export default async function OffMarketDetailPage({
           </p>
         </header>
 
-        {/* Cover */}
+        {/* Cover confidentiel standardisé (BUG 2) — jamais le visuel réel,
+            même flouté, même si une image custom existe en base. */}
         <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-bg-deep">
-          {property.cover_image_url ? (
-            <>
-              <Image
-                src={property.cover_image_url}
-                alt={property.title ?? "Off-market"}
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover blur-[2px]"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-bg-contrast/40 backdrop-blur-sm">
-                <div className="text-center text-text-contrast">
-                  <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-bright">
-                    {t("locked_eyebrow")}
-                  </p>
-                  <p className="mt-2 max-w-md font-display text-xl font-bold">
-                    {t("locked_text")}
-                  </p>
-                </div>
-              </div>
-            </>
-          ) : (
-            <OffmarketPlaceholder />
-          )}
+          <OffmarketPlaceholder
+            title={t("cover_title")}
+            subtitle={t("cover_subtitle")}
+          />
         </div>
 
         {/* Layout */}

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchOffmarketList } from "@/lib/data";
@@ -153,18 +152,13 @@ function OffMarketTeaser({
       href={`/off-market/${property.id}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-line bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >
+      {/* Cover confidentiel standardisé (BUG 2) — jamais le visuel réel. */}
       <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
-        {property.cover_image_url ? (
-          <Image
-            src={property.cover_image_url}
-            alt={property.title ?? "Off-market"}
-            fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 90vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <OffmarketPlaceholder />
-        )}
+        <OffmarketPlaceholder
+          compact
+          title={t("cover_title")}
+          subtitle={t("cover_subtitle")}
+        />
         <span className="absolute right-3 top-3 rounded-full bg-bg-contrast/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-gold-bright backdrop-blur">
           OFF-MARKET
         </span>
