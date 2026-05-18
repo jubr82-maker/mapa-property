@@ -1,13 +1,15 @@
 import { useTranslations } from "next-intl";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 
+// NAV2 : ordre voulu — Vente et acquisition, Mandat de recherche,
+// Broker International, Négociation, Estimation, Mise en location.
 const services = [
   "transaction",
   "search",
   "international",
   "negotiation",
-  "rental",
   "valuation",
+  "rental",
 ] as const;
 
 export function ServicesTable() {
