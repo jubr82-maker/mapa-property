@@ -52,6 +52,20 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <BackButton fallback="/" className="mb-6" />
 
+        {/* NAV9 : recommandation mandat exclusif — sur tous les mandats
+            SAUF /mandats/exclusif. Encadré or discret, italique léger,
+            ≤ 3 lignes (label texte, pas d'emoji — règle projet). */}
+        {config.slug !== "exclusif" && (
+          <div className="mb-8 rounded-lg border border-gold/40 bg-gold/5 px-4 py-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
+              {tCommon("reco_label")}
+            </p>
+            <p className="mt-1 text-sm italic leading-relaxed text-ink-mid">
+              {tCommon("reco_text")}
+            </p>
+          </div>
+        )}
+
         {/* Hero */}
         <header className="mb-14 grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end">
           <div>

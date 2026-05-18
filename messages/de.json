@@ -438,7 +438,9 @@
     "label_autonome": "Autonom",
     "label_recherche": "Suchmandat",
     "form_eyebrow": "Starten",
-    "form_subtitle": "Julien meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen."
+    "form_subtitle": "Julien meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen.",
+    "reco_label": "Unsere Empfehlung",
+    "reco_text": "Das Alleinvermittlungsmandat bleibt unsere Empfehlung. Der luxemburgische Markt ist klein; dasselbe Objekt bei mehreren Agenturen zu listen, zeigt es auf denselben Plattformen und signalisiert einen eiligen Verkauf — oft nachteilig in der Verhandlung."
   },
   "mandate_exclusif": {
     "title": "Exklusivmandat",

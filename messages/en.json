@@ -438,7 +438,9 @@
     "label_autonome": "Autonomous",
     "label_recherche": "Search",
     "form_eyebrow": "Get started",
-    "form_subtitle": "Julien will personally get back to you within 24 working hours."
+    "form_subtitle": "Julien will personally get back to you within 24 working hours.",
+    "reco_label": "Our recommendation",
+    "reco_text": "The exclusive mandate remains our recommendation. The Luxembourg market is small; listing the same property with several agencies exposes it on the same platforms and signals a rushed sale — often unfavourable in negotiation."
   },
   "mandate_exclusif": {
     "title": "Exclusive Mandate",
