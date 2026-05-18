@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { checkHoneypot } from "@/lib/honeypot";
+import { shouldDropTestLead } from "@/lib/test-email";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -24,6 +25,10 @@ export async function POST(req: Request) {
 
   if (!isEmail(body.email)) {
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
+  }
+  // BUG T7 : en prod, emails de test E2E -> OK sans INSERT.
+  if (shouldDropTestLead(body.email)) {
+    return NextResponse.json({ ok: true });
   }
   if (typeof body.name !== "string" || body.name.trim().length < 2) {
     return NextResponse.json({ error: "invalid_name" }, { status: 400 });

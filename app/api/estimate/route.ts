@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { estimateProperty, type EstimateInput, type EstimateResult } from "@/lib/estimate";
 import { fetchLatestInterestRates } from "@/lib/data";
+import { shouldDropTestLead } from "@/lib/test-email";
 import {
   estimate as estimateEvs,
   type EstimationInputs,
@@ -27,6 +28,9 @@ async function persistEstimationRequest(args: {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return;
+  // BUG T7 : en prod, ne pas persister les estimations de test E2E
+  // (le calcul/résultat est tout de même renvoyé à l'appelant).
+  if (shouldDropTestLead(args.contact_email)) return;
   const base = {
     inputs: args.inputs,
     client_output: args.client_output,

@@ -20,6 +20,7 @@ import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import type { LeadInsert } from "@/lib/types";
 import { isPlausiblePhone } from "@/lib/countries";
 import { insertLeadWithConsent } from "@/lib/lead-insert";
+import { shouldDropTestLead } from "@/lib/test-email";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -46,6 +47,10 @@ export async function POST(req: Request) {
   }
   if (typeof body.type !== "string" || !body.type) {
     return NextResponse.json({ error: "missing_type" }, { status: 400 });
+  }
+  // BUG T7 : en prod, emails de test E2E -> OK sans INSERT (anti-pollution).
+  if (shouldDropTestLead(body.email)) {
+    return NextResponse.json({ ok: true });
   }
 
   const turnstileOk = await verifyTurnstile(body.turnstile_token, clientIp(req));
