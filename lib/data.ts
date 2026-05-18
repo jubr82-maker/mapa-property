@@ -236,11 +236,31 @@ const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const NUMERIC_RE = /^[0-9]+$/;
 
-export async function fetchPropertyByIdOrSlug(
+// Codes d'erreur Postgres/PostgREST « bénins » = la ligne n'existe
+// simplement pas / requête inapplicable (PAS une panne) : on les traite
+// comme « introuvable », jamais comme erreur transitoire.
+//   PGRST116 = 0 ligne (maybeSingle)   22P02 = uuid/text invalide
+//   PGRST204 / 42703 = colonne absente
+const BENIGN_PG_CODES = new Set(["PGRST116", "22P02", "PGRST204", "42703"]);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Un passage de résolution. `transient` = au moins une requête a échoué
+// pour une raison NON bénigne (timeout 57014, réseau, 5xx, RLS, …) ->
+// l'appelant doit retenter avant de conclure à un 404 (BUG T1 : la
+// fiche s'ouvrait au reload car le 1er SSR tombait sur un échec
+// transitoire silencieusement transformé en notFound()).
+async function resolvePropertyOnce(
   identifier: string,
-): Promise<Property | null> {
+): Promise<{ data: Property | null; transient: boolean }> {
   const sb = supabaseServer();
   const isNumeric = NUMERIC_RE.test(identifier);
+  let transient = false;
+
+  const note = (where: string, error: { code?: string; message: string }) => {
+    if (error.code && BENIGN_PG_CODES.has(error.code)) return;
+    transient = true;
+    console.error(`[data] fetchPropertyByIdOrSlug ${where}`, error.message);
+  };
 
   // 1) Match strict slug (cas majoritaire)
   {
@@ -250,15 +270,11 @@ export async function fetchPropertyByIdOrSlug(
       .eq("slug", identifier)
       .eq("is_published", true)
       .maybeSingle();
-    if (!error && data) return data as Property;
-    if (error && error.code !== "PGRST116") {
-      console.error("[data] fetchPropertyByIdOrSlug slug", error.message);
-    }
+    if (!error && data) return { data: data as Property, transient: false };
+    if (error) note("slug", error);
   }
 
-  // 2) Match direct sur `id` (UUID Supabase ou identifiant Apimo numérique
-  //    stocké en text). Si Postgres rejette le format (22P02 invalid_text_
-  //    representation pour un UUID strict), on ignore silencieusement.
+  // 2) Match direct sur `id` (UUID Supabase ou identifiant Apimo numérique)
   {
     const { data, error } = await sb
       .from("properties")
@@ -266,14 +282,11 @@ export async function fetchPropertyByIdOrSlug(
       .eq("id", identifier)
       .eq("is_published", true)
       .maybeSingle();
-    if (!error && data) return data as Property;
-    if (error && error.code !== "PGRST116" && error.code !== "22P02") {
-      console.error("[data] fetchPropertyByIdOrSlug id", error.message);
-    }
+    if (!error && data) return { data: data as Property, transient: false };
+    if (error) note("id", error);
   }
 
-  // 3) Numérique → potentiel apimo_ref / apimo_id (best-effort, colonnes
-  //    tolérées : PGRST204 / 42703 si la colonne n'existe pas).
+  // 3) Numérique → potentiel apimo_ref / apimo_id
   if (isNumeric) {
     for (const col of ["apimo_ref", "apimo_id"] as const) {
       const { data, error } = await sb
@@ -282,18 +295,33 @@ export async function fetchPropertyByIdOrSlug(
         .eq(col, identifier)
         .eq("is_published", true)
         .maybeSingle();
-      if (!error && data) return data as Property;
-      if (
-        error &&
-        error.code !== "PGRST116" &&
-        error.code !== "PGRST204" &&
-        error.code !== "42703"
-      ) {
-        console.error(`[data] fetchPropertyByIdOrSlug ${col}`, error.message);
-      }
+      if (!error && data) return { data: data as Property, transient: false };
+      if (error) note(col, error);
     }
   }
 
+  return { data: null, transient };
+}
+
+export async function fetchPropertyByIdOrSlug(
+  identifier: string,
+): Promise<Property | null> {
+  let res = await resolvePropertyOnce(identifier);
+  if (res.data) return res.data;
+
+  // BUG T1 : on ne renvoie `null` (→ notFound) QUE si la résolution est
+  // « propre et vide ». En cas d'échec transitoire, un seul retry après
+  // un court délai (cold start Supabase / pic réseau) avant d'abandonner.
+  if (res.transient) {
+    await sleep(300);
+    res = await resolvePropertyOnce(identifier);
+    if (res.data) return res.data;
+    if (res.transient) {
+      console.error(
+        `[data] fetchPropertyByIdOrSlug "${identifier}" — échec transitoire après retry`,
+      );
+    }
+  }
   return null;
 }
 
