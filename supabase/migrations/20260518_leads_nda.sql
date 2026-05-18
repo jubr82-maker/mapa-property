@@ -1,0 +1,36 @@
+-- 20260518_leads_nda.sql — BUG 5 (demande de NDA off-market)
+--
+-- ⚠️ OPTIONNEL — NON REQUIS pour que la fonctionnalité marche.
+-- À appliquer manuellement par Julien dans Supabase Studio s'il
+-- souhaite une catégorie `type` DÉDIÉE pour les demandes de NDA.
+--
+-- CONTEXTE : l'endpoint /api/nda-request écrit dans `public.leads`
+-- (seule table en écriture autorisée). La policy RLS INSERT de `leads`
+-- impose une liste blanche de valeurs `type` : "contact" et
+-- "offmarket_request" passent, "nda_request" est REJETÉ
+-- (« new row violates row-level security policy for table leads »).
+--
+-- SOLUTION RETENUE (déjà en prod, sans migration) : on insère avec
+-- type = 'offmarket_request' (RLS-safe) et on discrimine la demande
+-- NDA via source = 'nda_request:offmarket:<id>' (filtrable côté admin).
+-- Aucune colonne manquante : `leads` a déjà email/first_name/last_name/
+-- phone/message/type/property_ref/source/lang/country.
+--
+-- Le bloc ci-dessous (commenté) montre comment ouvrir un type dédié
+-- 'nda_request' si souhaité plus tard. NE PAS décommenter sans relire
+-- la policy réelle en place (le nom exact de la policy peut différer).
+
+-- Exemple — élargir la liste blanche du type sur la policy INSERT de leads
+-- (adapter le nom de policy + l'expression WITH CHECK à l'existant) :
+--
+-- ALTER POLICY "<nom_policy_insert_leads>" ON public.leads
+--   WITH CHECK (
+--     type IN ('contact', 'offmarket_request', 'mandate_request',
+--              'estimation', 'nda_request')
+--   );
+--
+-- Puis, dans app/api/nda-request/route.ts, repasser
+--   type: "offmarket_request"  ->  type: "nda_request"
+-- et adapter le filtre admin correspondant.
+--
+-- En l'état : RIEN à appliquer. Fichier conservé pour traçabilité.

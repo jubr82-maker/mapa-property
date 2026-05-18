@@ -411,11 +411,16 @@
     "project_placeholder": "Einige Zeilen zum gesuchten Objekt, Ihrem Anschaffungshorizont, Ihrer Vermögenssituation.",
     "nda_label": "Ich akzeptiere die Bedingungen der vertraglichen NDA: keine Weitergabe an Dritte, keine Online-Veröffentlichung.",
     "proof_label": "Ich bestätige, dass meine Finanzkraft dem angegebenen Preis entspricht (Eigenkapital und/oder Bankfinanzierung).",
-    "submit": "Anfrage absenden",
+    "submit": "NDA anfordern",
+    "intro": "Anfrage einer vertraglichen NDA für den Zugang zum vollständigen Dossier",
     "error": "Bitte akzeptieren Sie die NDA und bestätigen Sie Ihre Finanzkraft, dann überprüfen Sie Ihre Kontaktdaten.",
     "success_eyebrow": "NDA-Anfrage empfangen",
     "success_title": "Ihre Anfrage wird geprüft.",
-    "success_text": "Julien meldet sich innerhalb von 24 Werkstunden mit der vertraglichen NDA und dem vollständigen Dossier."
+    "success_text": "Ihre NDA-Anfrage ist eingegangen. Julien Brebion meldet sich innerhalb von 24 Std. zur Übermittlung der vertraglichen NDA."
+  },
+  "rgpd": {
+    "consent_label": "Ich stimme zu, dass meine Daten von MAPA Property zur Bearbeitung meiner Anfrage gemäß der Datenschutzrichtlinie (DSGVO) verwendet werden.",
+    "policy_link": "Datenschutzrichtlinie"
   },
   "mandate_common": {
     "eyebrow": "Mandat",
