@@ -102,4 +102,41 @@ export async function PATCH(
   return NextResponse.json({ ok: true });
 }
 
+// Soft delete (BUG 6) — status = "deleted" (jamais de suppression dure ;
+// la liste admin filtre déjà neq("status","deleted")).
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const { error } = await supabase
+    .from("estimation_requests")
+    .update({ status: "deleted" })
+    .eq("id", id);
+
+  if (error) {
+    // CHECK status non encore élargi (migration 20260518_estimation_
+    // status_deleted.sql pas appliquée) → message actionnable.
+    const isCheck =
+      error.code === "23514" || /status/i.test(error.message ?? "");
+    return NextResponse.json(
+      {
+        error: isCheck
+          ? "Migration requise : appliquer supabase/migrations/20260518_estimation_status_deleted.sql (CHECK status n'autorise pas encore 'deleted')."
+          : error.message,
+      },
+      { status: isCheck ? 409 : 500 },
+    );
+  }
+  return NextResponse.json({ ok: true });
+}
+
 export const dynamic = "force-dynamic";

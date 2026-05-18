@@ -133,6 +133,32 @@ export function EstimationDetailClient({
     }
   }
 
+  async function deleteEstimation() {
+    if (
+      !window.confirm(
+        "Supprimer cette estimation ? (soft delete — masquée de la liste, non détruite)",
+      )
+    )
+      return;
+    setSaving(true);
+    setSavedMsg(null);
+    try {
+      const res = await fetch(`/api/admin/estimations/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        setSavedMsg(`Erreur : ${await res.text()}`);
+        return;
+      }
+      router.push("/admin/estimations");
+      router.refresh();
+    } catch (e) {
+      setSavedMsg(`Erreur réseau : ${(e as Error).message}`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function setSliderValue(k: MethodKey, v: number) {
     setWeights((prev) => ({ ...prev, [k]: v }));
   }
@@ -392,6 +418,19 @@ export function EstimationDetailClient({
             {savedMsg}
           </p>
         )}
+        <div className="mt-6 flex items-center justify-between gap-4 border-t border-red-200 pt-4">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-red-700/70">
+            Zone danger
+          </p>
+          <button
+            type="button"
+            onClick={deleteEstimation}
+            disabled={saving}
+            className="rounded-full border border-red-300 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50"
+          >
+            Supprimer
+          </button>
+        </div>
       </section>
     </>
   );

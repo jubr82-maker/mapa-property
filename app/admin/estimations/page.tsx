@@ -56,6 +56,7 @@ export default async function AdminEstimationsPage() {
     .select(
       "id, inputs, client_output, contact_email, contact_phone, engine, status, created_at",
     )
+    .neq("status", "deleted") // BUG 6 : masque les estimations soft-deleted
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -74,13 +75,21 @@ export default async function AdminEstimationsPage() {
             pour LU résidentiel, fallback hédoniste pour autres pays/types).
           </p>
         </div>
-        <div className="rounded-md border border-[#3D4F63]/15 bg-white px-4 py-2 text-right">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-            Total affiché
-          </p>
-          <p className="font-display text-2xl font-bold text-[#3D4F63]">
-            {rows?.length ?? 0}
-          </p>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/estimations/new"
+            className="rounded-full bg-[#9E7B2A] px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#B8865A]"
+          >
+            + Nouvelle estimation
+          </Link>
+          <div className="rounded-md border border-[#3D4F63]/15 bg-white px-4 py-2 text-right">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+              Total affiché
+            </p>
+            <p className="font-display text-2xl font-bold text-[#3D4F63]">
+              {rows?.length ?? 0}
+            </p>
+          </div>
         </div>
       </header>
 
