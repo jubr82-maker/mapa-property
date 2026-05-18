@@ -14,8 +14,9 @@ import Image from "next/image";
  */
 
 type LogoProps = {
-  /** Hauteur en px. La largeur s'adapte au ratio natif (~1.63:1) */
-  height?: 32 | 40 | 48 | 56 | 64 | 80 | 96;
+  /** Hauteur en px. La largeur s'adapte au ratio natif (~1.63:1).
+   *  44 / 76 ajoutés pour POL2 (logo header -20%). */
+  height?: 32 | 40 | 44 | 48 | 56 | 64 | 76 | 80 | 96;
   /** "auto" = bascule light/dark via CSS class. "light"/"dark" force */
   tone?: "auto" | "light" | "dark";
   className?: string;

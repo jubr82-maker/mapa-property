@@ -87,16 +87,18 @@ export function Header() {
 
         {/* Slot CENTRE — logo centré sur TOUS supports (BUG 10) */}
         <div className="flex justify-center">
+          {/* POL2 : logo -20% (96->76 desktop, 56->44 mobile) +
+              descendu de 8px (pt-2). */}
           <Link
             href="/"
             aria-label={`MAPA Property — ${t("home")}`}
-            className="inline-flex shrink-0 transition-opacity hover:opacity-80"
+            className="inline-flex shrink-0 pt-2 transition-opacity hover:opacity-80"
           >
             <span className="lg:hidden">
-              <Logo height={56} tone="auto" priority />
+              <Logo height={44} tone="auto" priority />
             </span>
             <span className="hidden lg:inline-block">
-              <Logo height={96} tone="auto" priority />
+              <Logo height={76} tone="auto" priority />
             </span>
           </Link>
         </div>
