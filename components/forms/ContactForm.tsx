@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Turnstile } from "@/components/ui/Turnstile";
+import { CountrySelect } from "@/components/ui/CountrySelect";
+import { DEFAULT_COUNTRY } from "@/lib/countries";
 
 interface Props {
   type: string;
@@ -30,6 +32,7 @@ export function ContactForm({
   const [status, setStatus] = useState<Status>("idle");
   const [errorKind, setErrorKind] = useState<ErrorKind>("generic");
   const [token, setToken] = useState<string | null>(null);
+  const [country, setCountry] = useState(DEFAULT_COUNTRY);
 
   // Si Turnstile n'est pas configuré côté client, on autorise la soumission
   // sans token (le back-end fait le bon choix : skip dev / fail prod).
@@ -48,6 +51,7 @@ export function ContactForm({
       last_name: String(formData.get("last_name") ?? ""),
       email: String(formData.get("email") ?? ""),
       phone: String(formData.get("phone") ?? ""),
+      country,
       message: String(formData.get("message") ?? ""),
       type,
       source,
@@ -112,6 +116,14 @@ export function ContactForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <Field name="email" type="email" label={t("email")} required />
         <Field name="phone" type="tel" label={t("phone")} />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <CountrySelect
+          label={t("country")}
+          value={country}
+          onChange={setCountry}
+          name="country"
+        />
       </div>
       {showSubject && <Field name="subject" label={t("subject")} />}
       <Field

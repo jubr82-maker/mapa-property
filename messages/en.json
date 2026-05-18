@@ -362,6 +362,7 @@
     "last_name": "Last name",
     "email": "Email",
     "phone": "Phone",
+    "country": "Country",
     "subject": "Subject",
     "message": "Message",
     "submit": "Send",

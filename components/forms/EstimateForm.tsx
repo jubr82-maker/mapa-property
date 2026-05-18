@@ -9,6 +9,8 @@ import {
   VDL_QUARTIERS_PRICES,
 } from "@/lib/data/luxembourg-prices";
 import { track } from "@/lib/tracking/track";
+import { CountrySelect } from "@/components/ui/CountrySelect";
+import { DEFAULT_COUNTRY } from "@/lib/countries";
 
 const PROPERTY_TYPES = [
   "appartement",
@@ -42,7 +44,7 @@ interface FormState {
 }
 
 const initial: FormState = {
-  country: "LU",
+  country: DEFAULT_COUNTRY,
   commune: "",
   quartier: "",
   postal: "",
@@ -203,13 +205,13 @@ export function EstimateForm() {
       {step === 2 && (
         <StepWrap title={t("step2_title")} subtitle={t("step2_subtitle")}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FieldSelect
+            <CountrySelect
               label={tSearch("country")}
               value={data.country}
-              onChange={(v) => set("country", v)}
-              options={["LU", "FR", "BE", "DE", "CH", "MC", "ES", "PT", "IT", "AE"].map(
-                (c) => ({ value: c, label: c }),
-              )}
+              onChange={(v) => {
+                set("country", v);
+                if (v !== "LU") set("quartier", "");
+              }}
             />
             {data.country === "LU" ? (
               <>
