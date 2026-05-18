@@ -33,6 +33,7 @@ export function NDAForm({ propertyRef, propertyTitle }: Props) {
 
   const [status, setStatus] = useState<Status>("idle");
   const [token, setToken] = useState<string | null>(null);
+  const [captchaFailed, setCaptchaFailed] = useState(false);
   const [f, setF] = useState({
     first_name: "",
     last_name: "",
@@ -50,7 +51,9 @@ export function NDAForm({ propertyRef, propertyTitle }: Props) {
     setF((p) => ({ ...p, [k]: v }));
 
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email);
-  const captchaReady = !turnstileEnabled || Boolean(token);
+  // BUG T3 : si Turnstile indisponible (script bloqué / timeout 10 s),
+  // on débloque et on laisse le serveur valider/rejeter.
+  const captchaReady = !turnstileEnabled || Boolean(token) || captchaFailed;
   const formValid =
     f.first_name.trim() !== "" &&
     f.last_name.trim() !== "" &&
@@ -198,7 +201,11 @@ export function NDAForm({ propertyRef, propertyTitle }: Props) {
         className="absolute -left-[9999px] size-0 opacity-0"
       />
 
-      <Turnstile onToken={setToken} className="mt-2" />
+      <Turnstile
+        onToken={setToken}
+        onUnavailable={() => setCaptchaFailed(true)}
+        className="mt-2"
+      />
 
       {status === "error" && (
         <p className="rounded-md border border-accent-warm/40 bg-accent-warm/10 px-4 py-2 font-mono text-xs text-accent-warm">

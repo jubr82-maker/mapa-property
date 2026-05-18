@@ -35,14 +35,17 @@ export function ContactForm({
   const [status, setStatus] = useState<Status>("idle");
   const [errorKind, setErrorKind] = useState<ErrorKind>("generic");
   const [token, setToken] = useState<string | null>(null);
+  const [captchaFailed, setCaptchaFailed] = useState(false);
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [rgpd, setRgpd] = useState(false);
 
   // Si Turnstile n'est pas configuré côté client, on autorise la soumission
   // sans token (le back-end fait le bon choix : skip dev / fail prod).
-  // Si configuré, on attend que le widget ait fourni un token avant d'accepter
-  // le submit — sinon le serveur renvoie 403 et l'utilisateur croit avoir échoué.
-  const captchaReady = !turnstileEnabled || Boolean(token);
+  // Si configuré, on attend un token AVANT le submit — SAUF si Turnstile
+  // est indisponible (script bloqué/timeout 10 s) : on débloque alors et
+  // on laisse le serveur valider/rejeter (BUG T3 : plus de moulinage
+  // infini sur « Vérification anti-spam en cours… »).
+  const captchaReady = !turnstileEnabled || Boolean(token) || captchaFailed;
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -139,7 +142,11 @@ export function ContactForm({
         required
       />
 
-      <Turnstile onToken={setToken} className="mt-2" />
+      <Turnstile
+        onToken={setToken}
+        onUnavailable={() => setCaptchaFailed(true)}
+        className="mt-2"
+      />
 
       {status === "error" && (
         <p className="rounded-md border border-accent-warm/40 bg-accent-warm/10 px-4 py-2 font-mono text-xs text-accent-warm">
