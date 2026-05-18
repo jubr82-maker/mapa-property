@@ -209,7 +209,10 @@ html {
 }
 
 .prose-mapa {
-  max-width: 65ch;
+  /* POL5 : largeur de lecture élargie 65ch -> 120ch (le conteneur
+     article 90vw/1400px de NAV6 borne la largeur effective ; sur
+     mobile le viewport étroit la cappe naturellement). */
+  max-width: 120ch;
   margin-left: auto;
   margin-right: auto;
   color: var(--ink-mid);
