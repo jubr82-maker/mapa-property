@@ -64,8 +64,9 @@ export function Header() {
       {/* BUG T8 : header élargi 1400 -> 1600px (logo inchangé 56/96px,
           la nav respire et s'éloigne du centre). */}
       <div className="mx-auto grid h-20 max-w-[1600px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:px-10">
-        {/* Slot GAUCHE — burger (mobile) / nav (desktop) */}
-        <div className="flex items-center justify-start gap-1">
+        {/* Slot GAUCHE — burger (mobile, à gauche) / nav desktop
+            resserrée vers le centre (POL3 : justify-end ≥lg). */}
+        <div className="flex items-center justify-start gap-1 lg:justify-end">
           <div className="lg:hidden">
             <HeaderBurger />
           </div>
@@ -103,9 +104,10 @@ export function Header() {
           </Link>
         </div>
 
-        {/* Slot DROITE — nav desktop ; vide sur mobile */}
-        <div className="flex items-center justify-end gap-1">
-          <div className="hidden items-center gap-1 lg:flex">
+        {/* Slot DROITE — nav desktop resserrée vers le centre, FR +
+            jour/nuit isolés à l'extrême droite (POL3) ; vide sur mobile */}
+        <div className="flex items-center justify-end gap-1 lg:justify-start">
+          <div className="hidden items-center gap-1 lg:flex lg:w-full">
             {/* NAV1 : ordre après logo — OFF-MARKET, SERVICES, JOURNAL. */}
             <Link
               href="/off-market"
@@ -122,7 +124,8 @@ export function Header() {
             >
               {t("journal")}
             </Link>
-            <div className="ml-2 flex items-center gap-2 border-l border-line pl-3">
+            {/* POL3 : poussé à l'extrême droite (ml-auto). */}
+            <div className="ml-auto flex items-center gap-2 border-l border-line pl-3">
               <LanguageSwitcher variant="light" />
               <ThemeToggle />
             </div>
