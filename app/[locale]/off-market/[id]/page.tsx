@@ -8,34 +8,9 @@ import { FavoriteHeart } from "@/components/property/FavoriteHeart";
 import { sbUrl } from "@/lib/supabase-url";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 
-function formatOffmarketPrice(p: {
-  price_mode: string | null;
-  price_estimate: number | null;
-  price_min: number | null;
-  price_max: number | null;
-  price_custom_text: string | null;
-}): string {
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "EUR",
-      maximumFractionDigits: 0,
-    }).format(n);
-  switch (p.price_mode) {
-    case "exact":
-      return p.price_estimate ? fmt(p.price_estimate) : "Prix sur demande";
-    case "range":
-      if (p.price_min && p.price_max) return `${fmt(p.price_min)} – ${fmt(p.price_max)}`;
-      if (p.price_min) return `À partir de ${fmt(p.price_min)}`;
-      if (p.price_max) return `Jusqu'à ${fmt(p.price_max)}`;
-      return "Prix sur demande";
-    case "custom":
-      return p.price_custom_text || "Prix sur demande";
-    case "on_request":
-    default:
-      return "Prix sur demande";
-  }
-}
+// BUG 1 : off-market = confidentiel → "Prix sur demande" partout (home +
+// fiche), jamais le prix réel. Helper de prix dynamique retiré (politique
+// de confidentialité prioritaire sur l'affichage du prix exact).
 
 export default async function OffMarketDetailPage({
   params,
@@ -81,7 +56,7 @@ export default async function OffMarketDetailPage({
             {[property.country, property.city_label].filter(Boolean).join(" · ")}
           </p>
           <p className="mt-4 font-display text-3xl font-black tracking-tight gold-text sm:text-4xl">
-            {formatOffmarketPrice(property)}
+            Prix sur demande
           </p>
         </header>
 

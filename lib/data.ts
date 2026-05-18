@@ -159,7 +159,7 @@ export async function fetchHomeFeatured(limit = 6): Promise<HomeFeatured[]> {
       city: row.city_label,
       country: row.country,
       price: null,
-      price_label: row.price_label ?? row.price_display ?? "Prix sur demande",
+      price_label: "Prix sur demande", // BUG 1 : off-market confidentiel — jamais le prix réel
       cover_url: row.cover_image_url,
       surface: row.surface_hab,
       bedrooms: row.bedrooms,
