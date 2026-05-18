@@ -19,6 +19,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import type { LeadInsert } from "@/lib/types";
 import { isPlausiblePhone } from "@/lib/countries";
+import { insertLeadWithConsent } from "@/lib/lead-insert";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -52,6 +53,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "turnstile_failed" }, { status: 403 });
   }
 
+  // Consentement RGPD (BUG 7) : horodaté serveur si le client l'a coché.
+  // Tracé aussi dans message (durable même si la colonne dédiée n'est
+  // pas encore migrée — cf. insertLeadWithConsent).
+  const consentAt =
+    body.rgpd_consent === true ? new Date().toISOString() : undefined;
+  const baseMessage =
+    typeof body.message === "string" ? body.message : undefined;
+  const message = consentAt
+    ? `${baseMessage ?? ""}\n\n[RGPD] consentement accordé le ${consentAt}`.trim()
+    : baseMessage;
+
   const lead: LeadInsert = {
     email: body.email,
     first_name:
@@ -64,7 +76,7 @@ export async function POST(req: Request) {
       typeof body.phone === "string" && isPlausiblePhone(body.phone)
         ? body.phone
         : undefined,
-    message: typeof body.message === "string" ? body.message : undefined,
+    message,
     type: body.type,
     property_ref:
       typeof body.property_ref === "string" ? body.property_ref : undefined,
@@ -75,9 +87,14 @@ export async function POST(req: Request) {
   };
 
   const sb = supabaseServer();
-  const { error } = await sb.from("leads").insert(lead);
-  if (error) {
-    console.error("[api/lead] supabase insert", error.message);
+  const res = await insertLeadWithConsent(
+    sb,
+    "leads",
+    lead as unknown as Record<string, unknown>,
+    consentAt,
+  );
+  if (!res.ok) {
+    console.error("[api/lead] supabase insert", res.error);
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 

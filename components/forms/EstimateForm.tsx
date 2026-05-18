@@ -11,6 +11,7 @@ import {
 import { track } from "@/lib/tracking/track";
 import { CountrySelect } from "@/components/ui/CountrySelect";
 import { PhoneInput } from "@/components/ui/PhoneInput";
+import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
 
 const PROPERTY_TYPES = [
@@ -42,6 +43,7 @@ interface FormState {
   contactEmail: string;
   contactPhone: string;
   contactConsent: boolean;
+  rgpdConsent: boolean;
 }
 
 const initial: FormState = {
@@ -60,11 +62,13 @@ const initial: FormState = {
   contactEmail: "",
   contactPhone: "",
   contactConsent: false,
+  rgpdConsent: false,
 };
 
 export function EstimateForm() {
   const t = useTranslations("estimate_form");
   const tSearch = useTranslations("search");
+  const tRgpd = useTranslations("rgpd");
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FormState>(initial);
   const [result, setResult] = useState<EstimateResult | null>(null);
@@ -99,6 +103,7 @@ export function EstimateForm() {
           // Coordonnées : on les passe pour qu'un lead soit créé côté serveur si présent
           contactEmail: data.contactEmail || undefined,
           contactPhone: data.contactPhone || undefined,
+          rgpdConsent: data.rgpdConsent,
         }),
       });
       if (!res.ok) throw new Error();
@@ -292,6 +297,26 @@ export function EstimateForm() {
               label={t("contact_consent")}
             />
           </div>
+          <div className="mt-3">
+            <label className="flex items-start gap-3 text-sm leading-snug text-ink-mid">
+              <input
+                type="checkbox"
+                checked={data.rgpdConsent}
+                onChange={(e) => set("rgpdConsent", e.target.checked)}
+                className="mt-0.5 size-4 accent-gold-deep"
+              />
+              <span>
+                {tRgpd("consent_label")}{" "}
+                <Link
+                  href="/legal/rgpd"
+                  target="_blank"
+                  className="underline hover:text-gold-deep"
+                >
+                  {tRgpd("policy_link")}
+                </Link>
+              </span>
+            </label>
+          </div>
           {error && (
             <p className="mt-3 rounded-md border border-accent-warm/40 bg-accent-warm/10 px-4 py-2 font-mono text-xs text-accent-warm">
               {error}
@@ -302,7 +327,9 @@ export function EstimateForm() {
             onSubmit={submit}
             pending={pending}
             t={t}
-            disabled={!data.contactConsent || !data.contactEmail}
+            disabled={
+              !data.contactConsent || !data.rgpdConsent || !data.contactEmail
+            }
           />
         </StepWrap>
       )}

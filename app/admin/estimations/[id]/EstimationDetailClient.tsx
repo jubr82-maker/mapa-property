@@ -26,6 +26,7 @@ interface Props {
   contactEmail: string | null;
   contactPhone: string | null;
   consent: boolean;
+  rgpdConsentAt?: string | null;
   methods: Record<string, MethodResult>;
   weightsInitial: Record<string, number>;
   statusLabels: Record<string, string>;
@@ -68,6 +69,7 @@ export function EstimationDetailClient({
   contactEmail,
   contactPhone,
   consent,
+  rgpdConsentAt,
   methods,
   weightsInitial,
   statusLabels,
@@ -180,8 +182,18 @@ export function EstimationDetailClient({
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-[#1A1F2A]/60">Consentement RGPD</dt>
-              <dd className={consent ? "text-emerald-700" : "text-red-700"}>
-                {consent ? "✓ obtenu" : "✗ non obtenu"}
+              <dd
+                className={
+                  rgpdConsentAt || consent
+                    ? "text-emerald-700"
+                    : "text-red-700"
+                }
+              >
+                {rgpdConsentAt
+                  ? `✓ obtenu le ${new Date(rgpdConsentAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })}`
+                  : consent
+                    ? "✓ obtenu"
+                    : "✗ non obtenu"}
               </dd>
             </div>
           </dl>

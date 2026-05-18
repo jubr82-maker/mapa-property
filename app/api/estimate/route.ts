@@ -22,23 +22,41 @@ async function persistEstimationRequest(args: {
   session_id?: string;
   ip_hash?: string;
   locale?: string;
+  rgpd_consent_at?: string;
 }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return;
+  const base = {
+    inputs: args.inputs,
+    client_output: args.client_output,
+    internal_output: args.internal_output,
+    engine: args.engine,
+    contact_email: args.contact_email ?? null,
+    contact_phone: args.contact_phone ?? null,
+    session_id: args.session_id ?? null,
+    ip_hash: args.ip_hash ?? null,
+    locale: args.locale ?? null,
+  };
   try {
     const supabase = createClient(url, key);
-    await supabase.from("estimation_requests").insert({
-      inputs: args.inputs,
-      client_output: args.client_output,
-      internal_output: args.internal_output,
-      engine: args.engine,
-      contact_email: args.contact_email ?? null,
-      contact_phone: args.contact_phone ?? null,
-      session_id: args.session_id ?? null,
-      ip_hash: args.ip_hash ?? null,
-      locale: args.locale ?? null,
-    });
+    // Consentement RGPD (BUG 7) : on tente AVEC les colonnes
+    // rgpd_consent_at/consent ; si la migration 20260518_rgpd_consent.sql
+    // n'est pas encore appliquée (colonne inconnue), on retente SANS
+    // (l'audit trail reste persisté). Jamais d'échec bloquant.
+    if (args.rgpd_consent_at) {
+      const { error } = await supabase.from("estimation_requests").insert({
+        ...base,
+        consent: true,
+        rgpd_consent_at: args.rgpd_consent_at,
+      });
+      if (!error) return;
+      console.warn(
+        "[api/estimate] rgpd_consent_at absente — migration à appliquer, persist dégradé:",
+        error.message,
+      );
+    }
+    await supabase.from("estimation_requests").insert(base);
   } catch (err) {
     console.error("[api/estimate] persist failed:", err);
   }
@@ -85,7 +103,11 @@ export async function POST(req: Request) {
     contactPhone?: string;
     sessionId?: string;
     locale?: string;
+    rgpdConsent?: boolean;
   };
+
+  const rgpdConsentAt =
+    body.rgpdConsent === true ? new Date().toISOString() : undefined;
 
   if (
     !body.country ||
@@ -133,6 +155,7 @@ export async function POST(req: Request) {
         session_id: body.sessionId,
         ip_hash: ipHash,
         locale: body.locale,
+        rgpd_consent_at: rgpdConsentAt,
       });
 
       return NextResponse.json({
@@ -167,6 +190,7 @@ export async function POST(req: Request) {
     session_id: body.sessionId,
     ip_hash: ipHash,
     locale: body.locale,
+    rgpd_consent_at: rgpdConsentAt,
   });
 
   return NextResponse.json({ result, rate, engine: "hedonic_legacy" });

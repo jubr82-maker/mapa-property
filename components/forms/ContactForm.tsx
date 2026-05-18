@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Turnstile } from "@/components/ui/Turnstile";
 import { CountrySelect } from "@/components/ui/CountrySelect";
 import { PhoneInput } from "@/components/ui/PhoneInput";
+import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
 
 interface Props {
@@ -30,10 +31,12 @@ export function ContactForm({
 }: Props) {
   const locale = useLocale();
   const t = useTranslations("form");
+  const tRgpd = useTranslations("rgpd");
   const [status, setStatus] = useState<Status>("idle");
   const [errorKind, setErrorKind] = useState<ErrorKind>("generic");
   const [token, setToken] = useState<string | null>(null);
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
+  const [rgpd, setRgpd] = useState(false);
 
   // Si Turnstile n'est pas configuré côté client, on autorise la soumission
   // sans token (le back-end fait le bon choix : skip dev / fail prod).
@@ -53,6 +56,7 @@ export function ContactForm({
       email: String(formData.get("email") ?? ""),
       phone: String(formData.get("phone") ?? ""),
       country,
+      rgpd_consent: rgpd,
       message: String(formData.get("message") ?? ""),
       type,
       source,
@@ -88,7 +92,7 @@ export function ContactForm({
         ? t("error_invalid")
         : t("error");
   const submitDisabled =
-    status === "submitting" || (turnstileEnabled && !captchaReady);
+    status === "submitting" || !rgpd || (turnstileEnabled && !captchaReady);
   const submitLabel =
     status === "submitting"
       ? t("submitting")
@@ -142,6 +146,25 @@ export function ContactForm({
           {errorMessage}
         </p>
       )}
+
+      <label className="flex items-start gap-3 text-sm leading-snug text-ink-mid">
+        <input
+          type="checkbox"
+          checked={rgpd}
+          onChange={(e) => setRgpd(e.target.checked)}
+          className="mt-0.5 size-4 accent-gold-deep"
+        />
+        <span>
+          {tRgpd("consent_label")}{" "}
+          <Link
+            href="/legal/rgpd"
+            target="_blank"
+            className="underline hover:text-gold-deep"
+          >
+            {tRgpd("policy_link")}
+          </Link>
+        </span>
+      </label>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-ink-soft">{t("rgpd_notice")}</p>

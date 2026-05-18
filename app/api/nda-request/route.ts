@@ -15,6 +15,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { checkHoneypot } from "@/lib/honeypot";
 import { isPlausiblePhone } from "@/lib/countries";
+import { insertLeadWithConsent } from "@/lib/lead-insert";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -112,21 +113,26 @@ export async function POST(req: Request) {
   // est RLS-safe ; la nature NDA est portée par `source` (filtrable
   // admin) et l'audit consentement reste dans `message`.
   const sb = supabaseServer();
-  const { error } = await sb.from("leads").insert({
-    email: body.email,
-    first_name: firstName,
-    last_name: lastName,
-    phone,
-    message,
-    type: "offmarket_request",
-    property_ref: propertyRef,
-    source: `nda_request:offmarket:${propertyRef}`,
-    country: str(body.country),
-    lang: str(body.lang),
-  } as never);
+  const ins = await insertLeadWithConsent(
+    sb,
+    "leads",
+    {
+      email: body.email,
+      first_name: firstName,
+      last_name: lastName,
+      phone,
+      message,
+      type: "offmarket_request",
+      property_ref: propertyRef,
+      source: `nda_request:offmarket:${propertyRef}`,
+      country: str(body.country),
+      lang: str(body.lang),
+    },
+    consentAt,
+  );
 
-  if (error) {
-    console.error("[api/nda-request] supabase insert", error.message);
+  if (!ins.ok) {
+    console.error("[api/nda-request] supabase insert", ins.error);
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 

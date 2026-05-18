@@ -32,7 +32,24 @@ type LeadRow = {
   property_ref: string | null;
   workflow_status?: string | null;
   next_follow_up?: string | null;
+  rgpd_consent_at?: string | null;
 };
+
+// Consentement RGPD (BUG 7). Source structurée = colonne
+// rgpd_consent_at (après migration 20260518_rgpd_consent.sql). Tant
+// qu'elle n'est pas migrée, on dérive de l'audit toujours présent
+// dans `message` (« [RGPD] consentement accordé le <ISO> ») —
+// résilient, aucun changement de requête à risque.
+function rgpdConsentAt(l: {
+  rgpd_consent_at?: string | null;
+  message: string | null;
+}): string | null {
+  if (l.rgpd_consent_at) return l.rgpd_consent_at;
+  const m = l.message?.match(
+    /\[RGPD\]\s*consentement accordé le\s*(\S+)/i,
+  );
+  return m ? m[1] : null;
+}
 
 const TABS: { key: string; label: string }[] = [
   { key: "new", label: "Nouveau" },
@@ -226,6 +243,26 @@ export default async function AdminLeadsPage({
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
+                  {(() => {
+                    const c = rgpdConsentAt(l);
+                    return c ? (
+                      <span
+                        title={`Consentement RGPD obtenu le ${new Date(c).toLocaleString("fr-FR")}`}
+                        className="rounded-full bg-emerald-600/15 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-emerald-700"
+                      >
+                        RGPD ✓{" "}
+                        {new Date(c).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-[#3D4F63]/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]/50">
+                        RGPD ✗
+                      </span>
+                    );
+                  })()}
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
                     {new Date(l.created_at).toLocaleDateString("fr-FR", {
                       day: "2-digit",
