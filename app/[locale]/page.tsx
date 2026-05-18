@@ -6,8 +6,7 @@ import { CoverageGrid } from "@/components/home/CoverageGrid";
 import { ServicesTable } from "@/components/home/ServicesTable";
 import { OffMarketBand } from "@/components/home/OffMarketBand";
 import { MandatesGrid } from "@/components/home/MandatesGrid";
-import { MarketsSection } from "@/components/home/MarketsSection";
-import { StatsBand } from "@/components/home/StatsBand";
+import { CoverageStats } from "@/components/home/CoverageStats";
 import { ProcessTable } from "@/components/home/ProcessTable";
 import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
@@ -34,18 +33,23 @@ export default async function HomePage({
 
   return (
     <>
+      {/* POL6 : ordre home — Hero, Coups de cœur, Familles d'actifs,
+          CTA Mandat (remonté), Couverture+Chiffres fusionnés, Méthode
+          (remontée avant), Six métiers, puis off-market/avis/journal.
+          SearchBar conservé (ancre #search du Hero) ; OffMarketBand /
+          Reviews / Blog conservés (non listés au brief mais existants —
+          pas de suppression non demandée). */}
       <Hero locale={locale} />
       <SearchBar />
       <FeaturedCarousel items={featured} />
       <CoverageGrid />
-      <ServicesTable />
-      <OffMarketBand />
       <MandatesGrid />
-      <MarketsSection />
-      <StatsBand locale={locale} />
+      <CoverageStats locale={locale} />
       <ProcessTable />
-      {/* NAV7 : « mot fondateur » (QuoteBand) retiré — à réécrire avec
-          Julien (cf. docs/qa/COPY_REWRITES_TODO.md). */}
+      <ServicesTable />
+      {/* NAV7 : « mot fondateur » (QuoteBand) retiré (cf.
+          docs/qa/COPY_REWRITES_TODO.md). */}
+      <OffMarketBand />
       <ReviewsCarousel reviews={reviews} />
       <BlogTeaser posts={blogPosts} locale={locale as Locale} />
       {/* NAV8 : ContactCTA « Une conversation peut tout changer »

@@ -27,7 +27,10 @@ export async function StatsBand({ locale }: { locale: string }) {
   ]);
 
   return (
-    <section className="bg-bg-contrast px-6 py-6 text-text-contrast md:py-20 lg:px-10 lg:py-20">
+    // POL6 : <div> (pas <section>) — band fusionné avec MarketsSection
+    // dans CoverageStats. Padding resserré (py réduit) pour lire comme
+    // un seul bloc « couverture en chiffres ».
+    <div className="mt-8 rounded-2xl bg-bg-contrast px-6 py-8 text-text-contrast md:mt-10 md:py-12 lg:px-10">
       <div className="mx-auto max-w-[1400px]">
         <p className="mb-6 max-w-xl font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:mb-12 md:text-xs">
           {eyebrow}
@@ -56,6 +59,6 @@ export async function StatsBand({ locale }: { locale: string }) {
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
