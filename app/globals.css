@@ -238,6 +238,25 @@ html {
 .prose-mapa p {
   margin-bottom: 1.1rem;
 }
+/* BUG T6 : typo article nettement réduite sur mobile (demande Julien). */
+@media (max-width: 640px) {
+  .prose-mapa {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .prose-mapa h2 {
+    font-size: 1.4rem;
+    line-height: 1.15;
+    margin-bottom: 0.9rem;
+  }
+  .prose-mapa h3 {
+    font-size: 1.15rem;
+    margin-top: 1.4rem;
+  }
+  .prose-mapa p {
+    margin-bottom: 0.9rem;
+  }
+}
 .prose-mapa a {
   color: var(--gold-deep);
   text-decoration: underline;
