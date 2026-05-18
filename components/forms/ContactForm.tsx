@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Turnstile } from "@/components/ui/Turnstile";
 import { CountrySelect } from "@/components/ui/CountrySelect";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
 
 interface Props {
@@ -115,7 +116,7 @@ export function ContactForm({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field name="email" type="email" label={t("email")} required />
-        <Field name="phone" type="tel" label={t("phone")} />
+        <PhoneInput name="phone" label={t("phone")} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <CountrySelect

@@ -18,6 +18,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import type { LeadInsert } from "@/lib/types";
+import { isPlausiblePhone } from "@/lib/countries";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -57,7 +58,12 @@ export async function POST(req: Request) {
       typeof body.first_name === "string" ? body.first_name : undefined,
     last_name:
       typeof body.last_name === "string" ? body.last_name : undefined,
-    phone: typeof body.phone === "string" ? body.phone : undefined,
+    // Tolérant : on capture le lead même si le téléphone est mal formé,
+    // on évite juste de stocker du bruit (validation serveur légère BUG 3).
+    phone:
+      typeof body.phone === "string" && isPlausiblePhone(body.phone)
+        ? body.phone
+        : undefined,
     message: typeof body.message === "string" ? body.message : undefined,
     type: body.type,
     property_ref:

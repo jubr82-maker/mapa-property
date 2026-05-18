@@ -9,7 +9,8 @@
     "theme_light": "Tagmodus",
     "theme_dark": "Nachtmodus",
     "loading": "Lädt…",
-    "back": "Zurück"
+    "back": "Zurück",
+    "phone_too_short": "Nummer zu kurz"
   },
   "nav": {
     "home": "Startseite",

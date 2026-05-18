@@ -9,7 +9,8 @@
     "theme_light": "Mode jour",
     "theme_dark": "Mode nuit",
     "loading": "Chargement…",
-    "back": "Retour"
+    "back": "Retour",
+    "phone_too_short": "Numéro trop court"
   },
   "nav": {
     "home": "Accueil",

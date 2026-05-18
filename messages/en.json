@@ -9,7 +9,8 @@
     "theme_light": "Light mode",
     "theme_dark": "Dark mode",
     "loading": "Loading…",
-    "back": "Back"
+    "back": "Back",
+    "phone_too_short": "Number too short"
   },
   "nav": {
     "home": "Home",

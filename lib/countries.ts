@@ -79,3 +79,18 @@ export const PHONE_MIN_DIGITS: Record<string, number> = {
 export function phoneMinDigits(code: string): number {
   return PHONE_MIN_DIGITS[code.toUpperCase()] ?? 6;
 }
+
+// Validation serveur légère (BUG 3) — sans libphonenumber-js. Plausible
+// si : commence par un indicatif connu + assez de chiffres nationaux
+// (>= min du pays). Tolérant par design : un lead ne doit jamais être
+// perdu sur un format de téléphone (l'API dégrade au lieu de rejeter).
+export function isPlausiblePhone(combined: string): boolean {
+  const s = combined.trim();
+  if (!s) return false;
+  const match = COUNTRIES.filter((c) => s.startsWith(c.phone_prefix)).sort(
+    (a, b) => b.phone_prefix.length - a.phone_prefix.length,
+  )[0];
+  if (!match) return false;
+  const national = s.slice(match.phone_prefix.length).replace(/\D/g, "");
+  return national.length >= phoneMinDigits(match.code);
+}

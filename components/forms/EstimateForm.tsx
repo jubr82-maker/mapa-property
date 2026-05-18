@@ -10,6 +10,7 @@ import {
 } from "@/lib/data/luxembourg-prices";
 import { track } from "@/lib/tracking/track";
 import { CountrySelect } from "@/components/ui/CountrySelect";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
 
 const PROPERTY_TYPES = [
@@ -279,13 +280,9 @@ export function EstimateForm() {
               placeholder="vous@exemple.com"
               autoComplete="email"
             />
-            <FieldText
-              type="tel"
+            <PhoneInput
               label={t("contact_phone")}
-              value={data.contactPhone}
               onChange={(v) => set("contactPhone", v)}
-              placeholder="+352 ..."
-              autoComplete="tel"
             />
           </div>
           <div className="mt-4">
