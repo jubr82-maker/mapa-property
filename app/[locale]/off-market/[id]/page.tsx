@@ -7,10 +7,13 @@ import { NDAForm } from "@/components/forms/NDAForm";
 import { FavoriteHeart } from "@/components/property/FavoriteHeart";
 import { sbUrl } from "@/lib/supabase-url";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
+import { PropertyPrice } from "@/components/property/PropertyPrice";
 
-// BUG 1 : off-market = confidentiel → "Prix sur demande" partout (home +
-// fiche), jamais le prix réel. Helper de prix dynamique retiré (politique
-// de confidentialité prioritaire sur l'affichage du prix exact).
+// POL2-9 : le prix off-market est désormais pilotable depuis le BO via
+// le drapeau `price_on_demand`. Par DÉFAUT (false ou colonne absente) le
+// prix réel formaté (price_display) est affiché — inversion DÉLIBÉRÉE du
+// comportement BUG 1 qui forçait "Prix sur demande" partout en dur. Si
+// l'admin coche la case, le prix est masqué ("Prix sur demande" localisé).
 
 export default async function OffMarketDetailPage({
   params,
@@ -55,9 +58,12 @@ export default async function OffMarketDetailPage({
           <p className="mt-3 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
             {[property.country, property.city_label].filter(Boolean).join(" · ")}
           </p>
-          <p className="mt-4 font-display text-3xl font-black tracking-tight gold-text sm:text-4xl">
-            Prix sur demande
-          </p>
+          <PropertyPrice
+            priceOnDemand={property.price_on_demand}
+            display={property.price_display}
+            locale={locale}
+            className="mt-4 block font-display text-3xl font-black tracking-tight gold-text sm:text-4xl"
+          />
         </header>
 
         {/* Cover confidentiel standardisé (BUG 2) — jamais le visuel réel,

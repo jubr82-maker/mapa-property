@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { fetchOffmarketList } from "@/lib/data";
 import type { PropertyOffmarket } from "@/lib/types";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
+import { PropertyPrice } from "@/components/property/PropertyPrice";
 
 export default async function OffMarketListPage({
   params,
@@ -118,7 +119,7 @@ export default async function OffMarketListPage({
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {list.map((p) => (
-              <OffMarketTeaser key={p.id} property={p} t={t} />
+              <OffMarketTeaser key={p.id} property={p} t={t} locale={locale} />
             ))}
           </div>
         )}
@@ -143,9 +144,11 @@ function Step({ num, title, text }: { num: string; title: string; text: string }
 function OffMarketTeaser({
   property,
   t,
+  locale,
 }: {
   property: PropertyOffmarket;
   t: (key: string) => string;
+  locale: string;
 }) {
   return (
     <Link
@@ -179,9 +182,12 @@ function OffMarketTeaser({
             {property.short_pitch}
           </p>
         )}
-        <p className="mt-auto font-display text-lg font-bold gold-text">
-          {property.price_display ?? t("price_on_request")}
-        </p>
+        <PropertyPrice
+          priceOnDemand={property.price_on_demand}
+          display={property.price_display ?? t("price_on_request")}
+          locale={locale}
+          className="mt-auto block font-display text-lg font-bold gold-text"
+        />
       </div>
     </Link>
   );

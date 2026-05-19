@@ -482,6 +482,12 @@ function mapPublicRows(
       price_min: (r.price_min as number | null) ?? null,
       price_max: (r.price_max as number | null) ?? null,
       price_custom_text: (r.price_custom_text as string | null) ?? null,
+      // POL2-9 : tolérant — colonne absente (migration non appliquée) ⇒
+      // undefined ⇒ null ⇒ traité comme false (prix réel affiché).
+      price_on_demand:
+        typeof r.price_on_demand === "boolean"
+          ? (r.price_on_demand as boolean)
+          : null,
     };
   });
 }

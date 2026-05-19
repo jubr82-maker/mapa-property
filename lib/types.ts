@@ -58,6 +58,10 @@ export interface PropertyOffmarket {
   price_min: number | null;
   price_max: number | null;
   price_custom_text: string | null;
+  // POL2-9 : masque le prix ("Prix sur demande") si true. Colonne
+  // potentiellement absente tant que la migration n'est pas appliquée
+  // → traitée comme false (prix affiché) côté mapper/composant.
+  price_on_demand: boolean | null;
   short_pitch: string | null;
   description: string | null;
   highlights: string[] | null;

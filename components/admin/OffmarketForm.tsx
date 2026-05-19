@@ -623,9 +623,41 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
   const initial: PriceMode = (row?.price_mode as PriceMode) ||
     (row?.price_estimate ? "exact" : "on_request");
   const [mode, setMode] = useState<PriceMode>(initial);
+  // POL2-9 : drapeau "Prix sur demande" (masque le prix public).
+  // Colonne potentiellement absente tant que la migration n'est pas
+  // appliquée → lue de façon tolérante, défaut false.
+  const initialOnDemand =
+    (row as { price_on_demand?: boolean | null } | null)?.price_on_demand ===
+    true;
+  const [priceOnDemand, setPriceOnDemand] = useState(initialOnDemand);
 
   return (
     <Section title="Prix">
+      <div className="md:col-span-2">
+        {/* Sentinelle toujours soumise : permet à l'action de distinguer
+            "formulaire soumis depuis cet onglet, case décochée" (→ false)
+            d'un onglet jamais monté (→ valeur DB conservée). */}
+        <input type="hidden" name="price_on_demand_present" value="1" />
+        <label className="flex items-start gap-3 rounded-md border border-[#3D4F63]/20 bg-[#F5EFE1]/40 px-3 py-3">
+          <input
+            type="checkbox"
+            name="price_on_demand"
+            checked={priceOnDemand}
+            onChange={(e) => setPriceOnDemand(e.target.checked)}
+            className="mt-0.5 size-4 rounded border-[#3D4F63]/30 accent-[#B8865A]"
+          />
+          <span className="text-sm leading-snug text-[#1A1F2A]">
+            <span className="font-semibold">
+              Afficher « Prix sur demande » (masquer le prix)
+            </span>
+            <span className="mt-0.5 block text-xs text-[#3D4F63]/70">
+              Décoché par défaut : le prix réel est affiché publiquement.
+              Cochez pour masquer le montant et n&apos;afficher que « Prix
+              sur demande ».
+            </span>
+          </span>
+        </label>
+      </div>
       <div className="md:col-span-2">
         <Field label="Mode d'affichage du prix">
           <select

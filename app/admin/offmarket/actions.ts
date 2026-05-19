@@ -39,6 +39,7 @@ const OPTIONAL_OFFMARKET_COLUMNS = [
   "price_min",
   "price_max",
   "price_custom_text",
+  "price_on_demand",
   "is_coup_de_coeur",
   "composition_commerces",
   "composition_bureaux",
@@ -200,6 +201,10 @@ function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, s
     price_custom_text: str(formData.get("price_custom_text")),
     price_label: priceLabelByMode,
     price_display: priceLabelByMode,
+    // POL2-9 : drapeau "Prix sur demande" (masque le prix public).
+    // Décoché par défaut ⇒ false ⇒ prix réel affiché (inversion
+    // délibérée de BUG 1).
+    price_on_demand: bool(formData.get("price_on_demand")),
 
     // Contenu
     short_pitch: str(formData.get("short_description")),
@@ -268,6 +273,19 @@ function buildOffmarketUpdatePayload(
       payload[key] = existing[key];
     }
     // sinon : on n'ajoute rien (Supabase ne touche pas la colonne)
+  }
+
+  // POL2-9 : price_on_demand. Une case décochée n'envoie AUCUNE entrée
+  // FormData → la boucle ci-dessus garderait existing. La sentinelle
+  // `price_on_demand_present` (hidden, toujours soumise quand l'onglet
+  // Prix est monté) permet de distinguer "case décochée" (→ false) d'un
+  // onglet jamais affiché (→ valeur DB conservée).
+  if (formData.has("price_on_demand_present")) {
+    payload.price_on_demand = bool(formData.get("price_on_demand"));
+  } else if ("price_on_demand" in existing) {
+    payload.price_on_demand = existing.price_on_demand;
+  } else {
+    delete payload.price_on_demand;
   }
 
   // reference : TOUJOURS utiliser existing.reference en édition
