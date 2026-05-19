@@ -18,8 +18,15 @@ import { AcquisitionSimulator } from "@/components/property/AcquisitionSimulator
 import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
 import { PropertyVideo } from "@/components/property/PropertyVideo";
 import { PropertyViewTracker } from "@/components/property/PropertyViewTracker";
+import { FicheHeader } from "@/components/property/fiche/FicheHeader";
+import { FicheSpecs } from "@/components/property/fiche/FicheSpecs";
+import { FicheAccordion } from "@/components/property/fiche/FicheAccordion";
+import { FicheConditions } from "@/components/property/fiche/FicheConditions";
+import { FicheLocation } from "@/components/property/fiche/FicheLocation";
+import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
+import { FicheReviews } from "@/components/property/fiche/FicheReviews";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 import { parseApimoDescription } from "@/lib/property-description-parser";
-import { Link as IntlLink } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumb, propertyListing } from "@/lib/seo";
 
@@ -74,6 +81,7 @@ export default async function PropertyPage({
   ]);
 
   const t = await getTranslations({ locale, namespace: "property" });
+  const tf = await getTranslations({ locale, namespace: "fiche" });
   const title = pickLang(property, "title", locale as Locale);
   const description = pickLang(property, "description", locale as Locale);
   const parsedDescription = parseApimoDescription(description);
@@ -132,6 +140,109 @@ export default async function PropertyPage({
     { name: title, url: `${SITE_URL}/${locale}/biens/${property.slug}` },
   ]);
 
+
+  const formattedPrice = formatPrice(
+    property.price,
+    property.transaction,
+    locale,
+  );
+  const txMeta = t(`tx_${property.transaction}`);
+
+  // Specs — toutes les données Supabase préservées, "—" si absent.
+  const specs = [
+    { label: t("living_surface"), value: property.living_surface ? `${property.living_surface} m²` : "—" },
+    { label: t("surface"), value: property.surface ? `${property.surface} m²` : "—" },
+    { label: t("bedrooms"), value: property.bedrooms != null ? String(property.bedrooms) : "—" },
+    { label: t("bathrooms"), value: property.bathrooms != null ? String(property.bathrooms) : "—" },
+    { label: t("energy"), value: property.energy ?? "—" },
+    { label: t("parking"), value: property.parking != null ? String(property.parking) : "—" },
+    { label: t("year"), value: property.year ? String(property.year) : "—" },
+    { label: t("land_surface"), value: property.land_surface ? `${property.land_surface} m²` : "—" },
+    { label: t("terrace_surface"), value: property.terrace_surface ? `${property.terrace_surface} m²` : "—" },
+  ];
+
+  const hasDescription =
+    !!description &&
+    (parsedDescription.intro || parsedDescription.chapters.length > 0);
+
+  const panels = [
+    {
+      id: "overview",
+      label: tf("tab_overview"),
+      content: (
+        <div className="space-y-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
+            {tf("tab_overview_title")}
+          </p>
+          <p className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
+            {title}
+          </p>
+          <p className="text-sm leading-relaxed text-ink-mid">
+            {parsedDescription.intro
+              ? parsedDescription.intro.slice(0, 280)
+              : tf("overview_intro")}
+          </p>
+        </div>
+      ),
+    },
+    {
+      id: "description",
+      label: tf("tab_description"),
+      content: hasDescription ? (
+        <PropertyMagazineDescription
+          description={description}
+          parsed={parsedDescription}
+        />
+      ) : (
+        <p className="text-sm leading-relaxed text-ink-mid">
+          {tf("overview_intro")}
+        </p>
+      ),
+    },
+    {
+      id: "location",
+      label: tf("tab_location"),
+      content: (
+        <FicheLocation
+          labels={{
+            title: tf("location_title"),
+            env: tf("location_env"),
+            na: tf("location_na"),
+          }}
+          city={property.city}
+          country={property.country}
+        />
+      ),
+    },
+    {
+      id: "conditions",
+      label: tf("tab_conditions"),
+      content: (
+        <FicheConditions
+          variant="standard"
+          labels={{
+            financing: tf("conditions_financing"),
+            fees: tf("conditions_fees"),
+            feesText: tf("conditions_fees_text"),
+            process: tf("conditions_process"),
+            processText: tf("conditions_process_text"),
+            offmarketText: tf("conditions_offmarket_text"),
+          }}
+          financing={
+            price > 0 && property.transaction !== "rent" ? (
+              <AcquisitionSimulator
+                price={price}
+                country={property.country ?? "LU"}
+                city={property.city ?? ""}
+                variant="compact"
+              />
+            ) : null
+          }
+        />
+      ),
+    },
+  ];
+
   return (
     <article className="pt-24 lg:pt-32">
       <PropertyViewTracker
@@ -142,229 +253,55 @@ export default async function PropertyPage({
       />
       <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
-        <div className="mb-6 flex items-center justify-between gap-4 print:hidden">
-          <BackButton fallback="/biens" />
-          <PropertyActions propertyId={property.id} />
-        </div>
+        <FicheHeader
+          back={<BackButton fallback="/biens" />}
+          actions={<PropertyActions propertyId={property.id} />}
+          eyebrow={{
+            lead: [property.country ?? "", property.city ?? ""],
+            accent: property.badge,
+          }}
+          title={title}
+          price={formattedPrice}
+          meta={txMeta}
+        />
 
-        {/* Header */}
-        <header className="mb-10">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
-            {[property.country, property.city].filter(Boolean).join(" · ")}
-            {property.badge && <> · <span className="text-gold-deep">{property.badge}</span></>}
-          </p>
-          <h1 className="mt-3 t-h1">
-            {title || "—"}
-          </h1>
-          <div className="mt-4 flex flex-wrap items-baseline gap-x-6 gap-y-2">
-            <p className="font-display text-3xl font-black tracking-tight gold-text sm:text-4xl">
-              {formatPrice(property.price, property.transaction, locale)}
-            </p>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-soft">
-              {t(`tx_${property.transaction}`)}
-            </p>
-          </div>
-        </header>
-
-        {/* Gallery */}
+        {/* Galerie + vidéo (POL2-10, null si absente) */}
         <PropertyGallery items={galleryItems} title={title} />
-
-        {/* Vidéo de présentation — galerie + lightbox (POL2-10).
-            Rend null automatiquement si video_url absent. */}
         <PropertyVideo
           videoUrl={property.video_url}
           poster={galleryItems[0]?.url}
           labels={{ eyebrow: t("video") }}
         />
 
-        {/* Main grid */}
+        {/* Grille principale : specs + 4 onglets | colonne droite épurée */}
         <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_360px]">
           <div className="space-y-12">
-            {/* Specs */}
-            <section>
-              <h2 className="mb-6 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
-                {t("specs")}
-              </h2>
-              <dl className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-                <Spec
-                  label={t("surface")}
-                  value={property.surface ? `${property.surface} m²` : "—"}
-                />
-                <Spec
-                  label={t("living_surface")}
-                  value={
-                    property.living_surface ? `${property.living_surface} m²` : "—"
-                  }
-                />
-                <Spec
-                  label={t("bedrooms")}
-                  value={
-                    property.bedrooms !== null && property.bedrooms !== undefined
-                      ? String(property.bedrooms)
-                      : "—"
-                  }
-                />
-                <Spec
-                  label={t("bathrooms")}
-                  value={
-                    property.bathrooms !== null && property.bathrooms !== undefined
-                      ? String(property.bathrooms)
-                      : "—"
-                  }
-                />
-                <Spec label={t("energy")} value={property.energy ?? "—"} />
-                <Spec
-                  label={t("parking")}
-                  value={
-                    property.parking !== null && property.parking !== undefined
-                      ? String(property.parking)
-                      : "—"
-                  }
-                />
-                <Spec
-                  label={t("year")}
-                  value={property.year ? String(property.year) : "—"}
-                />
-                <Spec
-                  label={t("land_surface")}
-                  value={
-                    property.land_surface ? `${property.land_surface} m²` : "—"
-                  }
-                />
-                <Spec
-                  label={t("terrace_surface")}
-                  value={
-                    property.terrace_surface
-                      ? `${property.terrace_surface} m²`
-                      : "—"
-                  }
-                />
-              </dl>
-            </section>
-
-            {/* Description (magazine éditorial) */}
-            {description && (parsedDescription.intro || parsedDescription.chapters.length > 0) && (
-              <section>
-                <h2 className="mb-6 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
-                  {t("description")}
-                </h2>
-                <PropertyMagazineDescription
-                  description={description}
-                  parsed={parsedDescription}
-                />
-              </section>
-            )}
-
-            {/* Reviews */}
-            {reviews.length > 0 && (
-              <section className="border-t border-line pt-10">
-                <h2 className="mb-6 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
-                  {t("reviews")}
-                </h2>
-                <ul className="grid gap-4 sm:grid-cols-2">
-                  {reviews.slice(0, 2).map((r) => (
-                    <li
-                      key={r.id}
-                      className="rounded-xl border border-line bg-bg-soft p-5"
-                    >
-                      <div className="flex items-center gap-1 text-gold-bright">
-                        {Array.from({ length: r.rating ?? 5 }).map((_, i) => (
-                          <span key={i}>★</span>
-                        ))}
-                      </div>
-                      <blockquote className="mt-3 text-sm leading-relaxed text-ink-mid">
-                        “{r.comment ?? ""}”
-                      </blockquote>
-                      <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-                        {r.name ?? "—"}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            <FicheSpecs heading={t("specs")} items={specs} />
+            <FicheAccordion panels={panels} />
           </div>
 
-          {/* Sidebar */}
-          <aside className="space-y-6">
-            <div className="rounded-xl border border-line bg-bg-soft p-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-                {t("advisor")}
-              </p>
-              {/* Bloc conseiller unique — pas de noms exposés en SSR (anti-scraping) */}
-              <div className="mt-2">
-                <h3 className="t-h3">
-                  {t("advisor_block_title")}
-                </h3>
-                <p className="mt-1 text-sm text-ink-mid">
-                  {t("advisor_block_roles")}
-                </p>
-                <div className="mt-4">
-                  <ContactReveal variant="sidebar" align="left" />
-                </div>
-              </div>
-            </div>
-
-            {/* CTA Mandat Exclusif — vendeurs */}
-            <div
-              className="overflow-hidden rounded-xl p-5 text-white shadow-sm"
-              style={{
-                backgroundImage:
-                  "linear-gradient(135deg, #B8865A 0%, #8B6635 100%)",
-              }}
-            >
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/80">
-                Mandat Exclusif
-              </p>
-              <p className="mt-2 font-display text-base font-bold leading-snug text-white">
-                Vous vendez un bien d&apos;exception ?
-              </p>
-              <p className="mt-2 text-xs text-white/85">
-                3% HT + 17% TVA. Marketing premium, exclusivité MAPA,
-                négociation et suivi dédiés.
-              </p>
-              <IntlLink
-                href="/mandats/exclusif"
-                className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] shadow-sm transition-transform hover:scale-[1.02]"
-                style={{ color: "#8B6635" }}
-              >
-                Découvrir le Mandat Exclusif →
-              </IntlLink>
-            </div>
-
-            {/* CTA Mandat de recherche */}
-            <div className="rounded-xl border border-gold/40 bg-bg p-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
-                Mandat de recherche
-              </p>
-              <p className="mt-2 font-display text-base font-bold leading-snug text-ink">
-                Vous cherchez un bien similaire ?
-              </p>
-              <p className="mt-2 text-sm text-ink-mid">
-                Confiez-nous votre recherche. Nous mobilisons nos canaux —
-                marché ouvert, off-market et réseau privé.
-              </p>
-              <IntlLink
-                href={`/mandats/recherche?ref=${property.slug}&type=${propertyType ?? ""}&country=${property.country ?? ""}`}
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-deep px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-bg transition-colors hover:bg-gold"
-              >
-                Demander un mandat de recherche →
-              </IntlLink>
-            </div>
-
-            {/* Simulateur d'acquisition par pays */}
-            {price > 0 && property.transaction !== "rent" && (
-              <AcquisitionSimulator
-                price={price}
-                country={property.country ?? "LU"}
-                city={property.city ?? ""}
-                variant="compact"
-              />
-            )}
-          </aside>
+          <FicheAdvisorColumn
+            labels={{
+              advisor: t("advisor"),
+              advisorRoles: t("advisor_block_roles"),
+              exclusiveEyebrow: tf("exclusive_mandate_eyebrow"),
+              exclusiveTitle: tf("exclusive_mandate_title"),
+              exclusiveText: tf("exclusive_mandate_text"),
+              exclusiveCta: tf("exclusive_mandate_cta"),
+              searchEyebrow: tf("search_mandate_eyebrow"),
+              searchTitle: tf("search_mandate_title"),
+              searchText: tf("search_mandate_text"),
+              searchCta: tf("search_mandate_cta"),
+            }}
+            searchMandateHref={`/mandats/recherche?ref=${property.slug}&type=${propertyType ?? ""}&country=${property.country ?? ""}`}
+            contact={<ContactReveal variant="sidebar" align="left" />}
+          />
         </div>
 
-        {/* Contact form */}
+        {/* Avis clients discrets */}
+        <FicheReviews heading={tf("reviews_title")} reviews={reviews} />
+
+        {/* Formulaire "Une question sur ce bien ?" */}
         <section
           id="contact-form"
           className="mt-20 rounded-2xl border border-line bg-bg-soft p-8 sm:p-12"
@@ -373,9 +310,7 @@ export default async function PropertyPage({
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
               {t("form_eyebrow")}
             </p>
-            <h2 className="mt-2 t-h2">
-              {t("form_title")}
-            </h2>
+            <h2 className="mt-2 t-h2">{t("form_title")}</h2>
             <p className="mt-3 text-base text-ink-mid">{t("form_subtitle")}</p>
           </header>
           <ContactForm
@@ -386,12 +321,13 @@ export default async function PropertyPage({
           />
         </section>
 
-        {/* Similar */}
+        {/* Biens similaires */}
         {similar.length > 0 && (
           <section className="mt-20 mb-16">
-            <h2 className="mb-8 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+            <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
               {t("similar")}
             </h2>
+            <SignatureLine width="w-8" />
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {similar.map((p) => (
                 <PropertyCard key={p.id} property={p} locale={locale as Locale} />
@@ -401,16 +337,5 @@ export default async function PropertyPage({
         )}
       </div>
     </article>
-  );
-}
-
-function Spec({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
-        {label}
-      </dt>
-      <dd className="mt-1 font-display text-2xl font-bold text-ink">{value}</dd>
-    </div>
   );
 }
