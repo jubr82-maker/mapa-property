@@ -27,6 +27,9 @@ import {
   type CommunePrices,
   type VdlQuartierPrices,
 } from "@/lib/data/luxembourg-prices";
+import { calcParkingValue, computeParkingAdjustment } from "@/lib/estimation/parking-coeff";
+import { calcLandValue, getLandZone } from "@/lib/estimation/land-zones";
+import { getApartmentBaseline } from "@/lib/data/luxembourg-prices";
 
 // ============================================================================
 // Types
@@ -36,7 +39,36 @@ export type PropertyType = "appartement" | "maison" | "penthouse" | "duplex" | "
 export type PropertyState = "to_renovate" | "good" | "renovated" | "new";
 export type EnergyClass = "A++" | "A+" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I";
 
+/**
+ * Catégories de travaux EVS (POL3-6). 11 catégories + `piscine`.
+ * Chacune : grâce (années 100 % rétention) puis décote linéaire annuelle.
+ */
+export type WorkCategory =
+  | "toiture"
+  | "facade_isolation"
+  | "pac"
+  | "chauffage"
+  | "photovoltaique"
+  | "electricite"
+  | "menuiseries"
+  | "cuisine"
+  | "salle_de_bain"
+  | "peinture"
+  | "sols_revetements"
+  | "amenagement_exterieur"
+  | "piscine";
+
+export interface WorkItem {
+  category: WorkCategory;
+  /** Année de réalisation des travaux (1980-2026). */
+  year: number;
+  /** Montant € HT engagé (optionnel — 0 si non renseigné). */
+  amount: number;
+}
+
 export interface EstimationInputs {
+  /** Pays ISO 3166-1 alpha-2. EVS = LUXEMBOURG UNIQUEMENT. */
+  country?: string;
   type: PropertyType;
   commune: string;
   quartier?: string; // si Luxembourg-Ville
@@ -48,12 +80,26 @@ export interface EstimationInputs {
   energy?: EnergyClass;
   // Spécificités
   parking?: boolean;
+  /** Nombre d'emplacements de parking INTÉRIEUR (box/garage). */
+  parkingInterior?: number;
+  /** Nombre d'emplacements de parking EXTÉRIEUR. */
+  parkingExterior?: number;
+  /** Travaux récents déclarés (vétusté appliquée par catégorie). */
+  works?: WorkItem[];
   terrace?: number; // m²
-  view?: "open" | "blocked" | "exceptional";
+  view?: "open" | "blocked" | "exceptional" | "panoramic";
   floor?: number; // 0 = RDC, négatif = sous-sol
   totalFloors?: number;
   lift?: boolean;
   exposureSouth?: boolean;
+  /** Surface sous-sol AMÉNAGÉ/FINI m² (maisons — annexes au-delà de 30 m²). */
+  basementFinishedSqm?: number;
+}
+
+/** Retour d'erreur pays non couvert (EVS = LU only). */
+export interface CountryNotCoveredError {
+  error: "COUNTRY_NOT_COVERED";
+  message: string;
 }
 
 export type Confidence = "HIGH" | "MEDIUM" | "LOW";
@@ -135,18 +181,21 @@ const STATE_COEF: Record<PropertyState, number> = {
  * Valeurs retenues (extrémité la moins agressive de chaque plage pour D,
  * justifiée par le bon vieillissement du bâti early-2000s LU) :
  */
+// FIGÉ — calibration finale MAPA-validée Julien (POL3-6 Étape 1.D).
+// NE PAS modifier. Spec : A+/AP/A 1.10 ; "A++" = top tier → 1.10 (clé du
+// type EnergyClass, alignée sur A+/A conformément au barème Julien).
 const ENERGY_COEF: Record<EnergyClass, number> = {
-  "A++": 1.08,
-  "A+": 1.07,
-  A: 1.065,
-  B: 1.0,
-  C: 0.96,
-  D: 0.91,
+  "A++": 1.1,
+  "A+": 1.1,
+  A: 1.1,
+  B: 1.05,
+  C: 1.02,
+  D: 1.0,
   E: 0.86,
   F: 0.84,
   G: 0.8,
   H: 0.78,
-  I: 0.76,
+  I: 0.78,
 };
 
 /**
@@ -155,28 +204,159 @@ const ENERGY_COEF: Record<EnergyClass, number> = {
  *   1990-99 : −12/−18 % | 1980-89 : −18/−25 % | <1980 non rénové : −25/−35 %.
  * Si l'année est inconnue → 1.0 (neutre, pas de pénalité arbitraire).
  */
-function yearCoef(year: number | undefined, state: PropertyState): number {
+// FIGÉ — calibration finale MAPA-validée Julien (POL3-6 Étape 1.E).
+// NE PAS modifier. Année absente → 1.0 (neutre, dégradation gracieuse).
+function yearCoef(year: number | undefined): number {
   if (!year) return 1.0;
-  if (year >= 2020) return 1.07; // +7 % (milieu +5/+10)
-  if (year >= 2010) return 1.0; // baseline
-  if (year >= 2000) return 0.92; // −8 % (extrémité haute −8/−12)
-  if (year >= 1990) return 0.85; // −15 %
-  if (year >= 1980) return 0.79; // −21 %
-  // <1980 : la décote forte ne s'applique qu'au bâti non rénové ;
-  // un bien rénové/neuf a déjà été requalifié via STATE_COEF.
-  return state === "to_renovate" ? 0.68 : 0.82; // −32 % / −18 %
+  if (year >= 2020) return 1.0;
+  if (year >= 2010) return 0.96;
+  if (year >= 2000) return 0.92;
+  if (year >= 1990) return 0.88;
+  if (year >= 1980) return 0.84;
+  return 0.78;
 }
 
 /**
- * Bonus parking/garage privatif (€ fixes).
+ * Valeur € totale des emplacements de parking d'un bien (POL3-6).
  *
- * Recalibration POL2-6 : l'ancienne valeur couronne (20 000 €) datait du
- * marché ~2023. Les emplacements/garages privatifs en couronne périphérique
- * LU se négocient 28-35 k€ en 2025-26 (relevés notariés / Observatoire). On
- * retient 30 000 € (couronne) et 35 000 € (Luxembourg-Ville).
+ * Coefficient PAR COMMUNE délégué à `lib/estimation/parking-coeff.ts`
+ * (module dédié, valeurs Observatoire/notarié 2025-26 : box couronne
+ * 28-35 k€, hyper-centre/Belair 40-50 k€).
+ *
+ * Rétrocompat : l'ancien drapeau `parking: boolean` (POL2-6, formulaire
+ * legacy) ⇒ 1 emplacement INTÉRIEUR si parkingInterior/Exterior absents.
  */
-function parkingBonus(commune: string): number {
-  return normCommune(commune).startsWith("luxembourg") ? 35000 : 30000;
+function computeParkingValue(inputs: EstimationInputs): number {
+  let interior = inputs.parkingInterior ?? 0;
+  let exterior = inputs.parkingExterior ?? 0;
+  if (
+    inputs.parkingInterior === undefined &&
+    inputs.parkingExterior === undefined &&
+    inputs.parking
+  ) {
+    interior = 1;
+  }
+  if (interior <= 0 && exterior <= 0) return 0;
+  return calcParkingValue(inputs.commune, inputs.quartier, interior, exterior);
+}
+
+// ============================================================================
+// MODULE TRAVAUX / VÉTUSTÉ (POL3-6)
+// ============================================================================
+//
+// Barème MAPA Property — décote progressive par catégorie de travaux.
+// Chaque catégorie a un nombre d'années de GRÂCE (rétention 100 % de la
+// plus-value : travaux comme neufs) puis une DÉCOTE LINÉAIRE annuelle
+// (decayPerYear) jusqu'à un plancher (floor). Plus le poste est durable
+// (toiture, isolation), plus la grâce est longue et la décote lente ; les
+// postes esthétiques (peinture) vieillissent vite.
+//
+// `piscine` est un cas spécial : c'est une PRIME sur la valeur du bien
+// (0.15) tant que l'âge ≤ graceYears (7 ans, neuve/quasi-neuve) ; au-delà,
+// elle bascule sur une rétention décroissante appliquée au montant.
+//
+// Sources de calibrage : TEGoVA EVS 2020 (dépréciation par composant),
+// barèmes d'usure du bâti Observatoire de l'Habitat / Ministère du
+// Logement (durées de vie utiles des lots techniques).
+
+interface WorkCategorySpec {
+  /** Années de rétention 100 %. */
+  graceYears: number;
+  /** Décote linéaire par an au-delà de la grâce (fraction). */
+  decayPerYear: number;
+  /** Piscine uniquement : prime (fraction de la valeur du bien). */
+  premium?: number;
+}
+
+// Barème vétusté MAPA-VALIDÉ (Julien, POL3-6). Cap plancher = 0
+// (la rétention peut tomber à -100 %). NE PAS recalibrer ici : seules
+// les baselines €/m² communes (luxembourg-prices.ts) sont ajustables.
+export const WORKS_CATEGORIES: Record<WorkCategory, WorkCategorySpec> = {
+  // GROS ŒUVRE LOURD : grâce 2 ans, décote 2 %/an, cap -100%
+  toiture: { graceYears: 2, decayPerYear: 0.02 },
+  facade_isolation: { graceYears: 2, decayPerYear: 0.02 },
+  pac: { graceYears: 2, decayPerYear: 0.02 },
+  chauffage: { graceYears: 2, decayPerYear: 0.02 },
+
+  // PHOTOVOLTAÏQUE : pas de grâce, décote 4 %/an, cap -100% à 25 ans
+  photovoltaique: { graceYears: 0, decayPerYear: 0.04 },
+
+  // GROS ŒUVRE TECHNIQUE : grâce 2 ans, décote 5 %/an, cap -100%
+  electricite: { graceYears: 2, decayPerYear: 0.05 },
+  menuiseries: { graceYears: 2, decayPerYear: 0.05 },
+
+  // CUISINE / SDB : pas de grâce, décote 5 %/an, cap -100% à 20 ans
+  cuisine: { graceYears: 0, decayPerYear: 0.05 },
+  salle_de_bain: { graceYears: 0, decayPerYear: 0.05 },
+
+  // LÉGER : pas de grâce, décote 5 %/an, cap -100% à 20 ans
+  peinture: { graceYears: 0, decayPerYear: 0.05 },
+  sols_revetements: { graceYears: 0, decayPerYear: 0.05 },
+  amenagement_exterieur: { graceYears: 0, decayPerYear: 0.05 },
+
+  // PISCINE : prime +15 % les 7 premières années, décote 5 %/an dès an 8
+  piscine: { graceYears: 7, decayPerYear: 0.05, premium: 0.15 },
+};
+
+/** Prime piscine par défaut (fraction de la valeur du bien) — fallback. */
+export const POOL_PREMIUM = 0.15;
+
+/**
+ * Rétention [0..1] d'un poste de travaux selon son ancienneté.
+ *
+ * - âge ≤ graceYears        → 1.0 (travaux comme neufs).
+ * - âge > graceYears        → 1 − (âge − grâce) × decayPerYear,
+ *                             borné au plancher de la catégorie.
+ *
+ * Pour `piscine`, retourne la rétention sur le MONTANT (la prime sur
+ * valeur du bien est gérée en amont par `calcWorksAddedValue`).
+ */
+export function calcWorkRetention(
+  category: WorkCategory,
+  yearOfWork: number,
+  currentYear = 2026,
+): number {
+  const spec = WORKS_CATEGORIES[category];
+  const age = Math.max(0, currentYear - yearOfWork);
+  if (age <= spec.graceYears) return 1.0;
+  const decayed = 1 - (age - spec.graceYears) * spec.decayPerYear;
+  return Math.max(0, decayed); // cap plancher 0 (peut tomber à -100 %)
+}
+
+/**
+ * Plus-value € totale apportée par les travaux déclarés.
+ *
+ * - `piscine` : si âge ≤ graceYears → prime = basePropertyValue × 0.15
+ *   (une piscine récente valorise le BIEN, pas le coût du chantier) ;
+ *   sinon → montant × rétention (piscine vieillissante = actif amorti).
+ * - autres catégories : montant × rétention (plus-value = part résiduelle
+ *   de l'investissement encore « lisible » dans le bien).
+ *
+ * Montant 0 (non renseigné) → contribution 0 pour la catégorie, SAUF
+ * piscine récente (prime sur valeur du bien, indépendante du montant).
+ */
+export function calcWorksAddedValue(
+  works: WorkItem[] | undefined,
+  basePropertyValue: number,
+  currentYear = 2026,
+): number {
+  if (!works || works.length === 0) return 0;
+  let addedValue = 0;
+  for (const work of works) {
+    const retention = calcWorkRetention(work.category, work.year, currentYear);
+    if (work.category === "piscine") {
+      const ageInYears = currentYear - work.year;
+      const cat = WORKS_CATEGORIES.piscine;
+      if (ageInYears <= cat.graceYears) {
+        addedValue += basePropertyValue * (cat.premium ?? POOL_PREMIUM) * retention;
+      } else {
+        addedValue += (work.amount || 0) * retention;
+      }
+    } else {
+      addedValue += (work.amount || 0) * retention;
+    }
+  }
+  return addedValue;
 }
 
 /** Type de bien : coefficient sur prix base appartement référence. */
@@ -312,16 +492,15 @@ export function getBaseline(
 //     des comparables notariés — pratique de segmentation Observatoire).
 // Puis facteur de correction marché 2026 = −3 % (Observatoire Q4'25/Q1'26).
 
-const PERIPHERAL_COMMUNES = new Set([
-  "strassen",
-  "bertrange",
-  "mamer",
-  "steinfort",
-  "kehlen",
-  "koerich",
-]);
+// POL3-6 — CADRAGE MÉTIER : le moteur s'applique UNIFORMÉMENT à TOUTES
+// les communes LU (aucune exclue), chacune avec SA baseline notariée. La
+// segmentation dans la fourchette notariée `real_existing_range` n'est
+// donc plus restreinte à 6 communes : elle s'applique à toute commune LU
+// disposant d'une fourchette notariée publiée parsable (le référentiel
+// `real_existing_range` couvre les communes à volume ≥10 ventes). Sinon
+// (peu de ventes, range "*") → baseline standard inchangée (fallback).
 
-/** Correction marché 2026 (Observatoire Q4'25/Q1'26 — léger repli). */
+/** Correction marché 2026 (Observatoire Q4'25/Q1'26 — repli marché de masse). */
 const MARKET_2026_CORRECTION = 0.97;
 
 /** Parse "4440 € - 10048 €" → { low, high } ; null si non parsable. */
@@ -336,29 +515,67 @@ function parseRange(range: string | null): { low: number; high: number } | null 
 }
 
 /**
- * Position [0..1] dans la fourchette notariée selon état + année.
- *  to_renovate / ancien            → ~0.10-0.30 (bas de fourchette, revu down)
- *  good + post-2000                → ~0.85 (segment supérieur des comparables)
- *  renovated/new + récent          → ~0.95
+ * Position [0..1] dans la fourchette notariée selon état + année (POL3-6).
+ *
+ * Recalibrée pour V2 : `real_existing_avg_m2` est une MOYENNE qui mélange
+ * tout le stock (1960s→neuf). Le segment qui correspond à un bien donné
+ * doit refléter sa qualité RELATIVE dans le panel notarié de la commune :
+ *  - to_renovate                   → bas de fourchette (0.00)
+ *  - good (état d'usage courant)    → tiers inférieur (0.10), c'est le
+ *    stock le plus représenté donc proche du bas/médian du panel
+ *  - renovated                     → ~0.30
+ *  - new                           → ~0.55 (sans atteindre le sommet du
+ *    panel, réservé au neuf prime VEFA hors périmètre)
+ * Récence : +0.15 si ≥2000, +0.30 si ≥2015 (cumulatif au seuil atteint),
+ * −0.10 si <1980 (stock ancien). Plafonné [0,1]. Calibrage Observatoire
+ * Q4'25/Q1'26 (marché de masse en correction post-pic 2022) ; bandes
+ * cibles brief POL3-6 vérifiées par scripts/test-engine.mjs.
  */
+// Calibration finale MAPA-validée Julien (POL3-6 Étape 1.C). "good" ne doit
+// jamais coller au plafond — plafond réservé à "new + récent 2020+".
 function rangePosition(state: PropertyState, year: number | undefined): number {
-  let p: number;
-  if (state === "to_renovate") p = 0.1;
-  else if (state === "good") p = 0.75;
-  else if (state === "renovated") p = 0.9;
-  else p = 1.0; // new → haut du panel notarié de la commune
-  // Bonus récence : un bien post-2000 se négocie dans le haut du panel
-  // (les comparables notariés hauts de fourchette sont du bâti récent).
-  if (year) {
-    if (year >= 2000) p += 0.25;
-    else if (year < 1980) p -= 0.15;
+  let pos: number;
+  switch (state) {
+    case "to_renovate":
+      pos = 0.1;
+      break;
+    case "good":
+      pos = 0.45;
+      break;
+    case "renovated":
+      pos = 0.7;
+      break;
+    case "new":
+      pos = 0.9;
+      break;
+    default:
+      pos = 0.45;
   }
-  return Math.max(0, Math.min(1, p));
+  if (year !== undefined) {
+    if (year >= 2020) pos += 0.15;
+    else if (year >= 2010) pos += 0.1;
+    else if (year >= 2000) pos += 0.05;
+    else if (year < 1980) pos -= 0.15;
+  }
+  return Math.max(0, Math.min(1.0, pos));
 }
 
 /**
- * Recalibre le €/m² baseline pour les 6 communes périphériques visées.
- * Retourne null si non concerné (→ baseline standard inchangée).
+ * Recalibre le €/m² baseline par SEGMENTATION dans la fourchette notariée
+ * publiée `real_existing_range` de la commune (Observatoire 2025).
+ *
+ * POL3-6 — CADRAGE : appliqué à TOUTE commune LU disposant d'une
+ * fourchette notariée parsable, pour les APPARTEMENTS. Retourne null si
+ * la commune n'a pas de fourchette notariée fiable (peu de ventes →
+ * fallback baseline standard, jamais d'exclusion arbitraire).
+ *
+ * MAISON : la fourchette notariée `real_existing_range` du référentiel
+ * mixe TOUT le stock vendu (fortement pondéré appartements/VEFA, plus
+ * chers au m² que les maisons individuelles dans ces communes — cf.
+ * écart `estimated_maison_m2_from_ann` ≈ 0,7 × appartement). La segmenter
+ * sur-évaluerait les maisons. Les maisons restent donc sur leur baseline
+ * `estimated_maison_m2_from_ann` (annonces maisons décotées −8,75 %,
+ * Observatoire) via getBaseline — recalibration appartement-only.
  */
 function peripheralRecalibratedBaseline(
   type: "appartement" | "maison",
@@ -367,19 +584,16 @@ function peripheralRecalibratedBaseline(
   year: number | undefined,
 ): { pricePerM2: number; reference: string } | null {
   if (type !== "appartement") return null;
-  const key = normCommune(commune).replace(/-/g, " ");
-  if (!PERIPHERAL_COMMUNES.has(key)) return null;
   const c = findCommune(commune);
   if (!c) return null;
   const r = parseRange(c.real_existing_range);
   if (!r) return null;
   const pos = rangePosition(state, year);
   const segmented = r.low + pos * (r.high - r.low);
-  // Correction marché 2026 segment-aware (Observatoire Q4'25/Q1'26) : le repli
-  // pèse sur le marché de masse ; le stock prime bien entretenu / récent (haut
-  // de fourchette) s'est montré plus résilient → correction atténuée au-delà
-  // du 80e centile du panel. Conforme au brief « revoir DOWN » pour le stock
-  // courant, sans sous-évaluer artificiellement le segment supérieur réel.
+  // Correction marché 2026 segment-aware (Observatoire Q4'25/Q1'26) : le
+  // repli pèse sur le marché de masse (bas/médian du panel) ; le stock
+  // prime/récent (haut de fourchette) s'est montré plus résilient → la
+  // correction s'atténue au-delà du 80e centile du panel.
   const corrFactor =
     pos >= 0.8 ? 1.0 : MARKET_2026_CORRECTION + (1 - MARKET_2026_CORRECTION) * (pos / 0.8);
   const corrected = Math.round(segmented * corrFactor);
@@ -478,7 +692,7 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
   const eff = effectiveBaseline(propType, inputs, baseline);
   const stateCoef = STATE_COEF[inputs.state];
   const energyCoef = inputs.energy ? ENERGY_COEF[inputs.energy] : 1.0;
-  const yrCoef = yearCoef(inputs.yearBuilt, inputs.state);
+  const yrCoef = yearCoef(inputs.yearBuilt);
   const typeCoef = TYPE_COEF[inputs.type];
   const flrCoef =
     propType === "appartement" ? floorCoef(inputs.floor, inputs.totalFloors) : 1.0;
@@ -498,17 +712,29 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
     exposureBonus *
     viewBonus;
 
-  let basePrice = pricePerM2 * inputs.surfaceLiving;
+  const bareBricks = pricePerM2 * inputs.surfaceLiving;
+  let basePrice = bareBricks;
 
   // Bonus terrasse (€ fixes par 10m²)
-  if (inputs.terrace && inputs.terrace > 0) {
-    basePrice += Math.round(inputs.terrace / 10) * 5000;
-  }
+  const terraceBonus =
+    inputs.terrace && inputs.terrace > 0
+      ? Math.round(inputs.terrace / 10) * 5000
+      : 0;
+  basePrice += terraceBonus;
 
-  // Bonus parking (€ fixes selon LU-Ville ou autres)
-  if (inputs.parking) {
-    basePrice += parkingBonus(inputs.commune);
-  }
+  // Parking (POL3-6) : coefficient PAR COMMUNE (lib/estimation/parking-coeff).
+  // Rétrocompat : l'ancien `parking: boolean` ⇒ 1 emplacement intérieur.
+  const parkingValue = computeParkingValue(inputs);
+  basePrice += parkingValue;
+
+  // Travaux récents (POL3-6) : plus-value vétusté par catégorie. La prime
+  // piscine porte sur la valeur du bien (gros œuvre + terrasse), pas le
+  // montant — base = `bareBricks + terraceBonus`.
+  const worksValue = calcWorksAddedValue(
+    inputs.works,
+    bareBricks + terraceBonus,
+  );
+  basePrice += worksValue;
 
   return {
     applicable: true,
@@ -529,10 +755,9 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
         view_bonus: viewBonus,
       },
       adjusted_per_m2: Math.round(pricePerM2),
-      bonus_terrace_eur: inputs.terrace
-        ? Math.round(inputs.terrace / 10) * 5000
-        : 0,
-      bonus_parking_eur: inputs.parking ? parkingBonus(inputs.commune) : 0,
+      bonus_terrace_eur: terraceBonus,
+      bonus_parking_eur: parkingValue,
+      works_added_value_eur: worksValue,
     },
     warnings: baseline.source === "announced_discounted"
       ? [`Baseline issue d'annonces (décote -8.75% appliquée).`]
@@ -547,6 +772,9 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
 
 /** Yields bruts approximatifs LU 2025 (source: ABBL + analyses MAPA). */
 const DEFAULT_YIELD = 0.035; // 3.5% pour LU-Ville et grosses communes
+
+// POL3-6 : yieldForCommune (calibration AGENT-B) SUPPRIMÉ — retour au
+// DEFAULT_YIELD unique (valeur MAPA fixée).
 
 /**
  * Loyer €/m²/mois indicatif par type.
@@ -689,13 +917,15 @@ export function methodStatecReference(
   const eff = effectiveBaseline(propType, inputs, baseline);
   const stateCoef = STATE_COEF[inputs.state];
   const energyCoef = inputs.energy ? ENERGY_COEF[inputs.energy] : 1.0;
-  const yrCoef = yearCoef(inputs.yearBuilt, inputs.state);
+  const yrCoef = yearCoef(inputs.yearBuilt);
   const adjusted = eff.pricePerM2 * stateCoef * energyCoef * yrCoef;
-  // POL2-6 : une vente notariée bundle l'emplacement de parking dans le prix
-  // de référence ; l'inclure aussi ici (comme hédoniste) évite de sous-évaluer
-  // un bien AVEC parking — cohérence inter-méthodes TEGoVA.
-  const parkingValue = inputs.parking ? parkingBonus(inputs.commune) : 0;
-  const price = adjusted * inputs.surfaceLiving + parkingValue;
+  const bareBricks = adjusted * inputs.surfaceLiving;
+  // POL2-6/POL3-6 : une vente notariée bundle parking + travaux récents dans
+  // le prix ; les inclure aussi ici (comme hédoniste) évite de sous-évaluer
+  // un bien équipé — cohérence inter-méthodes TEGoVA.
+  const parkingValue = computeParkingValue(inputs);
+  const worksValue = calcWorksAddedValue(inputs.works, bareBricks);
+  const price = bareBricks + parkingValue + worksValue;
 
   return {
     applicable: true,
@@ -709,6 +939,7 @@ export function methodStatecReference(
       energy_coef: energyCoef,
       year_coef: yrCoef,
       bonus_parking_eur: parkingValue,
+      works_added_value_eur: worksValue,
       adjusted_per_m2: Math.round(adjusted),
     },
     warnings: baseline.source === "announced_discounted"
@@ -718,92 +949,348 @@ export function methodStatecReference(
 }
 
 // ============================================================================
-// CROISEMENT — Pondération + indice de confiance
+// GARDE LU-ONLY + DISPATCH EVS V2
 // ============================================================================
 
-function computeStdDev(values: number[]): number {
-  if (values.length < 2) return 0;
-  const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / values.length;
-  return Math.sqrt(variance);
+/**
+ * Garde EVS = LUXEMBOURG UNIQUEMENT (CADRAGE MÉTIER NON-NÉGOCIABLE,
+ * POL3-6). Le moteur travaux/parkings/vétusté/CPE/année/état s'applique
+ * UNIFORMÉMENT à TOUTES les communes LU (chacune avec sa baseline). Pour
+ * tout pays explicite ≠ LU (Dubai, Monaco, Paris…) le moteur retourne
+ * immédiatement une erreur — JAMAIS un nombre.
+ *
+ * Si `country` est absent → comportement historique (commune LU implicite,
+ * cf. cas test 1-6/Cas 4 commune inconnue) ; on ne bloque pas.
+ */
+export function isCountryCovered(country: string | undefined): boolean {
+  if (country === undefined || country === null || country === "") return true;
+  return country.trim().toUpperCase() === "LU";
 }
 
-function confidenceFromStdDevPct(stdDevPct: number): Confidence {
-  if (stdDevPct < 8) return "HIGH";
-  if (stdDevPct < 15) return "MEDIUM";
-  return "LOW";
+export function isCountryNotCoveredError(
+  r: EstimationResult | CountryNotCoveredError,
+): r is CountryNotCoveredError {
+  return (r as CountryNotCoveredError).error === "COUNTRY_NOT_COVERED";
 }
 
-function fourchettePct(confidence: Confidence): number {
-  if (confidence === "HIGH") return 0.05;
-  if (confidence === "MEDIUM") return 0.1;
-  return 0.15;
+// ============================================================================
+// EVS V2 — CALIBRATION FINALE MAPA-VALIDÉE JULIEN (POL3-6)
+// Refonte en deux branches : estimateApartment (€/m² simple) vs
+// estimateHouse (bâti + terrain + annexes). Sources : Observatoire de
+// l'Habitat (Ministère du Logement), STATEC, Notaires LU, Chambre
+// Immobilière Grand-Duché, données internes MAPA Property.
+// ============================================================================
+
+// Coefficients SURFACE (apparts ET maisons, sur le bâti). Plus c'est petit,
+// plus c'est cher au m² (rareté studio) ; plus c'est grand, moins cher
+// (marché de niche). FIGÉ — calibration finale Julien (Étape 1.B).
+function surfaceCoef(surface: number): number {
+  if (surface < 40) return 1.25; // studio rare
+  if (surface < 65) return 1.15; // 1 chambre
+  if (surface < 100) return 1.05; // 2 chambres
+  if (surface < 140) return 0.95; // 3 chambres
+  if (surface < 200) return 0.9; // 4 chambres / familial
+  if (surface < 300) return 0.82; // grande maison
+  return 0.75; // trophy
 }
 
-/** Arrondi à la dizaine de milliers pour affichage client. */
-function roundDisplay(price: number): number {
-  return Math.round(price / 10000) * 10000;
+// Coûts construction LU 2026 (norme classe A obligatoire). FIGÉ Julien
+// (Étape 2.B). Inclut gros œuvre + second œuvre + finitions standard.
+// Source : observation marché construction LU 2026 + données internes MAPA.
+// Réajusté POL3-6 (annonces réelles 2026, validé Julien) — terrain construit
+// Bertrange/Strassen ~2 200-2 750 €/m² → coûts bâti relevés.
+const BATI_COST_PER_SQM: Record<string, number> = {
+  new: 4250,
+  renovated: 3800,
+  good: 3200,
+  to_renovate: 2200,
+};
+
+// Sous-sols / annexes (déjà inclus pour apparts via €/m² marché). FIGÉ.
+const ANNEXE_COST_PER_SQM = 1750; // moyenne sous-sol fini / garage / box
+
+// ACTION 3 (POL3-6, calibration finale annonces 2026, validé Julien) —
+// multiplicateur marché commune appliqué au sous-total des MAISONS
+// uniquement, APRÈS rangePosition et AVANT parking/travaux.
+const COMMUNE_MARKET_COEF_HOUSE: Record<string, number> = {
+  // Premium LU-Ville (tous quartiers)
+  luxembourg: 1.35,
+  belair: 1.35,
+  weimershof: 1.35,
+  merl: 1.35,
+  limpertsberg: 1.3,
+  kirchberg: 1.3,
+  centre: 1.3,
+  "centre-ville": 1.3,
+  hollerich: 1.3,
+
+  // 1ère couronne premium
+  strassen: 1.3,
+  bertrange: 1.25,
+  walferdange: 1.2,
+  steinsel: 1.2,
+  howald: 1.2,
+  kopstal: 1.0,
+  bridel: 1.2,
+  leudelange: 1.2,
+  bereldange: 1.15,
+  hesperange: 1.15,
+  helmsange: 1.15,
+
+  // 2ème couronne
+  mamer: 1.1,
+  schuttrange: 1.1,
+  alzingen: 1.1,
+  itzig: 1.1,
+  moutfort: 1.08,
+  fentange: 1.08,
+  contern: 1.08,
+  sandweiler: 1.08,
+  mersch: 1.05,
+  lorentzweiler: 1.05,
+  junglinster: 1.05,
+
+  // 3ème couronne
+  steinfort: 1.0,
+  capellen: 1.0,
+  kehlen: 1.05,
+  koerich: 1.0,
+  hobscheid: 0.95,
+  kaerjeng: 0.95,
+  "käerjeng": 0.95,
+  bascharage: 0.95,
+
+  // Sud
+  "esch-sur-alzette": 1.0,
+  differdange: 0.95,
+  dudelange: 1.0,
+  petange: 0.95,
+  "pétange": 0.95,
+  belvaux: 0.95,
+  schifflange: 0.95,
+  bettembourg: 1.0,
+
+  // Nord
+  wiltz: 0.9,
+  clervaux: 0.85,
+  ettelbruck: 0.95,
+  diekirch: 1.0,
+  vianden: 0.85,
+};
+
+function getCommuneMarketCoefHouse(commune: string): number {
+  if (!commune) return 1.05;
+  const key = commune
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+  return COMMUNE_MARKET_COEF_HOUSE[key] || 1.05;
+}
+
+// FIX 2 (POL3-6, validé Julien) — prime type ; penthouse modulé par la
+// baseline ancien €/m² du bien (tier haut/moyen/bas).
+function getTypePremium(type: string, baselineAncien: number): number {
+  const t = type?.toLowerCase();
+  if (t === "penthouse") {
+    if (baselineAncien > 11000) return 1.3; // tier haut : Belair, Weimershof, Hollerich, Merl
+    if (baselineAncien > 9500) return 1.15; // tier moyen : Centre, Limpertsberg, Kirchberg, Gasperich, Cessange, Muhlenbach, Rollingergrund, Neudorf, Beggen, Bonnevoie
+    // tier bas (Gare, Eich, Dommeldange, Cents, Weimerskirch + reste) :
+    // « penthouse » en quartier moins prestigieux = DÉCOTE, pas prime.
+    return 0.85;
+  }
+  const m: Record<string, number> = {
+    studio: 1.0,
+    appartement: 1.0,
+    duplex: 1.05,
+    loft: 1.1,
+    villa: 1.15,
+    maison: 1.0,
+  };
+  return m[t] || 1.0;
+}
+
+/**
+ * Construit un EstimationResult EVS V2 conforme à l'interface (méthode
+ * unique synthétique dans le slot `hedonic` ; weighted_price = mid pour
+ * la rétro-compat du pipeline app/api/estimate). Fourchette ±10 %.
+ */
+function buildEvsResult(
+  inputs: EstimationInputs,
+  value: number,
+  details: Record<string, unknown>,
+): EstimationResult {
+  const mid = Math.round(value);
+  const synthetic: MethodResult = {
+    applicable: true,
+    price: mid,
+    details,
+    warnings: [],
+  };
+  const na = (reason: string): MethodResult => ({
+    applicable: false,
+    price: null,
+    details: { reason },
+    warnings: [],
+  });
+  return {
+    client_output: {
+      price_low: Math.round(mid * 0.9),
+      price_mid: mid,
+      price_high: Math.round(mid * 1.1),
+      confidence: "MEDIUM",
+    },
+    internal_output: {
+      methods: {
+        sales_comparison: na("EVS V2 — méthode unique bâti/terrain ou €/m²."),
+        hedonic: synthetic,
+        income_capitalization: na("EVS V2 — non utilisée."),
+        depreciated_replacement: na("EVS V2 — non utilisée."),
+        statec_reference: na("EVS V2 — non utilisée."),
+      },
+      weighted_price: mid,
+      std_deviation_pct: 10,
+      confidence_score: 75,
+      warnings: [],
+      inputs_snapshot: inputs,
+      weights_used: DEFAULT_WEIGHTS,
+      computed_at: new Date().toISOString(),
+    },
+  };
+}
+
+/** Branche APPARTEMENT : €/m² simple (baseline MAPA × coefficients). */
+function estimateApartment(inputs: EstimationInputs): EstimationResult {
+  const bl = getApartmentBaseline(inputs.commune, inputs.quartier);
+  let baseM2: number;
+  if (bl) {
+    baseM2 =
+      inputs.state === "new" ? bl.pricePerM2_neuf : bl.pricePerM2_ancien;
+  } else {
+    // Fallback gracieux : ancienne baseline référentiel (jamais de throw).
+    const legacy = getBaseline(
+      "appartement",
+      inputs.commune,
+      inputs.quartier,
+    );
+    baseM2 = legacy ? legacy.pricePerM2 : 0;
+  }
+
+  const surfCoef = surfaceCoef(inputs.surfaceLiving);
+  let value = inputs.surfaceLiving * baseM2 * surfCoef;
+  value *= inputs.energy ? ENERGY_COEF[inputs.energy] ?? 1.0 : 1.0;
+  value *= yearCoef(inputs.yearBuilt);
+  value *= MARKET_2026_CORRECTION;
+
+  const pos = rangePosition(inputs.state, inputs.yearBuilt);
+  value *= 1 + (pos - 0.5) * 0.2;
+
+  // FIX 2 — prime type ; penthouse modulé par baseline ancien quartier.
+  const baselineAncien = bl ? bl.pricePerM2_ancien : baseM2;
+  value *= getTypePremium(inputs.type, baselineAncien);
+
+  value += computeParkingAdjustment(inputs, value);
+  value += calcWorksAddedValue(inputs.works, value);
+
+  // FIX 3 — bonus terrasse / dernier étage / vue / exposition (apparts).
+  if (inputs.terrace && inputs.terrace > 5) {
+    value += (inputs.terrace - 5) * 1500;
+  }
+  if (
+    inputs.floor &&
+    inputs.totalFloors &&
+    inputs.floor === inputs.totalFloors &&
+    inputs.floor >= 5
+  ) {
+    value *= 1.05;
+  }
+  if (inputs.view === "exceptional" || inputs.view === "panoramic") {
+    value *= 1.08;
+  }
+  if (inputs.exposureSouth === true) {
+    value *= 1.03;
+  }
+
+  // ACTION 4 (POL3-6) — PAS de plafond FIX4 (retiré, validé Julien).
+
+  return buildEvsResult(inputs, value, {
+    method: "apartment_per_sqm",
+    baseline_per_m2: Math.round(baseM2),
+    surface_coef: surfCoef,
+    range_position: pos,
+  });
+}
+
+/** Branche MAISON/VILLA : bâti + terrain + annexes (Étape 2.C). */
+function estimateHouse(inputs: EstimationInputs): EstimationResult {
+  // 1. Bâti
+  const stateBati = BATI_COST_PER_SQM[inputs.state] || BATI_COST_PER_SQM.good;
+  const surfCoef = surfaceCoef(inputs.surfaceLiving);
+  let bati = inputs.surfaceLiving * stateBati * surfCoef;
+  bati *= inputs.energy ? ENERGY_COEF[inputs.energy] ?? 1.0 : 1.0;
+  bati *= yearCoef(inputs.yearBuilt);
+  bati *= MARKET_2026_CORRECTION;
+
+  // 2. Terrain
+  const landZone = getLandZone(inputs.commune, inputs.quartier);
+  const land = calcLandValue(inputs.surfaceLand || 0, landZone);
+
+  // 3. Annexes (sous-sol fini > 30 m² seulement)
+  let annexes = 0;
+  if (inputs.basementFinishedSqm && inputs.basementFinishedSqm > 30) {
+    annexes = (inputs.basementFinishedSqm - 30) * ANNEXE_COST_PER_SQM;
+  }
+
+  // 4. Sous-total avant ajustements
+  let subtotal = bati + land + annexes;
+
+  // 5. rangePosition ajuste la fourchette (-10 % à +10 %)
+  const pos = rangePosition(inputs.state, inputs.yearBuilt);
+  const adj = (pos - 0.5) * 0.2;
+  subtotal *= 1 + adj;
+
+  // ACTION 3 — multiplicateur marché commune (maisons), APRÈS
+  // rangePosition et AVANT parking/travaux.
+  const marketCoef = getCommuneMarketCoefHouse(inputs.commune);
+  subtotal *= marketCoef;
+
+  // FIX 2 — prime type (villa, etc.) ; maison/villa non modulés par baseline.
+  subtotal *= getTypePremium(inputs.type, 0);
+
+  // 6. Parkings (écart à la norme)
+  subtotal += computeParkingAdjustment(inputs, subtotal);
+
+  // 7. Travaux (plus-value avec vétusté)
+  subtotal += calcWorksAddedValue(inputs.works, subtotal);
+
+  return buildEvsResult(inputs, subtotal, {
+    method: "hedonic_terrain_bati",
+    bati_value: Math.round(bati),
+    land_value: Math.round(land),
+    annexes_value: Math.round(annexes),
+    land_zone: landZone,
+    range_position: pos,
+  });
+}
+
+/** Dispatcher : le type de bien détermine la formule (Étape 1.A). */
+function estimateMain(inputs: EstimationInputs): EstimationResult {
+  if (inputs.type === "maison" || inputs.type === "villa") {
+    return estimateHouse(inputs); // bâti + terrain
+  }
+  return estimateApartment(inputs); // €/m² simple
 }
 
 export function estimate(
   inputs: EstimationInputs,
-  opts: { weights?: Partial<MethodWeights> } = {},
-): EstimationResult {
-  const weights: MethodWeights = { ...DEFAULT_WEIGHTS, ...(opts.weights ?? {}) };
-
-  const methods = {
-    sales_comparison: methodSalesComparison(inputs),
-    hedonic: methodHedonic(inputs),
-    income_capitalization: methodIncomeCapitalization(inputs),
-    depreciated_replacement: methodDepreciatedReplacement(inputs),
-    statec_reference: methodStatecReference(inputs),
-  };
-
-  // Renormaliser les poids sur les méthodes applicables
-  const applicableEntries = Object.entries(methods).filter(([, m]) => m.applicable && m.price !== null);
-  const totalWeight = applicableEntries.reduce(
-    (s, [k]) => s + weights[k as keyof MethodWeights],
-    0,
-  );
-  let weightedPrice = 0;
-  for (const [k, m] of applicableEntries) {
-    const w = weights[k as keyof MethodWeights] / totalWeight;
-    weightedPrice += (m.price ?? 0) * w;
+): EstimationResult | CountryNotCoveredError {
+  // GARDE LU-ONLY : avant tout calcul (POL3-6, Étape 6).
+  if (!isCountryCovered(inputs.country)) {
+    return {
+      error: "COUNTRY_NOT_COVERED",
+      message: "Estimation MAPA Property limitée au Luxembourg.",
+    };
   }
-  weightedPrice = Math.round(weightedPrice);
-
-  // Écart-type entre les méthodes applicables (en % du prix moyen pondéré)
-  const prices = applicableEntries.map(([, m]) => m.price as number);
-  const stdDev = computeStdDev(prices);
-  const stdDevPct = weightedPrice > 0 ? (stdDev / weightedPrice) * 100 : 0;
-  const confidence = confidenceFromStdDevPct(stdDevPct);
-  const fork = fourchettePct(confidence);
-
-  const allWarnings: string[] = [];
-  Object.values(methods).forEach((m) => allWarnings.push(...m.warnings));
-  if (applicableEntries.length < 2) {
-    allWarnings.push("Moins de 2 méthodes applicables : fiabilité limitée.");
-  }
-
-  // Score 0-100
-  const confidenceScore = Math.max(0, Math.min(100, Math.round(100 - stdDevPct * 4)));
-
-  return {
-    client_output: {
-      price_low: roundDisplay(weightedPrice * (1 - fork)),
-      price_mid: roundDisplay(weightedPrice),
-      price_high: roundDisplay(weightedPrice * (1 + fork)),
-      confidence,
-    },
-    internal_output: {
-      methods,
-      weighted_price: weightedPrice,
-      std_deviation_pct: Math.round(stdDevPct * 10) / 10,
-      confidence_score: confidenceScore,
-      warnings: allWarnings,
-      inputs_snapshot: inputs,
-      weights_used: weights,
-      computed_at: new Date().toISOString(),
-    },
-  };
+  // country absent → comportement historique (couvert).
+  return estimateMain(inputs);
 }

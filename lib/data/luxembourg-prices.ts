@@ -1911,3 +1911,146 @@ export function getBaselinePriceVdlQuartier(
     return { value: row.estimated_maison_m2_from_ann, source: "announced_discounted", confidence: "MEDIUM" };
   return null;
 }
+
+/*
+ * Baselines €/m² appartements 2026 — calibrées MAPA Property.
+ *
+ * Méthodologie : prix de transaction réel = prix affiché × (1 − décote).
+ * Décote MAPA Property : -6.5% appart sur prix affichés observés 2026.
+ * Source : observation marché LU 2026 + Observatoire de l'Habitat
+ * + STATEC + données internes MAPA Property (transactions notariales).
+ *
+ * Bonus "neuf" :
+ * - Zone PRIME LU-Ville (19 quartiers) : +20% sur baseline ancien
+ * - Reste LU : +10% sur baseline ancien
+ */
+export interface ApartmentBaseline {
+  commune: string;
+  /** Baseline marché (mix états) €/m². */
+  pricePerM2_ancien: number;
+  /** Baseline si state="new" €/m². */
+  pricePerM2_neuf: number;
+}
+
+/** Clé normalisée : minuscules, sans accents, séparateurs → '-'. */
+function normBaselineKey(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export const APARTMENT_BASELINES: Record<string, ApartmentBaseline> = {
+  // ============ LUXEMBOURG-VILLE (Zone PRIME, neuf +20%) ============
+  weimershof: { commune: "Weimershof", pricePerM2_ancien: 12444, pricePerM2_neuf: 14933 },
+  belair: { commune: "Belair", pricePerM2_ancien: 12008, pricePerM2_neuf: 11780 },
+  hollerich: { commune: "Hollerich", pricePerM2_ancien: 11255, pricePerM2_neuf: 13506 },
+  merl: { commune: "Merl", pricePerM2_ancien: 10752, pricePerM2_neuf: 12902 },
+  "centre-ville": { commune: "Centre-ville", pricePerM2_ancien: 10449, pricePerM2_neuf: 12539 },
+  centre: { commune: "Centre-ville", pricePerM2_ancien: 10449, pricePerM2_neuf: 12539 },
+  luxembourg: { commune: "Luxembourg", pricePerM2_ancien: 10449, pricePerM2_neuf: 12539 },
+  limpertsberg: { commune: "Limpertsberg", pricePerM2_ancien: 10385, pricePerM2_neuf: 12462 },
+  kirchberg: { commune: "Kirchberg", pricePerM2_ancien: 10118, pricePerM2_neuf: 12142 },
+  "gasperich-cloche-d-or": { commune: "Gasperich-Cloche-d-Or", pricePerM2_ancien: 9948, pricePerM2_neuf: 11938 },
+  gasperich: { commune: "Gasperich-Cloche-d-Or", pricePerM2_ancien: 9948, pricePerM2_neuf: 11938 },
+  "cloche-d-or": { commune: "Gasperich-Cloche-d-Or", pricePerM2_ancien: 9948, pricePerM2_neuf: 11938 },
+  cessange: { commune: "Cessange", pricePerM2_ancien: 9809, pricePerM2_neuf: 11771 },
+  muhlenbach: { commune: "Muhlenbach", pricePerM2_ancien: 9544, pricePerM2_neuf: 11453 },
+  rollingergrund: { commune: "Rollingergrund", pricePerM2_ancien: 9515, pricePerM2_neuf: 11418 },
+  neudorf: { commune: "Neudorf", pricePerM2_ancien: 9463, pricePerM2_neuf: 11356 },
+  gare: { commune: "Gare", pricePerM2_ancien: 8200, pricePerM2_neuf: 9840 },
+  beggen: { commune: "Beggen", pricePerM2_ancien: 9357, pricePerM2_neuf: 11228 },
+  bonnevoie: { commune: "Bonnevoie", pricePerM2_ancien: 9334, pricePerM2_neuf: 11201 },
+  eich: { commune: "Eich", pricePerM2_ancien: 8877, pricePerM2_neuf: 10652 },
+  dommeldange: { commune: "Dommeldange", pricePerM2_ancien: 8786, pricePerM2_neuf: 10543 },
+  cents: { commune: "Cents", pricePerM2_ancien: 8477, pricePerM2_neuf: 10172 },
+  weimerskirch: { commune: "Weimerskirch", pricePerM2_ancien: 8030, pricePerM2_neuf: 9636 },
+
+  // ============ 1ÈRE COURONNE (neuf +10%) ============
+  strassen: { commune: "Strassen", pricePerM2_ancien: 9608, pricePerM2_neuf: 10569 },
+  bertrange: { commune: "Bertrange", pricePerM2_ancien: 9122, pricePerM2_neuf: 10034 },
+  bereldange: { commune: "Bereldange", pricePerM2_ancien: 9354, pricePerM2_neuf: 10289 },
+  walferdange: { commune: "Walferdange", pricePerM2_ancien: 8935, pricePerM2_neuf: 9829 },
+  steinsel: { commune: "Steinsel", pricePerM2_ancien: 8798, pricePerM2_neuf: 9678 },
+  howald: { commune: "Howald", pricePerM2_ancien: 8693, pricePerM2_neuf: 9562 },
+  helmsange: { commune: "Helmsange", pricePerM2_ancien: 8577, pricePerM2_neuf: 9435 },
+  hesperange: { commune: "Hesperange", pricePerM2_ancien: 7968, pricePerM2_neuf: 8765 },
+  bridel: { commune: "Bridel", pricePerM2_ancien: 7936, pricePerM2_neuf: 8730 },
+  mamer: { commune: "Mamer", pricePerM2_ancien: 8704, pricePerM2_neuf: 9574 },
+  leudelange: { commune: "Leudelange", pricePerM2_ancien: 7985, pricePerM2_neuf: 8784 },
+  kopstal: { commune: "Kopstal", pricePerM2_ancien: 7700, pricePerM2_neuf: 8470 },
+
+  // ============ 2ÈME COURONNE OUEST ============
+  steinfort: { commune: "Steinfort", pricePerM2_ancien: 7814, pricePerM2_neuf: 8595 },
+  capellen: { commune: "Capellen", pricePerM2_ancien: 7775, pricePerM2_neuf: 8553 },
+  kehlen: { commune: "Kehlen", pricePerM2_ancien: 8414, pricePerM2_neuf: 9255 },
+  hobscheid: { commune: "Hobscheid", pricePerM2_ancien: 5471, pricePerM2_neuf: 6018 },
+  koerich: { commune: "Koerich", pricePerM2_ancien: 7295, pricePerM2_neuf: 8025 },
+  kaerjeng: { commune: "Käerjeng", pricePerM2_ancien: 6732, pricePerM2_neuf: 7405 },
+  mersch: { commune: "Mersch", pricePerM2_ancien: 7585, pricePerM2_neuf: 8344 },
+  lorentzweiler: { commune: "Lorentzweiler", pricePerM2_ancien: 7743, pricePerM2_neuf: 8517 },
+
+  // ============ NORD/EST ============
+  schuttrange: { commune: "Schuttrange", pricePerM2_ancien: 8535, pricePerM2_neuf: 9388 },
+  alzingen: { commune: "Alzingen", pricePerM2_ancien: 8480, pricePerM2_neuf: 9328 },
+  itzig: { commune: "Itzig", pricePerM2_ancien: 8098, pricePerM2_neuf: 8908 },
+  moutfort: { commune: "Moutfort", pricePerM2_ancien: 8079, pricePerM2_neuf: 8887 },
+  fentange: { commune: "Fentange", pricePerM2_ancien: 8068, pricePerM2_neuf: 8875 },
+  junglinster: { commune: "Junglinster", pricePerM2_ancien: 7904, pricePerM2_neuf: 8694 },
+  contern: { commune: "Contern", pricePerM2_ancien: 7899, pricePerM2_neuf: 8689 },
+  sandweiler: { commune: "Sandweiler", pricePerM2_ancien: 7480, pricePerM2_neuf: 8228 },
+  heisdorf: { commune: "Heisdorf", pricePerM2_ancien: 7685, pricePerM2_neuf: 8454 },
+  nospelt: { commune: "Nospelt", pricePerM2_ancien: 7728, pricePerM2_neuf: 8501 },
+  olm: { commune: "Olm", pricePerM2_ancien: 7277, pricePerM2_neuf: 8005 },
+
+  // ============ SUD (bassin minier) ============
+  belval: { commune: "Belval", pricePerM2_ancien: 8000, pricePerM2_neuf: 8800 },
+  "esch-sur-alzette": { commune: "Esch-sur-Alzette", pricePerM2_ancien: 6131, pricePerM2_neuf: 6744 },
+  esch: { commune: "Esch-sur-Alzette", pricePerM2_ancien: 6131, pricePerM2_neuf: 6744 },
+  differdange: { commune: "Differdange", pricePerM2_ancien: 6046, pricePerM2_neuf: 6651 },
+  dudelange: { commune: "Dudelange", pricePerM2_ancien: 6298, pricePerM2_neuf: 6928 },
+  petange: { commune: "Pétange", pricePerM2_ancien: 6217, pricePerM2_neuf: 6839 },
+  belvaux: { commune: "Belvaux", pricePerM2_ancien: 6025, pricePerM2_neuf: 6628 },
+  schifflange: { commune: "Schifflange", pricePerM2_ancien: 6735, pricePerM2_neuf: 7408 },
+  bettembourg: { commune: "Bettembourg", pricePerM2_ancien: 6754, pricePerM2_neuf: 7429 },
+  soleuvre: { commune: "Soleuvre", pricePerM2_ancien: 6005, pricePerM2_neuf: 6606 },
+  sanem: { commune: "Sanem", pricePerM2_ancien: 6016, pricePerM2_neuf: 6618 },
+  rumelange: { commune: "Rumelange", pricePerM2_ancien: 5734, pricePerM2_neuf: 6307 },
+  kayl: { commune: "Kayl", pricePerM2_ancien: 6105, pricePerM2_neuf: 6716 },
+  oberkorn: { commune: "Oberkorn", pricePerM2_ancien: 6060, pricePerM2_neuf: 6666 },
+  niederkorn: { commune: "Niederkorn", pricePerM2_ancien: 6031, pricePerM2_neuf: 6634 },
+  rodange: { commune: "Rodange", pricePerM2_ancien: 6012, pricePerM2_neuf: 6613 },
+
+  // ============ NORD ============
+  wiltz: { commune: "Wiltz", pricePerM2_ancien: 4640, pricePerM2_neuf: 5104 },
+  clervaux: { commune: "Clervaux", pricePerM2_ancien: 4347, pricePerM2_neuf: 4782 },
+  ettelbruck: { commune: "Ettelbruck", pricePerM2_ancien: 5541, pricePerM2_neuf: 6095 },
+  diekirch: { commune: "Diekirch", pricePerM2_ancien: 6650, pricePerM2_neuf: 7315 },
+  vianden: { commune: "Vianden", pricePerM2_ancien: 4470, pricePerM2_neuf: 4917 },
+  mertzig: { commune: "Mertzig", pricePerM2_ancien: 5738, pricePerM2_neuf: 6312 },
+  echternach: { commune: "Echternach", pricePerM2_ancien: 6119, pricePerM2_neuf: 6731 },
+  beaufort: { commune: "Beaufort", pricePerM2_ancien: 6325, pricePerM2_neuf: 6958 },
+  larochette: { commune: "Larochette", pricePerM2_ancien: 5504, pricePerM2_neuf: 6054 },
+  consdorf: { commune: "Consdorf", pricePerM2_ancien: 5578, pricePerM2_neuf: 6136 },
+  mondercange: { commune: "Mondercange", pricePerM2_ancien: 6034, pricePerM2_neuf: 6637 },
+  bissen: { commune: "Bissen", pricePerM2_ancien: 6012, pricePerM2_neuf: 6613 },
+};
+
+/**
+ * Baseline appartement MAPA pour une commune (+ quartier LU-Ville prioritaire).
+ * Retourne null si aucune baseline (fallback géré en amont par le moteur).
+ */
+export function getApartmentBaseline(
+  commune: string,
+  quartier?: string,
+): ApartmentBaseline | null {
+  if (quartier) {
+    const q = APARTMENT_BASELINES[normBaselineKey(quartier)];
+    if (q) return q;
+  }
+  if (!commune) return null;
+  return APARTMENT_BASELINES[normBaselineKey(commune)] ?? null;
+}

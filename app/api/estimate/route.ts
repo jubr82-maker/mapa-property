@@ -6,11 +6,50 @@ import { fetchLatestInterestRates } from "@/lib/data";
 import { shouldDropTestLead } from "@/lib/test-email";
 import {
   estimate as estimateEvs,
+  isCountryNotCoveredError,
   type EstimationInputs,
   type EnergyClass,
   type PropertyState,
   type PropertyType,
+  type WorkItem,
+  type WorkCategory,
 } from "@/lib/estimation/engine";
+
+const WORK_CATEGORIES: ReadonlySet<string> = new Set([
+  "toiture",
+  "facade_isolation",
+  "pac",
+  "chauffage",
+  "photovoltaique",
+  "electricite",
+  "menuiseries",
+  "cuisine",
+  "salle_de_bain",
+  "peinture",
+  "sols_revetements",
+  "amenagement_exterieur",
+  "piscine",
+]);
+
+/** Parse + valide les postes de travaux reçus du formulaire. */
+function parseWorks(raw: unknown): WorkItem[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const items: WorkItem[] = [];
+  for (const r of raw.slice(0, 10)) {
+    if (!r || typeof r !== "object") continue;
+    const o = r as Record<string, unknown>;
+    const category = String(o.category ?? "");
+    if (!WORK_CATEGORIES.has(category)) continue;
+    const year = Number(o.year);
+    const amount = Number(o.amount);
+    items.push({
+      category: category as WorkCategory,
+      year: Number.isFinite(year) ? year : 2024,
+      amount: Number.isFinite(amount) && amount > 0 ? amount : 0,
+    });
+  }
+  return items.length > 0 ? items : undefined;
+}
 
 /** Best-effort persistance dans estimation_requests. Silencieux en cas d'échec. */
 async function persistEstimationRequest(args: {
@@ -76,7 +115,14 @@ function hashIp(ip: string): string {
  * Le moteur EVS est utilisé UNIQUEMENT pour country='LU'. Pour les autres pays,
  * on retombe sur l'ancien moteur hédoniste (qui couvre 10 pays).
  */
-function mapToEvsInputs(body: EstimateInput & { quartier?: string }): EstimationInputs | null {
+function mapToEvsInputs(
+  body: EstimateInput & {
+    quartier?: string;
+    parkingInterior?: number;
+    parkingExterior?: number;
+    works?: unknown;
+  },
+): EstimationInputs | null {
   if (body.country !== "LU") return null;
   if (!body.commune || !body.type || !body.state || !body.livingSurface) return null;
 
@@ -87,6 +133,7 @@ function mapToEvsInputs(body: EstimateInput & { quartier?: string }): Estimation
     return null;
 
   return {
+    country: "LU",
     type: t as PropertyType,
     commune: body.commune,
     quartier: body.quartier, // 25 quartiers VDL si commune = Luxembourg
@@ -97,6 +144,15 @@ function mapToEvsInputs(body: EstimateInput & { quartier?: string }): Estimation
     state: body.state as PropertyState,
     energy: body.energy as EnergyClass | undefined,
     terrace: body.terraceSurface ? Number(body.terraceSurface) : undefined,
+    parkingInterior:
+      body.parkingInterior !== undefined
+        ? Number(body.parkingInterior)
+        : undefined,
+    parkingExterior:
+      body.parkingExterior !== undefined
+        ? Number(body.parkingExterior)
+        : undefined,
+    works: parseWorks(body.works),
   };
 }
 
@@ -108,6 +164,9 @@ export async function POST(req: Request) {
     sessionId?: string;
     locale?: string;
     rgpdConsent?: boolean;
+    parkingInterior?: number;
+    parkingExterior?: number;
+    works?: unknown;
   };
 
   const rgpdConsentAt =
@@ -136,10 +195,30 @@ export async function POST(req: Request) {
   const ipHash = hashIp(ip);
 
   // Tente le moteur EVS pour LU résidentiel.
-  const evsInputs = mapToEvsInputs(body as EstimateInput & { quartier?: string });
+  const evsInputs = mapToEvsInputs(
+    body as EstimateInput & {
+      quartier?: string;
+      parkingInterior?: number;
+      parkingExterior?: number;
+      works?: unknown;
+    },
+  );
   if (evsInputs) {
     try {
       const evs = estimateEvs(evsInputs);
+      // GARDE LU-ONLY (POL3-6) : le moteur EVS = Luxembourg uniquement.
+      // On renvoie le message + un flag pour que le formulaire affiche le
+      // CTA « Contactez-nous » — JAMAIS un nombre pour l'international.
+      if (isCountryNotCoveredError(evs)) {
+        return NextResponse.json(
+          {
+            error: "COUNTRY_NOT_COVERED",
+            message: evs.message,
+            engine: "evs_5_methods",
+          },
+          { status: 422 },
+        );
+      }
       const pricePerSqm = Math.round(
         evs.internal_output.weighted_price / evsInputs.surfaceLiving,
       );
