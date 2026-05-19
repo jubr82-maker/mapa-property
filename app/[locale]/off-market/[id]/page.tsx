@@ -181,7 +181,11 @@ export default async function OffMarketDetailPage({
           price={
             <PropertyPrice
               priceOnDemand={property.price_on_demand}
-              display={property.price_display}
+              priceMode={property.price_mode}
+              priceMin={property.price_min}
+              priceMax={property.price_max}
+              priceEstimate={property.price_estimate}
+              priceDisplay={property.price_display}
               locale={locale}
             />
           }

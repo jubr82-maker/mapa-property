@@ -463,10 +463,17 @@ function mapPublicRows(
         (r.classe_energetique as string | null) ??
         (r.energy_class as string | null) ??
         null,
+      // POL3-5 : NE lit JAMAIS price_label (legacy "Prix sur demande" en
+      // dur) ni price_custom_text. Le composant PropertyPrice calcule le
+      // libellé à partir des champs bruts (price_on_demand/mode/min/max/
+      // estimate). price_display n'est conservé que s'il est numérique ;
+      // une chaîne non numérique legacy est ignorée.
       price_display:
-        (r.price_label as string | null) ??
-        (r.price_display as string | null) ??
-        null,
+        r.price_display == null
+          ? null
+          : typeof r.price_display === "number"
+            ? String(r.price_display)
+            : (r.price_display as string),
       short_pitch:
         (r.short_description as string | null) ??
         (r.short_pitch as string | null) ??

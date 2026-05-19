@@ -637,7 +637,7 @@ const inputCls =
   "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#B8865A] focus:outline-none";
 
 // ─── Prix : 4 modes d'affichage ────────────────────────────────────────────
-type PriceMode = "exact" | "range" | "custom" | "on_request";
+type PriceMode = "exact" | "range" | "custom" | "on_request" | "on_demand";
 
 function PriceSection({ row }: { row: OffmarketRow | null }) {
   const initial: PriceMode = (row?.price_mode as PriceMode) ||
@@ -648,8 +648,21 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
   // appliquée → lue de façon tolérante, défaut false.
   const initialOnDemand =
     (row as { price_on_demand?: boolean | null } | null)?.price_on_demand ===
-    true;
+      true || (row?.price_mode as string | null) === "on_demand";
   const [priceOnDemand, setPriceOnDemand] = useState(initialOnDemand);
+
+  // POL3-5 : la case « Prix sur demande » pilote AUSSI price_mode.
+  //   cochée   → price_on_demand=true,  price_mode='on_demand'
+  //   décochée → price_on_demand=false, price_mode='exact'
+  //              (sauf si déjà 'range' → on conserve 'range')
+  function handleOnDemandChange(checked: boolean) {
+    setPriceOnDemand(checked);
+    if (checked) {
+      setMode("on_demand");
+    } else {
+      setMode((prev) => (prev === "range" ? "range" : "exact"));
+    }
+  }
 
   return (
     <Section title="Prix">
@@ -663,7 +676,7 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
             type="checkbox"
             name="price_on_demand"
             checked={priceOnDemand}
-            onChange={(e) => setPriceOnDemand(e.target.checked)}
+            onChange={(e) => handleOnDemandChange(e.target.checked)}
             className="mt-0.5 size-4 rounded border-[#3D4F63]/30 accent-[#B8865A]"
           />
           <span className="text-sm leading-snug text-[#1A1F2A]">
@@ -678,21 +691,28 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
           </span>
         </label>
       </div>
-      <div className="md:col-span-2">
-        <Field label="Mode d'affichage du prix">
-          <select
-            name="price_mode"
-            value={mode}
-            onChange={(e) => setMode(e.target.value as PriceMode)}
-            className={inputCls}
-          >
-            <option value="exact">Afficher le prix exact</option>
-            <option value="range">Afficher une fourchette</option>
-            <option value="custom">Texte personnalisé</option>
-            <option value="on_request">Sur demande</option>
-          </select>
-        </Field>
-      </div>
+      {priceOnDemand ? (
+        // POL3-5 : case cochée ⇒ price_mode='on_demand' soumis en dur.
+        // Le sélecteur de mode est masqué (le prix est de toute façon
+        // entièrement masqué publiquement).
+        <input type="hidden" name="price_mode" value="on_demand" />
+      ) : (
+        <div className="md:col-span-2">
+          <Field label="Mode d'affichage du prix">
+            <select
+              name="price_mode"
+              value={mode === "on_demand" ? "exact" : mode}
+              onChange={(e) => setMode(e.target.value as PriceMode)}
+              className={inputCls}
+            >
+              <option value="exact">Afficher le prix exact</option>
+              <option value="range">Afficher une fourchette</option>
+              <option value="custom">Texte personnalisé</option>
+              <option value="on_request">Sur demande</option>
+            </select>
+          </Field>
+        </div>
+      )}
 
       {mode === "exact" && (
         <Field

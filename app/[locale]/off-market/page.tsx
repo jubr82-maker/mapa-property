@@ -184,7 +184,11 @@ function OffMarketTeaser({
         )}
         <PropertyPrice
           priceOnDemand={property.price_on_demand}
-          display={property.price_display ?? t("price_on_request")}
+          priceMode={property.price_mode}
+          priceMin={property.price_min}
+          priceMax={property.price_max}
+          priceEstimate={property.price_estimate}
+          priceDisplay={property.price_display}
           locale={locale}
           className="mt-auto block font-display text-lg font-bold gold-text"
         />

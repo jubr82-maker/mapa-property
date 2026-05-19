@@ -138,11 +138,23 @@ function bool(value: FormDataEntryValue | null): boolean {
 
 function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, status: OffmarketStatus, reference: string) {
   const surfaceTerrain = num(formData.get("surface_terrain"));
-  const priceMode = (str(formData.get("price_mode")) ?? "exact") as
+  const rawPriceMode = (str(formData.get("price_mode")) ?? "exact") as
     | "exact"
     | "range"
     | "custom"
-    | "on_request";
+    | "on_request"
+    | "on_demand";
+  const priceOnDemandFlag = bool(formData.get("price_on_demand"));
+  // POL3-5 : la case « Prix sur demande » prime et synchronise price_mode.
+  //   cochée   → price_on_demand=true,  price_mode='on_demand'
+  //   décochée → price_on_demand=false, price_mode='exact'
+  //              (sauf si déjà 'range' → on conserve 'range')
+  const priceMode: "exact" | "range" | "custom" | "on_request" | "on_demand" =
+    priceOnDemandFlag
+      ? "on_demand"
+      : rawPriceMode === "on_demand"
+        ? "exact"
+        : rawPriceMode;
   const priceLabelByMode = computePriceLabel(priceMode, formData);
 
   return {
@@ -200,12 +212,19 @@ function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, s
     price_min: num(formData.get("price_min")),
     price_max: num(formData.get("price_max")),
     price_custom_text: str(formData.get("price_custom_text")),
+    // price_label : conservé pour compat back-office / exports, JAMAIS lu
+    // par l'affichage public (POL3-5 — PropertyPrice ignore price_label).
     price_label: priceLabelByMode,
-    price_display: priceLabelByMode,
-    // POL2-9 : drapeau "Prix sur demande" (masque le prix public).
-    // Décoché par défaut ⇒ false ⇒ prix réel affiché (inversion
-    // délibérée de BUG 1).
-    price_on_demand: bool(formData.get("price_on_demand")),
+    // POL3-5 : price_display devient strictement numérique (prix exact)
+    // ou null. PropertyPrice ne s'en sert qu'en dernier recours (étape 6)
+    // et parse un nombre — plus jamais de libellé legacy stocké ici.
+    price_display:
+      priceMode === "exact"
+        ? (num(formData.get("price_estimate"))?.toString() ?? null)
+        : null,
+    // POL2-9 / POL3-5 : drapeau "Prix sur demande" (masque le prix
+    // public). Décoché par défaut ⇒ false ⇒ prix réel affiché.
+    price_on_demand: priceOnDemandFlag,
 
     // Contenu
     short_pitch: str(formData.get("short_description")),
@@ -329,12 +348,15 @@ function parseCompositionFromFormData(formData: FormData): {
 }
 
 function computePriceLabel(
-  mode: "exact" | "range" | "custom" | "on_request",
+  mode: "exact" | "range" | "custom" | "on_request" | "on_demand",
   formData: FormData,
 ): string {
   const fmt = (n: number) =>
     new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n) + " €";
 
+  if (mode === "on_demand") {
+    return "Prix sur demande";
+  }
   if (mode === "exact") {
     const estimate = num(formData.get("price_estimate"));
     return estimate ? fmt(estimate) : "Prix sur demande";
