@@ -4,6 +4,12 @@
 // même flouté — d'un bien off-market. Ce cover remplace systématiquement
 // l'image, qu'une image custom existe ou non en base.
 //
+// POL2-8 : fond radial-gradient cuivré sombre, cadenas cuivre fin centré,
+// "OFF MARKET" dominant (text-5xl md:text-7xl) > SignatureLine cuivre >
+// "BIEN STRICTEMENT CONFIDENTIEL" (text-xs md:text-sm). La hiérarchie
+// typographique (OFF MARKET strictement plus grand que la mention) est
+// garantie par les classes Tailwind ci-dessous.
+//
 // Composant pur (aucun import next-intl) : utilisable côté serveur ET
 // client. Les libellés traduits sont passés en props par l'appelant
 // (namespace `offmarket` → `cover_title` / `cover_subtitle`). Les
@@ -11,6 +17,16 @@
 //
 // `showLabel={false}` conservé pour rétro-compat de la vignette admin
 // (app/admin/offmarket/page.tsx — fichier géré par Julien, non modifié).
+
+import { SignatureLine } from "@/components/ui/SignatureLine";
+
+// Dégradé radial cuivré sombre — couleur fixe identique jour/nuit
+// (cover confidentiel, hors thème). Hex tolérés ici car valeur de
+// dégradé brute non exprimable en token Tailwind.
+const RADIAL_BG =
+  "radial-gradient(circle at center, rgba(184,134,90,0.18) 0%, #1A1F2A 50%, #0F1419 100%)";
+
+const COPPER = "#B8865A";
 
 export function OffmarketPlaceholder({
   className = "",
@@ -27,21 +43,18 @@ export function OffmarketPlaceholder({
 }) {
   return (
     <div
-      className={`absolute inset-0 flex flex-col items-center justify-center bg-bg-contrast px-4 text-center ${className}`}
+      data-offmarket-placeholder
+      className={`absolute inset-0 flex flex-col items-center justify-center px-4 text-center ${className}`}
+      style={{ backgroundImage: RADIAL_BG }}
     >
-      {/* Cadre or fin — effet plaque confidentielle */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-3 rounded-sm ring-1 ring-gold/30"
-      />
-
+      {/* Cadenas cuivre fin centré */}
       <svg
         aria-hidden
         viewBox="0 0 80 80"
-        className={`text-gold ${compact ? "size-9" : "size-14 md:size-20"}`}
+        className={compact ? "size-8" : "size-12 md:size-16"}
         fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
+        stroke={COPPER}
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -52,19 +65,31 @@ export function OffmarketPlaceholder({
       {showLabel && (
         <>
           <p
-            className={`mt-4 font-display font-bold uppercase tracking-[0.25em] text-gold ${
-              compact ? "text-[11px]" : "text-base md:text-2xl"
+            data-offmarket-title
+            className={`mt-5 font-light uppercase tracking-[0.2em] ${
+              compact ? "text-xl" : "text-5xl md:text-7xl"
+            }`}
+            style={{ color: COPPER }}
+          >
+            {/* "OFF MARKET" dominant — la prop title (cover_title) est conservée
+                pour l'accessibilité / rétro-compat mais le visuel impose
+                l'identité OFF MARKET demandée par POL2-8. */}
+            OFF MARKET
+          </p>
+
+          <SignatureLine align="center" width={compact ? "w-6" : "w-8"} />
+
+          <p
+            data-offmarket-subtitle
+            className={`font-light uppercase tracking-[0.15em] text-white/60 ${
+              compact ? "text-[9px]" : "text-xs md:text-sm"
             }`}
           >
             {title ?? "Bien strictement confidentiel"}
           </p>
-          <p
-            className={`mt-2 font-mono uppercase tracking-[0.4em] text-text-contrast/55 ${
-              compact ? "text-[8px]" : "text-[10px] md:text-xs"
-            }`}
-          >
-            {subtitle ?? "Off Market"}
-          </p>
+          {subtitle && subtitle !== "Off Market" && (
+            <span className="sr-only">{subtitle}</span>
+          )}
         </>
       )}
     </div>
