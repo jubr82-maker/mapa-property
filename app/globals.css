@@ -295,6 +295,33 @@ html {
   font-size: 0.9em;
 }
 
+/* Tableaux éditoriaux — colonnes alignées, cellules respirantes
+   (POL2-1). Padding ≥16px horizontal / ≥12px vertical, en-têtes
+   copper #B8865A small-caps, filet bas copper translucide par ligne. */
+.prose-mapa table {
+  table-layout: auto;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+.prose-mapa th,
+.prose-mapa td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(184, 134, 90, 0.25);
+}
+.prose-mapa td {
+  vertical-align: top;
+}
+.prose-mapa th {
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #b8865a;
+}
+
 @media print {
   @page {
     size: A4;
