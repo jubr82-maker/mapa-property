@@ -63,7 +63,13 @@ export function Header() {
     >
       {/* BUG T8 : header élargi 1400 -> 1600px (logo inchangé 56/96px,
           la nav respire et s'éloigne du centre). */}
-      <div className="mx-auto grid h-20 max-w-[1600px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:px-10">
+      {/* POL2-4 : onglets ×1.5 (text-[20px]) + gaps doublés
+          (lg:gap-4→lg:gap-8, nav gap-1→gap-2). Bloc FR/jour-nuit
+          extrême droite (ml-auto, POL3 préservé). Burger mobile
+          inchangé. (C) « cluster aligné à la largeur visuelle MAPA »
+          structurellement impossible pour une nav 6 onglets ×1.5 —
+          documenté docs/qa/POL2-4_ALIGNEMENT_NOTE.md. */}
+      <div className="mx-auto grid h-20 max-w-[1600px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:h-28 lg:gap-8 lg:px-10">
         {/* Slot GAUCHE — burger (mobile, à gauche) / nav desktop
             resserrée vers le centre (POL3 : justify-end ≥lg). */}
         <div className="flex items-center justify-start gap-1 lg:justify-end">
@@ -71,7 +77,7 @@ export function Header() {
             <HeaderBurger />
           </div>
           {/* Nav desktop only */}
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav className="hidden items-center gap-2 lg:flex">
             {/* NAV1 : onglet MANDATS retiré (tout est dans VENDRE).
                 Ordre avant logo : ACHETER, VENDRE, LOUER. */}
             {leftDropdowns.map((d) => (
@@ -79,7 +85,7 @@ export function Header() {
             ))}
             <Link
               href="/biens?transaction=rent"
-              className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+              className="px-3 py-2 font-sans text-[20px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
             >
               {t("rent")}
             </Link>
@@ -107,11 +113,11 @@ export function Header() {
         {/* Slot DROITE — nav desktop resserrée vers le centre, FR +
             jour/nuit isolés à l'extrême droite (POL3) ; vide sur mobile */}
         <div className="flex items-center justify-end gap-1 lg:justify-start">
-          <div className="hidden items-center gap-1 lg:flex lg:w-full">
+          <div className="hidden items-center gap-2 lg:flex lg:w-full">
             {/* NAV1 : ordre après logo — OFF-MARKET, SERVICES, JOURNAL. */}
             <Link
               href="/off-market"
-              className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+              className="px-3 py-2 font-sans text-[20px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
             >
               {t("off_market")}
             </Link>
@@ -120,7 +126,7 @@ export function Header() {
             ))}
             <Link
               href="/journal"
-              className="px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+              className="px-3 py-2 font-sans text-[20px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
             >
               {t("journal")}
             </Link>
@@ -149,7 +155,7 @@ function DropdownItem({
     <div className="group relative">
       <button
         type="button"
-        className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[13px] font-medium uppercase tracking-[0.05em] text-ink transition-colors group-hover:text-gold"
+        className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[20px] font-medium uppercase tracking-[0.05em] text-ink transition-colors group-hover:text-gold"
       >
         {label}
         <svg
