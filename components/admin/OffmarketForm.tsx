@@ -521,6 +521,26 @@ export function OffmarketForm({
                 />
               </Field>
             </div>
+            <div className="md:col-span-2">
+              {/* POL2-10 : champ URL vidéo (addition minimale). Upload
+                  drag-and-drop natif différé Phase B — cf.
+                  docs/admin/VIDEO_UPLOAD_GUIDE.md */}
+              <Field
+                label="Vidéo de présentation — URL"
+                hint="URL publique d'un fichier vidéo (webm/mp4/mov). Bucket Supabase « property-videos » ou CDN. Laisser vide = pas de vidéo."
+              >
+                <input
+                  name="video_url"
+                  type="url"
+                  defaultValue={
+                    (row as { video_url?: string | null } | null)?.video_url ??
+                    ""
+                  }
+                  placeholder="https://… .mp4"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
           </Section>
 
           <PriceSection row={row} />

@@ -8,6 +8,7 @@ import { FavoriteHeart } from "@/components/property/FavoriteHeart";
 import { sbUrl } from "@/lib/supabase-url";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 import { PropertyPrice } from "@/components/property/PropertyPrice";
+import { PropertyVideo } from "@/components/property/PropertyVideo";
 
 // POL2-9 : le prix off-market est désormais pilotable depuis le BO via
 // le drapeau `price_on_demand`. Par DÉFAUT (false ou colonne absente) le
@@ -74,6 +75,13 @@ export default async function OffMarketDetailPage({
             subtitle={t("cover_subtitle")}
           />
         </div>
+
+        {/* Vidéo de présentation — galerie + lightbox (POL2-10).
+            Rend null automatiquement si video_url absent. */}
+        <PropertyVideo
+          videoUrl={property.video_url}
+          labels={{ eyebrow: tProperty("video") }}
+        />
 
         {/* Layout */}
         <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_420px]">

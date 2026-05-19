@@ -40,6 +40,7 @@ const OPTIONAL_OFFMARKET_COLUMNS = [
   "price_max",
   "price_custom_text",
   "price_on_demand",
+  "video_url",
   "is_coup_de_coeur",
   "composition_commerces",
   "composition_bureaux",
@@ -209,6 +210,8 @@ function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, s
     // Contenu
     short_pitch: str(formData.get("short_description")),
     description: str(formData.get("full_description")),
+    // POL2-10 : URL vidéo de présentation (colonne optionnelle tolérante).
+    video_url: str(formData.get("video_url")),
 
     // Workflow
     photos_locked: bool(formData.get("photos_locked")),

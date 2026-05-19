@@ -67,6 +67,9 @@ export interface PropertyOffmarket {
   highlights: string[] | null;
   cover_image_url: string | null;
   gallery_urls: string[] | null;
+  // POL2-10 : vidéo de présentation. Colonne potentiellement absente
+  // tant que la migration n'est pas appliquée → traitée comme null.
+  video_url: string | null;
   is_published: boolean | null;
   display_order: number | null;
 }

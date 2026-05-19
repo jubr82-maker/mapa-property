@@ -475,6 +475,9 @@ function mapPublicRows(
       highlights: (r.highlights as string[] | null) ?? null,
       cover_image_url: (r.cover_image_url as string | null) ?? null,
       gallery_urls: (r.gallery_urls as string[] | null) ?? null,
+      // POL2-10 : tolérant — colonne absente (migration non appliquée)
+      // ⇒ undefined ⇒ null ⇒ le composant PropertyVideo ne rend rien.
+      video_url: (r.video_url as string | null) ?? null,
       is_published: true,
       display_order: (r.display_order as number | null) ?? null,
       price_mode: (r.price_mode as string | null) ?? null,

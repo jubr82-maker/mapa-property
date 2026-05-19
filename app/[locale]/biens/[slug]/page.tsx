@@ -16,6 +16,7 @@ import { BackButton } from "@/components/ui/BackButton";
 import { ContactReveal } from "@/components/contact-reveal";
 import { AcquisitionSimulator } from "@/components/property/AcquisitionSimulator";
 import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
+import { PropertyVideo } from "@/components/property/PropertyVideo";
 import { PropertyViewTracker } from "@/components/property/PropertyViewTracker";
 import { parseApimoDescription } from "@/lib/property-description-parser";
 import { Link as IntlLink } from "@/i18n/navigation";
@@ -168,22 +169,13 @@ export default async function PropertyPage({
         {/* Gallery */}
         <PropertyGallery items={galleryItems} title={title} />
 
-        {/* Vidéo de présentation (isolée, pleine largeur 16:9) */}
-        {property.video_url && (
-          <section className="mt-12">
-            <p className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
-              {t("video")}
-            </p>
-            <video
-              controls
-              preload="metadata"
-              className="aspect-video w-full rounded-2xl bg-bg-soft"
-              poster={galleryItems[0]?.url}
-            >
-              <source src={property.video_url} />
-            </video>
-          </section>
-        )}
+        {/* Vidéo de présentation — galerie + lightbox (POL2-10).
+            Rend null automatiquement si video_url absent. */}
+        <PropertyVideo
+          videoUrl={property.video_url}
+          poster={galleryItems[0]?.url}
+          labels={{ eyebrow: t("video") }}
+        />
 
         {/* Main grid */}
         <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_360px]">
