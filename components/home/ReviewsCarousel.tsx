@@ -12,9 +12,9 @@ export function ReviewsCarousel({ reviews }: Props) {
   if (reviews.length === 0) return null;
 
   return (
-    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-20">
+    <section className="px-6 py-5 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-6 max-w-2xl md:mb-12">
+        <header className="mb-4 max-w-2xl md:mb-12">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
             {t("eyebrow")}
           </p>
@@ -31,9 +31,9 @@ export function ReviewsCarousel({ reviews }: Props) {
                 key={r.id}
                 className="w-[80vw] max-w-md shrink-0 snap-center sm:w-[420px]"
               >
-                <article className="flex h-full flex-col gap-3 rounded-xl border border-border-subtle bg-bg p-4 md:gap-5 md:p-6">
+                <article className="flex h-full flex-col gap-2.5 rounded-xl border border-border-subtle bg-bg p-4 md:gap-5 md:p-6">
                   <Stars rating={r.rating ?? 5} />
-                  <blockquote className="text-xs leading-relaxed text-ink-mid md:text-base">
+                  <blockquote className="line-clamp-5 text-sm leading-relaxed text-ink-mid md:line-clamp-none md:text-base">
                     “{r.comment ?? ""}”
                   </blockquote>
                   <footer className="mt-auto flex items-center justify-between border-t border-line pt-3 md:pt-4">

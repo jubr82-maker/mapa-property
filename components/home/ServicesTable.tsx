@@ -16,9 +16,9 @@ export function ServicesTable() {
   const t = useTranslations("services_home");
 
   return (
-    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-20">
+    <section className="px-6 py-5 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-6 max-w-2xl md:mb-12">
+        <header className="mb-4 max-w-2xl md:mb-12">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
             {t("eyebrow")}
           </p>
@@ -26,7 +26,7 @@ export function ServicesTable() {
             {t("title")}
           </h2>
           <SignatureLine />
-          <p className="mt-3 text-xs text-ink-mid md:text-base">{t("subtitle")}</p>
+          <p className="mt-3 text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
         </header>
 
         {/* NAV5 : liste mono-colonne + liseré doré copper (50% viewport,
@@ -37,11 +37,11 @@ export function ServicesTable() {
               {idx > 0 && (
                 <div
                   aria-hidden
-                  className="mx-auto my-1 h-px w-1/2"
+                  className="mx-auto my-0.5 h-px w-1/2 md:my-1"
                   style={{ backgroundColor: "#B8865A" }}
                 />
               )}
-              <article className="group flex items-start gap-3 py-4 md:gap-6 md:py-7 lg:px-8">
+              <article className="group flex items-start gap-3 py-2.5 md:gap-6 md:py-7 lg:px-8">
                 <span className="font-mono text-[10px] text-ink-soft shrink-0 w-8 pt-1 md:w-10 md:text-xs">
                   0{idx + 1}.
                 </span>
@@ -49,7 +49,7 @@ export function ServicesTable() {
                   <h3 className="font-display text-base font-bold leading-tight text-ink group-hover:text-gold-deep md:text-2xl">
                     {t(`${s}_title`)}
                   </h3>
-                  <p className="mt-2 text-xs leading-relaxed text-ink-mid md:text-sm">
+                  <p className="mt-1.5 text-sm leading-snug text-ink-mid md:mt-2 md:text-sm">
                     {t(`${s}_text`)}
                   </p>
                 </div>

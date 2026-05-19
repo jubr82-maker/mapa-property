@@ -15,9 +15,9 @@ export function BlogTeaser({ posts, locale }: Props) {
   if (posts.length === 0) return null;
 
   return (
-    <section className="bg-bg px-6 py-6 md:py-20 lg:px-10 lg:py-20">
+    <section className="bg-bg px-6 py-5 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-12">
+        <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-12">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
               {t("eyebrow")}
@@ -35,7 +35,7 @@ export function BlogTeaser({ posts, locale }: Props) {
           </Link>
         </header>
 
-        <div className="grid gap-3 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-6 lg:grid-cols-3">
           {posts.map((post) => {
             const title = pickLang(post, "title", locale);
             const excerpt = pickLang(post, "excerpt", locale);
@@ -45,7 +45,7 @@ export function BlogTeaser({ posts, locale }: Props) {
                 href={`/blog/${post.slug}`}
                 className="group flex flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg transition-colors hover:border-gold"
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
+                <div className="relative h-24 overflow-hidden bg-bg-deep sm:h-auto sm:aspect-[4/3]">
                   {post.cover_image ? (
                     <Image
                       src={post.cover_image}
@@ -56,17 +56,17 @@ export function BlogTeaser({ posts, locale }: Props) {
                     />
                   ) : null}
                 </div>
-                <div className="flex flex-1 flex-col gap-3 p-6">
+                <div className="flex flex-1 flex-col gap-1.5 p-3 sm:gap-2 sm:p-4 md:gap-3 md:p-6">
                   {post.primary_tag && (
                     <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
                       {post.primary_tag}
                     </span>
                   )}
-                  <h3 className="line-clamp-2 font-display text-xl font-bold leading-tight text-ink group-hover:text-gold-deep">
+                  <h3 className="line-clamp-2 font-display text-lg font-bold leading-tight text-ink group-hover:text-gold-deep md:text-xl">
                     {title}
                   </h3>
                   {excerpt && (
-                    <p className="line-clamp-3 text-sm leading-relaxed text-ink-mid">
+                    <p className="hidden text-sm leading-relaxed text-ink-mid sm:line-clamp-3 sm:block">
                       {excerpt}
                     </p>
                   )}

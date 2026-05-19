@@ -44,9 +44,9 @@ export function FeaturedCarousel({ items }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <section className="px-6 py-6 md:py-20 lg:px-10 lg:py-20">
+    <section className="px-6 py-5 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-10">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-10">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
               {t("eyebrow")}
@@ -55,7 +55,7 @@ export function FeaturedCarousel({ items }: Props) {
               {t("title")}
             </h2>
             <SignatureLine />
-            <p className="mt-3 max-w-xl text-xs text-ink-mid md:text-base">{t("subtitle")}</p>
+            <p className="mt-3 max-w-xl text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
           </div>
           <div className="flex items-center gap-3">
             <CarouselButton dir="prev" onClick={() => emblaApi?.scrollPrev()} />
@@ -83,7 +83,7 @@ export function FeaturedCarousel({ items }: Props) {
         </div>
 
         {scrollSnaps.length > 1 && (
-          <div className="mt-6 flex justify-center gap-2">
+          <div className="mt-4 flex justify-center gap-2 md:mt-6">
             {scrollSnaps.map((_, i) => (
               <button
                 key={i}
@@ -116,7 +116,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
       href={href}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border-subtle bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
+      <div className="relative h-40 overflow-hidden bg-bg-deep sm:h-auto sm:aspect-[4/3]">
         {isOffmarket ? (
           /* Cover confidentiel standardisé (BUG 2) — jamais le visuel
              réel d'un bien off-market, même si une image custom existe. */
@@ -152,7 +152,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
           {isOffmarket ? "Off-Market" : "Apimo"}
         </span>
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-5">
+      <div className="flex flex-1 flex-col gap-1.5 p-4 md:gap-2 md:p-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
           {[item.country, item.city].filter(Boolean).join(" · ") || "—"}
         </p>

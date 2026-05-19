@@ -41,9 +41,9 @@ export function CoverageGrid() {
   }, []);
 
   return (
-    <section className="bg-bg px-6 py-6 md:py-20 lg:px-10 lg:py-20">
+    <section className="bg-bg px-6 py-5 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-6 max-w-2xl md:mb-12">
+        <header className="mb-4 max-w-2xl md:mb-12">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
             {t("eyebrow")}
           </p>
@@ -51,16 +51,16 @@ export function CoverageGrid() {
             {t("title")}
           </h2>
           <SignatureLine />
-          <p className="mt-3 text-xs text-ink-mid md:text-base">{t("subtitle")}</p>
+          <p className="mt-3 text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
         </header>
 
-        <div className="grid gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-5 lg:grid-cols-4">
           {typologies.map((typo) => {
             const isFlipped = isMobile && expandedKey === typo.key;
             return (
               <HoverFlipCard
                 key={typo.key}
-                height="h-52 md:h-64"
+                height="h-40 sm:h-52 md:h-64"
                 flipped={isMobile ? expandedKey === typo.key : undefined}
                 onFlipToggle={
                   isMobile
@@ -78,7 +78,7 @@ export function CoverageGrid() {
                     <span className="font-mono text-[10px] font-light uppercase tracking-[0.3em] text-gold-deep">
                       {t(`${typo.key}_label`)}
                     </span>
-                    <h3 className="font-display text-2xl font-black leading-tight text-ink md:text-3xl">
+                    <h3 className="font-display text-lg font-black leading-tight text-ink sm:text-2xl md:text-3xl">
                       {t(`${typo.key}_title`)}
                     </h3>
                     {/* Desktop: hint discret "Survolez →" */}

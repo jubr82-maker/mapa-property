@@ -24,12 +24,12 @@ export function MarketsSection() {
         <div className="flex justify-center">
           <SignatureLine />
         </div>
-        <p className="mx-auto mt-3 max-w-3xl text-sm leading-relaxed text-ink-mid md:text-lg">
+        <p className="mx-auto mt-2 max-w-3xl text-sm leading-relaxed text-ink-mid md:mt-3 md:text-lg">
           {t("subtitle")}
         </p>
         <Link
           href="/services/marches-actifs"
-          className="mt-5 inline-flex items-center gap-2 rounded-full border border-gold/60 px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-deep transition-colors hover:text-gold"
+          className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/60 px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-deep transition-colors hover:text-gold md:mt-5"
         >
           {t("see_all")} →
         </Link>

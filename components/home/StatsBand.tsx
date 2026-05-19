@@ -40,13 +40,13 @@ export async function StatsBand({ locale }: { locale: string }) {
     // POL6 : <div> (pas <section>) — band fusionné avec MarketsSection
     // dans CoverageStats. Padding resserré (py réduit) pour lire comme
     // un seul bloc « couverture en chiffres ».
-    <div className="mt-8 rounded-2xl bg-bg-contrast px-6 py-8 text-text-contrast md:mt-10 md:py-12 lg:px-10">
+    <div className="mt-6 rounded-2xl bg-bg-contrast px-5 py-6 text-text-contrast md:mt-10 md:px-6 md:py-12 lg:px-10">
       <div className="mx-auto max-w-[1400px]">
-        <p className="mb-6 max-w-xl font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:mb-12 md:text-xs">
+        <p className="mb-4 max-w-xl font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:mb-12 md:text-xs">
           {eyebrow}
         </p>
 
-        <div className="grid gap-5 sm:grid-cols-2 md:gap-10 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-4 md:gap-10 lg:grid-cols-4">
           {labels.map((s) => (
             <div key={s.key} className="border-t border-text-contrast/15 pt-4 md:pt-6">
               <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-text-contrast/50 md:text-[10px]">
