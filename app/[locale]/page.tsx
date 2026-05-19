@@ -10,6 +10,7 @@ import { CoverageStats } from "@/components/home/CoverageStats";
 import { ProcessTable } from "@/components/home/ProcessTable";
 import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
+import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 import {
   fetchHomeFeatured,
   fetchLatestBlogPosts,
@@ -39,18 +40,36 @@ export default async function HomePage({
           SearchBar conservé (ancre #search du Hero) ; OffMarketBand /
           Reviews / Blog conservés (non listés au brief mais existants —
           pas de suppression non demandée). */}
+      {/* POL3-7 : Hero NON animé (au-dessus du fold). Blocs sans
+          stagger interne enveloppés dans FadeInOnScroll ; carrousel
+          révélé en bloc unique (Embla intact, validé Julien). Les
+          blocs à stagger (CoverageGrid, ServicesTable, OffMarketBand,
+          BlogTeaser) animent leurs items en interne — pas de double
+          wrap. prefers-reduced-motion respecté par le composant. */}
       <Hero locale={locale} />
-      <SearchBar />
-      <FeaturedCarousel items={featured} />
+      <FadeInOnScroll>
+        <SearchBar />
+      </FadeInOnScroll>
+      <FadeInOnScroll>
+        <FeaturedCarousel items={featured} />
+      </FadeInOnScroll>
       <CoverageGrid />
-      <MandatesGrid />
-      <CoverageStats locale={locale} />
-      <ProcessTable />
+      <FadeInOnScroll>
+        <MandatesGrid />
+      </FadeInOnScroll>
+      <FadeInOnScroll>
+        <CoverageStats locale={locale} />
+      </FadeInOnScroll>
+      <FadeInOnScroll>
+        <ProcessTable />
+      </FadeInOnScroll>
       <ServicesTable />
       {/* NAV7 : « mot fondateur » (QuoteBand) retiré (cf.
           docs/qa/COPY_REWRITES_TODO.md). */}
       <OffMarketBand />
-      <ReviewsCarousel reviews={reviews} />
+      <FadeInOnScroll>
+        <ReviewsCarousel reviews={reviews} />
+      </FadeInOnScroll>
       <BlogTeaser posts={blogPosts} locale={locale as Locale} />
       {/* NAV8 : ContactCTA « Une conversation peut tout changer »
           retiré (doublon du CTA footer « Passer à l'action »). */}

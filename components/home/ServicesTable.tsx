@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { SignatureLine } from "@/components/ui/SignatureLine";
+import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 // NAV2 : ordre voulu — Vente et acquisition, Mandat de recherche,
 // Broker International, Négociation, Estimation, Mise en location.
@@ -33,7 +34,7 @@ export function ServicesTable() {
             1px, centré, marges légères) entre chaque service. */}
         <div className="flex flex-col border-y border-line">
           {services.map((s, idx) => (
-            <div key={s}>
+            <FadeInOnScroll key={s} delay={idx * 80}>
               {idx > 0 && (
                 <div
                   aria-hidden
@@ -60,7 +61,7 @@ export function ServicesTable() {
                   →
                 </span>
               </article>
-            </div>
+            </FadeInOnScroll>
           ))}
         </div>
       </div>

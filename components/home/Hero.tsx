@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { sbUrl } from "@/lib/supabase-url";
 import { siteContent } from "@/lib/site-content";
 import { SignatureLine } from "@/components/ui/SignatureLine";
+import { ParallaxImage } from "@/components/ui/ParallaxImage";
 
 export async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: "hero" });
@@ -28,18 +29,28 @@ export async function Hero({ locale }: { locale: string }) {
           joue le rôle de placeholder le temps du buffering.
           Servi en deux variantes responsive (desktop 4.7MB / mobile 3.1MB)
           + preload="metadata" pour réduire l'Egress Supabase ~70%. */}
-      <video
-        className="absolute inset-0 size-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        aria-hidden
+      {/* POL3-7 : parallax desktop very subtil (0.05). Overscan
+          108%/-4% pour qu'aucun bord n'apparaisse sous le translate
+          (max ~±22px) — AUCUN zoom/scale. Inactif mobile (<768) +
+          prefers-reduced-motion (ParallaxImage). Gradient/brackets/
+          contenu inchangés. */}
+      <ParallaxImage
+        intensity={0.05}
+        className="absolute inset-0 z-0"
       >
-        <source src={videoDesktop} type="video/mp4" media="(min-width: 1024px)" />
-        <source src={videoMobile} type="video/mp4" />
-      </video>
+        <video
+          className="absolute left-0 top-[-4%] h-[108%] w-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden
+        >
+          <source src={videoDesktop} type="video/mp4" media="(min-width: 1024px)" />
+          <source src={videoMobile} type="video/mp4" />
+        </video>
+      </ParallaxImage>
 
       {/* Gradient overlay (ink → transparent → ink 60%) */}
       <div

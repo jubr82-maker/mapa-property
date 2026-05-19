@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 export function OffMarketBand() {
   const t = useTranslations("offmarket_band");
@@ -24,17 +25,32 @@ export function OffMarketBand() {
 
         <div className="flex flex-col gap-3 md:gap-4 lg:items-end">
           <ul className="space-y-2 font-mono text-[10px] uppercase tracking-[0.2em] text-text-contrast/70 md:space-y-3 md:text-xs">
-            <li className="flex items-center gap-3 lg:justify-end">
-              <span className="size-1.5 rounded-full bg-gold-bright" />
-              {t("benefit_1")}
+            <li>
+              <FadeInOnScroll
+                delay={0}
+                className="flex items-center gap-3 lg:justify-end"
+              >
+                <span className="size-1.5 rounded-full bg-gold-bright" />
+                {t("benefit_1")}
+              </FadeInOnScroll>
             </li>
-            <li className="flex items-center gap-3 lg:justify-end">
-              <span className="size-1.5 rounded-full bg-gold-bright" />
-              {t("benefit_2")}
+            <li>
+              <FadeInOnScroll
+                delay={80}
+                className="flex items-center gap-3 lg:justify-end"
+              >
+                <span className="size-1.5 rounded-full bg-gold-bright" />
+                {t("benefit_2")}
+              </FadeInOnScroll>
             </li>
-            <li className="flex items-center gap-3 lg:justify-end">
-              <span className="size-1.5 rounded-full bg-gold-bright" />
-              {t("benefit_3")}
+            <li>
+              <FadeInOnScroll
+                delay={160}
+                className="flex items-center gap-3 lg:justify-end"
+              >
+                <span className="size-1.5 rounded-full bg-gold-bright" />
+                {t("benefit_3")}
+              </FadeInOnScroll>
             </li>
           </ul>
 

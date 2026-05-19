@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { internationalRegions, luxembourgCommunes } from "@/lib/markets";
+import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 export default async function ActiveMarketsPage({
   params,
@@ -29,6 +30,7 @@ export default async function ActiveMarketsPage({
         </header>
 
         {/* Founding text — section 13 du brief */}
+        <FadeInOnScroll>
         <section className="mb-16 max-w-3xl space-y-4 text-base leading-relaxed text-ink-mid">
           <p className="t-h3">
             {t("found_p1")}
@@ -40,7 +42,9 @@ export default async function ActiveMarketsPage({
             — {t("found_source")}
           </p>
         </section>
+        </FadeInOnScroll>
 
+        <FadeInOnScroll>
         <div className="grid gap-10 lg:grid-cols-2">
           {/* Luxembourg */}
           <section className="rounded-xl border border-line bg-bg p-8">
@@ -92,6 +96,7 @@ export default async function ActiveMarketsPage({
             </ul>
           </section>
         </div>
+        </FadeInOnScroll>
 
         <p className="mt-12 max-w-3xl rounded-xl border border-gold/30 bg-bg-soft p-6 text-sm leading-relaxed text-ink-mid">
           {t("disclaimer")}

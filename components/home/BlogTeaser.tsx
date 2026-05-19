@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { pickLang, type BlogPost, type Locale } from "@/lib/types";
 import { SignatureLine } from "@/components/ui/SignatureLine";
+import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 interface Props {
   posts: BlogPost[];
@@ -36,14 +37,14 @@ export function BlogTeaser({ posts, locale }: Props) {
         </header>
 
         <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-6 lg:grid-cols-3">
-          {posts.map((post) => {
+          {posts.map((post, idx) => {
             const title = pickLang(post, "title", locale);
             const excerpt = pickLang(post, "excerpt", locale);
             return (
+              <FadeInOnScroll key={post.id} delay={idx * 80}>
               <Link
-                key={post.id}
                 href={`/blog/${post.slug}`}
-                className="group flex flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg transition-colors hover:border-gold"
+                className="group flex h-full flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg transition-colors hover:border-gold"
               >
                 <div className="relative h-24 overflow-hidden bg-bg-deep sm:h-auto sm:aspect-[4/3]">
                   {post.cover_image ? (
@@ -84,6 +85,7 @@ export function BlogTeaser({ posts, locale }: Props) {
                   )}
                 </div>
               </Link>
+              </FadeInOnScroll>
             );
           })}
         </div>

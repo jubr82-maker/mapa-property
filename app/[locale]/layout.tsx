@@ -14,6 +14,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 import { homepageGraph } from "@/lib/seo";
 import { siteDesignTokens } from "@/lib/site-content";
 import "../globals.css";
@@ -173,6 +174,7 @@ export default async function LocaleLayout({
         />
       </head>
       <body className="min-h-dvh bg-bg text-ink antialiased">
+        <NoiseOverlay />
         <JsonLd data={homepageGraph(locale)} />
         <ThemeProvider
           attribute="class"

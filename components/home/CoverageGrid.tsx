@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { HoverFlipCard } from "@/components/ui/HoverFlipCard";
 import { SignatureLine } from "@/components/ui/SignatureLine";
+import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 const typologies = [
   {
@@ -55,11 +56,11 @@ export function CoverageGrid() {
         </header>
 
         <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-5 lg:grid-cols-4">
-          {typologies.map((typo) => {
+          {typologies.map((typo, idx) => {
             const isFlipped = isMobile && expandedKey === typo.key;
             return (
+              <FadeInOnScroll key={typo.key} delay={idx * 80}>
               <HoverFlipCard
-                key={typo.key}
                 height="h-40 sm:h-52 md:h-64"
                 flipped={isMobile ? expandedKey === typo.key : undefined}
                 onFlipToggle={
@@ -128,6 +129,7 @@ export function CoverageGrid() {
                   </div>
                 }
               />
+              </FadeInOnScroll>
             );
           })}
         </div>

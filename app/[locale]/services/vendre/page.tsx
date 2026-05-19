@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ALL_MANDATE_SLUGS, MANDATES } from "@/lib/mandates";
+import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 export async function generateMetadata({
   params,
@@ -39,6 +40,7 @@ export default async function SellPage({
         </header>
 
         {/* Steps */}
+        <FadeInOnScroll>
         <section className="mb-20">
           <ol className="grid gap-6 lg:grid-cols-3">
             {(["one", "two", "three"] as const).map((s, i) => (
@@ -59,8 +61,10 @@ export default async function SellPage({
             ))}
           </ol>
         </section>
+        </FadeInOnScroll>
 
         {/* Mandates picker */}
+        <FadeInOnScroll>
         <section className="mb-16">
           <h2 className="mb-6 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
             {t("choose_mandate")}
@@ -91,8 +95,10 @@ export default async function SellPage({
             })}
           </div>
         </section>
+        </FadeInOnScroll>
 
         {/* Estimate CTA */}
+        <FadeInOnScroll>
         <section className="rounded-2xl border border-gold/40 bg-gradient-to-br from-bg-soft via-bg to-bg-soft p-8 sm:p-12">
           <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
             <div>
@@ -112,6 +118,7 @@ export default async function SellPage({
             </Link>
           </div>
         </section>
+        </FadeInOnScroll>
       </div>
     </div>
   );
