@@ -1,15 +1,17 @@
 "use client";
 
-// POL2-7 — Accordéon 4 onglets IDENTIQUE partout (biens standards +
-// off-market) : Aperçu ("Le brief"), Description, Localisation,
-// Conditions de vente (→ "Processus d'accès au dossier" en off-market).
+// POL2-7 / POL3-1 — Accordéon 4 onglets IDENTIQUE partout (biens
+// standards + off-market) : Aperçu ("Le brief"), Description,
+// Localisation, Conditions de vente (→ "Processus d'accès au dossier" en
+// off-market).
 //
-// Structure stable : 4 panneaux, le 1er ouvert par défaut, chevron
-// cuivre, transitions sobres (pas d'animation tape-à-l'œil). Le contenu
-// de chaque panneau est fourni par l'appelant (ReactNode) → la coquille
-// reste strictement identique sur les deux types de fiche.
+// POL3-1 : les 4 panneaux sont OUVERTS par défaut. Chaque en-tête est un
+// toggle INDÉPENDANT (clic → ferme ce panneau ; re-clic → ré-ouvre).
+// L'ouverture/fermeture est animée par un slide max-height 300ms ease
+// (le contenu reste monté pour que la transition fonctionne dans les
+// deux sens). aria-expanded + aria-controls conservés/ajoutés.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface FichePanel {
   id: string;
@@ -18,19 +20,35 @@ export interface FichePanel {
 }
 
 export function FicheAccordion({ panels }: { panels: FichePanel[] }) {
-  const [open, setOpen] = useState<string>(panels[0]?.id ?? "");
+  // POL3-1 : tous ouverts au premier rendu.
+  const [openIds, setOpenIds] = useState<Set<string>>(
+    () => new Set(panels.map((p) => p.id)),
+  );
+
+  function toggle(id: string) {
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   return (
     <div data-fiche-accordion className="divide-y divide-line border-y border-line">
       {panels.map((p) => {
-        const isOpen = open === p.id;
+        const isOpen = openIds.has(p.id);
+        const panelId = `fiche-panel-${p.id}`;
+        const headerId = `fiche-header-${p.id}`;
         return (
           <section key={p.id} data-fiche-panel data-panel-id={p.id}>
             <h2 className="m-0">
               <button
                 type="button"
+                id={headerId}
                 aria-expanded={isOpen}
-                onClick={() => setOpen(isOpen ? "" : p.id)}
+                aria-controls={panelId}
+                onClick={() => toggle(p.id)}
                 className="flex w-full items-center justify-between gap-4 py-5 text-left"
               >
                 <span className="font-mono text-xs uppercase tracking-[0.3em] text-ink">
@@ -56,17 +74,76 @@ export function FicheAccordion({ panels }: { panels: FichePanel[] }) {
                 </span>
               </button>
             </h2>
-            {isOpen && (
-              <div
-                data-fiche-panel-content
-                className="pb-8 pt-1 text-base leading-relaxed text-ink-mid"
-              >
-                {p.content}
-              </div>
-            )}
+            <AccordionPanel id={panelId} labelledBy={headerId} open={isOpen}>
+              {p.content}
+            </AccordionPanel>
           </section>
         );
       })}
+    </div>
+  );
+}
+
+// Conteneur animé : slide max-height 300ms ease. Le contenu reste TOUJOURS
+// monté (sinon pas de transition de fermeture). On mesure la hauteur réelle
+// du contenu pour animer vers/depuis une max-height précise puis on repasse
+// en "none" une fois ouvert (contenu dynamique : pas de clipping).
+function AccordionPanel({
+  id,
+  labelledBy,
+  open,
+  children,
+}: {
+  id: string;
+  labelledBy: string;
+  open: boolean;
+  children: React.ReactNode;
+}) {
+  const innerRef = useRef<HTMLDivElement | null>(null);
+  // maxHeight contrôlé : "" (= auto via inline non posé) géré via state.
+  const [maxHeight, setMaxHeight] = useState<string>(open ? "none" : "0px");
+
+  useEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    const full = el.scrollHeight;
+    if (open) {
+      // Ouverture : 0 → hauteur réelle, puis "none" en fin de transition
+      // pour absorber un contenu dynamique sans clipping.
+      setMaxHeight(`${full}px`);
+      const t = setTimeout(() => setMaxHeight("none"), 320);
+      return () => clearTimeout(t);
+    } else {
+      // Fermeture : on fige d'abord la hauteur courante puis on tombe à 0.
+      setMaxHeight(`${full}px`);
+      const r = requestAnimationFrame(() => {
+        requestAnimationFrame(() => setMaxHeight("0px"));
+      });
+      return () => cancelAnimationFrame(r);
+    }
+  }, [open]);
+
+  return (
+    <div
+      id={id}
+      role="region"
+      aria-labelledby={labelledBy}
+      aria-hidden={!open}
+      data-fiche-panel-shell
+      data-open={open}
+      style={{
+        maxHeight,
+        overflow: maxHeight === "none" ? "visible" : "hidden",
+        transition: "max-height 300ms ease",
+      }}
+    >
+      <div
+        ref={innerRef}
+        data-fiche-panel-content
+        className="pb-8 pt-1 text-base leading-relaxed text-ink-mid"
+      >
+        {children}
+      </div>
     </div>
   );
 }
