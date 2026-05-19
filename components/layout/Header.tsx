@@ -77,8 +77,9 @@ export function Header() {
           <div className="lg:hidden">
             <HeaderBurger />
           </div>
-          {/* Nav desktop only */}
-          <nav className="hidden items-center gap-2 lg:flex">
+          {/* Nav desktop only — POL3-P5 : lg:mt-3 baseline texte 12px
+              plus basse (alignement optique vs logo, desktop). */}
+          <nav className="hidden items-center gap-2 lg:mt-3 lg:flex">
             {/* NAV1 : onglet MANDATS retiré (tout est dans VENDRE).
                 Ordre avant logo : ACHETER, VENDRE, LOUER. */}
             {leftDropdowns.map((d) => (
@@ -93,8 +94,10 @@ export function Header() {
           </nav>
         </div>
 
-        {/* Slot CENTRE — logo centré sur TOUS supports (BUG 10) */}
-        <div className="flex justify-center">
+        {/* Slot CENTRE — logo centré sur TOUS supports (BUG 10).
+            POL3-P5 : lg:px-12 → +96px de respiration autour du logo
+            (push mécanique des navs latérales loin du centre). */}
+        <div className="flex justify-center lg:px-12">
           {/* POL2 : logo -20% (96->76 desktop, 56->44 mobile) +
               descendu de 8px (pt-2). */}
           <Link
@@ -115,22 +118,28 @@ export function Header() {
             jour/nuit isolés à l'extrême droite (POL3) ; vide sur mobile */}
         <div className="flex items-center justify-end gap-1 lg:justify-start">
           <div className="hidden items-center gap-2 lg:flex lg:w-full">
-            {/* NAV1 : ordre après logo — OFF-MARKET, SERVICES, JOURNAL. */}
-            <Link
-              href="/off-market"
-              className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
-            >
-              {t("off_market")}
-            </Link>
-            {rightDropdowns.map((d) => (
-              <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
-            ))}
-            <Link
-              href="/journal"
-              className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
-            >
-              {t("journal")}
-            </Link>
+            {/* POL3-P5 : <nav> introduite à droite pour porter lg:mt-3
+                (baseline 12px plus basse) sans descendre les toggles
+                FR/dark — qui restent à leur hauteur originale via la
+                div ml-auto sœur. */}
+            <nav className="flex items-center gap-2 lg:mt-3">
+              {/* NAV1 : ordre après logo — OFF-MARKET, SERVICES, JOURNAL. */}
+              <Link
+                href="/off-market"
+                className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+              >
+                {t("off_market")}
+              </Link>
+              {rightDropdowns.map((d) => (
+                <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
+              ))}
+              <Link
+                href="/journal"
+                className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+              >
+                {t("journal")}
+              </Link>
+            </nav>
             {/* POL3 : poussé à l'extrême droite (ml-auto). */}
             <div className="ml-auto flex items-center gap-2 border-l border-line pl-3">
               <LanguageSwitcher variant="light" />
