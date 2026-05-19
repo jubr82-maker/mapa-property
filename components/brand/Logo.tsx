@@ -49,7 +49,7 @@ export function Logo({
       width={width}
       height={height}
       priority={priority}
-      className={`${toneClass} ${className}`.trim()}
+      className={`mapa-logo-img ${toneClass} ${className}`.trim()}
     />
   );
 }

@@ -202,10 +202,16 @@ html {
 .logo-auto {
   display: block;
 }
+/* POL2-3 : couleur or PLATE #e0be60 (R224 G190 B96) sur la marque en
+   mode NUIT uniquement (décision Julien — pas de gradient, logo PNG).
+   brightness(0)+saturate(100%) normalise la source en noir (agnostique
+   du PNG), la chaîne reteinte vers #e0be60. Filtre calibré en DOM réel
+   (proof-pol2-3.mjs) : rgb(223,190,97), Δ canal max = 1 vs (224,190,96).
+   Mode clair : aucune règle ici → copper #B8865A INCHANGÉ. */
 :root.dark .logo-auto,
 .logo-gold {
-  filter: brightness(0) saturate(100%) invert(74%) sepia(38%)
-    saturate(560%) hue-rotate(346deg) brightness(92%) contrast(88%);
+  filter: brightness(0) saturate(100%) invert(70%) sepia(100%)
+    saturate(350%) hue-rotate(352deg) brightness(85%) contrast(95%);
 }
 
 .prose-mapa {
