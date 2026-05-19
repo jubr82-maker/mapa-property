@@ -5,7 +5,6 @@ import {
   fetchOffmarketById,
   fetchPropertyByIdOrSlug,
   fetchPropertyImages,
-  fetchPublishedReviews,
 } from "@/lib/data";
 import { pickLang, type Locale } from "@/lib/types";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
@@ -24,7 +23,6 @@ import { FicheAccordion } from "@/components/property/fiche/FicheAccordion";
 import { FicheConditions } from "@/components/property/fiche/FicheConditions";
 import { FicheLocation } from "@/components/property/fiche/FicheLocation";
 import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
-import { FicheReviews } from "@/components/property/fiche/FicheReviews";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { parseApimoDescription } from "@/lib/property-description-parser";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -74,9 +72,8 @@ export default async function PropertyPage({
     notFound();
   }
 
-  const [images, reviews, allProperties] = await Promise.all([
+  const [images, allProperties] = await Promise.all([
     fetchPropertyImages(property.id),
-    fetchPublishedReviews(3),
     fetchAllPropertiesWithCover(),
   ]);
 
@@ -298,8 +295,8 @@ export default async function PropertyPage({
           />
         </div>
 
-        {/* Avis clients discrets */}
-        <FicheReviews heading={tf("reviews_title")} reviews={reviews} />
+        {/* POL3-2 : bloc avis clients retiré des fiches biens (le
+            ReviewsCarousel reste sur la home). */}
 
         {/* Formulaire "Une question sur ce bien ?" */}
         <section

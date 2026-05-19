@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { fetchOffmarketById, fetchPublishedReviews } from "@/lib/data";
+import { fetchOffmarketById } from "@/lib/data";
 import { BackButton } from "@/components/ui/BackButton";
 import { NDAForm } from "@/components/forms/NDAForm";
 import { FavoriteHeart } from "@/components/property/FavoriteHeart";
@@ -15,7 +15,6 @@ import { FicheAccordion } from "@/components/property/fiche/FicheAccordion";
 import { FicheConditions } from "@/components/property/fiche/FicheConditions";
 import { FicheLocation } from "@/components/property/fiche/FicheLocation";
 import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
-import { FicheReviews } from "@/components/property/fiche/FicheReviews";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 
 // POL2-9 : le prix off-market est désormais pilotable depuis le BO via
@@ -40,8 +39,6 @@ export default async function OffMarketDetailPage({
 
   const property = await fetchOffmarketById(id, locale);
   if (!property) notFound();
-
-  const reviews = await fetchPublishedReviews(4);
 
   const t = await getTranslations({ locale, namespace: "offmarket" });
   const tProperty = await getTranslations({ locale, namespace: "property" });
@@ -262,8 +259,8 @@ export default async function OffMarketDetailPage({
           />
         </div>
 
-        {/* Avis clients discrets */}
-        <FicheReviews heading={tf("reviews_title")} reviews={reviews} />
+        {/* POL3-2 : bloc avis clients retiré des fiches off-market (le
+            ReviewsCarousel reste sur la home). */}
 
         {/* Formulaire bas : NDA "Accéder au dossier complet" */}
         <section
