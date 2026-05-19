@@ -63,7 +63,8 @@ export function Header() {
     >
       {/* BUG T8 : header élargi 1400 -> 1600px (logo inchangé 56/96px,
           la nav respire et s'éloigne du centre). */}
-      {/* POL2-4 : onglets ×1.5 (text-[20px]) + gaps doublés
+      {/* POL2-4 : onglets + gaps doublés (POL3-4 : taille onglets
+          ramenée 20px → 17px, text-[17px])
           (lg:gap-4→lg:gap-8, nav gap-1→gap-2). Bloc FR/jour-nuit
           extrême droite (ml-auto, POL3 préservé). Burger mobile
           inchangé. (C) « cluster aligné à la largeur visuelle MAPA »
@@ -85,7 +86,7 @@ export function Header() {
             ))}
             <Link
               href="/biens?transaction=rent"
-              className="px-3 py-2 font-sans text-[20px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+              className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
             >
               {t("rent")}
             </Link>
@@ -117,7 +118,7 @@ export function Header() {
             {/* NAV1 : ordre après logo — OFF-MARKET, SERVICES, JOURNAL. */}
             <Link
               href="/off-market"
-              className="px-3 py-2 font-sans text-[20px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+              className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
             >
               {t("off_market")}
             </Link>
@@ -126,7 +127,7 @@ export function Header() {
             ))}
             <Link
               href="/journal"
-              className="px-3 py-2 font-sans text-[20px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+              className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
             >
               {t("journal")}
             </Link>
@@ -155,7 +156,7 @@ function DropdownItem({
     <div className="group relative">
       <button
         type="button"
-        className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[20px] font-medium uppercase tracking-[0.05em] text-ink transition-colors group-hover:text-gold"
+        className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors group-hover:text-gold"
       >
         {label}
         <svg
