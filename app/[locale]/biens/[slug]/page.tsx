@@ -205,6 +205,7 @@ export default async function PropertyPage({
             title: tf("location_title"),
             env: tf("location_env"),
             na: tf("location_na"),
+            mapMore: tf("location_map_more"),
           }}
           city={property.city}
           country={property.country}

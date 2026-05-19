@@ -139,6 +139,7 @@ export default async function OffMarketDetailPage({
             title: tf("location_title"),
             env: tf("location_env"),
             na: tf("location_na"),
+            mapMore: tf("location_map_more"),
           }}
           city={property.city_label}
           country={property.country}
