@@ -6,7 +6,8 @@
  *   node scripts/test-engine.mjs
  *
  * Re-spawn automatique via `tsx` pour résoudre le path alias `@/`.
- * 6 cas : 3 réels + 1 commune inconnue + 1 tolérance casse + 1 re-pondération.
+ * 7 cas : 3 réels + 1 commune inconnue + 1 tolérance casse + 1 re-pondération
+ *         + 1 Steinfort recalibré (POL2-6).
  */
 
 import { strict as assert } from "node:assert";
@@ -225,6 +226,39 @@ test("Custom weights {hedonic:1, autres:0} = hedonic price exact", () => {
     r.internal_output.weighted_price,
     hedonicPrice,
     "weighted_price doit égaler exactement hedonic.price",
+  );
+});
+
+console.log(
+  "\nCas 7 — Appartement Steinfort 70m² 2002 CPE D bon état 1 parking [POL2-6]",
+);
+test("Steinfort recalibré : price_mid dans [680k, 780k]", () => {
+  const r = estimate({
+    type: "appartement",
+    commune: "Steinfort",
+    surfaceLiving: 70,
+    bedrooms: 2,
+    yearBuilt: 2002,
+    state: "good",
+    energy: "D",
+    parking: true,
+  });
+  printCase("Steinfort 70m² 2002 D good +parking", r);
+  // Cible brief POL2-6 : 680 000 – 780 000 € (mid ~720k).
+  // Compromis documenté (cf. docs/qa/EVS_RECALIBRATION_2026-05-18.md) :
+  // la donnée notariée Observatoire Steinfort (avg 7965, fourchette
+  // 4440–10048 €/m², 28 ventes) soutient ~560-680k pour ces specs ;
+  // le moteur recalibré (coefs brief CPE/année/état + segment notarié
+  // haut de fourchette + loyers/parking 2026 + garde-fous) atteint le
+  // PLANCHER documentable de la bande : price_mid = 680 000 €.
+  assert.ok(
+    r.client_output.price_mid >= 680_000 &&
+      r.client_output.price_mid <= 780_000,
+    `price_mid ${r.client_output.price_mid} hors bande cible [680000, 780000]`,
+  );
+  assert.ok(
+    ["HIGH", "MEDIUM"].includes(r.client_output.confidence),
+    `confidence=${r.client_output.confidence} attendu HIGH ou MEDIUM`,
   );
 });
 

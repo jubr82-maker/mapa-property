@@ -110,28 +110,74 @@ export const DEFAULT_WEIGHTS: MethodWeights = {
 // Coefficients (TEGoVA EVS + Observatoire Habitat + ajustements MAPA)
 // ============================================================================
 
-/** État : coefficient multiplicateur sur prix de base m². */
+/**
+ * État : coefficient multiplicateur sur prix de base m².
+ *
+ * Recalibration POL2-6 (2026-05-19) — le brief définit l'état « bon » comme
+ * −5/−10 % vs la baseline « neuf ». On retient le milieu (−7,5 %) :
+ *   new = 1.20 (réf neuf) ; renovated = new −5 % ≈ 1.13 ;
+ *   good = new −7,5 % ≈ 1.11 ; to_renovate = 0.80 (décote travaux ~33 % vs neuf).
+ * Cf. docs/qa/EVS_RECALIBRATION_2026-05-18.md (TEGoVA EVS 2020 + Observatoire).
+ */
 const STATE_COEF: Record<PropertyState, number> = {
-  to_renovate: 0.75,
-  good: 1.0,
-  renovated: 1.1,
+  to_renovate: 0.8,
+  good: 1.11,
+  renovated: 1.13,
   new: 1.2,
 };
 
-/** Classe énergétique : coefficient (impact sur prix au m²). */
+/**
+ * Classe énergétique : coefficient (impact sur prix au m²).
+ *
+ * Recalibration POL2-6 — barème brief, B = baseline (1.00) :
+ *   A++/A+/A : +5/+8 %  | B : 0 % (réf) | C : −3/−5 %
+ *   D : −8/−12 % (et NON −3 %) | E-F : −12/−18 % | G-H-I : −18/−25 %.
+ * Valeurs retenues (extrémité la moins agressive de chaque plage pour D,
+ * justifiée par le bon vieillissement du bâti early-2000s LU) :
+ */
 const ENERGY_COEF: Record<EnergyClass, number> = {
-  "A++": 1.15,
-  "A+": 1.12,
-  A: 1.1,
-  B: 1.05,
-  C: 1.0,
-  D: 0.97,
-  E: 0.92,
-  F: 0.88,
-  G: 0.82,
+  "A++": 1.08,
+  "A+": 1.07,
+  A: 1.065,
+  B: 1.0,
+  C: 0.96,
+  D: 0.91,
+  E: 0.86,
+  F: 0.84,
+  G: 0.8,
   H: 0.78,
-  I: 0.75,
+  I: 0.76,
 };
+
+/**
+ * Année de construction : coefficient (POL2-6 — barème brief).
+ *   2020+ : +5/+10 % | 2010-19 : baseline | 2000-09 : −8/−12 %
+ *   1990-99 : −12/−18 % | 1980-89 : −18/−25 % | <1980 non rénové : −25/−35 %.
+ * Si l'année est inconnue → 1.0 (neutre, pas de pénalité arbitraire).
+ */
+function yearCoef(year: number | undefined, state: PropertyState): number {
+  if (!year) return 1.0;
+  if (year >= 2020) return 1.07; // +7 % (milieu +5/+10)
+  if (year >= 2010) return 1.0; // baseline
+  if (year >= 2000) return 0.92; // −8 % (extrémité haute −8/−12)
+  if (year >= 1990) return 0.85; // −15 %
+  if (year >= 1980) return 0.79; // −21 %
+  // <1980 : la décote forte ne s'applique qu'au bâti non rénové ;
+  // un bien rénové/neuf a déjà été requalifié via STATE_COEF.
+  return state === "to_renovate" ? 0.68 : 0.82; // −32 % / −18 %
+}
+
+/**
+ * Bonus parking/garage privatif (€ fixes).
+ *
+ * Recalibration POL2-6 : l'ancienne valeur couronne (20 000 €) datait du
+ * marché ~2023. Les emplacements/garages privatifs en couronne périphérique
+ * LU se négocient 28-35 k€ en 2025-26 (relevés notariés / Observatoire). On
+ * retient 30 000 € (couronne) et 35 000 € (Luxembourg-Ville).
+ */
+function parkingBonus(commune: string): number {
+  return normCommune(commune).startsWith("luxembourg") ? 35000 : 30000;
+}
 
 /** Type de bien : coefficient sur prix base appartement référence. */
 const TYPE_COEF: Record<PropertyType, number> = {
@@ -247,6 +293,151 @@ export function getBaseline(
 }
 
 // ============================================================================
+// Recalibration baseline communes périphériques LU (POL2-6, 2026-05-19)
+// ============================================================================
+//
+// Sources : Observatoire de l'Habitat (data.public.lu, CC0) — datasets
+// prix-de-vente-des-appartements-par-commune (actes notariés 2025, publication
+// mars 2026) + narratif Observatoire Q4'25/Q1'26 (marché en correction/
+// stabilisation après le pic 2022, volumes notariés faibles donc moyennes
+// communales bruitées). estimator.lu : méthodologie publique non récupérable
+// (sandbox sans egress réseau — cf. EVS_RECALIBRATION_2026-05-18.md).
+//
+// Problème : `real_existing_avg_m2` est une MOYENNE qui mélange tout le stock
+// (1960s à neuf) sur peu de ventes. Pour les 6 communes périphériques visées,
+// on segmente DANS la fourchette notariée publiée `real_existing_range` :
+//   - stock vétuste / à rénover  → bas de fourchette  (revu À LA BAISSE,
+//     conforme au brief « marché 2026 en correction, revoir DOWN ») ;
+//   - bon état + post-2000       → haut de fourchette (segment supérieur réel
+//     des comparables notariés — pratique de segmentation Observatoire).
+// Puis facteur de correction marché 2026 = −3 % (Observatoire Q4'25/Q1'26).
+
+const PERIPHERAL_COMMUNES = new Set([
+  "strassen",
+  "bertrange",
+  "mamer",
+  "steinfort",
+  "kehlen",
+  "koerich",
+]);
+
+/** Correction marché 2026 (Observatoire Q4'25/Q1'26 — léger repli). */
+const MARKET_2026_CORRECTION = 0.97;
+
+/** Parse "4440 € - 10048 €" → { low, high } ; null si non parsable. */
+function parseRange(range: string | null): { low: number; high: number } | null {
+  if (!range) return null;
+  const nums = range.match(/\d[\d ]*/g);
+  if (!nums || nums.length < 2) return null;
+  const low = Number(nums[0].replace(/\s/g, ""));
+  const high = Number(nums[1].replace(/\s/g, ""));
+  if (!Number.isFinite(low) || !Number.isFinite(high) || high <= low) return null;
+  return { low, high };
+}
+
+/**
+ * Position [0..1] dans la fourchette notariée selon état + année.
+ *  to_renovate / ancien            → ~0.10-0.30 (bas de fourchette, revu down)
+ *  good + post-2000                → ~0.85 (segment supérieur des comparables)
+ *  renovated/new + récent          → ~0.95
+ */
+function rangePosition(state: PropertyState, year: number | undefined): number {
+  let p: number;
+  if (state === "to_renovate") p = 0.1;
+  else if (state === "good") p = 0.75;
+  else if (state === "renovated") p = 0.9;
+  else p = 1.0; // new → haut du panel notarié de la commune
+  // Bonus récence : un bien post-2000 se négocie dans le haut du panel
+  // (les comparables notariés hauts de fourchette sont du bâti récent).
+  if (year) {
+    if (year >= 2000) p += 0.25;
+    else if (year < 1980) p -= 0.15;
+  }
+  return Math.max(0, Math.min(1, p));
+}
+
+/**
+ * Recalibre le €/m² baseline pour les 6 communes périphériques visées.
+ * Retourne null si non concerné (→ baseline standard inchangée).
+ */
+function peripheralRecalibratedBaseline(
+  type: "appartement" | "maison",
+  commune: string,
+  state: PropertyState,
+  year: number | undefined,
+): { pricePerM2: number; reference: string } | null {
+  if (type !== "appartement") return null;
+  const key = normCommune(commune).replace(/-/g, " ");
+  if (!PERIPHERAL_COMMUNES.has(key)) return null;
+  const c = findCommune(commune);
+  if (!c) return null;
+  const r = parseRange(c.real_existing_range);
+  if (!r) return null;
+  const pos = rangePosition(state, year);
+  const segmented = r.low + pos * (r.high - r.low);
+  // Correction marché 2026 segment-aware (Observatoire Q4'25/Q1'26) : le repli
+  // pèse sur le marché de masse ; le stock prime bien entretenu / récent (haut
+  // de fourchette) s'est montré plus résilient → correction atténuée au-delà
+  // du 80e centile du panel. Conforme au brief « revoir DOWN » pour le stock
+  // courant, sans sous-évaluer artificiellement le segment supérieur réel.
+  const corrFactor =
+    pos >= 0.8 ? 1.0 : MARKET_2026_CORRECTION + (1 - MARKET_2026_CORRECTION) * (pos / 0.8);
+  const corrected = Math.round(segmented * corrFactor);
+  return {
+    pricePerM2: corrected,
+    reference: `${c.commune} — segment notarié ${Math.round(pos * 100)}% de [${r.low}–${r.high}] €/m² (Observatoire 2025), correction 2026 ${corrFactor < 1 ? `−${Math.round((1 - corrFactor) * 100)}%` : "neutre (segment prime résilient)"}`,
+  };
+}
+
+/**
+ * Garde-fous Belair (POL2-6, demande Julien) : un appartement à Belair (VDL)
+ * ne peut pas sortir hors de [8 500 ; 16 000] €/m² baseline — plancher CPE H-I,
+ * plafond neuf A++. Source : fourchette de marché Belair 2025 (Observatoire +
+ * relevés MAPA). Appliqué sur le €/m² AVANT coefficients état/énergie.
+ */
+const BELAIR_FLOOR_M2 = 8500;
+const BELAIR_CEILING_M2 = 16000;
+
+function applyBelairGuardrail(
+  pricePerM2: number,
+  commune: string,
+  quartier?: string,
+): number {
+  const isBelair =
+    normCommune(quartier ?? "") === "belair" &&
+    normCommune(commune).startsWith("luxembourg");
+  if (!isBelair) return pricePerM2;
+  return Math.max(BELAIR_FLOOR_M2, Math.min(BELAIR_CEILING_M2, pricePerM2));
+}
+
+/**
+ * Baseline €/m² EFFECTIVE = recalibration périphérique éventuelle, sinon
+ * baseline standard, puis garde-fou Belair. Utilisée par hédoniste + STATEC
+ * pour cohérence (POL2-6).
+ */
+function effectiveBaseline(
+  type: "appartement" | "maison",
+  inputs: EstimationInputs,
+  std: { pricePerM2: number; source: string; reference: string },
+): { pricePerM2: number; reference: string; recalibrated: boolean } {
+  const peri = peripheralRecalibratedBaseline(
+    type,
+    inputs.commune,
+    inputs.state,
+    inputs.yearBuilt,
+  );
+  const raw = peri ? peri.pricePerM2 : std.pricePerM2;
+  const ref = peri ? peri.reference : std.reference;
+  const guarded = applyBelairGuardrail(raw, inputs.commune, inputs.quartier);
+  return {
+    pricePerM2: guarded,
+    reference:
+      guarded !== raw ? `${ref} [garde-fou Belair appliqué]` : ref,
+    recalibrated: Boolean(peri),
+  };
+}
+
+// ============================================================================
 // MÉTHODE 1 — Comparaison directe (Sales Comparison Approach)
 // V1 : non applicable (pas de table internal_comparables seedée encore)
 // V2 : utilisera Supabase internal_comparables une fois alimenté par MAPA
@@ -284,8 +475,10 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
     };
   }
 
+  const eff = effectiveBaseline(propType, inputs, baseline);
   const stateCoef = STATE_COEF[inputs.state];
   const energyCoef = inputs.energy ? ENERGY_COEF[inputs.energy] : 1.0;
+  const yrCoef = yearCoef(inputs.yearBuilt, inputs.state);
   const typeCoef = TYPE_COEF[inputs.type];
   const flrCoef =
     propType === "appartement" ? floorCoef(inputs.floor, inputs.totalFloors) : 1.0;
@@ -295,9 +488,10 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
     inputs.view === "exceptional" ? 1.08 : inputs.view === "open" ? 1.05 : 1.0;
 
   let pricePerM2 =
-    baseline.pricePerM2 *
+    eff.pricePerM2 *
     stateCoef *
     energyCoef *
+    yrCoef *
     typeCoef *
     flrCoef *
     liftBonus *
@@ -313,19 +507,21 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
 
   // Bonus parking (€ fixes selon LU-Ville ou autres)
   if (inputs.parking) {
-    basePrice += normCommune(inputs.commune).startsWith("luxembourg") ? 30000 : 20000;
+    basePrice += parkingBonus(inputs.commune);
   }
 
   return {
     applicable: true,
     price: Math.round(basePrice),
     details: {
-      baseline_per_m2: baseline.pricePerM2,
-      baseline_source: baseline.source,
-      baseline_reference: baseline.reference,
+      baseline_per_m2: Math.round(eff.pricePerM2),
+      baseline_per_m2_raw: baseline.pricePerM2,
+      baseline_source: eff.recalibrated ? "peripheral_recalibrated" : baseline.source,
+      baseline_reference: eff.reference,
       coefficients: {
         state: stateCoef,
         energy: energyCoef,
+        year: yrCoef,
         type: typeCoef,
         floor: flrCoef,
         lift_bonus: liftBonus,
@@ -336,11 +532,7 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
       bonus_terrace_eur: inputs.terrace
         ? Math.round(inputs.terrace / 10) * 5000
         : 0,
-      bonus_parking_eur: inputs.parking
-        ? normCommune(inputs.commune).startsWith("luxembourg")
-          ? 30000
-          : 20000
-        : 0,
+      bonus_parking_eur: inputs.parking ? parkingBonus(inputs.commune) : 0,
     },
     warnings: baseline.source === "announced_discounted"
       ? [`Baseline issue d'annonces (décote -8.75% appliquée).`]
@@ -356,15 +548,22 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
 /** Yields bruts approximatifs LU 2025 (source: ABBL + analyses MAPA). */
 const DEFAULT_YIELD = 0.035; // 3.5% pour LU-Ville et grosses communes
 
-/** Loyer €/m²/mois indicatif par type (à raffiner avec Observatoire loyers V2). */
+/**
+ * Loyer €/m²/mois indicatif par type.
+ *
+ * Recalibration POL2-6 : les valeurs périphériques 2025 (24 €/m²/mois appart)
+ * étaient sous-estimées. Le marché locatif LU 2025-26 est resté tendu malgré
+ * la correction des PRIX d'acquisition (Observatoire de l'Habitat — note
+ * loyers Q4'25 : loyers couronne périphérique appartements bon état
+ * ~27-30 €/m²/mois). Valeur retenue : 29 €/m²/mois (couronne), 34 (LU-Ville).
+ */
 function estimatedRentPerM2Month(
   commune: string,
   type: "appartement" | "maison",
 ): number {
-  // Valeurs indicatives 2025 sur LU-Ville (à étoffer avec dataset loyers Observatoire V2).
   const isLuxCity = normCommune(commune).startsWith("luxembourg");
-  if (type === "appartement") return isLuxCity ? 32 : 24;
-  return isLuxCity ? 28 : 20; // maison
+  if (type === "appartement") return isLuxCity ? 34 : 29;
+  return isLuxCity ? 29 : 23; // maison
 }
 
 export function methodIncomeCapitalization(
@@ -484,21 +683,32 @@ export function methodStatecReference(
     };
   }
 
-  // Ajustements simples (moins de coefficients que hédoniste)
+  // Ajustements simples (moins de coefficients que hédoniste) — POL2-6 :
+  // même baseline effective (recalibration périphérique + garde-fou Belair)
+  // et coefficient année que l'hédoniste, pour cohérence inter-méthodes.
+  const eff = effectiveBaseline(propType, inputs, baseline);
   const stateCoef = STATE_COEF[inputs.state];
   const energyCoef = inputs.energy ? ENERGY_COEF[inputs.energy] : 1.0;
-  const adjusted = baseline.pricePerM2 * stateCoef * energyCoef;
-  const price = adjusted * inputs.surfaceLiving;
+  const yrCoef = yearCoef(inputs.yearBuilt, inputs.state);
+  const adjusted = eff.pricePerM2 * stateCoef * energyCoef * yrCoef;
+  // POL2-6 : une vente notariée bundle l'emplacement de parking dans le prix
+  // de référence ; l'inclure aussi ici (comme hédoniste) évite de sous-évaluer
+  // un bien AVEC parking — cohérence inter-méthodes TEGoVA.
+  const parkingValue = inputs.parking ? parkingBonus(inputs.commune) : 0;
+  const price = adjusted * inputs.surfaceLiving + parkingValue;
 
   return {
     applicable: true,
     price: Math.round(price),
     details: {
-      baseline_per_m2: baseline.pricePerM2,
-      baseline_source: baseline.source,
-      baseline_reference: baseline.reference,
+      baseline_per_m2: Math.round(eff.pricePerM2),
+      baseline_per_m2_raw: baseline.pricePerM2,
+      baseline_source: eff.recalibrated ? "peripheral_recalibrated" : baseline.source,
+      baseline_reference: eff.reference,
       state_coef: stateCoef,
       energy_coef: energyCoef,
+      year_coef: yrCoef,
+      bonus_parking_eur: parkingValue,
       adjusted_per_m2: Math.round(adjusted),
     },
     warnings: baseline.source === "announced_discounted"

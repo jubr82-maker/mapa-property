@@ -10,6 +10,7 @@ import {
 } from "@/lib/data/luxembourg-prices";
 import { track } from "@/lib/tracking/track";
 import { CountrySelect } from "@/components/ui/CountrySelect";
+import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
@@ -143,7 +144,10 @@ export function EstimateForm() {
   }
 
   return (
-    <div className="rounded-2xl border border-line bg-bg p-8 shadow-sm">
+    <div className="space-y-5">
+      {/* POL2-6 : mention légale obligatoire en TÊTE du formulaire EVS. */}
+      <DisclaimerLegal />
+      <div className="rounded-2xl border border-line bg-bg p-8 shadow-sm">
       <Stepper current={step} t={t} />
 
       {step === 1 && (
@@ -340,6 +344,7 @@ export function EstimateForm() {
           />
         </StepWrap>
       )}
+      </div>
     </div>
   );
 }
@@ -732,6 +737,9 @@ function ResultView({
           {t("restart")}
         </button>
       </div>
+
+      {/* POL2-6 : mention légale obligatoire en BAS du résultat d'estimation. */}
+      <DisclaimerLegal />
     </div>
   );
 }
