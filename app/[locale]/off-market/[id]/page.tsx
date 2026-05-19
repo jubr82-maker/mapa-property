@@ -13,7 +13,6 @@ import { FicheHeader } from "@/components/property/fiche/FicheHeader";
 import { FicheSpecs } from "@/components/property/fiche/FicheSpecs";
 import { FicheAccordion } from "@/components/property/fiche/FicheAccordion";
 import { FicheConditions } from "@/components/property/fiche/FicheConditions";
-import { FicheLocation } from "@/components/property/fiche/FicheLocation";
 import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 
@@ -130,22 +129,9 @@ export default async function OffMarketDetailPage({
         </p>
       ),
     },
-    {
-      id: "location",
-      label: tf("tab_location"),
-      content: (
-        <FicheLocation
-          labels={{
-            title: tf("location_title"),
-            env: tf("location_env"),
-            na: tf("location_na"),
-            mapMore: tf("location_map_more"),
-          }}
-          city={property.city_label}
-          country={property.country}
-        />
-      ),
-    },
+    // POL3-P2 : onglet « Localisation » retiré des fiches OFF-MARKET
+    // (positionnement confidentiel renforcé — décision Julien). La
+    // carte reste sur /biens/[slug] classiques via FicheLocation.
     {
       id: "conditions",
       label: tf("tab_conditions_offmarket"),

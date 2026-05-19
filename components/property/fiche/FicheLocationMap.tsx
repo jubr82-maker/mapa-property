@@ -1,13 +1,16 @@
 "use client";
 
-// POL3-3 — Carte Leaflet (chargée dynamiquement, ssr:false depuis
-// FicheLocation). Affiche UNIQUEMENT un cercle copper de 600 m centré sur
-// le centroïde de la commune/ville/pays (jamais de pin précis : le bien
-// n'est pas géolocalisé exactement — confidentialité). Tuiles OSM en
-// clair, CARTO dark_all en sombre. Zoom & drag désactivés par défaut ;
-// un bouton « Voir plus » les active. Attribution OSM visible. Aucune
-// dépendance réseau bloquante : si Leaflet ou les tuiles échouent, le
-// conteneur reste affiché sans crasher la page.
+// POL3-P2 — Carte Leaflet (chargée dynamiquement, ssr:false depuis
+// FicheLocation). Affiche UNIQUEMENT un cercle CARMIN #B91C1C centré
+// sur le centroïde de la commune/ville/pays (jamais de pin précis : le
+// bien n'est pas géolocalisé exactement — confidentialité). Tuiles
+// OpenStreetMap CLAIRES en light ET dark (décision Julien — la carte
+// garde ses couleurs OSM naturelles dans les deux modes : vert parcs,
+// gris routes, rose autoroutes). Zoom serré commune (≥ 14). Zoom &
+// drag désactivés par défaut ; un bouton « Voir plus » les active.
+// Attribution OSM visible. Aucune dépendance réseau bloquante : si
+// Leaflet ou les tuiles échouent, le conteneur reste affiché sans
+// crasher la page.
 
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
@@ -25,22 +28,7 @@ export default function FicheLocationMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const leafletRef = useRef<LeafletModule | null>(null);
-  const tileRef = useRef<import("leaflet").TileLayer | null>(null);
   const [interactive, setInteractive] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-
-  // Suivi du thème via la classe .dark (next-themes).
-  useEffect(() => {
-    const read = () =>
-      document.documentElement.classList.contains("dark");
-    setIsDark(read());
-    const obs = new MutationObserver(() => setIsDark(read()));
-    obs.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => obs.disconnect();
-  }, []);
 
   // Init carte (une seule fois).
   useEffect(() => {
@@ -50,9 +38,12 @@ export default function FicheLocationMap({
         const L = (await import("leaflet")) as unknown as LeafletModule;
         if (cancelled || !containerRef.current || mapRef.current) return;
         leafletRef.current = L;
+        // POL3-P2 : zoom serré commune — plancher 14 (Julien : « entre
+        // 14 et 15 selon taille commune »). On respecte geo.zoom si déjà ≥ 14.
+        const initialZoom = Math.max(14, geo.zoom);
         const map = L.map(containerRef.current, {
           center: [geo.center.lat, geo.center.lon],
-          zoom: geo.zoom,
+          zoom: initialZoom,
           scrollWheelZoom: false,
           dragging: false,
           doubleClickZoom: false,
@@ -63,15 +54,24 @@ export default function FicheLocationMap({
           attributionControl: true,
         });
         mapRef.current = map;
-        // Cercle copper 600 m — JAMAIS de marqueur précis.
+        // POL3-P2 : cercle CARMIN #B91C1C, weight 3, fillOpacity 0.18
+        // — plus prononcé visuellement (validé Julien). Rayon inchangé
+        // (logique POL3-3 commune/ville préservée).
         L.circle([geo.center.lat, geo.center.lon], {
           radius: 600,
-          color: "#B8865A",
-          weight: 1,
-          fillColor: "#B8865A",
-          fillOpacity: 0.15,
+          color: "#B91C1C",
+          weight: 3,
+          fillColor: "#B91C1C",
+          fillOpacity: 0.18,
         }).addTo(map);
-        applyTiles(L, map);
+        // POL3-P2 : tuiles OSM CLAIRES en light ET dark — décision
+        // Julien (la carte ne s'adapte plus au thème, garde toujours
+        // ses couleurs OSM naturelles).
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19,
+        }).addTo(map);
         // Invalidate après layout (conteneur en accordéon animé).
         setTimeout(() => map.invalidateSize(), 250);
       } catch {
@@ -88,32 +88,6 @@ export default function FicheLocationMap({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // (Re)pose la bonne couche de tuiles selon le thème.
-  function applyTiles(L: LeafletModule, map: import("leaflet").Map) {
-    if (tileRef.current) {
-      map.removeLayer(tileRef.current);
-      tileRef.current = null;
-    }
-    const dark = document.documentElement.classList.contains("dark");
-    const url = dark
-      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-      : "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-    const attribution = dark
-      ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-      : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-    const layer = L.tileLayer(url, { attribution, maxZoom: 19 });
-    layer.addTo(map);
-    tileRef.current = layer;
-  }
-
-  // Bascule de tuiles quand le thème change.
-  useEffect(() => {
-    const L = leafletRef.current;
-    const map = mapRef.current;
-    if (L && map) applyTiles(L, map);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDark]);
 
   // Active/désactive l'interaction (bouton « Voir plus »).
   const zoomCtrlRef = useRef<import("leaflet").Control.Zoom | null>(null);
