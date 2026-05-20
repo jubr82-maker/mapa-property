@@ -1,17 +1,17 @@
 "use client";
 
 /**
- * AmbientBackgroundLite — Étape 1 petit pas
+ * AmbientBackgroundLite — Étape 2 petit pas
  *
- * Remplace LivingBackground POL3-7a (3 photos Luxembourg rotation
- * jugées trop visibles). Ici : fond uni blanc cassé #FAF8F2 + 3
- * blobs SVG copper/gold très flous (filter blur 120) qui dérivent
- * en boucle SMIL (animate) et se décalent légèrement selon la
- * position de la souris (lerp 0.025, amplitude 30-60 px).
+ * Remplace les 3 blobs SVG flous de l'Étape 1 par 4 courbes
+ * line-art cuivre sombre (#8B6840) très fines (stroke 0.6) à
+ * opacité 0.42 : trace dessinée plutôt que masse colorée. Les
+ * `d` sont animés en SMIL (durées 38-52s) pour une dérive lente
+ * et un léger décalage translate3d réactif à la souris (lerp
+ * 0.02, amplitude 30-50 px).
  *
  * Fixed inset 0, z 0, pointer-events-none, aria-hidden. Désactivé
- * sur mobile (<768) côté useEffect : pas d'écoute mousemove, blobs
- * uniquement animés via SMIL.
+ * sur mobile (<768) côté useEffect : pas d'écoute mousemove.
  *
  * Cleanup au démontage : retire listener + cancelAnimationFrame.
  */
@@ -20,9 +20,10 @@ import { useEffect, useRef } from "react";
 
 export function AmbientBackgroundLite() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const blob1Ref = useRef<SVGEllipseElement>(null);
-  const blob2Ref = useRef<SVGEllipseElement>(null);
-  const blob3Ref = useRef<SVGEllipseElement>(null);
+  const path1Ref = useRef<SVGPathElement>(null);
+  const path2Ref = useRef<SVGPathElement>(null);
+  const path3Ref = useRef<SVGPathElement>(null);
+  const path4Ref = useRef<SVGPathElement>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -31,13 +32,15 @@ export function AmbientBackgroundLite() {
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
-    let blob1X = 0;
-    let blob1Y = 0;
-    let blob2X = 0;
-    let blob2Y = 0;
-    let blob3X = 0;
-    let blob3Y = 0;
-    const lerp = 0.025;
+    let p1X = 0;
+    let p1Y = 0;
+    let p2X = 0;
+    let p2Y = 0;
+    let p3X = 0;
+    let p3Y = 0;
+    let p4X = 0;
+    let p4Y = 0;
+    const lerp = 0.02;
     let rafId = 0;
 
     const onMove = (e: MouseEvent) => {
@@ -53,26 +56,32 @@ export function AmbientBackgroundLite() {
       const offsetX = (mouseX - cx) / cx;
       const offsetY = (mouseY - cy) / cy;
 
-      const target1X = -offsetX * 40;
-      const target1Y = -offsetY * 40;
-      const target2X = offsetX * 60;
-      const target2Y = offsetY * 60;
-      const target3X = -offsetX * 30;
-      const target3Y = offsetY * 50;
+      const t1X = -offsetX * 40;
+      const t1Y = -offsetY * 30;
+      const t2X = offsetX * 50;
+      const t2Y = offsetY * 40;
+      const t3X = -offsetX * 30;
+      const t3Y = offsetY * 50;
+      const t4X = offsetX * 35;
+      const t4Y = -offsetY * 35;
 
-      blob1X += (target1X - blob1X) * lerp;
-      blob1Y += (target1Y - blob1Y) * lerp;
-      blob2X += (target2X - blob2X) * lerp;
-      blob2Y += (target2Y - blob2Y) * lerp;
-      blob3X += (target3X - blob3X) * lerp;
-      blob3Y += (target3Y - blob3Y) * lerp;
+      p1X += (t1X - p1X) * lerp;
+      p1Y += (t1Y - p1Y) * lerp;
+      p2X += (t2X - p2X) * lerp;
+      p2Y += (t2Y - p2Y) * lerp;
+      p3X += (t3X - p3X) * lerp;
+      p3Y += (t3Y - p3Y) * lerp;
+      p4X += (t4X - p4X) * lerp;
+      p4Y += (t4Y - p4Y) * lerp;
 
-      if (blob1Ref.current)
-        blob1Ref.current.style.transform = `translate3d(${blob1X}px, ${blob1Y}px, 0)`;
-      if (blob2Ref.current)
-        blob2Ref.current.style.transform = `translate3d(${blob2X}px, ${blob2Y}px, 0)`;
-      if (blob3Ref.current)
-        blob3Ref.current.style.transform = `translate3d(${blob3X}px, ${blob3Y}px, 0)`;
+      if (path1Ref.current)
+        path1Ref.current.style.transform = `translate3d(${p1X}px, ${p1Y}px, 0)`;
+      if (path2Ref.current)
+        path2Ref.current.style.transform = `translate3d(${p2X}px, ${p2Y}px, 0)`;
+      if (path3Ref.current)
+        path3Ref.current.style.transform = `translate3d(${p3X}px, ${p3Y}px, 0)`;
+      if (path4Ref.current)
+        path4Ref.current.style.transform = `translate3d(${p4X}px, ${p4Y}px, 0)`;
 
       rafId = requestAnimationFrame(tick);
     };
@@ -103,51 +112,59 @@ export function AmbientBackgroundLite() {
         preserveAspectRatio="xMidYMid slice"
         style={{ width: "100%", height: "100%" }}
       >
-        <defs>
-          <filter id="ambient-soft-blur">
-            <feGaussianBlur stdDeviation="120" />
-          </filter>
-        </defs>
-        <g filter="url(#ambient-soft-blur)">
-          <ellipse
-            ref={blob1Ref}
-            cx="300"
-            cy="250"
-            rx="280"
-            ry="220"
-            fill="#B8865A"
-            opacity="0.10"
+        <g fill="none" stroke="#8B6840" strokeWidth="0.6" opacity="0.42">
+          <path
+            ref={path1Ref}
+            d="M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300"
           >
-            <animate attributeName="cx" values="300;480;320;300" dur="48s" repeatCount="indefinite" />
-            <animate attributeName="cy" values="250;380;200;250" dur="42s" repeatCount="indefinite" />
-            <animate attributeName="rx" values="280;320;260;280" dur="36s" repeatCount="indefinite" />
-          </ellipse>
-          <ellipse
-            ref={blob2Ref}
-            cx="1300"
-            cy="700"
-            rx="320"
-            ry="260"
-            fill="#C8A04A"
-            opacity="0.08"
+            <animate
+              attributeName="d"
+              dur="38s"
+              repeatCount="indefinite"
+              values="M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300;
+                      M -100,240 C 320,160 680,360 1120,280 S 1720,420 1900,330;
+                      M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300"
+            />
+          </path>
+          <path
+            ref={path2Ref}
+            d="M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650"
           >
-            <animate attributeName="cx" values="1300;1100;1350;1300" dur="54s" repeatCount="indefinite" />
-            <animate attributeName="cy" values="700;520;680;700" dur="46s" repeatCount="indefinite" />
-            <animate attributeName="rx" values="320;380;300;320" dur="40s" repeatCount="indefinite" />
-          </ellipse>
-          <ellipse
-            ref={blob3Ref}
-            cx="800"
-            cy="900"
-            rx="240"
-            ry="200"
-            fill="#B8865A"
-            opacity="0.06"
+            <animate
+              attributeName="d"
+              dur="46s"
+              repeatCount="indefinite"
+              values="M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650;
+                      M -100,640 C 420,500 780,710 1320,640 S 1820,540 1900,680;
+                      M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650"
+            />
+          </path>
+          <path
+            ref={path3Ref}
+            d="M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600"
           >
-            <animate attributeName="cx" values="800;620;860;800" dur="58s" repeatCount="indefinite" />
-            <animate attributeName="cy" values="900;780;920;900" dur="50s" repeatCount="indefinite" />
-            <animate attributeName="ry" values="200;240;180;200" dur="44s" repeatCount="indefinite" />
-          </ellipse>
+            <animate
+              attributeName="d"
+              dur="52s"
+              repeatCount="indefinite"
+              values="M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600;
+                      M 220,-100 C 320,340 520,520 820,440 S 1120,680 1420,520 S 1720,780 1900,620;
+                      M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600"
+            />
+          </path>
+          <path
+            ref={path4Ref}
+            d="M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850"
+          >
+            <animate
+              attributeName="d"
+              dur="44s"
+              repeatCount="indefinite"
+              values="M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850;
+                      M -100,920 C 220,830 520,930 920,840 S 1420,930 1900,870;
+                      M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850"
+            />
+          </path>
         </g>
       </svg>
     </div>

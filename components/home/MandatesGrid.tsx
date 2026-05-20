@@ -13,7 +13,7 @@ export function MandatesGrid() {
   const t = useTranslations("mandates_home");
 
   return (
-    <section className="bg-bg px-6 py-5 md:py-16 lg:px-10 lg:py-20">
+    <section className="px-6 py-5 md:py-16 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
         <header className="mb-5 max-w-2xl md:mb-8">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
