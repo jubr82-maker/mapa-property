@@ -23,6 +23,7 @@ import {
   reorderOffmarketPhotos,
   deleteOffmarket,
 } from "@/app/admin/offmarket/actions";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 type Tab = "location" | "specs" | "content" | "identity";
 
@@ -47,6 +48,12 @@ export function OffmarketForm({
   const [error, setError] = useState<string | null>(null);
   const [propertyType, setPropertyType] = useState<PropertyType>(
     (row?.property_type as PropertyType) || "maison",
+  );
+  // POL4-A1 (ELISE) : éditeur formaté TipTap pour la description complète.
+  // State contrôlé + hidden input `full_description` pour rétrocompat de la
+  // server action (createOffmarket/updateOffmarket lit formData.get).
+  const [fullDescription, setFullDescription] = useState<string>(
+    row?.full_description ?? row?.description ?? "",
   );
 
   const isImmeuble = propertyType === "immeuble";
@@ -511,13 +518,20 @@ export function OffmarketForm({
             <div className="md:col-span-2">
               <Field
                 label="Description complète"
-                hint="Accessible après NDA signé."
+                hint="Accessible après NDA signé. Mise en forme : gras (B) pour les titres « Description : », « Prestations : »… ; italique (I) ; saut de ligne Maj+Entrée."
               >
-                <textarea
+                {/* POL4-A1 (ELISE) : éditeur formaté TipTap (bold + italique
+                    + sauts uniquement). Hidden input `full_description`
+                    soumet le HTML à la server action existante. */}
+                <RichTextEditor
+                  value={fullDescription}
+                  onChange={setFullDescription}
+                  placeholder="Description complète du bien"
+                />
+                <input
+                  type="hidden"
                   name="full_description"
-                  rows={6}
-                  defaultValue={row?.full_description ?? row?.description ?? ""}
-                  className={inputCls + " font-sans"}
+                  value={fullDescription}
                 />
               </Field>
             </div>
