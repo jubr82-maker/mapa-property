@@ -27,7 +27,11 @@ interface Props {
 export function PropertyMagazineDescription({ description }: Props) {
   if (!description || !description.trim()) return null;
   return (
-    <div className="w-full text-left text-[16px] leading-[1.7] not-italic">
+    // POL4-A4 (MARC) : styles sur les balises HTML rendues via Tailwind
+    // arbitrary selectors. `[&_em]:italic` redonne l'italique aux <em>
+    // malgré `not-italic` parent (sinon TipTap italique invisible côté
+    // public).
+    <div className="w-full text-left text-[16px] leading-[1.7] not-italic [&_p]:mb-4 [&_strong]:font-semibold [&_em]:italic">
       {highlightTitles(description)}
     </div>
   );

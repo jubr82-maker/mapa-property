@@ -1,14 +1,20 @@
 /**
- * highlightTitles — POL3-P1-FIX
+ * highlightTitles — POL3-P1-FIX + POL4-A4 (MARC)
  *
- * Détecte les "titres internes" d'une description bien (pattern
- * `^Mot/groupe :` en début de ligne) et les wrappe en <strong>
- * font-semibold. Le reste du paragraphe (après le `:`) reste en corps
- * normal. Les paragraphes sans titre sont rendus tels quels.
+ * Deux modes selon le contenu entrant :
+ *  1. HTML formaté (commence par `<`) — descriptions saisies via TipTap
+ *     dans l'admin (off-market ELISE / Apimo CAMILLE). On sanitize
+ *     strictement (whitelist p/strong/em/br) et on rend tel quel.
+ *     Pas de re-détection de titres : l'admin a déjà mis en gras ce
+ *     qu'il voulait via Cmd+B.
+ *  2. Texte brut Apimo (legacy) — détecte les "titres internes"
+ *     (pattern `^Mot/groupe :` en début de ligne) et les wrappe en
+ *     <strong> font-semibold. Logique POL3-P1-FIX préservée intacte.
  *
- * Aucune police hardcodée ici : <strong> hérite de la police du wrapper
- * parent (PropertyMagazineDescription → Archivo sans-serif via le body).
+ * Aucune police hardcodée ici : <strong>/<em> héritent de la police du
+ * wrapper parent (PropertyMagazineDescription → Archivo sans-serif).
  */
+import sanitizeHtml from "sanitize-html";
 import type { ReactNode } from "react";
 
 // "<mot/groupe d'au plus 60 chars en lettres/espaces/apostrophes/tirets> :
@@ -17,6 +23,17 @@ const TITLE_REGEX = /^([A-Za-zÀ-ÿ'’\- ]{3,60})\s*:\s*(.*)$/;
 
 export function highlightTitles(text: string | null | undefined): ReactNode {
   if (!text) return null;
+  // POL4-A4 (MARC) : HTML formaté (TipTap) → sanitize strict, pas de
+  // re-détection regex (l'admin a déjà mis en gras manuellement).
+  // Whitelist : p, strong, em, br. Aucun attribut. Tout le reste stripé.
+  if (text.trim().startsWith("<")) {
+    const clean = sanitizeHtml(text, {
+      allowedTags: ["p", "strong", "em", "br"],
+      allowedAttributes: {},
+    });
+    return <div dangerouslySetInnerHTML={{ __html: clean }} />;
+  }
+  // Texte brut Apimo (legacy) — logique POL3-P1-FIX préservée :
   const paragraphs = text
     .split(/\n\s*\n|\n/)
     .map((p) => p.trim())
