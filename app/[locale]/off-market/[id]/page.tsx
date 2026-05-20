@@ -14,6 +14,7 @@ import { FicheSpecs } from "@/components/property/fiche/FicheSpecs";
 import { FicheAccordion } from "@/components/property/fiche/FicheAccordion";
 import { FicheConditions } from "@/components/property/fiche/FicheConditions";
 import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
+import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 
 // POL2-9 : le prix off-market est désormais pilotable depuis le BO via
@@ -114,15 +115,11 @@ export default async function OffMarketDetailPage({
     {
       id: "description",
       label: tf("tab_description"),
+      // POL3-P1 : rendu UNIFORME avec /biens/[slug] via le même
+      // composant PropertyMagazineDescription (serif droit, pas
+      // d'italique, pas de lettrine, titres internes en <strong>).
       content: property.description ? (
-        <div className="space-y-4 text-base leading-relaxed text-ink-mid">
-          {property.description
-            .split(/\n\s*\n/)
-            .filter((p) => p.trim())
-            .map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
-        </div>
+        <PropertyMagazineDescription description={property.description} />
       ) : (
         <p className="text-sm leading-relaxed text-ink-mid">
           {tf("overview_intro")}
