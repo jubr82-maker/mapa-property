@@ -6,25 +6,37 @@ export function OffMarketBand() {
   const t = useTranslations("offmarket_band");
 
   return (
-    <section className="relative overflow-hidden bg-bg-contrast px-6 py-5 text-text-contrast md:py-20 lg:px-10 lg:py-20">
+    // PLAINTES-3-4 (validé Julien) :
+    // - Fond sombre/premium HARDCODÉ identique en mode jour et mode nuit
+    //   (avant : bg-bg-contrast variait selon le thème → rendu "horrible"
+    //   en mode jour). bg-[#0a0a0a] + text-white = fixe, indépendant du
+    //   ThemeProvider, "cadenas OFF MARKET premium" visuel constant.
+    // - Padding vertical DOUBLÉ pour la visibilité (py-5/20 → py-10/40).
+    // - Titre +30% via text-* responsive ajoutés sur t-h2-contrast.
+    // - Badge MANDAT EXCLUSIF en haut, copper (gold-deep, le token réel
+    //   du projet — "text-copper" n'existe pas comme classe Tailwind ici).
+    <section className="relative overflow-hidden bg-[#0a0a0a] px-6 py-10 text-white md:py-40 lg:px-10 lg:py-40">
       <div className="pointer-events-none absolute -right-32 -top-32 size-48 rounded-full bg-gold/15 blur-3xl" />
       <div className="pointer-events-none absolute -left-32 -bottom-32 size-48 rounded-full bg-accent-warm/10 blur-3xl" />
 
       <div className="relative mx-auto grid max-w-[1400px] gap-3 md:gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-bright md:text-xs">
-            {t("eyebrow")}
-          </p>
-          <h2 className="mt-3 t-h2-contrast">
+          {/* Badge MANDAT EXCLUSIF copper, visible en haut */}
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-deep/40 bg-gold-deep/10 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.2em] text-gold-deep">
+            <span aria-hidden className="size-1.5 rounded-full bg-gold-deep" />
+            {t("eyebrow") /* MANDAT EXCLUSIF type de label — eyebrow gardé ici comme étiquette badge */}
+          </div>
+
+          <h2 className="t-h2-contrast mt-3 text-4xl md:text-5xl lg:text-6xl">
             {t("title")}
           </h2>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-text-contrast/80 md:mt-5 md:text-base">
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/80 md:mt-5 md:text-base">
             {t("description")}
           </p>
         </div>
 
         <div className="flex flex-col gap-3 md:gap-4 lg:items-end">
-          <ul className="space-y-2 font-mono text-[10px] uppercase tracking-[0.2em] text-text-contrast/70 md:space-y-3 md:text-xs">
+          <ul className="space-y-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/70 md:space-y-3 md:text-xs">
             <li>
               <FadeInOnScroll
                 delay={0}
