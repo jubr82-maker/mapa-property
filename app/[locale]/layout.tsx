@@ -15,6 +15,8 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
+import { LivingBackground } from "@/components/effects/LivingBackground";
+import { ScrollProgressBar } from "@/components/effects/ScrollProgressBar";
 import { homepageGraph } from "@/lib/seo";
 import { siteDesignTokens } from "@/lib/site-content";
 import "../globals.css";
@@ -174,6 +176,13 @@ export default async function LocaleLayout({
         />
       </head>
       <body className="min-h-dvh bg-bg text-ink antialiased">
+        {/* POL3-7a (ANTOINE) : fond vivant Luxembourg rotation 18s
+            (z-0, sous tout), barre progression scroll copper (z-[60],
+            au-dessus du Header z-50). Ordre DOM : Living d'abord (z-0
+            background), ScrollBar ensuite, NoiseOverlay POL3-7 sage
+            (z-[1]) PRÉSERVÉE intacte. */}
+        <LivingBackground />
+        <ScrollProgressBar />
         <NoiseOverlay />
         <JsonLd data={homepageGraph(locale)} />
         <ThemeProvider

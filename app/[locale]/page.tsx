@@ -11,6 +11,7 @@ import { ProcessTable } from "@/components/home/ProcessTable";
 import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
+import { FadeInOutSection } from "@/components/effects/FadeInOutSection";
 import {
   fetchHomeFeatured,
   fetchLatestBlogPosts,
@@ -57,18 +58,27 @@ export default async function HomePage({
       <FadeInOnScroll>
         <MandatesGrid />
       </FadeInOnScroll>
+      {/* POL3-7a (ANTOINE) : FadeInOutSection en double-wrap autour
+          du FadeInOnScroll existant — fade-in one-shot puis modulation
+          opacity continue selon intersectionRatio (sections respirantes). */}
       <FadeInOnScroll>
-        <CoverageStats locale={locale} />
+        <FadeInOutSection>
+          <CoverageStats locale={locale} />
+        </FadeInOutSection>
       </FadeInOnScroll>
       <FadeInOnScroll>
-        <ProcessTable />
+        <FadeInOutSection>
+          <ProcessTable />
+        </FadeInOutSection>
       </FadeInOnScroll>
       <ServicesTable />
       {/* NAV7 : « mot fondateur » (QuoteBand) retiré (cf.
           docs/qa/COPY_REWRITES_TODO.md). */}
       <OffMarketBand />
       <FadeInOnScroll>
-        <ReviewsCarousel reviews={reviews} />
+        <FadeInOutSection>
+          <ReviewsCarousel reviews={reviews} />
+        </FadeInOutSection>
       </FadeInOnScroll>
       <BlogTeaser posts={blogPosts} locale={locale as Locale} />
       {/* NAV8 : ContactCTA « Une conversation peut tout changer »
