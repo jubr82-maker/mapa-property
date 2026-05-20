@@ -15,7 +15,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
-import { LivingBackground } from "@/components/effects/LivingBackground";
+import { AmbientBackgroundLite } from "@/components/effects/AmbientBackgroundLite";
 import { ScrollProgressBar } from "@/components/effects/ScrollProgressBar";
 import { homepageGraph } from "@/lib/seo";
 import { siteDesignTokens } from "@/lib/site-content";
@@ -175,13 +175,16 @@ export default async function LocaleLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="min-h-dvh bg-bg text-ink antialiased">
-        {/* POL3-7a (ANTOINE) : fond vivant Luxembourg rotation 18s
-            (z-0, sous tout), barre progression scroll copper (z-[60],
-            au-dessus du Header z-50). Ordre DOM : Living d'abord (z-0
-            background), ScrollBar ensuite, NoiseOverlay POL3-7 sage
-            (z-[1]) PRÉSERVÉE intacte. */}
-        <LivingBackground />
+      <body
+        className="min-h-dvh bg-bg text-ink antialiased"
+        style={{ backgroundColor: "#FAF8F2" }}
+      >
+        {/* Étape 1 petit pas : LivingBackground POL3-7a (3 photos
+            Luxembourg) REMPLACÉ par AmbientBackgroundLite (fond uni
+            #FAF8F2 + 3 blobs copper/gold SVG flous dérivants avec
+            réaction subtile au curseur). ScrollProgressBar + NoiseOverlay
+            POL3-7 sage PRÉSERVÉS intacts. */}
+        <AmbientBackgroundLite />
         <ScrollProgressBar />
         <NoiseOverlay />
         <JsonLd data={homepageGraph(locale)} />
@@ -196,7 +199,10 @@ export default async function LocaleLayout({
               <TrackPageView />
             </Suspense>
             <Header />
-            <div className="flex min-h-dvh flex-col">
+            <div
+              className="flex min-h-dvh flex-col"
+              style={{ position: "relative", zIndex: 1 }}
+            >
               <main className="flex-1">{children}</main>
               <Footer />
             </div>
