@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PropertyVideoForm } from "@/components/admin/PropertyVideoForm";
+import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,9 @@ export default async function AdminPropertyEditPage({
 
   const { data, error } = await supabase
     .from("properties")
-    .select("id, slug, title_fr, city, country, transaction, video_url")
+    .select(
+      "id, slug, title_fr, description_fr, price, city, country, transaction, video_url",
+    )
     .eq("id", id)
     .maybeSingle();
 
@@ -46,6 +49,30 @@ export default async function AdminPropertyEditPage({
           </span>
         </p>
       </header>
+
+      {/* POL4-A2 (CAMILLE) : édition titre + description (TipTap) + prix.
+          Au-DESSUS de la section vidéo existante (PropertyVideoForm intact). */}
+      <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
+        <header className="mb-4">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+            Contenu rédactionnel
+          </p>
+          <h2 className="mt-1 font-display text-xl font-bold text-[#3D4F63]">
+            Titre, description, prix
+          </h2>
+          <p className="mt-2 text-sm text-[#3D4F63]/70">
+            Les champs synchronisés depuis Apimo sont écrasés à chaque
+            sauvegarde locale. La description supporte le gras et l&apos;italique
+            (rendu uniforme côté fiche publique).
+          </p>
+        </header>
+        <PropertyEditForm
+          propertyId={data.id}
+          initialTitle={data.title_fr ?? ""}
+          initialDescription={data.description_fr ?? ""}
+          initialPrice={data.price ?? null}
+        />
+      </section>
 
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <header className="mb-4">
