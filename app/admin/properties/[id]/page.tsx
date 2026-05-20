@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PropertyVideoForm } from "@/components/admin/PropertyVideoForm";
 import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
+import { PropertyPhotosSection } from "@/components/admin/PropertyPhotosSection";
+import type { PhotoData } from "@/components/admin/PhotoManager";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +28,27 @@ export default async function AdminPropertyEditPage({
     console.error("[admin/properties/[id]] query error:", error);
   }
   if (!data) notFound();
+
+  // POL4-A3 (HUGO) — fetch photos depuis la table `property_images` (schema
+  // réel = table jointe, pas colonne jsonb). cover = sort 0.
+  // Reconstruire le path bucket à partir de l'URL publique : Supabase Storage
+  // public URL pattern = `.../storage/v1/object/public/{bucket}/{path}`.
+  // On extrait ce qui suit `/property-images/` pour permettre les deletes.
+  const { data: imgs } = await supabase
+    .from("property_images")
+    .select("url, sort")
+    .eq("property_id", id)
+    .order("sort", { ascending: true });
+  const initialPhotos: PhotoData[] = (imgs ?? []).map((row, i) => {
+    const url = row.url ?? "";
+    const m = url.match(/\/property-images\/(.+)$/);
+    return {
+      url,
+      path: m ? m[1] : "",
+      isCover: i === 0,
+      order: i,
+    };
+  });
 
   return (
     <div className="space-y-8">
@@ -91,6 +114,29 @@ export default async function AdminPropertyEditPage({
         <PropertyVideoForm
           propertyId={data.id}
           initialVideoUrl={data.video_url ?? ""}
+        />
+      </section>
+
+      {/* POL4-A3 (HUGO) : gestion photos via PhotoManager générique
+          (drag-drop HTML5 natif, cover, suppression). Bucket
+          property-images + table property_images en wipe-and-recreate. */}
+      <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
+        <header className="mb-4">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+            Photos
+          </p>
+          <h2 className="mt-1 font-display text-xl font-bold text-[#3D4F63]">
+            Galerie ({initialPhotos.length})
+          </h2>
+          <p className="mt-2 text-sm text-[#3D4F63]/70">
+            Glissez-déposez pour réordonner. La première sert de cover
+            publique. Cliquez sur « Enregistrer l&apos;ordre » pour
+            persister.
+          </p>
+        </header>
+        <PropertyPhotosSection
+          propertyId={data.id}
+          initialPhotos={initialPhotos}
         />
       </section>
 
