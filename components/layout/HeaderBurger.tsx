@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 type SubItem = { href: string; key: string };
 type Group = {

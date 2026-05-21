@@ -15,7 +15,13 @@ export function OffMarketBand() {
     // - Titre +30% via text-* responsive ajoutés sur t-h2-contrast.
     // - Badge MANDAT EXCLUSIF en haut, copper (gold-deep, le token réel
     //   du projet — "text-copper" n'existe pas comme classe Tailwind ici).
-    <section className="relative overflow-hidden bg-[#0a0a0a] px-6 py-10 text-white md:py-40 lg:px-10 lg:py-40">
+    <section
+      className="relative overflow-hidden px-6 py-10 text-white md:py-40 lg:px-10 lg:py-40"
+      style={{
+        backgroundColor: "var(--offmarket-bg)",
+        transition: "background-color 0.4s ease",
+      }}
+    >
       <div className="pointer-events-none absolute -right-32 -top-32 size-48 rounded-full bg-gold/15 blur-3xl" />
       <div className="pointer-events-none absolute -left-32 -bottom-32 size-48 rounded-full bg-accent-warm/10 blur-3xl" />
 

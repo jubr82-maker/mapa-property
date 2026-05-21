@@ -177,7 +177,7 @@ export default async function LocaleLayout({
       </head>
       <body
         className="min-h-dvh bg-bg text-ink antialiased"
-        style={{ backgroundColor: "#FAF8F2" }}
+        style={{ backgroundColor: "var(--ambient-bg)" }}
       >
         {/* Étape 1 petit pas : LivingBackground POL3-7a (3 photos
             Luxembourg) REMPLACÉ par AmbientBackgroundLite (fond uni

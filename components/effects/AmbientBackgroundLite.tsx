@@ -104,7 +104,8 @@ export function AmbientBackgroundLite() {
         zIndex: 0,
         pointerEvents: "none",
         overflow: "hidden",
-        backgroundColor: "#FAF8F2",
+        backgroundColor: "var(--ambient-bg)",
+        transition: "background-color 0.4s ease",
       }}
     >
       <svg
@@ -112,7 +113,13 @@ export function AmbientBackgroundLite() {
         preserveAspectRatio="xMidYMid slice"
         style={{ width: "100%", height: "100%" }}
       >
-        <g fill="none" stroke="#8B6840" strokeWidth="0.6" opacity="0.42">
+        <g
+          fill="none"
+          stroke="var(--ambient-stroke)"
+          strokeWidth="0.6"
+          opacity="0.42"
+          style={{ transition: "stroke 0.4s ease" }}
+        >
           <path
             ref={path1Ref}
             d="M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300"

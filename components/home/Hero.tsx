@@ -22,7 +22,13 @@ export async function Hero({ locale }: { locale: string }) {
   const videoMobile = sbUrl("Videos", "mapa_showcase_mobile.mp4");
 
   return (
-    <section className="relative isolate min-h-[46vh] overflow-hidden bg-[#070605] md:min-h-[66vh] lg:min-h-screen">
+    <section
+      className="relative isolate min-h-[46vh] overflow-hidden md:min-h-[66vh] lg:min-h-screen"
+      style={{
+        backgroundColor: "var(--hero-bg)",
+        transition: "background-color 0.4s ease",
+      }}
+    >
       {/* Video background — bucket Supabase "Videos" (majuscule).
           CSP media-src 'self' https://*.supabase.co indispensable
           (cf. next.config.ts). Pas de poster externe : le bg #070605

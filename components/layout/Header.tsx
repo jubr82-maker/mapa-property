@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { HeaderBurger } from "@/components/layout/HeaderBurger";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 const leftDropdowns = [
   {

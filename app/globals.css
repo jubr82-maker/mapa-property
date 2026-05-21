@@ -3,9 +3,40 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
+   STEP3a — Tokens ambient/hero/offmarket pilotés par .dark
+   Permettent à AmbientBackgroundLite (fond + line-art), Hero
+   et OffMarketBand de basculer en bloc via le toggle utilisateur
+   (mapa_theme dans localStorage, géré par components/layout/
+   ThemeToggle.tsx). Transition 0.4s sur html/body — les
+   composants qui consomment ces vars suivent.
+   ============================================================ */
+:root {
+  --ambient-bg:     #FAF8F2;
+  --ambient-stroke: #8B6840;
+  --ambient-text:   #1A1F2A;
+  --hero-bg:        #070605;
+  --offmarket-bg:   #0a0a0a;
+}
+
+:root.dark {
+  --ambient-bg:     #0F1410;
+  --ambient-stroke: #E0BE60;
+  --ambient-text:   #FAF8F2;
+  --hero-bg:        #0F1410;
+  --offmarket-bg:   #0F1410;
+}
+
+html,
+body {
+  background-color: var(--ambient-bg);
+  color: var(--ambient-text);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ============================================================
    MAPA Property — Palette MAPA officielle (copper FIXE)
    Light mode = défaut. Dark mode via class="dark" sur <html>
-   (géré par next-themes).
+   (géré par next-themes + override custom toggle STEP3a).
    ============================================================ */
 
 :root {
@@ -202,13 +233,14 @@ html {
 .logo-auto {
   display: block;
 }
-/* POL2-3 : couleur or PLATE #e0be60 (R224 G190 B96) sur la marque en
-   mode NUIT uniquement (décision Julien — pas de gradient, logo PNG).
-   brightness(0)+saturate(100%) normalise la source en noir (agnostique
-   du PNG), la chaîne reteinte vers #e0be60. Filtre calibré en DOM réel
-   (proof-pol2-3.mjs) : rgb(223,190,97), Δ canal max = 1 vs (224,190,96).
-   Mode clair : aucune règle ici → copper #B8865A INCHANGÉ. */
-:root.dark .logo-auto,
+/* STEP3a : couleur or PLATE #e0be60 sur la marque en mode JOUR ET NUIT
+   (décision Julien — logo unifié doré chaud, le cuivre PNG d'origine
+   #B8865A n'est plus visible). Filtre calibré en DOM réel POL2-3
+   (rgb(223,190,97), Δ canal max = 1 vs #E0BE60 = R224 G190 B96).
+   brightness(0)+saturate(100%) normalise la source PNG en noir,
+   la chaîne reteinte vers #e0be60. Appliqué via .logo-auto sans
+   scope :root.dark (≠ POL2-3 qui restreignait à la nuit). */
+.logo-auto,
 .logo-gold {
   filter: brightness(0) saturate(100%) invert(70%) sepia(100%)
     saturate(350%) hue-rotate(352deg) brightness(85%) contrast(95%);
