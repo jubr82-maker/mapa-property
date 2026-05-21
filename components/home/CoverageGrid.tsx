@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { HoverFlipCard } from "@/components/ui/HoverFlipCard";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
+import { CoverageNarrativeScroll } from "@/components/home/CoverageNarrativeScroll";
 
 const typologies = [
   {
@@ -55,11 +56,17 @@ export function CoverageGrid() {
           <p className="mt-3 text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
         </header>
 
+        {/* STEP3c-3 : CoverageNarrativeScroll wrap externe — sur desktop-A
+            pin scroll narratif card par card (flip 3D), sur mobile/tablet
+            passthrough → comportement STEP3b preserve (FadeInOnScroll
+            stagger 300ms). */}
+        <CoverageNarrativeScroll cardsCount={typologies.length}>
         <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-5 lg:grid-cols-4">
           {typologies.map((typo, idx) => {
             const isFlipped = isMobile && expandedKey === typo.key;
             return (
               <FadeInOnScroll key={typo.key} delay={idx * 300} y={30}>
+              <div data-coverage-card>
               <HoverFlipCard
                 height="h-40 sm:h-52 md:h-64"
                 flipped={isMobile ? expandedKey === typo.key : undefined}
@@ -129,10 +136,12 @@ export function CoverageGrid() {
                   </div>
                 }
               />
+              </div>
               </FadeInOnScroll>
             );
           })}
         </div>
+        </CoverageNarrativeScroll>
       </div>
     </section>
   );
