@@ -19,8 +19,8 @@ const CARDS: MandateCard[] = [
   {
     id: "exclusif",
     slug: "exclusif",
-    accent: "#C8A04A",
-    accentDark: "#9E7B2A",
+    accent: "#D4A574",
+    accentDark: "#D4A574",
     isFeatured: true,
   },
   {

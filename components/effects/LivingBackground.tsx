@@ -6,7 +6,7 @@
  * Fond vivant : 3 images Luxembourg (URLs Unsplash) en rotation continue
  * 18 s avec fondu enchaîné (transition opacity 2 s ease-in-out). Fixed,
  * z-0, pointer-events-none, aria-hidden. Image active à opacity 0.18,
- * voile copper #B8865A à 0.04 par-dessus pour ancrer la marque.
+ * voile copper #D4A574 à 0.04 par-dessus pour ancrer la marque.
  *
  * NB : positionné en z-0, sous les sections opaques de la home (bg-bg,
  * bg-bg-soft, bg-bg-contrast, etc.) — visible donc principalement sur
@@ -28,7 +28,7 @@ const IMAGES = [
   "https://images.unsplash.com/photo-1601228040516-66e83e29c9ab?w=1920&q=70",
 ];
 const ROTATION_MS = 18_000;
-const COPPER = "#B8865A";
+const COPPER = "#D4A574";
 
 export function LivingBackground() {
   const [index, setIndex] = useState(0);

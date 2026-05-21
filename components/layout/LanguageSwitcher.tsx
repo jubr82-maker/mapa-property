@@ -68,8 +68,8 @@ export function LanguageSwitcher({ variant = "light", onSwitched }: Props) {
   const triggerClass = isDark
     ? `inline-flex h-9 min-w-[3rem] items-center justify-center gap-1.5 rounded-full border px-3 font-mono text-[11px] uppercase tracking-[0.2em] transition-all duration-200 ${
         open
-          ? "border-[#C8A04A] bg-[#C8A04A]/10 text-[#C8A04A]"
-          : "border-[#C8A04A] text-[#C8A04A] hover:bg-[#C8A04A]/10"
+          ? "border-[#D4A574] bg-[#D4A574]/10 text-[#D4A574]"
+          : "border-[#D4A574] text-[#D4A574] hover:bg-[#D4A574]/10"
       }`
     : `inline-flex items-center justify-center gap-1 rounded-full px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.2em] transition-all duration-200 ${
         open ? "text-gold" : "text-ink-soft hover:text-gold"
@@ -88,7 +88,7 @@ export function LanguageSwitcher({ variant = "light", onSwitched }: Props) {
       }`;
 
   const itemClass = isDark
-    ? "flex w-full items-center justify-center px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-white/80 transition-colors hover:bg-[#C8A04A]/10 hover:text-[#C8A04A]"
+    ? "flex w-full items-center justify-center px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-white/80 transition-colors hover:bg-[#D4A574]/10 hover:text-[#D4A574]"
     : "flex w-full items-center justify-center px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:bg-bg-soft hover:text-gold";
 
   const otherLocales = routing.locales.filter((l) => l !== locale);

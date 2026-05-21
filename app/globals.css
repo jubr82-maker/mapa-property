@@ -3,33 +3,45 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
-   STEP3a — Tokens ambient/hero/offmarket pilotés par .dark
-   Permettent à AmbientBackgroundLite (fond + line-art), Hero
-   et OffMarketBand de basculer en bloc via le toggle utilisateur
-   (mapa_theme dans localStorage, géré par components/layout/
-   ThemeToggle.tsx). Transition 0.4s sur html/body — les
-   composants qui consomment ces vars suivent.
+   STEP3a-FORET — Palette Forêt Luxembourgeoise (4 couleurs strictes)
+     - Sapin profond  #1F221A : fond nuit / texte jour / Hero+OffMkt
+     - Crème velin    #F0E6CC : fond jour / texte nuit
+     - Lime mur       #CFE542 : CTA unique / wave / signature SVG
+     - Cuivre citron  #D4A574 : logo / italiques / filets / bordures
+                                / line-art ambient (2 modes)
+   Bascule pilotée par .dark sur <html> (toggle mapa_theme).
+   Transition 0.4s sur html/body.
    ============================================================ */
 :root {
-  --ambient-bg:     #FAF8F2;
-  --ambient-stroke: #8B6840;
-  --ambient-text:   #1A1F2A;
-  --hero-bg:        #070605;
-  --offmarket-bg:   #0a0a0a;
+  --bg:               #F0E6CC;
+  --text:             #1F221A;
+  --accent-primary:   #CFE542;
+  --accent-secondary: #D4A574;
+  --ambient-bg:       #F0E6CC;
+  --ambient-stroke:   #D4A574;
+  --ambient-text:     #1F221A;
+  --hero-bg:          #1F221A;
+  --offmarket-bg:     #1F221A;
+  --logo-color:       #D4A574;
 }
 
 :root.dark {
-  --ambient-bg:     #0F1410;
-  --ambient-stroke: #E0BE60;
-  --ambient-text:   #FAF8F2;
-  --hero-bg:        #0F1410;
-  --offmarket-bg:   #0F1410;
+  --bg:               #1F221A;
+  --text:             #F0E6CC;
+  --accent-primary:   #CFE542;
+  --accent-secondary: #D4A574;
+  --ambient-bg:       #1F221A;
+  --ambient-stroke:   #D4A574;
+  --ambient-text:     #F0E6CC;
+  --hero-bg:          #1F221A;
+  --offmarket-bg:     #1F221A;
+  --logo-color:       #D4A574;
 }
 
 html,
 body {
-  background-color: var(--ambient-bg);
-  color: var(--ambient-text);
+  background-color: var(--bg);
+  color: var(--text);
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
@@ -40,34 +52,32 @@ body {
    ============================================================ */
 
 :root {
-  /* Light mode — blanc franc (plus de beige) */
-  --bg:           #FFFFFF;        /* blanc pur — alignement luxe intl (Christie's/Sotheby's/Knight Frank) */
-  --bg-deep:      #F5F5F5;        /* gris très clair pour élévation */
-  --bg-soft:      #FAFAFA;        /* presque blanc pour cards */
-  --bg-warm:      #FAF6EE;        /* off-white chaud TRÈS subtil — surfaces "warm" sélectives (DisclaimerLegal, etc.), jamais fond principal */
-  --ink:          #1A1F2A;        /* texte body — Decision 2 : #1A1F2A (jour) ↔ #FFFFFF (nuit) */
-  --ink-mid:      #2C2E33;
-  --ink-soft:     #6B6B6B;
-  --navy:         #3D4F63;        /* bleu prussien MAPA — conservé pour secondaire */
-  --navy-deep:    #2D3F53;
-  --gold:         #C8A04A;        /* or vif — plus jaune que copper, plus de présence */
-  --gold-bright:  #E0BE60;        /* or éclatant pour hover/highlights */
-  --gold-deep:    #9E7B2A;        /* or chaud profond pour CTAs sur clair */
-  --gold-shine:   #C8A04A;
-  --accent-warm:  #C8A04A;
-  --line:         rgba(15, 15, 16, 0.14);
-  --line-strong:  rgba(15, 15, 16, 0.26);
+  /* Light mode — Forêt Luxembourgeoise crème velin */
+  --bg:           #F0E6CC;        /* crème velin — fond principal jour */
+  --bg-deep:      #E5DBC0;        /* crème -6% — élévation basse cards */
+  --bg-soft:      #EBE2C7;        /* crème -3% — cards subtiles */
+  --bg-warm:      #F0E6CC;        /* identique au fond (palette stricte) */
+  --ink:          #1F221A;        /* sapin profond — texte body jour */
+  --ink-mid:      rgba(31, 34, 26, 0.78);
+  --ink-soft:     rgba(31, 34, 26, 0.55);
+  --navy:         #1F221A;        /* sapin (navy retiré de la palette) */
+  --navy-deep:    #1F221A;
+  --gold:         #D4A574;        /* cuivre citron — accent unique 4 couleurs strictes */
+  --gold-bright:  #D4A574;
+  --gold-deep:    #D4A574;
+  --gold-shine:   #D4A574;
+  --accent-warm:  #D4A574;
+  --line:         rgba(31, 34, 26, 0.14);
+  --line-strong:  rgba(31, 34, 26, 0.26);
 
-  /* ── Tokens sémantiques — langage visuel MAPA (Decision 2) ──
-     Inversion gérée UNIQUEMENT par le binding :root/.dark.
-     Aucune logique "if dark" en composant. */
-  --copper:         #B8865A;                 /* accent copper FIXE — identique jour/nuit */
-  --bg-base:        var(--bg);               /* fond principal              #FFFFFF (jour) */
-  --bg-contrast:    #1A1F2A;                 /* FIGÉ jour=nuit — surface premium (fix BUG H/I) */
-  --text-base:      var(--ink);              /* texte body */
-  --text-contrast:  #FFFFFF;                 /* FIGÉ jour=nuit — texte sur surface premium */
-  --text-muted:     rgba(26, 31, 42, 0.6);   /* ink/60% */
-  --border-subtle:  rgba(26, 31, 42, 0.08);  /* ink/8% — bordures cards */
+  /* ── Tokens sémantiques — palette Forêt stricte ── */
+  --copper:         #D4A574;                 /* cuivre citron — fixe 2 modes */
+  --bg-base:        var(--bg);               /* #F0E6CC (jour) */
+  --bg-contrast:    #1F221A;                 /* sapin profond — FIGÉ jour=nuit */
+  --text-base:      var(--ink);
+  --text-contrast:  #F0E6CC;                 /* crème velin sur sapin */
+  --text-muted:     rgba(31, 34, 26, 0.6);
+  --border-subtle:  rgba(31, 34, 26, 0.10);
 }
 
 /* `:root.dark` (spécificité 0,2,0) et NON `.dark` (0,1,0) : sinon le
@@ -75,32 +85,32 @@ body {
    (app/[locale]/layout.tsx) — même spécificité, source plus tardive —
    écrase les overrides dark et le mode nuit n'inverse jamais. */
 :root.dark {
-  /* Dark mode — noir/anthracite vrai (zéro brun) */
-  --bg:           #1A1F2A;        /* fond principal nuit — Decision 2 (anthracite bleuté, plus noir pur) */
-  --bg-deep:      #10131A;        /* élévation basse (sous le fond) */
-  --bg-soft:      #232936;        /* anthracite élevé (cards en dark) */
-  --bg-warm:      #20242E;        /* surface chaude TRÈS subtile — équivalent dark de --bg-warm */
-  --ink:          #FFFFFF;        /* texte body nuit — Decision 2 */
-  --ink-mid:      #BCBCBC;
-  --ink-soft:     #7A7A7A;
-  --navy:         #5C7088;
-  --navy-deep:    #3D4F63;
-  --gold:         #E0BE60;        /* or vif éclairé pour fond sombre */
-  --gold-bright:  #F0D580;
-  --gold-deep:    #C8A04A;
-  --gold-shine:   #E0BE60;
-  --accent-warm:  #E0BE60;
-  --line:         rgba(250, 250, 250, 0.14);
-  --line-strong:  rgba(250, 250, 250, 0.28);
+  /* Dark mode — Forêt Luxembourgeoise sapin profond */
+  --bg:           #1F221A;        /* sapin profond — fond principal nuit */
+  --bg-deep:      #181B14;        /* sapin -6% — élévation basse */
+  --bg-soft:      #262A1F;        /* sapin +3% — cards en dark */
+  --bg-warm:      #1F221A;        /* identique au fond (palette stricte) */
+  --ink:          #F0E6CC;        /* crème velin — texte body nuit */
+  --ink-mid:      rgba(240, 230, 204, 0.78);
+  --ink-soft:     rgba(240, 230, 204, 0.55);
+  --navy:         #F0E6CC;
+  --navy-deep:    #F0E6CC;
+  --gold:         #D4A574;        /* cuivre citron — accent unique 2 modes */
+  --gold-bright:  #D4A574;
+  --gold-deep:    #D4A574;
+  --gold-shine:   #D4A574;
+  --accent-warm:  #D4A574;
+  --line:         rgba(240, 230, 204, 0.14);
+  --line-strong:  rgba(240, 230, 204, 0.28);
 
-  /* ── Tokens sémantiques — inversion nuit (Decision 2) ── */
-  --copper:         #B8865A;                  /* INCHANGÉ — accent constant 2 modes */
-  --bg-base:        var(--bg);                /* #1A1F2A (nuit) */
-  --bg-contrast:    #1A1F2A;                  /* FIGÉ jour=nuit — surface premium, ne s'inverse JAMAIS (fix BUG H/I 2026-05-16) */
+  /* ── Tokens sémantiques — inversion nuit ── */
+  --copper:         #D4A574;                   /* cuivre citron — fixe 2 modes */
+  --bg-base:        var(--bg);                 /* #1F221A (nuit) */
+  --bg-contrast:    #1F221A;                   /* sapin profond — FIGÉ jour=nuit */
   --text-base:      var(--ink);
-  --text-contrast:  #FFFFFF;                  /* FIGÉ jour=nuit (fix BUG H/I) */
-  --text-muted:     rgba(255, 255, 255, 0.6); /* white/60% */
-  --border-subtle:  rgba(255, 255, 255, 0.08);/* white/8% */
+  --text-contrast:  #F0E6CC;                   /* crème velin sur sapin */
+  --text-muted:     rgba(240, 230, 204, 0.6);
+  --border-subtle:  rgba(240, 230, 204, 0.10);
 }
 
 /* Expose les variables comme tokens Tailwind */
@@ -124,25 +134,30 @@ body {
 
   /* Tokens sémantiques exposés en utilitaires Tailwind v4.
      --bg-base/--text-base = alias de bg/ink (déjà exposés) — documentés, pas de doublon d'utilitaire. */
-  --color-copper:          var(--copper);
-  --color-bg-contrast:     var(--bg-contrast);
-  --color-text-contrast:   var(--text-contrast);
-  --color-text-muted:      var(--text-muted);
-  --color-border-subtle:   var(--border-subtle);
+  --color-copper:            var(--copper);
+  --color-bg-contrast:       var(--bg-contrast);
+  --color-text-contrast:     var(--text-contrast);
+  --color-text-muted:        var(--text-muted);
+  --color-border-subtle:     var(--border-subtle);
+
+  /* STEP3a-FORET : tokens palette Forêt exposés Tailwind v4 */
+  --color-accent-primary:    var(--accent-primary);   /* lime mur #CFE542 */
+  --color-accent-secondary:  var(--accent-secondary); /* cuivre citron #D4A574 */
 
   --font-display: var(--font-display);
   --font-sans:    var(--font-sans);
   --font-mono:    var(--font-mono);
 }
 
-/* CTA copper FIXE — pas de gradient, pas d'animation, juste solid copper */
+/* CTA principal — désormais lime mur #CFE542 sur sapin (palette Forêt
+   STEP3a-FORET). Hover : cuivre citron pour cohérence avec --accent-secondary. */
 .gold-shine-bg {
-  background-color: var(--gold);
-  color: #FFFFFF;
+  background-color: var(--accent-primary);
+  color: var(--bg-contrast);
   transition: background-color 200ms ease;
 }
 .gold-shine-bg:hover {
-  background-color: var(--gold-deep);
+  background-color: var(--accent-secondary);
 }
 
 /* Texte d'accent copper — solid color, pas de gradient transparent */
@@ -233,17 +248,18 @@ html {
 .logo-auto {
   display: block;
 }
-/* STEP3a : couleur or PLATE #e0be60 sur la marque en mode JOUR ET NUIT
-   (décision Julien — logo unifié doré chaud, le cuivre PNG d'origine
-   #B8865A n'est plus visible). Filtre calibré en DOM réel POL2-3
-   (rgb(223,190,97), Δ canal max = 1 vs #E0BE60 = R224 G190 B96).
+/* STEP3a-FORET : couleur cuivre citron #D4A574 (R212 G165 B116) sur la
+   marque dans les 2 modes. Approximation manuelle (pas de calibration
+   DOM cette fois — l'ancien filtre POL2-3 visait #E0BE60). hue-rotate
+   plus chaud (340° vs 352°), saturation réduite (~280% vs 350%),
+   contrast/brightness ajustés. Visuel à valider chez Julien — si
+   décalage perceptible, ré-calibrer via proof script DOM.
    brightness(0)+saturate(100%) normalise la source PNG en noir,
-   la chaîne reteinte vers #e0be60. Appliqué via .logo-auto sans
-   scope :root.dark (≠ POL2-3 qui restreignait à la nuit). */
+   la chaîne reteinte vers ~#D4A574. */
 .logo-auto,
 .logo-gold {
-  filter: brightness(0) saturate(100%) invert(70%) sepia(100%)
-    saturate(350%) hue-rotate(352deg) brightness(85%) contrast(95%);
+  filter: brightness(0) saturate(100%) invert(74%) sepia(55%)
+    saturate(420%) hue-rotate(340deg) brightness(96%) contrast(85%);
 }
 
 .prose-mapa {
@@ -335,7 +351,7 @@ html {
 
 /* Tableaux éditoriaux — colonnes alignées, cellules respirantes
    (POL2-1). Padding ≥16px horizontal / ≥12px vertical, en-têtes
-   copper #B8865A small-caps, filet bas copper translucide par ligne. */
+   copper #D4A574 small-caps, filet bas copper translucide par ligne. */
 .prose-mapa table {
   table-layout: auto;
   width: 100%;
@@ -399,7 +415,7 @@ body {
    lead italic + lettrine copper, chapitres ascendants avec filet
    copper, corps confortable (line-height généreux), conclusion
    en small caps.
-   #B8865A = copper MAPA fixe (toléré pour cet éditorial).
+   #D4A574 = copper MAPA fixe (toléré pour cet éditorial).
    ============================================================ */
 
 .magazine {
@@ -431,7 +447,7 @@ body {
   line-height: 0.85;
   padding-right: 0.12em;
   padding-top: 0.08em;
-  color: #B8865A;
+  color: #D4A574;
   font-weight: 500;
   font-style: normal;
 }
@@ -470,12 +486,12 @@ body {
   font-size: clamp(0.78rem, 1.1vw, 0.92rem);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: #B8865A;
+  color: #D4A574;
 }
 .magazine-h2-rule {
   flex: 0 0 2.5rem;
   height: 1px;
-  background: #B8865A;
+  background: #D4A574;
   opacity: 0.55;
 }
 .magazine-h2-text {
@@ -533,7 +549,7 @@ body {
     max-width: none;
   }
   .magazine-lead::first-letter {
-    color: #B8865A !important;
+    color: #D4A574 !important;
   }
   .magazine-h2,
   .magazine-h2-rule {
@@ -565,7 +581,7 @@ body {
   line-height: 0.85;
   padding-right: 0.12em;
   padding-top: 0.08em;
-  color: #B8865A;
+  color: #D4A574;
   font-weight: 500;
   font-style: normal;
 }
@@ -576,7 +592,7 @@ body {
   font-size: clamp(0.85rem, 1.2vw, 1rem);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: #B8865A;
+  color: #D4A574;
   margin: 3.5rem 0 1.25rem;
   padding-bottom: 0.6rem;
   border-bottom: 1px solid rgba(184, 134, 90, 0.35);
@@ -620,7 +636,7 @@ body {
 .magazine-content ul { list-style-type: none; }
 .magazine-content ul > li::before {
   content: "·";
-  color: #B8865A;
+  color: #D4A574;
   font-weight: 700;
   display: inline-block;
   width: 1rem;
@@ -628,7 +644,7 @@ body {
 }
 .magazine-content ol { list-style-type: decimal; }
 .magazine-content ol > li::marker {
-  color: #B8865A;
+  color: #D4A574;
   font-family: var(--font-display), ui-serif, Georgia, serif;
   font-weight: 500;
 }
@@ -660,7 +676,7 @@ body {
     border-bottom-color: #8E6940 !important;
   }
   .magazine-content > p.intro::first-letter {
-    color: #B8865A !important;
+    color: #D4A574 !important;
   }
 }
 

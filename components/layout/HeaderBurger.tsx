@@ -133,12 +133,12 @@ export function HeaderBurger() {
             {/* BUG 1 : toggle jour/nuit fonctionnel dans le VRAI menu mobile
                 (HeaderBurger ; MobileMenu était mort). Styles forcés (!)
                 pour le drawer sombre. */}
-            <ThemeToggle className="!size-10 !border-white/30 !text-white hover:!border-[#C8A04A] hover:!text-[#C8A04A]" />
+            <ThemeToggle className="!size-10 !border-white/30 !text-white hover:!border-[#D4A574] hover:!text-[#D4A574]" />
             <button
               type="button"
               aria-label={t("close_menu")}
               onClick={close}
-              className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:border-[#C8A04A] hover:text-[#C8A04A]"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:border-[#D4A574] hover:text-[#D4A574]"
             >
               <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <path d="M6 6l12 12M18 6L6 18" />
@@ -161,7 +161,7 @@ export function HeaderBurger() {
                     <Link
                       href={group.href}
                       onClick={close}
-                      className="block py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-white transition-colors hover:text-[#C8A04A] sm:text-2xl"
+                      className="block py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-white transition-colors hover:text-[#D4A574] sm:text-2xl"
                     >
                       {t(group.label)}
                     </Link>
@@ -175,13 +175,13 @@ export function HeaderBurger() {
                     type="button"
                     onClick={() => setExpanded(isExpanded ? null : group.id)}
                     aria-expanded={isExpanded}
-                    className="flex w-full items-center justify-between gap-3 py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-white transition-colors hover:text-[#C8A04A] sm:text-2xl"
+                    className="flex w-full items-center justify-between gap-3 py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-white transition-colors hover:text-[#D4A574] sm:text-2xl"
                   >
                     {t(group.label)}
                     <svg
                       aria-hidden
                       viewBox="0 0 24 24"
-                      className={`size-5 text-[#C8A04A] transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                      className={`size-5 text-[#D4A574] transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -197,7 +197,7 @@ export function HeaderBurger() {
                           <Link
                             href={item.href}
                             onClick={close}
-                            className="block py-2 font-sans text-base text-white/80 transition-colors hover:text-[#C8A04A]"
+                            className="block py-2 font-sans text-base text-white/80 transition-colors hover:text-[#D4A574]"
                           >
                             {t(item.key)}
                           </Link>

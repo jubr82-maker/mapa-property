@@ -6,11 +6,9 @@ export function OffMarketBand() {
   const t = useTranslations("offmarket_band");
 
   return (
-    // PLAINTES-3-4 (validé Julien) :
-    // - Fond sombre/premium HARDCODÉ identique en mode jour et mode nuit
-    //   (avant : bg-bg-contrast variait selon le thème → rendu "horrible"
-    //   en mode jour). bg-[#0a0a0a] + text-white = fixe, indépendant du
-    //   ThemeProvider, "cadenas OFF MARKET premium" visuel constant.
+    // STEP3a-FORET : fond sapin profond var(--offmarket-bg) #1F221A,
+    // identique en jour ET nuit (palette Forêt stricte). Le texte
+    // reste white pour contraste maximum sur sapin.
     // - Padding vertical DOUBLÉ pour la visibilité (py-5/20 → py-10/40).
     // - Titre +30% via text-* responsive ajoutés sur t-h2-contrast.
     // - Badge MANDAT EXCLUSIF en haut, copper (gold-deep, le token réel

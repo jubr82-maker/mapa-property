@@ -179,11 +179,10 @@ export default async function LocaleLayout({
         className="min-h-dvh bg-bg text-ink antialiased"
         style={{ backgroundColor: "var(--ambient-bg)" }}
       >
-        {/* Étape 1 petit pas : LivingBackground POL3-7a (3 photos
-            Luxembourg) REMPLACÉ par AmbientBackgroundLite (fond uni
-            #FAF8F2 + 3 blobs copper/gold SVG flous dérivants avec
-            réaction subtile au curseur). ScrollProgressBar + NoiseOverlay
-            POL3-7 sage PRÉSERVÉS intacts. */}
+        {/* STEP3a-FORET : AmbientBackgroundLite — fond crème velin
+            #F0E6CC (jour) / sapin #1F221A (nuit) + 4 line-art cuivre
+            citron #D4A574 en vague océanique marquée, réaction souris
+            ±100px. ScrollProgressBar + NoiseOverlay préservés. */}
         <AmbientBackgroundLite />
         <ScrollProgressBar />
         <NoiseOverlay />

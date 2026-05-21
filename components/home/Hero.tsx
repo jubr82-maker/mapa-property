@@ -31,8 +31,8 @@ export async function Hero({ locale }: { locale: string }) {
     >
       {/* Video background — bucket Supabase "Videos" (majuscule).
           CSP media-src 'self' https://*.supabase.co indispensable
-          (cf. next.config.ts). Pas de poster externe : le bg #070605
-          joue le rôle de placeholder le temps du buffering.
+          (cf. next.config.ts). Pas de poster externe : le bg sapin
+          profond var(--hero-bg) #1F221A joue le rôle de placeholder.
           Servi en deux variantes responsive (desktop 4.7MB / mobile 3.1MB)
           + preload="metadata" pour réduire l'Egress Supabase ~70%. */}
       {/* POL3-7 : parallax desktop very subtil (0.05). Overscan
@@ -58,10 +58,10 @@ export async function Hero({ locale }: { locale: string }) {
         </video>
       </ParallaxImage>
 
-      {/* Gradient overlay (ink → transparent → ink 60%) */}
+      {/* Gradient overlay (sapin → transparent → sapin 85%) — palette Forêt */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-b from-[#070605]/65 via-[#070605]/20 to-[#070605]/85"
+        className="absolute inset-0 bg-gradient-to-b from-[#1F221A]/65 via-[#1F221A]/20 to-[#1F221A]/85"
       />
 
       {/* Brackets dorés (4 coins) */}

@@ -1,14 +1,17 @@
 "use client";
 
 /**
- * AmbientBackgroundLite — Étape 2 petit pas
+ * AmbientBackgroundLite — STEP3a-FORET
  *
- * Remplace les 3 blobs SVG flous de l'Étape 1 par 4 courbes
- * line-art cuivre sombre (#8B6840) très fines (stroke 0.6) à
- * opacité 0.42 : trace dessinée plutôt que masse colorée. Les
- * `d` sont animés en SMIL (durées 38-52s) pour une dérive lente
- * et un léger décalage translate3d réactif à la souris (lerp
- * 0.02, amplitude 30-50 px).
+ * 4 courbes line-art cuivre citron (var(--ambient-stroke) =
+ * #D4A574) très fines (stroke 0.6) à opacité 0.42. Les `d` sont
+ * animés en SMIL avec vague océanique : 4 keyframes (start /
+ * crest+ / crest- / start), variations ±60-100 sur points de
+ * contrôle Bézier → respiration marquée.
+ *
+ * Translate3d réactif à la souris : lerp 0.02 toujours doux,
+ * amplitudes ±80-110 px (vs ±30-50 STEP2) — réaction plus
+ * spectaculaire au survol large.
  *
  * Fixed inset 0, z 0, pointer-events-none, aria-hidden. Désactivé
  * sur mobile (<768) côté useEffect : pas d'écoute mousemove.
@@ -56,14 +59,14 @@ export function AmbientBackgroundLite() {
       const offsetX = (mouseX - cx) / cx;
       const offsetY = (mouseY - cy) / cy;
 
-      const t1X = -offsetX * 40;
-      const t1Y = -offsetY * 30;
-      const t2X = offsetX * 50;
-      const t2Y = offsetY * 40;
-      const t3X = -offsetX * 30;
-      const t3Y = offsetY * 50;
-      const t4X = offsetX * 35;
-      const t4Y = -offsetY * 35;
+      const t1X = -offsetX * 100;
+      const t1Y = -offsetY * 80;
+      const t2X = offsetX * 110;
+      const t2Y = offsetY * 90;
+      const t3X = -offsetX * 80;
+      const t3Y = offsetY * 85;
+      const t4X = offsetX * 90;
+      const t4Y = -offsetY * 95;
 
       p1X += (t1X - p1X) * lerp;
       p1Y += (t1Y - p1Y) * lerp;
@@ -129,7 +132,8 @@ export function AmbientBackgroundLite() {
               dur="38s"
               repeatCount="indefinite"
               values="M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300;
-                      M -100,240 C 320,160 680,360 1120,280 S 1720,420 1900,330;
+                      M -100,260 C 350,170 770,330 1170,300 S 1770,380 1900,360;
+                      M -100,160 C 250,40 630,470 1030,200 S 1630,520 1900,240;
                       M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300"
             />
           </path>
@@ -142,7 +146,8 @@ export function AmbientBackgroundLite() {
               dur="46s"
               repeatCount="indefinite"
               values="M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650;
-                      M -100,640 C 420,500 780,710 1320,640 S 1820,540 1900,680;
+                      M -100,680 C 460,520 860,820 1360,660 S 1860,560 1900,720;
+                      M -100,540 C 340,390 740,690 1240,540 S 1740,440 1900,580;
                       M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650"
             />
           </path>
@@ -155,7 +160,8 @@ export function AmbientBackgroundLite() {
               dur="52s"
               repeatCount="indefinite"
               values="M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600;
-                      M 220,-100 C 320,340 520,520 820,440 S 1120,680 1420,520 S 1720,780 1900,620;
+                      M 240,-100 C 360,370 580,580 880,470 S 1180,770 1480,570 S 1780,870 1900,680;
+                      M 160,-100 C 240,230 420,430 720,330 S 1020,630 1320,430 S 1620,730 1900,520;
                       M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600"
             />
           </path>
@@ -168,7 +174,8 @@ export function AmbientBackgroundLite() {
               dur="44s"
               repeatCount="indefinite"
               values="M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850;
-                      M -100,920 C 220,830 520,930 920,840 S 1420,930 1900,870;
+                      M -100,960 C 260,860 560,910 960,880 S 1460,920 1900,910;
+                      M -100,840 C 140,740 440,990 840,760 S 1340,990 1900,790;
                       M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850"
             />
           </path>
