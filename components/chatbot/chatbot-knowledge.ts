@@ -16,9 +16,9 @@ const KNOWLEDGE_FR = `
 
 ## 4 mandats de vente
 - Mandat Exclusif (3 % HT) : engagement réciproque maximal. Pack Vidéo inclus. Diffusion off-market puis publique. Le plus performant.
-- Mandat Semi-Exclusif (4 % HT) : vous gardez votre cercle privé, MAPA mobilise ses canaux. Pack Vidéo en option.
+- Mandat Semi-Exclusif (4 % HT) : vous gardez votre cercle privé, MAPA Property mobilise ses canaux. Pack Vidéo en option.
 - Mandat Simple (5 % HT) : aucune exclusivité, plusieurs agences possibles. Honoraires majorés.
-- Mandat Autonome (1 % HT) : vous pilotez vous-même, MAPA en backup juridique et notarial.
+- Mandat Autonome (1 % HT) : vous pilotez vous-même, MAPA Property en backup juridique et notarial.
 
 ## Mandat de recherche (buyer's agent à la française)
 - 1 % à 3 % HT du prix d'acquisition selon juridiction et complexité.
@@ -60,7 +60,7 @@ const KNOWLEDGE_FR = `
 ## Estimation
 - Modèle hédoniste calibré sur données Observatoire de l'Habitat.
 - Disclaimer : "Notre simulateur vous donne une fourchette indicative. La visite la rend juste."
-- Toujours redirige vers visite par un conseiller MAPA pour valeur opposable.
+- Toujours redirige vers visite par un conseiller MAPA Property pour valeur opposable.
 
 ## Délais moyens
 - Estimation indicative : 2 minutes en ligne.
@@ -74,7 +74,7 @@ const KNOWLEDGE_FR = `
 - Justificatif d'origine des fonds (relevés bancaires, vente précédente, donation, héritage).
 - Pour personne morale : KBIS / RCS, structure de propriété ultime.
 
-## Méthode MAPA
+## Méthode MAPA Property
 - Sous mandat signé.
 - Confidentialité contractuelle.
 - Conseil qui ne sert qu'un maître à la fois (jamais de double mandat).
@@ -104,9 +104,9 @@ const KNOWLEDGE_EN = `
 
 ## 4 sale mandates
 - Exclusive (3%): max mutual commitment, Video Pack included, off-market then public.
-- Semi-Exclusive (4%): you keep your private circle, MAPA mobilises channels.
+- Semi-Exclusive (4%): you keep your private circle, MAPA Property mobilises channels.
 - Simple (5%): no exclusivity, multiple agencies possible. Higher fees.
-- Autonomous (1%): you drive, MAPA legal/notarial backup.
+- Autonomous (1%): you drive, MAPA Property legal/notarial backup.
 
 ## Search mandate (buyer's agent)
 - 1% to 3% (excl. VAT) of acquisition price, by jurisdiction and complexity.
@@ -160,9 +160,9 @@ const KNOWLEDGE_DE = `
 
 ## 4 Verkaufsmandate
 - Exklusiv (3%): max gegenseitiges Engagement, Videopaket inklusive.
-- Halb-Exklusiv (4%): privater Kreis bleibt, MAPA aktiviert Kanäle.
+- Halb-Exklusiv (4%): privater Kreis bleibt, MAPA Property aktiviert Kanäle.
 - Einfach (5%): keine Exklusivität.
-- Autonom (1%): Sie steuern, MAPA Rückendeckung.
+- Autonom (1%): Sie steuern, MAPA Property Rückendeckung.
 
 ## Suchmandat
 - 1% bis 3% (zzgl. MwSt.) je Jurisdiktion.

@@ -204,7 +204,7 @@
   },
   "mandates_premium": {
     "eyebrow": "Unsere Premium-Mandate",
-    "title": "Verkaufen mit MAPA.",
+    "title": "Verkaufen mit MAPA Property.",
     "subtitle": "Vier Formate, abgestimmt auf Ihr Projekt: von totaler Exklusivität bis zur begleiteten Eigenregie.",
     "more_info": "Mehr erfahren",
     "modal_cta": "Dieses Mandat anfragen",
@@ -214,9 +214,9 @@
       "title": "Exklusiv",
       "rate": "3%",
       "rate_suffix": "netto + 17% MwSt.",
-      "short_desc": "Volle MAPA-Verpflichtung. Premium-Marketing, Exklusivität, Verhandlungsexpertise.",
-      "long_desc": "Das verbindlichste Mandat: MAPA verteidigt Ihr Objekt, als wäre es das eigene. Ein einziger Ansprechpartner, eine dedizierte Marketingstrategie und eine Verhandlung allein in Ihrem Interesse bis zur notariellen Urkunde. 3 Monate verlängerbar.",
-      "bullet_1": "MAPA-Exklusivität — ein einziger Ansprechpartner",
+      "short_desc": "Volle MAPA Property-Verpflichtung. Premium-Marketing, Exklusivität, Verhandlungsexpertise.",
+      "long_desc": "Das verbindlichste Mandat: MAPA Property verteidigt Ihr Objekt, als wäre es das eigene. Ein einziger Ansprechpartner, eine dedizierte Marketingstrategie und eine Verhandlung allein in Ihrem Interesse bis zur notariellen Urkunde. 3 Monate verlängerbar.",
+      "bullet_1": "MAPA Property-Exklusivität — ein einziger Ansprechpartner",
       "bullet_2": "Premium-Marketing und HDR-Fotoreportage",
       "bullet_3": "Verhandlung und Verteidigung Ihres Preises",
       "bullet_4": "Dedizierte Begleitung bis zur notariellen Urkunde"
@@ -226,11 +226,11 @@
       "title": "Halb-Exklusiv",
       "rate": "4%",
       "rate_suffix": "netto + 17% MwSt.",
-      "short_desc": "MAPA als Lead, mit optionalem zweitem Mandatar.",
-      "long_desc": "Sie genießen das volle MAPA-Serviceniveau und behalten zugleich die Option, einen zweiten Mandatar einzubinden oder direkt an einen Käufer zu verkaufen. Ideal für Objekte mit hoher Sichtbarkeit. 3 Monate verlängerbar.",
-      "bullet_1": "MAPA als Lead, vollständiges Marketing",
+      "short_desc": "MAPA Property als Lead, mit optionalem zweitem Mandatar.",
+      "long_desc": "Sie genießen das volle MAPA Property-Serviceniveau und behalten zugleich die Option, einen zweiten Mandatar einzubinden oder direkt an einen Käufer zu verkaufen. Ideal für Objekte mit hoher Sichtbarkeit. 3 Monate verlängerbar.",
+      "bullet_1": "MAPA Property als Lead, vollständiges Marketing",
       "bullet_2": "Zweiter Mandatar oder Direktverkauf möglich",
-      "bullet_3": "Besichtigungen durch MAPA koordiniert",
+      "bullet_3": "Besichtigungen durch MAPA Property koordiniert",
       "bullet_4": "Begleitung bis zur notariellen Urkunde"
     },
     "simple": {
@@ -239,9 +239,9 @@
       "rate": "5%",
       "rate_suffix": "netto + 17% MwSt.",
       "short_desc": "Mehrere Kanäle parallel — für gefragte Objekte.",
-      "long_desc": "Das offenste Mandat: MAPA vermarktet Ihr Objekt neben weiteren Kanälen, die Sie frei aktivieren. Geeignet für stark nachgefragte Objekte, bei denen Wettbewerb den Verkauf beschleunigt. 2 Monate verlängerbar.",
+      "long_desc": "Das offenste Mandat: MAPA Property vermarktet Ihr Objekt neben weiteren Kanälen, die Sie frei aktivieren. Geeignet für stark nachgefragte Objekte, bei denen Wettbewerb den Verkauf beschleunigt. 2 Monate verlängerbar.",
       "bullet_1": "Nicht-exklusives Mandat — mehrere Kanäle",
-      "bullet_2": "Verteilung über alle MAPA-Medien",
+      "bullet_2": "Verteilung über alle MAPA Property-Medien",
       "bullet_3": "Flexible Koordination mit Ihren Kanälen",
       "bullet_4": "Begleitung bis zur notariellen Urkunde"
     },
@@ -250,10 +250,10 @@
       "title": "Autonom",
       "rate": "1%",
       "rate_suffix": "netto + 17% MwSt.",
-      "short_desc": "Sie führen Besichtigungen, MAPA sichert Recht und Notariat.",
-      "long_desc": "Für autonome Verkäufer, die ihre Besichtigungen selbst steuern und zugleich ein juristisches und notarielles Sicherheitsnetz nutzen wollen. MAPA übernimmt Erstellung, Compliance und notarielle Begleitung. 2 Monate verlängerbar.",
+      "short_desc": "Sie führen Besichtigungen, MAPA Property sichert Recht und Notariat.",
+      "long_desc": "Für autonome Verkäufer, die ihre Besichtigungen selbst steuern und zugleich ein juristisches und notarielles Sicherheitsnetz nutzen wollen. MAPA Property übernimmt Erstellung, Compliance und notarielle Begleitung. 2 Monate verlängerbar.",
       "bullet_1": "Sie führen die Besichtigungen selbst",
-      "bullet_2": "MAPA-Rechtssicherung bei den Dokumenten",
+      "bullet_2": "MAPA Property-Rechtssicherung bei den Dokumenten",
       "bullet_3": "Notarielle Koordination gesichert",
       "bullet_4": "Compliance und Beratung in jeder Phase"
     }
@@ -304,7 +304,7 @@
   },
   "blog_teaser": {
     "eyebrow": "Editorial",
-    "title": "MAPA Insights",
+    "title": "MAPA Property Insights",
     "see_all": "Alle Artikel ansehen"
   },
   "contact_cta": {
@@ -460,11 +460,11 @@
   },
   "mandate_exclusif": {
     "title": "Exklusivmandat",
-    "intro": "Das Referenzmandat von MAPA. Maximales gegenseitiges Engagement, vollständiger Einsatz unserer Vermarktung und vertraulichen Kanäle, Vorzugskonditionen.",
+    "intro": "Das Referenzmandat von MAPA Property. Maximales gegenseitiges Engagement, vollständiger Einsatz unserer Vermarktung und vertraulichen Kanäle, Vorzugskonditionen.",
     "highlight_1_title": "Eine Agentur, ein Ansprechpartner",
     "highlight_1_text": "Konzentrierte Mittel, einfache Koordination, konsistente kommerzielle Botschaft.",
     "highlight_2_title": "Videopaket als kostenpflichtige Option (anrechenbar)",
-    "highlight_2_text": "Professionelle Aufnahme, Drohnenflug bei Bedarf, Schnitt. Bei Unterzeichnung kostenpflichtig: Betrag wird bei der notariellen Urkunde von der Provision abgezogen, nur wenn MAPA den Verkauf abschließt.",
+    "highlight_2_text": "Professionelle Aufnahme, Drohnenflug bei Bedarf, Schnitt. Bei Unterzeichnung kostenpflichtig: Betrag wird bei der notariellen Urkunde von der Provision abgezogen, nur wenn MAPA Property den Verkauf abschließt.",
     "highlight_3_title": "Off-Market zuerst",
     "highlight_3_text": "Aktivierung unserer qualifizierten Datenbank und Partner vor jeder öffentlichen Listung.",
     "highlight_4_title": "Vorzugskondition",
@@ -481,12 +481,12 @@
   },
   "mandate_semi_exclusif": {
     "title": "Halb-Exklusivmandat",
-    "intro": "Sie behalten Ihren privaten Kreis in der Hand, MAPA mobilisiert seine Kanäle. 4% zzgl. MwSt. (+ 17% MwSt.), Laufzeit 2 Monate verlängerbar.",
+    "intro": "Sie behalten Ihren privaten Kreis in der Hand, MAPA Property mobilisiert seine Kanäle. 4% zzgl. MwSt. (+ 17% MwSt.), Laufzeit 2 Monate verlängerbar.",
     "highlight_1_title": "Freiheit + Expertise",
-    "highlight_1_text": "Sie können Ihr Objekt Ihrem Kreis vorstellen, MAPA agiert parallel.",
+    "highlight_1_text": "Sie können Ihr Objekt Ihrem Kreis vorstellen, MAPA Property agiert parallel.",
     "highlight_2_title": "Komplettes Marketingpaket",
-    "highlight_2_text": "Foto, Premium-Verteilung. Videopaket als kostenpflichtige Option (anrechenbar bei MAPA-Abschluss).",
-    "highlight_3_title": "Honorar nur bei MAPA-Vermittlung",
+    "highlight_2_text": "Foto, Premium-Verteilung. Videopaket als kostenpflichtige Option (anrechenbar bei MAPA Property-Abschluss).",
+    "highlight_3_title": "Honorar nur bei MAPA Property-Vermittlung",
     "highlight_3_text": "Sie zahlen nur, wenn der Verkauf direkt oder indirekt durch uns zustande kommt.",
     "service_1": "Briefing-Termin und Bewertung",
     "service_2": "Professionelle Fotos",
@@ -503,7 +503,7 @@
     "intro": "Für gefragte Objekte, bei denen mehrere Kanäle parallel laufen können. 5% zzgl. MwSt. (+ 17% MwSt.), Laufzeit 2 Monate verlängerbar.",
     "highlight_1_title": "Keine Exklusivität",
     "highlight_1_text": "Sie behalten die volle Freiheit, weitere Profis zu beauftragen.",
-    "highlight_2_title": "Moderates MAPA-Engagement",
+    "highlight_2_title": "Moderates MAPA Property-Engagement",
     "highlight_2_text": "Listung und moderate Aktivierung — der volle Marketing-Einsatz ist dem Exklusivmandat vorbehalten.",
     "highlight_3_title": "Höhere Honorare",
     "highlight_3_text": "5% zzgl. MwSt. (+ 17% MwSt.) zur Kompensation des kommerziellen Risikos.",
@@ -523,7 +523,7 @@
     "highlight_1_title": "Sie steuern weiterhin",
     "highlight_1_text": "Inserat, Besichtigungen, Verhandlung: Sie übernehmen. Wir greifen auf Anfrage ein.",
     "highlight_2_title": "Rechtssicherheit",
-    "highlight_2_text": "Vorvertrag, aufschiebende Bedingungen, notarielle Koordination — durch MAPA gesichert.",
+    "highlight_2_text": "Vorvertrag, aufschiebende Bedingungen, notarielle Koordination — durch MAPA Property gesichert.",
     "highlight_3_title": "Festes Honorar",
     "highlight_3_text": "1% zzgl. MwSt. (+ 17% MwSt.) für den juristischen und notariellen Teil.",
     "service_1": "Erstbewertung",
@@ -558,7 +558,7 @@
     "when_text": "Sie haben weder Zeit noch Netzwerk, um das ideale Objekt selbst zu identifizieren, oder Sie suchen international (wo die Markttransparenz gering ist). Sie möchten eine Beratung, die ausschließlich Ihr Interesse verteidigt — keinen Makler, der zwei Herren dient."
   },
   "page_sell": {
-    "eyebrow": "Mit MAPA verkaufen",
+    "eyebrow": "Mit MAPA Property verkaufen",
     "title": "Vertrauen Sie uns Ihren Verkauf an.",
     "intro": "Eine Regel: Konsistenz. Vier Formeln zum Verkaufen je nach Engagement, eine einzige Methode — unsere.",
     "step_one_title": "Bewertung und Rahmen",
@@ -575,7 +575,7 @@
     "estimate_cta": "Mein Objekt bewerten"
   },
   "page_rent": {
-    "eyebrow": "Mit MAPA mieten",
+    "eyebrow": "Mit MAPA Property mieten",
     "title": "Finden, vermieten, verwalten.",
     "intro": "Mietobjekt finden, eigenes Objekt vermieten, modulare Hausverwaltung. Stets unter Beachtung der 5%-Mietobergrenze (Gesetz vom 21.09.2006).",
     "find_label": "Finden",
@@ -728,7 +728,7 @@
     "meeting_value": "Luxemburg-Stadt, vor Ort (im Objekt), bei Ihnen zu Hause oder per Videogespräch."
   },
   "blog_page": {
-    "eyebrow": "MAPA Editorial",
+    "eyebrow": "MAPA Property Editorial",
     "title": "Insights & Analysen.",
     "intro": "Marktentschlüsselungen, Steuern, Off-Market, Mandate. Langsames Lesen für präzise Entscheidungen.",
     "empty": "Noch kein Artikel veröffentlicht.",
@@ -742,7 +742,7 @@
   },
   "arcova": {
     "eyebrow": "ARCOVA — Privater Bereich",
-    "title": "ARCOVA · der private MAPA-Zugang.",
+    "title": "ARCOVA · der private MAPA Property-Zugang.",
     "intro": "Ein vertraglicher Bereich, der MAPA-Property-Mandantskunden vorbehalten ist: vollständige Off-Market-Dossiers, vertrauliche Angebote, gesicherter Austausch. Nur auf Einladung.",
     "waitlist_title": "Zugangsanfrage",
     "waitlist_text": "Der Zugang zu ARCOVA wird einzelfallbezogen nach einem Gespräch und der Unterzeichnung einer vertraglichen NDA gewährt. Für die Warteliste kontaktieren Sie uns direkt.",

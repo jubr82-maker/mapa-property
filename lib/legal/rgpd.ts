@@ -27,7 +27,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "1. Responsable de traitement",
         paragraphs: [
           "MAPA Synergy Sàrl, RCS Luxembourg B241974, 1, rue de la Vallée, L-3593 Dudelange.",
-          "Référent données : Julien Brebion. Contact : j.brebion@mapagroup.org. MAPA Property n'est pas tenue de désigner un Délégué à la Protection des Données (DPO) au sens de l'article 37 RGPD ; toutefois, Julien Brebion assume cette fonction de référence.",
+          "Référent données : Julien Brebion. Contact : voir « Nous contacter » en bas de page. MAPA Property n'est pas tenue de désigner un Délégué à la Protection des Données (DPO) au sens de l'article 37 RGPD ; toutefois, Julien Brebion assume cette fonction de référence.",
         ],
       },
       {
@@ -90,7 +90,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "8. Comment exercer vos droits",
         paragraphs: [
-          "Toute demande s'exerce par email à admin@mapagroup.org (référent RGPD : Julien Brebion) ou par courrier à l'adresse du siège, accompagnée d'une copie d'une pièce d'identité justifiant l'identité du demandeur.",
+          "Toute demande s'exerce par email via le bouton « Nous contacter » en bas de page (référent RGPD : Julien Brebion) ou par courrier à l'adresse du siège, accompagnée d'une copie d'une pièce d'identité justifiant l'identité du demandeur.",
           "MAPA s'engage à répondre dans un délai de 30 jours, prorogeable de deux mois en cas de complexité, conformément aux articles 6, 13, 15, 16, 17 et 21 du RGPD.",
         ],
       },
@@ -134,7 +134,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "1. Data controller",
         paragraphs: [
-          "MAPA Synergy Sàrl, RCS Luxembourg B241974. Data referent: Julien Brebion (j.brebion@mapagroup.org). No DPO designation required, but Julien Brebion fulfils this role.",
+          "MAPA Synergy Sàrl, RCS Luxembourg B241974. Data referent: Julien Brebion (coordonnées via « Nous contacter » en bas de page). No DPO designation required, but Julien Brebion fulfils this role.",
         ],
       },
       {
@@ -176,7 +176,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "8. Exercise of rights",
         paragraphs: [
-          "Email admin@mapagroup.org (GDPR contact: Julien Brebion) with proof of identity. Response within 30 days (extendable by two months for complex requests), per articles 6, 13, 15, 16, 17 and 21 GDPR.",
+          "Email via the « Contact us » button at the bottom of the page (GDPR contact: Julien Brebion) with proof of identity. Response within 30 days (extendable by two months for complex requests), per articles 6, 13, 15, 16, 17 and 21 GDPR.",
         ],
       },
       {
@@ -219,7 +219,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "1. Verantwortlicher",
         paragraphs: [
-          "MAPA Synergy Sàrl, RCS Luxemburg B241974. Datenschutzreferent: Julien Brebion (j.brebion@mapagroup.org).",
+          "MAPA Synergy Sàrl, RCS Luxemburg B241974. Datenschutzreferent: Julien Brebion (coordonnées via « Nous contacter » en bas de page).",
         ],
       },
       {
@@ -261,7 +261,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "8. Rechtsausübung",
         paragraphs: [
-          "E-Mail an admin@mapagroup.org (DSGVO-Referent: Julien Brebion) mit Identitätsnachweis. Antwort innerhalb von 30 Tagen (verlängerbar um zwei Monate bei komplexen Anfragen), gemäß Artikel 6, 13, 15, 16, 17 und 21 DSGVO.",
+          "E-Mail über die Schaltfläche « Kontakt » am Seitenende (DSGVO-Referent: Julien Brebion) mit Identitätsnachweis. Antwort innerhalb von 30 Tagen (verlängerbar um zwei Monate bei komplexen Anfragen), gemäß Artikel 6, 13, 15, 16, 17 und 21 DSGVO.",
         ],
       },
       {

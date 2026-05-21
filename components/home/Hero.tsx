@@ -24,7 +24,7 @@ export async function Hero({ locale }: { locale: string }) {
 
   return (
     <HeroScrollContainer
-      className="relative isolate min-h-[46vh] overflow-hidden md:min-h-[66vh] lg:min-h-screen"
+      className="relative isolate min-h-screen overflow-hidden md:min-h-[66vh] lg:min-h-screen"
       style={{
         backgroundColor: "var(--hero-bg)",
         transition: "background-color 0.4s ease",
@@ -85,7 +85,7 @@ export async function Hero({ locale }: { locale: string }) {
           (STEP3b B3 : translateY a 0.3x la vitesse scroll). */}
       <div
         data-hero-text
-        className="relative z-10 mx-auto flex min-h-[42vh] max-w-[1400px] flex-col items-start justify-center gap-3 px-6 pt-16 pb-8 md:min-h-[62vh] md:gap-8 md:pt-32 md:pb-24 lg:min-h-[88dvh] lg:px-10"
+        className="relative z-10 mx-auto flex min-h-[88dvh] max-w-[1400px] flex-col items-start justify-center gap-3 px-6 pt-16 pb-8 md:min-h-[62vh] md:gap-8 md:pt-32 md:pb-24 lg:min-h-[88dvh] lg:px-10"
       >
         {/* POL4 : pill retiré (affichait "TEST CMS LIVE" via override CMS). */}
 

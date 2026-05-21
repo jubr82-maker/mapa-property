@@ -40,16 +40,16 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Directeur de la publication",
         paragraphs: [
           "Julien Brebion, Real Estate Director.",
-          "Téléphone : +352 691 620 127.",
-          "Email : j.brebion@mapagroup.org.",
+          "Téléphone : disponible via le bouton « Nous contacter » en bas de page.",
+          "Email : disponible via le bouton « Nous contacter » en bas de page.",
         ],
       },
       {
         heading: "Gérant",
         paragraphs: [
           "Frédéric Mannis.",
-          "Téléphone : +352 691 113 018.",
-          "Email : contact@mapagroup.org.",
+          "Téléphone : disponible via le bouton « Nous contacter » en bas de page.",
+          "Email : disponible via le bouton « Nous contacter » en bas de page.",
         ],
       },
       {
@@ -121,14 +121,14 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Publication director",
         paragraphs: [
           "Julien Brebion, Real Estate Director.",
-          "+352 691 620 127 — j.brebion@mapagroup.org.",
+          "Coordonnées disponibles via le bouton « Nous contacter » en bas de page.",
         ],
       },
       {
         heading: "Manager",
         paragraphs: [
           "Frédéric Mannis.",
-          "+352 691 113 018 — contact@mapagroup.org.",
+          "Coordonnées disponibles via le bouton « Nous contacter » en bas de page.",
         ],
       },
       {
@@ -181,14 +181,14 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Verantwortlich",
         paragraphs: [
           "Julien Brebion, Real Estate Director.",
-          "+352 691 620 127 — j.brebion@mapagroup.org.",
+          "Coordonnées disponibles via le bouton « Nous contacter » en bas de page.",
         ],
       },
       {
         heading: "Geschäftsführer",
         paragraphs: [
           "Frédéric Mannis.",
-          "+352 691 113 018 — contact@mapagroup.org.",
+          "Coordonnées disponibles via le bouton « Nous contacter » en bas de page.",
         ],
       },
       {

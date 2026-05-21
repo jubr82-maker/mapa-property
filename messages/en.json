@@ -204,7 +204,7 @@
   },
   "mandates_premium": {
     "eyebrow": "Our flagship mandates",
-    "title": "Sell with MAPA.",
+    "title": "Sell with MAPA Property.",
     "subtitle": "Four formats tailored to your project: from total exclusivity to assisted autonomy.",
     "more_info": "Learn more",
     "modal_cta": "Request this mandate",
@@ -214,9 +214,9 @@
       "title": "Exclusive",
       "rate": "3%",
       "rate_suffix": "excl. VAT + 17% VAT",
-      "short_desc": "Full MAPA commitment. Premium marketing, exclusivity, expert negotiation.",
-      "long_desc": "The most committed mandate: MAPA defends your property as if it were its own. A single point of contact, a dedicated marketing strategy and a negotiation led solely in your interest through to the notarial deed. 3-month renewable term.",
-      "bullet_1": "MAPA exclusivity — one single point of contact",
+      "short_desc": "Full MAPA Property commitment. Premium marketing, exclusivity, expert negotiation.",
+      "long_desc": "The most committed mandate: MAPA Property defends your property as if it were its own. A single point of contact, a dedicated marketing strategy and a negotiation led solely in your interest through to the notarial deed. 3-month renewable term.",
+      "bullet_1": "MAPA Property exclusivity — one single point of contact",
       "bullet_2": "Premium marketing and HDR photo reportage",
       "bullet_3": "Negotiation and defence of your price",
       "bullet_4": "Dedicated follow-up through to the notarial deed"
@@ -226,11 +226,11 @@
       "title": "Semi-Exclusive",
       "rate": "4%",
       "rate_suffix": "excl. VAT + 17% VAT",
-      "short_desc": "MAPA in the lead, with an optional second agent.",
-      "long_desc": "You enjoy the full MAPA service level while keeping the option to bring on a second agent or accept a direct buyer. Ideal for high-visibility properties where testing several channels helps. 3-month renewable term.",
-      "bullet_1": "MAPA lead agent, full marketing",
+      "short_desc": "MAPA Property in the lead, with an optional second agent.",
+      "long_desc": "You enjoy the full MAPA Property service level while keeping the option to bring on a second agent or accept a direct buyer. Ideal for high-visibility properties where testing several channels helps. 3-month renewable term.",
+      "bullet_1": "MAPA Property lead agent, full marketing",
       "bullet_2": "Second agent or direct sale allowed",
-      "bullet_3": "Viewings coordinated by MAPA",
+      "bullet_3": "Viewings coordinated by MAPA Property",
       "bullet_4": "Support through to the notarial deed"
     },
     "simple": {
@@ -239,9 +239,9 @@
       "rate": "5%",
       "rate_suffix": "excl. VAT + 17% VAT",
       "short_desc": "Multiple channels activated in parallel for sought-after properties.",
-      "long_desc": "The most open mandate: MAPA markets your property alongside other channels you freely activate. Suited to highly sought-after properties where competition accelerates the sale. 2-month renewable term.",
+      "long_desc": "The most open mandate: MAPA Property markets your property alongside other channels you freely activate. Suited to highly sought-after properties where competition accelerates the sale. 2-month renewable term.",
       "bullet_1": "Non-exclusive mandate — multiple channels",
-      "bullet_2": "Distribution across all MAPA media",
+      "bullet_2": "Distribution across all MAPA Property media",
       "bullet_3": "Flexible coordination with your other channels",
       "bullet_4": "Support through to the notarial deed"
     },
@@ -250,10 +250,10 @@
       "title": "Autonomous",
       "rate": "1%",
       "rate_suffix": "excl. VAT + 17% VAT",
-      "short_desc": "You handle viewings, MAPA secures the legal and notarial side.",
-      "long_desc": "For autonomous sellers who want to manage their viewings while benefiting from a legal and notarial safety net. MAPA handles drafting, compliance and notarial follow-up. 2-month renewable term.",
+      "short_desc": "You handle viewings, MAPA Property secures the legal and notarial side.",
+      "long_desc": "For autonomous sellers who want to manage their viewings while benefiting from a legal and notarial safety net. MAPA Property handles drafting, compliance and notarial follow-up. 2-month renewable term.",
       "bullet_1": "You run viewings on your own",
-      "bullet_2": "MAPA legal backup on documents",
+      "bullet_2": "MAPA Property legal backup on documents",
       "bullet_3": "Notarial coordination secured",
       "bullet_4": "Compliance and advice at every step"
     }
@@ -304,7 +304,7 @@
   },
   "blog_teaser": {
     "eyebrow": "Insights",
-    "title": "MAPA editorial",
+    "title": "MAPA Property editorial",
     "see_all": "View all articles"
   },
   "contact_cta": {
@@ -460,11 +460,11 @@
   },
   "mandate_exclusif": {
     "title": "Exclusive Mandate",
-    "intro": "MAPA's reference mandate. Maximum mutual commitment, full deployment of our commercial force and confidential channels, preferred rate.",
+    "intro": "MAPA Property's reference mandate. Maximum mutual commitment, full deployment of our commercial force and confidential channels, preferred rate.",
     "highlight_1_title": "One agency, one point of contact",
     "highlight_1_text": "Resources concentrated, coordination simplified, consistent commercial narrative.",
     "highlight_2_title": "Video Pack as paid option (deductible)",
-    "highlight_2_text": "Professional shoot, drone if relevant, editing. Paid option at signing: amount deducted from the commission at the deed, only if MAPA closes the sale.",
+    "highlight_2_text": "Professional shoot, drone if relevant, editing. Paid option at signing: amount deducted from the commission at the deed, only if MAPA Property closes the sale.",
     "highlight_3_title": "Off-market first",
     "highlight_3_text": "Activation of our qualified database and partners before any public listing.",
     "highlight_4_title": "Preferred rate",
@@ -481,12 +481,12 @@
   },
   "mandate_semi_exclusif": {
     "title": "Semi-Exclusive Mandate",
-    "intro": "You keep your private circle in hand, MAPA mobilises its channels. 4% excl. VAT (+ 17% VAT), 2-month renewable term.",
+    "intro": "You keep your private circle in hand, MAPA Property mobilises its channels. 4% excl. VAT (+ 17% VAT), 2-month renewable term.",
     "highlight_1_title": "Freedom + expertise",
-    "highlight_1_text": "You can present your property to your own circle, MAPA acts in parallel.",
+    "highlight_1_text": "You can present your property to your own circle, MAPA Property acts in parallel.",
     "highlight_2_title": "Full marketing pack",
-    "highlight_2_text": "Photo, premium distribution. Video Pack as a paid option (deductible if MAPA closes).",
-    "highlight_3_title": "Fees only if MAPA introduces the buyer",
+    "highlight_2_text": "Photo, premium distribution. Video Pack as a paid option (deductible if MAPA Property closes).",
+    "highlight_3_title": "Fees only if MAPA Property introduces the buyer",
     "highlight_3_text": "You only pay if the sale results from our direct or indirect intervention.",
     "service_1": "Briefing visit and valuation",
     "service_2": "Professional photo shoot",
