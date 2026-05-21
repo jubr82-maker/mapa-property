@@ -46,12 +46,23 @@ export function FeaturedCarousel({ items }: Props) {
         </div>
       </div>
 
+      {/* FIX-3c : style inline initial opacity 0.3 + scale 0.85 — visible
+          des le mount JSX (avant que le useEffect FeaturedPinScroll tourne).
+          En mode mobile/tablet, le useEffect FeaturedPinScroll reset
+          opacity/transform a '' au mount → cards retrouvent leur 1.0 par
+          defaut. En mode desktop-A, le tick raf override avec valeurs
+          calculees selon distance au centre viewport. */}
       <FeaturedPinScroll cardsCount={items.length}>
         {items.map((item) => (
           <article
             key={`${item.kind}-${item.id}`}
             data-featured-card
             className="featured-card w-[78vw] shrink-0 sm:w-[48vw] lg:w-[420px]"
+            style={{
+              opacity: 0.3,
+              transform: "scale(0.85)",
+              willChange: "opacity, transform",
+            }}
           >
             <FeaturedCard item={item} />
           </article>

@@ -129,6 +129,11 @@ export function CoverageNarrativeScroll({
     return <>{children}</>;
   }
 
+  // FIX-3c : sticky wrapper NE PAS appliquer display:flex/center direct sur
+  // les children — sinon le <div className="grid"> enfant devient un flex
+  // item sans width et la grille s'effondre. Double wrapper interne : un
+  // flex container vertical-center, et un inner width:100% qui preserve
+  // le layout grid des enfants.
   return (
     <div ref={wrapperRef} style={{ height: pinHeight, position: "relative" }}>
       <div
@@ -137,12 +142,18 @@ export function CoverageNarrativeScroll({
           position: "sticky",
           top: 0,
           height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          overflow: "hidden",
         }}
       >
-        {children}
+        <div
+          style={{
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ width: "100%" }}>{children}</div>
+        </div>
       </div>
     </div>
   );
