@@ -1,11 +1,27 @@
 "use client";
 
+/**
+ * STEP3c-RECODE — Featured carousel simple : scroll horizontal natif +
+ * stagger IntersectionObserver.
+ *
+ * Embla + Autoplay supprimes (rollback decisions STEP3c-2 → 3c-FIX2).
+ * Architecture epurée :
+ *   - Layout : header compact + track horizontal overflow-x avec
+ *     scroll-snap mandatory (swipe natif touch + scroll souris desktop)
+ *   - Cards initiales (style inline) : opacity 0 + translateX -80px
+ *     + transition CSS delayed (i * 0.3s)
+ *   - IntersectionObserver : a l'entree dans le viewport (threshold 0.15),
+ *     toggle opacity 1 + translateX 0 → chaque card glisse depuis la
+ *     gauche en stagger 300ms
+ *   - Bouton final 'Voir tous nos biens' lime mur #CFE542 avec halo
+ *     permanent (.cta-lime-glow)
+ *   - prefers-reduced-motion : cards visibles immediates (skip stagger)
+ */
+
+import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import useEmblaCarousel from "embla-carousel-react";
-import Autoplay from "embla-carousel-autoplay";
-import { useCallback, useEffect, useState } from "react";
 import type { HomeFeatured } from "@/lib/data";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
@@ -16,89 +32,114 @@ interface Props {
 
 export function FeaturedCarousel({ items }: Props) {
   const t = useTranslations("featured");
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      loop: true,
-      align: "start",
-      dragFree: false,
-      duration: 30,
-    },
-    [Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })],
-  );
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!emblaApi) return;
-    setScrollSnaps(emblaApi.scrollSnapList());
-    emblaApi.on("select", onSelect);
-    emblaApi.on("reInit", onSelect);
-    onSelect();
-  }, [emblaApi, onSelect]);
+    if (typeof window === "undefined") return;
+    if (!trackRef.current) return;
+
+    const cards =
+      trackRef.current.querySelectorAll<HTMLElement>("[data-featured-card]");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches;
+
+    if (reduced) {
+      cards.forEach((card) => {
+        card.style.opacity = "1";
+        card.style.transform = "translateX(0)";
+      });
+      return;
+    }
+
+    cards.forEach((card, i) => {
+      card.style.opacity = "0";
+      card.style.transform = "translateX(-80px)";
+      card.style.transition =
+        "opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)";
+      card.style.transitionDelay = `${i * 0.3}s`;
+      card.style.willChange = "opacity, transform";
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          cards.forEach((card) => {
+            card.style.opacity = "1";
+            card.style.transform = "translateX(0)";
+          });
+          observer.disconnect();
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -100px 0px" },
+    );
+
+    observer.observe(trackRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   if (items.length === 0) return null;
 
   return (
-    <section className="px-6 py-5 md:py-20 lg:px-10 lg:py-20">
+    <section className="px-6 py-5 md:py-12 lg:px-10">
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-10">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
-              {t("eyebrow")}
-            </p>
-            <h2 className="mt-2 t-h2">
-              {t("title")}
-            </h2>
-            <SignatureLine />
-            <p className="mt-3 max-w-xl text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <CarouselButton dir="prev" onClick={() => emblaApi?.scrollPrev()} />
-            <CarouselButton dir="next" onClick={() => emblaApi?.scrollNext()} />
-            <Link
-              href="/biens"
-              className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-deep transition-colors hover:text-gold md:text-xs"
-            >
-              {t("see_all")} →
-            </Link>
-          </div>
+        {/* STEP3c-RECODE : compactage marges header (mb-4/mb-10 → mb-2/mb-4) */}
+        <div className="mb-2 md:mb-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
+            {t("eyebrow")}
+          </p>
+          <h2 className="mt-2 t-h2">{t("title")}</h2>
+          <SignatureLine />
+          <p className="mt-3 max-w-xl text-sm text-ink-mid md:text-base">
+            {t("subtitle")}
+          </p>
         </div>
+      </div>
 
-        <div ref={emblaRef} className="overflow-hidden">
-          <div className="flex gap-3 md:gap-5">
-            {items.map((item) => (
-              <article
-                key={`${item.kind}-${item.id}`}
-                className="min-w-0 shrink-0 grow-0 basis-[85%] sm:basis-[50%] lg:basis-[33%]"
-              >
-                <FeaturedCard item={item} />
-              </article>
-            ))}
-          </div>
-        </div>
-
-        {scrollSnaps.length > 1 && (
-          <div className="mt-4 flex justify-center gap-2 md:mt-6">
-            {scrollSnaps.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Bien ${i + 1}`}
-                onClick={() => emblaApi?.scrollTo(i)}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === selectedIndex ? "w-6 bg-gold" : "w-1.5 bg-line"
-                }`}
-              />
-            ))}
-          </div>
-        )}
+      {/* Track horizontal : overflow-x:auto + scroll-snap. Pas de pin scroll
+          ni JS de translateX — scroll natif. */}
+      <div
+        ref={trackRef}
+        className="mt-6 flex gap-5 overflow-x-auto pb-4 md:mt-8 md:gap-6 lg:px-[8vw]"
+        style={{
+          scrollSnapType: "x mandatory",
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none",
+        }}
+      >
+        {items.map((item) => (
+          <article
+            key={`${item.kind}-${item.id}`}
+            data-featured-card
+            style={{ scrollSnapAlign: "start" }}
+            className="w-[78vw] shrink-0 sm:w-[48vw] lg:w-[400px]"
+          >
+            <FeaturedCard item={item} />
+          </article>
+        ))}
+        <ViewAllCTA label={t("see_all")} />
       </div>
     </section>
+  );
+}
+
+function ViewAllCTA({ label }: { label: string }) {
+  // Bouton 'Voir tous nos biens' rendu en fin de track — toujours visible
+  // apres scroll horizontal. Halo lime mur permanent via .cta-lime-glow
+  // (defini globals.css STEP3b).
+  return (
+    <div
+      style={{ scrollSnapAlign: "start" }}
+      className="flex w-[78vw] shrink-0 items-center justify-center sm:w-[48vw] lg:w-[400px]"
+    >
+      <Link
+        href="/biens"
+        className="cta-lime-glow inline-flex items-center gap-3 rounded-full bg-[#CFE542] px-8 py-5 font-mono text-xs font-bold uppercase tracking-[0.25em] text-[#1F221A]"
+      >
+        {label}
+        <span aria-hidden>→</span>
+      </Link>
+    </div>
   );
 }
 
@@ -130,7 +171,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             src={item.cover_url}
             alt={item.title ?? ""}
             fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 85vw"
+            sizes="(min-width: 1024px) 400px, (min-width: 640px) 48vw, 78vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
@@ -138,7 +179,8 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             aria-hidden
             className="absolute inset-0"
             style={{
-              background: "radial-gradient(circle at center, #1a2332 0%, #0d1419 100%)",
+              background:
+                "radial-gradient(circle at center, #262A1F 0%, #1F221A 100%)",
             }}
           />
         )}
@@ -173,20 +215,5 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
         </div>
       </div>
     </Link>
-  );
-}
-
-function CarouselButton({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={dir === "prev" ? "Précédent" : "Suivant"}
-      className="inline-flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold"
-    >
-      <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        {dir === "prev" ? <path d="m15 18-6-6 6-6" /> : <path d="m9 18 6-6-6-6" />}
-      </svg>
-    </button>
   );
 }

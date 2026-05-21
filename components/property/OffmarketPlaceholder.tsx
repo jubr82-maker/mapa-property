@@ -4,29 +4,29 @@
 // même flouté — d'un bien off-market. Ce cover remplace systématiquement
 // l'image, qu'une image custom existe ou non en base.
 //
-// POL2-8 : fond radial-gradient cuivré sombre, cadenas cuivre fin centré,
+// STEP3c-RECODE : aligne sur palette Forêt Luxembourgeoise (strict 4
+// couleurs). Fond uni sapin profond #1F221A (vs radial-gradient cuivré
+// avant POL2-8), cadenas cuivre citron #D4A574, texte crème velin
+// #F0E6CC opacity 0.7 pour le sous-titre confidentiel. Bordure cuivre
+// citron subtile. Identique jour/nuit (cover confidentiel, hors thème).
+//
 // "OFF MARKET" dominant (text-5xl md:text-7xl) > SignatureLine cuivre >
 // "BIEN STRICTEMENT CONFIDENTIEL" (text-xs md:text-sm). La hiérarchie
-// typographique (OFF MARKET strictement plus grand que la mention) est
-// garantie par les classes Tailwind ci-dessous.
+// typographique préservée (POL2-8).
 //
 // Composant pur (aucun import next-intl) : utilisable côté serveur ET
 // client. Les libellés traduits sont passés en props par l'appelant
-// (namespace `offmarket` → `cover_title` / `cover_subtitle`). Les
-// fallbacks restent en dur uniquement comme garde-fou si une clé manque.
+// (namespace `offmarket` → `cover_title` / `cover_subtitle`).
 //
 // `showLabel={false}` conservé pour rétro-compat de la vignette admin
 // (app/admin/offmarket/page.tsx — fichier géré par Julien, non modifié).
 
 import { SignatureLine } from "@/components/ui/SignatureLine";
 
-// Dégradé radial cuivré sombre — couleur fixe identique jour/nuit
-// (cover confidentiel, hors thème). Hex tolérés ici car valeur de
-// dégradé brute non exprimable en token Tailwind.
-const RADIAL_BG =
-  "radial-gradient(circle at center, rgba(184,134,90,0.18) 0%, #1A1F2A 50%, #0F1419 100%)";
-
-const COPPER = "#B8865A";
+// STEP3c-RECODE : fond uni sapin profond + couleurs Forêt strict.
+const SAPIN_BG = "#1F221A";
+const COPPER = "#D4A574"; // cuivre citron — palette Forêt
+const CREME = "#F0E6CC"; // crème velin — palette Forêt
 
 export function OffmarketPlaceholder({
   className = "",
@@ -45,7 +45,10 @@ export function OffmarketPlaceholder({
     <div
       data-offmarket-placeholder
       className={`absolute inset-0 flex flex-col items-center justify-center px-4 text-center ${className}`}
-      style={{ backgroundImage: RADIAL_BG }}
+      style={{
+        backgroundColor: SAPIN_BG,
+        border: `1px solid rgba(212, 165, 116, 0.2)`,
+      }}
     >
       {/* Cadenas cuivre fin centré */}
       <svg
@@ -66,7 +69,7 @@ export function OffmarketPlaceholder({
         <>
           <p
             data-offmarket-title
-            className={`mt-5 font-light uppercase tracking-[0.2em] ${
+            className={`mt-5 font-mono font-light uppercase tracking-[0.2em] ${
               compact ? "text-xl" : "text-5xl md:text-7xl"
             }`}
             style={{ color: COPPER }}
@@ -81,9 +84,10 @@ export function OffmarketPlaceholder({
 
           <p
             data-offmarket-subtitle
-            className={`font-light uppercase tracking-[0.15em] text-white/60 ${
+            className={`font-mono font-light uppercase tracking-[0.15em] ${
               compact ? "text-[9px]" : "text-xs md:text-sm"
             }`}
+            style={{ color: CREME, opacity: 0.7 }}
           >
             {title ?? "Bien strictement confidentiel"}
           </p>
