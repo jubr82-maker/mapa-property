@@ -248,15 +248,18 @@ html {
 .logo-auto {
   display: block;
 }
-/* STEP3a-FORET : couleur cuivre citron #D4A574 (R212 G165 B116) sur la
-   marque dans les 2 modes. Approximation manuelle (pas de calibration
-   DOM cette fois — l'ancien filtre POL2-3 visait #E0BE60). hue-rotate
-   plus chaud (340° vs 352°), saturation réduite (~280% vs 350%),
-   contrast/brightness ajustés. Visuel à valider chez Julien — si
-   décalage perceptible, ré-calibrer via proof script DOM.
-   brightness(0)+saturate(100%) normalise la source PNG en noir,
-   la chaîne reteinte vers ~#D4A574. */
-.logo-auto,
+/* STEP3a-bis : mode jour = sapin profond #1F221A (R31 G34 B26) — logo
+   lisible sur fond crème velin. brightness(0) normalise en noir, puis
+   invert/sepia/hue-rotate léger donne la teinte presque-noire avec
+   micro-teinte verte du sapin. Approximation manuelle — si l'écart
+   est perceptible, calibrer DOM. */
+.logo-auto {
+  filter: brightness(0) saturate(100%) invert(11%) sepia(15%)
+    hue-rotate(60deg);
+}
+/* STEP3a-FORET : mode nuit = cuivre citron #D4A574 (override .logo-gold
+   actif quel que soit le mode, pour usage tone="dark" explicite). */
+:root.dark .logo-auto,
 .logo-gold {
   filter: brightness(0) saturate(100%) invert(74%) sepia(55%)
     saturate(420%) hue-rotate(340deg) brightness(96%) contrast(85%);

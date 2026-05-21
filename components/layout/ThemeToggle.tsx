@@ -24,18 +24,18 @@ export function ThemeToggle({ className = "" }: { className?: string } = {}) {
   useEffect(() => {
     setMounted(true);
     const saved = localStorage.getItem("mapa_theme");
-    if (saved === "dark") {
-      setIsDark(true);
-      document.documentElement.classList.add("dark");
-    } else if (saved === "light") {
+    if (saved === "light") {
       setIsDark(false);
       document.documentElement.classList.remove("dark");
     } else {
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      setIsDark(prefersDark);
-      if (prefersDark) document.documentElement.classList.add("dark");
+      // STEP3a-bis : premier visiteur OU saved=='dark' → MODE NUIT par défaut
+      // (override du prefers-color-scheme système — Julien préfère que
+      // l'expérience initiale soit toujours sombre).
+      setIsDark(true);
+      document.documentElement.classList.add("dark");
+      if (saved !== "dark") {
+        localStorage.setItem("mapa_theme", "dark");
+      }
     }
   }, []);
 

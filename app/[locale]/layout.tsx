@@ -148,6 +148,16 @@ export default async function LocaleLayout({
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
     >
       <head>
+        {/* STEP3a-bis : anti-FOUC — applique la classe .dark sur <html>
+            AVANT le premier paint pour matcher la logique ThemeToggle
+            (premier visiteur OU mapa_theme === 'dark' → dark ; seul
+            mapa_theme === 'light' force light). Bloque <100 ms,
+            évite le flash crème velin → sapin au mount React. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('mapa_theme');if(s==='light'){document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}}catch(e){}})();`,
+          }}
+        />
         {cssOverride ? (
           <style dangerouslySetInnerHTML={{ __html: `:root{${cssOverride}}` }} />
         ) : null}
