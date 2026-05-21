@@ -33,8 +33,9 @@ export function ServicesTable() {
         {/* NAV5 : liste mono-colonne + liseré doré copper (50% viewport,
             1px, centré, marges légères) entre chaque service. */}
         <div className="flex flex-col border-y border-line">
+          {/* STEP3c-1 : stagger 200ms (vs 80 STEP3b) — ralenti cinematique. */}
           {services.map((s, idx) => (
-            <FadeInOnScroll key={s} delay={idx * 80}>
+            <FadeInOnScroll key={s} delay={idx * 200}>
               {idx > 0 && (
                 <div
                   aria-hidden

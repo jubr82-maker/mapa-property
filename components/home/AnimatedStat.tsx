@@ -52,7 +52,7 @@ export function AnimatedStat({
     const el = ref.current;
     let raf = 0;
     let startTime = 0;
-    const duration = 1500;
+    const duration = 2000; // STEP3c-1 : ralenti cinematique (1500 → 2000ms)
 
     const animate = (now: number) => {
       if (!startTime) startTime = now;

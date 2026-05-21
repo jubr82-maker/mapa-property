@@ -1,26 +1,31 @@
 "use client";
 
 /**
- * STEP3b — Hero pin scroll hybride (B3).
+ * STEP3c-1 — Hero pin scroll cinematique renforce.
  *
- * Wrapper client autour du contenu Hero (server component). Au scroll
- * dans la 1ʳᵉ viewport :
- *  - le wrapper (section) glisse vers le haut a 0.5x la vitesse scroll
- *    (effet pin attenue, pas de blocage scroll utilisateur)
- *  - [data-hero-text] parallax interne a 0.3x (le texte remonte plus
- *    vite que le fond)
- *  - [data-hero-video] scale 1.0 → 0.95 (video se reduit subtilement)
- *  - opacity wrapper 1.0 → 0.7 a la fin du viewport
+ * Wrapper outer height = divisor * 100vh, Hero interne position
+ * sticky top:0 height:100vh → la section reste pin pendant que le
+ * scroll consume `divisor` viewports avant de passer au reste.
  *
- * Au-dela d'1 viewport : transforms cappes (pas de derive infinie).
- * prefers-reduced-motion : aucun effet. raf throttle pour 60fps.
+ *  - desktop-A      : 2.5 viewports (latence cinematique "3 scrolls")
+ *  - tablet-A-light : 2.0 viewports
+ *  - mobile-B       : 1.5 viewport (UX preservee petit ecran)
  *
- * Le contenu Hero (video, gradient, texte, brackets, scroll cue) est
- * passe en children. Les data-attributes ciblent les sous-elements
- * (video container, text container) sans coupler la prop API.
+ * Amplitudes amplifiees (STEP3c-1) :
+ *  - Wrapper opacity   : 1.0 → 0.6 (vs 0.7 STEP3b)
+ *  - Video scale       : 1.0 → 0.92 (vs 0.95 STEP3b)
+ *  - Texte parallax    : -y * 0.4 (vs -y * 0.3 STEP3b)
+ *  - Wrapper translateY: pas appliquee en mode sticky (sticky gere
+ *    le pin) ; appliquee -y*0.5 en mode non-sticky (mobile-B fallback)
+ *
+ * Sticky activée seulement apres mount + mode != mobile-B. Au premier
+ * SSR/CSR render : Hero rendu sans sticky (defaut mobile-B). Apres
+ * detect : styles inline applique → layout reflow minimal.
+ * prefers-reduced-motion respecte (aucun effet).
  */
 
 import { useEffect, useRef } from "react";
+import { useDeviceMode } from "@/hooks/useDeviceMode";
 
 export function HeroScrollContainer({
   children,
@@ -31,7 +36,34 @@ export function HeroScrollContainer({
   className?: string;
   style?: React.CSSProperties;
 }) {
+  const outerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLElement>(null);
+  const { mode, mounted } = useDeviceMode();
+
+  const divisor =
+    mode === "desktop-A" ? 2.5 : mode === "tablet-A-light" ? 2.0 : 1.5;
+  const useSticky = mode === "desktop-A" || mode === "tablet-A-light";
+
+  // Application des styles sticky apres mount pour eviter hydration
+  // mismatch (SSR rend toujours sans sticky).
+  useEffect(() => {
+    if (!mounted) return;
+    if (!outerRef.current || !wrapperRef.current) return;
+
+    if (useSticky) {
+      outerRef.current.style.height = `${divisor * 100}vh`;
+      outerRef.current.style.position = "relative";
+      wrapperRef.current.style.position = "sticky";
+      wrapperRef.current.style.top = "0";
+      wrapperRef.current.style.height = "100vh";
+    } else {
+      outerRef.current.style.height = "";
+      outerRef.current.style.position = "";
+      wrapperRef.current.style.position = "";
+      wrapperRef.current.style.top = "";
+      wrapperRef.current.style.height = "";
+    }
+  }, [mounted, useSticky, divisor]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -42,7 +74,6 @@ export function HeroScrollContainer({
     const videoEl = wrapper.querySelector<HTMLElement>("[data-hero-video]");
     const textEl = wrapper.querySelector<HTMLElement>("[data-hero-text]");
 
-    // willChange optimisation — composite layer hint
     wrapper.style.willChange = "transform, opacity";
     if (videoEl) videoEl.style.willChange = "transform";
     if (textEl) textEl.style.willChange = "transform";
@@ -58,16 +89,22 @@ export function HeroScrollContainer({
       }
       lastY = y;
       const h = window.innerHeight;
-      const progress = Math.min(1, Math.max(0, y / h));
+      const progress = Math.min(1, Math.max(0, y / (h * divisor)));
 
-      wrapper.style.transform = `translate3d(0, ${-y * 0.5}px, 0)`;
-      wrapper.style.opacity = String(1 - progress * 0.3);
+      // En mode sticky : pas de translateY sur wrapper (sticky pin gere).
+      // En mode non-sticky : translateY classique parallax wrapper.
+      if (useSticky) {
+        wrapper.style.transform = "";
+      } else {
+        wrapper.style.transform = `translate3d(0, ${-y * 0.5}px, 0)`;
+      }
+      wrapper.style.opacity = String(1 - progress * 0.4);
 
       if (textEl) {
-        textEl.style.transform = `translate3d(0, ${-y * 0.3}px, 0)`;
+        textEl.style.transform = `translate3d(0, ${-y * 0.4}px, 0)`;
       }
       if (videoEl) {
-        videoEl.style.transform = `scale(${1 - progress * 0.05})`;
+        videoEl.style.transform = `scale(${1 - progress * 0.08})`;
       }
 
       raf = window.requestAnimationFrame(tick);
@@ -81,11 +118,13 @@ export function HeroScrollContainer({
       if (videoEl) videoEl.style.willChange = "";
       if (textEl) textEl.style.willChange = "";
     };
-  }, []);
+  }, [divisor, useSticky]);
 
   return (
-    <section ref={wrapperRef} className={className} style={style}>
-      {children}
-    </section>
+    <div ref={outerRef}>
+      <section ref={wrapperRef} className={className} style={style}>
+        {children}
+      </section>
+    </div>
   );
 }

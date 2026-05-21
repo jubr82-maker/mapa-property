@@ -41,7 +41,7 @@ export function BlogTeaser({ posts, locale }: Props) {
             const title = pickLang(post, "title", locale);
             const excerpt = pickLang(post, "excerpt", locale);
             return (
-              <FadeInOnScroll key={post.id} delay={idx * 80}>
+              <FadeInOnScroll key={post.id} delay={idx * 250}>
               <Link
                 href={`/blog/${post.slug}`}
                 className="group flex h-full flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg transition-colors hover:border-gold"

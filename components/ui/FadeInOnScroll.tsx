@@ -11,7 +11,7 @@ interface Props {
   y?: number;
   /** STEP3b : scale initial (defaut 1 = pas de scale). */
   scale?: number;
-  /** STEP3b : duree transition en ms (defaut 700). */
+  /** STEP3c-1 : duree transition en ms (defaut 1200 — ralenti cinematique). */
   duration?: number;
 }
 
@@ -26,7 +26,7 @@ export function FadeInOnScroll({
   className = "",
   y = 16,
   scale = 1,
-  duration = 700,
+  duration = 1200,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);

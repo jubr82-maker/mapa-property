@@ -27,9 +27,9 @@ export function MandatesGrid() {
         </header>
 
         <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
-          {/* STEP3b : stagger 80ms par carte (gauche → droite). */}
+          {/* STEP3c-1 : stagger 250ms par carte (ralenti cinematique). */}
           {mandates.map((m, idx) => (
-            <FadeInOnScroll key={m.key} delay={idx * 80} y={30}>
+            <FadeInOnScroll key={m.key} delay={idx * 250} y={30}>
             <HoverFlipCard
               height="h-36 sm:h-44 md:h-48"
               front={

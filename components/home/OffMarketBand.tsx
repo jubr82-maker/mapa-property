@@ -28,7 +28,7 @@ export function OffMarketBand() {
       {/* STEP3b : wrapper FadeInOnScroll avec scale 0.95 → 1.0 (zoom-in
           subtil) + duree 1s sur tout le contenu — la bande premium
           "respire" en entrant dans le viewport. */}
-      <FadeInOnScroll y={0} scale={0.95} duration={1000} className="relative mx-auto max-w-[1400px]">
+      <FadeInOnScroll y={0} scale={0.92} duration={1400} className="relative mx-auto max-w-[1400px]">
       <div className="grid gap-3 md:gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end">
         <div>
           {/* Badge MANDAT EXCLUSIF copper, visible en haut */}

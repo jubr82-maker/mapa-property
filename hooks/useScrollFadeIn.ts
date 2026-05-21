@@ -35,7 +35,7 @@ export function useScrollFadeIn<T extends HTMLElement = HTMLDivElement>(
   const ref = useRef<T>(null);
   const {
     delay = 0,
-    duration = 0.8,
+    duration = 1.2, // STEP3c-1 : ralenti cinematique (0.8 → 1.2s)
     y = 30,
     scale = 1,
     threshold = 0.15,
