@@ -94,17 +94,24 @@ export async function Hero({ locale }: { locale: string }) {
           {eyebrow}
         </p>
 
-        {/* Titre 3 lignes — taille -15%, leading 1.15 (accents OK), tracking aéré */}
+        {/* STEP3c-1-bis : titre 2 lignes (titleLine3 vide en i18n par defaut,
+            mais override CMS possible). Conditional render evite ligne fantome. */}
         <h1 className="font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]">
           <span className="block text-white/90">{titleLine1}</span>
           <span className="block text-white">{titleLine2}</span>
-          <span className="gold-text block">{titleLine3}</span>
+          {titleLine3 && (
+            <span className="gold-text block">{titleLine3}</span>
+          )}
         </h1>
 
         <SignatureLine />
 
-        {/* Subtitle */}
-        <p className="max-w-xl text-xs leading-relaxed text-white/80 md:text-lg lg:text-xl">
+        {/* STEP3c-1-bis : subtitle multi-lignes (vertus rares). \n preserves
+            via whiteSpace pre-line — saut de ligne CSS sans <br/>. */}
+        <p
+          className="max-w-xl text-xs leading-relaxed text-white/80 md:text-lg lg:text-xl"
+          style={{ whiteSpace: "pre-line" }}
+        >
           {subtitle}
         </p>
         {/* POL4 : chips meta (Catalogue · Segments · Couverture ·

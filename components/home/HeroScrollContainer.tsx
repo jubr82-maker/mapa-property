@@ -14,7 +14,10 @@
  * Amplitudes amplifiees (STEP3c-1) :
  *  - Wrapper opacity   : 1.0 → 0.6 (vs 0.7 STEP3b)
  *  - Video scale       : 1.0 → 0.92 (vs 0.95 STEP3b)
- *  - Texte parallax    : -y * 0.4 (vs -y * 0.3 STEP3b)
+ *  - Texte (STEP3c-1-bis) :
+ *      Phase 0 → 1 viewport   : IMMOBILE (translateY 0) — latence ressentie
+ *      Phase 1 → divisor*vp   : -(y-vp)*0.5 — texte colle a la video et
+ *        sort avec elle sur la suite du pin
  *  - Wrapper translateY: pas appliquee en mode sticky (sticky gere
  *    le pin) ; appliquee -y*0.5 en mode non-sticky (mobile-B fallback)
  *
@@ -100,8 +103,14 @@ export function HeroScrollContainer({
       }
       wrapper.style.opacity = String(1 - progress * 0.4);
 
+      // STEP3c-1-bis : texte IMMOBILE pendant le 1er viewport (latence
+      // ressentie), puis colle a la video (vitesse -0.5) au-dela.
+      let textY = 0;
+      if (y > h) {
+        textY = -(y - h) * 0.5;
+      }
       if (textEl) {
-        textEl.style.transform = `translate3d(0, ${-y * 0.4}px, 0)`;
+        textEl.style.transform = `translate3d(0, ${textY}px, 0)`;
       }
       if (videoEl) {
         videoEl.style.transform = `scale(${1 - progress * 0.08})`;
