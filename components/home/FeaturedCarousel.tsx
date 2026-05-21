@@ -50,6 +50,7 @@ export function FeaturedCarousel({ items }: Props) {
         {items.map((item) => (
           <article
             key={`${item.kind}-${item.id}`}
+            data-featured-card
             className="featured-card w-[78vw] shrink-0 sm:w-[48vw] lg:w-[420px]"
           >
             <FeaturedCard item={item} />
