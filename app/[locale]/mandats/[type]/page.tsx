@@ -173,16 +173,23 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
           </p>
         </section>
 
-        {/* Comparator link */}
-        <div className="mb-16 flex flex-wrap items-center gap-3 text-sm">
-          <span className="font-mono text-xs uppercase tracking-[0.2em] text-ink-soft">
+        {/* SPRINT0 : Comparator agrandi 2x + bordure lime mur sur les pills.
+            Auparavant : pills compactes border-line. Maintenant : padding
+            20px 32px / text-base / bordure 2px lime / hover background lime
+            + texte sapin. Le mandat de la page courante est exclu (filter). */}
+        <div className="mb-16 flex flex-wrap items-center gap-4 text-base">
+          <span className="font-mono text-sm uppercase tracking-[0.2em] text-ink-soft">
             {tCommon("compare")}
           </span>
           {ALL_MANDATE_SLUGS.filter((s) => s !== config.slug).map((s) => (
             <Link
               key={s}
               href={`/mandats/${s}`}
-              className="rounded-full border border-line px-4 py-1.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold"
+              className="rounded-xl px-8 py-5 font-mono text-base font-medium uppercase tracking-[0.18em] text-ink transition-colors"
+              style={{
+                border: "2px solid #CFE542",
+              }}
+              data-comparator-pill
             >
               {tCommon(`label_${s.replace("-", "_")}`)}
             </Link>

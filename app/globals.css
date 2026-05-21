@@ -171,6 +171,13 @@ body {
   box-shadow: 0 0 40px rgba(207, 229, 66, 0.6);
 }
 
+/* SPRINT0 : hover pill comparator mandats — background lime mur + texte
+   sapin. Pas de modification de la bordure (deja 2px lime inline). */
+[data-comparator-pill]:hover {
+  background-color: #CFE542;
+  color: #1F221A;
+}
+
 /* Texte d'accent copper — solid color, pas de gradient transparent */
 .gold-text {
   color: var(--gold);
