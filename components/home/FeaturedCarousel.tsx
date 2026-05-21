@@ -1,21 +1,23 @@
 "use client";
 
 /**
- * STEP3c-RECODE — Featured carousel simple : scroll horizontal natif +
- * stagger IntersectionObserver.
+ * SPRINT1 — Featured polish desktop : ralenti + parallax lateral + bidirectionnel.
  *
- * Embla + Autoplay supprimes (rollback decisions STEP3c-2 → 3c-FIX2).
- * Architecture epurée :
- *   - Layout : header compact + track horizontal overflow-x avec
- *     scroll-snap mandatory (swipe natif touch + scroll souris desktop)
- *   - Cards initiales (style inline) : opacity 0 + translateX -80px
- *     + transition CSS delayed (i * 0.3s)
- *   - IntersectionObserver : a l'entree dans le viewport (threshold 0.15),
- *     toggle opacity 1 + translateX 0 → chaque card glisse depuis la
- *     gauche en stagger 300ms
- *   - Bouton final 'Voir tous nos biens' lime mur #CFE542 avec halo
- *     permanent (.cta-lime-glow)
- *   - prefers-reduced-motion : cards visibles immediates (skip stagger)
+ * Comportement (ordre temporel) :
+ *  1. Stagger d'apparition : cards en opacity 0 + translateX -80px,
+ *     IntersectionObserver à threshold 0.15. À l'entrée → reveal
+ *     stagger 600ms (vs 300ms STEP3c-RECODE), transition CSS 1000ms
+ *     (vs 700ms). Bidirectionnel : à la sortie viewport, disparition
+ *     stagger inverse 200ms (droite→gauche).
+ *  2. Parallax X scroll-piloté : un wrapper [data-featured-inner] reçoit
+ *     translateX -200px max selon la position de la section dans le
+ *     viewport. Le track parent garde son scroll horizontal natif
+ *     (overflow-x), le parallax X se compose dessus.
+ *  3. Bouton CTA hors [data-featured-inner] → ne subit pas le parallax,
+ *     reste atteignable à droite après scroll natif.
+ *
+ * Pill OFF-MARKET : couleur custom palette Forêt (cuivre citron #D4A574,
+ * background rgba 0.15, border rgba 0.5) — appliquée dans FeaturedCard.
  */
 
 import { useEffect, useRef } from "react";
@@ -32,12 +34,14 @@ interface Props {
 
 export function FeaturedCarousel({ items }: Props) {
   const t = useTranslations("featured");
+  const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
 
+  // Stagger d'apparition + bidirectionnel
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!trackRef.current) return;
-
     const cards =
       trackRef.current.querySelectorAll<HTMLElement>("[data-featured-card]");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -51,24 +55,34 @@ export function FeaturedCarousel({ items }: Props) {
       return;
     }
 
-    cards.forEach((card, i) => {
+    cards.forEach((card) => {
       card.style.opacity = "0";
       card.style.transform = "translateX(-80px)";
       card.style.transition =
-        "opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)";
-      card.style.transitionDelay = `${i * 0.3}s`;
+        "opacity 1s cubic-bezier(0.22,1,0.36,1), transform 1s cubic-bezier(0.22,1,0.36,1)";
       card.style.willChange = "opacity, transform";
     });
 
+    // SPRINT1 : bidirectionnel — observer reste actif (pas de disconnect).
+    // À l'entrée : reveal stagger 600ms gauche→droite.
+    // À la sortie : hide stagger inverse 200ms (droite→gauche s'efface).
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          cards.forEach((card) => {
-            card.style.opacity = "1";
-            card.style.transform = "translateX(0)";
+          cards.forEach((card, i) => {
+            if (entry.isIntersecting) {
+              window.setTimeout(() => {
+                card.style.opacity = "1";
+                card.style.transform = "translateX(0)";
+              }, i * 600);
+            } else {
+              const reverseIdx = cards.length - 1 - i;
+              window.setTimeout(() => {
+                card.style.opacity = "0";
+                card.style.transform = "translateX(-80px)";
+              }, reverseIdx * 200);
+            }
           });
-          observer.disconnect();
         });
       },
       { threshold: 0.15, rootMargin: "0px 0px -100px 0px" },
@@ -78,12 +92,52 @@ export function FeaturedCarousel({ items }: Props) {
     return () => observer.disconnect();
   }, []);
 
+  // SPRINT1 : parallax X scroll-piloté sur [data-featured-inner].
+  // Le track parent garde son scroll horizontal natif ; le parallax X
+  // se compose dessus via transform sur l'inner.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!sectionRef.current || !innerRef.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const section = sectionRef.current;
+    const inner = innerRef.current;
+    inner.style.willChange = "transform";
+
+    let raf = 0;
+    let lastProgress = -1;
+
+    const onScroll = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        if (rect.top >= vh || rect.bottom <= 0) return;
+        const totalRange = vh + rect.height;
+        const scrolled = vh - rect.top;
+        const progress = Math.max(0, Math.min(1, scrolled / totalRange));
+        if (Math.abs(progress - lastProgress) < 0.001) return;
+        lastProgress = progress;
+        // Drift -200px de droite a gauche sur toute la traversee viewport
+        inner.style.transform = `translateX(${-200 * progress}px)`;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+      inner.style.willChange = "";
+    };
+  }, []);
+
   if (items.length === 0) return null;
 
   return (
-    <section className="px-6 py-5 md:py-12 lg:px-10">
+    <section ref={sectionRef} className="px-6 py-5 md:py-12 lg:px-10">
       <div className="mx-auto max-w-[1400px]">
-        {/* STEP3c-RECODE : compactage marges header (mb-4/mb-10 → mb-2/mb-4) */}
         <div className="mb-2 md:mb-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
             {t("eyebrow")}
@@ -96,8 +150,9 @@ export function FeaturedCarousel({ items }: Props) {
         </div>
       </div>
 
-      {/* Track horizontal : overflow-x:auto + scroll-snap. Pas de pin scroll
-          ni JS de translateX — scroll natif. */}
+      {/* Track : overflow-x natif scroll-snap. L'inner [data-featured-inner]
+          reçoit le parallax X au scroll vertical. Le CTA est OUT de l'inner
+          pour ne pas subir le drift et rester atteignable à droite. */}
       <div
         ref={trackRef}
         className="mt-6 flex gap-5 overflow-x-auto pb-4 md:mt-8 md:gap-6 lg:px-[8vw]"
@@ -107,16 +162,22 @@ export function FeaturedCarousel({ items }: Props) {
           scrollbarWidth: "none",
         }}
       >
-        {items.map((item) => (
-          <article
-            key={`${item.kind}-${item.id}`}
-            data-featured-card
-            style={{ scrollSnapAlign: "start" }}
-            className="w-[78vw] shrink-0 sm:w-[48vw] lg:w-[400px]"
-          >
-            <FeaturedCard item={item} />
-          </article>
-        ))}
+        <div
+          ref={innerRef}
+          data-featured-inner
+          className="flex gap-5 md:gap-6"
+        >
+          {items.map((item) => (
+            <article
+              key={`${item.kind}-${item.id}`}
+              data-featured-card
+              style={{ scrollSnapAlign: "start" }}
+              className="w-[78vw] shrink-0 sm:w-[48vw] lg:w-[400px]"
+            >
+              <FeaturedCard item={item} />
+            </article>
+          ))}
+        </div>
         <ViewAllCTA label={t("see_all")} />
       </div>
     </section>
@@ -124,9 +185,6 @@ export function FeaturedCarousel({ items }: Props) {
 }
 
 function ViewAllCTA({ label }: { label: string }) {
-  // Bouton 'Voir tous nos biens' rendu en fin de track — toujours visible
-  // apres scroll horizontal. Halo lime mur permanent via .cta-lime-glow
-  // (defini globals.css STEP3b).
   return (
     <div
       style={{ scrollSnapAlign: "start" }}
@@ -159,8 +217,6 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
     >
       <div className="relative h-40 overflow-hidden bg-bg-deep sm:h-auto sm:aspect-[4/3]">
         {isOffmarket ? (
-          /* Cover confidentiel standardisé (BUG 2) — jamais le visuel
-             réel d'un bien off-market, même si une image custom existe. */
           <OffmarketPlaceholder
             compact
             title={tOff("cover_title")}
@@ -184,15 +240,26 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             }}
           />
         )}
-        <span
-          className={`absolute right-3 top-3 rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] backdrop-blur ${
-            isOffmarket
-              ? "bg-gold-deep text-bg"
-              : "bg-bg-contrast/70 text-text-contrast/90"
-          }`}
-        >
-          {isOffmarket ? "Off-Market" : "Apimo"}
-        </span>
+        {/* SPRINT1 : pill OFF-MARKET / APIMO — couleur palette Forêt
+            cuivre citron #D4A574 inline (background rgba 0.15, border
+            rgba 0.5, color D4A574). Pour APIMO : utilitaires Tailwind
+            classiques (token text-text-contrast). */}
+        {isOffmarket ? (
+          <span
+            className="absolute right-3 top-3 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] backdrop-blur"
+            style={{
+              backgroundColor: "rgba(212, 165, 116, 0.15)",
+              borderColor: "rgba(212, 165, 116, 0.5)",
+              color: "#D4A574",
+            }}
+          >
+            Off-Market
+          </span>
+        ) : (
+          <span className="absolute right-3 top-3 rounded-full bg-bg-contrast/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-text-contrast/90 backdrop-blur">
+            Apimo
+          </span>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-4 md:gap-2 md:p-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">

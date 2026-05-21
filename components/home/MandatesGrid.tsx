@@ -22,6 +22,9 @@
  * SUPPRIME : ancienne grille 4 colonnes plate (toutes a meme rang).
  */
 
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { HoverFlipCard } from "@/components/ui/HoverFlipCard";
@@ -47,9 +50,47 @@ const SIGNATURE_CARD_STYLE: React.CSSProperties = {
 
 export function MandatesGrid() {
   const t = useTranslations("mandates_home");
+  // SPRINT1 : flip auto state — Map<key, boolean> pour les 3 cards milieu.
+  // Initialement toutes a false. IntersectionObserver declenche un cycle
+  // unique : 3s d'attente apres entree viewport, puis flip stagger 200ms,
+  // 1s de pause, re-flip pour retour initial.
+  const sectionRef = useRef<HTMLElement>(null);
+  const triggeredRef = useRef(false);
+  const [flipped, setFlipped] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!sectionRef.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting || triggeredRef.current) return;
+          triggeredRef.current = true;
+          // 3s d'attente apres apparition
+          window.setTimeout(() => {
+            middleMandates.forEach((m, i) => {
+              window.setTimeout(() => {
+                // Flip ON
+                setFlipped((prev) => ({ ...prev, [m.key]: true }));
+                // Flip OFF apres 1s (revient a l'etat initial)
+                window.setTimeout(() => {
+                  setFlipped((prev) => ({ ...prev, [m.key]: false }));
+                }, 1000);
+              }, i * 200);
+            });
+          }, 3000);
+        });
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section className="px-6 py-5 md:py-16 lg:px-10 lg:py-20">
+    <section ref={sectionRef} className="px-6 py-5 md:py-16 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
         {/* ════════ SECTION VENDRE ════════ */}
         <header className="mb-5 max-w-3xl md:mb-8">
@@ -103,12 +144,14 @@ export function MandatesGrid() {
           </div>
         </FadeInOnScroll>
 
-        {/* GRILLE 3 COLONNES (Semi / Simple / Autonome) */}
+        {/* GRILLE 3 COLONNES (Semi / Simple / Autonome) — SPRINT1 stagger
+            600ms (vs 250 avant) + flip auto declenchee par l'observer. */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
           {middleMandates.map((m, idx) => (
-            <FadeInOnScroll key={m.key} delay={idx * 250} y={30}>
+            <FadeInOnScroll key={m.key} delay={idx * 600} y={30}>
               <HoverFlipCard
                 height="h-36 sm:h-44 md:h-48"
+                flipped={flipped[m.key]}
                 front={
                   <div className="relative flex size-full flex-col justify-between rounded-lg border border-border-subtle bg-bg p-3 md:p-4">
                     <div>
