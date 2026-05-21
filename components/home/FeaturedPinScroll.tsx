@@ -1,28 +1,26 @@
 "use client";
 
 /**
- * STEP3c-2 — Featured pin scroll horizontal style Apple Pro.
+ * STEP3c-FIX2 — Featured horizontal pin scroll Apple Pro (refonte compacte).
  *
  * Mode 'desktop-A' (>=1280px + pointer fine + !touch) :
- *   - Wrapper outer height = ~(cardsCount * 0.6 + 1) viewports, min 2.5
- *   - Section sticky top:0 height:100vh contient un track horizontal
- *   - Au scroll vertical : translateX du track de 0 → -(trackWidth - viewportWidth)
- *   - Dans le dernier 15% du scroll : le bouton [data-featured-cta] grossit
- *     (scale 1.0 → 1.4) + halo box-shadow lime mur #CFE542 intensifie
- *   - STEP3c-2-bis : chaque [data-featured-card] calcule sa distance au
- *     centre du viewport et adapte scale/opacity en temps reel — la
- *     card centrale est en focus (scale 1.0, opacity 1.0), les voisines
- *     sont legerement reduites et translucides (scale 0.85, opacity 0.5
- *     a 1 viewport de distance)
+ *   - Header (titre + signature + subtitle) RENDU DANS le sticky wrapper
+ *     pour eliminer le vide entre titre et cards (avant : header hors
+ *     sticky → 1 viewport vide pendant le pin)
+ *   - Wrapper outer height = max(2.5, cardsCount * 0.4 + 0.5) viewports
+ *     (avant : *0.6+1 = trop long). 6 cards → 2.9vp (vs 4.6vp avant)
+ *   - Section sticky top:0 height:100vh, flex column :
+ *       [header flex-shrink:0 padding 64/32]
+ *       [track horizontal flex:1 align-items:center]
+ *   - Au scroll vertical : translateX du track de 0 → -(trackWidth - vpWidth)
+ *   - Zoom dynamique cards : centrale 1.0/1.0, next/prev preview 0.6/0.9,
+ *     lointaine 0.2/0.8 (3 zones via normalizedDistance)
+ *   - Bouton [data-featured-cta] highlight dans le dernier 15%
  *
- * Mode 'tablet-A-light' / 'mobile-B' :
- *   - Pas de pin scroll, rendu direct dans .featured-mobile-wrapper
- *     (overflow-x:auto + scroll-snap CSS — defini globals.css)
- *   - Swipe natif touch, bouton CTA visible a la fin du track
- *
- * Pre-mount (SSR/CSR initial) : rendu mobile-safe (overflow-x), evite
- * hydration mismatch en attendant detect. prefers-reduced-motion :
- * pas d'effet pin (rendu mobile fallback).
+ * Mode 'tablet-A-light' / 'mobile-B' / pre-mount :
+ *   - Header rendu avant le wrapper mobile (flow normal)
+ *   - Track .featured-mobile-wrapper (overflow-x + scroll-snap CSS)
+ *   - Cards reset opacity/transform (depuis style initial JSX)
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -31,9 +29,11 @@ import { useDeviceMode } from "@/hooks/useDeviceMode";
 export function FeaturedPinScroll({
   children,
   cardsCount,
+  header,
 }: {
   children: React.ReactNode;
   cardsCount: number;
+  header?: React.ReactNode;
 }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -46,7 +46,8 @@ export function FeaturedPinScroll({
     if (typeof window === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (mode !== "desktop-A") {
-      // Mobile / tablet : reset eventuel transform si on a switche depuis desktop
+      // Mobile / tablet : reset opacity/transform sur les cards (les
+      // styles inline initiaux JSX opacity 0.2 / scale 0.8 disparaissent)
       if (trackRef.current) {
         trackRef.current.style.transform = "";
         const cards = trackRef.current.querySelectorAll<HTMLElement>(
@@ -62,23 +63,22 @@ export function FeaturedPinScroll({
     }
     if (!wrapperRef.current || !trackRef.current) return;
 
-    // STEP3c-2-bis : etat initial des cards en mode desktop-A — transparence
-    // visible (opacity 0.3, scale 0.85). Le premier tick raf calculera la
-    // position reelle (proche/loin du centre viewport) et ajustera.
+    // STEP3c-FIX2 : etat initial cards desktop — opacity 0.2 scale 0.8
+    // (deja en JSX inline, on re-confirme + ajoute transition pour le
+    // tick raf suivant).
     const initialCards = trackRef.current.querySelectorAll<HTMLElement>(
       "[data-featured-card]",
     );
     initialCards.forEach((card) => {
-      card.style.opacity = "0.3";
-      card.style.transform = "scale(0.85)";
+      card.style.opacity = "0.2";
+      card.style.transform = "scale(0.8)";
       card.style.transition =
         "transform 0.4s cubic-bezier(0.22,1,0.36,1), opacity 0.4s cubic-bezier(0.22,1,0.36,1)";
       card.style.willChange = "transform, opacity";
     });
 
-    // ~0.6 viewport de scroll par carte + 1 viewport reserve pour
-    // l'apogee du bouton highlight, minimum 2.5 vp.
-    const viewportsNeeded = Math.max(2.5, cardsCount * 0.6 + 1);
+    // STEP3c-FIX2 : hauteur compactee — cards*0.4 + 0.5 (vs cards*0.6 + 1).
+    const viewportsNeeded = Math.max(2.5, cardsCount * 0.4 + 0.5);
     setPinHeight(`${viewportsNeeded * 100}vh`);
 
     const wrapper = wrapperRef.current;
@@ -111,21 +111,40 @@ export function FeaturedPinScroll({
       track.style.transform = `translate3d(${translateX}px, 0, 0)`;
       track.dataset.scrollProgress = String(progress);
 
-      // STEP3c-2-bis : chaque card → distance au centre viewport →
-      // scale/opacity dynamique. La card sous le centre est en focus.
+      // STEP3c-FIX2 : zoom dynamique 3 zones (centrale / next-prev / loin)
+      // pour avoir une preview visible des cards adjacentes au lieu d'un
+      // dropoff lineaire trop subtil.
       const viewportCenter = viewportWidth / 2;
+      const halfVp = viewportWidth / 2;
       const cards = track.querySelectorAll<HTMLElement>(
         "[data-featured-card]",
       );
       cards.forEach((card) => {
         const cardRect = card.getBoundingClientRect();
         const cardCenter = cardRect.left + cardRect.width / 2;
-        const distance = Math.abs(cardCenter - viewportCenter);
-        const normalizedDistance = Math.min(1, distance / viewportCenter);
-        const cardScale = 1.0 - normalizedDistance * 0.15;
-        const cardOpacity = Math.max(0.3, 1.0 - normalizedDistance * 0.5);
-        card.style.transform = `scale(${cardScale})`;
-        card.style.opacity = String(cardOpacity);
+        const normalized = Math.min(
+          1,
+          Math.abs(cardCenter - viewportCenter) / halfVp,
+        );
+
+        let scale: number;
+        let opacity: number;
+        if (normalized < 0.2) {
+          // Card sous le centre : focus complet
+          scale = 1.0;
+          opacity = 1.0;
+        } else if (normalized < 0.7) {
+          // Card next/prev : preview visible (interpolation lineaire)
+          const t = (normalized - 0.2) / 0.5; // 0 → 1
+          scale = 0.9 - t * 0.1; // 0.9 → 0.8
+          opacity = 0.6 - t * 0.4; // 0.6 → 0.2
+        } else {
+          // Card lointaine : tres translucide
+          scale = 0.8;
+          opacity = 0.2;
+        }
+        card.style.transform = `scale(${scale})`;
+        card.style.opacity = String(opacity);
       });
 
       // STEP3c-2 : bouton highlight dans le dernier 15% du scroll
@@ -135,8 +154,8 @@ export function FeaturedPinScroll({
           0,
           Math.min(1, (progress - 0.85) / 0.15),
         );
-        const buttonScale = 1 + buttonProgress * 0.4; // 1.0 → 1.4
-        const buttonOpacity = 0.7 + buttonProgress * 0.3; // 0.7 → 1.0
+        const buttonScale = 1 + buttonProgress * 0.4;
+        const buttonOpacity = 0.7 + buttonProgress * 0.3;
         buttonEl.style.transform = `scale(${buttonScale})`;
         buttonEl.style.opacity = String(buttonOpacity);
         buttonEl.style.boxShadow =
@@ -155,18 +174,22 @@ export function FeaturedPinScroll({
     };
   }, [mode, mounted, cardsCount]);
 
-  // Pre-mount OU tablet/mobile : rendu swipe natif (overflow-x).
+  // Pre-mount OU tablet/mobile : header (si fourni) en flow normal,
+  // puis wrapper swipe natif.
   if (!mounted || mode !== "desktop-A") {
     return (
-      <div className="featured-mobile-wrapper">
-        <div className="featured-track-mobile" ref={trackRef}>
-          {children}
+      <>
+        {header}
+        <div className="featured-mobile-wrapper">
+          <div className="featured-track-mobile" ref={trackRef}>
+            {children}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
-  // Desktop-A : pin scroll horizontal
+  // Desktop-A : sticky flex column avec header en haut + track centre
   return (
     <div ref={wrapperRef} style={{ height: pinHeight, position: "relative" }}>
       <div
@@ -177,20 +200,34 @@ export function FeaturedPinScroll({
           height: "100vh",
           overflow: "hidden",
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
         }}
       >
+        {header && (
+          <div style={{ flexShrink: 0, padding: "64px 8vw 32px" }}>
+            {header}
+          </div>
+        )}
         <div
-          ref={trackRef}
           style={{
+            flex: 1,
             display: "flex",
-            gap: "32px",
-            paddingLeft: "8vw",
-            paddingRight: "8vw",
-            willChange: "transform",
+            alignItems: "center",
+            overflow: "hidden",
           }}
         >
-          {children}
+          <div
+            ref={trackRef}
+            style={{
+              display: "flex",
+              gap: "32px",
+              paddingLeft: "8vw",
+              paddingRight: "8vw",
+              willChange: "transform",
+            }}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </div>

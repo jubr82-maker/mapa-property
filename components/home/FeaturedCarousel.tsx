@@ -29,38 +29,35 @@ export function FeaturedCarousel({ items }: Props) {
 
   if (items.length === 0) return null;
 
+  // STEP3c-FIX2 : titre extrait en prop `header` du FeaturedPinScroll —
+  // rendu DANS le sticky en desktop-A (zero vide titre→cards), en flow
+  // normal avant le wrapper mobile sur tablet/mobile.
+  const headerNode = (
+    <div className="mx-auto max-w-[1400px]">
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
+        {t("eyebrow")}
+      </p>
+      <h2 className="mt-2 t-h2">{t("title")}</h2>
+      <SignatureLine />
+      <p className="mt-3 max-w-xl text-sm text-ink-mid md:text-base">
+        {t("subtitle")}
+      </p>
+    </div>
+  );
+
   return (
     <section className="px-6 py-5 md:py-12 lg:px-10">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-10">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
-              {t("eyebrow")}
-            </p>
-            <h2 className="mt-2 t-h2">{t("title")}</h2>
-            <SignatureLine />
-            <p className="mt-3 max-w-xl text-sm text-ink-mid md:text-base">
-              {t("subtitle")}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* FIX-3c : style inline initial opacity 0.3 + scale 0.85 — visible
-          des le mount JSX (avant que le useEffect FeaturedPinScroll tourne).
-          En mode mobile/tablet, le useEffect FeaturedPinScroll reset
-          opacity/transform a '' au mount → cards retrouvent leur 1.0 par
-          defaut. En mode desktop-A, le tick raf override avec valeurs
-          calculees selon distance au centre viewport. */}
-      <FeaturedPinScroll cardsCount={items.length}>
+      {/* STEP3c-FIX2 : style inline initial opacity 0.2 + scale 0.8 (vs 0.3/0.85
+          STEP3c-FIX) pour transparence plus visible des le mount JSX. */}
+      <FeaturedPinScroll cardsCount={items.length} header={headerNode}>
         {items.map((item) => (
           <article
             key={`${item.kind}-${item.id}`}
             data-featured-card
             className="featured-card w-[78vw] shrink-0 sm:w-[48vw] lg:w-[420px]"
             style={{
-              opacity: 0.3,
-              transform: "scale(0.85)",
+              opacity: 0.2,
+              transform: "scale(0.8)",
               willChange: "opacity, transform",
             }}
           >

@@ -1,24 +1,27 @@
 "use client";
 
 /**
- * STEP3c-3 — Coverage narratif card par card avec flip 3D + pin scroll.
+ * STEP3c-FIX2 — Coverage narratif card par card avec flip 3D + pin scroll
+ * (refonte compacte).
  *
  * Mode 'desktop-A' :
- *   - Wrapper outer height = max(2, cardsCount * 1.5) viewports (4 cards
- *     → 6 viewports de scroll vertical pour reveler les 4 cards)
- *   - Section sticky top:0 height:100vh centre les cards
- *   - Chaque card [data-coverage-card] revele dans son segment :
- *       card index k → segment [k/N, (k+1)/N] du progress total
- *       sous-segment d'entree [segmentStart, segmentMid] : opacity 0→1,
- *         scale 0.9→1.0, rotateY -90→0deg (effet flip 3D)
- *       au-dela de segmentMid : card pleinement visible (1.0/1.0/0deg)
- *   - Une fois le pin termine, scroll vertical reprend → section suivante
+ *   - Header (titre + signature + subtitle) RENDU DANS le sticky wrapper
+ *     pour eliminer le vide entre titre et cards (avant : header hors
+ *     sticky → 1 viewport vide pendant le pin)
+ *   - Wrapper outer height = max(2, cardsCount * 0.5) viewports — 4
+ *     cards → 2vp (vs 6vp avant). Defilement nettement plus rapide.
+ *   - Section sticky top:0 height:100vh, flex column :
+ *       [header flex-shrink:0 padding 64/32]
+ *       [grid flex:1 centre vertical, width:100% pour preserver grid-cols-N]
+ *   - Chaque card [data-coverage-card] revele dans son segment de progress
+ *     avec PRELOAD : la card N+1 commence a apparaitre en transparence
+ *     legere dans les 10% qui precedent son segment, evite l'effet 'pop'
  *
  * Mode 'tablet-A-light' / 'mobile-B' / pre-mount :
- *   - Passthrough (renvoie children tel quel)
- *   - Les cards conservent leur FadeInOnScroll wrap externe (STEP3b)
+ *   - Header avant les children (fragment), pas de pin
+ *   - Cards conservent FadeInOnScroll wrap externe (STEP3b stagger 300ms)
  *
- * prefers-reduced-motion : passthrough (skip pin scroll, rendu standard).
+ * prefers-reduced-motion : passthrough.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -27,9 +30,11 @@ import { useDeviceMode } from "@/hooks/useDeviceMode";
 export function CoverageNarrativeScroll({
   children,
   cardsCount = 4,
+  header,
 }: {
   children: React.ReactNode;
   cardsCount?: number;
+  header?: React.ReactNode;
 }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -43,8 +48,8 @@ export function CoverageNarrativeScroll({
     if (mode !== "desktop-A") return;
     if (!wrapperRef.current || !stickyRef.current) return;
 
-    // 1.5 viewport par card pour rythme narratif lent, minimum 2 vp
-    const viewportsNeeded = Math.max(2, cardsCount * 1.5);
+    // STEP3c-FIX2 : 0.5 viewport par card (vs 1.5 avant), minimum 2 vp
+    const viewportsNeeded = Math.max(2, cardsCount * 0.5);
     setPinHeight(`${viewportsNeeded * 100}vh`);
 
     const wrapper = wrapperRef.current;
@@ -88,21 +93,29 @@ export function CoverageNarrativeScroll({
         const segmentStart = index / cardsCount;
         const segmentEnd = (index + 1) / cardsCount;
         const segmentMid = (segmentStart + segmentEnd) / 2;
+        // STEP3c-FIX2 : preload — la card N commence a apparaitre 10%
+        // avant son segment, pour amorcer la visibilite avant le 'pop'.
+        const previewStart = Math.max(0, segmentStart - 0.1);
 
         let cardOpacity = 0;
         let cardScale = 0.9;
         let cardRotateY = -90;
 
-        if (progress >= segmentStart) {
-          const localProgress = Math.min(
-            1,
-            (progress - segmentStart) / (segmentMid - segmentStart),
-          );
-          cardOpacity = localProgress;
-          cardScale = 0.9 + localProgress * 0.1;
-          cardRotateY = -90 + localProgress * 90;
-        }
-        if (progress >= segmentMid) {
+        if (progress >= previewStart && progress < segmentStart) {
+          // Phase preview : card monte de 0 → 0.3 opacity, micro-rotation
+          const previewProgress = (progress - previewStart) / 0.1;
+          cardOpacity = previewProgress * 0.3;
+          cardScale = 0.9 + previewProgress * 0.02;
+          cardRotateY = -90 + previewProgress * 30;
+        } else if (progress >= segmentStart && progress < segmentMid) {
+          // Phase apparition complete : 0.3 → 1.0 opacity, rotateY -60 → 0
+          const localProgress =
+            (progress - segmentStart) / (segmentMid - segmentStart);
+          cardOpacity = 0.3 + localProgress * 0.7;
+          cardScale = 0.92 + localProgress * 0.08;
+          cardRotateY = -60 + localProgress * 60;
+        } else if (progress >= segmentMid) {
+          // Card pleinement visible
           cardOpacity = 1;
           cardScale = 1;
           cardRotateY = 0;
@@ -124,16 +137,18 @@ export function CoverageNarrativeScroll({
     };
   }, [mode, mounted, cardsCount]);
 
-  // Mobile/tablet/pre-mount/reduced-motion : passthrough
+  // Mobile/tablet/pre-mount/reduced-motion : header en flow puis children
   if (!mounted || mode !== "desktop-A") {
-    return <>{children}</>;
+    return (
+      <>
+        {header}
+        {children}
+      </>
+    );
   }
 
-  // FIX-3c : sticky wrapper NE PAS appliquer display:flex/center direct sur
-  // les children — sinon le <div className="grid"> enfant devient un flex
-  // item sans width et la grille s'effondre. Double wrapper interne : un
-  // flex container vertical-center, et un inner width:100% qui preserve
-  // le layout grid des enfants.
+  // Desktop-A : sticky flex column avec header + grid centre (width 100%
+  // preserve grid-cols-N — fix BUG1 STEP3c-FIX gardé)
   return (
     <div ref={wrapperRef} style={{ height: pinHeight, position: "relative" }}>
       <div
@@ -143,16 +158,23 @@ export function CoverageNarrativeScroll({
           top: 0,
           height: "100vh",
           overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
+        {header && (
+          <div style={{ flexShrink: 0, padding: "64px 8vw 32px" }}>
+            {header}
+          </div>
+        )}
         <div
           style={{
-            height: "100%",
+            flex: 1,
             display: "flex",
             alignItems: "center",
           }}
         >
-          <div style={{ width: "100%" }}>{children}</div>
+          <div style={{ width: "100%", padding: "0 8vw" }}>{children}</div>
         </div>
       </div>
     </div>

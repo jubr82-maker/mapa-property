@@ -42,25 +42,28 @@ export function CoverageGrid() {
     return () => mql.removeEventListener("change", update);
   }, []);
 
+  // STEP3c-FIX2 : header extrait en prop du CoverageNarrativeScroll —
+  // rendu DANS le sticky en desktop-A (zero vide titre→cards), en flow
+  // normal avant les children sur tablet/mobile.
+  const headerNode = (
+    <header className="max-w-2xl">
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
+        {t("eyebrow")}
+      </p>
+      <h2 className="mt-2 t-h2">{t("title")}</h2>
+      <SignatureLine />
+      <p className="mt-3 text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
+    </header>
+  );
+
   return (
     <section className="px-6 py-5 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-4 max-w-2xl md:mb-12">
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
-            {t("eyebrow")}
-          </p>
-          <h2 className="mt-2 t-h2">
-            {t("title")}
-          </h2>
-          <SignatureLine />
-          <p className="mt-3 text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
-        </header>
-
-        {/* STEP3c-3 : CoverageNarrativeScroll wrap externe — sur desktop-A
-            pin scroll narratif card par card (flip 3D), sur mobile/tablet
-            passthrough → comportement STEP3b preserve (FadeInOnScroll
-            stagger 300ms). */}
-        <CoverageNarrativeScroll cardsCount={typologies.length}>
+        {/* STEP3c-FIX2 : header passe en prop, pin compact (4 cards * 0.5 = 2vp). */}
+        <CoverageNarrativeScroll
+          cardsCount={typologies.length}
+          header={headerNode}
+        >
         <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-5 lg:grid-cols-4">
           {typologies.map((typo, idx) => {
             const isFlipped = isMobile && expandedKey === typo.key;
