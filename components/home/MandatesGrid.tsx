@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { HoverFlipCard } from "@/components/ui/HoverFlipCard";
+import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 const mandates = [
   { key: "exclusive", href: "/mandats/exclusif", rate: "3%", featured: true },
@@ -26,9 +27,10 @@ export function MandatesGrid() {
         </header>
 
         <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4">
-          {mandates.map((m) => (
+          {/* STEP3b : stagger 80ms par carte (gauche → droite). */}
+          {mandates.map((m, idx) => (
+            <FadeInOnScroll key={m.key} delay={idx * 80} y={30}>
             <HoverFlipCard
-              key={m.key}
               height="h-36 sm:h-44 md:h-48"
               front={
                 <div
@@ -100,6 +102,7 @@ export function MandatesGrid() {
                 </div>
               }
             />
+            </FadeInOnScroll>
           ))}
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ContactReveal } from "@/components/contact-reveal";
+import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 const colServices = [
   { href: "/services/vendre", key: "sell" },
@@ -56,7 +57,10 @@ export function Footer() {
   return (
     <footer className="mt-24 border-t border-line bg-bg-soft text-ink">
       <div className="mx-auto max-w-[1400px] px-6 py-16 lg:px-10">
-        {/* CTA mandats — monochrome noir + accents or */}
+        {/* STEP3b : CTA Footer wrapped FadeInOnScroll (y=30). Bouton
+            primaire reçoit classe .cta-lime-glow (box-shadow lime mur
+            #CFE542 transition 1s — defini globals.css). */}
+        <FadeInOnScroll y={30}>
         <div className="mb-14 grid gap-6 overflow-hidden rounded-2xl border border-gold/30 bg-bg-contrast p-8 text-text-contrast shadow-md md:grid-cols-[1fr_auto] md:items-center md:p-10">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-gold">
@@ -72,7 +76,7 @@ export function Footer() {
           <div className="flex flex-wrap gap-3 md:flex-col md:items-stretch">
             <Link
               href="/mandats/exclusif"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-ink shadow-md transition-colors hover:bg-gold-bright"
+              className="cta-lime-glow inline-flex items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-ink shadow-md transition-colors hover:bg-gold-bright"
             >
               {t("cta_exclusive")}
               <span aria-hidden>→</span>
@@ -86,6 +90,7 @@ export function Footer() {
             </Link>
           </div>
         </div>
+        </FadeInOnScroll>
 
         <Logo height={56} tone="auto" />
 

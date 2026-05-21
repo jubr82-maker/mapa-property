@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { siteContent } from "@/lib/site-content";
 import { luxembourgCommunes, internationalRegions } from "@/lib/markets";
+import { AnimatedStat } from "@/components/home/AnimatedStat";
 
 // Compteurs dérivés de la couverture réelle (lib/markets) — restent
 // justes quand la liste des communes/villes évolue (demande Julien :
@@ -47,25 +48,17 @@ export async function StatsBand({ locale }: { locale: string }) {
         </p>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-4 md:gap-10 lg:grid-cols-4">
+          {/* STEP3b : AnimatedStat client component — anime 0 → cible
+              au IntersectionObserver. Si value non-numerique ("100s",
+              "8+"), parse number + extra textuel. */}
           {labels.map((s) => (
-            <div key={s.key} className="border-t border-text-contrast/15 pt-4 md:pt-6">
-              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-text-contrast/50 md:text-[10px]">
-                {s.label}
-              </p>
-              {/* NAV4 : taille des chiffres réduite ~50%
-                  (text-4xl/6xl -> text-2xl/3xl). */}
-              <p className="mt-2 font-display text-2xl font-black leading-none tracking-tight md:mt-3 md:text-3xl">
-                <span className="gold-text">{s.value}</span>
-                {s.suffix && (
-                  <span className="ml-2 font-mono text-xs font-medium text-text-contrast/50 md:text-base">
-                    {s.suffix}
-                  </span>
-                )}
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-text-contrast/70 md:mt-3 md:text-sm">
-                {s.text}
-              </p>
-            </div>
+            <AnimatedStat
+              key={s.key}
+              value={s.value}
+              suffix={s.suffix}
+              label={s.label}
+              text={s.text}
+            />
           ))}
         </div>
       </div>

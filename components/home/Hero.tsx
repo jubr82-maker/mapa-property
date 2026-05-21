@@ -3,6 +3,7 @@ import { sbUrl } from "@/lib/supabase-url";
 import { siteContent } from "@/lib/site-content";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { ParallaxImage } from "@/components/ui/ParallaxImage";
+import { HeroScrollContainer } from "@/components/home/HeroScrollContainer";
 
 export async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: "hero" });
@@ -22,7 +23,7 @@ export async function Hero({ locale }: { locale: string }) {
   const videoMobile = sbUrl("Videos", "mapa_showcase_mobile.mp4");
 
   return (
-    <section
+    <HeroScrollContainer
       className="relative isolate min-h-[46vh] overflow-hidden md:min-h-[66vh] lg:min-h-screen"
       style={{
         backgroundColor: "var(--hero-bg)",
@@ -40,9 +41,13 @@ export async function Hero({ locale }: { locale: string }) {
           (max ~±22px) — AUCUN zoom/scale. Inactif mobile (<768) +
           prefers-reduced-motion (ParallaxImage). Gradient/brackets/
           contenu inchangés. */}
+      {/* data-hero-video : reçoit le scale 1→0.95 du HeroScrollContainer.
+          ParallaxImage interne garde son translateY parallax (compose
+          avec le scale du parent — chaînage transforms standard). */}
+      <div data-hero-video className="absolute inset-0 z-0">
       <ParallaxImage
         intensity={0.05}
-        className="absolute inset-0 z-0"
+        className="absolute inset-0"
       >
         <video
           className="absolute left-0 top-[-4%] h-[108%] w-full object-cover"
@@ -57,6 +62,7 @@ export async function Hero({ locale }: { locale: string }) {
           <source src={videoMobile} type="video/mp4" />
         </video>
       </ParallaxImage>
+      </div>
 
       {/* Gradient overlay (sapin → transparent → sapin 85%) — palette Forêt */}
       <div
@@ -75,8 +81,12 @@ export async function Hero({ locale }: { locale: string }) {
       {/* POL4 : HUD data-corners retiré (FRAME 001, coordonnées 49°/6°,
           VOL.I, LIVE·LU — décor debug, sans valeur). */}
 
-      {/* Content */}
-      <div className="relative z-10 mx-auto flex min-h-[42vh] max-w-[1400px] flex-col items-start justify-center gap-3 px-6 pt-16 pb-8 md:min-h-[62vh] md:gap-8 md:pt-32 md:pb-24 lg:min-h-[88dvh] lg:px-10">
+      {/* Content — data-hero-text reçoit la parallax interne au scroll
+          (STEP3b B3 : translateY a 0.3x la vitesse scroll). */}
+      <div
+        data-hero-text
+        className="relative z-10 mx-auto flex min-h-[42vh] max-w-[1400px] flex-col items-start justify-center gap-3 px-6 pt-16 pb-8 md:min-h-[62vh] md:gap-8 md:pt-32 md:pb-24 lg:min-h-[88dvh] lg:px-10"
+      >
         {/* POL4 : pill retiré (affichait "TEST CMS LIVE" via override CMS). */}
 
         {/* Eyebrow */}
@@ -114,7 +124,7 @@ export async function Hero({ locale }: { locale: string }) {
           ↓
         </span>
       </a>
-    </section>
+    </HeroScrollContainer>
   );
 }
 

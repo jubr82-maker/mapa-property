@@ -160,6 +160,17 @@ body {
   background-color: var(--accent-secondary);
 }
 
+/* STEP3b : glow lime mur sur le bouton CTA Footer "Confier votre projet"
+   (.cta-lime-glow). Halo permanent subtil rgba lime, intensifie au
+   hover. Transition 1s ease pour adoucir l'apparition. */
+.cta-lime-glow {
+  box-shadow: 0 0 30px rgba(207, 229, 66, 0.4);
+  transition: box-shadow 1s ease, background-color 200ms ease;
+}
+.cta-lime-glow:hover {
+  box-shadow: 0 0 40px rgba(207, 229, 66, 0.6);
+}
+
 /* Texte d'accent copper — solid color, pas de gradient transparent */
 .gold-text {
   color: var(--gold);

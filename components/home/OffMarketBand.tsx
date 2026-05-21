@@ -1,6 +1,8 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
+// FadeInOnScroll (STEP3b enrichi y/scale/duration) wrap externe pour le
+// scale 0.95 → 1.0 ; FadeInOnScroll interne (delays 0/80/160) preserves.
 
 export function OffMarketBand() {
   const t = useTranslations("offmarket_band");
@@ -23,7 +25,11 @@ export function OffMarketBand() {
       <div className="pointer-events-none absolute -right-32 -top-32 size-48 rounded-full bg-gold/15 blur-3xl" />
       <div className="pointer-events-none absolute -left-32 -bottom-32 size-48 rounded-full bg-accent-warm/10 blur-3xl" />
 
-      <div className="relative mx-auto grid max-w-[1400px] gap-3 md:gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end">
+      {/* STEP3b : wrapper FadeInOnScroll avec scale 0.95 → 1.0 (zoom-in
+          subtil) + duree 1s sur tout le contenu — la bande premium
+          "respire" en entrant dans le viewport. */}
+      <FadeInOnScroll y={0} scale={0.95} duration={1000} className="relative mx-auto max-w-[1400px]">
+      <div className="grid gap-3 md:gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end">
         <div>
           {/* Badge MANDAT EXCLUSIF copper, visible en haut */}
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold-deep/40 bg-gold-deep/10 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.2em] text-gold-deep">
@@ -79,6 +85,7 @@ export function OffMarketBand() {
           </Link>
         </div>
       </div>
+      </FadeInOnScroll>
     </section>
   );
 }
