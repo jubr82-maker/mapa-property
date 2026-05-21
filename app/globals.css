@@ -171,6 +171,33 @@ body {
   box-shadow: 0 0 40px rgba(207, 229, 66, 0.6);
 }
 
+/* ============================================================
+   STEP3c-2 — Featured carousel mobile/tablet swipe natif
+   Desktop-A : controle JS par FeaturedPinScroll (pas concerne ici).
+   Tablet-A-light + mobile-B : overflow-x:auto + scroll-snap CSS,
+   pas d'autoplay (regression assumee vs Embla STEP2).
+   ============================================================ */
+.featured-mobile-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-left: 4vw;
+  padding-right: 4vw;
+}
+.featured-mobile-wrapper::-webkit-scrollbar {
+  display: none;
+}
+.featured-track-mobile {
+  display: flex;
+  gap: 24px;
+  min-width: max-content;
+}
+.featured-track-mobile > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
 /* Texte d'accent copper — solid color, pas de gradient transparent */
 .gold-text {
   color: var(--gold);

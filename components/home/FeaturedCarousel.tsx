@@ -1,14 +1,24 @@
 "use client";
 
+/**
+ * STEP3c-2 — Featured horizontal pin scroll (Apple Pro style desktop-A).
+ *
+ * Embla + Autoplay supprimes : le defilement horizontal est desormais
+ * pilote par le scroll vertical via FeaturedPinScroll (desktop-A) ou
+ * via swipe natif touch + scroll-snap CSS (tablet-A-light, mobile-B).
+ *
+ * Le bouton final "Voir tous nos biens" est rendu en derniere card du
+ * track avec data-featured-cta — FeaturedPinScroll lui applique scale
+ * 1.0 → 1.4 + halo lime mur dans le dernier 15% du scroll desktop.
+ */
+
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import useEmblaCarousel from "embla-carousel-react";
-import Autoplay from "embla-carousel-autoplay";
-import { useCallback, useEffect, useState } from "react";
 import type { HomeFeatured } from "@/lib/data";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
+import { FeaturedPinScroll } from "@/components/home/FeaturedPinScroll";
 
 interface Props {
   items: HomeFeatured[];
@@ -16,89 +26,57 @@ interface Props {
 
 export function FeaturedCarousel({ items }: Props) {
   const t = useTranslations("featured");
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      loop: true,
-      align: "start",
-      dragFree: false,
-      duration: 30,
-    },
-    [Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })],
-  );
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    setScrollSnaps(emblaApi.scrollSnapList());
-    emblaApi.on("select", onSelect);
-    emblaApi.on("reInit", onSelect);
-    onSelect();
-  }, [emblaApi, onSelect]);
 
   if (items.length === 0) return null;
 
   return (
-    <section className="px-6 py-5 md:py-20 lg:px-10 lg:py-20">
+    <section className="px-6 py-5 md:py-12 lg:px-10">
       <div className="mx-auto max-w-[1400px]">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between md:mb-10">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
               {t("eyebrow")}
             </p>
-            <h2 className="mt-2 t-h2">
-              {t("title")}
-            </h2>
+            <h2 className="mt-2 t-h2">{t("title")}</h2>
             <SignatureLine />
-            <p className="mt-3 max-w-xl text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <CarouselButton dir="prev" onClick={() => emblaApi?.scrollPrev()} />
-            <CarouselButton dir="next" onClick={() => emblaApi?.scrollNext()} />
-            <Link
-              href="/biens"
-              className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-deep transition-colors hover:text-gold md:text-xs"
-            >
-              {t("see_all")} →
-            </Link>
+            <p className="mt-3 max-w-xl text-sm text-ink-mid md:text-base">
+              {t("subtitle")}
+            </p>
           </div>
         </div>
-
-        <div ref={emblaRef} className="overflow-hidden">
-          <div className="flex gap-3 md:gap-5">
-            {items.map((item) => (
-              <article
-                key={`${item.kind}-${item.id}`}
-                className="min-w-0 shrink-0 grow-0 basis-[85%] sm:basis-[50%] lg:basis-[33%]"
-              >
-                <FeaturedCard item={item} />
-              </article>
-            ))}
-          </div>
-        </div>
-
-        {scrollSnaps.length > 1 && (
-          <div className="mt-4 flex justify-center gap-2 md:mt-6">
-            {scrollSnaps.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Bien ${i + 1}`}
-                onClick={() => emblaApi?.scrollTo(i)}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === selectedIndex ? "w-6 bg-gold" : "w-1.5 bg-line"
-                }`}
-              />
-            ))}
-          </div>
-        )}
       </div>
+
+      <FeaturedPinScroll cardsCount={items.length}>
+        {items.map((item) => (
+          <article
+            key={`${item.kind}-${item.id}`}
+            className="featured-card w-[78vw] shrink-0 sm:w-[48vw] lg:w-[420px]"
+          >
+            <FeaturedCard item={item} />
+          </article>
+        ))}
+        <ViewAllCTA label={t("see_all")} />
+      </FeaturedPinScroll>
     </section>
+  );
+}
+
+function ViewAllCTA({ label }: { label: string }) {
+  return (
+    <div className="featured-cta-slot flex w-[78vw] shrink-0 items-center justify-center sm:w-[48vw] lg:w-[420px]">
+      <Link
+        href="/biens"
+        data-featured-cta
+        className="inline-flex items-center gap-3 rounded-full bg-[#CFE542] px-8 py-5 font-mono text-xs font-bold uppercase tracking-[0.25em] text-[#1F221A] transition-transform"
+        style={{
+          opacity: 0.7,
+          willChange: "transform, opacity, box-shadow",
+        }}
+      >
+        {label}
+        <span aria-hidden>→</span>
+      </Link>
+    </div>
   );
 }
 
@@ -130,7 +108,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             src={item.cover_url}
             alt={item.title ?? ""}
             fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 85vw"
+            sizes="(min-width: 1024px) 420px, (min-width: 640px) 48vw, 78vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
@@ -138,7 +116,8 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             aria-hidden
             className="absolute inset-0"
             style={{
-              background: "radial-gradient(circle at center, #1a2332 0%, #0d1419 100%)",
+              background:
+                "radial-gradient(circle at center, #1a2332 0%, #0d1419 100%)",
             }}
           />
         )}
@@ -173,20 +152,5 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
         </div>
       </div>
     </Link>
-  );
-}
-
-function CarouselButton({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={dir === "prev" ? "Précédent" : "Suivant"}
-      className="inline-flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold"
-    >
-      <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        {dir === "prev" ? <path d="m15 18-6-6 6-6" /> : <path d="m9 18 6-6-6-6" />}
-      </svg>
-    </button>
   );
 }
