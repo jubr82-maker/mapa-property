@@ -93,12 +93,12 @@ export function LineChart({ data, label = "valeur", height = 160 }: LineChartPro
           0
         </text>
         {/* Area */}
-        <path d={areaPath} fill="#B8865A" fillOpacity="0.12" />
+        <path d={areaPath} fill="#e0af6e" fillOpacity="0.12" />
         {/* Polyline */}
         <polyline
           points={polyline}
           fill="none"
-          stroke="#B8865A"
+          stroke="#e0af6e"
           strokeWidth="2"
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -106,7 +106,7 @@ export function LineChart({ data, label = "valeur", height = 160 }: LineChartPro
         {/* Points */}
         {pts.map((p) => (
           <g key={p.d}>
-            <circle cx={p.x} cy={p.y} r="2.5" fill="#B8865A" />
+            <circle cx={p.x} cy={p.y} r="2.5" fill="#e0af6e" />
             <title>{`${fmtDate(p.d)} : ${p.v} ${label}`}</title>
           </g>
         ))}

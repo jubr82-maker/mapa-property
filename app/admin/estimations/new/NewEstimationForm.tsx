@@ -167,7 +167,7 @@ export function NewEstimationForm() {
           type="button"
           onClick={submit}
           disabled={saving}
-          className="rounded-full bg-[#9E7B2A] px-6 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#B8865A] disabled:opacity-50"
+          className="rounded-full bg-[#9E7B2A] px-6 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
         >
           {saving ? "Enregistrement…" : "Créer l'estimation"}
         </button>

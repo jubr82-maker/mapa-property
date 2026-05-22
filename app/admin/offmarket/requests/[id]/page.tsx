@@ -115,7 +115,7 @@ export default async function AdminOffmarketRequestDetailPage({
       <div>
         <Link
           href="/admin/offmarket/requests"
-          className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#B8865A]"
+          className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           <ArrowLeft className="size-3" />
           Retour aux demandes
@@ -124,7 +124,7 @@ export default async function AdminOffmarketRequestDetailPage({
 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Off-Market · demande
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
@@ -173,7 +173,7 @@ export default async function AdminOffmarketRequestDetailPage({
               )}
               <Link
                 href={`/admin/offmarket/${property.id}/requests`}
-                className="mt-2 inline-block font-mono text-[10px] uppercase tracking-[0.2em] text-[#B8865A] hover:underline"
+                className="mt-2 inline-block font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
               >
                 Voir toutes les demandes sur ce bien →
               </Link>
@@ -254,7 +254,7 @@ export default async function AdminOffmarketRequestDetailPage({
                 href={item.nda_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2 inline-block font-mono text-sm text-[#B8865A] hover:underline"
+                className="mt-2 inline-block font-mono text-sm text-[#e0af6e] hover:underline"
               >
                 Ouvrir le document NDA
               </a>

@@ -54,7 +54,7 @@ export function PropertyVideoForm({ propertyId, initialVideoUrl }: Props) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="https://… .mp4"
-          className="w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm focus:border-[#B8865A] focus:outline-none"
+          className="w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm focus:border-[#e0af6e] focus:outline-none"
         />
       </label>
 

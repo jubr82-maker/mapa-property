@@ -70,7 +70,7 @@ export function FicheHeader({
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
           <span
             data-fiche-price
-            className="font-display text-3xl font-black tracking-tight text-[#B8865A] sm:text-4xl"
+            className="font-display text-3xl font-black tracking-tight text-[#e0af6e] sm:text-4xl"
           >
             {price}
           </span>

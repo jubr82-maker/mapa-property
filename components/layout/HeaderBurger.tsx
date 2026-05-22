@@ -131,19 +131,19 @@ export function HeaderBurger() {
             "opacity 300ms cubic-bezier(0.22,1,0.36,1), transform 300ms cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        <div className="flex items-center justify-between border-b border-[#D4A574]/30 px-6 py-5 lg:px-10">
+        <div className="flex items-center justify-between border-b border-[#e0af6e]/30 px-6 py-5 lg:px-10">
           <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#F0E6CC]/60">
             MAPA Property
           </span>
           <div className="flex items-center gap-2">
             {/* SPRINT3 T6 : toggle jour/nuit + close en crème velin #F0E6CC,
-                hover cuivre citron #D4A574 (palette Forêt). */}
-            <ThemeToggle className="!size-10 !border-[#F0E6CC]/30 !text-[#F0E6CC] hover:!border-[#D4A574] hover:!text-[#D4A574]" />
+                hover cuivre citron #e0af6e (palette Forêt). */}
+            <ThemeToggle className="!size-10 !border-[#F0E6CC]/30 !text-[#F0E6CC] hover:!border-[#e0af6e] hover:!text-[#e0af6e]" />
             <button
               type="button"
               aria-label={t("close_menu")}
               onClick={close}
-              className="inline-flex size-10 items-center justify-center rounded-full border border-[#F0E6CC]/30 text-[#F0E6CC] transition-colors hover:border-[#D4A574] hover:text-[#D4A574]"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-[#F0E6CC]/30 text-[#F0E6CC] transition-colors hover:border-[#e0af6e] hover:text-[#e0af6e]"
             >
               <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <path d="M6 6l12 12M18 6L6 18" />
@@ -154,7 +154,7 @@ export function HeaderBurger() {
 
         {/* BUG 4 : langues en haut, sous la barre titre, avant la nav.
             SPRINT3 T6 : séparateur cuivre citron opacité 0.3. */}
-        <div className="border-b border-[#D4A574]/30 px-6 py-4 lg:px-10">
+        <div className="border-b border-[#e0af6e]/30 px-6 py-4 lg:px-10">
           <LanguageSwitcher variant="dark" onSwitched={close} />
         </div>
 
@@ -163,11 +163,11 @@ export function HeaderBurger() {
             {groups.map((group) => {
               if (group.href) {
                 return (
-                  <li key={group.id} className="border-b border-[#D4A574]/30">
+                  <li key={group.id} className="border-b border-[#e0af6e]/30">
                     <Link
                       href={group.href}
                       onClick={close}
-                      className="inline-block border-b-2 border-transparent py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-[#F0E6CC] transition-colors hover:border-[#D4A574] sm:text-2xl"
+                      className="inline-block border-b-2 border-transparent py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-[#F0E6CC] transition-colors hover:border-[#e0af6e] sm:text-2xl"
                     >
                       {t(group.label)}
                     </Link>
@@ -176,18 +176,18 @@ export function HeaderBurger() {
               }
               const isExpanded = expanded === group.id;
               return (
-                <li key={group.id} className="border-b border-[#D4A574]/30">
+                <li key={group.id} className="border-b border-[#e0af6e]/30">
                   <button
                     type="button"
                     onClick={() => setExpanded(isExpanded ? null : group.id)}
                     aria-expanded={isExpanded}
-                    className="flex w-full items-center justify-between gap-3 py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-[#F0E6CC] transition-colors hover:text-[#D4A574] sm:text-2xl"
+                    className="flex w-full items-center justify-between gap-3 py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-[#F0E6CC] transition-colors hover:text-[#e0af6e] sm:text-2xl"
                   >
                     {t(group.label)}
                     <svg
                       aria-hidden
                       viewBox="0 0 24 24"
-                      className={`size-5 text-[#D4A574] transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                      className={`size-5 text-[#e0af6e] transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -203,7 +203,7 @@ export function HeaderBurger() {
                           <Link
                             href={item.href}
                             onClick={close}
-                            className="inline-block border-b-2 border-transparent py-2 font-sans text-base text-[#F0E6CC]/80 transition-colors hover:border-[#D4A574] hover:text-[#F0E6CC]"
+                            className="inline-block border-b-2 border-transparent py-2 font-sans text-base text-[#F0E6CC]/80 transition-colors hover:border-[#e0af6e] hover:text-[#F0E6CC]"
                           >
                             {t(item.key)}
                           </Link>

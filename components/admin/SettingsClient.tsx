@@ -295,9 +295,9 @@ function AccountInfoSection({ email }: { email: string | null }) {
 
 // ----- Primitives ----------------------------------------------------------
 const inputCls =
-  "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm text-[#1A1F2A] focus:border-[#B8865A] focus:outline-none";
+  "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none";
 const btnCls =
-  "rounded-full bg-[#3D4F63] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#B8865A] disabled:opacity-50";
+  "rounded-full bg-[#3D4F63] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50";
 const btnSecondaryCls =
   "rounded-full border border-red-200 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50";
 

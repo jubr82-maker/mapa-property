@@ -12,7 +12,7 @@
  *   au useEffect — risque de flash <100ms lors du tout premier paint
  *   pour une session avec mapa_theme defini differemment du systeme.
  * - Le bouton mesure 40x40, icone soleil/lune contextuelle, couleur
- *   cuivre citron #D4A574 dans les 2 modes (palette Forêt stricte).
+ *   cuivre citron #e0af6e dans les 2 modes (palette Forêt stricte).
  */
 
 import { useEffect, useState } from "react";
@@ -72,7 +72,7 @@ export function ThemeToggle({ className = "" }: { className?: string } = {}) {
         borderRadius: 999,
         border: "1px solid currentColor",
         background: "transparent",
-        color: "#D4A574",
+        color: "#e0af6e",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

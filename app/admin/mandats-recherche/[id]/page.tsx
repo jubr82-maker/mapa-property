@@ -121,7 +121,7 @@ export default async function AdminMandatDetailPage({
       <div>
         <Link
           href="/admin/mandats-recherche"
-          className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#B8865A]"
+          className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           <ArrowLeft className="size-3" />
           Retour aux mandats
@@ -130,7 +130,7 @@ export default async function AdminMandatDetailPage({
 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Mandat ·{" "}
             {[mandat.transaction_type, mandat.property_type]
               .filter(Boolean)

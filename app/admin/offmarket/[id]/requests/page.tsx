@@ -29,7 +29,7 @@ export default async function OffmarketRequestsPage({
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             {property.reference}
           </p>
           <h1 className="mt-2 font-display text-3xl font-bold text-[#3D4F63]">
@@ -42,7 +42,7 @@ export default async function OffmarketRequestsPage({
         </div>
         <Link
           href={`/admin/offmarket/${property.id}/edit`}
-          className="rounded-full border border-[#3D4F63]/20 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+          className="rounded-full border border-[#3D4F63]/20 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
         >
           ← Retour au bien
         </Link>

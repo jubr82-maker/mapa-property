@@ -97,14 +97,14 @@ export function AdminNotes({
             value={followUp}
             disabled={busy}
             onChange={(e) => submitFollowUp(e.target.value)}
-            className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+            className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
           />
           {followUp && (
             <button
               type="button"
               onClick={() => submitFollowUp("")}
               disabled={busy}
-              className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60 hover:text-[#B8865A]"
+              className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60 hover:text-[#e0af6e]"
             >
               Effacer
             </button>
@@ -121,14 +121,14 @@ export function AdminNotes({
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Note interne — historisée avec horodatage."
-          className="mt-2 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+          className="mt-2 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
         />
         <div className="mt-2 flex items-center justify-between">
           <button
             type="button"
             onClick={submitNote}
             disabled={busy || !note.trim()}
-            className="rounded-full bg-[#3D4F63] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#F5EFE1] hover:bg-[#B8865A] disabled:opacity-50"
+            className="rounded-full bg-[#3D4F63] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#F5EFE1] hover:bg-[#e0af6e] disabled:opacity-50"
           >
             {busy ? "..." : "Ajouter la note"}
           </button>
@@ -169,7 +169,7 @@ export function AdminNotes({
                       {entry.from ?? "—"}
                     </span>{" "}
                     →{" "}
-                    <span className="font-mono text-xs uppercase tracking-[0.15em] text-[#B8865A]">
+                    <span className="font-mono text-xs uppercase tracking-[0.15em] text-[#e0af6e]">
                       {entry.to ?? "—"}
                     </span>
                     {entry.reason && (

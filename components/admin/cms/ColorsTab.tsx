@@ -5,7 +5,7 @@ import { HexColorPicker } from "react-colorful";
 import type { TokenRow } from "./FontsTab";
 
 const COLOR_SLOTS = [
-  { key: "gold", label: "Gold / Copper (accent)", fallback: "#B8865A" },
+  { key: "gold", label: "Gold / Copper (accent)", fallback: "#e0af6e" },
   { key: "ink", label: "Ink (texte)", fallback: "#1A1F2A" },
   { key: "bg", label: "Background (crème)", fallback: "#F5EFE1" },
 ] as const;

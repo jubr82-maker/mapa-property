@@ -13,7 +13,7 @@ export default async function AdminDocumentsPage() {
   return (
     <div className="space-y-8">
       <header>
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
           Console MAPA
         </p>
         <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">

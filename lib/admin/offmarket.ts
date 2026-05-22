@@ -17,7 +17,7 @@ export const OFFMARKET_STATUS_LABELS: Record<OffmarketStatus, string> = {
 export const OFFMARKET_STATUS_TONES: Record<OffmarketStatus, string> = {
   draft: "bg-[#3D4F63]/10 text-[#3D4F63]",
   published: "bg-emerald-100 text-emerald-800",
-  sold: "bg-[#B8865A]/15 text-[#7B5C36]",
+  sold: "bg-[#e0af6e]/15 text-[#7B5C36]",
   withdrawn: "bg-red-100 text-red-700",
 };
 

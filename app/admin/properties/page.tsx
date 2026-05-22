@@ -60,7 +60,7 @@ export default async function AdminPropertiesPage({
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Console MAPA
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
@@ -93,7 +93,7 @@ export default async function AdminPropertiesPage({
             href="/admin/properties?featured=1"
             className={`rounded-full px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] ${
               sp.featured === "1"
-                ? "bg-[#B8865A] text-white"
+                ? "bg-[#e0af6e] text-white"
                 : "border border-[#3D4F63]/20 text-[#3D4F63]"
             }`}
           >

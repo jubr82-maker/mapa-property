@@ -110,7 +110,7 @@ export default async function AdminLeadDetailPage({
       <div>
         <Link
           href="/admin/leads"
-          className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#B8865A]"
+          className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           <ArrowLeft className="size-3" />
           Retour aux leads
@@ -119,7 +119,7 @@ export default async function AdminLeadDetailPage({
 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Lead · {lead.type ?? "contact"}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">

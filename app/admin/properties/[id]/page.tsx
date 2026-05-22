@@ -55,11 +55,11 @@ export default async function AdminPropertyEditPage({
       <header className="space-y-2">
         <Link
           href="/admin/properties"
-          className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#B8865A]"
+          className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           ← Properties
         </Link>
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
           Édition bien
         </p>
         <h1 className="font-display text-3xl font-bold text-[#3D4F63]">
@@ -77,7 +77,7 @@ export default async function AdminPropertyEditPage({
           Au-DESSUS de la section vidéo existante (PropertyVideoForm intact). */}
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <header className="mb-4">
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Contenu rédactionnel
           </p>
           <h2 className="mt-1 font-display text-xl font-bold text-[#3D4F63]">
@@ -99,7 +99,7 @@ export default async function AdminPropertyEditPage({
 
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <header className="mb-4">
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Vidéo de présentation
           </p>
           <h2 className="mt-1 font-display text-xl font-bold text-[#3D4F63]">
@@ -122,7 +122,7 @@ export default async function AdminPropertyEditPage({
           property-images + table property_images en wipe-and-recreate. */}
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <header className="mb-4">
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Photos
           </p>
           <h2 className="mt-1 font-display text-xl font-bold text-[#3D4F63]">
@@ -147,7 +147,7 @@ export default async function AdminPropertyEditPage({
         <Link
           href={`/fr/biens/${data.slug ?? data.id}`}
           target="_blank"
-          className="mt-2 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:text-[#B8865A]"
+          className="mt-2 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:text-[#e0af6e]"
         >
           Voir la fiche ↗
         </Link>

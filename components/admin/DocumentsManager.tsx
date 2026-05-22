@@ -44,7 +44,7 @@ export function DocumentsManager({ documents }: { documents: Doc[] }) {
             <input
               name="title"
               required
-              className="block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+              className="block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
             />
           </Field>
           <Field label="Catégorie">
@@ -74,7 +74,7 @@ export function DocumentsManager({ documents }: { documents: Doc[] }) {
               <input
                 type="checkbox"
                 name="is_public"
-                className="size-4 rounded border-[#3D4F63]/30 accent-[#B8865A]"
+                className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
               />
               <span>Accessible aux visiteurs du site</span>
             </label>
@@ -88,7 +88,7 @@ export function DocumentsManager({ documents }: { documents: Doc[] }) {
         <button
           type="submit"
           disabled={busy}
-          className="mt-5 rounded-full bg-[#3D4F63] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] hover:bg-[#B8865A] disabled:opacity-50"
+          className="mt-5 rounded-full bg-[#3D4F63] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] hover:bg-[#e0af6e] disabled:opacity-50"
         >
           {busy ? "Upload…" : "Uploader"}
         </button>
@@ -147,7 +147,7 @@ function DocRow({ doc }: { doc: Doc }) {
               setPub(next);
               startTransition(() => toggleDocumentPublic(doc.id, next));
             }}
-            className="size-4 rounded border-[#3D4F63]/30 accent-[#B8865A]"
+            className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
           />
           {pub ? "Public" : "Privé"}
         </label>
@@ -157,7 +157,7 @@ function DocRow({ doc }: { doc: Doc }) {
           href={doc.file_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#B8865A] hover:underline"
+          className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
         >
           Ouvrir ↗
         </a>

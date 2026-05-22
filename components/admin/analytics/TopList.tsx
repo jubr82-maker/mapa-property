@@ -39,7 +39,7 @@ export function TopList({ items, unit, emptyLabel = "Aucune donnée." }: TopList
               </div>
               <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[#3D4F63]/10">
                 <div
-                  className="h-full rounded-full bg-[#B8865A]"
+                  className="h-full rounded-full bg-[#e0af6e]"
                   style={{ width: `${width}%` }}
                 />
               </div>

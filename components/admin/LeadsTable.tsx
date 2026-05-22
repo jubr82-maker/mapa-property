@@ -66,7 +66,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
           placeholder="Recherche email / nom / tel…"
           defaultValue={sp.get("q") ?? ""}
           onChange={(e) => setParam("q", e.target.value)}
-          className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+          className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
         />
         <select
           value={sp.get("type") ?? ""}
@@ -197,7 +197,7 @@ function LeadRow({
                 </p>
                 {lead.property_ref && (
                   <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                    Bien réf : <span className="text-[#B8865A]">{lead.property_ref}</span>
+                    Bien réf : <span className="text-[#e0af6e]">{lead.property_ref}</span>
                   </p>
                 )}
                 {lead.source && (
@@ -221,7 +221,7 @@ function LeadRow({
                         className={`rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] transition-colors disabled:opacity-50 ${
                           s === status
                             ? "bg-[#3D4F63] text-[#F5EFE1]"
-                            : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#B8865A]"
+                            : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e]"
                         }`}
                       >
                         {LEAD_STATUS_LABELS[s]}
@@ -237,12 +237,12 @@ function LeadRow({
                     rows={3}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+                    className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
                   />
                   <button
                     onClick={saveNotes}
                     disabled={busy}
-                    className="mt-2 rounded-full bg-[#3D4F63] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#F5EFE1] hover:bg-[#B8865A] disabled:opacity-50"
+                    className="mt-2 rounded-full bg-[#3D4F63] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#F5EFE1] hover:bg-[#e0af6e] disabled:opacity-50"
                   >
                     {busy ? "…" : "Enregistrer notes"}
                   </button>

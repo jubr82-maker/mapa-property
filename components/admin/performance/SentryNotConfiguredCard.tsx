@@ -63,7 +63,7 @@ export function SentryNotConfiguredCard({
             href={signupUrl}
             target="_blank"
             rel="noreferrer noopener"
-            className="mt-5 inline-flex items-center gap-2 rounded-md border border-[#B8865A] bg-[#B8865A] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#3D4F63] hover:border-[#3D4F63]"
+            className="mt-5 inline-flex items-center gap-2 rounded-md border border-[#e0af6e] bg-[#e0af6e] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#3D4F63] hover:border-[#3D4F63]"
           >
             Activer Sentry
             <ArrowUpRight className="size-3.5" />

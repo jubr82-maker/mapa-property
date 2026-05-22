@@ -130,7 +130,7 @@ export default function FicheLocationMap({
           <button
             type="button"
             onClick={() => setInteractive(true)}
-            className="absolute bottom-3 right-3 z-[500] rounded-full border border-[#B8865A]/50 bg-bg/90 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#B8865A] backdrop-blur transition-colors hover:bg-[#B8865A]/10"
+            className="absolute bottom-3 right-3 z-[500] rounded-full border border-[#e0af6e]/50 bg-bg/90 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] backdrop-blur transition-colors hover:bg-[#e0af6e]/10"
           >
             {expandLabel}
           </button>

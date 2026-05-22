@@ -58,7 +58,7 @@ export function PropertyEditForm({
   };
 
   const inputCls =
-    "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#B8865A] focus:outline-none";
+    "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none";
 
   return (
     <form onSubmit={onSave} className="space-y-5">
@@ -111,7 +111,7 @@ export function PropertyEditForm({
         <button
           type="submit"
           disabled={busy}
-          className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#B8865A] disabled:opacity-50"
+          className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
         >
           {busy ? "Enregistrement…" : "Enregistrer"}
         </button>

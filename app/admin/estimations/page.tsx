@@ -22,7 +22,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  new: "bg-[#C8A04A]/15 text-[#9E7B2A]",
+  new: "bg-[#e0af6e]/15 text-[#9E7B2A]",
   in_progress: "bg-blue-500/15 text-blue-700",
   avis_sent: "bg-purple-500/15 text-purple-700",
   mandate_signed: "bg-emerald-500/15 text-emerald-700",
@@ -78,7 +78,7 @@ export default async function AdminEstimationsPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/estimations/new"
-            className="rounded-full bg-[#9E7B2A] px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#B8865A]"
+            className="rounded-full bg-[#9E7B2A] px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#e0af6e]"
           >
             + Nouvelle estimation
           </Link>
@@ -160,7 +160,7 @@ export default async function AdminEstimationsPage() {
                         r.client_output?.confidence === "HIGH"
                           ? "bg-emerald-500/15 text-emerald-700"
                           : r.client_output?.confidence === "MEDIUM"
-                            ? "bg-[#C8A04A]/15 text-[#9E7B2A]"
+                            ? "bg-[#e0af6e]/15 text-[#9E7B2A]"
                             : "bg-red-500/15 text-red-700"
                       }`}
                     >

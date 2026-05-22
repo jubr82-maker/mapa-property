@@ -28,7 +28,7 @@ export default async function AdminReviewsPage() {
       <Link
         key="edit"
         href={`/admin/reviews/${r.id}/edit`}
-        className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+        className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
       >
         Éditer
       </Link>,
@@ -39,7 +39,7 @@ export default async function AdminReviewsPage() {
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Console MAPA
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
@@ -51,7 +51,7 @@ export default async function AdminReviewsPage() {
         </div>
         <Link
           href="/admin/reviews/new"
-          className="rounded-full bg-[#B8865A] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-white hover:bg-[#9d6e44]"
+          className="rounded-full bg-[#e0af6e] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-white hover:bg-[#9d6e44]"
         >
           + Nouvel avis
         </Link>

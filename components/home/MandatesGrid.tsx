@@ -198,7 +198,7 @@ export function MandatesGrid() {
           <div
             aria-hidden
             className="h-px w-24"
-            style={{ backgroundColor: "rgba(212, 165, 116, 0.4)" }}
+            style={{ backgroundColor: "rgba(224, 175, 110, 0.4)" }}
           />
         </div>
 

@@ -140,7 +140,7 @@ export function PhotoManager({
 
   return (
     <div className="space-y-4">
-      <label className="block rounded-xl border-2 border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-6 text-center hover:border-[#B8865A]">
+      <label className="block rounded-xl border-2 border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-6 text-center hover:border-[#e0af6e]">
         <input
           ref={fileInputRef}
           type="file"
@@ -177,7 +177,7 @@ export function PhotoManager({
                   draggable={false}
                 />
                 {idx === 0 && (
-                  <span className="absolute left-2 top-2 rounded-full bg-[#B8865A] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
+                  <span className="absolute left-2 top-2 rounded-full bg-[#e0af6e] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
                     Cover
                   </span>
                 )}
@@ -192,8 +192,8 @@ export function PhotoManager({
                   disabled={idx === 0 || busy}
                   className={`rounded border px-2 py-1 transition-colors disabled:opacity-40 ${
                     idx === 0
-                      ? "border-[#B8865A] text-[#B8865A]"
-                      : "border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+                      ? "border-[#e0af6e] text-[#e0af6e]"
+                      : "border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   }`}
                   title="Définir comme cover"
                 >
@@ -219,7 +219,7 @@ export function PhotoManager({
           type="button"
           onClick={save}
           disabled={busy || uploading || photos.length === 0}
-          className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#B8865A] disabled:opacity-50"
+          className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
         >
           {busy ? "Enregistrement…" : "Enregistrer l'ordre"}
         </button>

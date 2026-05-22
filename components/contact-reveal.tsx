@@ -124,7 +124,7 @@ export function ContactReveal({
   })();
 
   const btnBase = isDark
-    ? "border-white/30 text-white hover:border-[#D4A574] hover:text-[#D4A574]"
+    ? "border-white/30 text-white hover:border-[#e0af6e] hover:text-[#e0af6e]"
     : "border-line text-ink hover:border-gold-deep hover:text-gold-deep";
 
   const btnSize = variant === "compact"

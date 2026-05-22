@@ -34,7 +34,7 @@ export default async function AdminOffmarketListPage({
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Off-Market
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
@@ -46,7 +46,7 @@ export default async function AdminOffmarketListPage({
         </div>
         <Link
           href="/admin/offmarket/new"
-          className="inline-flex items-center gap-2 rounded-full bg-[#B8865A] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-white shadow-md shadow-[#B8865A]/30 transition-colors hover:bg-[#9d6e44]"
+          className="inline-flex items-center gap-2 rounded-full bg-[#e0af6e] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-white shadow-md shadow-[#e0af6e]/30 transition-colors hover:bg-[#9d6e44]"
         >
           + Nouveau bien off-market
         </Link>
@@ -83,7 +83,7 @@ export default async function AdminOffmarketListPage({
                 const status = (row.status ?? "draft") as OffmarketStatus;
                 return (
                   <tr key={row.id} className="hover:bg-[#3D4F63]/5">
-                    <td className="px-4 py-3 font-mono text-[11px] uppercase tracking-[0.15em] text-[#B8865A]">
+                    <td className="px-4 py-3 font-mono text-[11px] uppercase tracking-[0.15em] text-[#e0af6e]">
                       {row.reference}
                     </td>
                     <td className="px-4 py-3">
@@ -122,7 +122,7 @@ export default async function AdminOffmarketListPage({
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/admin/offmarket/${row.id}/requests`}
-                        className="font-mono text-xs font-bold text-[#B8865A] hover:underline"
+                        className="font-mono text-xs font-bold text-[#e0af6e] hover:underline"
                       >
                         {row.requests_count ?? 0}
                       </Link>
@@ -131,7 +131,7 @@ export default async function AdminOffmarketListPage({
                       <div className="inline-flex gap-2">
                         <Link
                           href={`/admin/offmarket/${row.id}/edit`}
-                          className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+                          className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                         >
                           Éditer
                         </Link>

@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-10">
       <header>
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
           Console MAPA
         </p>
         <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
@@ -87,7 +87,7 @@ export default async function AdminDashboardPage() {
           <Link
             key={c.href}
             href={c.href}
-            className="rounded-2xl border border-[#3D4F63]/15 bg-white p-5 transition-colors hover:border-[#B8865A]"
+            className="rounded-2xl border border-[#3D4F63]/15 bg-white p-5 transition-colors hover:border-[#e0af6e]"
           >
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
               {c.label}
@@ -107,7 +107,7 @@ export default async function AdminDashboardPage() {
             </h2>
             <Link
               href="/admin/leads"
-              className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#B8865A] hover:underline"
+              className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#e0af6e] hover:underline"
             >
               Tout voir →
             </Link>
@@ -154,7 +154,7 @@ export default async function AdminDashboardPage() {
             </h2>
             <Link
               href="/admin/offmarket/requests"
-              className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#B8865A] hover:underline"
+              className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#e0af6e] hover:underline"
             >
               Tout voir →
             </Link>

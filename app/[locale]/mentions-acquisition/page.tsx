@@ -60,7 +60,7 @@ export default async function MentionsAcquisitionPage({
         <header className="mb-12">
           <p
             className="font-mono text-xs uppercase tracking-[0.3em]"
-            style={{ color: "#B8865A" }}
+            style={{ color: "#e0af6e" }}
           >
             {t("eyebrow")}
           </p>

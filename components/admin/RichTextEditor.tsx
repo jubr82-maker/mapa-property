@@ -73,7 +73,7 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
   }, [value, editor]);
 
   return (
-    <div className="rounded-md border border-[#3D4F63]/20 bg-white focus-within:border-[#B8865A]">
+    <div className="rounded-md border border-[#3D4F63]/20 bg-white focus-within:border-[#e0af6e]">
       <Toolbar editor={editor} />
       <EditorContent editor={editor} />
     </div>
@@ -130,7 +130,7 @@ function ToolbarButton({
       title={title}
       className={`flex size-7 items-center justify-center rounded text-xs transition-colors disabled:opacity-40 ${
         active
-          ? "bg-[#B8865A] text-white"
+          ? "bg-[#e0af6e] text-white"
           : "text-[#3D4F63] hover:bg-[#3D4F63]/10"
       }`}
     >

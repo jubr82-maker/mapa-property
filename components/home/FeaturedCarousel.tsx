@@ -9,7 +9,7 @@
  *    INCHANGÉ.
  *  - mobile-B / tablet-A-light : FeaturedMobileEmbla = Embla pleine
  *    largeur 1 card + peek 8% du suivant, swipe natif, autoplay 4000ms,
- *    dots crème #F0E6CC inactif / cuivre citron #D4A574 actif.
+ *    dots crème #F0E6CC inactif / cuivre citron #e0af6e actif.
  *
  * FeaturedCard + ViewAllCTA partages entre les deux rendus.
  */
@@ -225,7 +225,7 @@ function FeaturedMobileEmbla({ items }: Props) {
               onClick={() => emblaApi?.scrollTo(i)}
               className="size-2 rounded-full transition-colors"
               style={{
-                backgroundColor: i === selectedIndex ? "#D4A574" : "#F0E6CC",
+                backgroundColor: i === selectedIndex ? "#e0af6e" : "#F0E6CC",
                 opacity: i === selectedIndex ? 1 : 0.5,
               }}
             />
@@ -317,9 +317,9 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
           <span
             className="absolute right-3 top-3 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] backdrop-blur"
             style={{
-              backgroundColor: "rgba(212, 165, 116, 0.15)",
-              borderColor: "rgba(212, 165, 116, 0.5)",
-              color: "#D4A574",
+              backgroundColor: "rgba(224, 175, 110, 0.15)",
+              borderColor: "rgba(224, 175, 110, 0.5)",
+              color: "#e0af6e",
             }}
           >
             Off-Market

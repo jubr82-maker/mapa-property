@@ -124,7 +124,7 @@ export default async function AdminArcovaPage({
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Console MAPA
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
@@ -172,7 +172,7 @@ export default async function AdminArcovaPage({
                   ? "bg-[#3D4F63] text-[#F5EFE1]"
                   : disabled
                     ? "cursor-not-allowed border border-[#3D4F63]/10 text-[#3D4F63]/40"
-                    : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+                    : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
               }`}
             >
               <span>{t.label}</span>
@@ -239,7 +239,7 @@ export default async function AdminArcovaPage({
                       className={`rounded-full px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] ${
                         followUpPast
                           ? "bg-red-100 text-red-700 ring-1 ring-inset ring-red-300"
-                          : "bg-[#B8865A]/15 text-[#B8865A]"
+                          : "bg-[#e0af6e]/15 text-[#e0af6e]"
                       }`}
                     >
                       Suivi : {i.next_follow_up}
@@ -247,7 +247,7 @@ export default async function AdminArcovaPage({
                   )}
                   <Link
                     href={`/admin/arcova/${i.id}`}
-                    className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+                    className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   >
                     Voir
                   </Link>

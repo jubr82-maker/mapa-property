@@ -74,7 +74,7 @@ export function WorkflowSelect({
             className={`rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] transition-colors disabled:opacity-50 ${
               s === status
                 ? "bg-[#3D4F63] text-[#F5EFE1]"
-                : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+                : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
             }`}
           >
             {WORKFLOW_LABELS[s]}
@@ -90,7 +90,7 @@ export function WorkflowSelect({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="Ex. budget insuffisant, RDV programmé…"
-          className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+          className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
         />
       </div>
       {error && (

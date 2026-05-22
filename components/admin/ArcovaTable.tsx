@@ -66,7 +66,7 @@ export function ArcovaTable({ items }: { items: Item[] }) {
           placeholder="Filtre rôle (texte libre)"
           defaultValue={sp.get("role") ?? ""}
           onChange={(e) => setParam("role", e.target.value)}
-          className="min-w-[200px] rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+          className="min-w-[200px] rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
         />
         <select
           value={sp.get("status") ?? ""}
@@ -82,7 +82,7 @@ export function ArcovaTable({ items }: { items: Item[] }) {
         </select>
         <button
           onClick={exportCsv}
-          className="ml-auto rounded-full bg-[#B8865A] px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-white hover:bg-[#9d6e44]"
+          className="ml-auto rounded-full bg-[#e0af6e] px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-white hover:bg-[#9d6e44]"
         >
           Export CSV
         </button>

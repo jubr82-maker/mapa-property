@@ -4,7 +4,7 @@
  * AmbientBackgroundLite — STEP3a-FORET
  *
  * 4 courbes line-art cuivre citron (var(--ambient-stroke) =
- * #D4A574) très fines (stroke 0.6) à opacité 0.42. Les `d` sont
+ * #e0af6e) très fines (stroke 0.6) à opacité 0.42. Les `d` sont
  * animés en SMIL avec vague océanique : 4 keyframes (start /
  * crest+ / crest- / start), variations ±60-100 sur points de
  * contrôle Bézier → respiration marquée.

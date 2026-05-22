@@ -29,7 +29,7 @@ export function OffmarketListFilters() {
         placeholder="Rechercher référence ou titre…"
         defaultValue={sp.get("q") ?? ""}
         onChange={(e) => setParam("q", e.target.value)}
-        className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+        className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
       />
       <select
         value={sp.get("status") ?? ""}

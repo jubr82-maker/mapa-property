@@ -147,7 +147,7 @@ function SectionHeader({
         <Icon className="size-5" />
       </span>
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#B8865A]">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#e0af6e]">
           {eyebrow}
         </p>
         <h2 className="font-display text-2xl font-bold text-[#3D4F63]">{title}</h2>
@@ -174,7 +174,7 @@ export default async function AdminPerformancePage() {
   return (
     <div className="space-y-12">
       <header>
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
           Console MAPA
         </p>
         <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
@@ -218,7 +218,7 @@ export default async function AdminPerformancePage() {
                     href={url}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#B8865A] hover:underline"
+                    className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
                   >
                     {url}
                   </a>
@@ -434,7 +434,7 @@ export default async function AdminPerformancePage() {
                             href={issue.permalink}
                             target="_blank"
                             rel="noreferrer noopener"
-                            className="block truncate font-sans text-sm text-[#1A1F2A] hover:text-[#B8865A]"
+                            className="block truncate font-sans text-sm text-[#1A1F2A] hover:text-[#e0af6e]"
                           >
                             {issue.title}
                           </a>

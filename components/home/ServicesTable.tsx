@@ -40,7 +40,7 @@ export function ServicesTable() {
                 <div
                   aria-hidden
                   className="mx-auto my-0.5 h-px w-1/2 md:my-1"
-                  style={{ backgroundColor: "#D4A574" }}
+                  style={{ backgroundColor: "#e0af6e" }}
                 />
               )}
               <article className="group flex items-start gap-3 py-2.5 md:gap-6 md:py-7 lg:px-8">

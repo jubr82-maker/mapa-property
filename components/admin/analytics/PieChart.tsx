@@ -9,7 +9,7 @@ interface PieChartProps {
   totalLabel?: string;
 }
 
-const DEFAULT_PALETTE = ["#3D4F63", "#B8865A", "#5B7B9E", "#A88B5F", "#3F8F62", "#C2604B"];
+const DEFAULT_PALETTE = ["#3D4F63", "#e0af6e", "#5B7B9E", "#A88B5F", "#3F8F62", "#C2604B"];
 
 export function PieChart({ slices, totalLabel = "Total" }: PieChartProps) {
   const filtered = slices.filter((s) => s.value > 0);

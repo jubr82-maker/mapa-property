@@ -45,7 +45,7 @@ export function PropertiesTable({ rows }: { rows: Row[] }) {
           placeholder="Recherche slug / titre / ville…"
           defaultValue={sp.get("q") ?? ""}
           onChange={(e) => setParam("q", e.target.value)}
-          className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+          className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
         />
         <select
           value={sp.get("transaction") ?? ""}
@@ -106,7 +106,7 @@ function PropertyRow({ row }: { row: Row }) {
 
   return (
     <tr className="hover:bg-[#3D4F63]/5">
-      <td className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[#B8865A]">
+      <td className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[#e0af6e]">
         {row.slug}
       </td>
       <td className="px-4 py-3">
@@ -143,14 +143,14 @@ function PropertyRow({ row }: { row: Row }) {
         <div className="flex justify-end gap-1.5">
           <Link
             href={`/admin/properties/${row.id}`}
-            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
           >
             Éditer
           </Link>
           <Link
             href={`/fr/biens/${row.slug || row.id}`}
             target="_blank"
-            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
           >
             Voir ↗
           </Link>
@@ -176,7 +176,7 @@ function Switch({
       disabled={busy}
       aria-pressed={checked}
       className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors disabled:opacity-50 ${
-        checked ? "bg-[#B8865A]" : "bg-[#3D4F63]/20"
+        checked ? "bg-[#e0af6e]" : "bg-[#3D4F63]/20"
       }`}
     >
       <span

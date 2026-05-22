@@ -9,7 +9,7 @@
  * AUCUN dot, AUCUNE fleche : passif. Transition adoucie (duration 30).
  *
  * Cards palette Forêt :
- *  - bordure cuivre citron #D4A574 1px
+ *  - bordure cuivre citron #e0af6e 1px
  *  - fond crème #F0E6CC (jour) / sapin #1F221A (nuit) via token bg-bg
  *  - commentaire italique cuivre citron
  *  - nom client JetBrains Mono uppercase petit
@@ -73,12 +73,12 @@ export function ReviewsCarousel({ reviews }: Props) {
               >
                 <article
                   className="flex h-full flex-col gap-2.5 rounded-xl bg-bg p-4 md:gap-5 md:p-6"
-                  style={{ border: "1px solid #D4A574" }}
+                  style={{ border: "1px solid #e0af6e" }}
                 >
                   <Stars rating={r.rating ?? 5} />
                   <blockquote
                     className="line-clamp-5 text-sm italic leading-relaxed md:line-clamp-none md:text-base"
-                    style={{ color: "#D4A574" }}
+                    style={{ color: "#e0af6e" }}
                   >
                     “{r.comment ?? ""}”
                   </blockquote>
@@ -114,7 +114,7 @@ function Stars({ rating }: { rating: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <span
           key={i}
-          style={{ color: i < rating ? "#D4A574" : "rgba(212,165,116,0.25)" }}
+          style={{ color: i < rating ? "#e0af6e" : "rgba(224, 175, 110,0.25)" }}
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="size-4">
             <path d="M10 1.5l2.6 5.4 5.9.6-4.4 4.1 1.2 5.9L10 14.6 4.7 17.5l1.2-5.9-4.4-4.1 5.9-.6L10 1.5z" />

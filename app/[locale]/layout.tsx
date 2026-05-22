@@ -191,7 +191,7 @@ export default async function LocaleLayout({
       >
         {/* STEP3a-FORET : AmbientBackgroundLite — fond crème velin
             #F0E6CC (jour) / sapin #1F221A (nuit) + 4 line-art cuivre
-            citron #D4A574 en vague océanique marquée, réaction souris
+            citron #e0af6e en vague océanique marquée, réaction souris
             ±100px. ScrollProgressBar + NoiseOverlay préservés. */}
         <AmbientBackgroundLite />
         <ScrollProgressBar />

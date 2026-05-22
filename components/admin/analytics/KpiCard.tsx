@@ -29,7 +29,7 @@ export function KpiCard({ label, value, variation, Icon, hint, unit }: KpiCardPr
           : "text-[#3D4F63]/60";
 
   return (
-    <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-6 transition-colors hover:border-[#B8865A]">
+    <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-6 transition-colors hover:border-[#e0af6e]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
@@ -39,7 +39,7 @@ export function KpiCard({ label, value, variation, Icon, hint, unit }: KpiCardPr
             {formatValue(value, unit)}
           </p>
         </div>
-        {Icon ? <Icon className="size-5 shrink-0 text-[#B8865A]" /> : null}
+        {Icon ? <Icon className="size-5 shrink-0 text-[#e0af6e]" /> : null}
       </div>
       {variation !== null && variation !== undefined ? (
         <p className={`mt-3 font-mono text-xs ${variationColor}`}>

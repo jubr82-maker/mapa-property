@@ -100,7 +100,7 @@ export async function Hero({ locale }: { locale: string }) {
         {/* STEP3c-1-bis : titre 2 lignes (titleLine3 vide en i18n par defaut,
             mais override CMS possible). Conditional render evite ligne fantome. */}
         {/* HERO-L3 : L1/L2 grande taille (clamp 1.9→6.8rem), L3 accroche
-            editoriale copper #B8865A italic regular, legerement plus petite
+            editoriale copper #e0af6e italic regular, legerement plus petite
             (clamp 1.4→4.8rem ≈ 70%), meme alignement/tracking que le bloc
             titre. Conditionnel : rien si title_line_3 vide. */}
         <h1 className="font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]">

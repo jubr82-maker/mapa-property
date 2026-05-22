@@ -57,7 +57,7 @@ export function TwoFactorPrompt({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={submit} className="space-y-4">
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#B8865A]">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#e0af6e]">
           Étape 2 / 2
         </p>
         <h2 className="mt-2 font-display text-2xl font-bold text-[#3D4F63]">
@@ -78,7 +78,7 @@ export function TwoFactorPrompt({ onSuccess }: { onSuccess: () => void }) {
         value={code}
         onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
         placeholder="123456"
-        className="block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-3 text-center font-mono text-2xl tracking-[0.5em] text-[#1A1F2A] focus:border-[#B8865A] focus:outline-none"
+        className="block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-3 text-center font-mono text-2xl tracking-[0.5em] text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none"
       />
       {error && (
         <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -88,7 +88,7 @@ export function TwoFactorPrompt({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={busy || code.length !== 6}
-        className="w-full rounded-md bg-[#3D4F63] px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#B8865A] disabled:opacity-50"
+        className="w-full rounded-md bg-[#3D4F63] px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
       >
         {busy ? "Vérification…" : "Valider"}
       </button>

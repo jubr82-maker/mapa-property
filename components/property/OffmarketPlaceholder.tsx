@@ -6,7 +6,7 @@
 //
 // STEP3c-RECODE : aligne sur palette Forêt Luxembourgeoise (strict 4
 // couleurs). Fond uni sapin profond #1F221A (vs radial-gradient cuivré
-// avant POL2-8), cadenas cuivre citron #D4A574, texte crème velin
+// avant POL2-8), cadenas cuivre citron #e0af6e, texte crème velin
 // #F0E6CC opacity 0.7 pour le sous-titre confidentiel. Bordure cuivre
 // citron subtile. Identique jour/nuit (cover confidentiel, hors thème).
 //
@@ -25,7 +25,7 @@ import { SignatureLine } from "@/components/ui/SignatureLine";
 
 // STEP3c-RECODE : fond uni sapin profond + couleurs Forêt strict.
 const SAPIN_BG = "#1F221A";
-const COPPER = "#D4A574"; // cuivre citron — palette Forêt
+const COPPER = "#e0af6e"; // cuivre citron — palette Forêt
 const CREME = "#F0E6CC"; // crème velin — palette Forêt
 
 export function OffmarketPlaceholder({
@@ -47,7 +47,7 @@ export function OffmarketPlaceholder({
       className={`absolute inset-0 flex flex-col items-center justify-center px-4 text-center ${className}`}
       style={{
         backgroundColor: SAPIN_BG,
-        border: `1px solid rgba(212, 165, 116, 0.2)`,
+        border: `1px solid rgba(224, 175, 110, 0.2)`,
       }}
     >
       {/* Cadenas cuivre fin centré */}

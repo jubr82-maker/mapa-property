@@ -7,7 +7,7 @@
      - Sapin profond  #1F221A : fond nuit / texte jour / Hero+OffMkt
      - Crème velin    #F0E6CC : fond jour / texte nuit
      - Lime mur       #CFE542 : CTA unique / wave / signature SVG
-     - Cuivre citron  #D4A574 : logo / italiques / filets / bordures
+     - Cuivre citron  #e0af6e : logo / italiques / filets / bordures
                                 / line-art ambient (2 modes)
    Bascule pilotée par .dark sur <html> (toggle mapa_theme).
    Transition 0.4s sur html/body.
@@ -16,26 +16,26 @@
   --bg:               #F0E6CC;
   --text:             #1F221A;
   --accent-primary:   #CFE542;
-  --accent-secondary: #D4A574;
+  --accent-secondary: #e0af6e;
   --ambient-bg:       #F0E6CC;
-  --ambient-stroke:   #D4A574;
+  --ambient-stroke:   #e0af6e;
   --ambient-text:     #1F221A;
   --hero-bg:          #1F221A;
   --offmarket-bg:     #1F221A;
-  --logo-color:       #D4A574;
+  --logo-color:       #e0af6e;
 }
 
 :root.dark {
   --bg:               #1F221A;
   --text:             #F0E6CC;
   --accent-primary:   #CFE542;
-  --accent-secondary: #D4A574;
+  --accent-secondary: #e0af6e;
   --ambient-bg:       #1F221A;
-  --ambient-stroke:   #D4A574;
+  --ambient-stroke:   #e0af6e;
   --ambient-text:     #F0E6CC;
   --hero-bg:          #1F221A;
   --offmarket-bg:     #1F221A;
-  --logo-color:       #D4A574;
+  --logo-color:       #e0af6e;
 }
 
 html,
@@ -45,11 +45,11 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* HERO-H2 : copper charte historique MAPA #B8865A pour les accents
+/* HERO-H2 : copper charte historique MAPA #e0af6e pour les accents
    editoriaux (sous-accroche Hero, logo light). Distinct de var(--copper)
-   = cuivre citron #D4A574 (palette Forêt design). Identique jour/nuit. */
+   = cuivre citron #e0af6e (palette Forêt design). Identique jour/nuit. */
 :root {
-  --copper-charte: #B8865A;
+  --copper-charte: #e0af6e;
 }
 
 /* ============================================================
@@ -69,16 +69,16 @@ body {
   --ink-soft:     rgba(31, 34, 26, 0.55);
   --navy:         #1F221A;        /* sapin (navy retiré de la palette) */
   --navy-deep:    #1F221A;
-  --gold:         #D4A574;        /* cuivre citron — accent unique 4 couleurs strictes */
-  --gold-bright:  #D4A574;
-  --gold-deep:    #D4A574;
-  --gold-shine:   #D4A574;
-  --accent-warm:  #D4A574;
+  --gold:         #e0af6e;        /* cuivre citron — accent unique 4 couleurs strictes */
+  --gold-bright:  #e0af6e;
+  --gold-deep:    #e0af6e;
+  --gold-shine:   #e0af6e;
+  --accent-warm:  #e0af6e;
   --line:         rgba(31, 34, 26, 0.14);
   --line-strong:  rgba(31, 34, 26, 0.26);
 
   /* ── Tokens sémantiques — palette Forêt stricte ── */
-  --copper:         #D4A574;                 /* cuivre citron — fixe 2 modes */
+  --copper:         #e0af6e;                 /* cuivre citron — fixe 2 modes */
   --bg-base:        var(--bg);               /* #F0E6CC (jour) */
   --bg-contrast:    #1F221A;                 /* sapin profond — FIGÉ jour=nuit */
   --text-base:      var(--ink);
@@ -102,16 +102,16 @@ body {
   --ink-soft:     rgba(240, 230, 204, 0.55);
   --navy:         #F0E6CC;
   --navy-deep:    #F0E6CC;
-  --gold:         #D4A574;        /* cuivre citron — accent unique 2 modes */
-  --gold-bright:  #D4A574;
-  --gold-deep:    #D4A574;
-  --gold-shine:   #D4A574;
-  --accent-warm:  #D4A574;
+  --gold:         #e0af6e;        /* cuivre citron — accent unique 2 modes */
+  --gold-bright:  #e0af6e;
+  --gold-deep:    #e0af6e;
+  --gold-shine:   #e0af6e;
+  --accent-warm:  #e0af6e;
   --line:         rgba(240, 230, 204, 0.14);
   --line-strong:  rgba(240, 230, 204, 0.28);
 
   /* ── Tokens sémantiques — inversion nuit ── */
-  --copper:         #D4A574;                   /* cuivre citron — fixe 2 modes */
+  --copper:         #e0af6e;                   /* cuivre citron — fixe 2 modes */
   --bg-base:        var(--bg);                 /* #1F221A (nuit) */
   --bg-contrast:    #1F221A;                   /* sapin profond — FIGÉ jour=nuit */
   --text-base:      var(--ink);
@@ -149,7 +149,7 @@ body {
 
   /* STEP3a-FORET : tokens palette Forêt exposés Tailwind v4 */
   --color-accent-primary:    var(--accent-primary);   /* lime mur #CFE542 */
-  --color-accent-secondary:  var(--accent-secondary); /* cuivre citron #D4A574 */
+  --color-accent-secondary:  var(--accent-secondary); /* cuivre citron #e0af6e */
 
   --font-display: var(--font-display);
   --font-sans:    var(--font-sans);
@@ -283,7 +283,7 @@ html {
 .logo-auto {
   display: block;
 }
-/* Mode NUIT : recoloration cuivre citron #D4A574 pour rester lisible
+/* Mode NUIT : recoloration cuivre citron #e0af6e pour rester lisible
    sur fond sapin (le wordmark ink noir d'origine serait invisible).
    .logo-gold force ce filtre quel que soit le mode (tone="dark"). */
 :root.dark .logo-auto,
@@ -381,7 +381,7 @@ html {
 
 /* Tableaux éditoriaux — colonnes alignées, cellules respirantes
    (POL2-1). Padding ≥16px horizontal / ≥12px vertical, en-têtes
-   copper #D4A574 small-caps, filet bas copper translucide par ligne. */
+   copper #e0af6e small-caps, filet bas copper translucide par ligne. */
 .prose-mapa table {
   table-layout: auto;
   width: 100%;
@@ -394,7 +394,7 @@ html {
 .prose-mapa td {
   padding: 0.75rem 1rem;
   text-align: left;
-  border-bottom: 1px solid rgba(184, 134, 90, 0.25);
+  border-bottom: 1px solid rgba(224, 175, 110, 0.25);
 }
 .prose-mapa td {
   vertical-align: top;
@@ -403,7 +403,7 @@ html {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #b8865a;
+  color: #e0af6e;
 }
 
 @media print {
@@ -445,7 +445,7 @@ body {
    lead italic + lettrine copper, chapitres ascendants avec filet
    copper, corps confortable (line-height généreux), conclusion
    en small caps.
-   #D4A574 = copper MAPA fixe (toléré pour cet éditorial).
+   #e0af6e = copper MAPA fixe (toléré pour cet éditorial).
    ============================================================ */
 
 .magazine {
@@ -477,7 +477,7 @@ body {
   line-height: 0.85;
   padding-right: 0.12em;
   padding-top: 0.08em;
-  color: #D4A574;
+  color: #e0af6e;
   font-weight: 500;
   font-style: normal;
 }
@@ -516,12 +516,12 @@ body {
   font-size: clamp(0.78rem, 1.1vw, 0.92rem);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: #D4A574;
+  color: #e0af6e;
 }
 .magazine-h2-rule {
   flex: 0 0 2.5rem;
   height: 1px;
-  background: #D4A574;
+  background: #e0af6e;
   opacity: 0.55;
 }
 .magazine-h2-text {
@@ -579,7 +579,7 @@ body {
     max-width: none;
   }
   .magazine-lead::first-letter {
-    color: #D4A574 !important;
+    color: #e0af6e !important;
   }
   .magazine-h2,
   .magazine-h2-rule {
@@ -611,7 +611,7 @@ body {
   line-height: 0.85;
   padding-right: 0.12em;
   padding-top: 0.08em;
-  color: #D4A574;
+  color: #e0af6e;
   font-weight: 500;
   font-style: normal;
 }
@@ -622,10 +622,10 @@ body {
   font-size: clamp(0.85rem, 1.2vw, 1rem);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: #D4A574;
+  color: #e0af6e;
   margin: 3.5rem 0 1.25rem;
   padding-bottom: 0.6rem;
-  border-bottom: 1px solid rgba(184, 134, 90, 0.35);
+  border-bottom: 1px solid rgba(224, 175, 110, 0.35);
 }
 
 .magazine-content h4 {
@@ -666,7 +666,7 @@ body {
 .magazine-content ul { list-style-type: none; }
 .magazine-content ul > li::before {
   content: "·";
-  color: #D4A574;
+  color: #e0af6e;
   font-weight: 700;
   display: inline-block;
   width: 1rem;
@@ -674,7 +674,7 @@ body {
 }
 .magazine-content ol { list-style-type: decimal; }
 .magazine-content ol > li::marker {
-  color: #D4A574;
+  color: #e0af6e;
   font-family: var(--font-display), ui-serif, Georgia, serif;
   font-weight: 500;
 }
@@ -706,7 +706,7 @@ body {
     border-bottom-color: #8E6940 !important;
   }
   .magazine-content > p.intro::first-letter {
-    color: #D4A574 !important;
+    color: #e0af6e !important;
   }
 }
 
@@ -745,7 +745,7 @@ body {
   outline: none;
 }
 .flip-card:focus-visible {
-  outline: 2px solid rgba(212, 165, 116, 0.55);
+  outline: 2px solid rgba(224, 175, 110, 0.55);
   outline-offset: 3px;
   border-radius: 0.75rem;
 }

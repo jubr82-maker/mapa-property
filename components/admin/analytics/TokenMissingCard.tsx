@@ -18,7 +18,7 @@ export function TokenMissingCard({
           🔑
         </span>
         <div className="flex-1">
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#B8865A]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#e0af6e]">
             Token manquant
           </p>
           <h3 className="mt-1 font-display text-lg font-bold text-[#3D4F63]">{title}</h3>
@@ -42,7 +42,7 @@ export function TokenMissingCard({
             href={configUrl}
             target="_blank"
             rel="noreferrer noopener"
-            className="mt-4 inline-flex items-center gap-2 rounded-md bg-[#3D4F63] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#B8865A]"
+            className="mt-4 inline-flex items-center gap-2 rounded-md bg-[#3D4F63] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e]"
           >
             Configurer →
           </a>

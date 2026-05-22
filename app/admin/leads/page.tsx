@@ -139,7 +139,7 @@ export default async function AdminLeadsPage({
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Console MAPA
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
@@ -189,7 +189,7 @@ export default async function AdminLeadsPage({
                   ? "bg-[#3D4F63] text-[#F5EFE1]"
                   : disabled
                     ? "cursor-not-allowed border border-[#3D4F63]/10 text-[#3D4F63]/40"
-                    : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+                    : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
               }`}
             >
               <span>{t.label}</span>
@@ -271,13 +271,13 @@ export default async function AdminLeadsPage({
                     })}
                   </span>
                   {l.next_follow_up && (
-                    <span className="rounded-full bg-[#B8865A]/15 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#B8865A]">
+                    <span className="rounded-full bg-[#e0af6e]/15 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#e0af6e]">
                       Suivi : {l.next_follow_up}
                     </span>
                   )}
                   <Link
                     href={`/admin/leads/${l.id}`}
-                    className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+                    className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   >
                     Voir
                   </Link>

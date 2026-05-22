@@ -71,7 +71,7 @@ export function FicheAdvisorColumn({
         data-fiche-mandate-exclusive
         className="overflow-hidden rounded-xl p-5 text-white shadow-sm"
         style={{
-          backgroundImage: "linear-gradient(135deg, #B8865A 0%, #8B6635 100%)",
+          backgroundImage: "linear-gradient(135deg, #e0af6e 0%, #8B6635 100%)",
         }}
       >
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/80">

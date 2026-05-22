@@ -114,7 +114,7 @@ const fetchDesignTokens = unstable_cache(
  *
  * @example
  *   const tokens = await siteDesignTokens();
- *   const gold = tokens.color?.gold; // "#B8865A" ou undefined
+ *   const gold = tokens.color?.gold; // "#e0af6e" ou undefined
  */
 export async function siteDesignTokens(): Promise<DesignTokensMap> {
   try {

@@ -597,7 +597,7 @@ export function OffmarketForm({
                   type="checkbox"
                   name="photos_locked"
                   defaultChecked={row?.photos_locked ?? true}
-                  className="size-4 rounded border-[#3D4F63]/30 accent-[#B8865A]"
+                  className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
                 />
                 <span>Cadenas même après NDA</span>
               </label>
@@ -625,7 +625,7 @@ export function OffmarketForm({
           <button
             type="submit"
             disabled={busy}
-            className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#B8865A] disabled:opacity-50"
+            className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
           >
             {busy ? "Enregistrement…" : mode === "create" ? "Créer le bien" : "Enregistrer"}
           </button>
@@ -633,7 +633,7 @@ export function OffmarketForm({
             <Link
               href={`/fr/off-market/${row.id}`}
               target="_blank"
-              className="rounded-full border border-[#3D4F63]/20 px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+              className="rounded-full border border-[#3D4F63]/20 px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
             >
               Aperçu public ↗
             </Link>
@@ -648,7 +648,7 @@ export function OffmarketForm({
 }
 
 const inputCls =
-  "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#B8865A] focus:outline-none";
+  "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none";
 
 // ─── Prix : 4 modes d'affichage ────────────────────────────────────────────
 type PriceMode = "exact" | "range" | "custom" | "on_request" | "on_demand";
@@ -691,7 +691,7 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
             name="price_on_demand"
             checked={priceOnDemand}
             onChange={(e) => handleOnDemandChange(e.target.checked)}
-            className="mt-0.5 size-4 rounded border-[#3D4F63]/30 accent-[#B8865A]"
+            className="mt-0.5 size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
           />
           <span className="text-sm leading-snug text-[#1A1F2A]">
             <span className="font-semibold">
@@ -987,7 +987,7 @@ function CommercesTable({
             { nom: "", surface_m2: 0, type: "retail" as CommerceRow["type"] },
           ])
         }
-        className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+        className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
       >
         + Ajouter un commerce
       </button>
@@ -1077,7 +1077,7 @@ function BureauxTable({
         onClick={() =>
           setRows([...rows, { etage: "", surface_m2: 0, type: "plateau_ouvert" }])
         }
-        className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+        className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
       >
         + Ajouter un plateau de bureaux
       </button>
@@ -1188,7 +1188,7 @@ function LogementsTable({
             { etage: "", surface_m2: 0, type: "T2", chambres: 1 },
           ])
         }
-        className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#B8865A] hover:text-[#B8865A]"
+        className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
       >
         + Ajouter un logement
       </button>
@@ -1209,7 +1209,7 @@ function Toggle({
         type="checkbox"
         name={name}
         defaultChecked={defaultChecked}
-        className="size-4 rounded border-[#3D4F63]/30 accent-[#B8865A]"
+        className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
       />
       <span className="text-sm text-[#3D4F63]/80">Activé</span>
     </label>
@@ -1232,8 +1232,8 @@ function PublishGuard({
 }) {
   if (mode === "create") {
     return (
-      <div className="rounded-xl border border-[#B8865A]/30 bg-[#B8865A]/5 px-4 py-3">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#B8865A]">
+      <div className="rounded-xl border border-[#e0af6e]/30 bg-[#e0af6e]/5 px-4 py-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e]">
           Étape 4 sur 4 — Publication
         </p>
         <p className="mt-2 text-sm text-[#3D4F63]">
@@ -1376,7 +1376,7 @@ function PhotosManager({ id, photos }: { id: string; photos: string[] }) {
 
   return (
     <div className="mt-3 space-y-4">
-      <label className="block rounded-xl border-2 border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-6 text-center hover:border-[#B8865A]">
+      <label className="block rounded-xl border-2 border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-6 text-center hover:border-[#e0af6e]">
         <input
           type="file"
           multiple
@@ -1397,7 +1397,7 @@ function PhotosManager({ id, photos }: { id: string; photos: string[] }) {
               <div className="relative aspect-[4/3]">
                 <Image src={url} alt={`Photo ${i + 1}`} fill sizes="220px" className="object-cover" />
                 {i === 0 && (
-                  <span className="absolute left-2 top-2 rounded-full bg-[#B8865A] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
+                  <span className="absolute left-2 top-2 rounded-full bg-[#e0af6e] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
                     Cover
                   </span>
                 )}
@@ -1408,7 +1408,7 @@ function PhotosManager({ id, photos }: { id: string; photos: string[] }) {
                     type="button"
                     onClick={() => move(i, -1)}
                     disabled={i === 0 || busy}
-                    className="rounded border border-[#3D4F63]/20 px-2 py-1 hover:border-[#B8865A] disabled:opacity-40"
+                    className="rounded border border-[#3D4F63]/20 px-2 py-1 hover:border-[#e0af6e] disabled:opacity-40"
                   >
                     ←
                   </button>
@@ -1416,7 +1416,7 @@ function PhotosManager({ id, photos }: { id: string; photos: string[] }) {
                     type="button"
                     onClick={() => move(i, 1)}
                     disabled={i === list.length - 1 || busy}
-                    className="rounded border border-[#3D4F63]/20 px-2 py-1 hover:border-[#B8865A] disabled:opacity-40"
+                    className="rounded border border-[#3D4F63]/20 px-2 py-1 hover:border-[#e0af6e] disabled:opacity-40"
                   >
                     →
                   </button>

@@ -130,7 +130,7 @@ function vitalColor(metric: "lcp" | "fid" | "cls" | "inp", value: number | null)
   };
   const [good, poor] = thresholds[metric];
   if (value <= good) return "text-[#3F8F62]";
-  if (value <= poor) return "text-[#B8865A]";
+  if (value <= poor) return "text-[#e0af6e]";
   return "text-[#C2604B]";
 }
 
@@ -415,7 +415,7 @@ function StatCard({
             {formatCount(counter)}
           </p>
         </div>
-        <Icon className="size-5 text-[#B8865A]" />
+        <Icon className="size-5 text-[#e0af6e]" />
       </div>
       {!counter.available ? (
         <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/50">
@@ -428,7 +428,7 @@ function StatCard({
   );
 
   const cls =
-    "rounded-2xl border border-[#3D4F63]/15 bg-white p-5 transition-colors hover:border-[#B8865A]";
+    "rounded-2xl border border-[#3D4F63]/15 bg-white p-5 transition-colors hover:border-[#e0af6e]";
 
   return href ? (
     <Link href={href} className={cls}>
@@ -454,7 +454,7 @@ function SectionHeader({
         <Icon className="size-5" />
       </span>
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#B8865A]">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#e0af6e]">
           {eyebrow}
         </p>
         <h2 className="font-display text-2xl font-bold text-[#3D4F63]">{title}</h2>
@@ -465,7 +465,7 @@ function SectionHeader({
 
 const STATUS_PALETTE: Record<string, string> = {
   new: "#3D4F63",
-  pending: "#B8865A",
+  pending: "#e0af6e",
   contacted: "#5B7B9E",
   qualified: "#A88B5F",
   won: "#3F8F62",
@@ -622,7 +622,7 @@ function Leads12mLine({ byMonth }: { byMonth: Record<string, number> }) {
         <polyline
           points={polyline}
           fill="none"
-          stroke="#B8865A"
+          stroke="#e0af6e"
           strokeWidth="2"
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -630,7 +630,7 @@ function Leads12mLine({ byMonth }: { byMonth: Record<string, number> }) {
         {/* Points */}
         {pts.map((p) => (
           <g key={p.m}>
-            <circle cx={p.x} cy={p.y} r="3" fill="#B8865A" />
+            <circle cx={p.x} cy={p.y} r="3" fill="#e0af6e" />
             <title>{`${p.m}: ${p.v} lead${p.v > 1 ? "s" : ""}`}</title>
           </g>
         ))}
@@ -678,7 +678,7 @@ export default async function AdminAnalyticsPage() {
   return (
     <div className="space-y-12">
       <header>
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#B8865A]">
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
           Console MAPA
         </p>
         <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
@@ -727,7 +727,7 @@ export default async function AdminAnalyticsPage() {
             href="https://vercel.com/dashboard"
             target="_blank"
             rel="noreferrer noopener"
-            className="group rounded-2xl border border-[#3D4F63]/15 bg-white p-6 transition-colors hover:border-[#B8865A]"
+            className="group rounded-2xl border border-[#3D4F63]/15 bg-white p-6 transition-colors hover:border-[#e0af6e]"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -741,9 +741,9 @@ export default async function AdminAnalyticsPage() {
                   Données en temps réel disponibles sur Vercel Dashboard.
                 </p>
               </div>
-              <ArrowUpRight className="size-5 shrink-0 text-[#B8865A] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              <ArrowUpRight className="size-5 shrink-0 text-[#e0af6e] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </div>
-            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[#B8865A]">
+            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e]">
               Ouvrir le dashboard Vercel →
             </p>
           </a>
@@ -752,7 +752,7 @@ export default async function AdminAnalyticsPage() {
             href="https://vercel.com/dashboard/usage"
             target="_blank"
             rel="noreferrer noopener"
-            className="group rounded-2xl border border-[#3D4F63]/15 bg-white p-6 transition-colors hover:border-[#B8865A]"
+            className="group rounded-2xl border border-[#3D4F63]/15 bg-white p-6 transition-colors hover:border-[#e0af6e]"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -766,9 +766,9 @@ export default async function AdminAnalyticsPage() {
                   Logs WAF, Turnstile et règles de filtrage accessibles côté Cloudflare.
                 </p>
               </div>
-              <ArrowUpRight className="size-5 shrink-0 text-[#B8865A] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              <ArrowUpRight className="size-5 shrink-0 text-[#e0af6e] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </div>
-            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[#B8865A]">
+            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e]">
               Ouvrir Cloudflare →
             </p>
           </a>
@@ -842,7 +842,7 @@ export default async function AdminAnalyticsPage() {
                   Leads par mois
                 </h3>
               </div>
-              <LineChart className="size-5 text-[#B8865A]" />
+              <LineChart className="size-5 text-[#e0af6e]" />
             </header>
             {data.leads.available ? (
               <Leads12mLine byMonth={data.leads.byMonth} />
@@ -898,7 +898,7 @@ export default async function AdminAnalyticsPage() {
                 </p>
               )}
             </div>
-            <Eye className="size-5 text-[#B8865A]" />
+            <Eye className="size-5 text-[#e0af6e]" />
           </header>
 
           {!data.biens.viewsAvailable ? (
@@ -922,7 +922,7 @@ export default async function AdminAnalyticsPage() {
                       {p.href ? (
                         <Link
                           href={p.href}
-                          className="block truncate font-sans text-sm text-[#1A1F2A] hover:text-[#B8865A]"
+                          className="block truncate font-sans text-sm text-[#1A1F2A] hover:text-[#e0af6e]"
                         >
                           {p.label}
                         </Link>
@@ -968,7 +968,7 @@ export default async function AdminAnalyticsPage() {
             href="https://vercel.com/dashboard"
             target="_blank"
             rel="noreferrer noopener"
-            className="group rounded-2xl border border-[#3D4F63]/15 bg-white p-6 transition-colors hover:border-[#B8865A]"
+            className="group rounded-2xl border border-[#3D4F63]/15 bg-white p-6 transition-colors hover:border-[#e0af6e]"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -982,9 +982,9 @@ export default async function AdminAnalyticsPage() {
                   LCP, INP, CLS et FID réels mesurés en production.
                 </p>
               </div>
-              <ArrowUpRight className="size-5 shrink-0 text-[#B8865A] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              <ArrowUpRight className="size-5 shrink-0 text-[#e0af6e] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </div>
-            <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-[#B8865A]">
+            <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e]">
               Ouvrir Speed Insights →
             </p>
           </a>
@@ -1053,7 +1053,7 @@ export default async function AdminAnalyticsPage() {
               </h3>
               <PieChart
                 slices={[
-                  { key: "mobile", value: ga4Ok.mobileVsDesktop.mobile, color: "#B8865A" },
+                  { key: "mobile", value: ga4Ok.mobileVsDesktop.mobile, color: "#e0af6e" },
                   { key: "desktop", value: ga4Ok.mobileVsDesktop.desktop, color: "#3D4F63" },
                   { key: "tablet", value: ga4Ok.mobileVsDesktop.tablet, color: "#5B7B9E" },
                 ]}
@@ -1078,7 +1078,7 @@ export default async function AdminAnalyticsPage() {
             instructions={vercelMissing.instructions}
           />
         ) : vercelMissing ? (
-          <div className="rounded-lg border border-[#B8865A]/40 bg-white p-6 text-sm text-[#3D4F63]/70">
+          <div className="rounded-lg border border-[#e0af6e]/40 bg-white p-6 text-sm text-[#3D4F63]/70">
             API Vercel indisponible : {vercelMissing.message ?? vercelMissing.reason}. Consulter
             le dashboard Vercel directement.
           </div>
@@ -1231,7 +1231,7 @@ export default async function AdminAnalyticsPage() {
                 <h3 className="font-display text-lg font-bold text-[#3D4F63]">
                   Top recherches IA
                 </h3>
-                <Search className="size-5 text-[#B8865A]" />
+                <Search className="size-5 text-[#e0af6e]" />
               </header>
               {supaOk.searchLogsAvailable ? (
                 <TopList
@@ -1264,7 +1264,7 @@ function PieIcon() {
       height="20"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#B8865A"
+      stroke="#e0af6e"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"

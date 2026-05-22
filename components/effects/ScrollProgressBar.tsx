@@ -3,7 +3,7 @@
 /**
  * ScrollProgressBar — POL3-7a (AGENT ANTOINE)
  *
- * Barre cuivre citron #D4A574 de 2 px en haut du viewport, largeur en % du
+ * Barre cuivre citron #e0af6e de 2 px en haut du viewport, largeur en % du
  * scroll vertical (scrollY / (scrollHeight − innerHeight)). Fixed, z-[60]
  * — au-dessus du Header (z-50). Passive scroll listener + rAF throttle
  * pour ne jamais bloquer le main thread.
@@ -14,7 +14,7 @@
 
 import { useEffect, useState } from "react";
 
-const COPPER = "#D4A574";
+const COPPER = "#e0af6e";
 
 export function ScrollProgressBar() {
   const [pct, setPct] = useState(0);

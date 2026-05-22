@@ -36,7 +36,7 @@ export function ForgotPasswordForm() {
         </p>
         <Link
           href="/admin/login"
-          className="inline-block font-mono text-xs uppercase tracking-[0.2em] text-[#B8865A] hover:underline"
+          className="inline-block font-mono text-xs uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
         >
           ← Retour à la connexion
         </Link>
@@ -60,7 +60,7 @@ export function ForgotPasswordForm() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#B8865A] focus:outline-none"
+          className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
         />
       </div>
       {error && (
@@ -71,14 +71,14 @@ export function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={busy}
-        className="w-full rounded-md bg-[#3D4F63] px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#B8865A] disabled:opacity-50"
+        className="w-full rounded-md bg-[#3D4F63] px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
       >
         {busy ? "Envoi…" : "Envoyer le lien de récupération"}
       </button>
       <div className="text-center">
         <Link
           href="/admin/login"
-          className="font-mono text-xs uppercase tracking-[0.2em] text-[#B8865A] hover:underline"
+          className="font-mono text-xs uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
         >
           ← Retour à la connexion
         </Link>
