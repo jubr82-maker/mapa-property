@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { SERVICES_ITEMS } from "@/lib/nav-services";
 
 type SubItem = { href: string; key: string };
 type Group = {
