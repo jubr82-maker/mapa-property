@@ -197,10 +197,16 @@ export default async function LocaleLayout({
         <ScrollProgressBar />
         <NoiseOverlay />
         <JsonLd data={homepageGraph(locale)} />
+        {/* SPRINT3 T1 : next-themes aligne sur le custom toggle + script
+            anti-FOUC — meme storageKey 'mapa_theme', defaultTheme 'dark',
+            enableSystem desactive (mode nuit force premier visiteur). Fix
+            le conflit qui retirait .dark sur Safari iOS → logo cuivre
+            citron applique des le 1er paint sans flash sapin. */}
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
-          enableSystem
+          defaultTheme="dark"
+          storageKey="mapa_theme"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <NextIntlClientProvider locale={locale} messages={messages}>
