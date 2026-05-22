@@ -20,7 +20,7 @@ const KNOWLEDGE_FR = `
 - Mandat Simple (5 % HT) : aucune exclusivité, plusieurs agences possibles. Honoraires majorés.
 - Mandat Autonome (1 % HT) : vous pilotez vous-même, MAPA Property en backup juridique et notarial.
 
-## Mandat de recherche (buyer's agent à la française)
+## Mandat de recherche (buyer's agent)
 - 1 % à 3 % HT du prix d'acquisition selon juridiction et complexité.
 - Couverture : Luxembourg, Union européenne, hors UE (Émirats, Royaume-Uni, Suisse, Amériques).
 - Avance sur frais possible, déductible en cas de réussite.
