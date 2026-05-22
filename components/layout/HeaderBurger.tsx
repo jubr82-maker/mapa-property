@@ -120,25 +120,30 @@ export function HeaderBurger() {
         aria-modal="true"
         aria-label={t("menu")}
         aria-hidden={!open}
-        className={`fixed inset-0 z-[9999] flex flex-col overflow-y-auto backdrop-blur-md transition-opacity duration-200 ${
+        className={`fixed inset-0 z-[9999] flex flex-col overflow-y-auto backdrop-blur-md ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
-        style={{ backgroundColor: "rgba(13, 20, 25, 0.97)" }}
+        style={{
+          // SPRINT3 T6 : fond sapin profond palette Forêt + slide-down 300ms
+          backgroundColor: "#1F221A",
+          transform: open ? "translateY(0)" : "translateY(-20px)",
+          transition:
+            "opacity 300ms cubic-bezier(0.22,1,0.36,1), transform 300ms cubic-bezier(0.22,1,0.36,1)",
+        }}
       >
-        <div className="flex items-center justify-between border-b border-white/10 px-6 py-5 lg:px-10">
-          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/60">
+        <div className="flex items-center justify-between border-b border-[#D4A574]/30 px-6 py-5 lg:px-10">
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#F0E6CC]/60">
             MAPA Property
           </span>
           <div className="flex items-center gap-2">
-            {/* BUG 1 : toggle jour/nuit fonctionnel dans le VRAI menu mobile
-                (HeaderBurger ; MobileMenu était mort). Styles forcés (!)
-                pour le drawer sombre. */}
-            <ThemeToggle className="!size-10 !border-white/30 !text-white hover:!border-[#D4A574] hover:!text-[#D4A574]" />
+            {/* SPRINT3 T6 : toggle jour/nuit + close en crème velin #F0E6CC,
+                hover cuivre citron #D4A574 (palette Forêt). */}
+            <ThemeToggle className="!size-10 !border-[#F0E6CC]/30 !text-[#F0E6CC] hover:!border-[#D4A574] hover:!text-[#D4A574]" />
             <button
               type="button"
               aria-label={t("close_menu")}
               onClick={close}
-              className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:border-[#D4A574] hover:text-[#D4A574]"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-[#F0E6CC]/30 text-[#F0E6CC] transition-colors hover:border-[#D4A574] hover:text-[#D4A574]"
             >
               <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <path d="M6 6l12 12M18 6L6 18" />
@@ -147,8 +152,9 @@ export function HeaderBurger() {
           </div>
         </div>
 
-        {/* BUG 4 : langues en haut, sous la barre titre, avant la nav */}
-        <div className="border-b border-white/10 px-6 py-4 lg:px-10">
+        {/* BUG 4 : langues en haut, sous la barre titre, avant la nav.
+            SPRINT3 T6 : séparateur cuivre citron opacité 0.3. */}
+        <div className="border-b border-[#D4A574]/30 px-6 py-4 lg:px-10">
           <LanguageSwitcher variant="dark" onSwitched={close} />
         </div>
 
@@ -157,11 +163,11 @@ export function HeaderBurger() {
             {groups.map((group) => {
               if (group.href) {
                 return (
-                  <li key={group.id} className="border-b border-white/10">
+                  <li key={group.id} className="border-b border-[#D4A574]/30">
                     <Link
                       href={group.href}
                       onClick={close}
-                      className="block py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-white transition-colors hover:text-[#D4A574] sm:text-2xl"
+                      className="inline-block border-b-2 border-transparent py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-[#F0E6CC] transition-colors hover:border-[#D4A574] sm:text-2xl"
                     >
                       {t(group.label)}
                     </Link>
@@ -170,12 +176,12 @@ export function HeaderBurger() {
               }
               const isExpanded = expanded === group.id;
               return (
-                <li key={group.id} className="border-b border-white/10">
+                <li key={group.id} className="border-b border-[#D4A574]/30">
                   <button
                     type="button"
                     onClick={() => setExpanded(isExpanded ? null : group.id)}
                     aria-expanded={isExpanded}
-                    className="flex w-full items-center justify-between gap-3 py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-white transition-colors hover:text-[#D4A574] sm:text-2xl"
+                    className="flex w-full items-center justify-between gap-3 py-4 text-left font-display text-xl font-medium uppercase tracking-[0.12em] text-[#F0E6CC] transition-colors hover:text-[#D4A574] sm:text-2xl"
                   >
                     {t(group.label)}
                     <svg
@@ -197,7 +203,7 @@ export function HeaderBurger() {
                           <Link
                             href={item.href}
                             onClick={close}
-                            className="block py-2 font-sans text-base text-white/80 transition-colors hover:text-[#D4A574]"
+                            className="inline-block border-b-2 border-transparent py-2 font-sans text-base text-[#F0E6CC]/80 transition-colors hover:border-[#D4A574] hover:text-[#F0E6CC]"
                           >
                             {t(item.key)}
                           </Link>
@@ -210,8 +216,16 @@ export function HeaderBurger() {
             })}
           </ul>
 
+          {/* SPRINT3 T6 : CTA Nous contacter lime mûr #CFE542 sur fond
+              sapin + glow lime au hover (.cta-lime-glow). ContactReveal
+              gère l'anti-scraping (split JS + reconstruction au clic). */}
           <div className="mx-auto mt-10 flex max-w-2xl flex-col items-start gap-6">
-            <ContactReveal variant="compact" align="left" theme="dark" />
+            <ContactReveal
+              variant="compact"
+              align="left"
+              theme="dark"
+              className="cta-lime-glow !border-[#CFE542] !bg-[#CFE542] !text-[#1F221A]"
+            />
           </div>
         </nav>
       </div>,
