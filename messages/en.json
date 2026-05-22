@@ -875,5 +875,14 @@
     "exclusive_mandate_text": "3% excl. VAT + 17% VAT. Premium marketing, MAPA Property exclusivity, dedicated negotiation and follow-up.",
     "exclusive_mandate_cta": "Discover the Exclusive Mandate",
     "reviews_title": "They trusted us"
+  },
+  "disclaimer": {
+    "short": "Non-contractual information — Indicative data based on public sources and MAPA Property algorithms. No liability can be incurred. For financing, taxation or notarial deeds, consult the relevant professional.",
+    "full": {
+      "title": "Non-contractual information",
+      "p1": "The estimates, simulations, market analyses and data presented on this site are provided for informational and indicative purposes. They rely on public sources (STATEC, Observatoire de l'Habitat, ABBL, Central Bank of Luxembourg) and on MAPA Property's proprietary algorithms.",
+      "p2": "MAPA Property accepts no liability for any use that may be made of this information, for decisions taken on its basis, or for any discrepancies with market reality or the user's individual situation.",
+      "p3": "This data does not constitute financial, tax, legal or notarial advice. For any concrete transaction, consult the relevant professionals: notary (authentic deed, inheritance, matrimonial regime), bank or licensed credit broker (financing), tax adviser (taxation, capital gains), lawyer (legal advice)."
+    }
   }
 }

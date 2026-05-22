@@ -875,5 +875,14 @@
     "exclusive_mandate_text": "3% zzgl. MwSt. + 17% MwSt. Premium-Marketing, MAPA Property Exklusivität, dedizierte Verhandlung und Betreuung.",
     "exclusive_mandate_cta": "Exklusivmandat entdecken",
     "reviews_title": "Sie haben uns vertraut"
+  },
+  "disclaimer": {
+    "short": "Unverbindliche Informationen — Indikative Daten auf Basis öffentlicher Quellen und MAPA Property-Algorithmen. Es kann keine Haftung übernommen werden. Für Finanzierung, Steuern oder notarielle Urkunden konsultieren Sie den zuständigen Fachmann.",
+    "full": {
+      "title": "Unverbindliche Informationen",
+      "p1": "Die auf dieser Website dargestellten Schätzungen, Simulationen, Marktanalysen und Daten dienen Informations- und Richtzwecken. Sie stützen sich auf öffentliche Quellen (STATEC, Observatoire de l'Habitat, ABBL, Zentralbank Luxemburg) und auf die proprietären Algorithmen von MAPA Property.",
+      "p2": "MAPA Property übernimmt keine Haftung für die Verwendung dieser Informationen, für auf ihrer Grundlage getroffene Entscheidungen oder für etwaige Abweichungen von der Marktrealität oder der individuellen Situation des Nutzers.",
+      "p3": "Diese Daten stellen keine finanzielle, steuerliche, rechtliche oder notarielle Beratung dar. Für jede konkrete Transaktion konsultieren Sie die zuständigen Fachleute: Notar (notarielle Urkunde, Erbschaft, Güterstand), Bank oder zugelassener Kreditvermittler (Finanzierung), Steuerberater (Besteuerung, Veräußerungsgewinne), Anwalt (Rechtsberatung)."
+    }
   }
 }

@@ -1,32 +1,59 @@
+"use client";
+
 /**
- * DisclaimerLegal — mention légale obligatoire sur tout simulateur /
- * estimation MAPA Property (POL2-6).
+ * DisclaimerLegal v2 — mention non contractuelle unifiée (sprint juridique).
  *
- * Contenu EXACT requis (non traduit — mention légale figée, identique
- * FR/EN/DE par exigence du brief). Sources de données autorisées
- * limitativement : STATEC, Observatoire de l'Habitat, ABBL, BCL.
+ * 2 variantes :
+ *  - "short" (defaut) : 1 ligne, bas des outils (estimation, simulateurs,
+ *    marchés actifs, fiches). Italique, discret.
+ *  - "full" : version longue (CGU), titre + 3 paragraphes, liste les
+ *    professionnels competents (notaire/banque/fiscal/avocat).
  *
- * Server Component (texte statique, pas de hook/state) — tokens couleur
- * Tailwind uniquement, aucun hexa en dur, aucun emoji.
+ * Julien = agent immobilier carte pro (intermediation) — PAS courtier
+ * credit, fiscaliste, banquier, juriste ni notaire. Le disclaimer borne
+ * la responsabilite hors de ces champs.
+ *
+ * i18n namespace "disclaimer" (FR/EN/DE). Client component (useTranslations)
+ * → utilisable dans server ET client. Couleur via token adaptatif
+ * text-ink-soft (creme/55 en nuit, sapin/55 en jour) — un creme fixe
+ * serait invisible sur fond creme en mode jour. Palette Forêt.
  */
-export function DisclaimerLegal({ className = "" }: { className?: string }) {
+
+import { useTranslations } from "next-intl";
+
+export function DisclaimerLegal({
+  variant = "short",
+  className = "",
+}: {
+  variant?: "short" | "full";
+  className?: string;
+}) {
+  const t = useTranslations("disclaimer");
+
+  if (variant === "full") {
+    return (
+      <aside
+        role="note"
+        aria-label={t("full.title")}
+        className={`rounded-lg border border-line bg-bg-soft px-5 py-4 text-sm leading-relaxed text-ink-mid ${className}`}
+      >
+        <p className="font-mono uppercase tracking-[0.18em] text-ink">
+          {t("full.title")}
+        </p>
+        <p className="mt-3">{t("full.p1")}</p>
+        <p className="mt-3">{t("full.p2")}</p>
+        <p className="mt-3">{t("full.p3")}</p>
+      </aside>
+    );
+  }
+
   return (
     <aside
       role="note"
-      aria-label="Mentions légales estimation"
-      className={`rounded-lg border border-line bg-bg-soft px-4 py-3 text-xs leading-relaxed text-ink-soft ${className}`}
+      aria-label={t("full.title")}
+      className={`max-w-prose text-xs italic leading-relaxed text-ink-soft ${className}`}
     >
-      <p className="font-mono uppercase tracking-[0.18em] text-ink-mid">
-        Informations non contractuelles.
-      </p>
-      <p className="mt-1.5">
-        Sources : STATEC, Observatoire de l&apos;Habitat, ABBL, BCL.
-      </p>
-      <p className="mt-1.5">
-        MAPA Property ne peut être tenu responsable d&apos;aucune erreur ou
-        décision prise sur ces estimations. Validation par professionnel agréé
-        requise (banque, notaire, courtier).
-      </p>
+      {t("short")}
     </aside>
   );
 }
