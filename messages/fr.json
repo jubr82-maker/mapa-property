@@ -204,7 +204,7 @@
   },
   "mandates_premium": {
     "eyebrow": "Nos mandats phares",
-    "title": "Vendre avec MAPA.",
+    "title": "Vendre avec MAPA Property.",
     "subtitle": "Quatre formules adaptées à votre projet : de l'exclusivité totale à l'autonomie accompagnée.",
     "more_info": "En savoir plus",
     "modal_cta": "Demander ce mandat",
@@ -214,9 +214,9 @@
       "title": "Exclusif",
       "rate": "3%",
       "rate_suffix": "HT + 17% TVA",
-      "short_desc": "Engagement total MAPA. Marketing premium, exclusivité, négociation experte.",
-      "long_desc": "Le mandat le plus engageant : MAPA défend votre bien comme s'il était le sien. Un interlocuteur unique, une stratégie marketing dédiée et une négociation menée dans votre seul intérêt jusqu'à l'acte authentique. Durée 3 mois reconductibles.",
-      "bullet_1": "Exclusivité MAPA — un seul interlocuteur",
+      "short_desc": "Engagement total MAPA Property. Marketing premium, exclusivité, négociation experte.",
+      "long_desc": "Le mandat le plus engageant : MAPA Property défend votre bien comme s'il était le sien. Un interlocuteur unique, une stratégie marketing dédiée et une négociation menée dans votre seul intérêt jusqu'à l'acte authentique. Durée 3 mois reconductibles.",
+      "bullet_1": "Exclusivité MAPA Property — un seul interlocuteur",
       "bullet_2": "Marketing premium et reportage photo HDR",
       "bullet_3": "Négociation et défense de votre prix",
       "bullet_4": "Suivi dédié jusqu'à l'acte authentique"
@@ -226,11 +226,11 @@
       "title": "Semi-Exclusif",
       "rate": "4%",
       "rate_suffix": "HT + 17% TVA",
-      "short_desc": "MAPA en chef de file, avec un second mandataire optionnel.",
-      "long_desc": "Vous bénéficiez du niveau de service MAPA tout en gardant la possibilité d'associer un second mandataire ou un acquéreur direct. Idéal pour des biens à forte visibilité où l'on souhaite tester plusieurs canaux. Durée 3 mois reconductibles.",
-      "bullet_1": "MAPA chef de file, marketing complet",
+      "short_desc": "MAPA Property en chef de file, avec un second mandataire optionnel.",
+      "long_desc": "Vous bénéficiez du niveau de service MAPA Property tout en gardant la possibilité d'associer un second mandataire ou un acquéreur direct. Idéal pour des biens à forte visibilité où l'on souhaite tester plusieurs canaux. Durée 3 mois reconductibles.",
+      "bullet_1": "MAPA Property chef de file, marketing complet",
       "bullet_2": "Second mandataire ou vente directe possible",
-      "bullet_3": "Coordination des visites par MAPA",
+      "bullet_3": "Coordination des visites par MAPA Property",
       "bullet_4": "Accompagnement jusqu'à l'acte authentique"
     },
     "simple": {
@@ -239,9 +239,9 @@
       "rate": "5%",
       "rate_suffix": "HT + 17% TVA",
       "short_desc": "Plusieurs canaux activés en parallèle pour les biens recherchés.",
-      "long_desc": "Le mandat le plus ouvert : MAPA travaille votre bien aux côtés d'autres canaux que vous activez librement. Adapté aux biens très recherchés où la mise en concurrence accélère la vente. Durée 2 mois reconductibles.",
+      "long_desc": "Le mandat le plus ouvert : MAPA Property travaille votre bien aux côtés d'autres canaux que vous activez librement. Adapté aux biens très recherchés où la mise en concurrence accélère la vente. Durée 2 mois reconductibles.",
       "bullet_1": "Mandat non exclusif — plusieurs canaux",
-      "bullet_2": "Diffusion MAPA sur tous nos supports",
+      "bullet_2": "Diffusion MAPA Property sur tous nos supports",
       "bullet_3": "Coordination souple avec vos autres canaux",
       "bullet_4": "Accompagnement jusqu'à l'acte authentique"
     },
@@ -250,10 +250,10 @@
       "title": "Autonome",
       "rate": "1%",
       "rate_suffix": "HT + 17% TVA",
-      "short_desc": "Vous gérez les visites, MAPA sécurise le juridique et le notarial.",
-      "long_desc": "Pour les vendeurs autonomes qui veulent maîtriser leurs visites tout en bénéficiant d'un filet de sécurité juridique et notarial. MAPA intervient sur la rédaction, la conformité et le suivi notarial. Durée 2 mois reconductibles.",
+      "short_desc": "Vous gérez les visites, MAPA Property sécurise le juridique et le notarial.",
+      "long_desc": "Pour les vendeurs autonomes qui veulent maîtriser leurs visites tout en bénéficiant d'un filet de sécurité juridique et notarial. MAPA Property intervient sur la rédaction, la conformité et le suivi notarial. Durée 2 mois reconductibles.",
       "bullet_1": "Vous gérez les visites en autonomie",
-      "bullet_2": "Backup juridique MAPA sur les documents",
+      "bullet_2": "Backup juridique MAPA Property sur les documents",
       "bullet_3": "Coordination notariale assurée",
       "bullet_4": "Conformité et conseil à chaque étape"
     }
@@ -304,7 +304,7 @@
   },
   "blog_teaser": {
     "eyebrow": "Édito",
-    "title": "Insights MAPA",
+    "title": "Insights MAPA Property",
     "see_all": "Voir tous les articles"
   },
   "contact_cta": {
@@ -460,11 +460,11 @@
   },
   "mandate_exclusif": {
     "title": "Mandat Exclusif",
-    "intro": "Le mandat de référence MAPA. Engagement réciproque maximal, déploiement complet de notre force commerciale et de nos canaux confidentiels, taux préférentiel.",
+    "intro": "Le mandat de référence MAPA Property. Engagement réciproque maximal, déploiement complet de notre force commerciale et de nos canaux confidentiels, taux préférentiel.",
     "highlight_1_title": "Une seule agence, un seul interlocuteur",
     "highlight_1_text": "Concentration des moyens, coordination simplifiée, cohérence du discours commercial.",
     "highlight_2_title": "Pack Vidéo en option (déductible)",
-    "highlight_2_text": "Tournage professionnel, drone si pertinent, montage. Option payante à la signature : montant déduit de la commission à l'acte notarié, uniquement si MAPA conclut la vente.",
+    "highlight_2_text": "Tournage professionnel, drone si pertinent, montage. Option payante à la signature : montant déduit de la commission à l'acte notarié, uniquement si MAPA Property conclut la vente.",
     "highlight_3_title": "Diffusion off-market d'abord",
     "highlight_3_text": "Activation de notre fichier qualifié et de nos partenaires avant toute mise en ligne.",
     "highlight_4_title": "Taux préférentiel",
@@ -481,12 +481,12 @@
   },
   "mandate_semi_exclusif": {
     "title": "Mandat Semi-Exclusif",
-    "intro": "Vous gardez la main sur votre cercle privé, MAPA mobilise ses canaux. Un équilibre apprécié des vendeurs avertis qui souhaitent associer leur réseau à notre savoir-faire. 4% HT (+ 17% TVA), durée 2 mois reconductibles.",
+    "intro": "Vous gardez la main sur votre cercle privé, MAPA Property mobilise ses canaux. Un équilibre apprécié des vendeurs avertis qui souhaitent associer leur réseau à notre savoir-faire. 4% HT (+ 17% TVA), durée 2 mois reconductibles.",
     "highlight_1_title": "Liberté + expertise",
-    "highlight_1_text": "Vous pouvez présenter votre bien à votre cercle de connaissances, MAPA agit en parallèle.",
+    "highlight_1_text": "Vous pouvez présenter votre bien à votre cercle de connaissances, MAPA Property agit en parallèle.",
     "highlight_2_title": "Pack marketing complet",
-    "highlight_2_text": "Photo, diffusion premium. Pack Vidéo en option payante (déductible si MAPA conclut).",
-    "highlight_3_title": "Honoraires si MAPA présente l'acquéreur",
+    "highlight_2_text": "Photo, diffusion premium. Pack Vidéo en option payante (déductible si MAPA Property conclut).",
+    "highlight_3_title": "Honoraires si MAPA Property présente l'acquéreur",
     "highlight_3_text": "Vous ne payez les honoraires que si la vente résulte de notre intervention directe ou indirecte.",
     "service_1": "Visite de cadrage et estimation",
     "service_2": "Reportage photo professionnel",
@@ -503,7 +503,7 @@
     "intro": "Pour les biens recherchés où plusieurs canaux peuvent être actifs en parallèle. Vous pouvez confier votre vente à plusieurs agences. 5% HT (+ 17% TVA), durée 2 mois reconductibles.",
     "highlight_1_title": "Aucune exclusivité",
     "highlight_1_text": "Vous gardez votre liberté totale de mandater d'autres professionnels.",
-    "highlight_2_title": "Engagement modéré de MAPA",
+    "highlight_2_title": "Engagement modéré de MAPA Property",
     "highlight_2_text": "Mise en ligne et activation modérée de nos canaux — l'investissement marketing complet est réservé à l'Exclusif.",
     "highlight_3_title": "Honoraires majorés",
     "highlight_3_text": "5% HT (+ 17% TVA) pour compenser le risque commercial.",
@@ -523,7 +523,7 @@
     "highlight_1_title": "Vous restez le pilote",
     "highlight_1_text": "Annonce, visites, négociation : vous gérez. Nous intervenons sur demande.",
     "highlight_2_title": "Sécurité juridique",
-    "highlight_2_text": "Compromis, conditions suspensives, coordination notariale assurés par MAPA.",
+    "highlight_2_text": "Compromis, conditions suspensives, coordination notariale assurés par MAPA Property.",
     "highlight_3_title": "Honoraires fixes",
     "highlight_3_text": "1% HT (+ 17% TVA) pour le volet juridique et notarial uniquement.",
     "service_1": "Estimation initiale",
@@ -558,7 +558,7 @@
     "when_text": "Vous n'avez pas le temps ou le réseau pour identifier vous-même le bien idéal, ou vous cherchez à l'international (où l'opacité du marché est élevée). Vous voulez un conseil qui défend exclusivement votre intérêt — pas un courtier qui sert deux maîtres."
   },
   "page_sell": {
-    "eyebrow": "Vendre avec MAPA",
+    "eyebrow": "Vendre avec MAPA Property",
     "title": "Confier la vente de votre bien.",
     "intro": "Une seule règle : la cohérence. Quatre formules pour vendre selon votre niveau d'engagement, et une méthode unique — la nôtre.",
     "step_one_title": "Estimation et cadrage",
@@ -575,7 +575,7 @@
     "estimate_cta": "Estimer mon bien"
   },
   "page_rent": {
-    "eyebrow": "Louer avec MAPA",
+    "eyebrow": "Louer avec MAPA Property",
     "title": "Trouver, louer, gérer.",
     "intro": "Recherche d'une location, mise en location de votre bien, gestion locative à la carte. Toujours dans le respect du plafond loyer 5% (loi 21.09.2006).",
     "find_label": "Trouver",
@@ -728,7 +728,7 @@
     "meeting_value": "Luxembourg-Ville, sur site (dans le bien visité), à votre domicile, ou en visioconférence."
   },
   "blog_page": {
-    "eyebrow": "Édito MAPA",
+    "eyebrow": "Édito MAPA Property",
     "title": "Insights & analyses.",
     "intro": "Décryptages marché, fiscalité, off-market, mandats. Une lecture lente pour des décisions précises.",
     "empty": "Aucun article publié pour le moment.",
@@ -742,7 +742,7 @@
   },
   "arcova": {
     "eyebrow": "ARCOVA — Espace privé",
-    "title": "ARCOVA · l'accès privé MAPA.",
+    "title": "ARCOVA · l'accès privé MAPA Property.",
     "intro": "Un espace contractuel réservé aux clients sous mandat MAPA Property : dossiers off-market complets, propositions confidentielles, échanges sécurisés. Sur invitation uniquement.",
     "waitlist_title": "Demande d'accès",
     "waitlist_text": "L'accès à ARCOVA est délivré au cas par cas, après un entretien et la signature d'un NDA contractuel. Pour rejoindre la liste d'attente, contactez-nous directement.",
@@ -777,7 +777,7 @@
     "s3_title": "3. Limites méthodologiques",
     "s3_body": "Le simulateur couvre neuf pays : Luxembourg, France, Belgique, Allemagne, Monaco, Suisse, Italie, Espagne et Portugal. Les coûts inclus sont les droits d'enregistrement / mutation, les frais notariés réglementés, la TVA applicable au neuf, et les principaux abattements de droit commun (primo-accédant, résidence principale, profil familial). Sont exclus : honoraires d'agence, diagnostics techniques, taxes locales annuelles, charges de copropriété, intérêts d'emprunt, assurances, frais bancaires, conversion de devises, fiscalité personnelle de l'acquéreur (IR, IFI, plus-values) et frais postérieurs à l'acquisition. La variabilité régionale (Länder allemands, Communautés autonomes espagnoles, Régions belges, cantons suisses) est intégrée à la maille la plus fine disponible, mais reste indicative. La réglementation immobilière évolue fréquemment : une vérification auprès d'un notaire local agréé à la date effective de la transaction est indispensable.",
     "s4_title": "4. Limitation de responsabilité — MAPA SYNERGY Sàrl",
-    "s4_body": "MAPA SYNERGY Sàrl (LBR B241974, TVA LU 31988923, AE N°10108681/0-1-2-3, matricule 2020 2407 901), exploitant la marque MAPA PROPERTY, ainsi que ses dirigeants, salariés, partenaires et prestataires, déclinent expressément toute responsabilité civile, fiscale ou pénale quant à l'exactitude, l'exhaustivité, la disponibilité ou l'actualité des informations affichées par le simulateur, et quant aux décisions d'acquisition, de financement ou d'investissement prises sur la base de ces estimations. Aucun recours indemnitaire ne pourra être engagé contre MAPA SYNERGY Sàrl sur ce fondement.",
+    "s4_body": "MAPA SYNERGY Sàrl (LBR B241974, TVA LU 31988923, AE N°10108681/0-1-2-3, matricule 2020 2407 901), exploitant la marque MAPA Property PROPERTY, ainsi que ses dirigeants, salariés, partenaires et prestataires, déclinent expressément toute responsabilité civile, fiscale ou pénale quant à l'exactitude, l'exhaustivité, la disponibilité ou l'actualité des informations affichées par le simulateur, et quant aux décisions d'acquisition, de financement ou d'investissement prises sur la base de ces estimations. Aucun recours indemnitaire ne pourra être engagé contre MAPA SYNERGY Sàrl sur ce fondement.",
     "s5_title": "5. Obligations de l'utilisateur",
     "s5_body": "L'utilisateur reconnaît que l'usage du simulateur ne le dispense en aucun cas de la consultation OBLIGATOIRE d'un notaire local agréé dans le pays de l'acquisition, ainsi que, le cas échéant, d'un conseiller fiscal indépendant et d'un avocat spécialisé. Toute décision engageante (signature de compromis, versement d'arrhes, demande de prêt, déclaration fiscale) doit reposer sur des chiffrages contradictoires fournis par ces professionnels et non sur les estimations du simulateur.",
     "s6_title": "6. Recommandation MAPA Property",

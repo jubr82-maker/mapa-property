@@ -503,7 +503,7 @@
     "intro": "For sought-after properties where multiple channels can run in parallel. 5% excl. VAT (+ 17% VAT), 2-month renewable term.",
     "highlight_1_title": "No exclusivity",
     "highlight_1_text": "You retain full freedom to mandate other professionals.",
-    "highlight_2_title": "Moderate MAPA engagement",
+    "highlight_2_title": "Moderate MAPA Property engagement",
     "highlight_2_text": "Listing and moderate channel activation — full marketing investment is reserved for Exclusive.",
     "highlight_3_title": "Higher fees",
     "highlight_3_text": "5% excl. VAT (+ 17% VAT) to offset commercial risk.",
@@ -523,7 +523,7 @@
     "highlight_1_title": "You stay in the driver's seat",
     "highlight_1_text": "Listing, viewings, negotiation: you handle it. We step in on request.",
     "highlight_2_title": "Legal safety",
-    "highlight_2_text": "Compromise, suspensive conditions, notarial coordination — handled by MAPA.",
+    "highlight_2_text": "Compromise, suspensive conditions, notarial coordination — handled by MAPA Property.",
     "highlight_3_title": "Fixed fees",
     "highlight_3_text": "1% excl. VAT (+ 17% VAT) for the legal and notarial side only.",
     "service_1": "Initial valuation",
@@ -558,7 +558,7 @@
     "when_text": "You don't have the time or the network to identify the ideal property yourself, or you are looking abroad (where market opacity is high). You want advice that defends exclusively your interest — not a broker serving two masters."
   },
   "page_sell": {
-    "eyebrow": "Sell with MAPA",
+    "eyebrow": "Sell with MAPA Property",
     "title": "Entrust the sale of your property.",
     "intro": "One rule: consistency. Four formulas to sell according to your level of engagement, and a single method — ours.",
     "step_one_title": "Valuation and framing",
@@ -575,7 +575,7 @@
     "estimate_cta": "Estimate my property"
   },
   "page_rent": {
-    "eyebrow": "Rent with MAPA",
+    "eyebrow": "Rent with MAPA Property",
     "title": "Find, list, manage.",
     "intro": "Find a rental, list your property, à la carte property management. Always within the 5% rent cap (law of 21 September 2006).",
     "find_label": "Find",
@@ -728,7 +728,7 @@
     "meeting_value": "Luxembourg-City, on site (at the property), at your home, or by video call."
   },
   "blog_page": {
-    "eyebrow": "MAPA Editorial",
+    "eyebrow": "MAPA Property Editorial",
     "title": "Insights & analyses.",
     "intro": "Market decryptions, taxation, off-market, mandates. Slow reading for precise decisions.",
     "empty": "No article published yet.",
@@ -742,7 +742,7 @@
   },
   "arcova": {
     "eyebrow": "ARCOVA — Private space",
-    "title": "ARCOVA · the MAPA private access.",
+    "title": "ARCOVA · the MAPA Property private access.",
     "intro": "A contractual space reserved for MAPA Property mandate clients: complete off-market files, confidential proposals, secure exchanges. By invitation only.",
     "waitlist_title": "Access request",
     "waitlist_text": "ARCOVA access is granted case by case, after an interview and the signature of a contractual NDA. To join the waitlist, contact us directly.",
@@ -777,7 +777,7 @@
     "s3_title": "3. Methodological limitations",
     "s3_body": "The simulator covers nine countries: Luxembourg, France, Belgium, Germany, Monaco, Switzerland, Italy, Spain and Portugal. Costs included are registration / transfer duties, regulated notarial fees, VAT applicable to new-build, and the main common-law allowances (first-time buyer, primary residence, family profile). Excluded are: agency fees, technical diagnostics, annual local taxes, condominium charges, loan interest, insurance, banking fees, currency conversion, the buyer's personal taxation (IR, IFI, capital gains) and any post-acquisition costs. Regional variability (German Länder, Spanish autonomous communities, Belgian regions, Swiss cantons) is integrated at the finest available granularity but remains indicative. Real estate regulation evolves frequently: a check with a locally licensed notary at the effective transaction date is essential.",
     "s4_title": "4. Limitation of liability — MAPA SYNERGY Sàrl",
-    "s4_body": "MAPA SYNERGY Sàrl (LBR B241974, VAT LU 31988923, AE N°10108681/0-1-2-3, registration number 2020 2407 901), operating the MAPA PROPERTY brand, together with its directors, employees, partners and service providers, expressly declines any civil, tax or criminal liability with respect to the accuracy, completeness, availability or timeliness of the information displayed by the simulator, and with respect to acquisition, financing or investment decisions made on the basis of these estimates. No claim for damages may be brought against MAPA SYNERGY Sàrl on this basis.",
+    "s4_body": "MAPA SYNERGY Sàrl (LBR B241974, VAT LU 31988923, AE N°10108681/0-1-2-3, registration number 2020 2407 901), operating the MAPA Property PROPERTY brand, together with its directors, employees, partners and service providers, expressly declines any civil, tax or criminal liability with respect to the accuracy, completeness, availability or timeliness of the information displayed by the simulator, and with respect to acquisition, financing or investment decisions made on the basis of these estimates. No claim for damages may be brought against MAPA SYNERGY Sàrl on this basis.",
     "s5_title": "5. User obligations",
     "s5_body": "The user acknowledges that use of the simulator does not in any way release them from the MANDATORY consultation of a locally licensed notary in the country of acquisition, as well as, where applicable, of an independent tax advisor and a specialised lawyer. Any binding decision (signing of a preliminary contract, payment of a deposit, loan application, tax declaration) must rely on contradictory figures provided by these professionals and not on the simulator's estimates.",
     "s6_title": "6. MAPA Property recommendation",

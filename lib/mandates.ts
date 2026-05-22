@@ -18,7 +18,7 @@ export const MANDATES: Record<MandateType, MandateConfig> = {
     slug: "exclusif",
     rate: "3 %",
     rateNote: "HT + 17 % TVA · prix net vendeur",
-    duration: "À partir de 2 mois (recommandation MAPA), reconductible tacitement, résiliable avec préavis de 15 jours",
+    duration: "À partir de 2 mois (recommandation MAPA Property), reconductible tacitement, résiliable avec préavis de 15 jours",
     formType: "mandate_exclusive",
     formCta: "Demander un mandat exclusif",
     defaultMessage:
@@ -31,7 +31,7 @@ export const MANDATES: Record<MandateType, MandateConfig> = {
     slug: "semi-exclusif",
     rate: "4 %",
     rateNote: "HT + 17 % TVA · prix net vendeur",
-    duration: "À partir de 2 mois (recommandation MAPA), reconductible tacitement, résiliable avec préavis de 15 jours",
+    duration: "À partir de 2 mois (recommandation MAPA Property), reconductible tacitement, résiliable avec préavis de 15 jours",
     formType: "mandate_semi",
     formCta: "Demander un mandat semi-exclusif",
     defaultMessage:
@@ -44,7 +44,7 @@ export const MANDATES: Record<MandateType, MandateConfig> = {
     slug: "simple",
     rate: "5 %",
     rateNote: "HT + 17 % TVA · prix net vendeur",
-    duration: "À partir de 2 mois (recommandation MAPA), reconductible tacitement, résiliable avec préavis de 15 jours",
+    duration: "À partir de 2 mois (recommandation MAPA Property), reconductible tacitement, résiliable avec préavis de 15 jours",
     formType: "mandate_simple",
     formCta: "Demander un mandat simple",
     defaultMessage:
@@ -57,7 +57,7 @@ export const MANDATES: Record<MandateType, MandateConfig> = {
     slug: "autonome",
     rate: "1 %",
     rateNote: "HT + 17 % TVA · backup juridique et notarial",
-    duration: "À partir de 2 mois (recommandation MAPA), reconductible tacitement, résiliable avec préavis de 15 jours",
+    duration: "À partir de 2 mois (recommandation MAPA Property), reconductible tacitement, résiliable avec préavis de 15 jours",
     formType: "mandate_autonomous",
     formCta: "Discuter d'un mandat autonome",
     defaultMessage:
@@ -70,7 +70,7 @@ export const MANDATES: Record<MandateType, MandateConfig> = {
     slug: "recherche",
     rate: "Selon mission",
     rateNote: "+ 17 % TVA · barème selon juridiction et complexité",
-    duration: "À partir de 2 mois (recommandation MAPA), reconductible tacitement, résiliable avec préavis de 15 jours",
+    duration: "À partir de 2 mois (recommandation MAPA Property), reconductible tacitement, résiliable avec préavis de 15 jours",
     formType: "search_mandate",
     formCta: "Démarrer un mandat de recherche",
     defaultMessage:

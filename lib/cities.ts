@@ -64,14 +64,14 @@ const belair: City = {
     "Tissu d'expatriés cadres dirigeants stable",
   ],
   intro: {
-    fr: "Belair est le quartier résidentiel le plus convoité de Luxembourg-Ville. Sa réputation tient à trois facteurs : la qualité du parc bâti (maisons de maître des années 1920 à 1970, copropriétés haut de gamme, programmes neufs récents), la stabilité de sa population (cadres dirigeants, fonctionnaires européens, professions libérales installés) et la rareté du foncier disponible. Le marché s'étale de 8 500 €/m² (très ancien à rénover, classes énergétiques H ou I) à 16 000 €/m² (neuf premium A++ avec terrasse et vue dégagée), avec un médian autour de 11 500 €/m². Les biens en classe énergie E ou F ne se négocient pas en deçà de 8 500 €/m² ; les prix inférieurs constatés ailleurs dans la capitale ne s'appliquent pas à Belair. Le quartier compte des écoles privées prisées (ISL mitoyen, Vauban à 2 km, École Européenne I à Kirchberg), des liaisons rapides vers le centre historique et le quartier d'affaires Kirchberg. Pour les acquéreurs étrangers, le mandat de recherche MAPA mobilise un réseau off-market structuré ; les biens visibles sur les portails publics ne représentent qu'une fraction du marché réel.",
-    en: "Belair is the most sought-after residential district in Luxembourg City. Its reputation rests on three factors: the quality of the building stock (1920s–1970s manor houses, high-end condominiums, recent new-build), the stability of its population (senior executives, EU civil servants, established professionals) and the scarcity of available land. The market ranges from €8,500/sqm (older property to renovate, energy class H or I) to €16,000/sqm (premium new-build A++ with terrace and view), with a median around €11,500/sqm. Energy class E or F properties do not trade below €8,500/sqm; the lower prices seen elsewhere in the capital do not apply to Belair. The district is home to several prestigious private schools (ISL adjacent, Vauban 2 km away, European School I in Kirchberg), with quick links to the historic centre and Kirchberg business district. For foreign buyers, MAPA's search mandate activates a structured off-market network; properties visible on public portals are only a fraction of the real market.",
-    de: "Belair ist das gefragteste Wohnviertel Luxemburg-Stadt. Sein Ruf beruht auf drei Faktoren: Qualität des Gebäudebestands (Herrenhäuser der 1920–1970er Jahre, hochwertige Eigentumswohnungen, jüngste Neubauten), Stabilität der Bewohnerschaft (Führungskräfte, EU-Beamte, etablierte Freiberufler) und Knappheit des Baulands. Die Preise reichen von 8.500 €/m² (sehr alt, sanierungsbedürftig, Energieklassen H oder I) bis 16.000 €/m² (Neubau Premium A++ mit Terrasse und freier Sicht), Median rund 11.500 €/m². Objekte der Energieklassen E oder F werden nicht unter 8.500 €/m² gehandelt; in der Hauptstadt anderswo beobachtete Niedrigpreise gelten in Belair nicht. Das Viertel verfügt über angesehene Privatschulen (ISL angrenzend, Vauban 2 km, Europaschule I in Kirchberg) und schnelle Verbindungen zur Altstadt und nach Kirchberg. Für ausländische Käufer mobilisiert das MAPA-Suchmandat ein strukturiertes Off-Market-Netzwerk; die auf öffentlichen Portalen sichtbaren Objekte sind nur ein Bruchteil des realen Marktes.",
+    fr: "Belair est le quartier résidentiel le plus convoité de Luxembourg-Ville. Sa réputation tient à trois facteurs : la qualité du parc bâti (maisons de maître des années 1920 à 1970, copropriétés haut de gamme, programmes neufs récents), la stabilité de sa population (cadres dirigeants, fonctionnaires européens, professions libérales installés) et la rareté du foncier disponible. Le marché s'étale de 8 500 €/m² (très ancien à rénover, classes énergétiques H ou I) à 16 000 €/m² (neuf premium A++ avec terrasse et vue dégagée), avec un médian autour de 11 500 €/m². Les biens en classe énergie E ou F ne se négocient pas en deçà de 8 500 €/m² ; les prix inférieurs constatés ailleurs dans la capitale ne s'appliquent pas à Belair. Le quartier compte des écoles privées prisées (ISL mitoyen, Vauban à 2 km, École Européenne I à Kirchberg), des liaisons rapides vers le centre historique et le quartier d'affaires Kirchberg. Pour les acquéreurs étrangers, le mandat de recherche MAPA Property mobilise un réseau off-market structuré ; les biens visibles sur les portails publics ne représentent qu'une fraction du marché réel.",
+    en: "Belair is the most sought-after residential district in Luxembourg City. Its reputation rests on three factors: the quality of the building stock (1920s–1970s manor houses, high-end condominiums, recent new-build), the stability of its population (senior executives, EU civil servants, established professionals) and the scarcity of available land. The market ranges from €8,500/sqm (older property to renovate, energy class H or I) to €16,000/sqm (premium new-build A++ with terrace and view), with a median around €11,500/sqm. Energy class E or F properties do not trade below €8,500/sqm; the lower prices seen elsewhere in the capital do not apply to Belair. The district is home to several prestigious private schools (ISL adjacent, Vauban 2 km away, European School I in Kirchberg), with quick links to the historic centre and Kirchberg business district. For foreign buyers, MAPA Property's search mandate activates a structured off-market network; properties visible on public portals are only a fraction of the real market.",
+    de: "Belair ist das gefragteste Wohnviertel Luxemburg-Stadt. Sein Ruf beruht auf drei Faktoren: Qualität des Gebäudebestands (Herrenhäuser der 1920–1970er Jahre, hochwertige Eigentumswohnungen, jüngste Neubauten), Stabilität der Bewohnerschaft (Führungskräfte, EU-Beamte, etablierte Freiberufler) und Knappheit des Baulands. Die Preise reichen von 8.500 €/m² (sehr alt, sanierungsbedürftig, Energieklassen H oder I) bis 16.000 €/m² (Neubau Premium A++ mit Terrasse und freier Sicht), Median rund 11.500 €/m². Objekte der Energieklassen E oder F werden nicht unter 8.500 €/m² gehandelt; in der Hauptstadt anderswo beobachtete Niedrigpreise gelten in Belair nicht. Das Viertel verfügt über angesehene Privatschulen (ISL angrenzend, Vauban 2 km, Europaschule I in Kirchberg) und schnelle Verbindungen zur Altstadt und nach Kirchberg. Für ausländische Käufer mobilisiert das MAPA Property-Suchmandat ein strukturiertes Off-Market-Netzwerk; die auf öffentlichen Portalen sichtbaren Objekte sind nur ein Bruchteil des realen Marktes.",
   },
   metaDescription: {
     fr: "Belair, quartier le plus recherché de Luxembourg-Ville. Maisons de maître, programmes neufs A++. 8500 à 16000 €/m². Mandat MAPA Property.",
     en: "Belair, most sought-after district of Luxembourg City. Manor houses, new-build A++. €8500 to €16000/sqm. MAPA Property mandate.",
-    de: "Belair, gefragtestes Viertel Luxemburg-Stadt. Herrenhäuser, Neubau A++. 8500 bis 16000 €/m². MAPA-Property-Mandat.",
+    de: "Belair, gefragtestes Viertel Luxemburg-Stadt. Herrenhäuser, Neubau A++. 8500 bis 16000 €/m². MAPA Property-Property-Mandat.",
   },
 };
 
@@ -111,7 +111,7 @@ const kirchberg: City = {
   metaDescription: {
     fr: "Kirchberg : quartier d'affaires européen, neuf A++, tram T1. 8500 à 14000 €/m². Mandats MAPA Property.",
     en: "Kirchberg: European business district, new A++, T1 tram. €8500 to €14000/sqm. MAPA Property mandates.",
-    de: "Kirchberg: europäisches Geschäftsviertel, Neubau A++, T1-Straßenbahn. 8500 bis 14000 €/m². MAPA-Property-Mandate.",
+    de: "Kirchberg: europäisches Geschäftsviertel, Neubau A++, T1-Straßenbahn. 8500 bis 14000 €/m². MAPA Property-Property-Mandate.",
   },
 };
 
@@ -323,7 +323,7 @@ const eschSurAlzette: City = {
   metaDescription: {
     fr: "Esch-sur-Alzette : 2ᵉ ville du Luxembourg, Belval, capitale culturelle 2022. 5500 à 9500 €/m². Mandats MAPA Property.",
     en: "Esch-sur-Alzette: Luxembourg's 2nd city, Belval, 2022 cultural capital. €5500 to €9500/sqm. MAPA Property mandates.",
-    de: "Esch an der Alzette: zweitgrößte Stadt Luxemburgs, Belval, Kulturhauptstadt 2022. 5500 bis 9500 €/m². MAPA-Property-Mandate.",
+    de: "Esch an der Alzette: zweitgrößte Stadt Luxemburgs, Belval, Kulturhauptstadt 2022. 5500 bis 9500 €/m². MAPA Property-Property-Mandate.",
   },
 };
 
@@ -343,7 +343,7 @@ const differdange: City = {
   metaDescription: {
     fr: "Differdange : 3ᵉ ville du Luxembourg, frontalière, 5000 à 8500 €/m². Mandats MAPA Property.",
     en: "Differdange: Luxembourg's 3rd city, border location, €5000 to €8500/sqm. MAPA Property mandates.",
-    de: "Differdingen: drittgrößte Stadt Luxemburgs, grenznah, 5000 bis 8500 €/m². MAPA-Property-Mandate.",
+    de: "Differdingen: drittgrößte Stadt Luxemburgs, grenznah, 5000 bis 8500 €/m². MAPA Property-Property-Mandate.",
   },
 };
 
@@ -362,7 +362,7 @@ const dudelange: City = {
   metaDescription: {
     fr: "Dudelange : 4ᵉ ville, frontière FR, CNA, 5500 à 9000 €/m². Mandats MAPA Property.",
     en: "Dudelange: 4th city, French border, CNA, €5500 to €9000/sqm. MAPA Property mandates.",
-    de: "Düdelingen: viertgrößte Stadt, Grenze FR, CNA, 5500 bis 9000 €/m². MAPA-Property-Mandate.",
+    de: "Düdelingen: viertgrößte Stadt, Grenze FR, CNA, 5500 bis 9000 €/m². MAPA Property-Property-Mandate.",
   },
 };
 
@@ -382,7 +382,7 @@ const mamer: City = {
   metaDescription: {
     fr: "Mamer : couronne ouest, École Européenne II, 7000 à 12000 €/m². Mandats MAPA Property.",
     en: "Mamer: western ring, European School II, €7000 to €12000/sqm. MAPA Property mandates.",
-    de: "Mamer: westlicher Ring, Europaschule II, 7000 bis 12000 €/m². MAPA-Property-Mandate.",
+    de: "Mamer: westlicher Ring, Europaschule II, 7000 bis 12000 €/m². MAPA Property-Property-Mandate.",
   },
 };
 
@@ -401,7 +401,7 @@ const strassen: City = {
   metaDescription: {
     fr: "Strassen : couronne ouest premium, familles internationales. 7500 à 13000 €/m². Mandats MAPA Property.",
     en: "Strassen: premium western ring, international families. €7500 to €13000/sqm. MAPA Property mandates.",
-    de: "Strassen: Premium-Westring, internationale Familien. 7500 bis 13000 €/m². MAPA-Property-Mandate.",
+    de: "Strassen: Premium-Westring, internationale Familien. 7500 bis 13000 €/m². MAPA Property-Property-Mandate.",
   },
 };
 
