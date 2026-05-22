@@ -160,22 +160,27 @@ body {
   background-color: var(--accent-secondary);
 }
 
-/* STEP3b : glow lime mur sur le bouton CTA Footer "Confier votre projet"
-   (.cta-lime-glow). Halo permanent subtil rgba lime, intensifie au
-   hover. Transition 1s ease pour adoucir l'apparition. */
+/* CORRECTION 3 — Halo accent UNIQUE pour tout le site. Un seul halo lime
+   mûr #CFE542 = rgba(207,229,66), discret comme les CTA d'accueil.
+   Source unique : .halo-accent. Reutilise par .cta-lime-glow (alias) et
+   les pills comparator mandats. Intensite calibree sur le rendu accueil
+   (0.3 base / 0.45 hover) — plus de vert fluo intense ailleurs. */
+.halo-accent,
 .cta-lime-glow {
-  box-shadow: 0 0 30px rgba(207, 229, 66, 0.4);
-  transition: box-shadow 1s ease, background-color 200ms ease;
+  box-shadow: 0 0 30px rgba(207, 229, 66, 0.3);
+  transition: box-shadow 0.4s ease, background-color 200ms ease;
 }
+.halo-accent:hover,
 .cta-lime-glow:hover {
-  box-shadow: 0 0 40px rgba(207, 229, 66, 0.6);
+  box-shadow: 0 0 38px rgba(207, 229, 66, 0.45);
 }
 
-/* SPRINT0 : hover pill comparator mandats — background lime mur + texte
-   sapin. Pas de modification de la bordure (deja 2px lime inline). */
+/* CORRECTION 3 : pills comparator mandats — bordure discrete (1px rgba
+   lime 0.4 via inline page.tsx) + halo-accent. Hover : halo intensifie
+   leger + fond lime tres subtil (PAS bg plein fluo). */
 [data-comparator-pill]:hover {
-  background-color: #CFE542;
-  color: #1F221A;
+  background-color: rgba(207, 229, 66, 0.12);
+  box-shadow: 0 0 38px rgba(207, 229, 66, 0.45);
 }
 
 /* Texte d'accent copper — solid color, pas de gradient transparent */
@@ -724,6 +729,18 @@ body {
 }
 .flip-card.is-flipped .flip-card-inner {
   transform: rotateY(180deg);
+}
+/* CORRECTION 3 (a) : remplace le focus-ring natif navigateur (bleu/vert
+   systeme intense au tap mobile sur role=button tabIndex=0) par un
+   outline cuivre citron discret, clavier uniquement. Au tap/clic
+   (focus non-visible) : aucun ring. Coherence palette Forêt. */
+.flip-card:focus {
+  outline: none;
+}
+.flip-card:focus-visible {
+  outline: 2px solid rgba(212, 165, 116, 0.55);
+  outline-offset: 3px;
+  border-radius: 0.75rem;
 }
 @media (hover: hover) and (pointer: fine) {
   .flip-card:hover .flip-card-inner,
