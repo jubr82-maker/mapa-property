@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchLatestInterestRates } from "@/lib/data";
 import { SimulatorTabs } from "@/components/simulators/SimulatorTabs";
+import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 
 export default async function SimulatorsPage({
   params,
@@ -30,16 +31,9 @@ export default async function SimulatorsPage({
 
         <SimulatorTabs rates={rates} />
 
-        <aside className="mt-12 rounded-xl border border-line bg-bg-soft p-6 text-sm leading-relaxed text-ink-mid">
-          <p className="font-display text-base font-bold text-ink">
-            {t("disclaimer_title")}
-          </p>
-          <p className="mt-2">{t("disclaimer_p1")}</p>
-          <p className="mt-2">{t("disclaimer_p2")}</p>
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-            {t("source")}
-          </p>
-        </aside>
+        {/* Sprint juridique : disclaimer unifie sous les chiffres calcules
+            (remplace l'ancienne mention custom simulators_page.disclaimer_*). */}
+        <DisclaimerLegal className="mt-12" />
       </div>
     </div>
   );

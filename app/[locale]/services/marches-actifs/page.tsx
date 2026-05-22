@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { internationalRegions, luxembourgCommunes } from "@/lib/markets";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
+import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 
 export default async function ActiveMarketsPage({
   params,
@@ -98,9 +99,9 @@ export default async function ActiveMarketsPage({
         </div>
         </FadeInOnScroll>
 
-        <p className="mt-12 max-w-3xl rounded-xl border border-gold/30 bg-bg-soft p-6 text-sm leading-relaxed text-ink-mid">
-          {t("disclaimer")}
-        </p>
+        {/* Sprint juridique : disclaimer unifie sous les tableaux de
+            donnees STATEC/Observatoire (remplace l'ancienne mention custom). */}
+        <DisclaimerLegal className="mt-12" />
       </div>
     </div>
   );
