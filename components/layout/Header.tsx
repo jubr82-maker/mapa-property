@@ -7,6 +7,7 @@ import { Logo } from "@/components/brand/Logo";
 import { HeaderBurger } from "@/components/layout/HeaderBurger";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { SERVICES_ITEMS } from "@/lib/nav-services";
 
 const leftDropdowns = [
   {
@@ -33,12 +34,8 @@ const leftDropdowns = [
 const rightDropdowns = [
   {
     label: "services",
-    items: [
-      { href: "/services/estimer", key: "estimate" },
-      { href: "/services/simulateurs", key: "simulators" },
-      { href: "/services/marches-actifs", key: "markets" },
-      { href: "/legal/honoraires", key: "fees" },
-    ],
+    // HOTFIX nav : source unique SERVICES_ITEMS (5 items, identiques mobile).
+    items: SERVICES_ITEMS,
   },
 ] as const;
 

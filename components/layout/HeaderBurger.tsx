@@ -54,14 +54,10 @@ const groups: Group[] = [
   {
     id: "services",
     label: "services",
-    items: [
-      { href: "/services/estimer", key: "estimate" },
-      { href: "/services/simulateurs", key: "simulators" },
-      { href: "/services/marches-actifs", key: "markets" },
-      { href: "/qui-sommes-nous", key: "about" },
-      { href: "/contact", key: "contact" },
-      { href: "/blog", key: "blog" },
-    ],
+    // HOTFIX nav : source unique SERVICES_ITEMS (5 items, identiques
+    // desktop). Journal/blog + contact RETIRES (Journal = doublon avec
+    // l'onglet top-level ; liste alignee sur la decision Julien option B).
+    items: [...SERVICES_ITEMS],
   },
   {
     id: "journal",
