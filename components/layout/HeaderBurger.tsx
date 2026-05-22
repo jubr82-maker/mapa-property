@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { SERVICES_ITEMS } from "@/lib/nav-services";
+import { SERVICES_ITEMS, RENT_ITEMS, AGENCY_ITEMS } from "@/lib/navigation";
 
 type SubItem = { href: string; key: string };
 type Group = {
@@ -43,9 +43,11 @@ const groups: Group[] = [
     ],
   },
   {
+    // Sprint menu restructure : LOUER devient un groupe dropdown (2 items
+    // RENT_ITEMS), aligne sur desktop.
     id: "rent",
     label: "rent",
-    href: "/biens?transaction=rent",
+    items: [...RENT_ITEMS],
   },
   {
     id: "off_market",
@@ -55,15 +57,17 @@ const groups: Group[] = [
   {
     id: "services",
     label: "services",
-    // HOTFIX nav : source unique SERVICES_ITEMS (5 items, identiques
-    // desktop). Journal/blog + contact RETIRES (Journal = doublon avec
-    // l'onglet top-level ; liste alignee sur la decision Julien option B).
+    // Sprint menu restructure : SERVICES reduit a 3 items (Estimation /
+    // Simulateurs / Marchés actifs). Honoraires + about deplaces vers
+    // AGENCY_ITEMS.
     items: [...SERVICES_ITEMS],
   },
   {
-    id: "journal",
-    label: "journal",
-    href: "/journal",
+    // Sprint menu restructure : L'AGENCE remplace l'ancien onglet JOURNAL
+    // top-level. 4 items via AGENCY_ITEMS (Blog/about/contact/honoraires).
+    id: "agency",
+    label: "agency",
+    items: [...AGENCY_ITEMS],
   },
 ];
 

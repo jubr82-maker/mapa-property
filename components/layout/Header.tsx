@@ -7,7 +7,7 @@ import { Logo } from "@/components/brand/Logo";
 import { HeaderBurger } from "@/components/layout/HeaderBurger";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { SERVICES_ITEMS } from "@/lib/nav-services";
+import { SERVICES_ITEMS, RENT_ITEMS, AGENCY_ITEMS } from "@/lib/navigation";
 
 const leftDropdowns = [
   {
@@ -29,13 +29,23 @@ const leftDropdowns = [
       { href: "/services/estimer", key: "estimate" },
     ],
   },
+  {
+    // Sprint menu restructure : LOUER devient dropdown (etait link simple).
+    label: "rent",
+    items: RENT_ITEMS,
+  },
 ] as const;
 
 const rightDropdowns = [
   {
     label: "services",
-    // HOTFIX nav : source unique SERVICES_ITEMS (5 items, identiques mobile).
+    // Sprint menu restructure : SERVICES reduit a 3 items.
     items: SERVICES_ITEMS,
+  },
+  {
+    // Sprint menu restructure : NOUVEAU L'AGENCE — remplace JOURNAL top-level.
+    label: "agency",
+    items: AGENCY_ITEMS,
   },
 ] as const;
 
@@ -82,12 +92,6 @@ export function Header() {
             {leftDropdowns.map((d) => (
               <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
             ))}
-            <Link
-              href="/biens?transaction=rent"
-              className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
-            >
-              {t("rent")}
-            </Link>
           </nav>
         </div>
 
@@ -130,12 +134,6 @@ export function Header() {
               {rightDropdowns.map((d) => (
                 <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
               ))}
-              <Link
-                href="/journal"
-                className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
-              >
-                {t("journal")}
-              </Link>
             </nav>
             {/* POL3 : poussé à l'extrême droite (ml-auto). */}
             <div className="ml-auto flex items-center gap-2 border-l border-line pl-3">
