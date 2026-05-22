@@ -283,13 +283,18 @@ html {
 .logo-auto {
   display: block;
 }
-/* Mode NUIT : recoloration cuivre citron #e0af6e pour rester lisible
-   sur fond sapin (le wordmark ink noir d'origine serait invisible).
-   .logo-gold force ce filtre quel que soit le mode (tone="dark"). */
+/* Mode NUIT : recoloration cuivre lumière #e0af6e (rgb 224,175,110)
+   pour rester lisible sur fond sapin. Filtre recalibre depuis l'ancien
+   ciblage #D4A574 (rgb 212,165,116) : cible plus claire/doree (+lum,
+   +saturation, hue legerement vers le jaune) → invert/sepia/saturate
+   augmentes, hue-rotate -4°, brightness +. Approximation manuelle (sans
+   calibration DOM) — ajustable si ecart visuel. .logo-gold force ce
+   filtre quel que soit le mode (tone="dark"). Mode jour inchange
+   (PNG bicolore original, aucun filtre). */
 :root.dark .logo-auto,
 .logo-gold {
-  filter: brightness(0) saturate(100%) invert(74%) sepia(55%)
-    saturate(420%) hue-rotate(340deg) brightness(96%) contrast(85%);
+  filter: brightness(0) saturate(100%) invert(76%) sepia(62%)
+    saturate(520%) hue-rotate(336deg) brightness(101%) contrast(88%);
 }
 
 .prose-mapa {
