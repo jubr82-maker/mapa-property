@@ -185,7 +185,7 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
             <Link
               key={s}
               href={`/mandats/${s}`}
-              className="halo-accent rounded-xl px-8 py-5 font-mono text-base font-medium uppercase tracking-[0.18em] text-ink transition-colors"
+              className="halo-accent rounded-xl px-4 py-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-ink transition-colors md:px-8 md:py-5 md:text-base"
               style={{
                 // CORRECTION 3 : bordure discrete 1px rgba lime 0.4 (vs 2px
                 // solid #CFE542 vif) + .halo-accent unifie au halo accueil.

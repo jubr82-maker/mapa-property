@@ -23,8 +23,8 @@ export const MANDATES: Record<MandateType, MandateConfig> = {
     formCta: "Demander un mandat exclusif",
     defaultMessage:
       "Bonjour, je souhaite un mandat exclusif pour la vente de mon bien.",
-    servicesIncluded: 5,
-    servicesExcluded: 2,
+    servicesIncluded: 6,
+    servicesExcluded: 1,
     highlights: 4,
   },
   "semi-exclusif": {
