@@ -268,34 +268,11 @@ html {
   color: var(--ink-mid);
 }
 
-/* ── Logo : recolore le master en or chaud en mode nuit (BUG A) ──
-   L'asset gold dédié (mapa-logo-gold-h96.png) est corrompu (base64
-   inline tronqué → décodage vide → invisible "noir sur noir").
-   Solution sans asset : on garde le master (copper + ink, prouvé bon)
-   et on le teinte en or via filtre CSS classe-based — SSR-safe, pas
-   de useTheme/flash. :root.dark (spécificité 0,2,0) pour battre le
-   :root{} CMS injecté, comme pour les tokens. */
-/* CORRECTION SPRINT : mode JOUR = logo master ORIGINAL bicolore
-   (flamme copper + wordmark ink), AUCUN filtre. L'asset de marque
-   officiel Julien Brebion reste intact en light mode — le filtre sapin
-   STEP3a-bis (logo presque-noir monochrome) est retiré : il rendait le
-   logo terne/monochrome au lieu du bicolore copper/noir attendu. */
-.logo-auto {
-  display: block;
-}
-/* Mode NUIT : recoloration cuivre lumière #e0af6e (rgb 224,175,110)
-   pour rester lisible sur fond sapin. Filtre recalibre depuis l'ancien
-   ciblage #D4A574 (rgb 212,165,116) : cible plus claire/doree (+lum,
-   +saturation, hue legerement vers le jaune) → invert/sepia/saturate
-   augmentes, hue-rotate -4°, brightness +. Approximation manuelle (sans
-   calibration DOM) — ajustable si ecart visuel. .logo-gold force ce
-   filtre quel que soit le mode (tone="dark"). Mode jour inchange
-   (PNG bicolore original, aucun filtre). */
-:root.dark .logo-auto,
-.logo-gold {
-  filter: brightness(0) saturate(100%) invert(76%) sepia(62%)
-    saturate(520%) hue-rotate(336deg) brightness(101%) contrast(88%);
-}
+/* ── Logo : HOTFIX 5 KO — fin des filtres CSS approximatifs.
+   Le logo bicolore est desormais gere par 2 PNG prefabriques
+   (/logo_mapa_nuit.png cuivre, /logo_mapa_jour.png sapin+signe cuivre)
+   switches via useTheme dans components/brand/Logo.tsx. Plus aucune
+   regle .logo-auto / .logo-gold / filter ici. */
 
 .prose-mapa {
   /* POL5 : largeur de lecture élargie 65ch -> 120ch (le conteneur
