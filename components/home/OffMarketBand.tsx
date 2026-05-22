@@ -8,15 +8,13 @@ export function OffMarketBand() {
   const t = useTranslations("offmarket_band");
 
   return (
-    // STEP3a-FORET : fond sapin profond var(--offmarket-bg) #1F221A,
-    // identique en jour ET nuit (palette Forêt stricte). Le texte
-    // reste white pour contraste maximum sur sapin.
-    // - Padding vertical DOUBLÉ pour la visibilité (py-5/20 → py-10/40).
-    // - Titre +30% via text-* responsive ajoutés sur t-h2-contrast.
-    // - Badge MANDAT EXCLUSIF en haut, copper (gold-deep, le token réel
-    //   du projet — "text-copper" n'existe pas comme classe Tailwind ici).
+    // STEP3a-FORET : fond sapin profond var(--offmarket-bg) #1F221A.
+    // ECHO : couleur texte UNIFORME crème velin #F0E6CC sur toute la
+    // section (descriptif + liste) — plus d'opacités variables
+    // (white/80, white/70). Badge eyebrow et puces gardent leur accent
+    // cuivre citron (label/marqueurs distincts, hors corps de texte).
     <section
-      className="relative overflow-hidden px-6 py-10 text-white md:py-40 lg:px-10 lg:py-40"
+      className="relative overflow-hidden px-6 py-10 text-[#F0E6CC] md:py-40 lg:px-10 lg:py-40"
       style={{
         backgroundColor: "var(--offmarket-bg)",
         transition: "background-color 0.4s ease",
@@ -40,13 +38,13 @@ export function OffMarketBand() {
           <h2 className="t-h2-contrast mt-3 text-4xl md:text-5xl lg:text-6xl">
             {t("title")}
           </h2>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/80 md:mt-5 md:text-base">
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#F0E6CC] md:mt-5 md:text-base">
             {t("description")}
           </p>
         </div>
 
         <div className="flex flex-col gap-3 md:gap-4 lg:items-end">
-          <ul className="space-y-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/70 md:space-y-3 md:text-xs">
+          <ul className="space-y-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#F0E6CC] md:space-y-3 md:text-xs">
             <li>
               <FadeInOnScroll
                 delay={0}
