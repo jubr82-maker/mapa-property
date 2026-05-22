@@ -45,6 +45,13 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* HERO-H2 : copper charte historique MAPA #B8865A pour les accents
+   editoriaux (sous-accroche Hero, logo light). Distinct de var(--copper)
+   = cuivre citron #D4A574 (palette Forêt design). Identique jour/nuit. */
+:root {
+  --copper-charte: #B8865A;
+}
+
 /* ============================================================
    MAPA Property — Palette MAPA officielle (copper FIXE)
    Light mode = défaut. Dark mode via class="dark" sur <html>

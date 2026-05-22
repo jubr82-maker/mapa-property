@@ -10,7 +10,7 @@ export async function Hero({ locale }: { locale: string }) {
   // POL4 : hero nettoyé — pill (source "TEST CMS LIVE" via override CMS),
   // HUD data-corners (FRAME 001, coords, etc.) et chips meta retirés.
   // CMS overlay conservé pour les éléments restants.
-  const [eyebrow, titleLine1, titleLine2, titleLine3, subtitle, scroll] =
+  const [eyebrow, titleLine1, titleLine2, titleLine3, subtitle, scroll, h2Subtitle] =
     await Promise.all([
       siteContent("home.hero.eyebrow", locale, t("eyebrow")),
       siteContent("home.hero.title_line_1", locale, t("title_line_1")),
@@ -18,6 +18,9 @@ export async function Hero({ locale }: { locale: string }) {
       siteContent("home.hero.title_line_3", locale, t("title_line_3")),
       siteContent("home.hero.subtitle", locale, t("subtitle")),
       siteContent("home.hero.scroll", locale, t("scroll")),
+      // HERO-H2 : sous-accroche editoriale CMS (3 locales en DB). Fallback
+      // "" → si absente/vide, le <h2> n'est PAS rendu (cf. JSX conditionnel).
+      siteContent("home.hero.h2_subtitle", locale, ""),
     ]);
   const videoDesktop = sbUrl("Videos", "mapa_showcase_desktop.mp4");
   const videoMobile = sbUrl("Videos", "mapa_showcase_mobile.mp4");
@@ -105,6 +108,19 @@ export async function Hero({ locale }: { locale: string }) {
         </h1>
 
         <SignatureLine />
+
+        {/* HERO-H2 : sous-accroche editoriale (CMS home.hero.h2_subtitle).
+            Copper charte #B8865A via token --copper-charte (≠ var(--copper)
+            cuivre citron Forêt). Italic regular, max-w 640, aligne sur le
+            H1 (gauche). Rendu conditionnel : rien si vide/absent. */}
+        {h2Subtitle && (
+          <h2
+            className="mt-6 max-w-[640px] text-[15px] font-normal italic leading-relaxed md:mt-8 md:text-[19px]"
+            style={{ color: "var(--copper-charte)" }}
+          >
+            {h2Subtitle}
+          </h2>
+        )}
 
         {/* STEP3c-1-bis : subtitle multi-lignes (vertus rares). \n preserves
             via whiteSpace pre-line — saut de ligne CSS sans <br/>. */}
