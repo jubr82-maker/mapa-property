@@ -1,44 +1,53 @@
 "use client";
 
 /**
- * SPRINT1 — Featured polish desktop : ralenti + parallax lateral + bidirectionnel.
+ * SPRINT3 T4 — Featured dispatcher device-aware.
  *
- * Comportement (ordre temporel) :
- *  1. Stagger d'apparition : cards en opacity 0 + translateX -80px,
- *     IntersectionObserver à threshold 0.15. À l'entrée → reveal
- *     stagger 600ms (vs 300ms STEP3c-RECODE), transition CSS 1000ms
- *     (vs 700ms). Bidirectionnel : à la sortie viewport, disparition
- *     stagger inverse 200ms (droite→gauche).
- *  2. Parallax X scroll-piloté : un wrapper [data-featured-inner] reçoit
- *     translateX -200px max selon la position de la section dans le
- *     viewport. Le track parent garde son scroll horizontal natif
- *     (overflow-x), le parallax X se compose dessus.
- *  3. Bouton CTA hors [data-featured-inner] → ne subit pas le parallax,
- *     reste atteignable à droite après scroll natif.
+ *  - desktop-A (>=1280px pointer fine) / pre-mount : FeaturedDesktop
+ *    = comportement SPRINT1 (grid overflow-x scroll-snap + stagger
+ *    IntersectionObserver gauche→droite + parallax X + bidirectionnel).
+ *    INCHANGÉ.
+ *  - mobile-B / tablet-A-light : FeaturedMobileEmbla = Embla pleine
+ *    largeur 1 card + peek 8% du suivant, swipe natif, autoplay 4000ms,
+ *    dots crème #F0E6CC inactif / cuivre citron #D4A574 actif.
  *
- * Pill OFF-MARKET : couleur custom palette Forêt (cuivre citron #D4A574,
- * background rgba 0.15, border rgba 0.5) — appliquée dans FeaturedCard.
+ * FeaturedCard + ViewAllCTA partages entre les deux rendus.
  */
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 import type { HomeFeatured } from "@/lib/data";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
+import { useDeviceMode } from "@/hooks/useDeviceMode";
 
 interface Props {
   items: HomeFeatured[];
 }
 
 export function FeaturedCarousel({ items }: Props) {
+  const { mode, mounted } = useDeviceMode();
+  if (items.length === 0) return null;
+  // Pre-mount → desktop (SSR-safe, overflow-x natif marche aussi mobile).
+  // Apres mount, mobile/tablet → Embla autoplay.
+  if (mounted && mode !== "desktop-A") {
+    return <FeaturedMobileEmbla items={items} />;
+  }
+  return <FeaturedDesktop items={items} />;
+}
+
+/* ──────────────────────── DESKTOP (SPRINT1 — inchangé) ──────────────── */
+
+function FeaturedDesktop({ items }: Props) {
   const t = useTranslations("featured");
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
 
-  // Stagger d'apparition + bidirectionnel
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!trackRef.current) return;
@@ -63,9 +72,6 @@ export function FeaturedCarousel({ items }: Props) {
       card.style.willChange = "opacity, transform";
     });
 
-    // SPRINT1 : bidirectionnel — observer reste actif (pas de disconnect).
-    // À l'entrée : reveal stagger 600ms gauche→droite.
-    // À la sortie : hide stagger inverse 200ms (droite→gauche s'efface).
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -92,9 +98,6 @@ export function FeaturedCarousel({ items }: Props) {
     return () => observer.disconnect();
   }, []);
 
-  // SPRINT1 : parallax X scroll-piloté sur [data-featured-inner].
-  // Le track parent garde son scroll horizontal natif ; le parallax X
-  // se compose dessus via transform sur l'inner.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!sectionRef.current || !innerRef.current) return;
@@ -119,7 +122,6 @@ export function FeaturedCarousel({ items }: Props) {
         const progress = Math.max(0, Math.min(1, scrolled / totalRange));
         if (Math.abs(progress - lastProgress) < 0.001) return;
         lastProgress = progress;
-        // Drift -200px de droite a gauche sur toute la traversee viewport
         inner.style.transform = `translateX(${-200 * progress}px)`;
       });
     };
@@ -133,26 +135,11 @@ export function FeaturedCarousel({ items }: Props) {
     };
   }, []);
 
-  if (items.length === 0) return null;
-
   return (
     <section ref={sectionRef} className="px-6 py-5 md:py-12 lg:px-10">
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-2 md:mb-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
-            {t("eyebrow")}
-          </p>
-          <h2 className="mt-2 t-h2">{t("title")}</h2>
-          <SignatureLine />
-          <p className="mt-3 max-w-xl text-sm text-ink-mid md:text-base">
-            {t("subtitle")}
-          </p>
-        </div>
+        <FeaturedHeader t={t} />
       </div>
-
-      {/* Track : overflow-x natif scroll-snap. L'inner [data-featured-inner]
-          reçoit le parallax X au scroll vertical. Le CTA est OUT de l'inner
-          pour ne pas subir le drift et rester atteignable à droite. */}
       <div
         ref={trackRef}
         className="mt-6 flex gap-5 overflow-x-auto pb-4 md:mt-8 md:gap-6 lg:px-[8vw]"
@@ -162,11 +149,7 @@ export function FeaturedCarousel({ items }: Props) {
           scrollbarWidth: "none",
         }}
       >
-        <div
-          ref={innerRef}
-          data-featured-inner
-          className="flex gap-5 md:gap-6"
-        >
+        <div ref={innerRef} data-featured-inner className="flex gap-5 md:gap-6">
           {items.map((item) => (
             <article
               key={`${item.kind}-${item.id}`}
@@ -184,12 +167,102 @@ export function FeaturedCarousel({ items }: Props) {
   );
 }
 
-function ViewAllCTA({ label }: { label: string }) {
+/* ──────────────────────── MOBILE (Embla autoplay) ──────────────────── */
+
+function FeaturedMobileEmbla({ items }: Props) {
+  const t = useTranslations("featured");
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, align: "center", containScroll: false },
+    // Autoplay 4s — stopOnInteraction false : le swipe interrompt
+    // momentanement, l'autoplay reprend au tick suivant (~equivalent
+    // "pause au touch, reprend").
+    [Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: false })],
+  );
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    setScrollSnaps(emblaApi.scrollSnapList());
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    onSelect();
+  }, [emblaApi, onSelect]);
+
   return (
-    <div
-      style={{ scrollSnapAlign: "start" }}
-      className="flex w-[78vw] shrink-0 items-center justify-center sm:w-[48vw] lg:w-[400px]"
-    >
+    <section className="px-6 py-5">
+      <div className="mx-auto max-w-[1400px]">
+        <FeaturedHeader t={t} />
+      </div>
+
+      {/* Embla : 1 card visible (92%) + peek 8% suivant via basis-[92%]. */}
+      <div ref={emblaRef} className="mt-6 overflow-hidden">
+        <div className="flex">
+          {items.map((item) => (
+            <div
+              key={`${item.kind}-${item.id}`}
+              className="min-w-0 shrink-0 grow-0 basis-[92%] pl-3 first:pl-0"
+            >
+              <FeaturedCard item={item} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Dots — crème inactif / cuivre citron actif */}
+      {scrollSnaps.length > 1 && (
+        <div className="mt-4 flex justify-center gap-2">
+          {scrollSnaps.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Bien ${i + 1}`}
+              onClick={() => emblaApi?.scrollTo(i)}
+              className="size-2 rounded-full transition-colors"
+              style={{
+                backgroundColor: i === selectedIndex ? "#D4A574" : "#F0E6CC",
+                opacity: i === selectedIndex ? 1 : 0.5,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="mt-5 flex justify-center">
+        <ViewAllCTA label={t("see_all")} inline />
+      </div>
+    </section>
+  );
+}
+
+/* ──────────────────────── Partagés ──────────────────── */
+
+function FeaturedHeader({ t }: { t: ReturnType<typeof useTranslations> }) {
+  return (
+    <div className="mb-2 md:mb-4">
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
+        {t("eyebrow")}
+      </p>
+      <h2 className="mt-2 t-h2">{t("title")}</h2>
+      <SignatureLine />
+      <p className="mt-3 max-w-xl text-sm text-ink-mid md:text-base">
+        {t("subtitle")}
+      </p>
+    </div>
+  );
+}
+
+function ViewAllCTA({ label, inline = false }: { label: string; inline?: boolean }) {
+  const wrapperCls = inline
+    ? ""
+    : "flex w-[78vw] shrink-0 items-center justify-center sm:w-[48vw] lg:w-[400px]";
+  return (
+    <div style={inline ? undefined : { scrollSnapAlign: "start" }} className={wrapperCls}>
       <Link
         href="/biens"
         className="cta-lime-glow inline-flex items-center gap-3 rounded-full bg-[#CFE542] px-8 py-5 font-mono text-xs font-bold uppercase tracking-[0.25em] text-[#1F221A]"
@@ -227,7 +300,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             src={item.cover_url}
             alt={item.title ?? ""}
             fill
-            sizes="(min-width: 1024px) 400px, (min-width: 640px) 48vw, 78vw"
+            sizes="(min-width: 1024px) 400px, (min-width: 640px) 48vw, 92vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
@@ -240,10 +313,6 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             }}
           />
         )}
-        {/* SPRINT1 : pill OFF-MARKET / APIMO — couleur palette Forêt
-            cuivre citron #D4A574 inline (background rgba 0.15, border
-            rgba 0.5, color D4A574). Pour APIMO : utilitaires Tailwind
-            classiques (token text-text-contrast). */}
         {isOffmarket ? (
           <span
             className="absolute right-3 top-3 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] backdrop-blur"
