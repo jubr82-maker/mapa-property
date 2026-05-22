@@ -75,11 +75,11 @@ export function CoverageGrid() {
                   isFlipped ? t("show_less") : t("show_more")
                 }`}
                 front={
-                  <div className="flex size-full flex-col justify-between rounded-xl border border-border-subtle bg-bg p-5 md:p-6">
+                  <div className="flex size-full flex-col justify-between rounded-xl border border-border-subtle bg-bg p-3 md:p-6">
                     <span className="font-mono text-[10px] font-light uppercase tracking-[0.3em] text-gold-deep">
                       {t(`${typo.key}_label`)}
                     </span>
-                    <h3 className="font-display text-lg font-black leading-tight text-ink sm:text-2xl md:text-3xl">
+                    <h3 className="font-display text-base font-black leading-tight text-ink sm:text-xl md:text-3xl">
                       {t(`${typo.key}_title`)}
                     </h3>
                     {/* Desktop: hint discret "Survolez →" */}
@@ -99,11 +99,11 @@ export function CoverageGrid() {
                   </div>
                 }
                 back={
-                  <div className="flex size-full flex-col gap-2 rounded-xl border border-gold bg-bg-contrast p-5 text-text-contrast md:gap-3 md:p-6">
+                  <div className="flex size-full flex-col gap-2 rounded-xl border border-gold bg-bg-contrast p-3 text-text-contrast md:gap-3 md:p-6">
                     <span className="font-mono text-[10px] font-light uppercase tracking-[0.3em] text-gold-bright">
                       {t(`${typo.key}_label`)}
                     </span>
-                    <h3 className="font-display text-xl font-black leading-tight md:text-2xl">
+                    <h3 className="font-display text-base font-black leading-tight md:text-2xl">
                       {t(`${typo.key}_title`)}
                     </h3>
                     <ul className="mt-1 space-y-1 text-xs text-text-contrast/85 md:mt-2 md:space-y-1.5 md:text-sm">
