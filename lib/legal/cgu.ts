@@ -94,7 +94,15 @@ export const cgu: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
       {
-        heading: "11. Droit applicable et juridiction",
+        heading: "11. Nature des informations et limitation de responsabilité",
+        paragraphs: [
+          "Les estimations, simulations, analyses de marché et données présentées sur ce site sont fournies à titre informatif et indicatif. Elles s'appuient sur des sources publiques (STATEC, Observatoire de l'Habitat, ABBL, Banque centrale du Luxembourg) et sur les algorithmes propriétaires de MAPA Property.",
+          "MAPA Property décline toute responsabilité quant à l'usage qui pourrait être fait de ces informations, aux décisions prises sur leur base, ou aux écarts éventuels avec la réalité du marché ou la situation individuelle de l'utilisateur.",
+          "Ces données ne constituent pas un conseil financier, fiscal, juridique ou notarial. Pour toute opération concrète, consultez les professionnels compétents : notaire (acte authentique, succession, régime matrimonial), banque ou courtier en crédit agréé (financement), conseil fiscal (imposition, plus-values), avocat (conseil juridique).",
+        ],
+      },
+      {
+        heading: "12. Droit applicable et juridiction",
         paragraphs: [
           "Les présentes CGU sont régies par le droit luxembourgeois. Tout litige relatif à leur interprétation ou exécution relèvera de la compétence exclusive des tribunaux de Luxembourg-Ville, sauf disposition impérative contraire en faveur du consommateur.",
         ],
@@ -174,7 +182,15 @@ export const cgu: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
       {
-        heading: "11. Law and jurisdiction",
+        heading: "11. Nature of information and limitation of liability",
+        paragraphs: [
+          "The estimates, simulations, market analyses and data presented on this site are provided for informational and indicative purposes. They rely on public sources (STATEC, Observatoire de l'Habitat, ABBL, Central Bank of Luxembourg) and on MAPA Property's proprietary algorithms.",
+          "MAPA Property accepts no liability for any use that may be made of this information, for decisions taken on its basis, or for any discrepancies with market reality or the user's individual situation.",
+          "This data does not constitute financial, tax, legal or notarial advice. For any concrete transaction, consult the relevant professionals: notary (authentic deed, inheritance, matrimonial regime), bank or licensed credit broker (financing), tax adviser (taxation, capital gains), lawyer (legal advice).",
+        ],
+      },
+      {
+        heading: "12. Law and jurisdiction",
         paragraphs: [
           "Luxembourg law applies. Exclusive jurisdiction: courts of Luxembourg-City, subject to mandatory consumer-protection rules.",
         ],
@@ -253,7 +269,15 @@ export const cgu: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
       {
-        heading: "11. Recht und Gerichtsstand",
+        heading: "11. Art der Informationen und Haftungsbeschränkung",
+        paragraphs: [
+          "Die auf dieser Website dargestellten Schätzungen, Simulationen, Marktanalysen und Daten dienen Informations- und Richtzwecken. Sie stützen sich auf öffentliche Quellen (STATEC, Observatoire de l'Habitat, ABBL, Zentralbank Luxemburg) und auf die proprietären Algorithmen von MAPA Property.",
+          "MAPA Property übernimmt keine Haftung für die Verwendung dieser Informationen, für auf ihrer Grundlage getroffene Entscheidungen oder für etwaige Abweichungen von der Marktrealität oder der individuellen Situation des Nutzers.",
+          "Diese Daten stellen keine finanzielle, steuerliche, rechtliche oder notarielle Beratung dar. Für jede konkrete Transaktion konsultieren Sie die zuständigen Fachleute: Notar (notarielle Urkunde, Erbschaft, Güterstand), Bank oder zugelassener Kreditvermittler (Finanzierung), Steuerberater (Besteuerung, Veräußerungsgewinne), Anwalt (Rechtsberatung).",
+        ],
+      },
+      {
+        heading: "12. Recht und Gerichtsstand",
         paragraphs: [
           "Luxemburgisches Recht. Ausschließlicher Gerichtsstand: Luxemburg-Stadt.",
         ],
