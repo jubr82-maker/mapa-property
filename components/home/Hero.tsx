@@ -10,17 +10,17 @@ export async function Hero({ locale }: { locale: string }) {
   // POL4 : hero nettoyé — pill (source "TEST CMS LIVE" via override CMS),
   // HUD data-corners (FRAME 001, coords, etc.) et chips meta retirés.
   // CMS overlay conservé pour les éléments restants.
-  const [eyebrow, titleLine1, titleLine2, titleLine3, subtitle, scroll, h2Subtitle] =
+  const [eyebrow, titleLine1, titleLine2, titleLine3, subtitle, scroll] =
     await Promise.all([
       siteContent("home.hero.eyebrow", locale, t("eyebrow")),
       siteContent("home.hero.title_line_1", locale, t("title_line_1")),
       siteContent("home.hero.title_line_2", locale, t("title_line_2")),
+      // HERO-L3 : title_line_3 porte desormais l'accroche editoriale
+      // (Écouter, conseiller, conclure.) — rendue copper italic plus
+      // petite dans le bloc titre (cf. JSX). h2_subtitle supprime.
       siteContent("home.hero.title_line_3", locale, t("title_line_3")),
       siteContent("home.hero.subtitle", locale, t("subtitle")),
       siteContent("home.hero.scroll", locale, t("scroll")),
-      // HERO-H2 : sous-accroche editoriale CMS (3 locales en DB). Fallback
-      // "" → si absente/vide, le <h2> n'est PAS rendu (cf. JSX conditionnel).
-      siteContent("home.hero.h2_subtitle", locale, ""),
     ]);
   const videoDesktop = sbUrl("Videos", "mapa_showcase_desktop.mp4");
   const videoMobile = sbUrl("Videos", "mapa_showcase_mobile.mp4");
@@ -99,28 +99,24 @@ export async function Hero({ locale }: { locale: string }) {
 
         {/* STEP3c-1-bis : titre 2 lignes (titleLine3 vide en i18n par defaut,
             mais override CMS possible). Conditional render evite ligne fantome. */}
+        {/* HERO-L3 : L1/L2 grande taille (clamp 1.9→6.8rem), L3 accroche
+            editoriale copper #B8865A italic regular, legerement plus petite
+            (clamp 1.4→4.8rem ≈ 70%), meme alignement/tracking que le bloc
+            titre. Conditionnel : rien si title_line_3 vide. */}
         <h1 className="font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]">
           <span className="block text-white/90">{titleLine1}</span>
           <span className="block text-white">{titleLine2}</span>
           {titleLine3 && (
-            <span className="gold-text block">{titleLine3}</span>
+            <span
+              className="mt-1 block font-normal italic text-[clamp(1.4rem,5.5vw,4.8rem)] md:mt-2"
+              style={{ color: "var(--copper-charte)" }}
+            >
+              {titleLine3}
+            </span>
           )}
         </h1>
 
         <SignatureLine />
-
-        {/* HERO-H2 : sous-accroche editoriale (CMS home.hero.h2_subtitle).
-            Copper charte #B8865A via token --copper-charte (≠ var(--copper)
-            cuivre citron Forêt). Italic regular, max-w 640, aligne sur le
-            H1 (gauche). Rendu conditionnel : rien si vide/absent. */}
-        {h2Subtitle && (
-          <h2
-            className="mt-6 max-w-[640px] text-[15px] font-normal italic leading-relaxed md:mt-8 md:text-[19px]"
-            style={{ color: "var(--copper-charte)" }}
-          >
-            {h2Subtitle}
-          </h2>
-        )}
 
         {/* STEP3c-1-bis : subtitle multi-lignes (vertus rares). \n preserves
             via whiteSpace pre-line — saut de ligne CSS sans <br/>. */}
