@@ -33,6 +33,8 @@ type LeadRow = {
   workflow_status?: string | null;
   next_follow_up?: string | null;
   rgpd_consent_at?: string | null;
+  /** Sprint C3 : sujet pre-cadre depuis /contact (NULLABLE). */
+  subject?: string | null;
 };
 
 // Consentement RGPD (BUG 7). Source structurée = colonne
@@ -74,27 +76,41 @@ export default async function AdminLeadsPage({
   let migrationApplied = true;
   let leads: LeadRow[] = [];
 
-  const tryNew = await supabase
+  // Sprint C3 : tentative avec subject (migration 20260527) ; fallback
+  // cascade vers workflow → legacy si colonnes manquantes.
+  const tryC3 = await supabase
     .from("leads")
     .select(
-      "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref,workflow_status,next_follow_up",
+      "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref,workflow_status,next_follow_up,subject",
     )
     .order("created_at", { ascending: false })
     .limit(500);
 
-  if (tryNew.error) {
-    // Migration pas encore appliquée → fallback sur les colonnes existantes
-    migrationApplied = false;
-    const fallback = await supabase
+  if (!tryC3.error) {
+    leads = (tryC3.data ?? []) as LeadRow[];
+  } else {
+    const tryNew = await supabase
       .from("leads")
       .select(
-        "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref",
+        "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref,workflow_status,next_follow_up",
       )
       .order("created_at", { ascending: false })
       .limit(500);
-    leads = (fallback.data ?? []) as LeadRow[];
-  } else {
-    leads = (tryNew.data ?? []) as LeadRow[];
+
+    if (tryNew.error) {
+      // Migration pas encore appliquée → fallback sur les colonnes existantes
+      migrationApplied = false;
+      const fallback = await supabase
+        .from("leads")
+        .select(
+          "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref",
+        )
+        .order("created_at", { ascending: false })
+        .limit(500);
+      leads = (fallback.data ?? []) as LeadRow[];
+    } else {
+      leads = (tryNew.data ?? []) as LeadRow[];
+    }
   }
 
   // Compteurs par statut workflow (sans filtres q/type)

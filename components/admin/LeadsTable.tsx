@@ -18,7 +18,26 @@ type Lead = {
   message: string | null;
   status: string | null;
   property_ref: string | null;
+  /** Sprint C3 : sujet pre-cadre depuis /contact (NULLABLE). */
+  subject?: string | null;
 };
+
+// Sprint C3 : libelle humain pour les 6 sujets pre-cadres du formulaire
+// /contact (sprint B3 dropdown). Fallback : valeur brute si subject
+// custom (NDA, mandat, etc.).
+const SUBJECT_LABELS: Record<string, string> = {
+  mandat_vente: "Mandat de vente",
+  mandat_recherche: "Mandat de recherche",
+  estimation: "Estimation",
+  mise_en_location: "Mettre en location",
+  informations: "Informations",
+  offmarket_arcova: "Off-Market — ARCOVA",
+};
+
+function subjectLabel(s: string | null | undefined): string {
+  if (!s) return "—";
+  return SUBJECT_LABELS[s] ?? s;
+}
 
 const LEAD_STATUSES = ["pending", "contacted", "qualified", "converted", "rejected"] as const;
 const LEAD_STATUS_LABELS: Record<string, string> = {
@@ -98,7 +117,8 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
         <table className="w-full text-sm">
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
-              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Date · Heure</th>
+              <th className="px-4 py-3">Objet</th>
               <th className="px-4 py-3">Type</th>
               <th className="px-4 py-3">Contact</th>
               <th className="px-4 py-3">Localisation</th>
@@ -109,7 +129,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
           <tbody className="divide-y divide-[#3D4F63]/10">
             {leads.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
+                <td colSpan={7} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
                   Aucun lead.
                 </td>
               </tr>
@@ -158,11 +178,22 @@ function LeadRow({
     <>
       <tr className="cursor-pointer hover:bg-[#3D4F63]/5" onClick={onToggle}>
         <td className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]/70">
-          {new Date(lead.created_at).toLocaleDateString("fr-FR", {
+          {new Date(lead.created_at).toLocaleString("fr-FR", {
             day: "2-digit",
             month: "short",
             year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
           })}
+        </td>
+        <td className="px-4 py-3 text-xs">
+          {lead.subject ? (
+            <span className="inline-flex items-center rounded-full bg-[#e0af6e]/15 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-[#9E7B2A]">
+              {subjectLabel(lead.subject)}
+            </span>
+          ) : (
+            <span className="text-[#3D4F63]/40">—</span>
+          )}
         </td>
         <td className="px-4 py-3 font-mono text-xs">{lead.type ?? "—"}</td>
         <td className="px-4 py-3">
@@ -186,7 +217,7 @@ function LeadRow({
       </tr>
       {open && (
         <tr className="bg-[#F5EFE1]/40">
-          <td colSpan={6} className="px-4 py-5">
+          <td colSpan={7} className="px-4 py-5">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
