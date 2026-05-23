@@ -668,7 +668,7 @@
     "intro": "Mensualité, rendement locatif, capacité d'emprunt — pré-remplis avec les derniers taux BCL.",
     "disclaimer_title": "Outils indicatifs uniquement, non contractuels.",
     "disclaimer_p1": "Notre simulateur s'appuie sur les données publiques de l'Observatoire de l'Habitat (Ministère du Logement luxembourgeois) et les taux de référence de la Banque centrale du Luxembourg (BCL), adaptés en continu par notre agence aux tendances du marché.",
-    "disclaimer_p2": "Seuil prudentiel usuel d'endettement (35%). Plafond loyer luxembourgeois : 5% du capital investi par an. Frais de notaire ~7% du prix d'acquisition au Luxembourg dont 1% Bëllegen Akt avec abattement éventuel.",
+    "disclaimer_p2": "Seuil prudentiel usuel d'endettement (35%). Plafond loyer luxembourgeois : 5% du capital investi par an. Frais de notaire ~7% du prix d'acquisition au Luxembourg. Bëllegen Akt : crédit d'impôt jusqu'à 40 000 € par acquéreur (80 000 € pour un couple acquérant ensemble) sur les droits d'enregistrement, sous conditions d'occupation effective comme résidence principale.",
     "source": "— Source : MAPA Property — © 2026. Tous droits réservés. Toute reproduction interdite."
   },
   "simulators": {
