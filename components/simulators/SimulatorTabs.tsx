@@ -133,8 +133,11 @@ function YieldSim() {
     ((rentMonthly * 12 - chargesYear - rentMonthly * 12 * (mgmtRate / 100)) /
       purchase) *
     100;
-  const taxFactor = 0.65; // abattement fiscal 35% LU
-  const netAfterTax = netCharges * taxFactor;
+  // Note : suppression de la ligne "Net apres abattement fiscal 35% LU"
+  // (calcul taxFactor = 0.65). L'abattement 35% des revenus locatifs est
+  // plafonne a 2700€/an et exclu pour les biens > 650€/mois de loyer
+  // (~99% des cas LU). Affichage trompeur → remplace par disclaimer
+  // fiscalite renvoyant au conseil fiscal personnel.
   const overCap = grossYield > 5;
 
   return (
@@ -192,16 +195,16 @@ function YieldSim() {
             label={t("net_charges")}
             value={`${netCharges.toFixed(2).replace(".", ",")} %`}
           />
-          <Stat
-            label={t("net_after_tax")}
-            value={`${netAfterTax.toFixed(2).replace(".", ",")} %`}
-          />
 
           {overCap && (
             <p className="rounded-md border border-accent-warm/40 bg-accent-warm/10 p-4 text-sm text-accent-warm">
               ⚠ {t("alert_5pct")}
             </p>
           )}
+
+          <p className="rounded-md border border-line bg-bg-soft/60 p-4 text-xs leading-relaxed text-ink-soft">
+            {t("tax_disclaimer")}
+          </p>
         </div>
       </div>
     </section>
