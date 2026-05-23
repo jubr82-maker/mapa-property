@@ -159,7 +159,7 @@
     "transaction_title": "Sale and acquisition",
     "transaction_text": "Exclusive, Semi-Exclusive, Simple or Autonomous mandates. To each project its formula.",
     "rental_title": "Rental and management",
-    "rental_text": "Rigorous tenant selection, 5% rent cap respected in Luxembourg (law of 21.09.2006), modular property management.",
+    "rental_text": "Rigorous tenant selection, Luxembourg 5% rent cap respected, modular property management.",
     "international_title": "International broker",
     "international_text": "Under search mandate signed in Luxembourg, with vetted local partners internationally."
   },
@@ -580,7 +580,7 @@
   "page_rent": {
     "eyebrow": "Rent with MAPA Property",
     "title": "Find, list, manage.",
-    "intro": "Find a rental, list your property, à la carte property management. Always within the 5% rent cap (law of 21 September 2006).",
+    "intro": "Find a rental, list your property, à la carte property management. Always within the Luxembourg 5% rent cap.",
     "find_label": "Find",
     "find_title": "See available rentals",
     "find_text": "Our Luxembourg and international rental catalogue, continuously updated.",
@@ -591,7 +591,7 @@
     "manage_title": "Property management",
     "manage_text": "Collection, charges, claims, end of lease. A modular formula tailored to your needs.",
     "learn_more": "Learn more",
-    "legal_notice": "The Luxembourg legal cap is 5% of invested capital per year (law of 21 September 2006). MAPA Property guarantees strict compliance with this rule, which protects both tenant and landlord."
+    "legal_notice": "The Luxembourg cap is 5% of invested capital per year. MAPA Property guarantees strict compliance with this rule, which protects both tenant and landlord."
   },
   "estimate_page": {
     "eyebrow": "Valuation",

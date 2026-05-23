@@ -159,7 +159,7 @@
     "transaction_title": "Verkauf und Erwerb",
     "transaction_text": "Exklusiv-, Halb-Exklusiv-, Einfach- oder Autonomes Mandat. Jedes Projekt erhält die passende Form.",
     "rental_title": "Vermietung und Verwaltung",
-    "rental_text": "Sorgfältige Mieterauswahl, 5%-Mietobergrenze in Luxemburg beachtet (Gesetz vom 21.09.2006), modulare Hausverwaltung.",
+    "rental_text": "Sorgfältige Mieterauswahl, Luxemburger 5%-Mietobergrenze beachtet, modulare Hausverwaltung.",
     "international_title": "Internationaler Broker",
     "international_text": "Unter in Luxemburg unterzeichnetem Suchmandat, mit geprüften lokalen Partnern international."
   },
@@ -580,7 +580,7 @@
   "page_rent": {
     "eyebrow": "Mit MAPA Property mieten",
     "title": "Finden, vermieten, verwalten.",
-    "intro": "Mietobjekt finden, eigenes Objekt vermieten, modulare Hausverwaltung. Stets unter Beachtung der 5%-Mietobergrenze (Gesetz vom 21.09.2006).",
+    "intro": "Mietobjekt finden, eigenes Objekt vermieten, modulare Hausverwaltung. Stets unter Beachtung der Luxemburger 5%-Mietobergrenze.",
     "find_label": "Finden",
     "find_title": "Verfügbare Mietobjekte",
     "find_text": "Unser Mietobjektkatalog Luxemburg und international, kontinuierlich aktualisiert.",
@@ -591,7 +591,7 @@
     "manage_title": "Hausverwaltung",
     "manage_text": "Inkasso, Nebenkosten, Schäden, Vertragsende. Eine modulare Formel nach Ihren Bedürfnissen.",
     "learn_more": "Mehr erfahren",
-    "legal_notice": "Die luxemburgische gesetzliche Obergrenze beträgt 5% des investierten Kapitals pro Jahr (Gesetz vom 21. September 2006). MAPA Property garantiert die strikte Einhaltung dieser Regel — sie schützt Mieter und Vermieter."
+    "legal_notice": "Die Luxemburger Obergrenze beträgt 5% des investierten Kapitals pro Jahr. MAPA Property garantiert die strikte Einhaltung dieser Regel — sie schützt Mieter und Vermieter."
   },
   "estimate_page": {
     "eyebrow": "Bewertung",

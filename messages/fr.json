@@ -159,7 +159,7 @@
     "transaction_title": "Vente et acquisition",
     "transaction_text": "Mandats Exclusif, Semi-Exclusif, Simple ou Autonome. À chaque projet sa formule.",
     "rental_title": "Mise en location et gestion",
-    "rental_text": "Sélection rigoureuse de locataires, plafond loyer 5% respecté au Luxembourg (loi 21.09.2006), gestion locative à la carte.",
+    "rental_text": "Sélection rigoureuse de locataires, plafond luxembourgeois de 5% respecté, gestion locative à la carte.",
     "international_title": "Broker international",
     "international_text": "Sous mandat de recherche signé au Luxembourg, partenaires locaux habilités à l'international."
   },
@@ -580,7 +580,7 @@
   "page_rent": {
     "eyebrow": "Louer avec MAPA Property",
     "title": "Trouver, louer, gérer.",
-    "intro": "Recherche d'une location, mise en location de votre bien, gestion locative à la carte. Toujours dans le respect du plafond loyer 5% (loi 21.09.2006).",
+    "intro": "Recherche d'une location, mise en location de votre bien, gestion locative à la carte. Toujours dans le respect du plafond luxembourgeois de 5%.",
     "find_label": "Trouver",
     "find_title": "Voir les locations disponibles",
     "find_text": "Notre catalogue de locations Luxembourg et international, mis à jour en continu.",
@@ -591,7 +591,7 @@
     "manage_title": "Gestion locative",
     "manage_text": "Encaissement, charges, sinistres, fin de bail. Une formule modulable selon vos besoins.",
     "learn_more": "En savoir plus",
-    "legal_notice": "Le plafond légal au Luxembourg est de 5% du capital investi par an (loi du 21 septembre 2006). MAPA Property garantit le respect strict de cette règle, qui protège locataire et bailleur."
+    "legal_notice": "Le plafond luxembourgeois est de 5% du capital investi par an. MAPA Property garantit le respect strict de cette règle, qui protège locataire et bailleur."
   },
   "estimate_page": {
     "eyebrow": "Estimation",
