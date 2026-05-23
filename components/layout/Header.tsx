@@ -124,10 +124,13 @@ export function Header() {
                 FR/dark — qui restent à leur hauteur originale via la
                 div ml-auto sœur. */}
             <nav className="flex items-center gap-2 lg:mt-3">
-              {/* NAV1 : ordre après logo — OFF-MARKET, SERVICES, JOURNAL. */}
+              {/* NAV1 : ordre après logo — OFF-MARKET, SERVICES, JOURNAL.
+                  Sprint C1 : whitespace-nowrap pour eviter le wrap
+                  'OFF-' / 'MARKET' sur 2 lignes en viewports moyens
+                  (1024-1280px) avec uppercase + tracking 0.05em. */}
               <Link
                 href="/off-market"
-                className="px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
+                className="whitespace-nowrap px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors hover:text-gold"
               >
                 {t("off_market")}
               </Link>
