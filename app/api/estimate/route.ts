@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { estimateProperty, type EstimateInput, type EstimateResult } from "@/lib/estimate";
 import { fetchLatestInterestRates } from "@/lib/data";
 import { shouldDropTestLead } from "@/lib/test-email";
+import { sendEstimationEmails } from "@/lib/email/estimation-emails";
 import {
   estimate as estimateEvs,
   isCountryNotCoveredError,
@@ -63,6 +64,11 @@ async function persistEstimationRequest(args: {
   ip_hash?: string;
   locale?: string;
   rgpd_consent_at?: string;
+  // Sprint B1 : nouveaux champs lead qualifie (migration 20260523).
+  contact_name?: string;
+  surface_total?: number;
+  works_level?: string;
+  message?: string;
 }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -71,6 +77,24 @@ async function persistEstimationRequest(args: {
   // (le calcul/résultat est tout de même renvoyé à l'appelant).
   if (shouldDropTestLead(args.contact_email)) return;
   const base = {
+    inputs: args.inputs,
+    client_output: args.client_output,
+    internal_output: args.internal_output,
+    engine: args.engine,
+    contact_email: args.contact_email ?? null,
+    contact_phone: args.contact_phone ?? null,
+    session_id: args.session_id ?? null,
+    ip_hash: args.ip_hash ?? null,
+    locale: args.locale ?? null,
+    // Sprint B1 : tentative AVEC les nouvelles colonnes. Fallback ci-dessous
+    // si la migration 20260523 n'est pas encore appliquee.
+    contact_name: args.contact_name ?? null,
+    surface_total: args.surface_total ?? null,
+    works_level: args.works_level ?? null,
+    message: args.message ?? null,
+  };
+  // Snapshot SANS les nouvelles colonnes B1 (fallback si migration absente).
+  const baseLegacy = {
     inputs: args.inputs,
     client_output: args.client_output,
     internal_output: args.internal_output,
@@ -95,11 +119,17 @@ async function persistEstimationRequest(args: {
       });
       if (!error) return;
       console.warn(
-        "[api/estimate] rgpd_consent_at absente — migration à appliquer, persist dégradé:",
+        "[api/estimate] insert dégradé (colonnes B1 ou rgpd absentes):",
         error.message,
       );
     }
-    await supabase.from("estimation_requests").insert(base);
+    // Premier fallback : avec colonnes B1 mais sans RGPD.
+    const { error: e2 } = await supabase
+      .from("estimation_requests")
+      .insert(base);
+    if (!e2) return;
+    // Second fallback : schema legacy strict (migration B1 non appliquée).
+    await supabase.from("estimation_requests").insert(baseLegacy);
   } catch (err) {
     console.error("[api/estimate] persist failed:", err);
   }
@@ -167,6 +197,11 @@ export async function POST(req: Request) {
     parkingInterior?: number;
     parkingExterior?: number;
     works?: unknown;
+    // Sprint B1 : nouveaux champs lead generator.
+    contactName?: string;
+    surfaceTotal?: number;
+    worksLevel?: string;
+    message?: string;
   };
 
   const rgpdConsentAt =
@@ -245,6 +280,27 @@ export async function POST(req: Request) {
         ip_hash: ipHash,
         locale: body.locale,
         rgpd_consent_at: rgpdConsentAt,
+        // Sprint B1 : lead qualifie
+        contact_name: body.contactName,
+        surface_total: typeof body.surfaceTotal === "number" ? body.surfaceTotal : undefined,
+        works_level: body.worksLevel,
+        message: body.message,
+      });
+
+      // Sprint B1 : emails client (confirmation + promesse rapport 24h) +
+      // interne (notification lead Julien/Frederic). Best-effort, jamais bloquant.
+      void sendEstimationEmails({
+        contactEmail: body.contactEmail,
+        contactName: body.contactName,
+        contactPhone: body.contactPhone,
+        message: body.message,
+        commune: body.commune,
+        type: body.type,
+        surfaceLiving:
+          typeof body.livingSurface === "number" ? body.livingSurface : undefined,
+        range: result.range,
+        engine: "evs_5_methods",
+        locale: body.locale,
       });
 
       return NextResponse.json({
@@ -280,6 +336,26 @@ export async function POST(req: Request) {
     ip_hash: ipHash,
     locale: body.locale,
     rgpd_consent_at: rgpdConsentAt,
+    // Sprint B1 : lead qualifie
+    contact_name: body.contactName,
+    surface_total: typeof body.surfaceTotal === "number" ? body.surfaceTotal : undefined,
+    works_level: body.worksLevel,
+    message: body.message,
+  });
+
+  // Sprint B1 : emails client + interne (cf. branche EVS ci-dessus).
+  void sendEstimationEmails({
+    contactEmail: body.contactEmail,
+    contactName: body.contactName,
+    contactPhone: body.contactPhone,
+    message: body.message,
+    commune: body.commune,
+    type: body.type,
+    surfaceLiving:
+      typeof body.livingSurface === "number" ? body.livingSurface : undefined,
+    range: result.range,
+    engine: "hedonic_legacy",
+    locale: body.locale,
   });
 
   return NextResponse.json({ result, rate, engine: "hedonic_legacy" });

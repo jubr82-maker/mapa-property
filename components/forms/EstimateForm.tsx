@@ -26,6 +26,10 @@ const PROPERTY_TYPES = [
 ] as const;
 const STATES = ["to_renovate", "good", "renovated", "new"] as const;
 const ENERGIES = ["A", "B", "C", "D", "E", "F", "G", "H", "I"] as const;
+// Sprint B1 : niveau global des travaux realises (radio simple). Reste
+// optionnel — le moteur EVS V2 supporte des WorkItem detailles par poste
+// mais on n'expose ici qu'un proxy grossier pour le lead generator.
+const WORKS_LEVELS = ["gros", "moyens", "petits", "aucun"] as const;
 
 interface FormState {
   country: string;
@@ -38,11 +42,17 @@ interface FormState {
   livingSurface: string;
   landSurface: string;
   terraceSurface: string;
+  // Sprint B1 : surface totale (habitable + caves + greniers + garages).
+  surfaceTotal: string;
+  // Sprint B1 : niveau global travaux ('' = non renseigne).
+  worksLevel: "" | (typeof WORKS_LEVELS)[number];
   bedrooms: string;
   year: string;
   // Step 3 — coordonnées client (pour livraison résultat + suivi)
+  contactName: string; // Sprint B1 : nom complet obligatoire (lead utile)
   contactEmail: string;
   contactPhone: string;
+  message: string; // Sprint B1 : texte libre optionnel
   contactConsent: boolean;
   rgpdConsent: boolean;
 }
@@ -58,10 +68,14 @@ const initial: FormState = {
   livingSurface: "",
   landSurface: "",
   terraceSurface: "",
+  surfaceTotal: "",
+  worksLevel: "",
   bedrooms: "",
   year: "",
+  contactName: "",
   contactEmail: "",
   contactPhone: "",
+  message: "",
   contactConsent: false,
   rgpdConsent: false,
 };
@@ -101,6 +115,11 @@ export function EstimateForm() {
             : undefined,
           bedrooms: data.bedrooms ? Number(data.bedrooms) : undefined,
           year: data.year ? Number(data.year) : undefined,
+          // Sprint B1 : nouveaux champs lead generator (persistance + email)
+          surfaceTotal: data.surfaceTotal ? Number(data.surfaceTotal) : undefined,
+          worksLevel: data.worksLevel || undefined,
+          contactName: data.contactName || undefined,
+          message: data.message || undefined,
           // Coordonnées : on les passe pour qu'un lead soit créé côté serveur si présent
           contactEmail: data.contactEmail || undefined,
           contactPhone: data.contactPhone || undefined,
@@ -176,6 +195,15 @@ export function EstimateForm() {
               onChange={(v) => set("livingSurface", v)}
               suffix="m²"
               required={data.type !== "terrain"}
+              tooltip={t("living_surface_tooltip")}
+            />
+            {/* Sprint B1 : surface totale optionnelle (qualification lead). */}
+            <FieldNumber
+              label={t("surface_total")}
+              value={data.surfaceTotal}
+              onChange={(v) => set("surfaceTotal", v)}
+              suffix="m²"
+              tooltip={t("surface_total_tooltip")}
             />
             <FieldNumber
               label={t("land_surface")}
@@ -205,6 +233,14 @@ export function EstimateForm() {
               value={data.energy}
               onChange={(v) => set("energy", v)}
               options={ENERGIES.map((e) => ({ value: e, label: e }))}
+            />
+          </div>
+          {/* Sprint B1 : niveau global travaux (radio plein largeur). */}
+          <div className="mt-5">
+            <WorksLevelRadio
+              value={data.worksLevel}
+              onChange={(v) => set("worksLevel", v)}
+              t={t}
             />
           </div>
           <NextBtn
@@ -287,6 +323,16 @@ export function EstimateForm() {
 
       {step === 3 && (
         <StepWrap title={t("step3_title")} subtitle={t("step3_subtitle")}>
+          {/* Sprint B1 : nom complet obligatoire en premier (lead utile) */}
+          <div className="mb-4">
+            <FieldText
+              label={t("contact_name")}
+              value={data.contactName}
+              onChange={(v) => set("contactName", v)}
+              placeholder={t("contact_name_placeholder")}
+              autoComplete="name"
+            />
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <FieldText
               type="email"
@@ -299,6 +345,16 @@ export function EstimateForm() {
             <PhoneInput
               label={t("contact_phone")}
               onChange={(v) => set("contactPhone", v)}
+            />
+          </div>
+          {/* Sprint B1 : message libre optionnel (qualifie le lead) */}
+          <div className="mt-4">
+            <FieldTextarea
+              label={t("message")}
+              value={data.message}
+              onChange={(v) => set("message", v)}
+              placeholder={t("message_placeholder")}
+              rows={3}
             />
           </div>
           <div className="mt-4">
@@ -339,7 +395,10 @@ export function EstimateForm() {
             pending={pending}
             t={t}
             disabled={
-              !data.contactConsent || !data.rgpdConsent || !data.contactEmail
+              !data.contactConsent ||
+              !data.rgpdConsent ||
+              !data.contactEmail ||
+              !data.contactName
             }
           />
         </StepWrap>
@@ -449,19 +508,32 @@ function FieldNumber({
   onChange,
   suffix,
   required,
+  tooltip,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   suffix?: string;
   required?: boolean;
+  tooltip?: string;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+      <span className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
         {label}
-        {required && <span className="ml-1 text-gold-deep">*</span>}
-        {suffix && <span className="ml-2 text-ink-mid">{suffix}</span>}
+        {required && <span className="text-gold-deep">*</span>}
+        {suffix && <span className="text-ink-mid">{suffix}</span>}
+        {tooltip && (
+          <span
+            tabIndex={0}
+            role="img"
+            aria-label={tooltip}
+            title={tooltip}
+            className="inline-flex size-4 cursor-help items-center justify-center rounded-full border border-line text-[9px] font-bold text-ink-soft hover:border-gold hover:text-gold focus:outline-none"
+          >
+            ⓘ
+          </span>
+        )}
       </span>
       <input
         type="number"
@@ -471,6 +543,76 @@ function FieldNumber({
         className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
       />
     </label>
+  );
+}
+
+// Sprint B1 : textarea pour le message libre Step 3.
+function FieldTextarea({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  rows?: number;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+        {label}
+      </span>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        className="resize-y rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
+      />
+    </label>
+  );
+}
+
+// Sprint B1 : radio horizontal "Travaux realises" — niveau global, optionnel.
+function WorksLevelRadio({
+  value,
+  onChange,
+  t,
+}: {
+  value: "" | (typeof WORKS_LEVELS)[number];
+  onChange: (v: "" | (typeof WORKS_LEVELS)[number]) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <fieldset>
+      <legend className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+        {t("works_level")}
+      </legend>
+      <div className="flex flex-wrap gap-2">
+        {WORKS_LEVELS.map((level) => {
+          const active = value === level;
+          return (
+            <button
+              key={level}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => onChange(active ? "" : level)}
+              className={`rounded-full border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors ${
+                active
+                  ? "border-gold bg-gold/10 text-gold-deep"
+                  : "border-line text-ink-soft hover:border-gold hover:text-gold"
+              }`}
+            >
+              {t(`works_${level}`)}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
 
@@ -728,7 +870,22 @@ function ResultView({
         </section>
       )}
 
+      {/* Sprint B1 : CTA finaux post-resultat — RDV expertise gratuit
+          (lead chaud) + decouvrir services (lead tiède). Restart relegue
+          en option discrete. */}
       <div className="flex flex-wrap gap-3">
+        <Link
+          href="/nous-contacter"
+          className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02]"
+        >
+          {t("cta_rdv_expertise")} →
+        </Link>
+        <Link
+          href="/services"
+          className="rounded-full border border-gold px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-gold-deep transition-colors hover:bg-gold/10"
+        >
+          {t("cta_services")}
+        </Link>
         <button
           type="button"
           onClick={onReset}
