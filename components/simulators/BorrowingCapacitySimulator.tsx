@@ -23,8 +23,11 @@ function borrowingCapacity(
   return maxMonthlyPayment * ((1 - Math.pow(1 + r, -n)) / r);
 }
 
-const MAX_DEBT_RATIO = 0.4; // Recommandation BCL Luxembourg : 40% max
-const SAFE_DEBT_RATIO = 0.33; // Zone confort : 33%
+// Seuils prudentiels usuels pratiques bancaires LU — PAS d'obligation
+// legale au Luxembourg (le 35% souvent cite est une reference francaise).
+// La CSSF impose un LTV 80% max ; le DSTI reste a la discretion bancaire.
+const MAX_DEBT_RATIO = 0.4; // Limite haute usuelle
+const SAFE_DEBT_RATIO = 0.33; // Zone confort recommandee
 
 function fmtEur(n: number) {
   if (!isFinite(n) || isNaN(n)) return "—";

@@ -668,7 +668,7 @@
     "intro": "Monatsrate, Mietrendite, Kreditkapazität — vorausgefüllt mit den neuesten BCL-Zinsen.",
     "disclaimer_title": "Nur indikative Werkzeuge, nicht vertraglich bindend.",
     "disclaimer_p1": "Unser Rechner basiert auf öffentlichen Daten des Observatoire de l'Habitat (Luxemburger Wohnungsministerium) und Referenzzinsen der Banque centrale du Luxembourg (BCL), kontinuierlich von unserer Agentur an Markttrends angepasst.",
-    "disclaimer_p2": "35% Verschuldungsgrenze gemäß BCL/CSSF-Empfehlungen. 5% Mietobergrenze auf investiertes Kapital (Gesetz vom 21. September 2006). Notarkosten ~7% des Kaufpreises in Luxemburg, davon 1% Bëllegen Akt mit eventuellem Rabatt.",
+    "disclaimer_p2": "Üblicher prudentieller Verschuldungsgrenzwert (35%). Luxemburger Mietobergrenze: 5% des investierten Kapitals pro Jahr. Notarkosten ~7% des Kaufpreises in Luxemburg, davon 1% Bëllegen Akt mit eventuellem Rabatt.",
     "source": "— Quelle: MAPA Property — © 2026. Alle Rechte vorbehalten. Vervielfältigung untersagt."
   },
   "simulators": {
@@ -698,7 +698,7 @@
     "monthly_max": "Verfügbare Rate (35%)",
     "max_borrow": "Darlehensvolumen",
     "rate_used": "Verwendeter Zinssatz",
-    "limit_35pct": "35% Verschuldungsgrenze (BCL / CSSF)"
+    "limit_35pct": "Üblicher prudentieller Verschuldungsgrenzwert (35%)"
   },
   "about_page": {
     "eyebrow": "Seit 2018",
