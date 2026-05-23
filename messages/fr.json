@@ -698,7 +698,12 @@
     "monthly_max": "Mensualité disponible (35%)",
     "max_borrow": "Capital empruntable",
     "rate_used": "Taux utilisé",
-    "limit_35pct": "Seuil prudentiel usuel d'endettement (35%)"
+    "limit_35pct": "Seuil prudentiel usuel d'endettement (35%)",
+    "rate_type_label": "Type de taux",
+    "rate_type_fixed": "Taux fixe",
+    "rate_type_variable": "Taux variable",
+    "customize_rate": "Personnaliser le taux",
+    "rate_auto_tooltip": "Taux automatique selon la durée — cochez pour modifier."
   },
   "about_page": {
     "eyebrow": "Depuis 2018",

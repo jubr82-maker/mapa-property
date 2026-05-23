@@ -698,7 +698,12 @@
     "monthly_max": "Verfügbare Rate (35%)",
     "max_borrow": "Darlehensvolumen",
     "rate_used": "Verwendeter Zinssatz",
-    "limit_35pct": "Üblicher prudentieller Verschuldungsgrenzwert (35%)"
+    "limit_35pct": "Üblicher prudentieller Verschuldungsgrenzwert (35%)",
+    "rate_type_label": "Zinsart",
+    "rate_type_fixed": "Festzins",
+    "rate_type_variable": "Variabler Zins",
+    "customize_rate": "Zins anpassen",
+    "rate_auto_tooltip": "Zinssatz automatisch nach Laufzeit — anhaken zum Anpassen."
   },
   "about_page": {
     "eyebrow": "Seit 2018",

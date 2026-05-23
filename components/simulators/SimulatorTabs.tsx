@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { formatEuro, monthlyPayment } from "@/lib/finance";
+import { getRateForDuration } from "@/lib/finance-sim";
 import type { InterestRates } from "@/lib/types";
+
+type RateType = "fixed" | "variable";
 
 // Convertit "2026-05" → "mai 2026" (FR) / "May 2026" (EN) / "Mai 2026" (DE).
 // Renvoie la string brute si parsing impossible (defense + tolerance).
@@ -55,7 +58,7 @@ export function SimulatorTabs({ rates }: Props) {
 
       {active === "mortgage" && <MortgageSim rates={rates} locale={locale} />}
       {active === "yield" && <YieldSim />}
-      {active === "capacity" && <CapacitySim rates={rates} />}
+      {active === "capacity" && <CapacitySim rates={rates} locale={locale} />}
     </div>
   );
 }
@@ -65,18 +68,34 @@ function MortgageSim({ rates, locale }: { rates: InterestRates | null; locale: s
   const t = useTranslations("simulators");
   const [capital, setCapital] = useState(500_000);
   const [years, setYears] = useState(25);
-  // Fallback 3,82% = interpolation courtiers LU 25 ans mai 2026 (BCL).
-  const [rate, setRate] = useState(rates?.rates?.fixed_25 ?? 3.82);
+  const [rateType, setRateType] = useState<RateType>("fixed");
+  const [isCustomRate, setIsCustomRate] = useState(false);
+  const [customRateValue, setCustomRateValue] = useState<number | null>(null);
 
-  // Pre-fill rate when years change
-  const updateYearsRate = (yr: number) => {
-    setYears(yr);
-    const key = `fixed_${yr}` as keyof NonNullable<InterestRates["rates"]>;
-    const r = rates?.rates?.[key];
-    if (typeof r === "number") setRate(r);
+  // Taux auto suit la duree via le helper. Si personnalisation activee,
+  // on utilise customRateValue (snapshot pris au moment du toggle).
+  const autoRate = getRateForDuration(years, rateType, rates);
+  const displayRate =
+    isCustomRate && customRateValue !== null ? customRateValue : autoRate;
+  const sliderDisabled = !isCustomRate || rateType === "variable";
+
+  const handleToggleCustom = (checked: boolean) => {
+    setIsCustomRate(checked);
+    // Snapshot du taux auto courant pour eviter un saut visuel.
+    if (checked && customRateValue === null) setCustomRateValue(autoRate);
+    if (!checked) setCustomRateValue(null);
   };
 
-  const monthly = monthlyPayment(capital, rate, years);
+  const handleTypeChange = (newType: RateType) => {
+    setRateType(newType);
+    // Variable → personnalisation forcement off (taux unique 2.85%).
+    if (newType === "variable") {
+      setIsCustomRate(false);
+      setCustomRateValue(null);
+    }
+  };
+
+  const monthly = monthlyPayment(capital, displayRate, years);
   const total = monthly * years * 12;
   const interest = total - capital;
 
@@ -84,6 +103,7 @@ function MortgageSim({ rates, locale }: { rates: InterestRates | null; locale: s
     <section className="rounded-2xl border border-line bg-bg p-8">
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="space-y-5">
+          <RateTypeRadio value={rateType} onChange={handleTypeChange} t={t} />
           <Slider
             label={t("capital")}
             value={capital}
@@ -98,19 +118,28 @@ function MortgageSim({ rates, locale }: { rates: InterestRates | null; locale: s
             value={years}
             min={5}
             max={30}
-            step={5}
-            onChange={updateYearsRate}
+            step={1}
+            onChange={setYears}
             format={(v) => `${v} ${t("years")}`}
           />
-          <Slider
-            label={t("rate_label")}
-            value={rate}
-            min={0.5}
-            max={8}
-            step={0.05}
-            onChange={setRate}
-            format={(v) => `${v.toFixed(2).replace(".", ",")} %`}
-          />
+          <div>
+            <Slider
+              label={t("rate_label")}
+              value={displayRate}
+              min={0.5}
+              max={8}
+              step={0.05}
+              onChange={setCustomRateValue}
+              format={(v) => `${v.toFixed(2).replace(".", ",")} %`}
+              disabled={sliderDisabled}
+            />
+            <CustomRateToggle
+              checked={isCustomRate}
+              onChange={handleToggleCustom}
+              disabled={rateType === "variable"}
+              t={t}
+            />
+          </div>
         </div>
 
         <div className="rounded-xl border border-gold/40 bg-bg-soft p-6">
@@ -232,17 +261,38 @@ function YieldSim() {
 }
 
 /* --- Capacity simulator --- */
-function CapacitySim({ rates }: { rates: InterestRates | null }) {
+function CapacitySim({ rates, locale }: { rates: InterestRates | null; locale: string }) {
   const t = useTranslations("simulators");
   const [income, setIncome] = useState(8_000);
   const [charges, setCharges] = useState(500);
   const [down, setDown] = useState(150_000);
   const [years, setYears] = useState(25);
-  // Fallback 3,82% = interpolation courtiers LU 25 ans mai 2026 (BCL).
-  const rate = rates?.rates?.[`fixed_${years}` as keyof NonNullable<InterestRates["rates"]>] ?? 3.82;
+  const [rateType, setRateType] = useState<RateType>("fixed");
+  const [isCustomRate, setIsCustomRate] = useState(false);
+  const [customRateValue, setCustomRateValue] = useState<number | null>(null);
+
+  // Meme logique que MortgageSim : auto par defaut, custom optionnel.
+  const autoRate = getRateForDuration(years, rateType, rates);
+  const displayRate =
+    isCustomRate && customRateValue !== null ? customRateValue : autoRate;
+  const sliderDisabled = !isCustomRate || rateType === "variable";
+
+  const handleToggleCustom = (checked: boolean) => {
+    setIsCustomRate(checked);
+    if (checked && customRateValue === null) setCustomRateValue(autoRate);
+    if (!checked) setCustomRateValue(null);
+  };
+
+  const handleTypeChange = (newType: RateType) => {
+    setRateType(newType);
+    if (newType === "variable") {
+      setIsCustomRate(false);
+      setCustomRateValue(null);
+    }
+  };
 
   const dispo = Math.max(0, (income - charges) * 0.35);
-  const r = (rate as number) / 100 / 12;
+  const r = displayRate / 100 / 12;
   const n = years * 12;
   const maxBorrow = r === 0 ? dispo * n : (dispo * (1 - Math.pow(1 + r, -n))) / r;
   const totalBudget = maxBorrow + down;
@@ -252,6 +302,7 @@ function CapacitySim({ rates }: { rates: InterestRates | null }) {
     <section className="rounded-2xl border border-line bg-bg p-8">
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="space-y-5">
+          <RateTypeRadio value={rateType} onChange={handleTypeChange} t={t} />
           <Slider
             label={t("monthly_income")}
             value={income}
@@ -284,10 +335,28 @@ function CapacitySim({ rates }: { rates: InterestRates | null }) {
             value={years}
             min={5}
             max={30}
-            step={5}
+            step={1}
             onChange={setYears}
             format={(v) => `${v} ${t("years")}`}
           />
+          <div>
+            <Slider
+              label={t("rate_label")}
+              value={displayRate}
+              min={0.5}
+              max={8}
+              step={0.05}
+              onChange={setCustomRateValue}
+              format={(v) => `${v.toFixed(2).replace(".", ",")} %`}
+              disabled={sliderDisabled}
+            />
+            <CustomRateToggle
+              checked={isCustomRate}
+              onChange={handleToggleCustom}
+              disabled={rateType === "variable"}
+              t={t}
+            />
+          </div>
         </div>
 
         <div className="rounded-xl border border-gold/40 bg-bg-soft p-6">
@@ -302,11 +371,18 @@ function CapacitySim({ rates }: { rates: InterestRates | null }) {
             <Stat label={t("max_borrow")} value={formatEuro(Math.round(maxBorrow))} />
             <Stat
               label={t("rate_used")}
-              value={`${(rate as number).toFixed(2).replace(".", ",")} %`}
+              value={`${displayRate.toFixed(2).replace(".", ",")} %`}
             />
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
               {t("limit_35pct")}
             </p>
+            {rates?.reference_month && (
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+                {t("source_label", {
+                  month: formatMonthLong(rates.reference_month, locale),
+                })}
+              </p>
+            )}
           </dl>
         </div>
       </div>
@@ -322,6 +398,7 @@ function Slider({
   step,
   onChange,
   format,
+  disabled = false,
 }: {
   label: string;
   value: number;
@@ -330,9 +407,10 @@ function Slider({
   step: number;
   onChange: (v: number) => void;
   format: (v: number) => string;
+  disabled?: boolean;
 }) {
   return (
-    <label className="block">
+    <label className={`block ${disabled ? "opacity-60" : ""}`}>
       <div className="mb-1 flex items-baseline justify-between">
         <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
           {label}
@@ -348,8 +426,91 @@ function Slider({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-gold"
+        disabled={disabled}
+        className={`w-full accent-gold ${disabled ? "cursor-not-allowed" : ""}`}
       />
+    </label>
+  );
+}
+
+// Radio Fixe / Variable — au-dessus des sliders. Mode 'variable' verrouille
+// le taux a la valeur unique Supabase (2.85% mai 2026) et grise la
+// personnalisation.
+function RateTypeRadio({
+  value,
+  onChange,
+  t,
+}: {
+  value: RateType;
+  onChange: (v: RateType) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const opts: { value: RateType; key: string }[] = [
+    { value: "fixed", key: "rate_type_fixed" },
+    { value: "variable", key: "rate_type_variable" },
+  ];
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t("rate_type_label")}
+      className="flex gap-2 rounded-full border border-line bg-bg-soft p-1"
+    >
+      {opts.map((opt) => {
+        const active = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(opt.value)}
+            className={`flex-1 rounded-full px-4 py-2 font-mono text-[10px] font-medium uppercase tracking-[0.2em] transition-colors ${
+              active ? "bg-ink text-bg" : "text-ink-soft hover:text-gold"
+            }`}
+          >
+            {t(opt.key)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Checkbox "Personnaliser le taux" sous le slider taux. Decochee par defaut :
+// le taux suit la duree via getRateForDuration. Cochee : slider editable.
+// Grisee si rateType='variable' (un seul taux possible).
+function CustomRateToggle({
+  checked,
+  onChange,
+  disabled,
+  t,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  disabled: boolean;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <label
+      className={`mt-2 flex cursor-pointer items-start gap-2 text-[11px] leading-snug text-ink-soft ${
+        disabled ? "cursor-not-allowed opacity-60" : ""
+      }`}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
+        className="mt-0.5 accent-gold"
+      />
+      <span>
+        <span className="font-mono uppercase tracking-[0.15em]">
+          {t("customize_rate")}
+        </span>
+        <span className="mt-0.5 block text-ink-soft/80">
+          {t("rate_auto_tooltip")}
+        </span>
+      </span>
     </label>
   );
 }

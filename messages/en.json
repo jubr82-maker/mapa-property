@@ -698,7 +698,12 @@
     "monthly_max": "Available monthly (35%)",
     "max_borrow": "Borrowable capital",
     "rate_used": "Rate used",
-    "limit_35pct": "Usual prudential debt threshold (35%)"
+    "limit_35pct": "Usual prudential debt threshold (35%)",
+    "rate_type_label": "Rate type",
+    "rate_type_fixed": "Fixed rate",
+    "rate_type_variable": "Variable rate",
+    "customize_rate": "Customize rate",
+    "rate_auto_tooltip": "Rate automatically set by duration — tick to override."
   },
   "about_page": {
     "eyebrow": "Since 2018",
