@@ -21,6 +21,7 @@ import type { LeadInsert } from "@/lib/types";
 import { isPlausiblePhone } from "@/lib/countries";
 import { insertLeadWithConsent } from "@/lib/lead-insert";
 import { shouldDropTestLead } from "@/lib/test-email";
+import { sendLeadEmails } from "@/lib/email/lead-emails";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -114,11 +115,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  // TODO: si RESEND_API_KEY présente, envoyer notification email via Resend (Étape 13 / déploiement)
-  if (process.env.RESEND_API_KEY) {
-    // À brancher quand la clé sera fournie
-    // await resend.emails.send(...)
-  }
+  // Sprint C3 : emails client (confirmation 48h ouvrees) + interne
+  // (notification Julien). Best-effort, jamais bloquant ni throw.
+  // Pattern identique a sendEstimationEmails (sprint B1).
+  void sendLeadEmails({
+    contactEmail: body.email,
+    firstName: lead.first_name,
+    lastName: lead.last_name,
+    phone: lead.phone,
+    subject,
+    message: baseMessage,
+    type: lead.type,
+    source: lead.source,
+    propertyRef: lead.property_ref,
+    locale: lead.lang,
+  });
 
   return NextResponse.json({ ok: true });
 }
