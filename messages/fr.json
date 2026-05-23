@@ -682,7 +682,7 @@
     "monthly_label": "Mensualité",
     "total_paid": "Coût total",
     "total_interest": "Intérêts totaux",
-    "source_bcl": "Source BCL — {month}",
+    "source_label": "Sources : BCL et courtiers Luxembourg agréés — {month}",
     "purchase_price": "Prix d'achat",
     "rent_monthly": "Loyer mensuel",
     "charges_year": "Charges annuelles",

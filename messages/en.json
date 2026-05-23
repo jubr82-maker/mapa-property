@@ -682,7 +682,7 @@
     "monthly_label": "Monthly",
     "total_paid": "Total cost",
     "total_interest": "Total interest",
-    "source_bcl": "BCL source — {month}",
+    "source_label": "Sources: BCL and accredited Luxembourg brokers — {month}",
     "purchase_price": "Purchase price",
     "rent_monthly": "Monthly rent",
     "charges_year": "Annual charges",

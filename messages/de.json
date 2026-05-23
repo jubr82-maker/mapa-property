@@ -682,7 +682,7 @@
     "monthly_label": "Monatsrate",
     "total_paid": "Gesamtkosten",
     "total_interest": "Gesamtzinsen",
-    "source_bcl": "BCL-Quelle — {month}",
+    "source_label": "Quellen: BCL und zugelassene Luxemburger Makler — {month}",
     "purchase_price": "Kaufpreis",
     "rent_monthly": "Monatsmiete",
     "charges_year": "Jährliche Nebenkosten",

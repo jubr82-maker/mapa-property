@@ -1,9 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { formatEuro, monthlyPayment } from "@/lib/finance";
 import type { InterestRates } from "@/lib/types";
+
+// Convertit "2026-05" → "mai 2026" (FR) / "May 2026" (EN) / "Mai 2026" (DE).
+// Renvoie la string brute si parsing impossible (defense + tolerance).
+function formatMonthLong(monthIso: string, locale: string): string {
+  const match = /^(\d{4})-(\d{2})$/.exec(monthIso);
+  if (!match) return monthIso;
+  const [, year, month] = match;
+  const date = new Date(Number(year), Number(month) - 1, 1);
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      month: "long",
+      year: "numeric",
+    }).format(date);
+  } catch {
+    return monthIso;
+  }
+}
 
 interface Props {
   rates: InterestRates | null;
@@ -15,6 +32,7 @@ type Tab = (typeof tabs)[number];
 export function SimulatorTabs({ rates }: Props) {
   const [active, setActive] = useState<Tab>("mortgage");
   const t = useTranslations("simulators");
+  const locale = useLocale();
 
   return (
     <div>
@@ -35,7 +53,7 @@ export function SimulatorTabs({ rates }: Props) {
         ))}
       </nav>
 
-      {active === "mortgage" && <MortgageSim rates={rates} />}
+      {active === "mortgage" && <MortgageSim rates={rates} locale={locale} />}
       {active === "yield" && <YieldSim />}
       {active === "capacity" && <CapacitySim rates={rates} />}
     </div>
@@ -43,7 +61,7 @@ export function SimulatorTabs({ rates }: Props) {
 }
 
 /* --- Mortgage simulator --- */
-function MortgageSim({ rates }: { rates: InterestRates | null }) {
+function MortgageSim({ rates, locale }: { rates: InterestRates | null; locale: string }) {
   const t = useTranslations("simulators");
   const [capital, setCapital] = useState(500_000);
   const [years, setYears] = useState(25);
@@ -110,7 +128,9 @@ function MortgageSim({ rates }: { rates: InterestRates | null }) {
             />
             {rates?.reference_month && (
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-                {t("source_bcl", { month: rates.reference_month })}
+                {t("source_label", {
+                  month: formatMonthLong(rates.reference_month, locale),
+                })}
               </p>
             )}
           </dl>
