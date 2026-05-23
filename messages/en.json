@@ -443,7 +443,7 @@
     "error": "Please accept the NDA and confirm your financial capacity, then verify your contact details.",
     "success_eyebrow": "NDA request received",
     "success_title": "Your request is being validated.",
-    "success_text": "Your NDA request has been received. Julien Brebion will get back to you within 24h to send the contractual NDA."
+    "success_text": "Your NDA request has been received. Julien Brebion will get back to you within 48 business hours to send the contractual NDA."
   },
   "rgpd": {
     "consent_label": "I agree that my data may be used by MAPA Property to process my request in accordance with the privacy policy (GDPR).",
@@ -625,7 +625,7 @@
       "estimate": {
         "eyebrow": "Valuation",
         "title": "EVS Valuation",
-        "body": "Free online valuation, followed by a detailed expertise report within 24h by our team."
+        "body": "Free online valuation, followed by a detailed expertise report within 48 business hours by our team."
       },
       "simulators": {
         "eyebrow": "Simulators",

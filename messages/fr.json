@@ -362,7 +362,7 @@
     "advisor_block_roles": "Real Estate Director · Gérant",
     "form_eyebrow": "Demande d'information",
     "form_title": "Une question sur ce bien ?",
-    "form_subtitle": "MAPA Property vous recontacte personnellement sous 24 heures ouvrées.",
+    "form_subtitle": "MAPA Property vous recontacte personnellement sous 48 heures ouvrées.",
     "similar": "Biens similaires",
     "download_pdf": "Télécharger / Imprimer",
     "request_info": "Demander des informations"
@@ -443,7 +443,7 @@
     "error": "Veuillez accepter le NDA et confirmer votre capacité financière, puis vérifier vos coordonnées.",
     "success_eyebrow": "Demande NDA reçue",
     "success_title": "Votre demande est en cours de validation.",
-    "success_text": "Votre demande de NDA a bien été reçue. Julien Brebion vous recontactera sous 24h pour l'envoi du NDA contractuel."
+    "success_text": "Votre demande de NDA a bien été reçue. Julien Brebion vous recontactera sous 48 heures ouvrées pour l'envoi du NDA contractuel."
   },
   "rgpd": {
     "consent_label": "J'accepte que mes données soient utilisées par MAPA Property pour traiter ma demande conformément à la politique de confidentialité (RGPD).",
@@ -465,7 +465,7 @@
     "label_autonome": "Autonome",
     "label_recherche": "Recherche",
     "form_eyebrow": "Démarrer",
-    "form_subtitle": "MAPA Property vous recontacte personnellement sous 24 heures ouvrées.",
+    "form_subtitle": "MAPA Property vous recontacte personnellement sous 48 heures ouvrées.",
     "reco_label": "Notre recommandation",
     "reco_text": "Le mandat exclusif reste notre recommandation. Le marché luxembourgeois est petit ; multiplier la même annonce dans plusieurs agences expose votre bien sur les mêmes plateformes et donne un signal de vente pressée — souvent défavorable à la négociation."
   },
@@ -625,7 +625,7 @@
       "estimate": {
         "eyebrow": "Estimation",
         "title": "Estimation EVS",
-        "body": "Estimation gratuite en ligne, suivie d'un rapport d'expertise détaillé sous 24h par notre équipe."
+        "body": "Estimation gratuite en ligne, suivie d'un rapport d'expertise détaillé sous 48 heures ouvrées par notre équipe."
       },
       "simulators": {
         "eyebrow": "Simulateurs",
@@ -819,7 +819,7 @@
   "contact_page": {
     "eyebrow": "Contact",
     "title": "Une conversation peut tout changer.",
-    "intro": "Mandat de vente, recherche, accès off-market, conseil patrimonial — chaque demande est traitée personnellement par MAPA Property sous 24 heures ouvrées.",
+    "intro": "Mandat de vente, recherche, accès off-market, conseil patrimonial — chaque demande est traitée personnellement par MAPA Property sous 48 heures ouvrées.",
     "form_title": "Écrivez-nous",
     "call_label": "Appeler",
     "email_label": "Écrire",

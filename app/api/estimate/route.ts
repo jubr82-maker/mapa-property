@@ -305,7 +305,7 @@ export async function POST(req: Request) {
         works_amount: typeof body.worksAmount === "number" ? body.worksAmount : undefined,
       });
 
-      // Sprint B1 : emails client (confirmation + promesse rapport 24h) +
+      // Sprint B1 : emails client (confirmation + promesse rapport 48h ouvrees) +
       // interne (notification lead Julien/Frederic). Best-effort, jamais bloquant.
       void sendEstimationEmails({
         contactEmail: body.contactEmail,

@@ -2,7 +2,7 @@
 //
 // Helper unique pour envoyer 2 emails apres une soumission /api/estimate :
 //   1. CLIENT : confirmation + fourchette indicative + promesse rapport
-//      EVS detaille sous 24h. Envoye si contactEmail + rgpdConsent.
+//      EVS detaille sous 48h ouvrees. Envoye si contactEmail + rgpdConsent.
 //   2. INTERNE : notification lead a j.brebion@mapagroup.org +
 //      f.frederic@mapagroup.org (variable d'env optionnelle).
 //
@@ -79,7 +79,7 @@ function clientBody(args: {
         ``,
         `This indicative range is calculated by our proprietary EVS engine (Estimation de Valeur Sécurisée).`,
         ``,
-        `Within 24 hours, our team will send you a detailed expertise report — fine-tuned based on real comparable sales in your municipality and the current Luxembourg market dynamics.`,
+        `Within 48 business hours, our team will send you a detailed expertise report — fine-tuned based on real comparable sales in your municipality and the current Luxembourg market dynamics.`,
         ``,
         `For an in-person assessment with one of our advisors, simply reply to this email or visit https://mapaproperty.lu/contact.`,
         ``,
@@ -100,7 +100,7 @@ function clientBody(args: {
         ``,
         `Diese indikative Bandbreite wird von unserer hauseigenen EVS-Engine berechnet (Estimation de Valeur Sécurisée).`,
         ``,
-        `Innerhalb von 24 Stunden sendet Ihnen unser Team einen detaillierten Gutachten-Bericht, verfeinert anhand realer Vergleichsverkäufe in Ihrer Gemeinde und der aktuellen Luxemburger Marktdynamik.`,
+        `Innerhalb von 48 Werkstunden sendet Ihnen unser Team einen detaillierten Gutachten-Bericht, verfeinert anhand realer Vergleichsverkäufe in Ihrer Gemeinde und der aktuellen Luxemburger Marktdynamik.`,
         ``,
         `Für eine persönliche Begutachtung mit einem unserer Berater antworten Sie einfach auf diese E-Mail oder besuchen Sie https://mapaproperty.lu/contact.`,
         ``,
@@ -121,7 +121,7 @@ function clientBody(args: {
         ``,
         `Cette fourchette indicative est calculée par notre moteur propriétaire EVS (Estimation de Valeur Sécurisée).`,
         ``,
-        `Sous 24h, notre équipe vous enverra un rapport d'expertise détaillé — affiné sur la base des ventes comparables réelles dans votre commune et de la dynamique actuelle du marché luxembourgeois.`,
+        `Sous 48 heures ouvrées, notre équipe vous enverra un rapport d'expertise détaillé — affiné sur la base des ventes comparables réelles dans votre commune et de la dynamique actuelle du marché luxembourgeois.`,
         ``,
         `Pour une évaluation en personne avec l'un de nos conseillers, répondez simplement à ce mail ou rendez-vous sur https://mapaproperty.lu/contact.`,
         ``,
