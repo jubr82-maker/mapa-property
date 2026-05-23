@@ -660,7 +660,21 @@
     "contact_email": "Email",
     "contact_phone": "Téléphone",
     "contact_consent": "J'accepte d'être contacté(e) par MAPA Property au sujet de cette estimation.",
-    "quartier": "Quartier (Luxembourg-Ville)"
+    "quartier": "Quartier (Luxembourg-Ville)",
+    "surface_total": "Surface totale",
+    "surface_total_tooltip": "Surface habitable + caves + greniers aménageables + garages intégrés. N'inclut pas terrasses, balcons, jardins.",
+    "living_surface_tooltip": "Surface chauffée intérieure, hors caves, garages, terrasses, balcons, jardins. Cette donnée figure sur le passeport énergétique CPE.",
+    "works_level": "Travaux réalisés (optionnel)",
+    "works_gros": "Gros travaux",
+    "works_moyens": "Travaux moyens",
+    "works_petits": "Petits travaux",
+    "works_aucun": "Aucun",
+    "contact_name": "Nom complet",
+    "contact_name_placeholder": "Prénom NOM",
+    "message": "Message (optionnel)",
+    "message_placeholder": "Précisions sur votre projet, contraintes particulières, calendrier souhaité…",
+    "cta_rdv_expertise": "Demander un rendez-vous d'expertise gratuit",
+    "cta_services": "Découvrir nos services"
   },
   "simulators_page": {
     "eyebrow": "Outils financiers",

@@ -660,7 +660,21 @@
     "contact_email": "E-Mail",
     "contact_phone": "Telefon",
     "contact_consent": "Ich willige ein, von MAPA Property zu dieser Schätzung kontaktiert zu werden.",
-    "quartier": "Stadtteil (Luxemburg-Stadt)"
+    "quartier": "Stadtteil (Luxemburg-Stadt)",
+    "surface_total": "Gesamtfläche",
+    "surface_total_tooltip": "Wohnfläche + Keller + ausbaubare Dachböden + integrierte Garagen. Ohne Terrassen, Balkone, Gärten.",
+    "living_surface_tooltip": "Beheizte Innenfläche, ohne Keller, Garagen, Terrassen, Balkone, Gärten. Diese Angabe steht im CPE-Energiepass.",
+    "works_level": "Durchgeführte Arbeiten (optional)",
+    "works_gros": "Große Arbeiten",
+    "works_moyens": "Mittlere Arbeiten",
+    "works_petits": "Kleine Arbeiten",
+    "works_aucun": "Keine",
+    "contact_name": "Vollständiger Name",
+    "contact_name_placeholder": "Vorname NACHNAME",
+    "message": "Nachricht (optional)",
+    "message_placeholder": "Details zu Ihrem Projekt, besondere Anforderungen, gewünschter Zeitplan…",
+    "cta_rdv_expertise": "Kostenlosen Beratungstermin anfragen",
+    "cta_services": "Unsere Dienstleistungen entdecken"
   },
   "simulators_page": {
     "eyebrow": "Finanzwerkzeuge",

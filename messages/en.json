@@ -660,7 +660,21 @@
     "contact_email": "Email",
     "contact_phone": "Phone",
     "contact_consent": "I agree to be contacted by MAPA Property regarding this estimate.",
-    "quartier": "Neighbourhood (Luxembourg City)"
+    "quartier": "Neighbourhood (Luxembourg City)",
+    "surface_total": "Total surface",
+    "surface_total_tooltip": "Living surface + cellars + convertible attics + integrated garages. Excludes terraces, balconies, gardens.",
+    "living_surface_tooltip": "Indoor heated surface, excluding cellars, garages, terraces, balconies, gardens. This figure appears on the CPE energy passport.",
+    "works_level": "Works carried out (optional)",
+    "works_gros": "Major works",
+    "works_moyens": "Medium works",
+    "works_petits": "Minor works",
+    "works_aucun": "None",
+    "contact_name": "Full name",
+    "contact_name_placeholder": "First name LAST NAME",
+    "message": "Message (optional)",
+    "message_placeholder": "Details about your project, specific constraints, desired timeline…",
+    "cta_rdv_expertise": "Request a free expert appointment",
+    "cta_services": "Discover our services"
   },
   "simulators_page": {
     "eyebrow": "Financial tools",
