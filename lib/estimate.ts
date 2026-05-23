@@ -175,9 +175,9 @@ export const estimateProperty = (
         key: "bellegen_akt",
         amount: 40000 * buyers,
         conditions: [
-          "Résidence principale (loi du 3 juillet 2025)",
+          "Résidence principale (occupation effective et personnelle)",
           "Aucune condition d'âge ni de primo-accession",
-          `Abattement 40 000 € par acquéreur (${buyers} personne${buyers > 1 ? "s" : ""})`,
+          `Crédit d'impôt 40 000 € par acquéreur (${buyers} personne${buyers > 1 ? "s" : ""})`,
         ],
       });
     }

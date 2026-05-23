@@ -48,7 +48,7 @@ export const STATE_AIDS_LU: StateAid[] = [
     country: "LU",
     name: "Bëllegen Akt",
     description:
-      "Abattement de 40 000 EUR par acquéreur sur les droits d'enregistrement (loi du 3 juillet 2025).",
+      "Crédit d'impôt jusqu'à 40 000 EUR par acquéreur sur les droits d'enregistrement, pour toute résidence principale, sans condition d'âge ni de primo-accession.",
     maxAmount: 40000,
     conditions: {
       primoAccedant: null,

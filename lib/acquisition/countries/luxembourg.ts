@@ -63,7 +63,7 @@ export function computeLuxembourg(input: AcquisitionInput): AcquisitionResult {
     amount: Math.round(registrationTax),
     rate: REGISTRATION_RATE,
     isPercentage: true,
-    notes: `Minimum légal ${MIN_REGISTRATION_FEE} €. Mesure temporaire 3,5% (Bëllegen Akt majoré) terminée le 30 juin 2025.`,
+    notes: `Minimum ${MIN_REGISTRATION_FEE} €.`,
   });
   lineItems.push({
     label: 'Droit de transcription (1%)',
@@ -72,7 +72,8 @@ export function computeLuxembourg(input: AcquisitionInput): AcquisitionResult {
     isPercentage: true,
   });
 
-  // ── Bëllegen Akt (40 000 € / acquéreur, SANS condition primo/âge depuis loi 3 juillet 2025)
+  // ── Bëllegen Akt : credit d'impot 40 000 € / acquereur, sans condition
+  //    primo-accession ni d'age (cadre legal en vigueur).
   //    Multiplicateur 2 si famille / couple.
   let bellegenAkt = 0;
   if (isPrimary) {
@@ -86,7 +87,7 @@ export function computeLuxembourg(input: AcquisitionInput): AcquisitionResult {
       label: `Bëllegen Akt (crédit d'impôt droits — ${multiplier === 2 ? 'couple/famille' : 'acquéreur seul'})`,
       amount: -Math.round(bellegenAkt),
       isPercentage: false,
-      notes: `Crédit ${BELLEGEN_AKT_PER_BUYER.toLocaleString('fr-FR')} €/acquéreur (loi du 3 juillet 2025, sans condition primo-accédant ni d'âge). Résidence principale uniquement. Crédit plafonné aux droits dus.`,
+      notes: `Crédit ${BELLEGEN_AKT_PER_BUYER.toLocaleString('fr-FR')} €/acquéreur, sans condition primo-accédant ni d'âge. Résidence principale uniquement. Crédit plafonné aux droits dus.`,
     });
   }
 
