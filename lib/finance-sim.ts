@@ -77,8 +77,11 @@ export function fmtEur(n: number): string {
 
 // Taux indicatifs par pays (mise à jour manuelle ou via le cron
 // refresh-rates documenté en blocker — dev pragmatique 2026-05).
+// LU mai 2026 : 3,82% = interpolation 25 ans entre les taux fixes
+// courtiers 10 ans (3,69%) et 30 ans (3,90%). Source BCL janvier 2026
+// + grille courtiers Luxembourg.
 export const DEFAULT_RATES_BY_COUNTRY: Record<string, number> = {
-  LU: 3.85,
+  LU: 3.82,
   FR: 3.65,
   BE: 3.45,
   DE: 3.95,

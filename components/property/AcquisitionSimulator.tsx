@@ -218,7 +218,8 @@ function SimulatorActive({
   );
 
   const downPayment = Math.round((price * downPct) / 100);
-  const rate = 3.5;
+  // 3,82% = interpolation courtiers LU 25 ans mai 2026 (source BCL).
+  const rate = 3.82;
 
   const mortgage = useMemo(
     () =>

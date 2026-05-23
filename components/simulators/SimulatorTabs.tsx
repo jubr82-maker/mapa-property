@@ -47,7 +47,8 @@ function MortgageSim({ rates }: { rates: InterestRates | null }) {
   const t = useTranslations("simulators");
   const [capital, setCapital] = useState(500_000);
   const [years, setYears] = useState(25);
-  const [rate, setRate] = useState(rates?.rates?.fixed_25 ?? 3.6);
+  // Fallback 3,82% = interpolation courtiers LU 25 ans mai 2026 (BCL).
+  const [rate, setRate] = useState(rates?.rates?.fixed_25 ?? 3.82);
 
   // Pre-fill rate when years change
   const updateYearsRate = (yr: number) => {
@@ -214,7 +215,8 @@ function CapacitySim({ rates }: { rates: InterestRates | null }) {
   const [charges, setCharges] = useState(500);
   const [down, setDown] = useState(150_000);
   const [years, setYears] = useState(25);
-  const rate = rates?.rates?.[`fixed_${years}` as keyof NonNullable<InterestRates["rates"]>] ?? 3.6;
+  // Fallback 3,82% = interpolation courtiers LU 25 ans mai 2026 (BCL).
+  const rate = rates?.rates?.[`fixed_${years}` as keyof NonNullable<InterestRates["rates"]>] ?? 3.82;
 
   const dispo = Math.max(0, (income - charges) * 0.35);
   const r = (rate as number) / 100 / 12;
