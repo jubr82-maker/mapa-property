@@ -53,6 +53,11 @@ export function ContactForm({
     setStatus("submitting");
     const form = e.currentTarget;
     const formData = new FormData(form);
+    // Sprint C3 : capture du champ subject (ajoute en B3 via <select>).
+    // Sans cette ligne, le DOM contenait bien le select mais le payload
+    // construit manuellement omettait `subject` → l'admin recevait le lead
+    // SANS objet. Fix critique pour le tri par sujet cote admin.
+    const subjectRaw = String(formData.get("subject") ?? "").trim();
     const payload = {
       first_name: String(formData.get("first_name") ?? ""),
       last_name: String(formData.get("last_name") ?? ""),
@@ -60,6 +65,7 @@ export function ContactForm({
       phone: String(formData.get("phone") ?? ""),
       country,
       rgpd_consent: rgpd,
+      subject: subjectRaw || undefined,
       message: String(formData.get("message") ?? ""),
       type,
       source,

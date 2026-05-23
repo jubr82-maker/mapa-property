@@ -65,9 +65,19 @@ export async function POST(req: Request) {
     body.rgpd_consent === true ? new Date().toISOString() : undefined;
   const baseMessage =
     typeof body.message === "string" ? body.message : undefined;
-  const message = consentAt
-    ? `${baseMessage ?? ""}\n\n[RGPD] consentement accordé le ${consentAt}`.trim()
+  // Sprint C3 : on prepend aussi le subject dans message en clair (audit
+  // durable, retrouvable meme si la colonne subject n'est pas encore
+  // migree — degradation gracieuse identique au pattern RGPD).
+  const subjectRaw =
+    typeof body.subject === "string" ? body.subject.trim() : "";
+  const messageWithSubject = subjectRaw
+    ? `[OBJET] ${subjectRaw}\n\n${baseMessage ?? ""}`.trim()
     : baseMessage;
+  const message = consentAt
+    ? `${messageWithSubject ?? ""}\n\n[RGPD] consentement accordé le ${consentAt}`.trim()
+    : messageWithSubject;
+
+  const subject = subjectRaw || undefined;
 
   const lead: LeadInsert = {
     email: body.email,
@@ -89,6 +99,7 @@ export async function POST(req: Request) {
     lang: typeof body.lang === "string" ? body.lang : undefined,
     country: typeof body.country === "string" ? body.country : undefined,
     city: typeof body.city === "string" ? body.city : undefined,
+    subject,
   };
 
   const sb = supabaseServer();

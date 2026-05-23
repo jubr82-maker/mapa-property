@@ -16,23 +16,40 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 type Row = Record<string, unknown>;
 
+/** Code Postgres / PostgREST signifiant "colonne inconnue". */
 function isUnknownColumnError(err: {
   code?: string;
   message?: string;
 } | null): boolean {
   if (!err) return false;
   // 42703 = undefined_column (Postgres) ; PGRST204 = colonne absente du
-  // cache de schéma PostgREST. On filtre aussi sur le nom de colonne.
-  return (
-    err.code === "42703" ||
-    err.code === "PGRST204" ||
-    /rgpd_consent_at/i.test(err.message ?? "")
-  );
+  // cache de schéma PostgREST.
+  return err.code === "42703" || err.code === "PGRST204";
 }
 
 /**
- * Insère `row` dans `table`. Si `consentAt` est fourni, ajoute
- * `rgpd_consent_at` ; en cas de colonne absente, retente sans.
+ * Extrait le nom de colonne fautif d'un message d'erreur PostgREST.
+ * Format observé : 'Could not find the \'X\' column' / 'column "X" of
+ * relation "Y" does not exist'.
+ */
+function extractMissingColumn(message: string | undefined): string | null {
+  if (!message) return null;
+  const m1 = message.match(/find the '([\w_]+)' column/i);
+  if (m1) return m1[1];
+  const m2 = message.match(/column "([\w_]+)" of relation/i);
+  if (m2) return m2[1];
+  return null;
+}
+
+/**
+ * Insère `row` dans `table`, en degradation gracieuse face aux colonnes
+ * absentes (migrations Julien appliquees a posteriori).
+ *
+ * Sprint C3 : generalisation du pattern RGPD (BUG 7) a toutes les
+ * colonnes optionnelles. Si l'INSERT echoue avec "colonne inconnue",
+ * on retire la colonne fautive et on retente — jusqu'a 3 essais
+ * (assez pour rgpd_consent_at + subject + autres futures).
+ *
  * Pas de .select()/RETURNING (tables privées : pas de policy SELECT
  * anon — cf. /api/nda-request). Retourne { ok, degraded }.
  */
@@ -42,21 +59,34 @@ export async function insertLeadWithConsent(
   row: Row,
   consentAt?: string,
 ): Promise<{ ok: boolean; degraded: boolean; error?: string }> {
-  if (consentAt) {
-    const { error } = await sb
-      .from(table)
-      .insert({ ...row, rgpd_consent_at: consentAt } as never);
-    if (!error) return { ok: true, degraded: false };
+  let payload: Row = consentAt
+    ? { ...row, rgpd_consent_at: consentAt }
+    : { ...row };
+  let degraded = false;
+
+  // Jusqu'a 3 tentatives : chaque iteration retire la colonne signalee
+  // inconnue. Au-dela, on echoue proprement.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const { error } = await sb.from(table).insert(payload as never);
+    if (!error) {
+      return { ok: true, degraded };
+    }
     if (!isUnknownColumnError(error)) {
-      return { ok: false, degraded: false, error: error.message };
+      return { ok: false, degraded, error: error.message };
+    }
+    const col = extractMissingColumn(error.message);
+    if (!col || !(col in payload)) {
+      // Erreur "unknown column" sans nom extractible → on abandonne.
+      return { ok: false, degraded, error: error.message };
     }
     console.warn(
-      `[lead-insert] ${table}.rgpd_consent_at absente — migration ` +
-        `20260518_rgpd_consent.sql à appliquer ; insertion dégradée ` +
-        `(consentement conservé dans message).`,
+      `[lead-insert] ${table}.${col} absente (migration a appliquer) — ` +
+        `retry sans cette colonne.`,
     );
+    const next: Row = { ...payload };
+    delete next[col];
+    payload = next;
+    degraded = true;
   }
-  const { error } = await sb.from(table).insert(row as never);
-  if (error) return { ok: false, degraded: Boolean(consentAt), error: error.message };
-  return { ok: true, degraded: Boolean(consentAt) };
+  return { ok: false, degraded, error: "too_many_unknown_column_retries" };
 }

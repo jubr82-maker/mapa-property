@@ -135,6 +135,8 @@ export interface LeadInsert {
   lang?: string;
   country?: string;
   city?: string;
+  /** Sprint C3 : objet pre-cadre du formulaire /contact (NULLABLE). */
+  subject?: string;
 }
 
 type WithLangColumns<T extends string> = `${T}_fr` | `${T}_en` | `${T}_de`;
