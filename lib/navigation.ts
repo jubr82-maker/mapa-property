@@ -31,6 +31,9 @@ export const RENT_ITEMS: readonly { href: string; key: string }[] = [
 export const AGENCY_ITEMS: readonly { href: string; key: string }[] = [
   { href: "/journal", key: "blog" },
   { href: "/qui-sommes-nous", key: "about" },
-  { href: "/nous-contacter", key: "contact" },
+  // Page contact existante : /[locale]/contact (pas /nous-contacter).
+  // Audit Sprint A : ancien href '/nous-contacter' renvoyait 404 alors que
+  // la route /contact existait deja avec ContactForm + ContactReveal.
+  { href: "/contact", key: "contact" },
   { href: "/legal/honoraires", key: "fees" },
 ];

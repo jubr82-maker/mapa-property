@@ -875,7 +875,7 @@ function ResultView({
           en option discrete. */}
       <div className="flex flex-wrap gap-3">
         <Link
-          href="/nous-contacter"
+          href="/contact"
           className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02]"
         >
           {t("cta_rdv_expertise")} →
