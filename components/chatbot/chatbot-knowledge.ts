@@ -45,14 +45,14 @@ const KNOWLEDGE_FR = `
 - Sous mandat, peut intervenir sur d'autres villes.
 
 ## Cadre légal Luxembourg
-- Plafond loyer : 5 % du capital investi par an (loi 21 septembre 2006).
+- Plafond loyer luxembourgeois : 5 % du capital investi par an.
 - TVA neuf résidence principale : 3 % réduit jusqu'à 50 000 € de crédit.
-- Frais de notaire : ~7 % du prix d'acquisition. Le Bëllegen Akt offre un abattement de 40 000 € par acquéreur sur les droits d'enregistrement, pour toute résidence principale (loi du 3 juillet 2025, sans condition d'âge ni de primo-accession).
-- AML/KYC : loi du 12 novembre 2004 modifiée. Vérification d'identité et origine des fonds obligatoires.
-- Plafond endettement : 35 % des revenus (recommandation BCL/CSSF).
+- Frais de notaire : ~7 % du prix d'acquisition. Le Bëllegen Akt est un crédit d'impôt jusqu'à 40 000 € par acquéreur sur les droits d'enregistrement, pour toute résidence principale, sans condition d'âge ni de primo-accession.
+- AML/KYC : cadre légal en vigueur. Vérification d'identité et origine des fonds obligatoires.
+- Seuil prudentiel usuel d'endettement : 35 % des revenus (pratique bancaire non contraignante au Luxembourg).
 
 ## Aides au logement (Luxembourg)
-- Bëllegen Akt : abattement droits enregistrement 40 000 € par acquéreur de résidence principale (loi 3 juillet 2025, sans condition d'âge ni de primo-accession).
+- Bëllegen Akt : crédit d'impôt 40 000 € par acquéreur de résidence principale, sans condition d'âge ni de primo-accession.
 - Aide étatique : sous conditions de revenus, voir logement.lu et Fonds du Logement.
 - Garantie d'État : pour primo-acquéreurs revenus modestes.
 - Prêt climatique : pour rénovation énergétique, voir klima-agence.lu.
@@ -132,11 +132,11 @@ const KNOWLEDGE_EN = `
 - Extendable under mandate.
 
 ## Luxembourg legal framework
-- Rent cap: 5% of invested capital per year (law of 21 September 2006).
+- Luxembourg rent cap: 5% of invested capital per year.
 - New build VAT: 3% reduced up to €50,000 credit for primary residence.
-- Notary fees: ~7% of acquisition price. The Bëllegen Akt is a €40,000 rebate per buyer on registration duty, for any primary residence (law of 3 July 2025, no age or first-time buyer condition).
-- AML/KYC: law of 12 November 2004 (amended).
-- Debt cap: 35% of income (BCL/CSSF recommendation).
+- Notary fees: ~7% of acquisition price. The Bëllegen Akt is a tax credit of up to €40,000 per buyer on registration duty, for any primary residence, no age or first-time buyer condition.
+- AML/KYC: applicable legal framework. Identity verification and source of funds required.
+- Usual prudential debt threshold: 35% of income (non-binding banking practice in Luxembourg).
 
 ## Method
 - Always under signed mandate.
@@ -187,11 +187,11 @@ const KNOWLEDGE_DE = `
 - Unter Mandat erweiterbar.
 
 ## Luxemburger Rechtsrahmen
-- Mietobergrenze: 5% des investierten Kapitals pro Jahr (Gesetz vom 21.09.2006).
+- Luxemburger Mietobergrenze: 5% des investierten Kapitals pro Jahr.
 - Neubau-MwSt.: 3% bis 50.000 € Gutschrift bei Hauptwohnsitz.
-- Notarkosten: ~7% des Kaufpreises, davon 1% Bëllegen Akt.
-- AML/KYC: Gesetz vom 12. November 2004 (geändert).
-- Verschuldungsgrenze: 35% (BCL/CSSF).
+- Notarkosten: ~7% des Kaufpreises. Bëllegen Akt: Steuergutschrift bis zu 40 000 € pro Erwerber für Hauptwohnsitz.
+- AML/KYC: geltender Rechtsrahmen. Identitätsprüfung und Mittelherkunft erforderlich.
+- Üblicher prudentieller Verschuldungsgrenzwert: 35% (nicht bindende Bankpraxis in Luxemburg).
 
 ## Methode
 - Immer unter unterzeichnetem Mandat.
