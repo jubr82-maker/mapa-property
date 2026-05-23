@@ -48,7 +48,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         paragraphs: [
           "Honoraires de mise en location : un mois de loyer HT, partagé selon usage (50 % bailleur / 50 % locataire) ou intégralement à la charge du bailleur selon mandat.",
           "Gestion locative : 6 % à 8 % HT des loyers encaissés, selon les services inclus.",
-          "Le plafond loyer 5 % du capital investi par an (loi du 21 septembre 2006) est strictement respecté.",
+          "Le plafond luxembourgeois de 5 % du capital investi par an est strictement respecté.",
         ],
       },
       {
@@ -75,7 +75,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Frais annexes (à la charge du Mandant)",
         paragraphs: [
-          "Frais d'enregistrement et de notaire : payés au notaire (~7 % au Luxembourg). Le Bëllegen Akt est un abattement de 40 000 € par acquéreur, sans condition d'âge ni de primo-accession, pour toute résidence principale (loi du 3 juillet 2025).",
+          "Frais d'enregistrement et de notaire : payés au notaire (~7 % au Luxembourg). Le Bëllegen Akt est un crédit d'impôt jusqu'à 40 000 € par acquéreur, sans condition d'âge ni de primo-accession, pour toute résidence principale.",
           "Frais d'huissier en cas de procédure : à la charge du Mandant.",
           "Frais de déplacement à l'international au-delà de 200 km du siège : forfait kilométrique sur devis.",
         ],
@@ -123,7 +123,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         paragraphs: [
           "Letting: one month's rent (excl. VAT), split as customary or fully at landlord's expense.",
           "Property management: 6% to 8% (excl. VAT) of collected rents.",
-          "Strict compliance with the 5% rent cap on invested capital (law of 21 September 2006).",
+          "Strict compliance with the Luxembourg 5% rent cap on invested capital per year.",
         ],
       },
       {
@@ -149,7 +149,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Ancillary fees (Mandant's expense)",
         paragraphs: [
-          "Notary fees ~7% in Luxembourg. The Bëllegen Akt is a €40,000 rebate per buyer on registration duty, for any primary residence (law of 3 July 2025, no age or first-time buyer condition).",
+          "Notary fees ~7% in Luxembourg. The Bëllegen Akt is a tax credit of up to €40,000 per buyer on registration duty, for any primary residence, no age or first-time buyer condition.",
           "Bailiff fees if proceedings.",
           "International travel beyond 200 km from HQ: per-quote.",
         ],
@@ -197,7 +197,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         paragraphs: [
           "Vermietung: eine Monatsmiete zzgl. MwSt., je nach Brauch geteilt oder voll vom Vermieter getragen.",
           "Hausverwaltung: 6 % bis 8 % zzgl. MwSt. der eingenommenen Mieten.",
-          "Strikte Einhaltung der 5 %-Mietobergrenze auf investiertes Kapital (Gesetz vom 21. September 2006).",
+          "Strikte Einhaltung der Luxemburger 5 %-Mietobergrenze auf investiertes Kapital pro Jahr.",
         ],
       },
       {
@@ -223,7 +223,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Nebenkosten (zu Lasten des Mandanten)",
         paragraphs: [
-          "Notarkosten ~7 % in Luxemburg. Der Bëllegen Akt ist ein Rabatt von 40 000 € pro Käufer auf die Eintragungsgebühr für jeden Hauptwohnsitz (Gesetz vom 3. Juli 2025, ohne Alters- oder Erstkäufer-Bedingung).",
+          "Notarkosten ~7 % in Luxemburg. Der Bëllegen Akt ist eine Steuergutschrift von bis zu 40 000 € pro Käufer auf die Eintragungsgebühr für jeden Hauptwohnsitz, ohne Alters- oder Erstkäufer-Bedingung.",
           "Gerichtsvollzieherkosten bei Verfahren.",
           "Internationale Reisen über 200 km vom Sitz: auf Angebot.",
         ],
