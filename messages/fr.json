@@ -401,7 +401,8 @@
     "rgpd_notice": "Vos données sont confidentielles et utilisées uniquement pour vous recontacter.",
     "success_eyebrow": "Demande reçue",
     "success_title": "Merci, votre demande a été enregistrée.",
-    "success_text": "MAPA Property vous recontactera personnellement sous 24 heures ouvrées."
+    "success_text": "MAPA Property vous recontactera personnellement sous 48 heures ouvrées.",
+    "send_another": "Envoyer une nouvelle demande"
   },
   "offmarket": {
     "eyebrow": "Off-Market",

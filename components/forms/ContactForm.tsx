@@ -109,6 +109,11 @@ export function ContactForm({
         ? t("captcha_pending")
         : t("submit");
 
+  // Sprint C3 : bouton 'Envoyer une nouvelle demande' qui reset le state
+  // local au lieu de bloquer l'utilisateur sur 'Demande recue'. Comme
+  // 'status' est un useState local, naviguer ailleurs puis revenir sur
+  // /contact monte un composant neuf avec status='idle' → formulaire vide
+  // par defaut. Aucune persistance localStorage/sessionStorage volontaire.
   if (status === "success") {
     return (
       <div className="rounded-xl border border-gold bg-gold/5 p-6 text-ink">
@@ -117,6 +122,19 @@ export function ContactForm({
         </p>
         <p className="mt-2 font-display text-xl font-bold">{t("success_title")}</p>
         <p className="mt-2 text-sm text-ink-mid">{t("success_text")}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setStatus("idle");
+            setErrorKind("generic");
+            setRgpd(false);
+            setToken(null);
+            setCaptchaFailed(false);
+          }}
+          className="mt-5 inline-flex items-center gap-2 rounded-full border border-gold px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] text-gold-deep transition-colors hover:bg-gold/10"
+        >
+          {t("send_another")} →
+        </button>
       </div>
     );
   }

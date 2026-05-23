@@ -401,7 +401,8 @@
     "rgpd_notice": "Ihre Daten sind vertraulich und werden ausschließlich zur Kontaktaufnahme verwendet.",
     "success_eyebrow": "Anfrage empfangen",
     "success_title": "Danke, Ihre Anfrage wurde registriert.",
-    "success_text": "MAPA Property meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen."
+    "success_text": "MAPA Property meldet sich persönlich innerhalb von 48 Werkstunden bei Ihnen.",
+    "send_another": "Neue Anfrage senden"
   },
   "offmarket": {
     "eyebrow": "Off-Market",

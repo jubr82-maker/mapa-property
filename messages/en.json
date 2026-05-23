@@ -401,7 +401,8 @@
     "rgpd_notice": "Your data is confidential and used only to reach back out to you.",
     "success_eyebrow": "Request received",
     "success_title": "Thank you, your request has been registered.",
-    "success_text": "MAPA Property will personally get back to you within 24 working hours."
+    "success_text": "MAPA Property will personally get back to you within 48 business hours.",
+    "send_another": "Send another request"
   },
   "offmarket": {
     "eyebrow": "Off-Market",
