@@ -374,7 +374,7 @@
     "rate": "Festzins {years} Jahre",
     "down": "Eigenkapital (20%)",
     "notary": "Notarkosten",
-    "disclaimer": "Indikative Berechnung auf Basis aktueller BCL-Zinsen, 20% Eigenkapital, 25 Jahre Laufzeit, 7% Notarkosten. Nicht vertraglich bindend.",
+    "disclaimer": "Indikative Berechnung auf Basis aktueller luxemburgischer Marktzinssätze, 20% Eigenkapital, 25 Jahre Laufzeit, 7% Notarkosten. Nicht vertraglich bindend.",
     "cta": "Mit dem vollständigen Rechner verfeinern"
   },
   "form": {
@@ -665,7 +665,7 @@
   "simulators_page": {
     "eyebrow": "Finanzwerkzeuge",
     "title": "Drei sofortige Rechner.",
-    "intro": "Monatsrate, Mietrendite, Kreditkapazität — vorausgefüllt mit den neuesten BCL-Zinsen.",
+    "intro": "Monatsrate, Mietrendite, Kreditkapazität — vorausgefüllt mit den neuesten luxemburgischen Marktzinssätzen.",
     "disclaimer_title": "Nur indikative Werkzeuge, nicht vertraglich bindend.",
     "disclaimer_p1": "Unser Rechner basiert auf öffentlichen Daten des Observatoire de l'Habitat (Luxemburger Wohnungsministerium) und Referenzzinsen der Banque centrale du Luxembourg (BCL), kontinuierlich von unserer Agentur an Markttrends angepasst.",
     "disclaimer_p2": "Üblicher prudentieller Verschuldungsgrenzwert (35%). Luxemburger Mietobergrenze: 5% des investierten Kapitals pro Jahr. Notarkosten ~7% des Kaufpreises in Luxemburg. Bëllegen Akt: Steuergutschrift von bis zu 40 000 € pro Käufer (80 000 € für ein gemeinsam erwerbendes Paar) auf die Eintragungsgebühren, unter der Bedingung der tatsächlichen Nutzung als Hauptwohnsitz.",

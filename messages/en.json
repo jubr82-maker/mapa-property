@@ -374,7 +374,7 @@
     "rate": "Fixed rate {years} years",
     "down": "Deposit (20%)",
     "notary": "Notary fees",
-    "disclaimer": "Indicative calculation based on current BCL rates, 20% deposit, 25-year term, 7% notary fees. Not contractual.",
+    "disclaimer": "Indicative calculation based on current Luxembourg market rates, 20% deposit, 25-year term, 7% notary fees. Not contractual.",
     "cta": "Refine with the full simulator"
   },
   "form": {
@@ -665,7 +665,7 @@
   "simulators_page": {
     "eyebrow": "Financial tools",
     "title": "Three instant calculators.",
-    "intro": "Monthly payment, rental yield, borrowing capacity — pre-filled with the latest BCL rates.",
+    "intro": "Monthly payment, rental yield, borrowing capacity — pre-filled with the latest Luxembourg market rates.",
     "disclaimer_title": "Indicative tools only, non-contractual.",
     "disclaimer_p1": "Our simulator is based on public data from the Observatoire de l'Habitat (Luxembourg Ministry of Housing) and reference rates from the Banque centrale du Luxembourg (BCL), continuously adapted by our agency to market trends.",
     "disclaimer_p2": "Usual prudential debt threshold (35%). Luxembourg rent cap: 5% of invested capital per year. Notary fees ~7% of acquisition price in Luxembourg. Bëllegen Akt: tax credit of up to €40,000 per buyer (€80,000 for a couple buying together) on registration duty, subject to effective occupation as primary residence.",
