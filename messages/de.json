@@ -593,6 +593,54 @@
     "learn_more": "Mehr erfahren",
     "legal_notice": "Die Luxemburger Obergrenze beträgt 5% des investierten Kapitals pro Jahr. MAPA Property garantiert die strikte Einhaltung dieser Regel — sie schützt Mieter und Vermieter."
   },
+  "services_page": {
+    "eyebrow": "Leistungen",
+    "title": "Unsere Leistungen",
+    "intro": "Verkaufen, kaufen, vermieten, schätzen oder vorausschauen: ein einziger Ansprechpartner, eine bewährte Boutique-Methode und ein Off-Market-Netzwerk in Luxemburg.",
+    "cta_more": "Entdecken",
+    "cards": {
+      "sell": {
+        "eyebrow": "Verkaufen",
+        "title": "Ihre Immobilie verkaufen",
+        "body": "Exklusiv-, Halb-Exklusiv-, Einfach- oder Autonomes Mandat. Für jedes Verkäuferprojekt die effektivste Form."
+      },
+      "buy": {
+        "eyebrow": "Kaufen",
+        "title": "Mit MAPA kaufen",
+        "body": "Suchmandat, vollständige Begleitung von der ersten Besichtigung bis zur Unterzeichnung der notariellen Urkunde."
+      },
+      "rent": {
+        "eyebrow": "Mieten",
+        "title": "Mieten oder vermieten",
+        "body": "Sorgfältige Mieterauswahl, modulare Hausverwaltung im Rahmen der Luxemburger 5%-Mietobergrenze."
+      },
+      "estimate": {
+        "eyebrow": "Schätzung",
+        "title": "EVS-Bewertung",
+        "body": "Kostenlose Online-Bewertung, gefolgt von einem detaillierten Gutachten-Bericht innerhalb von 24h."
+      },
+      "simulators": {
+        "eyebrow": "Rechner",
+        "title": "Finanzrechner",
+        "body": "Monatsrate, Kreditkapazität, Mietrendite — vorausgefüllt mit Luxemburger Marktzinssätzen."
+      },
+      "markets": {
+        "eyebrow": "Aktive Märkte",
+        "title": "Observatorium aktiver Märkte",
+        "body": "Strukturierende Daten nach Gemeinde und Stadtteil: Medianpreise, Transaktionsdynamik, Mieten-Trends."
+      },
+      "search_mandate": {
+        "eyebrow": "Suchmandat",
+        "title": "Spezialisiertes Suchmandat",
+        "body": "Für anspruchsvolle Käufer, die keine Zeit verlieren wollen: gezielte Suche, Off-Market-Zugang, Verhandlung."
+      },
+      "offmarket": {
+        "eyebrow": "Off-Market",
+        "title": "Off-Market-Katalog",
+        "body": "Vertrauliche Objekte, die nie online veröffentlicht werden, zugänglich nach Unterzeichnung einer NDA und Kapazitätsnachweis."
+      }
+    }
+  },
   "estimate_page": {
     "eyebrow": "Bewertung",
     "title": "Was ist der faire Preis Ihres Objekts?",

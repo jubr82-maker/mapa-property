@@ -593,6 +593,54 @@
     "learn_more": "En savoir plus",
     "legal_notice": "Le plafond luxembourgeois est de 5% du capital investi par an. MAPA Property garantit le respect strict de cette règle, qui protège locataire et bailleur."
   },
+  "services_page": {
+    "eyebrow": "Services",
+    "title": "Nos services",
+    "intro": "Vendre, acheter, louer, estimer ou anticiper : un seul interlocuteur, une méthode boutique éprouvée et un réseau off-market au Luxembourg.",
+    "cta_more": "Découvrir",
+    "cards": {
+      "sell": {
+        "eyebrow": "Vendre",
+        "title": "Vendre votre bien",
+        "body": "Mandat exclusif, semi-exclusif, simple ou autonome. À chaque projet vendeur sa formule la plus efficace."
+      },
+      "buy": {
+        "eyebrow": "Acheter",
+        "title": "Acheter avec MAPA",
+        "body": "Mandat de recherche, accompagnement complet jusqu'à la signature de l'acte authentique."
+      },
+      "rent": {
+        "eyebrow": "Louer",
+        "title": "Louer ou mettre en location",
+        "body": "Sélection rigoureuse de locataires, gestion locative modulaire dans le respect du plafond luxembourgeois 5%."
+      },
+      "estimate": {
+        "eyebrow": "Estimation",
+        "title": "Estimation EVS",
+        "body": "Estimation gratuite en ligne, suivie d'un rapport d'expertise détaillé sous 24h par notre équipe."
+      },
+      "simulators": {
+        "eyebrow": "Simulateurs",
+        "title": "Simulateurs financiers",
+        "body": "Mensualité de prêt, capacité d'emprunt, rendement locatif — pré-remplis avec les taux marché luxembourgeois."
+      },
+      "markets": {
+        "eyebrow": "Marchés actifs",
+        "title": "Observatoire des marchés actifs",
+        "body": "Données structurantes par commune et quartier : prix médians, dynamique transactions, tendances loyers."
+      },
+      "search_mandate": {
+        "eyebrow": "Mandat de recherche",
+        "title": "Mandat de recherche dédié",
+        "body": "Pour les acquéreurs exigeants ne souhaitant pas perdre de temps : recherche ciblée, off-market, négociation."
+      },
+      "offmarket": {
+        "eyebrow": "Off-Market",
+        "title": "Catalogue Off-Market",
+        "body": "Biens confidentiels jamais publiés en ligne, accessibles après signature d'un NDA et vérification de capacité."
+      }
+    }
+  },
   "estimate_page": {
     "eyebrow": "Estimation",
     "title": "Quel est le prix juste de votre bien ?",

@@ -593,6 +593,54 @@
     "learn_more": "Learn more",
     "legal_notice": "The Luxembourg cap is 5% of invested capital per year. MAPA Property guarantees strict compliance with this rule, which protects both tenant and landlord."
   },
+  "services_page": {
+    "eyebrow": "Services",
+    "title": "Our services",
+    "intro": "Sell, buy, rent, value or plan ahead: a single point of contact, a proven boutique method, and an off-market network in Luxembourg.",
+    "cta_more": "Discover",
+    "cards": {
+      "sell": {
+        "eyebrow": "Sell",
+        "title": "Sell your property",
+        "body": "Exclusive, semi-exclusive, simple or autonomous mandate. To each seller's project, its most effective formula."
+      },
+      "buy": {
+        "eyebrow": "Buy",
+        "title": "Buy with MAPA",
+        "body": "Search mandate, full support from first viewing to the signing of the authentic deed."
+      },
+      "rent": {
+        "eyebrow": "Rent",
+        "title": "Rent or list a property",
+        "body": "Rigorous tenant selection, modular property management within the Luxembourg 5% rent cap."
+      },
+      "estimate": {
+        "eyebrow": "Valuation",
+        "title": "EVS Valuation",
+        "body": "Free online valuation, followed by a detailed expertise report within 24h by our team."
+      },
+      "simulators": {
+        "eyebrow": "Simulators",
+        "title": "Financial simulators",
+        "body": "Monthly payment, borrowing capacity, rental yield — pre-filled with Luxembourg market rates."
+      },
+      "markets": {
+        "eyebrow": "Active markets",
+        "title": "Active markets observatory",
+        "body": "Structuring data by municipality and neighbourhood: median prices, transaction dynamics, rental trends."
+      },
+      "search_mandate": {
+        "eyebrow": "Search mandate",
+        "title": "Dedicated search mandate",
+        "body": "For demanding buyers who don't want to waste time: targeted search, off-market access, negotiation."
+      },
+      "offmarket": {
+        "eyebrow": "Off-Market",
+        "title": "Off-Market catalogue",
+        "body": "Confidential properties never published online, accessible after signing an NDA and proof of capacity."
+      }
+    }
+  },
   "estimate_page": {
     "eyebrow": "Valuation",
     "title": "What is the fair price of your property?",
