@@ -133,7 +133,7 @@ export function ContactForm({
           name="country"
         />
       </div>
-      {showSubject && <Field name="subject" label={t("subject")} />}
+      {showSubject && <SubjectSelect t={t} />}
       <Field
         name="message"
         label={t("message")}
@@ -195,6 +195,48 @@ interface FieldProps {
   required?: boolean;
   defaultValue?: string;
   as?: "input" | "textarea";
+}
+
+// Sprint B3 : 6 sujets pre-cadres pour le formulaire contact (au lieu
+// d'un input texte libre). Valeurs envoyees au backend sous name='subject'
+// pour rester retro-compatible avec l'API /api/contact existante.
+const SUBJECT_OPTIONS = [
+  "mandat_vente",
+  "mandat_recherche",
+  "estimation",
+  "mise_en_location",
+  "informations",
+  "offmarket_arcova",
+] as const;
+
+function SubjectSelect({
+  t,
+}: {
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+        {t("subject")}
+        <span className="ml-1 text-gold-deep">*</span>
+      </span>
+      <select
+        name="subject"
+        required
+        defaultValue=""
+        className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm text-ink focus:border-gold focus:outline-none"
+      >
+        <option value="" disabled>
+          {t("subject_select")}
+        </option>
+        {SUBJECT_OPTIONS.map((opt) => (
+          <option key={opt} value={opt}>
+            {t(`subject_${opt}`)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
 }
 
 function Field({
