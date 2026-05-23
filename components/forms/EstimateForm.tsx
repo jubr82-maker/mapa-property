@@ -26,10 +26,53 @@ const PROPERTY_TYPES = [
 ] as const;
 const STATES = ["to_renovate", "good", "renovated", "new"] as const;
 const ENERGIES = ["A", "B", "C", "D", "E", "F", "G", "H", "I"] as const;
-// Sprint B1 : niveau global des travaux realises (radio simple). Reste
-// optionnel — le moteur EVS V2 supporte des WorkItem detailles par poste
-// mais on n'expose ici qu'un proxy grossier pour le lead generator.
+// Sprint B1 : niveau global des travaux realises (radio simple).
 const WORKS_LEVELS = ["gros", "moyens", "petits", "aucun"] as const;
+
+// Sprint C1 : exposition UI des 13 categories engine EVS (POL3-6).
+// Reservoir aligne strict sur WorkCategory dans lib/estimation/engine.ts —
+// evite tout mapping fragile et garantit que ce qui est coche est
+// directement consomme par calcWorksValue() cote serveur.
+// Groupement visuel par "lourdeur" pour aider la lecture utilisateur,
+// mais TOUTES les checkboxes restent accessibles quel que soit le
+// niveau choisi (un bien peut avoir cumule gros + moyens + petits).
+const WORKS_CATEGORIES = [
+  "toiture",
+  "facade_isolation",
+  "pac",
+  "chauffage",
+  "photovoltaique",
+  "electricite",
+  "menuiseries",
+  "cuisine",
+  "salle_de_bain",
+  "peinture",
+  "sols_revetements",
+  "amenagement_exterieur",
+  "piscine",
+] as const;
+type WorksCategory = (typeof WORKS_CATEGORIES)[number];
+
+// Groupement UI par lourdeur (purement visuel — l'engine ne s'en sert pas).
+const WORKS_GROUPS: ReadonlyArray<{
+  level: "gros" | "moyens" | "petits";
+  categories: ReadonlyArray<WorksCategory>;
+}> = [
+  {
+    level: "gros",
+    categories: ["toiture", "facade_isolation", "pac", "chauffage", "photovoltaique", "menuiseries"],
+  },
+  {
+    level: "moyens",
+    categories: ["cuisine", "salle_de_bain", "electricite", "sols_revetements", "amenagement_exterieur"],
+  },
+  {
+    level: "petits",
+    categories: ["peinture", "piscine"],
+  },
+];
+
+const CURRENT_YEAR = new Date().getFullYear();
 
 interface FormState {
   country: string;
@@ -46,6 +89,12 @@ interface FormState {
   surfaceTotal: string;
   // Sprint B1 : niveau global travaux ('' = non renseigne).
   worksLevel: "" | (typeof WORKS_LEVELS)[number];
+  // Sprint C1 : detail des travaux (multi-select 13 categories engine
+  // EVS) + annee globale + montant total. Affichage conditionnel si
+  // worksLevel != 'aucun'. Genere works: WorkItem[] a l'envoi API.
+  worksCategories: WorksCategory[];
+  worksYear: string;
+  worksAmount: string;
   bedrooms: string;
   year: string;
   // Step 3 — coordonnées client (pour livraison résultat + suivi)
@@ -70,6 +119,9 @@ const initial: FormState = {
   terraceSurface: "",
   surfaceTotal: "",
   worksLevel: "",
+  worksCategories: [],
+  worksYear: "",
+  worksAmount: "",
   bedrooms: "",
   year: "",
   contactName: "",
@@ -98,6 +150,25 @@ export function EstimateForm() {
     setPending(true);
     setError(null);
     try {
+      // Sprint C1 : construit works: WorkItem[] consommable par le moteur
+      // EVS (calcWorksValue / vetuste par categorie POL3-6). Year unique
+      // partage entre toutes les categories cochees ; amount total
+      // reparti uniformement (amount_total / n) si fourni, sinon 0.
+      const worksYearNum = Number(data.worksYear);
+      const worksAmountNum = Number(data.worksAmount);
+      const cats = data.worksCategories;
+      const worksPayload: { category: string; year: number; amount: number }[] =
+        cats.length > 0 && Number.isFinite(worksYearNum) && worksYearNum > 0
+          ? cats.map((c) => ({
+              category: c,
+              year: worksYearNum,
+              amount:
+                Number.isFinite(worksAmountNum) && worksAmountNum > 0
+                  ? Math.round(worksAmountNum / cats.length)
+                  : 0,
+            }))
+          : [];
+
       const res = await fetch("/api/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -118,6 +189,19 @@ export function EstimateForm() {
           // Sprint B1 : nouveaux champs lead generator (persistance + email)
           surfaceTotal: data.surfaceTotal ? Number(data.surfaceTotal) : undefined,
           worksLevel: data.worksLevel || undefined,
+          // Sprint C1 : Travaux detailles. works[] consomme par engine EVS
+          // (vetuste par categorie). 3 champs plats persistes en colonnes
+          // dediees pour stats admin (cf. migration 20260525).
+          works: worksPayload.length > 0 ? worksPayload : undefined,
+          worksDetails: cats.length > 0 ? cats : undefined,
+          worksYear:
+            Number.isFinite(worksYearNum) && worksYearNum > 0
+              ? worksYearNum
+              : undefined,
+          worksAmount:
+            Number.isFinite(worksAmountNum) && worksAmountNum > 0
+              ? worksAmountNum
+              : undefined,
           contactName: data.contactName || undefined,
           message: data.message || undefined,
           // Coordonnées : on les passe pour qu'un lead soit créé côté serveur si présent
@@ -235,13 +319,34 @@ export function EstimateForm() {
               options={ENERGIES.map((e) => ({ value: e, label: e }))}
             />
           </div>
-          {/* Sprint B1 : niveau global travaux (radio plein largeur). */}
+          {/* Sprint C1 : section Travaux enrichie. Niveau radio (B1
+              conserve) + detail conditionnel (categories cochees + annee
+              + montant) si niveau != 'aucun'. */}
           <div className="mt-5">
             <WorksLevelRadio
               value={data.worksLevel}
-              onChange={(v) => set("worksLevel", v)}
+              onChange={(v) => {
+                set("worksLevel", v);
+                // Reset cascade si aucun travaux declare.
+                if (v === "aucun" || v === "") {
+                  set("worksCategories", []);
+                  set("worksYear", "");
+                  set("worksAmount", "");
+                }
+              }}
               t={t}
             />
+            {data.worksLevel && data.worksLevel !== "aucun" && (
+              <WorksDetailsBlock
+                categories={data.worksCategories}
+                onCategoriesChange={(cats) => set("worksCategories", cats)}
+                year={data.worksYear}
+                onYearChange={(y) => set("worksYear", y)}
+                amount={data.worksAmount}
+                onAmountChange={(a) => set("worksAmount", a)}
+                t={t}
+              />
+            )}
           </div>
           <NextBtn
             onClick={() => setStep(2)}
@@ -573,6 +678,99 @@ function FieldTextarea({
         className="resize-y rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
       />
     </label>
+  );
+}
+
+// Sprint C1 : bloc detail des travaux (categories engine EVS + annee +
+// montant). Affiche conditionnellement par EstimateForm si worksLevel
+// est defini et != 'aucun'. Toutes les categories sont accessibles
+// (un bien peut combiner gros/moyens/petits) ; le regroupement visuel
+// par 'lourdeur' aide juste la lecture.
+function WorksDetailsBlock({
+  categories,
+  onCategoriesChange,
+  year,
+  onYearChange,
+  amount,
+  onAmountChange,
+  t,
+}: {
+  categories: WorksCategory[];
+  onCategoriesChange: (cats: WorksCategory[]) => void;
+  year: string;
+  onYearChange: (y: string) => void;
+  amount: string;
+  onAmountChange: (a: string) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const toggleCat = (cat: WorksCategory) => {
+    if (categories.includes(cat)) {
+      onCategoriesChange(categories.filter((c) => c !== cat));
+    } else {
+      onCategoriesChange([...categories, cat]);
+    }
+  };
+  return (
+    <div className="mt-5 space-y-5 rounded-xl border border-line bg-bg-soft/60 p-5">
+      <p className="text-xs leading-relaxed text-ink-soft">
+        {t("works_help_text")}
+      </p>
+
+      {/* Categories cochables, groupees visuellement par lourdeur. */}
+      <fieldset>
+        <legend className="mb-3 font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+          {t("works_details_label")}
+        </legend>
+        <div className="space-y-4">
+          {WORKS_GROUPS.map((group) => (
+            <div key={group.level}>
+              <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.3em] text-gold-deep/70">
+                {t(`works_group_${group.level}`)}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {group.categories.map((cat) => {
+                  const active = categories.includes(cat);
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      role="checkbox"
+                      aria-checked={active}
+                      onClick={() => toggleCat(cat)}
+                      className={`rounded-full border px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] transition-colors ${
+                        active
+                          ? "border-gold bg-gold/15 text-gold-deep"
+                          : "border-line text-ink-soft hover:border-gold hover:text-gold"
+                      }`}
+                    >
+                      {active ? "✓ " : ""}
+                      {t(`works_cat_${cat}`)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </fieldset>
+
+      {/* Annee + montant — grid 2 colonnes desktop. */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FieldNumber
+          label={t("works_year_label")}
+          value={year}
+          onChange={onYearChange}
+          tooltip={t("works_year_tooltip")}
+        />
+        <FieldNumber
+          label={t("works_amount_label")}
+          value={amount}
+          onChange={onAmountChange}
+          suffix="€"
+          tooltip={t("works_amount_tooltip")}
+        />
+      </div>
+    </div>
   );
 }
 

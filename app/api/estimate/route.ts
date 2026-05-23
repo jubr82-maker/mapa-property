@@ -69,6 +69,10 @@ async function persistEstimationRequest(args: {
   surface_total?: number;
   works_level?: string;
   message?: string;
+  // Sprint C1 : Travaux detailles (migration 20260525).
+  works_details?: unknown;
+  works_year?: number;
+  works_amount?: number;
 }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -92,6 +96,12 @@ async function persistEstimationRequest(args: {
     surface_total: args.surface_total ?? null,
     works_level: args.works_level ?? null,
     message: args.message ?? null,
+    // Sprint C1 : 3 colonnes Travaux detaillees (migration 20260525).
+    // Si la migration n'est pas encore appliquee, le fallback cascade
+    // ci-dessous (base sans B1 ni C1) sera utilise.
+    works_details: args.works_details ?? null,
+    works_year: args.works_year ?? null,
+    works_amount: args.works_amount ?? null,
   };
   // Snapshot SANS les nouvelles colonnes B1 (fallback si migration absente).
   const baseLegacy = {
@@ -202,6 +212,10 @@ export async function POST(req: Request) {
     surfaceTotal?: number;
     worksLevel?: string;
     message?: string;
+    // Sprint C1 : detail des travaux (cf. WorksDetailsBlock UI).
+    worksDetails?: string[];
+    worksYear?: number;
+    worksAmount?: number;
   };
 
   const rgpdConsentAt =
@@ -285,6 +299,10 @@ export async function POST(req: Request) {
         surface_total: typeof body.surfaceTotal === "number" ? body.surfaceTotal : undefined,
         works_level: body.worksLevel,
         message: body.message,
+        // Sprint C1 : Travaux detailles (3 colonnes plates pour stats admin).
+        works_details: Array.isArray(body.worksDetails) ? body.worksDetails : undefined,
+        works_year: typeof body.worksYear === "number" ? body.worksYear : undefined,
+        works_amount: typeof body.worksAmount === "number" ? body.worksAmount : undefined,
       });
 
       // Sprint B1 : emails client (confirmation + promesse rapport 24h) +
