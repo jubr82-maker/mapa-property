@@ -36,8 +36,33 @@ import { getApartmentBaseline } from "@/lib/data/luxembourg-prices";
 // ============================================================================
 
 export type PropertyType = "appartement" | "maison" | "penthouse" | "duplex" | "villa";
-export type PropertyState = "to_renovate" | "good" | "renovated" | "new";
+// Sprint C7 : 6 etats au lieu de 4. Mapping doux des anciens :
+//   to_renovate → to_renovate (idem)
+//   good        → good        (idem)
+//   renovated   → excellent   (rename)
+//   new         → new         (idem)
+// + ajouts fair (a rafraichir), major_works (gros travaux).
+export type PropertyState =
+  | "to_renovate"
+  | "good"
+  | "renovated"
+  | "new"
+  | "excellent"
+  | "fair"
+  | "major_works";
 export type EnergyClass = "A++" | "A+" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I";
+
+// Sprint C7 — types Observatoire pour appartements (segment='apartment').
+// Tous OPTIONNELS dans EstimationInputs, avec defaults safe.
+export type FloorType =
+  | "basement"
+  | "ground"
+  | "first"
+  | "middle"
+  | "high"
+  | "top"
+  | "penthouse";
+export type AtypicalType = "standard" | "studio" | "duplex" | "triplex" | "loft";
 
 /**
  * Catégories de travaux EVS (POL3-6). 11 catégories + `piscine`.
@@ -94,6 +119,113 @@ export interface EstimationInputs {
   exposureSouth?: boolean;
   /** Surface sous-sol AMÉNAGÉ/FINI m² (maisons — annexes au-delà de 30 m²). */
   basementFinishedSqm?: number;
+  // ──────────────────────────────────────────────────────────────────────
+  // Sprint C7 — Methode Observatoire (appartements uniquement).
+  // Tous optionnels. Si absents, defaults safe (cf. estimateObservatoire).
+  // ──────────────────────────────────────────────────────────────────────
+  /** Etat C7 enrichi (6 niveaux). Si absent, fallback sur `state` legacy
+   *  via mapLegacyState(). */
+  condition?: PropertyState;
+  /** Type d'etage (apartment only). Default 'middle'. */
+  floorType?: FloorType;
+  /** Type atypique (apartment only). Default 'standard'. */
+  atypicalType?: AtypicalType;
+  /** Vente en l'etat futur d'achevement (TVA 3% logement neuf). */
+  vefa?: boolean;
+  /** Nombre de places de parking interieur (box/garage). Cap 5. */
+  parkingIndoor?: number;
+  /** Nombre de places de parking exterieur. Cap 5. */
+  parkingOutdoor?: number;
+  /** Cave privative presente (forfait 3000€). */
+  cellar?: boolean;
+  /** Surface terrasse m². > 15 = bonus, <=15 inclus dans prix/m². */
+  terraceArea?: number;
+  /** Surface balcon m² (info seulement, inclus dans prix/m²). */
+  balconyArea?: number;
+  /** Surface jardin m² (apartment only). 800€/m² plafond 50k€. */
+  gardenArea?: number;
+}
+
+// ============================================================================
+// Sprint C7 — Constantes methode Observatoire (placeholders commit 1).
+// Les vraies valeurs sont injectees aux commits 2-7. Garder ces objets
+// dans le meme fichier evite un import circulaire avec methodHedonic etc.
+// ============================================================================
+
+/** Sprint C7 — coefficients CPE A++ → I. Placeholder 1.0 (rempli commit 2). */
+export const CPE_COEF_C7: Record<EnergyClass, number> = {
+  "A++": 1.0,
+  "A+": 1.0,
+  A: 1.0,
+  B: 1.0,
+  C: 1.0,
+  D: 1.0,
+  E: 1.0,
+  F: 1.0,
+  G: 1.0,
+  H: 1.0,
+  I: 1.0,
+};
+
+/** Sprint C7 — coefficients etat (6 niveaux). Placeholder 1.0 (commit 3). */
+export const STATE_COEF_C7: Record<PropertyState, number> = {
+  new: 1.0,
+  excellent: 1.0,
+  renovated: 1.0, // alias de excellent via mapLegacyState
+  good: 1.0,
+  fair: 1.0,
+  to_renovate: 1.0,
+  major_works: 1.0,
+};
+
+/** Sprint C7 — coefficients etage (apartment only). Placeholder 1.0 (commit 4). */
+export const FLOOR_COEF_C7: Record<FloorType, number> = {
+  basement: 1.0,
+  ground: 1.0,
+  first: 1.0,
+  middle: 1.0,
+  high: 1.0,
+  top: 1.0,
+  penthouse: 1.0,
+};
+
+/** Sprint C7 — coefficients atypique (apartment only). Placeholder 1.0 (commit 5). */
+export const ATYPICAL_COEF_C7: Record<AtypicalType, number> = {
+  standard: 1.0,
+  studio: 1.0,
+  duplex: 1.0,
+  triplex: 1.0,
+  loft: 1.0,
+};
+
+/** Sprint C7 — mapping doux state legacy → C7 (back-compat).
+ *  `renovated` ancien → `excellent` C7 (rename, meme coef cible 1.05). */
+function mapLegacyState(state: PropertyState | undefined): PropertyState {
+  if (!state) return "good";
+  if (state === "renovated") return "excellent";
+  return state;
+}
+
+/** Sprint C7 — derive floorType + atypicalType depuis PropertyType legacy
+ *  si l'utilisateur n'a pas saisi explicitement les nouveaux champs C7. */
+function deriveAtypicalFromType(
+  inputs: EstimationInputs,
+): AtypicalType {
+  if (inputs.atypicalType) return inputs.atypicalType;
+  if (inputs.type === "duplex") return "duplex";
+  // penthouse, appartement → standard (le penthouse passe par floorType).
+  return "standard";
+}
+
+function deriveFloorFromType(inputs: EstimationInputs): FloorType {
+  if (inputs.floorType) return inputs.floorType;
+  if (inputs.type === "penthouse") return "penthouse";
+  return "middle";
+}
+
+/** Sprint C7 — segment Observatoire derive du PropertyType legacy. */
+function isHouseSegment(type: PropertyType): boolean {
+  return type === "maison" || type === "villa";
 }
 
 /** Retour d'erreur pays non couvert (EVS = LU only). */
@@ -165,11 +297,22 @@ export const DEFAULT_WEIGHTS: MethodWeights = {
  *   good = new −7,5 % ≈ 1.11 ; to_renovate = 0.80 (décote travaux ~33 % vs neuf).
  * Cf. docs/qa/EVS_RECALIBRATION_2026-05-18.md (TEGoVA EVS 2020 + Observatoire).
  */
+// Sprint C7 : PropertyState etendu de 4 a 7 valeurs (mapping doux des
+// anciennes : renovated → excellent). Cette table reste utilisee par les
+// methodes legacy code-mort (methodHedonic / methodStatecReference /
+// estimateApartment / estimateHouse). Les nouveaux etats (excellent / fair /
+// major_works) heritent par defaut des coefs proches pour eviter une
+// regression silencieuse des fixtures maisons (qui continuent d'utiliser
+// estimateHouse → STATE_COEF).
 const STATE_COEF: Record<PropertyState, number> = {
   to_renovate: 0.8,
   good: 1.11,
   renovated: 1.13,
   new: 1.2,
+  // Sprint C7 ajouts (alignes sur valeurs proches existantes pour code mort) :
+  excellent: 1.13, // alias renovated
+  fair: 0.95, // entre to_renovate (0.8) et good (1.11)
+  major_works: 0.7, // pire que to_renovate
 };
 
 /**
@@ -1273,12 +1416,151 @@ function estimateHouse(inputs: EstimationInputs): EstimationResult {
   });
 }
 
-/** Dispatcher : le type de bien détermine la formule (Étape 1.A). */
-function estimateMain(inputs: EstimationInputs): EstimationResult {
-  if (inputs.type === "maison" || inputs.type === "villa") {
-    return estimateHouse(inputs); // bâti + terrain
+// ============================================================================
+// Sprint C7 — Methode Observatoire (appartements uniquement).
+//
+// Formule unique conforme standards Observatoire de l'Habitat (LISER) +
+// modele hedonique luxembourgeois :
+//
+//   mid = surface
+//       × prix_m²_commune
+//       × CPE
+//       × etat
+//       × etage
+//       × atypique
+//       × (1 + VEFA × 0.03)
+//       × coef_surface_degressive
+//       + bonus_annexes
+//
+//   low  = mid × 0.90
+//   high = mid × 1.10   (spread ±10% intervalle de confiance Observatoire)
+//
+// Rupture vs POL3-6 (sprints prec.) :
+//   - Plus de decote vetuste annuelle (yearCoef supprime du flux)
+//   - Plus de calcWorksAddedValue (travaux ignores du calcul ; le CPE +
+//     etat refletent indirectement l'age et l'usage du bien)
+//   - Plus de rangePosition / MARKET_2026_CORRECTION / typePremium
+//   - Plus de surfaceCoef historique → remplace par degressivite -0.5%/m² >80m²
+//
+// House (segment='house') : RESTE sur estimateHouse() intact (bati+terrain
+// calibre POL3-6 par Julien). Le routage estimateMain() distingue les 2.
+//
+// Commit 1 : squelette + placeholders coefs (1.0 partout). Commits 2-7
+// remplissent les vraies valeurs Observatoire.
+// ============================================================================
+
+function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
+  // 1. Prix de base m² commune (source TS hardcodee getBaseline — pas de
+  //    migration Supabase async dans ce sprint, decision Julien).
+  const baseline = getBaseline("appartement", inputs.commune, inputs.quartier);
+  if (!baseline) {
+    // Pas de baseline → renvoyer un EstimationResult minimal a 0 plutot
+    // que crash. L'admin verra la commune introuvable dans warnings.
+    return buildEvsResult(inputs, 0, {
+      method: "observatoire_no_baseline",
+      reason: `Commune "${inputs.commune}" hors referentiel.`,
+    });
   }
-  return estimateApartment(inputs); // €/m² simple
+  const pricePerM2 = baseline.pricePerM2;
+  const baseValue = inputs.surfaceLiving * pricePerM2;
+
+  // 2. Coefficients Observatoire (placeholders commit 1, valeurs commits 2-7).
+  const cpe = inputs.energy ? CPE_COEF_C7[inputs.energy] ?? 1.0 : 1.0;
+
+  const state = mapLegacyState(inputs.condition ?? inputs.state);
+  const stateCoef = STATE_COEF_C7[state] ?? 1.0;
+
+  const floor = deriveFloorFromType(inputs);
+  const floorCoef = FLOOR_COEF_C7[floor] ?? 1.0;
+
+  const atypical = deriveAtypicalFromType(inputs);
+  const atypicalCoef = ATYPICAL_COEF_C7[atypical] ?? 1.0;
+
+  const vefaCoef = inputs.vefa ? 1.03 : 1.0;
+
+  // Degressivite surface : commit 6 (placeholder 1.0 ici).
+  const surfaceCoef = 1.0;
+
+  // 3. mid avant annexes.
+  const midBeforeAnnexes =
+    baseValue * cpe * stateCoef * floorCoef * atypicalCoef * vefaCoef * surfaceCoef;
+
+  // 4. Bonus annexes (placeholders commit 1 — vraies valeurs commit 7).
+  const parkingIndoor = Math.max(0, Math.min(5, inputs.parkingIndoor ?? 0));
+  const parkingOutdoor = Math.max(0, Math.min(5, inputs.parkingOutdoor ?? 0));
+  const annexes = 0
+    + parkingIndoor * 0
+    + parkingOutdoor * 0
+    + (inputs.cellar ? 0 : 0)
+    + 0  // terrasse > 15m²
+    + 0; // jardin (apartment only)
+
+  const mid = Math.round(midBeforeAnnexes + annexes);
+
+  // Spread ±10% Observatoire (commit 8 le formalise dans buildEvsResult,
+  // ici on bypass et on construit notre propre EstimationResult).
+  const low = Math.round(mid * 0.9);
+  const high = Math.round(mid * 1.1);
+
+  const naResult = {
+    applicable: false,
+    price: null,
+    details: { reason: "Sprint C7 — methode Observatoire active (appartement)." },
+    warnings: [],
+  };
+
+  return {
+    client_output: {
+      price_low: low,
+      price_mid: mid,
+      price_high: high,
+      confidence: "MEDIUM",
+    },
+    internal_output: {
+      methods: {
+        sales_comparison: naResult,
+        hedonic: {
+          applicable: true,
+          price: mid,
+          details: {
+            method: "observatoire_c7",
+            base_per_m2: pricePerM2,
+            surface: inputs.surfaceLiving,
+            coef_cpe: cpe,
+            coef_etat: stateCoef,
+            coef_etage: floorCoef,
+            coef_atypique: atypicalCoef,
+            coef_vefa: vefaCoef,
+            coef_surface: surfaceCoef,
+            annexes,
+          },
+          warnings: [],
+        },
+        income_capitalization: naResult,
+        depreciated_replacement: naResult,
+        statec_reference: naResult,
+      },
+      weighted_price: mid,
+      std_deviation_pct: 10,
+      confidence_score: 75,
+      warnings: [],
+      inputs_snapshot: inputs,
+      weights_used: DEFAULT_WEIGHTS,
+      computed_at: new Date().toISOString(),
+    },
+  };
+}
+
+/** Dispatcher : le type de bien détermine la formule (Étape 1.A).
+ *  Sprint C7 : apartment → estimateObservatoire (nouveau) ;
+ *  house/villa → estimateHouse (intact, calibre POL3-6 par Julien). */
+function estimateMain(inputs: EstimationInputs): EstimationResult {
+  if (isHouseSegment(inputs.type)) {
+    return estimateHouse(inputs); // INTACT — bati + terrain + travaux
+  }
+  return estimateObservatoire(inputs); // C7 nouvelle methode
+  // NB : estimateApartment() ci-dessous reste defini comme code mort
+  // (POL3-6 conservation, dette technique acceptee — usage futur eventuel).
 }
 
 export function estimate(
