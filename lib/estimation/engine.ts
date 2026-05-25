@@ -152,19 +152,22 @@ export interface EstimationInputs {
 // dans le meme fichier evite un import circulaire avec methodHedonic etc.
 // ============================================================================
 
-/** Sprint C7 — coefficients CPE A++ → I. Placeholder 1.0 (rempli commit 2). */
+/** Sprint C7 — coefficients CPE A++ → I (modele hedonique Observatoire LU
+ *  + green premium STATEC/Spuerkeess 2023). D = reference 1.00.
+ *  Brief Julien : A++/A+ alignes sur A (Observatoire publie 9 valeurs A→I,
+ *  les classes A++/A+ historiques heritent du meme coef A). */
 export const CPE_COEF_C7: Record<EnergyClass, number> = {
-  "A++": 1.0,
-  "A+": 1.0,
-  A: 1.0,
-  B: 1.0,
-  C: 1.0,
+  "A++": 1.05,
+  "A+": 1.05,
+  A: 1.05,
+  B: 1.03,
+  C: 1.01,
   D: 1.0,
-  E: 1.0,
-  F: 1.0,
-  G: 1.0,
-  H: 1.0,
-  I: 1.0,
+  E: 0.97,
+  F: 0.94,
+  G: 0.9,
+  H: 0.88,
+  I: 0.85,
 };
 
 /** Sprint C7 — coefficients etat (6 niveaux). Placeholder 1.0 (commit 3). */
