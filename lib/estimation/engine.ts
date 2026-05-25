@@ -241,6 +241,22 @@ function isHouseSegment(type: PropertyType): boolean {
   return type === "maison" || type === "villa";
 }
 
+/** Sprint C7 — coefficient de degressivite surface Observatoire.
+ *
+ *  Plus la surface est grande, plus le prix/m² descend (le marche
+ *  luxembourgeois absorbe difficilement les grandes surfaces, surtout
+ *  au-dessus de 100m² en appartement).
+ *
+ *  - surface <= 80 m² : 1.00 (pas de degressivite)
+ *  - surface > 80 m²  : 1 - (surface - 80) × 0.005   (-0.5% par m² supp)
+ *  - plancher         : 0.75 (-25% maximum, pour eviter des prix/m² ridicules
+ *    sur des biens de 150m²+ qui sont alors penalises de >35% mecaniquement) */
+export function surfaceDegressiveCoef(surface: number): number {
+  if (surface <= 80) return 1.0;
+  const raw = 1 - (surface - 80) * 0.005;
+  return Math.max(0.75, raw);
+}
+
 /** Retour d'erreur pays non couvert (EVS = LU only). */
 export interface CountryNotCoveredError {
   error: "COUNTRY_NOT_COVERED";
@@ -1491,8 +1507,9 @@ function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
 
   const vefaCoef = inputs.vefa ? 1.03 : 1.0;
 
-  // Degressivite surface : commit 6 (placeholder 1.0 ici).
-  const surfaceCoef = 1.0;
+  // Sprint C7 commit 6 : degressivite surface au-dela de 80m² (-0.5%/m²,
+  // plancher -25%). Le bonus VEFA 1.03 est deja actif dans vefaCoef.
+  const surfaceCoef = surfaceDegressiveCoef(inputs.surfaceLiving);
 
   // 3. mid avant annexes.
   const midBeforeAnnexes =
