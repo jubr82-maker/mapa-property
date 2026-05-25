@@ -29,7 +29,20 @@ interface SendLeadEmailsArgs {
 }
 
 const INTERNAL_TO_DEFAULT = "j.brebion@mapagroup.org";
-const FROM = "MAPA Property <noreply@mapaproperty.lu>";
+// Sprint C5 : compat env vars Vercel. RESEND_FROM_EMAIL peut etre defini
+// avec un sender deja verifie (ex: 'onboarding@resend.dev' tant que le
+// domaine mapaproperty.lu n'est pas verifie en DNS Resend). Fallback :
+// 'onboarding@resend.dev' qui est toujours accepte par Resend sans
+// verification de domaine.
+function resolveFrom(): string {
+  const raw = process.env.RESEND_FROM_EMAIL?.trim();
+  if (raw) {
+    // Si la var contient deja un nom + email (ex: 'MAPA <x@y>'), on garde.
+    // Sinon on l'enveloppe avec le nom de la marque.
+    return raw.includes("<") ? raw : `MAPA Property <${raw}>`;
+  }
+  return "MAPA Property <onboarding@resend.dev>";
+}
 
 function pickLocale(input: string | undefined): Locale {
   if (input === "en" || input === "de") return input;
@@ -179,16 +192,16 @@ function internalBody(args: SendLeadEmailsArgs & { locale: Locale; subjectStr: s
   return lines.join("\n");
 }
 
-async function sendOne(args: { to: string; subject: string; text: string }): Promise<void> {
+async function sendOne(args: { to: string; subject: string; text: string; from: string }): Promise<{ ok: boolean; status?: number; body?: string; error?: string }> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     console.warn(
-      "[email/lead] Resend non configuré — email stub:",
+      "[lead-emails] RESEND_API_KEY absent — email stub:",
       args.subject,
       "→",
       args.to,
     );
-    return;
+    return { ok: false, error: "no_api_key" };
   }
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -198,17 +211,29 @@ async function sendOne(args: { to: string; subject: string; text: string }): Pro
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: FROM,
+        from: args.from,
         to: [args.to],
         subject: args.subject,
         text: args.text,
       }),
     });
+    const bodyText = await res.text().catch(() => "");
     if (!res.ok) {
-      console.error("[email/lead] Resend HTTP", res.status, args.subject);
+      console.error(
+        "[lead-emails] Resend HTTP",
+        res.status,
+        "→",
+        args.to,
+        "|",
+        bodyText.slice(0, 300),
+      );
+      return { ok: false, status: res.status, body: bodyText.slice(0, 300) };
     }
+    return { ok: true, status: res.status, body: bodyText.slice(0, 200) };
   } catch (e) {
-    console.error("[email/lead] Resend error", (e as Error).message);
+    const err = (e as Error).message;
+    console.error("[lead-emails] Resend exception", err, "→", args.to);
+    return { ok: false, error: err };
   }
 }
 
@@ -225,28 +250,54 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
   const firstName =
     args.firstName ??
     (locale === "en" ? "there" : locale === "de" ? "geehrte/r Interessent/in" : "Madame, Monsieur");
-  const internalTo = process.env.LEAD_INTERNAL_TO ?? INTERNAL_TO_DEFAULT;
+  // Sprint C5 : fallback cascade pour compat avec env vars existantes
+  // (MAPA_NOTIFICATION_EMAIL deploye depuis le 15 mai).
+  const internalTo =
+    process.env.LEAD_INTERNAL_TO?.trim() ||
+    process.env.MAPA_NOTIFICATION_EMAIL?.trim() ||
+    INTERNAL_TO_DEFAULT;
+  const from = resolveFrom();
   const fullName = [args.firstName, args.lastName].filter(Boolean).join(" ") || "Prospect";
 
-  const tasks: Promise<void>[] = [];
+  console.log("[lead-emails] start", {
+    to: internalTo,
+    from,
+    hasApiKey: !!process.env.RESEND_API_KEY,
+    clientEmail: args.contactEmail ?? "(none)",
+    subject: subjectStr,
+  });
+
+  const tasks: Array<Promise<{ ok: boolean; status?: number; body?: string; error?: string }>> = [];
+  const labels: string[] = [];
 
   if (args.contactEmail) {
+    labels.push("client_email_result");
     tasks.push(
       sendOne({
         to: args.contactEmail,
+        from,
         subject: clientSubject(locale),
         text: clientBody({ locale, firstName, subjectStr }),
       }),
     );
   }
 
+  labels.push("internal_email_result");
   tasks.push(
     sendOne({
       to: internalTo,
+      from,
       subject: internalSubject({ subjectStr, name: fullName }),
       text: internalBody({ ...args, locale, subjectStr }),
     }),
   );
 
-  await Promise.allSettled(tasks);
+  const results = await Promise.allSettled(tasks);
+  results.forEach((r, i) => {
+    if (r.status === "fulfilled") {
+      console.log(`[lead-emails] ${labels[i]}`, r.value);
+    } else {
+      console.error(`[lead-emails] ${labels[i]} rejected`, r.reason);
+    }
+  });
 }

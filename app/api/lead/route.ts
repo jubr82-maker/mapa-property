@@ -115,10 +115,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  // Sprint C3 : emails client (confirmation 48h ouvrees) + interne
-  // (notification Julien). Best-effort, jamais bloquant ni throw.
-  // Pattern identique a sendEstimationEmails (sprint B1).
-  void sendLeadEmails({
+  // Sprint C3 → C5 : emails client (confirmation 48h ouvrees) + interne
+  // (notification Julien). AWAIT obligatoire en serverless Vercel : un
+  // 'void' fire-and-forget laisse le runtime tuer le process apres
+  // response avant que le fetch vers api.resend.com ait ete initie
+  // (cause racine bug C5). sendLeadEmails ne throw jamais (Promise.allSettled
+  // interne) donc l'await est sur — au pire +500-800ms de latence.
+  await sendLeadEmails({
     contactEmail: body.email,
     firstName: lead.first_name,
     lastName: lead.last_name,
