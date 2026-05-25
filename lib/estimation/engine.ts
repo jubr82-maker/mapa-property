@@ -197,13 +197,16 @@ export const FLOOR_COEF_C7: Record<FloorType, number> = {
   penthouse: 1.1, // attique / penthouse
 };
 
-/** Sprint C7 — coefficients atypique (apartment only). Placeholder 1.0 (commit 5). */
+/** Sprint C7 — coefficients atypique Observatoire (apartment uniquement).
+ *  standard = reference 1.00. N/A pour segment='house' (=1.00).
+ *  Brief : 'studio si surface < 35m²' → applique automatiquement dans
+ *  estimateObservatoire (deriveAtypicalFromType priorise inputs explicite). */
 export const ATYPICAL_COEF_C7: Record<AtypicalType, number> = {
-  standard: 1.0,
-  studio: 1.0,
-  duplex: 1.0,
-  triplex: 1.0,
-  loft: 1.0,
+  standard: 1.0, // reference
+  studio: 1.03, // +3% effet petite surface (auto si surface < 35m²)
+  duplex: 0.95, // -5% perte de plain-pied
+  triplex: 0.92, // -8% accentuation duplex
+  loft: 1.05, // +5% prestige industriel
 };
 
 /** Sprint C7 — mapping doux state legacy → C7 (back-compat).
@@ -221,6 +224,8 @@ function deriveAtypicalFromType(
 ): AtypicalType {
   if (inputs.atypicalType) return inputs.atypicalType;
   if (inputs.type === "duplex") return "duplex";
+  // Sprint C7 brief : 'studio si surface < 35m²' (auto si pas saisi).
+  if (inputs.surfaceLiving < 35) return "studio";
   // penthouse, appartement → standard (le penthouse passe par floorType).
   return "standard";
 }
