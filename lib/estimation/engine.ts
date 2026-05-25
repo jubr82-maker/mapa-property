@@ -170,15 +170,17 @@ export const CPE_COEF_C7: Record<EnergyClass, number> = {
   I: 0.85,
 };
 
-/** Sprint C7 — coefficients etat (6 niveaux). Placeholder 1.0 (commit 3). */
+/** Sprint C7 — coefficients etat general (6 niveaux Observatoire LU).
+ *  good = reference 1.00. mapLegacyState() translate l'ancien 'renovated'
+ *  vers 'excellent' avant l'appel a cette table. */
 export const STATE_COEF_C7: Record<PropertyState, number> = {
-  new: 1.0,
-  excellent: 1.0,
-  renovated: 1.0, // alias de excellent via mapLegacyState
-  good: 1.0,
-  fair: 1.0,
-  to_renovate: 1.0,
-  major_works: 1.0,
+  new: 1.08, // neuf, jamais habite
+  excellent: 1.05, // renove < 5 ans
+  renovated: 1.05, // alias excellent (back-compat, jamais lu via mapLegacyState)
+  good: 1.0, // reference
+  fair: 0.95, // correct, a rafraichir
+  to_renovate: 0.88, // a renover travaux moyens
+  major_works: 0.8, // gros travaux necessaires
 };
 
 /** Sprint C7 — coefficients etage (apartment only). Placeholder 1.0 (commit 4). */
