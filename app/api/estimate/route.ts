@@ -16,7 +16,8 @@ import {
   type WorkCategory,
 } from "@/lib/estimation/engine";
 import {
-  validateName,
+  validateFirstName,
+  validateLastName,
   validateEmail,
   validatePhone,
 } from "@/lib/validators/contact";
@@ -92,6 +93,9 @@ async function persistEstimationRequest(args: {
   rgpd_consent_at?: string;
   // Sprint B1 : nouveaux champs lead qualifie (migration 20260523).
   contact_name?: string;
+  // Sprint C10 : separation prenom / nom (migration 20260528).
+  first_name?: string;
+  last_name?: string;
   surface_total?: number;
   works_level?: string;
   message?: string;
@@ -131,6 +135,11 @@ async function persistEstimationRequest(args: {
     // Sprint B1 : tentative AVEC les nouvelles colonnes. Fallback ci-dessous
     // si la migration 20260523 n'est pas encore appliquee.
     contact_name: args.contact_name ?? null,
+    // Sprint C10 : 2 colonnes prenom / nom (migration 20260528). Si la
+    // migration n'est pas appliquee, le fallback baseB1C1 ci-dessous
+    // (qui delete ces cles) prend le relais.
+    first_name: args.first_name ?? null,
+    last_name: args.last_name ?? null,
     surface_total: args.surface_total ?? null,
     works_level: args.works_level ?? null,
     message: args.message ?? null,
@@ -192,6 +201,8 @@ async function persistEstimationRequest(args: {
     if (!e2) return;
     // Sprint C7 : 2eme fallback intermediaire avec B1+C1 mais SANS les
     // 11 colonnes C7 (cas migration 20260525_c7 pas encore appliquee).
+    // Sprint C10 : on enleve aussi first_name/last_name au cas ou la
+    // migration 20260528 ne serait pas encore appliquee.
     const baseB1C1 = { ...base } as Record<string, unknown>;
     delete baseB1C1.energy_class;
     delete baseB1C1.condition;
@@ -204,6 +215,8 @@ async function persistEstimationRequest(args: {
     delete baseB1C1.terrace_area;
     delete baseB1C1.balcony_area;
     delete baseB1C1.garden_area;
+    delete baseB1C1.first_name;
+    delete baseB1C1.last_name;
     const { error: e3 } = await supabase
       .from("estimation_requests")
       .insert(baseB1C1);
@@ -315,6 +328,9 @@ export async function POST(req: Request) {
     works?: unknown;
     // Sprint B1 : nouveaux champs lead generator.
     contactName?: string;
+    // Sprint C10 : separation prenom / nom (Step 3 EstimateForm).
+    contactFirstName?: string;
+    contactLastName?: string;
     surfaceTotal?: number;
     worksLevel?: string;
     message?: string;
@@ -358,33 +374,61 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
-  // Sprint C9 — validation contact server-side avant toute persistance.
+  // Sprint C9 + C10 — validation contact server-side avant toute persistance.
   // Doublonne le gating client (Step 3 disabled) pour bloquer les leads
   // forges (DevTools, scripts) qui contourneraient le bouton disabled.
-  // Tolerant si les 3 champs sont vides (estimation anonyme possible),
-  // mais STRICT si au moins un est renseigne -> les 3 doivent etre valides.
+  // Tolerant si les 4 champs sont vides (estimation anonyme possible),
+  // mais STRICT si au moins un est renseigne -> les 4 doivent etre valides.
+  //
+  // Back-compat C10 : si seul contactName arrive (client cache pre-C10),
+  // on splitte au premier espace -> first/last. Fallback last_name = ''
+  // si pas d'espace (la validation rejettera alors, OK).
+  const rawFirst = (body.contactFirstName ?? "").trim();
+  const rawLast = (body.contactLastName ?? "").trim();
+  const rawName = (body.contactName ?? "").trim();
+  let firstName = rawFirst;
+  let lastName = rawLast;
+  if (!firstName && !lastName && rawName) {
+    const parts = rawName.split(/\s+/);
+    firstName = parts[0] ?? "";
+    lastName = parts.slice(1).join(" ");
+  }
+  const fullName = `${firstName} ${lastName}`.trim();
+
   const hasAnyContact = Boolean(
-    body.contactName || body.contactEmail || body.contactPhone,
+    firstName || lastName || body.contactEmail || body.contactPhone,
   );
   if (hasAnyContact) {
-    const nameRes = validateName(body.contactName ?? "");
+    const firstRes = validateFirstName(firstName);
+    const lastRes = validateLastName(lastName);
     const emailRes = validateEmail(body.contactEmail ?? "");
     const phoneRes = validatePhone(
       body.contactPhone ?? "",
       body.contactPhoneCountry ?? "LU",
     );
-    if (!nameRes.valid || !emailRes.valid || !phoneRes.valid) {
-      const field = !nameRes.valid
-        ? "contactName"
-        : !emailRes.valid
-          ? "contactEmail"
-          : "contactPhone";
+    if (!firstRes.valid || !lastRes.valid || !emailRes.valid || !phoneRes.valid) {
+      const field = !firstRes.valid
+        ? "contactFirstName"
+        : !lastRes.valid
+          ? "contactLastName"
+          : !emailRes.valid
+            ? "contactEmail"
+            : "contactPhone";
       const reason =
-        (nameRes.error ?? emailRes.error ?? phoneRes.error) ?? "unknown";
+        (firstRes.error ??
+          lastRes.error ??
+          emailRes.error ??
+          phoneRes.error) ?? "unknown";
+      const valueByField: Record<string, string> = {
+        contactFirstName: firstName,
+        contactLastName: lastName,
+        contactEmail: body.contactEmail ?? "",
+        contactPhone: body.contactPhone ?? "",
+      };
       console.warn(
-        `[api/estimate] Validation failed: field=${field} value=${String(
-          body[field as "contactName" | "contactEmail" | "contactPhone"] ?? "",
-        ).slice(0, 30)} reason=${reason}`,
+        `[api/estimate] Validation failed: field=${field} value=${valueByField[
+          field
+        ].slice(0, 30)} reason=${reason}`,
       );
       return NextResponse.json(
         { error: "invalid_payload", field, reason },
@@ -451,7 +495,10 @@ export async function POST(req: Request) {
         locale: body.locale,
         rgpd_consent_at: rgpdConsentAt,
         // Sprint B1 : lead qualifie
-        contact_name: body.contactName,
+        contact_name: fullName || body.contactName || undefined,
+        // Sprint C10 : prenom / nom separes (back-compat split fait plus haut).
+        first_name: firstName || undefined,
+        last_name: lastName || undefined,
         surface_total: typeof body.surfaceTotal === "number" ? body.surfaceTotal : undefined,
         works_level: body.worksLevel,
         message: body.message,
@@ -477,7 +524,7 @@ export async function POST(req: Request) {
       // interne (notification lead Julien/Frederic). Best-effort, jamais bloquant.
       void sendEstimationEmails({
         contactEmail: body.contactEmail,
-        contactName: body.contactName,
+        contactName: fullName || body.contactName,
         contactPhone: body.contactPhone,
         message: body.message,
         commune: body.commune,
@@ -523,7 +570,10 @@ export async function POST(req: Request) {
     locale: body.locale,
     rgpd_consent_at: rgpdConsentAt,
     // Sprint B1 : lead qualifie
-    contact_name: body.contactName,
+    contact_name: fullName || body.contactName,
+    // Sprint C10 : prenom / nom separes.
+    first_name: firstName || undefined,
+    last_name: lastName || undefined,
     surface_total: typeof body.surfaceTotal === "number" ? body.surfaceTotal : undefined,
     works_level: body.worksLevel,
     message: body.message,
@@ -532,7 +582,7 @@ export async function POST(req: Request) {
   // Sprint B1 : emails client + interne (cf. branche EVS ci-dessus).
   void sendEstimationEmails({
     contactEmail: body.contactEmail,
-    contactName: body.contactName,
+    contactName: fullName || body.contactName,
     contactPhone: body.contactPhone,
     message: body.message,
     commune: body.commune,
