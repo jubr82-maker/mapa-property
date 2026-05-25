@@ -15,7 +15,8 @@ import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
 import {
-  validateName,
+  validateFirstName,
+  validateLastName,
   validateEmail,
   validatePhone,
 } from "@/lib/validators/contact";
@@ -157,7 +158,11 @@ interface FormState {
   balconyArea: string;
   gardenArea: string;
   // Step 3 — coordonnées client (pour livraison résultat + suivi)
-  contactName: string; // Sprint B1 : nom complet obligatoire (lead utile)
+  // Sprint C10 : split nom complet -> prenom + nom (2 champs distincts).
+  // contactName conserve = concat firstName + ' ' + lastName (back-compat).
+  contactFirstName: string;
+  contactLastName: string;
+  contactName: string; // @deprecated Sprint C10 : derive de firstName + lastName.
   contactEmail: string;
   contactPhone: string;
   message: string; // Sprint B1 : texte libre optionnel
@@ -194,6 +199,8 @@ const initial: FormState = {
   terraceArea: "",
   balconyArea: "",
   gardenArea: "",
+  contactFirstName: "",
+  contactLastName: "",
   contactName: "",
   contactEmail: "",
   contactPhone: "",
@@ -218,7 +225,9 @@ export function EstimateForm() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Sprint C8 — touched flags pour affichage erreurs onBlur uniquement.
-  const [touchedName, setTouchedName] = useState(false);
+  // Sprint C10 — touchedName remplace par touchedFirstName + touchedLastName.
+  const [touchedFirstName, setTouchedFirstName] = useState(false);
+  const [touchedLastName, setTouchedLastName] = useState(false);
   const [touchedEmail, setTouchedEmail] = useState(false);
   const [touchedPhone, setTouchedPhone] = useState(false);
   // Sprint C9 — code ISO pays choisi dans PhoneInput, requis par
@@ -266,12 +275,15 @@ export function EstimateForm() {
     // Sprint C9 — double protection : meme si le bouton fuit (DevTools,
     // race), on refuse cote handler si un validator KO. Force le retour
     // visuel onBlur en marquant tous les champs comme touches.
+    // Sprint C10 — 4 validators (firstName + lastName + email + phone).
     if (
-      !validateName(data.contactName).valid ||
+      !validateFirstName(data.contactFirstName).valid ||
+      !validateLastName(data.contactLastName).valid ||
       !validateEmail(data.contactEmail).valid ||
       !validatePhone(data.contactPhone, phoneCountry).valid
     ) {
-      setTouchedName(true);
+      setTouchedFirstName(true);
+      setTouchedLastName(true);
       setTouchedEmail(true);
       setTouchedPhone(true);
       return;
@@ -354,7 +366,13 @@ export function EstimateForm() {
               : Number.isFinite(worksAmountGlobal) && worksAmountGlobal > 0
                 ? worksAmountGlobal
                 : undefined,
-          contactName: data.contactName || undefined,
+          // Sprint C10 : firstName + lastName envoyes separes. contactName
+          // reste en payload pour back-compat API (concat cote serveur).
+          contactFirstName: data.contactFirstName.trim() || undefined,
+          contactLastName: data.contactLastName.trim() || undefined,
+          contactName:
+            `${data.contactFirstName.trim()} ${data.contactLastName.trim()}`.trim() ||
+            undefined,
           message: data.message || undefined,
           // Sprint C7 : champs Observatoire (apartment uniquement, defauts
           // safe cote engine). Envoyes meme si segment=house — l'engine les
@@ -705,13 +723,18 @@ export function EstimateForm() {
       )}
 
       {step === 3 && (() => {
-        // Sprint C9 — validators officiels (libphonenumber-js + whitelists).
-        const nameRes = validateName(data.contactName);
+        // Sprint C9 + C10 — validators officiels (libphonenumber-js + whitelists).
+        const firstNameRes = validateFirstName(data.contactFirstName);
+        const lastNameRes = validateLastName(data.contactLastName);
         const emailRes = validateEmail(data.contactEmail);
         const phoneRes = validatePhone(data.contactPhone, phoneCountry);
-        const nameError =
-          touchedName && !nameRes.valid && nameRes.error
-            ? t(`validation.${nameRes.error}`)
+        const firstNameError =
+          touchedFirstName && !firstNameRes.valid && firstNameRes.error
+            ? t(`validation.${firstNameRes.error}`)
+            : undefined;
+        const lastNameError =
+          touchedLastName && !lastNameRes.valid && lastNameRes.error
+            ? t(`validation.${lastNameRes.error}`)
             : undefined;
         const emailError =
           touchedEmail && !emailRes.valid && emailRes.error
@@ -724,21 +747,32 @@ export function EstimateForm() {
         const step3Disabled =
           !data.contactConsent ||
           !data.rgpdConsent ||
-          !nameRes.valid ||
+          !firstNameRes.valid ||
+          !lastNameRes.valid ||
           !emailRes.valid ||
           !phoneRes.valid;
         return (
         <StepWrap title={t("step3_title")} subtitle={t("step3_subtitle")}>
-          {/* Sprint B1 : nom complet obligatoire en premier (lead utile) */}
-          <div className="mb-4">
+          {/* Sprint C10 : prenom + nom separes (2 champs cote a cote desktop,
+              empiles mobile via grid-cols-1 sm:grid-cols-2). */}
+          <div className="mb-4 grid gap-4 sm:grid-cols-2">
             <FieldText
-              label={t("contact_name")}
-              value={data.contactName}
-              onChange={(v) => set("contactName", v)}
-              onBlur={() => setTouchedName(true)}
-              error={nameError}
-              placeholder={t("contact_name_placeholder")}
-              autoComplete="name"
+              label={t("contact_first_name")}
+              value={data.contactFirstName}
+              onChange={(v) => set("contactFirstName", v)}
+              onBlur={() => setTouchedFirstName(true)}
+              error={firstNameError}
+              placeholder={t("contact_first_name_placeholder")}
+              autoComplete="given-name"
+            />
+            <FieldText
+              label={t("contact_last_name")}
+              value={data.contactLastName}
+              onChange={(v) => set("contactLastName", v)}
+              onBlur={() => setTouchedLastName(true)}
+              error={lastNameError}
+              placeholder={t("contact_last_name_placeholder")}
+              autoComplete="family-name"
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
