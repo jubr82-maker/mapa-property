@@ -95,6 +95,10 @@ interface FormState {
   worksCategories: WorksCategory[];
   worksYear: string;
   worksAmount: string;
+  // Sprint C2 : annee + montant PAR categorie cochee. Key = WorksCategory.
+  // Initialise au toggle cat (heritage de worksYear global comme defaut),
+  // editable individuellement. Auto-purgee quand cat est decochee.
+  worksByCat: Record<string, { year: string; amount: string }>;
   bedrooms: string;
   year: string;
   // Step 3 — coordonnées client (pour livraison résultat + suivi)
@@ -122,6 +126,7 @@ const initial: FormState = {
   worksCategories: [],
   worksYear: "",
   worksAmount: "",
+  worksByCat: {},
   bedrooms: "",
   year: "",
   contactName: "",
@@ -150,23 +155,37 @@ export function EstimateForm() {
     setPending(true);
     setError(null);
     try {
-      // Sprint C1 : construit works: WorkItem[] consommable par le moteur
-      // EVS (calcWorksValue / vetuste par categorie POL3-6). Year unique
-      // partage entre toutes les categories cochees ; amount total
-      // reparti uniformement (amount_total / n) si fourni, sinon 0.
-      const worksYearNum = Number(data.worksYear);
-      const worksAmountNum = Number(data.worksAmount);
+      // Sprint C2 : construit works: WorkItem[] AVEC annee + montant
+      // INDIVIDUELS par categorie (data.worksByCat). Fini la repartition
+      // uniforme de C1 : chaque categorie a sa propre annee et son propre
+      // montant saisis. Fallback sur data.worksYear / data.worksAmount /
+      // n si une categorie n'a pas encore de valeur individuelle (saisie
+      // partielle), pour preserver la robustesse.
       const cats = data.worksCategories;
+      const worksYearGlobal = Number(data.worksYear);
+      const worksAmountGlobal = Number(data.worksAmount);
+      const hasAnyEntry = cats.some((c) => {
+        const e = data.worksByCat[c];
+        return e && (e.year || e.amount);
+      });
       const worksPayload: { category: string; year: number; amount: number }[] =
-        cats.length > 0 && Number.isFinite(worksYearNum) && worksYearNum > 0
-          ? cats.map((c) => ({
-              category: c,
-              year: worksYearNum,
-              amount:
-                Number.isFinite(worksAmountNum) && worksAmountNum > 0
-                  ? Math.round(worksAmountNum / cats.length)
-                  : 0,
-            }))
+        cats.length > 0
+          ? cats.map((c) => {
+              const entry = data.worksByCat[c];
+              const entryYear = entry?.year ? Number(entry.year) : NaN;
+              const entryAmount = entry?.amount ? Number(entry.amount) : NaN;
+              const year = Number.isFinite(entryYear) && entryYear > 0
+                ? entryYear
+                : Number.isFinite(worksYearGlobal) && worksYearGlobal > 0
+                  ? worksYearGlobal
+                  : 0;
+              const amount = Number.isFinite(entryAmount) && entryAmount > 0
+                ? entryAmount
+                : Number.isFinite(worksAmountGlobal) && worksAmountGlobal > 0
+                  ? Math.round(worksAmountGlobal / cats.length)
+                  : 0;
+              return { category: c, year, amount };
+            }).filter((w) => w.year > 0 || w.amount > 0 || hasAnyEntry)
           : [];
 
       const res = await fetch("/api/estimate", {
@@ -193,15 +212,24 @@ export function EstimateForm() {
           // (vetuste par categorie). 3 champs plats persistes en colonnes
           // dediees pour stats admin (cf. migration 20260525).
           works: worksPayload.length > 0 ? worksPayload : undefined,
-          worksDetails: cats.length > 0 ? cats : undefined,
+          // Sprint C2 : worksDetails enrichi (WorkItem[] complet au lieu de
+          // string[] cats nues en C1). Permet stats admin par poste +
+          // future calibration EVS year/amount par categorie.
+          worksDetails: worksPayload.length > 0 ? worksPayload : undefined,
+          // Scalaires derives pour stats admin (colonnes plates) :
+          // works_year = max(year), works_amount = sum(amount).
           worksYear:
-            Number.isFinite(worksYearNum) && worksYearNum > 0
-              ? worksYearNum
-              : undefined,
+            worksPayload.length > 0
+              ? worksPayload.reduce((mx, w) => (w.year > mx ? w.year : mx), 0) || undefined
+              : Number.isFinite(worksYearGlobal) && worksYearGlobal > 0
+                ? worksYearGlobal
+                : undefined,
           worksAmount:
-            Number.isFinite(worksAmountNum) && worksAmountNum > 0
-              ? worksAmountNum
-              : undefined,
+            worksPayload.length > 0
+              ? worksPayload.reduce((s, w) => s + w.amount, 0) || undefined
+              : Number.isFinite(worksAmountGlobal) && worksAmountGlobal > 0
+                ? worksAmountGlobal
+                : undefined,
           contactName: data.contactName || undefined,
           message: data.message || undefined,
           // Coordonnées : on les passe pour qu'un lead soit créé côté serveur si présent
@@ -332,6 +360,7 @@ export function EstimateForm() {
                   set("worksCategories", []);
                   set("worksYear", "");
                   set("worksAmount", "");
+                  set("worksByCat", {});
                 }
               }}
               t={t}
@@ -339,11 +368,26 @@ export function EstimateForm() {
             {data.worksLevel && data.worksLevel !== "aucun" && (
               <WorksDetailsBlock
                 categories={data.worksCategories}
-                onCategoriesChange={(cats) => set("worksCategories", cats)}
+                onCategoriesChange={(cats) => {
+                  // Sprint C2 : synchroniser worksByCat (purge des cats
+                  // decochees, init des nouvelles cats avec annee/montant
+                  // globaux comme defaut).
+                  const next: Record<string, { year: string; amount: string }> = {};
+                  cats.forEach((c) => {
+                    next[c] = data.worksByCat[c] ?? {
+                      year: data.worksYear || "",
+                      amount: "",
+                    };
+                  });
+                  set("worksCategories", cats);
+                  set("worksByCat", next);
+                }}
                 year={data.worksYear}
                 onYearChange={(y) => set("worksYear", y)}
                 amount={data.worksAmount}
                 onAmountChange={(a) => set("worksAmount", a)}
+                byCat={data.worksByCat}
+                onByCatChange={(byCat) => set("worksByCat", byCat)}
                 t={t}
               />
             )}
@@ -693,6 +737,8 @@ function WorksDetailsBlock({
   onYearChange,
   amount,
   onAmountChange,
+  byCat,
+  onByCatChange,
   t,
 }: {
   categories: WorksCategory[];
@@ -701,6 +747,8 @@ function WorksDetailsBlock({
   onYearChange: (y: string) => void;
   amount: string;
   onAmountChange: (a: string) => void;
+  byCat: Record<string, { year: string; amount: string }>;
+  onByCatChange: (next: Record<string, { year: string; amount: string }>) => void;
   t: ReturnType<typeof useTranslations>;
 }) {
   const toggleCat = (cat: WorksCategory) => {
@@ -710,13 +758,56 @@ function WorksDetailsBlock({
       onCategoriesChange([...categories, cat]);
     }
   };
+  // Sprint C2 : helper pour patcher une entree byCat sans muter le state.
+  const patchCat = (cat: WorksCategory, patch: Partial<{ year: string; amount: string }>) => {
+    onByCatChange({
+      ...byCat,
+      [cat]: {
+        year: byCat[cat]?.year ?? "",
+        amount: byCat[cat]?.amount ?? "",
+        ...patch,
+      },
+    });
+  };
+  // Sprint C2 : total live (somme des montants saisis par categorie).
+  // Si une cat n'a pas de montant individuel, on utilise le montant global
+  // divise par n comme defaut (coherent avec la logique de submit).
+  const globalAmountNum = Number(amount);
+  const total = categories.reduce((sum, c) => {
+    const v = byCat[c]?.amount ? Number(byCat[c].amount) : NaN;
+    if (Number.isFinite(v) && v > 0) return sum + v;
+    if (Number.isFinite(globalAmountNum) && globalAmountNum > 0) {
+      return sum + Math.round(globalAmountNum / categories.length);
+    }
+    return sum;
+  }, 0);
+  const totalLabel = new Intl.NumberFormat("fr-FR").format(total);
   return (
     <div className="mt-5 space-y-5 rounded-xl border border-line bg-bg-soft/60 p-5">
       <p className="text-xs leading-relaxed text-ink-soft">
         {t("works_help_text")}
       </p>
 
-      {/* Categories cochables, groupees visuellement par lourdeur. */}
+      {/* Annee + montant GLOBAUX (defauts pour categories cochees). */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FieldNumber
+          label={t("works_year_label")}
+          value={year}
+          onChange={onYearChange}
+          tooltip={t("works_year_tooltip")}
+        />
+        <FieldNumber
+          label={t("works_amount_label")}
+          value={amount}
+          onChange={onAmountChange}
+          suffix="€"
+          tooltip={t("works_amount_tooltip")}
+        />
+      </div>
+
+      {/* Categories cochables, groupees visuellement par lourdeur.
+          Sprint C2 : chaque cat cochee deplie 2 mini-champs annee+montant
+          juste en dessous (auto-fill = year global, edition individuelle). */}
       <fieldset>
         <legend className="mb-3 font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
           {t("works_details_label")}
@@ -749,27 +840,64 @@ function WorksDetailsBlock({
                   );
                 })}
               </div>
+              {/* Sprint C2 : pour chaque cat de ce groupe qui est cochee,
+                  afficher l'inline editor annee+montant. */}
+              {group.categories.some((c) => categories.includes(c)) && (
+                <ul className="mt-3 space-y-2 border-l-2 border-gold/40 pl-4">
+                  {group.categories
+                    .filter((c) => categories.includes(c))
+                    .map((cat) => {
+                      const entry = byCat[cat] ?? { year: "", amount: "" };
+                      return (
+                        <li key={cat} className="grid gap-2 sm:grid-cols-[160px_1fr_1fr]">
+                          <span className="self-center font-mono text-[10px] uppercase tracking-[0.18em] text-ink-mid">
+                            {t(`works_cat_${cat}`)}
+                          </span>
+                          <input
+                            type="number"
+                            min="1900"
+                            max={CURRENT_YEAR}
+                            placeholder={year || String(CURRENT_YEAR)}
+                            value={entry.year}
+                            onChange={(e) => patchCat(cat, { year: e.target.value })}
+                            className="rounded-md border border-line bg-bg px-3 py-1.5 text-sm focus:border-gold focus:outline-none"
+                            aria-label={`${t(`works_cat_${cat}`)} — ${t("works_year_label")}`}
+                          />
+                          <div className="relative">
+                            <input
+                              type="number"
+                              min="0"
+                              placeholder="0"
+                              value={entry.amount}
+                              onChange={(e) => patchCat(cat, { amount: e.target.value })}
+                              className="w-full rounded-md border border-line bg-bg px-3 py-1.5 pr-8 text-sm focus:border-gold focus:outline-none"
+                              aria-label={`${t(`works_cat_${cat}`)} — ${t("works_amount_label")}`}
+                            />
+                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-ink-soft">
+                              €
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    })}
+                </ul>
+              )}
             </div>
           ))}
         </div>
       </fieldset>
 
-      {/* Annee + montant — grid 2 colonnes desktop. */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FieldNumber
-          label={t("works_year_label")}
-          value={year}
-          onChange={onYearChange}
-          tooltip={t("works_year_tooltip")}
-        />
-        <FieldNumber
-          label={t("works_amount_label")}
-          value={amount}
-          onChange={onAmountChange}
-          suffix="€"
-          tooltip={t("works_amount_tooltip")}
-        />
-      </div>
+      {/* Total live calcule a partir des montants par categorie. */}
+      {categories.length > 0 && (
+        <div className="flex items-baseline justify-between border-t border-line pt-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+            {t("works_total_label")}
+          </span>
+          <span className="font-display text-lg font-bold gold-text">
+            {totalLabel} €
+          </span>
+        </div>
+      )}
     </div>
   );
 }

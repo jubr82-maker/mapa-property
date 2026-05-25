@@ -740,6 +740,7 @@
     "works_year_tooltip": "Si plusieurs vagues de travaux, indiquez l'année la plus récente.",
     "works_amount_label": "Montant total investi (optionnel)",
     "works_amount_tooltip": "Donnée optionnelle qui affine considérablement l'estimation. HT, toutes catégories cumulées.",
+    "works_total_label": "Total travaux",
     "works_cat_toiture": "Toiture",
     "works_cat_facade_isolation": "Isolation / façade",
     "works_cat_pac": "Pompe à chaleur",

@@ -740,6 +740,7 @@
     "works_year_tooltip": "Bei mehreren Bauphasen geben Sie das jüngste Jahr an.",
     "works_amount_label": "Gesamter Investitionsbetrag (optional)",
     "works_amount_tooltip": "Optionale Angabe, die die Bewertung erheblich präzisiert. Netto, alle Kategorien zusammen.",
+    "works_total_label": "Gesamt Arbeiten",
     "works_cat_toiture": "Dach",
     "works_cat_facade_isolation": "Dämmung / Fassade",
     "works_cat_pac": "Wärmepumpe",

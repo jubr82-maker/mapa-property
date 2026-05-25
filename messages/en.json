@@ -740,6 +740,7 @@
     "works_year_tooltip": "If multiple rounds of works, indicate the most recent year.",
     "works_amount_label": "Total amount invested (optional)",
     "works_amount_tooltip": "Optional data that significantly refines the valuation. Excl. VAT, all categories combined.",
+    "works_total_label": "Total works",
     "works_cat_toiture": "Roof",
     "works_cat_facade_isolation": "Insulation / facade",
     "works_cat_pac": "Heat pump",
