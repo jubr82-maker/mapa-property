@@ -148,11 +148,42 @@ const PREFIX_TO_ISO: Record<string, CountryCode> = {
 export type ValidationResult = { valid: boolean; error?: string };
 
 // ------------------------------------------------------------------------
-// Nom : prenom + nom obligatoires, lettres (avec accents) + tirets/apostrophes,
-// 2+ chars par token, total >= 4 chars (filtre "ju ju" qui passerait sinon).
+// Sprint C10 : separation prenom / nom en 2 champs distincts (EstimateForm
+// Step 3 + ContactForm deja separe). Regex 1 mot : lettres (avec accents)
+// + tirets/apostrophes, 2-40 chars. Tolere "Jean-Paul", "L'Heureux".
+// ------------------------------------------------------------------------
+const SINGLE_NAME_REGEX = /^[A-Za-zÀ-ÿ\-']{2,40}$/;
+
+export function validateFirstName(name: string): ValidationResult {
+  const trimmed = (name ?? "").trim();
+  if (trimmed.length < 2)
+    return { valid: false, error: "first_name_too_short" };
+  if (trimmed.length > 40)
+    return { valid: false, error: "first_name_too_long" };
+  if (!SINGLE_NAME_REGEX.test(trimmed))
+    return { valid: false, error: "first_name_format" };
+  return { valid: true };
+}
+
+export function validateLastName(name: string): ValidationResult {
+  const trimmed = (name ?? "").trim();
+  if (trimmed.length < 2)
+    return { valid: false, error: "last_name_too_short" };
+  if (trimmed.length > 40)
+    return { valid: false, error: "last_name_too_long" };
+  if (!SINGLE_NAME_REGEX.test(trimmed))
+    return { valid: false, error: "last_name_format" };
+  return { valid: true };
+}
+
+// ------------------------------------------------------------------------
+// validateName (deprecated) — conserve pour back-compat si du code legacy
+// passe encore le "nom complet" en une seule chaine. Le nouveau code C10+
+// doit utiliser validateFirstName + validateLastName.
 // ------------------------------------------------------------------------
 const NAME_REGEX = /^[A-Za-zÀ-ÿ\-']{2,}(\s+[A-Za-zÀ-ÿ\-']{2,})+$/;
 
+/** @deprecated Use validateFirstName + validateLastName (Sprint C10). */
 export function validateName(name: string): ValidationResult {
   const trimmed = (name ?? "").trim();
   if (trimmed.length < 4) return { valid: false, error: "name_too_short" };
