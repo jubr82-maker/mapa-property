@@ -197,6 +197,14 @@ const initial: FormState = {
   rgpdConsent: false,
 };
 
+// Sprint C8 — Validation stricte Step 3 (regression-proof apres C7 commit
+// 4016e9c qui avait reduit le gating a un simple check non-vide). Regex
+// alignees sur la spec C3 originale : prenom+nom obligatoires, email
+// strict, telephone min 6 chiffres apres normalisation.
+const NAME_REGEX = /^[A-Za-zÀ-ÿ\-']{2,}(\s+[A-Za-zÀ-ÿ\-']{2,})+$/;
+const EMAIL_REGEX = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+const PHONE_MIN_DIGITS = 6;
+
 export function EstimateForm() {
   const t = useTranslations("estimate_form");
   const tSearch = useTranslations("search");
@@ -206,6 +214,10 @@ export function EstimateForm() {
   const [result, setResult] = useState<EstimateResult | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Sprint C8 — touched flags pour affichage erreurs onBlur uniquement.
+  const [touchedName, setTouchedName] = useState(false);
+  const [touchedEmail, setTouchedEmail] = useState(false);
+  const [touchedPhone, setTouchedPhone] = useState(false);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setData((d) => ({ ...d, [key]: value }));
@@ -671,7 +683,28 @@ export function EstimateForm() {
         </StepWrap>
       )}
 
-      {step === 3 && (
+      {step === 3 && (() => {
+        const nameValid = NAME_REGEX.test(data.contactName.trim());
+        const emailValid = EMAIL_REGEX.test(data.contactEmail.trim());
+        const phoneValid =
+          data.contactPhone.replace(/\D/g, "").length >= PHONE_MIN_DIGITS;
+        const nameError =
+          touchedName && !nameValid ? t("validation.name_invalid") : undefined;
+        const emailError =
+          touchedEmail && !emailValid
+            ? t("validation.email_invalid")
+            : undefined;
+        const phoneError =
+          touchedPhone && !phoneValid
+            ? t("validation.phone_invalid")
+            : undefined;
+        const step3Disabled =
+          !data.contactConsent ||
+          !data.rgpdConsent ||
+          !nameValid ||
+          !emailValid ||
+          !phoneValid;
+        return (
         <StepWrap title={t("step3_title")} subtitle={t("step3_subtitle")}>
           {/* Sprint B1 : nom complet obligatoire en premier (lead utile) */}
           <div className="mb-4">
@@ -679,6 +712,8 @@ export function EstimateForm() {
               label={t("contact_name")}
               value={data.contactName}
               onChange={(v) => set("contactName", v)}
+              onBlur={() => setTouchedName(true)}
+              error={nameError}
               placeholder={t("contact_name_placeholder")}
               autoComplete="name"
             />
@@ -689,12 +724,16 @@ export function EstimateForm() {
               label={t("contact_email")}
               value={data.contactEmail}
               onChange={(v) => set("contactEmail", v)}
+              onBlur={() => setTouchedEmail(true)}
+              error={emailError}
               placeholder="vous@exemple.com"
               autoComplete="email"
             />
             <PhoneInput
               label={t("contact_phone")}
               onChange={(v) => set("contactPhone", v)}
+              onBlur={() => setTouchedPhone(true)}
+              error={phoneError}
             />
           </div>
           {/* Sprint B1 : message libre optionnel (qualifie le lead) */}
@@ -744,15 +783,12 @@ export function EstimateForm() {
             onSubmit={submit}
             pending={pending}
             t={t}
-            disabled={
-              !data.contactConsent ||
-              !data.rgpdConsent ||
-              !data.contactEmail ||
-              !data.contactName
-            }
+            disabled={step3Disabled}
+            disabledTooltip={t("validation.submit_disabled_tooltip")}
           />
         </StepWrap>
-      )}
+        );
+      })()}
       </div>
     </div>
   );
@@ -824,6 +860,8 @@ function FieldText({
   label,
   value,
   onChange,
+  onBlur,
+  error,
   placeholder,
   type = "text",
   autoComplete,
@@ -831,10 +869,15 @@ function FieldText({
   label: string;
   value: string;
   onChange: (v: string) => void;
+  onBlur?: () => void;
+  error?: string;
   placeholder?: string;
   type?: "text" | "email" | "tel";
   autoComplete?: string;
 }) {
+  const borderClass = error
+    ? "border-red-500 focus:border-red-500"
+    : "border-line focus:border-gold";
   return (
     <label className="flex flex-col gap-1.5">
       <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
@@ -844,10 +887,15 @@ function FieldText({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
+        aria-invalid={error ? true : undefined}
+        className={`rounded-md border ${borderClass} bg-bg px-4 py-2.5 text-sm focus:outline-none`}
       />
+      {error && (
+        <span className="font-mono text-[10px] text-red-500">{error}</span>
+      )}
     </label>
   );
 }
@@ -1373,12 +1421,14 @@ function BackSubmitBtn({
   pending,
   t,
   disabled = false,
+  disabledTooltip,
 }: {
   onBack: () => void;
   onSubmit: () => void;
   pending: boolean;
   t: ReturnType<typeof useTranslations>;
   disabled?: boolean;
+  disabledTooltip?: string;
 }) {
   return (
     <div className="mt-8 flex items-center justify-between">
@@ -1393,6 +1443,7 @@ function BackSubmitBtn({
         type="button"
         onClick={onSubmit}
         disabled={pending || disabled}
+        title={disabled && !pending ? disabledTooltip : undefined}
         className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {pending ? t("computing") : t("compute")}

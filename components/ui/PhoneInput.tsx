@@ -29,6 +29,8 @@ export function PhoneInput({
   required = false,
   defaultCountry = DEFAULT_COUNTRY,
   onChange,
+  onBlur,
+  error,
   id,
 }: {
   label: string;
@@ -36,6 +38,8 @@ export function PhoneInput({
   required?: boolean;
   defaultCountry?: string;
   onChange?: (combined: string) => void;
+  onBlur?: () => void;
+  error?: string;
   id?: string;
 }) {
   const tc = useTranslations("common");
@@ -87,14 +91,22 @@ export function PhoneInput({
             setNational(e.target.value);
             emit(code, e.target.value);
           }}
-          className="min-w-0 flex-1 rounded-md border border-line bg-bg px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:border-gold focus:outline-none"
+          onBlur={onBlur}
+          aria-invalid={error ? true : undefined}
+          className={`min-w-0 flex-1 rounded-md border bg-bg px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:outline-none ${
+            error
+              ? "border-red-500 focus:border-red-500"
+              : "border-line focus:border-gold"
+          }`}
         />
       </div>
-      {tooShort && (
+      {error ? (
+        <span className="font-mono text-[10px] text-red-500">{error}</span>
+      ) : tooShort ? (
         <span className="font-mono text-[10px] text-accent-warm">
           {tc("phone_too_short")}
         </span>
-      )}
+      ) : null}
       {name && <input type="hidden" name={name} value={combined} />}
     </label>
   );

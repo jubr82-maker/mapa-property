@@ -794,7 +794,13 @@
     "works_cat_peinture": "Paintwork",
     "works_cat_sols_revetements": "Floors / coverings",
     "works_cat_amenagement_exterieur": "Outdoor landscaping",
-    "works_cat_piscine": "Swimming pool"
+    "works_cat_piscine": "Swimming pool",
+    "validation": {
+      "name_invalid": "Invalid format — first name and last name required",
+      "email_invalid": "Invalid email format",
+      "phone_invalid": "Minimum 6 digits",
+      "submit_disabled_tooltip": "Enter a valid name, email and phone number"
+    }
   },
   "simulators_page": {
     "eyebrow": "Financial tools",

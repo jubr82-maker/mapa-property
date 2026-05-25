@@ -794,7 +794,13 @@
     "works_cat_peinture": "Peintures",
     "works_cat_sols_revetements": "Sols / revêtements",
     "works_cat_amenagement_exterieur": "Aménagement extérieur",
-    "works_cat_piscine": "Piscine"
+    "works_cat_piscine": "Piscine",
+    "validation": {
+      "name_invalid": "Format invalide — prénom et nom obligatoires",
+      "email_invalid": "Format e-mail invalide",
+      "phone_invalid": "Minimum 6 chiffres",
+      "submit_disabled_tooltip": "Renseignez nom, e-mail et téléphone valides"
+    }
   },
   "simulators_page": {
     "eyebrow": "Outils financiers",

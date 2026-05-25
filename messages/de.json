@@ -794,7 +794,13 @@
     "works_cat_peinture": "Malerarbeiten",
     "works_cat_sols_revetements": "Böden / Beläge",
     "works_cat_amenagement_exterieur": "Außenanlagen",
-    "works_cat_piscine": "Swimmingpool"
+    "works_cat_piscine": "Swimmingpool",
+    "validation": {
+      "name_invalid": "Ungültiges Format — Vor- und Nachname erforderlich",
+      "email_invalid": "Ungültiges E-Mail-Format",
+      "phone_invalid": "Mindestens 6 Ziffern",
+      "submit_disabled_tooltip": "Bitte gültigen Namen, E-Mail und Telefon angeben"
+    }
   },
   "simulators_page": {
     "eyebrow": "Finanzwerkzeuge",
