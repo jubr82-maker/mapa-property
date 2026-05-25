@@ -781,7 +781,15 @@
     "c7_balcony_tooltip": "Included in the commune €/m² (information persisted for admin file).",
     "c7_garden_area": "Private garden",
     "c7_garden_tooltip": "Apartments only. €800/m² capped at €50,000.",
-    "c7_methodology_footer": "Methodology aligned with the Observatoire de l'Habitat (LISER) standards and the Luxembourg hedonic model. Indicative valuation — validation by a licensed professional (bank, notary, broker) is required.",
+    "result_view": {
+      "footer_combined": {
+        "title": "Our simulator gives you an indicative price range. An on-site visit makes it accurate.",
+        "p1": "Methodology aligned with the Observatoire de l'Habitat (Luxembourg Ministry of Housing — LISER) standards and the Luxembourg hedonic model, continuously adapted by our agency to current market trends.",
+        "p2": "For an enforceable valuation, a visit by one of our advisors remains essential — it is the only way to account for the view, orientation, layout, actual condition and specific features of the property.",
+        "p3": "Non-contractual information. For financing, taxation or notarial deeds, validation by a licensed professional (bank, notary, broker) is required.",
+        "source": "— SOURCE: MAPA PROPERTY — © 2026. ALL RIGHTS RESERVED."
+      }
+    },
     "works_cat_toiture": "Roof",
     "works_cat_facade_isolation": "Insulation / facade",
     "works_cat_pac": "Heat pump",

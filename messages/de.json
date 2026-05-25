@@ -781,7 +781,15 @@
     "c7_balcony_tooltip": "Im Gemeinde-€/m² enthalten (Information für die Verwaltungsakte persistiert).",
     "c7_garden_area": "Privatgarten",
     "c7_garden_tooltip": "Nur Wohnungen. 800 €/m² mit Höchstgrenze 50 000 €.",
-    "c7_methodology_footer": "Methodik entspricht den Standards des Observatoire de l'Habitat (LISER) und dem luxemburgischen hedonischen Modell. Indikative Bewertung — Validierung durch eine zugelassene Fachkraft (Bank, Notar, Makler) erforderlich.",
+    "result_view": {
+      "footer_combined": {
+        "title": "Unser Simulator liefert Ihnen eine indikative Preisspanne. Die Besichtigung macht sie verbindlich.",
+        "p1": "Methodik entspricht den Standards des Observatoire de l'Habitat (Luxemburgisches Wohnungsbauministerium — LISER) und dem luxemburgischen hedonischen Modell, fortlaufend von unserer Agentur an die Marktentwicklung angepasst.",
+        "p2": "Für eine belastbare Bewertung bleibt eine Besichtigung durch einen unserer Berater unverzichtbar — nur so können Aussicht, Ausrichtung, Grundriss, tatsächlicher Zustand und Besonderheiten der Immobilie berücksichtigt werden.",
+        "p3": "Unverbindliche Informationen. Für Finanzierung, Steuern oder notarielle Urkunden ist die Validierung durch eine zugelassene Fachkraft (Bank, Notar, Makler) erforderlich.",
+        "source": "— QUELLE: MAPA PROPERTY — © 2026. ALLE RECHTE VORBEHALTEN."
+      }
+    },
     "works_cat_toiture": "Dach",
     "works_cat_facade_isolation": "Dämmung / Fassade",
     "works_cat_pac": "Wärmepumpe",

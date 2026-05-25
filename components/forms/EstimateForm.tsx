@@ -1592,15 +1592,31 @@ function ResultView({
         </button>
       </div>
 
-      {/* Sprint C7 : citation methodologie Observatoire LISER + invitation
-          validation pro (banque/notaire/courtier). Place AVANT le
-          DisclaimerLegal generique. */}
-      <p className="rounded-md border border-line bg-bg-soft/60 p-4 text-xs leading-relaxed text-ink-soft">
-        {t("c7_methodology_footer")}
-      </p>
-
-      {/* POL2-6 : mention légale obligatoire en BAS du résultat d'estimation. */}
-      <DisclaimerLegal />
+      {/* Sprint C8 — Footer unifie : methodologie Observatoire + invitation
+          visite + mention legale + source. Remplace 3 blocs distincts
+          (c7_methodology_footer + DisclaimerLegal + result_footer). Bordure
+          copper, fond sapin transparent, espacement 24px. */}
+      <aside
+        role="note"
+        aria-label={t("result_view.footer_combined.title")}
+        className="mt-6 rounded-2xl border border-gold-deep/60 bg-bg-soft/40 p-6"
+      >
+        <h3 className="font-display text-base font-bold text-ink">
+          {t("result_view.footer_combined.title")}
+        </h3>
+        <p className="mt-3 text-sm leading-relaxed text-ink-mid">
+          {t("result_view.footer_combined.p1")}
+        </p>
+        <p className="mt-3 text-sm leading-relaxed text-ink-mid">
+          {t("result_view.footer_combined.p2")}
+        </p>
+        <p className="mt-3 text-xs italic leading-relaxed text-ink-soft">
+          {t("result_view.footer_combined.p3")}
+        </p>
+        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+          {t("result_view.footer_combined.source")}
+        </p>
+      </aside>
     </div>
   );
 }

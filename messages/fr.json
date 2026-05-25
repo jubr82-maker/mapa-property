@@ -781,7 +781,15 @@
     "c7_balcony_tooltip": "Inclus dans le prix/m² de la commune (information persistée pour le dossier admin).",
     "c7_garden_area": "Jardin privatif",
     "c7_garden_tooltip": "Apartment uniquement. 800 €/m² avec plafond 50 000 €.",
-    "c7_methodology_footer": "Méthodologie conforme aux standards Observatoire de l'Habitat (LISER) et au modèle hédonique luxembourgeois. Estimation indicative — validation par professionnel agréé requise (banque, notaire, courtier).",
+    "result_view": {
+      "footer_combined": {
+        "title": "Notre simulateur vous donne une fourchette indicative. La visite la rend juste.",
+        "p1": "Méthodologie conforme aux standards Observatoire de l'Habitat (Ministère du Logement luxembourgeois — LISER) et au modèle hédonique luxembourgeois, adaptée en continu par notre agence aux tendances du marché.",
+        "p2": "Pour une valeur opposable, une visite par un de nos conseillers reste indispensable — c'est le seul moyen de tenir compte de la vue, l'orientation, l'agencement, l'état réel et les spécificités du bien.",
+        "p3": "Informations non contractuelles. Pour financement, fiscalité ou acte notarié, validation par professionnel agréé requise (banque, notaire, courtier).",
+        "source": "— SOURCE : MAPA PROPERTY — © 2026. TOUS DROITS RÉSERVÉS."
+      }
+    },
     "works_cat_toiture": "Toiture",
     "works_cat_facade_isolation": "Isolation / façade",
     "works_cat_pac": "Pompe à chaleur",
