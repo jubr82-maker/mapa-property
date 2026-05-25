@@ -15,6 +15,11 @@ import {
   type WorkItem,
   type WorkCategory,
 } from "@/lib/estimation/engine";
+import {
+  validateName,
+  validateEmail,
+  validatePhone,
+} from "@/lib/validators/contact";
 
 const WORK_CATEGORIES: ReadonlySet<string> = new Set([
   "toiture",
@@ -300,6 +305,8 @@ export async function POST(req: Request) {
     quartier?: string;
     contactEmail?: string;
     contactPhone?: string;
+    // Sprint C9 : ISO pays du PhoneInput pour validation libphonenumber.
+    contactPhoneCountry?: string;
     sessionId?: string;
     locale?: string;
     rgpdConsent?: boolean;
@@ -349,6 +356,41 @@ export async function POST(req: Request) {
     usefulSurface <= 0
   ) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
+  }
+
+  // Sprint C9 — validation contact server-side avant toute persistance.
+  // Doublonne le gating client (Step 3 disabled) pour bloquer les leads
+  // forges (DevTools, scripts) qui contourneraient le bouton disabled.
+  // Tolerant si les 3 champs sont vides (estimation anonyme possible),
+  // mais STRICT si au moins un est renseigne -> les 3 doivent etre valides.
+  const hasAnyContact = Boolean(
+    body.contactName || body.contactEmail || body.contactPhone,
+  );
+  if (hasAnyContact) {
+    const nameRes = validateName(body.contactName ?? "");
+    const emailRes = validateEmail(body.contactEmail ?? "");
+    const phoneRes = validatePhone(
+      body.contactPhone ?? "",
+      body.contactPhoneCountry ?? "LU",
+    );
+    if (!nameRes.valid || !emailRes.valid || !phoneRes.valid) {
+      const field = !nameRes.valid
+        ? "contactName"
+        : !emailRes.valid
+          ? "contactEmail"
+          : "contactPhone";
+      const reason =
+        (nameRes.error ?? emailRes.error ?? phoneRes.error) ?? "unknown";
+      console.warn(
+        `[api/estimate] Validation failed: field=${field} value=${String(
+          body[field as "contactName" | "contactEmail" | "contactPhone"] ?? "",
+        ).slice(0, 30)} reason=${reason}`,
+      );
+      return NextResponse.json(
+        { error: "invalid_payload", field, reason },
+        { status: 400 },
+      );
+    }
   }
 
   const ip =
