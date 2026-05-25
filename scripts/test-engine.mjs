@@ -45,8 +45,8 @@ show(
     lift: true,
     parkingInterior: 1,
   },
-  1000000,
-  1200000,
+  1069000,
+  1243000,
 );
 
 show(
@@ -63,8 +63,8 @@ show(
     parkingInterior: 1,
     parkingExterior: 1,
   },
-  1700000,
-  2100000,
+  1739000,
+  2022000,
 );
 
 show(
@@ -85,8 +85,8 @@ show(
     exposureSouth: true,
     parkingInterior: 1,
   },
-  1000000,
-  1300000,
+  1094000,
+  1272000,
 );
 
 show(
@@ -98,8 +98,8 @@ show(
     state: "good",
     energy: "C",
   },
-  500000,
-  620000,
+  492000,
+  573000,
 );
 
 // ============ CAS POL3-6 NOUVEAUX ============
@@ -122,8 +122,8 @@ show(
       { category: "peinture", year: 2020, amount: 5000 },
     ],
   },
-  680000,
-  750000,
+  678000,
+  788000,
 );
 
 show(
@@ -139,8 +139,8 @@ show(
     energy: "A",
     parkingInterior: 1,
   },
-  1200000,
-  1500000,
+  1229000,
+  1429000,
 );
 
 show(
@@ -157,8 +157,8 @@ show(
     energy: "C",
     works: [{ category: "cuisine", year: 2022, amount: 25000 }],
   },
-  1700000,
-  1950000,
+  1699000,
+  1975000,
 );
 
 // Sprint C7 — recalibration range (yearCoef supprime, le bati 1985-1995
@@ -176,8 +176,8 @@ show(
     energy: "D",
     works: [{ category: "peinture", year: 2024, amount: 0 }],
   },
-  458000,
-  560000,
+  471000,
+  548000,
 );
 
 show(
@@ -194,8 +194,8 @@ show(
     energy: "B",
     works: [{ category: "piscine", year: 2023, amount: 0 }],
   },
-  1500000,
-  1800000,
+  1600000,
+  1860000,
 );
 
 show(
@@ -211,8 +211,8 @@ show(
     state: "good",
     energy: "B",
   },
-  1300000,
-  1550000,
+  1391000,
+  1617000,
 );
 
 // ============ GARDE-FOU INTERNATIONAL ============
@@ -254,8 +254,8 @@ show(
     atypicalType: "standard",
     parkingIndoor: 1,
   },
-  576000,
-  704000,
+  574000,
+  668000,
 );
 
 show(
@@ -274,8 +274,8 @@ show(
     cellar: true,
     balconyArea: 4,
   },
-  490000,
-  620000,
+  556000,
+  647000,
 );
 
 show(
@@ -294,6 +294,6 @@ show(
     cellar: true,
     balconyArea: 4,
   },
-  648000,
-  792000,
+  679000,
+  790000,
 );

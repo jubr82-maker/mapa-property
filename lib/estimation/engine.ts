@@ -1548,8 +1548,8 @@ function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
 
   // Spread ±10% Observatoire (commit 8 le formalise dans buildEvsResult,
   // ici on bypass et on construit notre propre EstimationResult).
-  const low = Math.round(mid * 0.9);
-  const high = Math.round(mid * 1.1);
+  const low = Math.round(mid * 0.925);
+  const high = Math.round(mid * 1.075);
 
   const naResult = {
     applicable: false,
