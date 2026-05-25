@@ -183,15 +183,18 @@ export const STATE_COEF_C7: Record<PropertyState, number> = {
   major_works: 0.8, // gros travaux necessaires
 };
 
-/** Sprint C7 — coefficients etage (apartment only). Placeholder 1.0 (commit 4). */
+/** Sprint C7 — coefficients etage Observatoire (apartment uniquement).
+ *  middle (2-3e) = reference 1.00. N/A pour segment='house' (=1.00).
+ *  deriveFloorFromType() (commit 1) deduit 'penthouse' depuis PropertyType
+ *  legacy = 'penthouse' si l'utilisateur n'a pas saisi floorType. */
 export const FLOOR_COEF_C7: Record<FloorType, number> = {
-  basement: 1.0,
-  ground: 1.0,
-  first: 1.0,
-  middle: 1.0,
-  high: 1.0,
-  top: 1.0,
-  penthouse: 1.0,
+  basement: 0.88, // sous-sol / rez-de-jardin
+  ground: 0.93, // rez-de-chaussee
+  first: 0.97, // 1er etage
+  middle: 1.0, // 2-3e etage (reference)
+  high: 1.03, // 4-5e etage
+  top: 1.05, // dernier etage standard
+  penthouse: 1.1, // attique / penthouse
 };
 
 /** Sprint C7 — coefficients atypique (apartment only). Placeholder 1.0 (commit 5). */
