@@ -29,6 +29,7 @@ export function PhoneInput({
   required = false,
   defaultCountry = DEFAULT_COUNTRY,
   onChange,
+  onCountryChange,
   onBlur,
   error,
   id,
@@ -38,6 +39,9 @@ export function PhoneInput({
   required?: boolean;
   defaultCountry?: string;
   onChange?: (combined: string) => void;
+  // Sprint C9 : expose le code ISO selectionne au parent (utile pour
+  // validatePhone(phone, iso) cote EstimateForm).
+  onCountryChange?: (iso: string) => void;
   onBlur?: () => void;
   error?: string;
   id?: string;
@@ -70,6 +74,7 @@ export function PhoneInput({
           onChange={(e) => {
             setCode(e.target.value);
             emit(e.target.value, national);
+            onCountryChange?.(e.target.value);
           }}
           className="w-[120px] shrink-0 rounded-md border border-line bg-bg px-2 py-2.5 text-sm focus:border-gold focus:outline-none"
         >

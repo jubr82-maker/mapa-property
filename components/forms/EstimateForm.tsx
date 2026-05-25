@@ -14,6 +14,11 @@ import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
+import {
+  validateName,
+  validateEmail,
+  validatePhone,
+} from "@/lib/validators/contact";
 
 const PROPERTY_TYPES = [
   "appartement",
@@ -197,13 +202,11 @@ const initial: FormState = {
   rgpdConsent: false,
 };
 
-// Sprint C8 — Validation stricte Step 3 (regression-proof apres C7 commit
-// 4016e9c qui avait reduit le gating a un simple check non-vide). Regex
-// alignees sur la spec C3 originale : prenom+nom obligatoires, email
-// strict, telephone min 6 chiffres apres normalisation.
-const NAME_REGEX = /^[A-Za-zÀ-ÿ\-']{2,}(\s+[A-Za-zÀ-ÿ\-']{2,})+$/;
-const EMAIL_REGEX = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
-const PHONE_MIN_DIGITS = 6;
+// Sprint C9 — Validation stricte Step 3 via lib/validators/contact (regex
+// nom, email 3 niveaux + whitelist + TLDs + min 5 chars, telephone
+// libphonenumber-js 65 pays). Remplace les regex inline C8 qui acceptaient
+// des leads pourris ("j@j.lu", "+352 691"). Bouton vraiment disabled tant
+// que validators ne retournent pas valid=true sur les 3 champs.
 
 export function EstimateForm() {
   const t = useTranslations("estimate_form");
@@ -218,6 +221,9 @@ export function EstimateForm() {
   const [touchedName, setTouchedName] = useState(false);
   const [touchedEmail, setTouchedEmail] = useState(false);
   const [touchedPhone, setTouchedPhone] = useState(false);
+  // Sprint C9 — code ISO pays choisi dans PhoneInput, requis par
+  // validatePhone(phone, iso). Defaut LU (cf. DEFAULT_COUNTRY).
+  const [phoneCountry, setPhoneCountry] = useState<string>(DEFAULT_COUNTRY);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setData((d) => ({ ...d, [key]: value }));
@@ -257,6 +263,19 @@ export function EstimateForm() {
   const hasWorksErrors = worksErrors.length > 0;
 
   const submit = async () => {
+    // Sprint C9 — double protection : meme si le bouton fuit (DevTools,
+    // race), on refuse cote handler si un validator KO. Force le retour
+    // visuel onBlur en marquant tous les champs comme touches.
+    if (
+      !validateName(data.contactName).valid ||
+      !validateEmail(data.contactEmail).valid ||
+      !validatePhone(data.contactPhone, phoneCountry).valid
+    ) {
+      setTouchedName(true);
+      setTouchedEmail(true);
+      setTouchedPhone(true);
+      return;
+    }
     setPending(true);
     setError(null);
     try {
@@ -353,6 +372,8 @@ export function EstimateForm() {
           // Coordonnées : on les passe pour qu'un lead soit créé côté serveur si présent
           contactEmail: data.contactEmail || undefined,
           contactPhone: data.contactPhone || undefined,
+          // Sprint C9 — ISO pays requis pour validatePhone server-side.
+          contactPhoneCountry: phoneCountry || undefined,
           rgpdConsent: data.rgpdConsent,
         }),
       });
@@ -684,26 +705,28 @@ export function EstimateForm() {
       )}
 
       {step === 3 && (() => {
-        const nameValid = NAME_REGEX.test(data.contactName.trim());
-        const emailValid = EMAIL_REGEX.test(data.contactEmail.trim());
-        const phoneValid =
-          data.contactPhone.replace(/\D/g, "").length >= PHONE_MIN_DIGITS;
+        // Sprint C9 — validators officiels (libphonenumber-js + whitelists).
+        const nameRes = validateName(data.contactName);
+        const emailRes = validateEmail(data.contactEmail);
+        const phoneRes = validatePhone(data.contactPhone, phoneCountry);
         const nameError =
-          touchedName && !nameValid ? t("validation.name_invalid") : undefined;
+          touchedName && !nameRes.valid && nameRes.error
+            ? t(`validation.${nameRes.error}`)
+            : undefined;
         const emailError =
-          touchedEmail && !emailValid
-            ? t("validation.email_invalid")
+          touchedEmail && !emailRes.valid && emailRes.error
+            ? t(`validation.${emailRes.error}`)
             : undefined;
         const phoneError =
-          touchedPhone && !phoneValid
-            ? t("validation.phone_invalid")
+          touchedPhone && !phoneRes.valid && phoneRes.error
+            ? t(`validation.${phoneRes.error}`)
             : undefined;
         const step3Disabled =
           !data.contactConsent ||
           !data.rgpdConsent ||
-          !nameValid ||
-          !emailValid ||
-          !phoneValid;
+          !nameRes.valid ||
+          !emailRes.valid ||
+          !phoneRes.valid;
         return (
         <StepWrap title={t("step3_title")} subtitle={t("step3_subtitle")}>
           {/* Sprint B1 : nom complet obligatoire en premier (lead utile) */}
@@ -732,6 +755,7 @@ export function EstimateForm() {
             <PhoneInput
               label={t("contact_phone")}
               onChange={(v) => set("contactPhone", v)}
+              onCountryChange={(iso) => setPhoneCountry(iso)}
               onBlur={() => setTouchedPhone(true)}
               error={phoneError}
             />
