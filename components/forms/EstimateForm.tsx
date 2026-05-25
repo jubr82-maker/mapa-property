@@ -26,6 +26,45 @@ const PROPERTY_TYPES = [
 ] as const;
 const STATES = ["to_renovate", "good", "renovated", "new"] as const;
 const ENERGIES = ["A", "B", "C", "D", "E", "F", "G", "H", "I"] as const;
+
+// Sprint C7 — Methode Observatoire LU.
+// 6 niveaux d'etat (mapping doux cote engine : renovated → excellent).
+const CONDITIONS_C7 = [
+  "new",
+  "excellent",
+  "good",
+  "fair",
+  "to_renovate",
+  "major_works",
+] as const;
+type ConditionC7 = (typeof CONDITIONS_C7)[number];
+
+const FLOOR_TYPES_C7 = [
+  "basement",
+  "ground",
+  "first",
+  "middle",
+  "high",
+  "top",
+  "penthouse",
+] as const;
+type FloorTypeC7 = (typeof FLOOR_TYPES_C7)[number];
+
+const ATYPICAL_TYPES_C7 = [
+  "standard",
+  "studio",
+  "duplex",
+  "triplex",
+  "loft",
+] as const;
+type AtypicalTypeC7 = (typeof ATYPICAL_TYPES_C7)[number];
+
+// Apartment dans le sens C7 = tous types sauf maison/villa (legacy
+// PropertyType). Garde le type 'terrain' a part — il continue d'utiliser
+// l'ancien moteur (pas de coefs C7).
+function isApartmentSegment(type: string): boolean {
+  return type === "appartement" || type === "penthouse" || type === "duplex";
+}
 // Sprint B1 : niveau global des travaux realises (radio simple).
 const WORKS_LEVELS = ["gros", "moyens", "petits", "aucun"] as const;
 
@@ -101,6 +140,17 @@ interface FormState {
   worksByCat: Record<string, { year: string; amount: string }>;
   bedrooms: string;
   year: string;
+  // Sprint C7 — Observatoire (apartment uniquement, ignores pour house/villa).
+  conditionC7: "" | ConditionC7;
+  floorTypeC7: "" | FloorTypeC7;
+  atypicalTypeC7: "" | AtypicalTypeC7;
+  vefa: boolean;
+  parkingIndoor: string;
+  parkingOutdoor: string;
+  cellar: boolean;
+  terraceArea: string;
+  balconyArea: string;
+  gardenArea: string;
   // Step 3 — coordonnées client (pour livraison résultat + suivi)
   contactName: string; // Sprint B1 : nom complet obligatoire (lead utile)
   contactEmail: string;
@@ -129,6 +179,16 @@ const initial: FormState = {
   worksByCat: {},
   bedrooms: "",
   year: "",
+  conditionC7: "",
+  floorTypeC7: "",
+  atypicalTypeC7: "",
+  vefa: false,
+  parkingIndoor: "",
+  parkingOutdoor: "",
+  cellar: false,
+  terraceArea: "",
+  balconyArea: "",
+  gardenArea: "",
   contactName: "",
   contactEmail: "",
   contactPhone: "",
@@ -265,6 +325,19 @@ export function EstimateForm() {
                 : undefined,
           contactName: data.contactName || undefined,
           message: data.message || undefined,
+          // Sprint C7 : champs Observatoire (apartment uniquement, defauts
+          // safe cote engine). Envoyes meme si segment=house — l'engine les
+          // ignore et utilise estimateHouse intact.
+          condition: data.conditionC7 || undefined,
+          floorType: data.floorTypeC7 || undefined,
+          atypicalType: data.atypicalTypeC7 || undefined,
+          vefa: data.vefa || undefined,
+          parkingIndoor: data.parkingIndoor ? Number(data.parkingIndoor) : undefined,
+          parkingOutdoor: data.parkingOutdoor ? Number(data.parkingOutdoor) : undefined,
+          cellar: data.cellar || undefined,
+          terraceArea: data.terraceArea ? Number(data.terraceArea) : undefined,
+          balconyArea: data.balconyArea ? Number(data.balconyArea) : undefined,
+          gardenArea: data.gardenArea ? Number(data.gardenArea) : undefined,
           // Coordonnées : on les passe pour qu'un lead soit créé côté serveur si présent
           contactEmail: data.contactEmail || undefined,
           contactPhone: data.contactPhone || undefined,
@@ -363,11 +436,10 @@ export function EstimateForm() {
               onChange={(v) => set("terraceSurface", v)}
               suffix="m²"
             />
-            <FieldNumber
-              label={t("year")}
-              value={data.year}
-              onChange={(v) => set("year", v)}
-            />
+            {/* Sprint C7 : champ 'annee de construction' SUPPRIME du Step 1.
+                La methode Observatoire n'utilise pas yearBuilt — CPE + etat
+                refletent indirectement l'age. State legacy `year` conserve
+                dans le payload optionnel (back-compat API). */}
             <FieldNumber
               label={t("bedrooms")}
               value={data.bedrooms}
@@ -379,10 +451,104 @@ export function EstimateForm() {
               onChange={(v) => set("energy", v)}
               options={ENERGIES.map((e) => ({ value: e, label: e }))}
             />
+            {/* Sprint C7 : VEFA checkbox (apartment only, visuellement
+                disponible aussi pour terrain — l'engine ignore si maison). */}
+            {isApartmentSegment(data.type) && (
+              <label className="flex items-center gap-2 self-end text-sm text-ink-mid">
+                <input
+                  type="checkbox"
+                  checked={data.vefa}
+                  onChange={(e) => set("vefa", e.target.checked)}
+                  className="accent-gold"
+                />
+                <span>{t("vefa_label")}</span>
+              </label>
+            )}
           </div>
+
+          {/* Sprint C7 : 3 nouveaux selects + radio condition apartment-only. */}
+          {isApartmentSegment(data.type) && (
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+              <FieldSelect
+                label={t("c7_floor_label")}
+                value={data.floorTypeC7}
+                onChange={(v) => set("floorTypeC7", v as FloorTypeC7 | "")}
+                options={[
+                  { value: "", label: t("c7_floor_default") },
+                  ...FLOOR_TYPES_C7.map((f) => ({
+                    value: f,
+                    label: t(`c7_floor_${f}`),
+                  })),
+                ]}
+              />
+              <FieldSelect
+                label={t("c7_atypical_label")}
+                value={data.atypicalTypeC7}
+                onChange={(v) => set("atypicalTypeC7", v as AtypicalTypeC7 | "")}
+                options={[
+                  { value: "", label: t("c7_atypical_default") },
+                  ...ATYPICAL_TYPES_C7.map((a) => ({
+                    value: a,
+                    label: t(`c7_atypical_${a}`),
+                  })),
+                ]}
+              />
+            </div>
+          )}
+
+          {/* Sprint C7 : condition radio 6 niveaux (apartment seulement —
+              les maisons utilisent state legacy via estimateHouse). */}
+          {isApartmentSegment(data.type) && (
+            <fieldset className="mt-5">
+              <legend className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+                {t("c7_condition_label")}
+              </legend>
+              <div className="flex flex-wrap gap-2">
+                {CONDITIONS_C7.map((c) => {
+                  const active = data.conditionC7 === c;
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => set("conditionC7", active ? "" : c)}
+                      className={`rounded-full border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors ${
+                        active
+                          ? "border-gold bg-gold/15 text-gold-deep"
+                          : "border-line text-ink-soft hover:border-gold hover:text-gold"
+                      }`}
+                    >
+                      {t(`c7_condition_${c}`)}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs italic text-ink-soft">
+                {t("c7_methodology_hint")}
+              </p>
+            </fieldset>
+          )}
+          {/* Sprint C7 : bloc ANNEXES (obligatoire methode Observatoire,
+              apartment uniquement). Place AVANT le bloc Travaux. */}
+          {isApartmentSegment(data.type) && (
+            <AnnexesC7Block
+              parkingIndoor={data.parkingIndoor}
+              parkingOutdoor={data.parkingOutdoor}
+              cellar={data.cellar}
+              terraceArea={data.terraceArea}
+              balconyArea={data.balconyArea}
+              gardenArea={data.gardenArea}
+              onChange={(field, value) => set(field, value as never)}
+              t={t}
+            />
+          )}
+
           {/* Sprint C1 : section Travaux enrichie. Niveau radio (B1
               conserve) + detail conditionnel (categories cochees + annee
-              + montant) si niveau != 'aucun'. */}
+              + montant) si niveau != 'aucun'. Sprint C7 : conservee mais
+              OPTIONNELLE — l'engine Observatoire ne consomme pas works
+              dans le calcul. Persistance DB intacte pour historique admin. */}
           <div className="mt-5">
             <WorksLevelRadio
               value={data.worksLevel}
@@ -972,6 +1138,90 @@ function WorksDetailsBlock({
   );
 }
 
+// Sprint C7 : bloc Annexes Observatoire (apartment uniquement).
+// Parkings intérieurs/extérieurs + cave + terrasse + balcon + jardin.
+// Tous optionnels mais necessaires pour calibrer le mid Observatoire.
+function AnnexesC7Block({
+  parkingIndoor,
+  parkingOutdoor,
+  cellar,
+  terraceArea,
+  balconyArea,
+  gardenArea,
+  onChange,
+  t,
+}: {
+  parkingIndoor: string;
+  parkingOutdoor: string;
+  cellar: boolean;
+  terraceArea: string;
+  balconyArea: string;
+  gardenArea: string;
+  onChange: (
+    field:
+      | "parkingIndoor"
+      | "parkingOutdoor"
+      | "cellar"
+      | "terraceArea"
+      | "balconyArea"
+      | "gardenArea",
+    value: string | boolean,
+  ) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div className="mt-5 rounded-xl border border-line bg-bg-soft/60 p-5">
+      <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.25em] text-gold-deep">
+        {t("c7_annexes_title")}
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FieldNumber
+          label={t("c7_parking_indoor")}
+          value={parkingIndoor}
+          onChange={(v) => onChange("parkingIndoor", v)}
+          tooltip={t("c7_parking_indoor_tooltip")}
+        />
+        <FieldNumber
+          label={t("c7_parking_outdoor")}
+          value={parkingOutdoor}
+          onChange={(v) => onChange("parkingOutdoor", v)}
+          tooltip={t("c7_parking_outdoor_tooltip")}
+        />
+        <FieldNumber
+          label={t("c7_terrace_area")}
+          value={terraceArea}
+          onChange={(v) => onChange("terraceArea", v)}
+          suffix="m²"
+          tooltip={t("c7_terrace_tooltip")}
+        />
+        <FieldNumber
+          label={t("c7_balcony_area")}
+          value={balconyArea}
+          onChange={(v) => onChange("balconyArea", v)}
+          suffix="m²"
+          tooltip={t("c7_balcony_tooltip")}
+        />
+        <FieldNumber
+          label={t("c7_garden_area")}
+          value={gardenArea}
+          onChange={(v) => onChange("gardenArea", v)}
+          suffix="m²"
+          tooltip={t("c7_garden_tooltip")}
+        />
+        <label className="flex items-center gap-2 self-end text-sm text-ink-mid">
+          <input
+            type="checkbox"
+            checked={cellar}
+            onChange={(e) => onChange("cellar", e.target.checked)}
+            className="accent-gold"
+          />
+          <span>{t("c7_cellar_label")}</span>
+        </label>
+      </div>
+    </div>
+  );
+}
+
 // Sprint B1 : radio horizontal "Travaux realises" — niveau global, optionnel.
 function WorksLevelRadio({
   value,
@@ -1290,6 +1540,13 @@ function ResultView({
           {t("restart")}
         </button>
       </div>
+
+      {/* Sprint C7 : citation methodologie Observatoire LISER + invitation
+          validation pro (banque/notaire/courtier). Place AVANT le
+          DisclaimerLegal generique. */}
+      <p className="rounded-md border border-line bg-bg-soft/60 p-4 text-xs leading-relaxed text-ink-soft">
+        {t("c7_methodology_footer")}
+      </p>
 
       {/* POL2-6 : mention légale obligatoire en BAS du résultat d'estimation. */}
       <DisclaimerLegal />
