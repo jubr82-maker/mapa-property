@@ -804,10 +804,18 @@
     "works_cat_amenagement_exterieur": "Außenanlagen",
     "works_cat_piscine": "Swimmingpool",
     "validation": {
-      "name_invalid": "Ungültiges Format — Vor- und Nachname erforderlich",
-      "email_invalid": "Ungültiges E-Mail-Format",
-      "phone_invalid": "Mindestens 6 Ziffern",
-      "submit_disabled_tooltip": "Bitte gültigen Namen, E-Mail und Telefon angeben"
+      "name_too_short": "Zu kurz — vollständiger Vor- und Nachname erforderlich",
+      "name_format": "Ungültiges Format — nur Buchstaben, Bindestriche und Apostrophe",
+      "email_required": "E-Mail erforderlich",
+      "email_format": "Ungültiges E-Mail-Format",
+      "email_local_too_short": "Lokaler Teil zu kurz (mindestens 2 Zeichen vor @)",
+      "email_tld_invalid": "Ungültige Domain-Erweiterung (.com, .lu, .fr, .org, usw.)",
+      "email_domain_too_short": "Domain zu kurz (mindestens 5 Zeichen, z. B. bp.lu)",
+      "phone_required": "Telefonnummer erforderlich",
+      "phone_country_missing": "Land auswählen",
+      "phone_invalid_country": "Ungültige Nummer für das ausgewählte Land",
+      "phone_format": "Ungültiges Telefonformat",
+      "submit_disabled_tooltip": "Bitte gültigen Namen, E-Mail und Telefonnummer angeben, um fortzufahren"
     }
   },
   "simulators_page": {

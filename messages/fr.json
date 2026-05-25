@@ -804,10 +804,18 @@
     "works_cat_amenagement_exterieur": "Aménagement extérieur",
     "works_cat_piscine": "Piscine",
     "validation": {
-      "name_invalid": "Format invalide — prénom et nom obligatoires",
-      "email_invalid": "Format e-mail invalide",
-      "phone_invalid": "Minimum 6 chiffres",
-      "submit_disabled_tooltip": "Renseignez nom, e-mail et téléphone valides"
+      "name_too_short": "Trop court — prénom et nom complets requis",
+      "name_format": "Format invalide — lettres, tirets et apostrophes uniquement",
+      "email_required": "E-mail obligatoire",
+      "email_format": "Format e-mail invalide",
+      "email_local_too_short": "Partie locale trop courte (minimum 2 caractères avant @)",
+      "email_tld_invalid": "Extension de domaine invalide (.com, .lu, .fr, .org, etc.)",
+      "email_domain_too_short": "Domaine trop court (minimum 5 caractères, ex. bp.lu)",
+      "phone_required": "Téléphone obligatoire",
+      "phone_country_missing": "Sélectionnez un pays",
+      "phone_invalid_country": "Numéro invalide pour le pays sélectionné",
+      "phone_format": "Format téléphone invalide",
+      "submit_disabled_tooltip": "Renseignez nom, e-mail et téléphone valides pour continuer"
     }
   },
   "simulators_page": {
