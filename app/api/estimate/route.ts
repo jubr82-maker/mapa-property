@@ -94,6 +94,18 @@ async function persistEstimationRequest(args: {
   works_details?: unknown;
   works_year?: number;
   works_amount?: number;
+  // Sprint C7 : 11 colonnes Observatoire LU (migration 20260525_c7).
+  energy_class?: string;
+  condition?: string;
+  floor_type?: string;
+  atypical_type?: string;
+  vefa?: boolean;
+  parking_indoor?: number;
+  parking_outdoor?: number;
+  cellar?: boolean;
+  terrace_area?: number;
+  balcony_area?: number;
+  garden_area?: number;
 }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -123,6 +135,20 @@ async function persistEstimationRequest(args: {
     works_details: args.works_details ?? null,
     works_year: args.works_year ?? null,
     works_amount: args.works_amount ?? null,
+    // Sprint C7 : 11 colonnes Observatoire LU (migration 20260525_c7).
+    // Defaut FALSE/0 dans la migration → si args absents on n'envoie pas
+    // null pour les booleens/numeriques (laisse le default jouer).
+    energy_class: args.energy_class ?? null,
+    condition: args.condition ?? null,
+    floor_type: args.floor_type ?? null,
+    atypical_type: args.atypical_type ?? null,
+    vefa: args.vefa ?? null,
+    parking_indoor: args.parking_indoor ?? null,
+    parking_outdoor: args.parking_outdoor ?? null,
+    cellar: args.cellar ?? null,
+    terrace_area: args.terrace_area ?? null,
+    balcony_area: args.balcony_area ?? null,
+    garden_area: args.garden_area ?? null,
   };
   // Snapshot SANS les nouvelles colonnes B1 (fallback si migration absente).
   const baseLegacy = {
@@ -154,12 +180,30 @@ async function persistEstimationRequest(args: {
         error.message,
       );
     }
-    // Premier fallback : avec colonnes B1 mais sans RGPD.
+    // Premier fallback : avec toutes les colonnes B1+C1+C7 mais sans RGPD.
     const { error: e2 } = await supabase
       .from("estimation_requests")
       .insert(base);
     if (!e2) return;
-    // Second fallback : schema legacy strict (migration B1 non appliquée).
+    // Sprint C7 : 2eme fallback intermediaire avec B1+C1 mais SANS les
+    // 11 colonnes C7 (cas migration 20260525_c7 pas encore appliquee).
+    const baseB1C1 = { ...base } as Record<string, unknown>;
+    delete baseB1C1.energy_class;
+    delete baseB1C1.condition;
+    delete baseB1C1.floor_type;
+    delete baseB1C1.atypical_type;
+    delete baseB1C1.vefa;
+    delete baseB1C1.parking_indoor;
+    delete baseB1C1.parking_outdoor;
+    delete baseB1C1.cellar;
+    delete baseB1C1.terrace_area;
+    delete baseB1C1.balcony_area;
+    delete baseB1C1.garden_area;
+    const { error: e3 } = await supabase
+      .from("estimation_requests")
+      .insert(baseB1C1);
+    if (!e3) return;
+    // Dernier fallback : schema legacy strict (migration B1 non appliquée).
     await supabase.from("estimation_requests").insert(baseLegacy);
   } catch (err) {
     console.error("[api/estimate] persist failed:", err);
@@ -182,6 +226,17 @@ function mapToEvsInputs(
     parkingInterior?: number;
     parkingExterior?: number;
     works?: unknown;
+    // Sprint C7 : 11 champs Observatoire (apartment).
+    condition?: string;
+    floorType?: string;
+    atypicalType?: string;
+    vefa?: boolean;
+    parkingIndoor?: number;
+    parkingOutdoor?: number;
+    cellar?: boolean;
+    terraceArea?: number;
+    balconyArea?: number;
+    gardenArea?: number;
   },
 ): EstimationInputs | null {
   if (body.country !== "LU") return null;
@@ -214,7 +269,30 @@ function mapToEvsInputs(
         ? Number(body.parkingExterior)
         : undefined,
     works: parseWorks(body.works),
+    // Sprint C7 : champs Observatoire propages au moteur. Tous optionnels,
+    // les casts string suffisent (engine valide via les Records typed).
+    condition: c7Cast(body as unknown as Record<string, unknown>, "condition") as EstimationInputs["condition"],
+    floorType: c7Cast(body as unknown as Record<string, unknown>, "floorType") as EstimationInputs["floorType"],
+    atypicalType: c7Cast(body as unknown as Record<string, unknown>, "atypicalType") as EstimationInputs["atypicalType"],
+    vefa: typeof body.vefa === "boolean" ? body.vefa : undefined,
+    parkingIndoor:
+      typeof body.parkingIndoor === "number" ? body.parkingIndoor : undefined,
+    parkingOutdoor:
+      typeof body.parkingOutdoor === "number" ? body.parkingOutdoor : undefined,
+    cellar: typeof body.cellar === "boolean" ? body.cellar : undefined,
+    terraceArea:
+      typeof body.terraceArea === "number" ? body.terraceArea : undefined,
+    balconyArea:
+      typeof body.balconyArea === "number" ? body.balconyArea : undefined,
+    gardenArea:
+      typeof body.gardenArea === "number" ? body.gardenArea : undefined,
   };
+}
+
+/** Sprint C7 — string-or-undefined cast pour les champs enumeratif body. */
+function c7Cast(body: Record<string, unknown>, key: string): string | undefined {
+  const v = body[key];
+  return typeof v === "string" && v.trim() ? v.trim() : undefined;
 }
 
 export async function POST(req: Request) {
@@ -240,6 +318,18 @@ export async function POST(req: Request) {
     worksDetails?: unknown;
     worksYear?: number;
     worksAmount?: number;
+    // Sprint C7 : 11 champs Observatoire (apartment).
+    energyClass?: string;
+    condition?: string;
+    floorType?: string;
+    atypicalType?: string;
+    vefa?: boolean;
+    parkingIndoor?: number;
+    parkingOutdoor?: number;
+    cellar?: boolean;
+    terraceArea?: number;
+    balconyArea?: number;
+    gardenArea?: number;
   };
 
   const rgpdConsentAt =
@@ -327,6 +417,18 @@ export async function POST(req: Request) {
         works_details: Array.isArray(body.worksDetails) ? body.worksDetails : undefined,
         works_year: typeof body.worksYear === "number" ? body.worksYear : undefined,
         works_amount: typeof body.worksAmount === "number" ? body.worksAmount : undefined,
+        // Sprint C7 : 11 colonnes Observatoire (apartment).
+        energy_class: typeof body.energy === "string" ? body.energy : undefined,
+        condition: typeof body.condition === "string" ? body.condition : undefined,
+        floor_type: typeof body.floorType === "string" ? body.floorType : undefined,
+        atypical_type: typeof body.atypicalType === "string" ? body.atypicalType : undefined,
+        vefa: typeof body.vefa === "boolean" ? body.vefa : undefined,
+        parking_indoor: typeof body.parkingIndoor === "number" ? body.parkingIndoor : undefined,
+        parking_outdoor: typeof body.parkingOutdoor === "number" ? body.parkingOutdoor : undefined,
+        cellar: typeof body.cellar === "boolean" ? body.cellar : undefined,
+        terrace_area: typeof body.terraceArea === "number" ? body.terraceArea : undefined,
+        balcony_area: typeof body.balconyArea === "number" ? body.balconyArea : undefined,
+        garden_area: typeof body.gardenArea === "number" ? body.gardenArea : undefined,
       });
 
       // Sprint B1 : emails client (confirmation + promesse rapport 48h ouvrees) +
