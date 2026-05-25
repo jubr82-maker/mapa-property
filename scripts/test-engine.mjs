@@ -161,6 +161,9 @@ show(
   1950000,
 );
 
+// Sprint C7 — recalibration range (yearCoef supprime, le bati 1985-1995
+// n'est plus decote mecaniquement, le bien vaut son prix/m² Esch sans
+// penalite age — la condition='good' est ce que l'utilisateur declare).
 show(
   "10 Esch appart 80m² D + peinture",
   {
@@ -173,8 +176,8 @@ show(
     energy: "D",
     works: [{ category: "peinture", year: 2024, amount: 0 }],
   },
-  380000,
-  470000,
+  458000,
+  560000,
 );
 
 show(
@@ -234,3 +237,63 @@ show("14 Paris", {
   surfaceLiving: 100,
   state: "good",
 });
+
+// ============ SPRINT C7 — VALIDATION TERRAIN (3 ventes reelles Julien) ============
+// Calibration validee par Julien sur 3 ventes reelles ±10% Observatoire.
+
+show(
+  "C7_A Steinfort 83m² G good 1 park int (vendu 640k)",
+  {
+    country: "LU",
+    type: "appartement",
+    commune: "Steinfort",
+    surfaceLiving: 83,
+    state: "good",
+    energy: "G",
+    floorType: "middle",
+    atypicalType: "standard",
+    parkingIndoor: 1,
+  },
+  576000,
+  704000,
+);
+
+show(
+  "C7_B Hesperange 80m² H fair 1 park int + cave (vendu 550k)",
+  {
+    country: "LU",
+    type: "appartement",
+    commune: "Hesperange",
+    surfaceLiving: 80,
+    state: "good",
+    condition: "fair",
+    energy: "H",
+    floorType: "middle",
+    atypicalType: "standard",
+    parkingIndoor: 1,
+    cellar: true,
+    balconyArea: 4,
+  },
+  490000,
+  620000,
+);
+
+show(
+  "C7_C Steinfort duplex 115m² E fair 2 park int + cave (marche 720k)",
+  {
+    country: "LU",
+    type: "duplex",
+    commune: "Steinfort",
+    surfaceLiving: 115,
+    state: "good",
+    condition: "fair",
+    energy: "E",
+    floorType: "middle",
+    atypicalType: "duplex",
+    parkingIndoor: 2,
+    cellar: true,
+    balconyArea: 4,
+  },
+  648000,
+  792000,
+);
