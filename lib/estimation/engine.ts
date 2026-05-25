@@ -241,6 +241,32 @@ function isHouseSegment(type: PropertyType): boolean {
   return type === "maison" || type === "villa";
 }
 
+/** Sprint C7 — bonus annexes Observatoire LU (€ ajoutes au mid).
+ *
+ *  Calibre Observatoire/Tevaxia/STATEC 2026 :
+ *  - parking interieur : 35 000€/place (cap 5)
+ *  - parking exterieur : 12 000€/place (cap 5)
+ *  - cave privative    : forfait 3 000€ si presente (pas par m²)
+ *  - terrasse          : <= 15m² inclus dans prix/m² ; > 15m² bonus
+ *                         (area - 15) × prix_m²_commune × 0.30
+ *  - balcon            : 0€ (info seulement, integre prix/m²)
+ *  - jardin (apartment): area × 800€/m², plafond 50 000€ */
+export function bonusAnnexes(inputs: EstimationInputs, pricePerM2: number): number {
+  const parkingIndoor = Math.max(0, Math.min(5, inputs.parkingIndoor ?? 0));
+  const parkingOutdoor = Math.max(0, Math.min(5, inputs.parkingOutdoor ?? 0));
+  const parkingValue = parkingIndoor * 35_000 + parkingOutdoor * 12_000;
+
+  const cellarValue = inputs.cellar ? 3_000 : 0;
+
+  const terrace = inputs.terraceArea ?? 0;
+  const terraceBonus = terrace > 15 ? (terrace - 15) * pricePerM2 * 0.3 : 0;
+
+  const garden = inputs.gardenArea ?? 0;
+  const gardenBonus = Math.min(50_000, garden * 800);
+
+  return parkingValue + cellarValue + terraceBonus + gardenBonus;
+}
+
 /** Sprint C7 — coefficient de degressivite surface Observatoire.
  *
  *  Plus la surface est grande, plus le prix/m² descend (le marche
@@ -1515,15 +1541,8 @@ function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
   const midBeforeAnnexes =
     baseValue * cpe * stateCoef * floorCoef * atypicalCoef * vefaCoef * surfaceCoef;
 
-  // 4. Bonus annexes (placeholders commit 1 — vraies valeurs commit 7).
-  const parkingIndoor = Math.max(0, Math.min(5, inputs.parkingIndoor ?? 0));
-  const parkingOutdoor = Math.max(0, Math.min(5, inputs.parkingOutdoor ?? 0));
-  const annexes = 0
-    + parkingIndoor * 0
-    + parkingOutdoor * 0
-    + (inputs.cellar ? 0 : 0)
-    + 0  // terrasse > 15m²
-    + 0; // jardin (apartment only)
+  // Sprint C7 commit 7 : bonus annexes recalibres Observatoire LU.
+  const annexes = bonusAnnexes(inputs, pricePerM2);
 
   const mid = Math.round(midBeforeAnnexes + annexes);
 
