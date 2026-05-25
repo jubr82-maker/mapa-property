@@ -32,21 +32,42 @@ const WORK_CATEGORIES: ReadonlySet<string> = new Set([
   "piscine",
 ]);
 
+// Sprint C2 : 13 = nb max de categories engine EVS POL3-6 (1 entry par cat
+// max). Year clampe [1900, annee courante + 1] pour empecher des saisies
+// aberrantes (utilisateur qui tape 2025 par erreur a la place de 1995
+// reste accepte ; mais 99999 est rejete via year_max).
+const MAX_WORK_ITEMS = 13;
+const WORK_YEAR_MIN = 1900;
+const WORK_YEAR_MAX = new Date().getFullYear() + 1;
+const WORK_AMOUNT_MAX = 1_000_000;
+
 /** Parse + valide les postes de travaux reçus du formulaire. */
 function parseWorks(raw: unknown): WorkItem[] | undefined {
   if (!Array.isArray(raw)) return undefined;
   const items: WorkItem[] = [];
-  for (const r of raw.slice(0, 10)) {
+  const seenCategories = new Set<string>();
+  for (const r of raw.slice(0, MAX_WORK_ITEMS)) {
     if (!r || typeof r !== "object") continue;
     const o = r as Record<string, unknown>;
     const category = String(o.category ?? "");
     if (!WORK_CATEGORIES.has(category)) continue;
+    // Sprint C2 : pas de doublons categorie (UI envoie 1 entry max par cat).
+    if (seenCategories.has(category)) continue;
+    seenCategories.add(category);
     const year = Number(o.year);
     const amount = Number(o.amount);
+    const clampedYear =
+      Number.isFinite(year) && year >= WORK_YEAR_MIN && year <= WORK_YEAR_MAX
+        ? year
+        : 2024;
+    const clampedAmount =
+      Number.isFinite(amount) && amount > 0 && amount <= WORK_AMOUNT_MAX
+        ? amount
+        : 0;
     items.push({
       category: category as WorkCategory,
-      year: Number.isFinite(year) ? year : 2024,
-      amount: Number.isFinite(amount) && amount > 0 ? amount : 0,
+      year: clampedYear,
+      amount: clampedAmount,
     });
   }
   return items.length > 0 ? items : undefined;
@@ -212,8 +233,11 @@ export async function POST(req: Request) {
     surfaceTotal?: number;
     worksLevel?: string;
     message?: string;
-    // Sprint C1 : detail des travaux (cf. WorksDetailsBlock UI).
-    worksDetails?: string[];
+    // Sprint C1→C2 : detail des travaux. C1 envoyait string[] (cats nues),
+    // C2 envoie WorkItem[] enrichi ({category, year, amount}). On accepte
+    // les deux formats pour retro-compat (clients caches anciens) ; la
+    // persistance JSONB accepte n'importe quoi.
+    worksDetails?: unknown;
     worksYear?: number;
     worksAmount?: number;
   };
