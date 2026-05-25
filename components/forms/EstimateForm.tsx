@@ -151,6 +151,39 @@ export function EstimateForm() {
     setData((d) => ({ ...d, [key]: value }));
   };
 
+  // Sprint C2 LIVRABLE 4 : validation par-categorie. Une cat cochee DOIT
+  // avoir year ET amount remplis et valides. Si une seule cat est invalide,
+  // on bloque le passage Step 1 → Step 2 + affichage erreurs inline.
+  const worksErrors: { cat: string; reason: "year_missing" | "year_range" | "amount_missing" | "amount_range" }[] = [];
+  if (data.worksLevel && data.worksLevel !== "aucun") {
+    for (const cat of data.worksCategories) {
+      const entry = data.worksByCat[cat];
+      const yearStr = entry?.year ?? "";
+      const amountStr = entry?.amount ?? "";
+      // Fallback sur le year global → seulement le global vide = erreur.
+      const effectiveYear = yearStr || data.worksYear;
+      if (!effectiveYear) {
+        worksErrors.push({ cat, reason: "year_missing" });
+      } else {
+        const yNum = Number(effectiveYear);
+        if (!Number.isFinite(yNum) || yNum < 1900 || yNum > CURRENT_YEAR) {
+          worksErrors.push({ cat, reason: "year_range" });
+        }
+      }
+      // Pour le montant : individuel OU global (reparti) suffit.
+      const effectiveAmount = amountStr || data.worksAmount;
+      if (!effectiveAmount) {
+        worksErrors.push({ cat, reason: "amount_missing" });
+      } else {
+        const aNum = Number(effectiveAmount);
+        if (!Number.isFinite(aNum) || aNum < 100 || aNum > 1_000_000) {
+          worksErrors.push({ cat, reason: "amount_range" });
+        }
+      }
+    }
+  }
+  const hasWorksErrors = worksErrors.length > 0;
+
   const submit = async () => {
     setPending(true);
     setError(null);
@@ -388,6 +421,7 @@ export function EstimateForm() {
                 onAmountChange={(a) => set("worksAmount", a)}
                 byCat={data.worksByCat}
                 onByCatChange={(byCat) => set("worksByCat", byCat)}
+                errors={worksErrors}
                 t={t}
               />
             )}
@@ -395,9 +429,10 @@ export function EstimateForm() {
           <NextBtn
             onClick={() => setStep(2)}
             disabled={
-              data.type === "terrain"
+              hasWorksErrors ||
+              (data.type === "terrain"
                 ? !data.landSurface || Number(data.landSurface) <= 0
-                : !data.livingSurface || Number(data.livingSurface) <= 0
+                : !data.livingSurface || Number(data.livingSurface) <= 0)
             }
             t={t}
           />
@@ -739,6 +774,7 @@ function WorksDetailsBlock({
   onAmountChange,
   byCat,
   onByCatChange,
+  errors,
   t,
 }: {
   categories: WorksCategory[];
@@ -749,8 +785,15 @@ function WorksDetailsBlock({
   onAmountChange: (a: string) => void;
   byCat: Record<string, { year: string; amount: string }>;
   onByCatChange: (next: Record<string, { year: string; amount: string }>) => void;
+  errors: { cat: string; reason: "year_missing" | "year_range" | "amount_missing" | "amount_range" }[];
   t: ReturnType<typeof useTranslations>;
 }) {
+  // Sprint C2 : index des erreurs par categorie pour render rapide.
+  const errorByCat = new Map<string, Set<string>>();
+  for (const e of errors) {
+    if (!errorByCat.has(e.cat)) errorByCat.set(e.cat, new Set());
+    errorByCat.get(e.cat)!.add(e.reason);
+  }
   const toggleCat = (cat: WorksCategory) => {
     if (categories.includes(cat)) {
       onCategoriesChange(categories.filter((c) => c !== cat));
@@ -848,35 +891,62 @@ function WorksDetailsBlock({
                     .filter((c) => categories.includes(c))
                     .map((cat) => {
                       const entry = byCat[cat] ?? { year: "", amount: "" };
+                      const errs = errorByCat.get(cat);
+                      const yearErr = errs?.has("year_missing") || errs?.has("year_range");
+                      const amountErr = errs?.has("amount_missing") || errs?.has("amount_range");
+                      const errMsg = errs
+                        ? errs.has("year_missing") || errs.has("amount_missing")
+                          ? t("works_err_missing", { cat: t(`works_cat_${cat}`) })
+                          : errs.has("year_range")
+                            ? t("works_err_year_range")
+                            : t("works_err_amount_range")
+                        : null;
                       return (
-                        <li key={cat} className="grid gap-2 sm:grid-cols-[160px_1fr_1fr]">
-                          <span className="self-center font-mono text-[10px] uppercase tracking-[0.18em] text-ink-mid">
-                            {t(`works_cat_${cat}`)}
-                          </span>
-                          <input
-                            type="number"
-                            min="1900"
-                            max={CURRENT_YEAR}
-                            placeholder={year || String(CURRENT_YEAR)}
-                            value={entry.year}
-                            onChange={(e) => patchCat(cat, { year: e.target.value })}
-                            className="rounded-md border border-line bg-bg px-3 py-1.5 text-sm focus:border-gold focus:outline-none"
-                            aria-label={`${t(`works_cat_${cat}`)} — ${t("works_year_label")}`}
-                          />
-                          <div className="relative">
+                        <li key={cat}>
+                          <div className="grid gap-2 sm:grid-cols-[160px_1fr_1fr]">
+                            <span className="self-center font-mono text-[10px] uppercase tracking-[0.18em] text-ink-mid">
+                              {t(`works_cat_${cat}`)}
+                            </span>
                             <input
                               type="number"
-                              min="0"
-                              placeholder="0"
-                              value={entry.amount}
-                              onChange={(e) => patchCat(cat, { amount: e.target.value })}
-                              className="w-full rounded-md border border-line bg-bg px-3 py-1.5 pr-8 text-sm focus:border-gold focus:outline-none"
-                              aria-label={`${t(`works_cat_${cat}`)} — ${t("works_amount_label")}`}
+                              min="1900"
+                              max={CURRENT_YEAR}
+                              placeholder={year || String(CURRENT_YEAR)}
+                              value={entry.year}
+                              onChange={(e) => patchCat(cat, { year: e.target.value })}
+                              className={`rounded-md border bg-bg px-3 py-1.5 text-sm focus:outline-none ${
+                                yearErr
+                                  ? "border-accent-warm focus:border-accent-warm"
+                                  : "border-line focus:border-gold"
+                              }`}
+                              aria-label={`${t(`works_cat_${cat}`)} — ${t("works_year_label")}`}
+                              aria-invalid={yearErr || undefined}
                             />
-                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-ink-soft">
-                              €
-                            </span>
+                            <div className="relative">
+                              <input
+                                type="number"
+                                min="0"
+                                placeholder="0"
+                                value={entry.amount}
+                                onChange={(e) => patchCat(cat, { amount: e.target.value })}
+                                className={`w-full rounded-md border bg-bg px-3 py-1.5 pr-8 text-sm focus:outline-none ${
+                                  amountErr
+                                    ? "border-accent-warm focus:border-accent-warm"
+                                    : "border-line focus:border-gold"
+                                }`}
+                                aria-label={`${t(`works_cat_${cat}`)} — ${t("works_amount_label")}`}
+                                aria-invalid={amountErr || undefined}
+                              />
+                              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-ink-soft">
+                                €
+                              </span>
+                            </div>
                           </div>
+                          {errMsg && (
+                            <p className="mt-1 font-mono text-[10px] text-accent-warm">
+                              {errMsg}
+                            </p>
+                          )}
                         </li>
                       );
                     })}
