@@ -131,11 +131,31 @@ export default async function LocaleLayout({
   // l'instant l'éditeur peut changer le token_value côté admin mais
   // l'affichage n'est pas encore relié (chargement de Google Fonts en
   // runtime à faire dans une phase ultérieure).
+  //
+  // Sprint OPTIM-1A hotfix : garde defensive contre une table
+  // site_design_tokens outdated (ex. pre-palette Forêt avec seulement
+  // {gold, ink, bg} = ancien Cuivre Sahara du commit 788fa03). Si aucune
+  // key Forêt attendue n'est presente, on N'INJECTE PAS l'override —
+  // globals.css garde la main avec la palette canonique (--copper,
+  // --sapin, --creme, etc.). Sans cette garde, le <style>:root{} ecrase
+  // globals.css avec d'anciennes valeurs, et revalidate: false fige le
+  // bug pour 1 an (cf. OPTIM-1A C1).
   const tokens = await siteDesignTokens();
+  const EXPECTED_COLOR_KEYS: readonly string[] = ["copper", "sapin", "creme"];
+  const hasForetSchema = Object.keys(tokens.color ?? {}).some((k) =>
+    EXPECTED_COLOR_KEYS.includes(k),
+  );
+  if (!hasForetSchema && process.env.NODE_ENV === "development") {
+    console.warn(
+      "[layout] site_design_tokens.color schema outdated (no copper/sapin/creme key); skipping injection, globals.css palette Forêt in use.",
+    );
+  }
   const colorOverrides: Record<string, string> = {};
-  for (const [k, v] of Object.entries(tokens.color ?? {})) {
-    // token_key "gold" → CSS var "--gold"
-    colorOverrides[`--${k}`] = v;
+  if (hasForetSchema) {
+    for (const [k, v] of Object.entries(tokens.color ?? {})) {
+      // token_key "copper" → CSS var "--copper"
+      colorOverrides[`--${k}`] = v;
+    }
   }
   const cssOverride = Object.entries(colorOverrides)
     .map(([k, v]) => `${k}:${v};`)
