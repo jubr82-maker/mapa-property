@@ -322,10 +322,24 @@ export function parseApimoDescription(
   const introBlocks = blocks.slice(0, firstSectionIdx);
   const sectionBlocks = blocks.slice(firstSectionIdx);
 
+  // Sprint HTML-RENDERING C0 : strip HTML brut dans intro. Apimo livre
+  // parfois description_fr sur 1 seule ligne avec des tags inline
+  // (<p>, <strong>, <br>, <em>, ...) — parseBlocks ne strip pas ces
+  // tags donc l'intro contenait du HTML brut, ensuite affiche en
+  // {value} echappe par React dans le panel "LE BRIEF" (cf.
+  // app/[locale]/biens/[slug]/page.tsx panel overview). Resultat
+  // visible : "<p><strong>MAPA Property</strong>..." litteralement.
+  // On normalise <br> en \n, on strip le set known-good de tags, puis
+  // tout reste de balise pour securite. introHtml (L.361) ecrase
+  // ensuite via escapeHtml — sans impact car le texte est deja plat.
   const introText = introBlocks
     .filter((b) => b.kind === "p")
     .map((b) => (b as { text: string }).text)
-    .join("\n\n");
+    .join("\n\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/?(p|strong|em|b|i|ul|ol|li)[^>]*>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .trim();
 
   // 7. Détection conclusion (dernier paragraphe match CONCLUSION_HINTS)
   let conclusion: string | undefined;
