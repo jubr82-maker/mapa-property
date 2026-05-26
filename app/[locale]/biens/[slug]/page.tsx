@@ -5,7 +5,9 @@ import {
   fetchOffmarketById,
   fetchPropertyByIdOrSlug,
   fetchPropertyImages,
+  fetchPublishedProperties,
 } from "@/lib/data";
+import { routing } from "@/i18n/routing";
 import { pickLang, type Locale } from "@/lib/types";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
 import { PropertyActions } from "@/components/property/PropertyActions";
@@ -28,8 +30,40 @@ import { parseApimoDescription } from "@/lib/property-description-parser";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumb, propertyListing } from "@/lib/seo";
 
-// ISR — régénération toutes les 60s (Agent 16, perf LCP).
-export const revalidate = 60;
+// Sprint OPTIM-1A : ISR 30 min (vs 60s avant). Les fiches biens changent
+// rarement (titre/description/prix edites depuis admin invalident deja
+// /fr/biens via revalidatePath dans admin/properties/actions.ts).
+// generateStaticParams ci-dessous pre-build les pages au deploy ->
+// premiere visite = HIT cache au lieu d'une regeneration ISR.
+export const revalidate = 1800;
+
+/**
+ * Sprint OPTIM-1A : pre-build des fiches biens publiees pour les 3 locales.
+ * Permet a Next.js de generer ces routes au build au lieu de les construire
+ * a la demande au premier visiteur. Combine avec revalidate: 1800s, ca
+ * passe les writes ISR fiches biens de ~tous les 60s a tous les 30 min
+ * (et seulement si quelqu'un les visite).
+ *
+ * Source : fetchPublishedProperties() (table properties, is_published=true).
+ * On exclut les rows sans slug (resolveur fetchPropertyByIdOrSlug accepte
+ * aussi UUID/reference mais le slug est l'URL canonique). En cas d'erreur
+ * fetch (Supabase down au build), retourne [] -> Next bascule en dynamic
+ * rendering, le site reste up.
+ */
+export async function generateStaticParams() {
+  try {
+    const properties = await fetchPublishedProperties();
+    const slugs = properties
+      .map((p) => p.slug)
+      .filter((s): s is string => typeof s === "string" && s.length > 0);
+    return routing.locales.flatMap((locale) =>
+      slugs.map((slug) => ({ locale, slug })),
+    );
+  } catch (e) {
+    console.warn("[biens/[slug]] generateStaticParams failed:", e);
+    return [];
+  }
+}
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
