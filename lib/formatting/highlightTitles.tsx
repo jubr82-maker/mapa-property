@@ -25,10 +25,12 @@ export function highlightTitles(text: string | null | undefined): ReactNode {
   if (!text) return null;
   // POL4-A4 (MARC) : HTML formaté (TipTap) → sanitize strict, pas de
   // re-détection regex (l'admin a déjà mis en gras manuellement).
-  // Whitelist : p, strong, em, br. Aucun attribut. Tout le reste stripé.
+  // Sprint HTML-RENDERING C2 : whitelist elargie aux listes (ul/ol/li)
+  // + tags alternatifs (b/i, alias de strong/em utilises par certains
+  // editeurs WYSIWYG et par Apimo). Aucun attribut. Tout le reste stripe.
   if (text.trim().startsWith("<")) {
     const clean = sanitizeHtml(text, {
-      allowedTags: ["p", "strong", "em", "br"],
+      allowedTags: ["p", "strong", "em", "b", "i", "br", "ul", "ol", "li"],
       allowedAttributes: {},
     });
     return <div dangerouslySetInnerHTML={{ __html: clean }} />;
