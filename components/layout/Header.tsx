@@ -163,7 +163,7 @@ function DropdownItem({
     <div className="group relative">
       <button
         type="button"
-        className="inline-flex items-center gap-1 px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors group-hover:text-gold"
+        className="inline-flex whitespace-nowrap items-center gap-1 px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors group-hover:text-gold"
       >
         {label}
         <svg
