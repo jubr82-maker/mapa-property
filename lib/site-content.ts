@@ -53,7 +53,12 @@ const fetchContent = unstable_cache(
     return data?.content ?? null;
   },
   ["site-content"],
-  { revalidate: 60, tags: [SITE_CONTENT_TAG] },
+  // Sprint OPTIM-1A : revalidate: false (cache infini, tag-only invalidation).
+  // Avant : revalidate: 60s -> propageait un TTL 60s a TOUTES les routes
+  // [locale]/* via app/[locale]/layout.tsx (siteDesignTokens()), generant
+  // ~192k writes ISR / mois sur les 261 pages SSG. L'invalidation passe
+  // exclusivement par revalidateTag(SITE_CONTENT_TAG) depuis /admin/contenu.
+  { revalidate: false, tags: [SITE_CONTENT_TAG] },
 );
 
 /**
@@ -106,7 +111,9 @@ const fetchDesignTokens = unstable_cache(
     return out;
   },
   ["site-design-tokens"],
-  { revalidate: 60, tags: [SITE_DESIGN_TOKENS_TAG] },
+  // Sprint OPTIM-1A : revalidate: false (cache infini, tag-only invalidation).
+  // Identique a fetchContent — voir commentaire ci-dessus.
+  { revalidate: false, tags: [SITE_DESIGN_TOKENS_TAG] },
 );
 
 /**
