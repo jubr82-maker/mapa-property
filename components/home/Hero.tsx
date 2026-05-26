@@ -1,9 +1,9 @@
 import { getTranslations } from "next-intl/server";
-import { sbUrl } from "@/lib/supabase-url";
 import { siteContent } from "@/lib/site-content";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { ParallaxImage } from "@/components/ui/ParallaxImage";
 import { HeroScrollContainer } from "@/components/home/HeroScrollContainer";
+import { VideoR2 } from "@/components/media/VideoR2";
 
 export async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: "hero" });
@@ -22,8 +22,10 @@ export async function Hero({ locale }: { locale: string }) {
       siteContent("home.hero.subtitle", locale, t("subtitle")),
       siteContent("home.hero.scroll", locale, t("scroll")),
     ]);
-  const videoDesktop = sbUrl("Videos", "mapa_showcase_desktop.mp4");
-  const videoMobile = sbUrl("Videos", "mapa_showcase_mobile.mp4");
+  // Sprint C11-bis : videos migrees de Supabase Storage vers Cloudflare R2
+  // (egress illimite). Le composant VideoR2 resout l'URL via
+  // NEXT_PUBLIC_R2_PUBLIC_URL. Variantes desktop (1080p) + mobile (720p)
+  // restees responsives via <source media="(min-width: 1024px)">.
 
   return (
     <HeroScrollContainer
@@ -33,12 +35,11 @@ export async function Hero({ locale }: { locale: string }) {
         transition: "background-color 0.4s ease",
       }}
     >
-      {/* Video background — bucket Supabase "Videos" (majuscule).
-          CSP media-src 'self' https://*.supabase.co indispensable
-          (cf. next.config.ts). Pas de poster externe : le bg sapin
-          profond var(--hero-bg) #1F221A joue le rôle de placeholder.
-          Servi en deux variantes responsive (desktop 4.7MB / mobile 3.1MB)
-          + preload="metadata" pour réduire l'Egress Supabase ~70%. */}
+      {/* Sprint C11-bis : video background depuis Cloudflare R2 (egress
+          illimite, was Supabase Storage). CSP media-src autorise https:
+          generique (cf. next.config.ts). Pas de poster externe : le bg
+          sapin profond var(--hero-bg) joue le placeholder. Variantes
+          responsives : desktop 1080p / mobile 720p + preload='metadata'. */}
       {/* POL3-7 : parallax desktop very subtil (0.05). Overscan
           108%/-4% pour qu'aucun bord n'apparaisse sous le translate
           (max ~±22px) — AUCUN zoom/scale. Inactif mobile (<768) +
@@ -52,18 +53,15 @@ export async function Hero({ locale }: { locale: string }) {
         intensity={0.05}
         className="absolute inset-0"
       >
-        <video
+        <VideoR2
           className="absolute left-0 top-[-4%] h-[108%] w-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
+          ariaHidden
           preload="metadata"
-          aria-hidden
-        >
-          <source src={videoDesktop} type="video/mp4" media="(min-width: 1024px)" />
-          <source src={videoMobile} type="video/mp4" />
-        </video>
+          sources={[
+            { filename: "mapa-showcase-desktop.mp4", media: "(min-width: 1024px)", type: "video/mp4" },
+            { filename: "mapa-showcase-mobile.mp4", type: "video/mp4" },
+          ]}
+        />
       </ParallaxImage>
       </div>
 
