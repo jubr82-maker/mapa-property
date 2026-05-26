@@ -474,11 +474,24 @@ function mapPublicRows(
           : typeof r.price_display === "number"
             ? String(r.price_display)
             : (r.price_display as string),
+      // Sprint HTML-RENDERING C4 : utiliser getLocalizedField pour
+      // selectionner la variante locale (short_pitch_en/_de,
+      // description_en/_de — colonnes ajoutees migration
+      // 20260526_offmarket_i18n_full). Fallback cascade : <field>_<locale>
+      // -> <field>_fr -> <field>. Permet a la page detail de servir
+      // EN/DE sur /en /de au lieu du FR systematique.
+      // Les colonnes legacy short_description / full_description (FR
+      // uniquement) restent une derniere ligne de defense.
       short_pitch:
-        (r.short_description as string | null) ??
-        (r.short_pitch as string | null) ??
+        getLocalizedField(r, "short_pitch", locale) ||
+        (r.short_description as string | null) ||
+        (r.short_pitch as string | null) ||
         null,
-      description: (r.full_description as string | null) ?? (r.description as string | null) ?? null,
+      description:
+        getLocalizedField(r, "description", locale) ||
+        (r.full_description as string | null) ||
+        (r.description as string | null) ||
+        null,
       highlights: (r.highlights as string[] | null) ?? null,
       cover_image_url: (r.cover_image_url as string | null) ?? null,
       gallery_urls: (r.gallery_urls as string[] | null) ?? null,

@@ -16,6 +16,7 @@ import { FicheConditions } from "@/components/property/fiche/FicheConditions";
 import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
 import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
 import { SignatureLine } from "@/components/ui/SignatureLine";
+import { highlightTitles } from "@/lib/formatting/highlightTitles";
 
 // POL2-9 : le prix off-market est désormais pilotable depuis le BO via
 // le drapeau `price_on_demand`. Par DÉFAUT (false ou colonne absente) le
@@ -88,9 +89,14 @@ export default async function OffMarketDetailPage({
             {t("brief")}
           </p>
           {property.short_pitch ? (
-            <p className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
-              {property.short_pitch}
-            </p>
+            // Sprint HTML-RENDERING C4 : short_pitch passe via
+            // highlightTitles -> rendu HTML securise (sanitize whitelist
+            // p/strong/em/b/i/br/ul/ol/li) ou mode B legacy si texte
+            // plat. Auparavant : {property.short_pitch} en {value}
+            // brut -> React echappait les '<' si HTML present.
+            <div className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl [&_p]:mb-3 [&_strong]:font-semibold [&_em]:italic">
+              {highlightTitles(property.short_pitch)}
+            </div>
           ) : (
             <p className="text-sm leading-relaxed text-ink-mid">
               {tf("overview_intro")}
