@@ -17,8 +17,12 @@
 // Cible : luxury real estate (Luxembourg). Prompt force "Return ONLY the
 // translation, no explanations" pour eviter les wrappers Markdown que
 // Mistral ajoute parfois.
-
-import "server-only";
+//
+// Note : pas de `import "server-only"` ici car ce helper est consomme aussi
+// par scripts/translate-existing-offmarket.mjs (tsx Node standalone, hors
+// contexte Next). MISTRAL_API_KEY est lu via process.env exclusivement —
+// jamais expose au bundle client (le helper n'est appele que cote serveur
+// dans les server actions admin).
 
 const MISTRAL_ENDPOINT = "https://api.mistral.ai/v1/chat/completions";
 const MISTRAL_MODEL = "mistral-small-latest";
