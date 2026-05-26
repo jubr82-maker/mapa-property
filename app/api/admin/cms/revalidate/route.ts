@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SITE_CONTENT_TAG, SITE_DESIGN_TOKENS_TAG } from "@/lib/site-content";
 
@@ -7,7 +7,14 @@ import { SITE_CONTENT_TAG, SITE_DESIGN_TOKENS_TAG } from "@/lib/site-content";
  * POST /api/admin/cms/revalidate
  * Vide le cache CMS — utilisé depuis le bouton "Vider cache" de
  * /admin/contenu. Force la prochaine requête à recharger les rows
- * site_content + site_design_tokens et invalide le layout racine.
+ * site_content + site_design_tokens.
+ *
+ * Sprint OPTIM-1A : suppression de revalidatePath("/", "layout") qui
+ * invalidait les 261 pages SSG d'un coup (bombe nucleaire). Les 2
+ * revalidateTag suffisent : les Server Components qui consomment
+ * siteContent()/siteDesignTokens() relisent au prochain render, et
+ * comme le cache est en revalidate: false (cf. lib/site-content.ts),
+ * c'est strictement le tag-invalidate qui pilote la fraicheur.
  */
 export async function POST() {
   const supabase = await createSupabaseServerClient();
@@ -22,8 +29,6 @@ export async function POST() {
   // = invalidation immédiate (équivalent ancienne signature 1-arg).
   revalidateTag(SITE_CONTENT_TAG, { expire: 0 });
   revalidateTag(SITE_DESIGN_TOKENS_TAG, { expire: 0 });
-  // Invalide le layout racine (couleurs/fonts injectées dans <head>).
-  revalidatePath("/", "layout");
 
   return NextResponse.json({ ok: true });
 }
