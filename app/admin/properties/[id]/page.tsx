@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PropertyVideoForm } from "@/components/admin/PropertyVideoForm";
 import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
 import { PropertyPhotosSection } from "@/components/admin/PropertyPhotosSection";
+import { RevalidateButton } from "@/components/admin/RevalidateButton";
 import type { PhotoData } from "@/components/admin/PhotoManager";
 
 export const dynamic = "force-dynamic";
@@ -151,6 +152,16 @@ export default async function AdminPropertyEditPage({
         >
           Voir la fiche ↗
         </Link>
+        {/* Sprint OPTIM-1A : bouton refresh ISR manuel. Utile si l'admin
+            veut voir ses modifs immediatement (le TTL revalidate ISR sur
+            la fiche est de 30 min — cf. C2). Les server actions
+            invalident deja la fiche par slug, ce bouton est un fallback
+            de confort. */}
+        {data.slug && (
+          <div className="mt-4">
+            <RevalidateButton path={`/fr/biens/${data.slug}`} />
+          </div>
+        )}
       </section>
     </div>
   );
