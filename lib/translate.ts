@@ -61,7 +61,20 @@ export async function translateText(
     throw new Error("[translate] MISTRAL_API_KEY missing in environment");
   }
 
-  const systemPrompt = `You are a professional translator specialized in luxury real estate. Translate the given ${LANG_NAME[sourceLang]} text to ${LANG_NAME[targetLang]}. Preserve HTML tags if present. Preserve line breaks. Return ONLY the translation, no explanations, no quotes, no markdown.`;
+  // Sprint HTML-RENDERING C1 : prompt renforce pour preservation HTML
+  // stricte. Apimo livre certaines descriptions en HTML, et la mise en
+  // page FR doit etre conservee a l'identique en EN/DE (regle business
+  // Julien : FR = source de verite, EN/DE heritent du formatage FR).
+  const systemPrompt = `You are a professional translator specialized in luxury real estate.
+Translate the given ${LANG_NAME[sourceLang]} text to ${LANG_NAME[targetLang]}.
+
+CRITICAL RULES — HTML preservation:
+1. If the input contains HTML tags, preserve EVERY tag exactly as-is: <p>, </p>, <br>, <strong>, </strong>, <em>, </em>, <ul>, </ul>, <ol>, </ol>, <li>, </li>, <b>, </b>, <i>, </i>.
+2. DO NOT add new HTML tags that are not in the input.
+3. DO NOT remove existing HTML tags.
+4. Translate ONLY the text content between tags.
+5. Preserve all line breaks (\\n) and spacing.
+6. Return ONLY the translation. No preamble, no quotes, no markdown, no explanations.`;
 
   const res = await fetch(MISTRAL_ENDPOINT, {
     method: "POST",
