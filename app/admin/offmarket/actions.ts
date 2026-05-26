@@ -10,12 +10,21 @@ import {
   type PropertyType,
   type RequestStatus,
 } from "@/lib/admin/offmarket";
+import { translateBatch } from "@/lib/translate";
 
 // Colonnes potentiellement absentes selon l'état d'application des migrations.
 // Si Postgres remonte "column does not exist" sur l'une d'elles, on la retire
 // du payload et on réessaie — permet au BO de fonctionner même si Julien
 // n'a pas encore appliqué les dernières migrations SQL.
 const OPTIONAL_OFFMARKET_COLUMNS = [
+  // Sprint I18N : colonnes traduites auto (migration 20260526_offmarket_i18n_full).
+  // Tolerance retry si la migration n'a pas encore ete appliquee.
+  "title_en",
+  "title_de",
+  "description_en",
+  "description_de",
+  "short_pitch_en",
+  "short_pitch_de",
   "sub_type",
   "surface_utile",
   "surface_ponderee",
@@ -106,6 +115,50 @@ async function updateWithRetry(
     return { error };
   }
   return { error: new Error("Trop de tentatives") };
+}
+
+// Sprint I18N-Mistral — Auto-traduction des champs FR -> EN + DE au save.
+// Lecture des champs FR depuis le payload (title, description, short_pitch),
+// appel Mistral en parallele (2 langues), ajout des 6 colonnes _en/_de dans
+// le payload. Si Mistral fail : console.warn + payload non modifie -> les
+// anciennes valeurs EN/DE en DB sont preservees (updateWithRetry ne touche
+// pas ce qui n'est pas dans le payload). Jamais bloquant pour le save FR.
+//
+// Pour UPDATE partiel : ne traduit QUE les champs presents dans le payload
+// (formData a explicitement envoye ces fields, donc edition delibérée).
+async function attachI18nTranslations(
+  payload: Record<string, unknown>,
+): Promise<void> {
+  const fr: Record<string, string | null | undefined> = {};
+  if ("title" in payload && typeof payload.title === "string") {
+    fr.title = payload.title;
+  }
+  if ("description" in payload && typeof payload.description === "string") {
+    fr.description = payload.description;
+  }
+  if ("short_pitch" in payload && typeof payload.short_pitch === "string") {
+    fr.short_pitch = payload.short_pitch;
+  }
+  if (Object.keys(fr).length === 0) return;
+
+  try {
+    const [en, de] = await Promise.all([
+      translateBatch(fr, "EN"),
+      translateBatch(fr, "DE"),
+    ]);
+    for (const key of Object.keys(fr)) {
+      if (en[key]) payload[`${key}_en`] = en[key];
+      if (de[key]) payload[`${key}_de`] = de[key];
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.warn(
+      `[translate] Mistral failed for offmarket: ${msg} — keeping previous EN/DE values in DB.`,
+    );
+    // Pas de modification du payload : les colonnes _en/_de NE sont PAS
+    // ajoutees -> updateWithRetry ne les touchera pas, les valeurs DB
+    // existantes sont preservees.
+  }
 }
 
 export type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
@@ -425,6 +478,10 @@ export async function createOffmarket(formData: FormData): Promise<ActionResult>
 
   Object.assign(payload, parseCompositionFromFormData(formData));
 
+  // Sprint I18N-Mistral : auto-traduction des champs FR vers EN+DE
+  // avant l'INSERT. Idempotent et tolerant (cf. attachI18nTranslations).
+  await attachI18nTranslations(payload);
+
   const { data, error } = await insertWithRetry(supabase, "properties_offmarket", payload);
 
   if (error || !data) {
@@ -503,6 +560,12 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
     status,
   );
   Object.assign(payload, parseCompositionFromFormData(formData));
+
+  // Sprint I18N-Mistral : auto-traduction des champs FR vers EN+DE.
+  // buildOffmarketUpdatePayload n'inclut un champ que si formData l'a
+  // soumis (edition deliberee), donc attachI18nTranslations ne retraduit
+  // pas les champs inchanges -> economie de calls Mistral.
+  await attachI18nTranslations(payload);
 
   const { error } = await updateWithRetry(supabase, "properties_offmarket", payload, id);
 
