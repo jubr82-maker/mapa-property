@@ -52,6 +52,18 @@ export async function savePropertyPhotos(
   photos: PhotoData[],
 ): Promise<{ ok: true }> {
   const supabase = await createSupabaseServerClient();
+  // Sprint OPTIM-1A : fetch slug pour invalidation ciblee fiche SSG (C2).
+  const { data: slugRow, error: slugErr } = await supabase
+    .from("properties")
+    .select("slug")
+    .eq("id", propertyId)
+    .maybeSingle();
+  if (slugErr) {
+    console.warn("[admin/properties/photos] fetchSlug error:", slugErr.message);
+  }
+  const slug = (slugRow as { slug: string | null } | null)?.slug;
+  const slugClean =
+    typeof slug === "string" && slug.length > 0 ? slug : null;
   // Wipe existing rows pour ce property_id
   const { error: delErr } = await supabase
     .from("property_images")
@@ -78,6 +90,8 @@ export async function savePropertyPhotos(
   revalidatePath(`/admin/properties/${propertyId}`);
   revalidatePath("/admin/properties");
   revalidatePath("/fr/biens");
+  // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
+  if (slugClean) revalidatePath(`/fr/biens/${slugClean}`);
   return { ok: true };
 }
 

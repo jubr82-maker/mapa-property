@@ -3,8 +3,34 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 
+/**
+ * Sprint OPTIM-1A : helper de lecture du slug d'un bien par id. Utilise
+ * pour cibler revalidatePath sur la fiche SSG generee par C2
+ * generateStaticParams. Si fetch echoue OU slug null : retourne null,
+ * le caller console.warn + skip l'invalidation de la fiche (la liste
+ * /fr/biens reste invalidee, et la fiche se rafraichit au revalidate
+ * 30min ou via le bouton refresh admin C5).
+ */
+async function fetchPropertySlug(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  id: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("properties")
+    .select("slug")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.warn("[admin/properties] fetchSlug error:", error.message);
+    return null;
+  }
+  const slug = (data as { slug: string | null } | null)?.slug;
+  return typeof slug === "string" && slug.length > 0 ? slug : null;
+}
+
 export async function setPropertyPublished(id: string, isPublished: boolean) {
   const supabase = await createSupabaseServerClient();
+  const slug = await fetchPropertySlug(supabase, id);
   const { error } = await supabase
     .from("properties")
     .update({ is_published: isPublished })
@@ -12,10 +38,13 @@ export async function setPropertyPublished(id: string, isPublished: boolean) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin/properties");
   revalidatePath("/fr/biens");
+  // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
+  if (slug) revalidatePath(`/fr/biens/${slug}`);
 }
 
 export async function setPropertyFeatured(id: string, isFeatured: boolean) {
   const supabase = await createSupabaseServerClient();
+  const slug = await fetchPropertySlug(supabase, id);
   const { error } = await supabase
     .from("properties")
     .update({ is_featured: isFeatured })
@@ -23,6 +52,9 @@ export async function setPropertyFeatured(id: string, isFeatured: boolean) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin/properties");
   revalidatePath("/fr");
+  // Sprint OPTIM-1A : la fiche elle-meme peut afficher un badge featured
+  // dans certains rendus -> on l'invalide aussi par securite (cout marginal).
+  if (slug) revalidatePath(`/fr/biens/${slug}`);
 }
 
 /**
@@ -56,6 +88,7 @@ export async function updateProperty(
       data.price == null || Number.isNaN(data.price) ? null : data.price;
   }
   if (Object.keys(update).length === 0) return { ok: true };
+  const slug = await fetchPropertySlug(supabase, id);
   const { error } = await supabase
     .from("properties")
     .update(update)
@@ -64,6 +97,8 @@ export async function updateProperty(
   revalidatePath("/admin/properties");
   revalidatePath(`/admin/properties/${id}`);
   revalidatePath("/fr/biens");
+  // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
+  if (slug) revalidatePath(`/fr/biens/${slug}`);
   return { ok: true };
 }
 
@@ -80,6 +115,7 @@ export async function updatePropertyVideoUrl(
     typeof videoUrl === "string" && videoUrl.trim().length > 0
       ? videoUrl.trim()
       : null;
+  const slug = await fetchPropertySlug(supabase, propertyId);
   const { error } = await supabase
     .from("properties")
     .update({ video_url: normalized })
@@ -88,4 +124,6 @@ export async function updatePropertyVideoUrl(
   revalidatePath("/admin/properties");
   revalidatePath(`/admin/properties/${propertyId}`);
   revalidatePath("/fr/biens");
+  // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
+  if (slug) revalidatePath(`/fr/biens/${slug}`);
 }
