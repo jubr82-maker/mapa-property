@@ -179,6 +179,7 @@ export default async function OffMarketDetailPage({
           <OffmarketPlaceholder
             title={t("cover_title")}
             subtitle={t("cover_subtitle")}
+            invertOnDark
           />
         </div>
 

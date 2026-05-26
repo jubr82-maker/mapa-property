@@ -8,7 +8,13 @@
 // couleurs). Fond uni sapin profond #1F221A (vs radial-gradient cuivré
 // avant POL2-8), cadenas cuivre citron #e0af6e, texte crème velin
 // #F0E6CC opacity 0.7 pour le sous-titre confidentiel. Bordure cuivre
-// citron subtile. Identique jour/nuit (cover confidentiel, hors thème).
+// citron subtile.
+//
+// Sprint C12-cosmetic : prop opt-in `invertOnDark` (default false)
+// inverse les couleurs en dark mode UNIQUEMENT — fond crème, texte/
+// cadenas sapin. Active sur les fiches de biens off-market
+// (/off-market/[id]) ; les 4 autres callers (list, carousel home,
+// admin) restent strictement identiques jour/nuit.
 //
 // "OFF MARKET" dominant (text-5xl md:text-7xl) > SignatureLine cuivre >
 // "BIEN STRICTEMENT CONFIDENTIEL" (text-xs md:text-sm). La hiérarchie
@@ -23,40 +29,63 @@
 
 import { SignatureLine } from "@/components/ui/SignatureLine";
 
-// STEP3c-RECODE : fond uni sapin profond + couleurs Forêt strict.
-const SAPIN_BG = "#1F221A";
-const COPPER = "#e0af6e"; // cuivre citron — palette Forêt
-const CREME = "#F0E6CC"; // crème velin — palette Forêt
-
 export function OffmarketPlaceholder({
   className = "",
   showLabel = true,
   compact = false,
   title,
   subtitle,
+  invertOnDark = false,
 }: {
   className?: string;
   showLabel?: boolean;
   compact?: boolean;
   title?: string;
   subtitle?: string;
+  /** Sprint C12-cosmetic : inverse les couleurs en dark mode (fond crème,
+   *  cadenas/texte sapin). Activé uniquement sur la fiche bien off-market.
+   *  Light mode reste strictement identique dans tous les cas. */
+  invertOnDark?: boolean;
 }) {
+  // Classes light mode (defaut, inchange) :
+  //   - bg sapin #1F221A
+  //   - border copper 20%
+  //   - text copper (cadenas via currentColor + "OFF MARKET")
+  //
+  // Classes dark mode (uniquement si invertOnDark=true) :
+  //   - bg creme #F0E6CC
+  //   - border sapin 20%
+  //   - text sapin (cadenas via currentColor + "OFF MARKET")
+  const containerClasses = [
+    "absolute inset-0 flex flex-col items-center justify-center px-4 text-center",
+    "border bg-[#1F221A] border-[#e0af6e]/20 text-[#e0af6e]",
+    invertOnDark
+      ? "dark:bg-[#F0E6CC] dark:border-[#1F221A]/20 dark:text-[#1F221A]"
+      : "",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  // Subtitle : creme/70 en light, sapin/70 en dark si invertOnDark.
+  const subtitleClasses = [
+    "font-mono font-light uppercase tracking-[0.15em] text-[#F0E6CC]/70",
+    invertOnDark ? "dark:text-[#1F221A]/70" : "",
+    compact ? "text-[9px]" : "text-xs md:text-sm",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div
-      data-offmarket-placeholder
-      className={`absolute inset-0 flex flex-col items-center justify-center px-4 text-center ${className}`}
-      style={{
-        backgroundColor: SAPIN_BG,
-        border: `1px solid rgba(224, 175, 110, 0.2)`,
-      }}
-    >
-      {/* Cadenas cuivre fin centré */}
+    <div data-offmarket-placeholder className={containerClasses}>
+      {/* Cadenas — stroke via currentColor pour heriter du text-* parent
+          (copper en light, sapin en dark si invertOnDark). */}
       <svg
         aria-hidden
         viewBox="0 0 80 80"
         className={compact ? "size-8" : "size-12 md:size-16"}
         fill="none"
-        stroke={COPPER}
+        stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -72,23 +101,16 @@ export function OffmarketPlaceholder({
             className={`mt-5 font-mono font-light uppercase tracking-[0.2em] ${
               compact ? "text-xl" : "text-5xl md:text-7xl"
             }`}
-            style={{ color: COPPER }}
           >
-            {/* "OFF MARKET" dominant — la prop title (cover_title) est conservée
-                pour l'accessibilité / rétro-compat mais le visuel impose
-                l'identité OFF MARKET demandée par POL2-8. */}
+            {/* "OFF MARKET" dominant — heriter du text-* parent via currentColor
+                implicite (pas de color override). La prop title est conservee
+                pour l'accessibilite mais le visuel impose OFF MARKET (POL2-8). */}
             OFF MARKET
           </p>
 
           <SignatureLine align="center" width={compact ? "w-6" : "w-8"} />
 
-          <p
-            data-offmarket-subtitle
-            className={`font-mono font-light uppercase tracking-[0.15em] ${
-              compact ? "text-[9px]" : "text-xs md:text-sm"
-            }`}
-            style={{ color: CREME, opacity: 0.7 }}
-          >
+          <p data-offmarket-subtitle className={subtitleClasses}>
             {title ?? "Bien strictement confidentiel"}
           </p>
           {subtitle && subtitle !== "Off Market" && (
