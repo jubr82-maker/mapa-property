@@ -28,6 +28,11 @@ export interface Property {
   featured_order: number | null;
   is_published: boolean | null;
   video_url?: string | null;
+  // Sprint C13 : colonne reelle de la table public.properties (Capitalized
+  // FR + variantes Apimo). Consommee par matchesTypeQuery pour le filtrage
+  // par equivalences (maison<->villa, appartement<->duplex<->penthouse...).
+  // Optionnel a la lecture pour les rows mal renseignees (fallback title).
+  property_type?: string | null;
   // Note : la table public.properties n'a PAS de colonne cover_image_url
   // (les photos sont dans la table séparée property_images via property_id
   // + sort). Voir lib/properties.ts pour les helpers getCoverImage /

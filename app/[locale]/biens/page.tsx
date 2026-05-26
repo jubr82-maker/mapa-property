@@ -3,6 +3,7 @@ import { fetchAllPropertiesWithCover, type PropertyWithCover } from "@/lib/data"
 import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import type { Locale } from "@/lib/types";
+import { matchesTypeQuery } from "@/lib/property-types";
 
 interface SearchParams {
   country?: string;
@@ -14,7 +15,12 @@ interface SearchParams {
   min_surface?: string;
 }
 
-const matchType = (title: string | null, type: string) => {
+// Sprint C13 : fallback title-matching pour les biens dont la colonne
+// property_type est null/vide (rare mais possible si Apimo n'a pas
+// renseigne le type). Le matching principal passe par matchesTypeQuery
+// (lib/property-types.ts) qui couvre les 5 groupes d'equivalences avec
+// normalisation accents.
+const matchTypeFromTitle = (title: string | null, type: string) => {
   if (!title) return false;
   const lower = title.toLowerCase();
   const map: Record<string, string[]> = {
@@ -43,11 +49,21 @@ const filterProperties = (
       return false;
     if (filters.transaction && p.transaction !== filters.transaction) return false;
     if (filters.type) {
-      const titles = [p.title_fr, p.title_en, p.title_de].filter(
-        Boolean,
-      ) as string[];
-      const ok = titles.some((t) => matchType(t, filters.type!));
-      if (!ok) return false;
+      // Sprint C13 : 1) match strict sur property_type via les groupes
+      // d'equivalences (maison<->villa<->maison jumelee, appartement<->
+      // duplex<->penthouse<->studio<->triplex, terrain<->terrain
+      // constructible, etc.). 2) si property_type est null/vide ->
+      // fallback title-matching legacy pour ne pas perdre les biens mal
+      // renseignes par Apimo.
+      if (p.property_type) {
+        if (!matchesTypeQuery(p.property_type, filters.type)) return false;
+      } else {
+        const titles = [p.title_fr, p.title_en, p.title_de].filter(
+          Boolean,
+        ) as string[];
+        const ok = titles.some((t) => matchTypeFromTitle(t, filters.type!));
+        if (!ok) return false;
+      }
     }
     if (filters.budget_max) {
       const max = Number(filters.budget_max);
