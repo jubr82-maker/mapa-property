@@ -35,8 +35,15 @@ export function highlightTitles(text: string | null | undefined): ReactNode {
     });
     return <div dangerouslySetInnerHTML={{ __html: clean }} />;
   }
-  // Texte brut Apimo (legacy) — logique POL3-P1-FIX préservée :
-  const paragraphs = text
+  // Texte brut Apimo (legacy) — logique POL3-P1-FIX préservée.
+  // Sprint HTML-RENDERING C3 : normalise <br><br> en \n\n avant le
+  // split pour reconnaitre les sauts de paragraphes en pseudo-HTML.
+  // Apimo livre parfois EN/DE en texte plat avec <br><br> intercales
+  // (cas mixte). Sans normalisation, tout finit dans 1 seul <p>.
+  const normalized = text
+    .replace(/<br\s*\/?>\s*<br\s*\/?>/gi, "\n\n")
+    .replace(/<br\s*\/?>/gi, "\n");
+  const paragraphs = normalized
     .split(/\n\s*\n|\n/)
     .map((p) => p.trim())
     .filter(Boolean);

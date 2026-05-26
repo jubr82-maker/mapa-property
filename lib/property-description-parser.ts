@@ -201,7 +201,16 @@ type Block =
 
 function parseBlocks(text: string): Block[] {
   const blocks: Block[] = [];
-  const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  // Sprint HTML-RENDERING C3 : normalise <br><br> (et <br/><br/> +
+  // variantes) en \n\n avant le split. Apimo livre certaines
+  // descriptions sur 1 seule ligne avec des <br><br> en guise de saut
+  // de paragraphe — sans cette normalisation, parseBlocks faisait 1
+  // seul block geant et l'intro etait toute la description.
+  // <br> simple -> \n (saut de ligne simple, conserve dans le block).
+  const normalized = text
+    .replace(/<br\s*\/?>\s*<br\s*\/?>/gi, "\n\n")
+    .replace(/<br\s*\/?>/gi, "\n");
+  const lines = normalized.split(/\n+/).map((l) => l.trim()).filter(Boolean);
 
   for (const line of lines) {
     if (line.startsWith(H3_TOKEN)) {
