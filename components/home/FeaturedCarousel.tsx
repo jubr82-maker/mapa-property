@@ -294,6 +294,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             compact
             title={tOff("cover_title")}
             subtitle={tOff("cover_subtitle")}
+            invertOnDark
           />
         ) : item.cover_url ? (
           <Image

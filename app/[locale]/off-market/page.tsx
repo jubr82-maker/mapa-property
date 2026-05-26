@@ -161,6 +161,7 @@ function OffMarketTeaser({
           compact
           title={t("cover_title")}
           subtitle={t("cover_subtitle")}
+          invertOnDark
         />
         <span className="absolute right-3 top-3 rounded-full bg-bg-contrast/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-gold-bright backdrop-blur">
           OFF-MARKET
