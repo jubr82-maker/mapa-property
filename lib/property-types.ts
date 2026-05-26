@@ -9,15 +9,36 @@
 // branchement SearchBar / filtrage / comparables est fait séparément
 // (cf. TODO RAPPORT_NUIT) pour ne pas risquer la recherche en prod.
 
+// Sprint C13 — equivalences etendues pour matcher les valeurs reelles
+// Apimo en DB (Capitalized + variantes composees comme "Maison jumelee",
+// "Terrain constructible") + types off-market ("immeuble", "ensemble
+// immobilier"). Les valeurs ici sont en lowercase + sans accents
+// (apres normalisation NFD) — norm() s'occupe de la transformation des
+// entrees au match. Chaque variante composee est listee explicitement,
+// pas de matching par substring (deterministe, testable).
 export const TYPE_GROUPS = {
-  house: ["maison", "villa"],
+  house: ["maison", "villa", "maison jumelee"],
   apartment: ["appartement", "duplex", "studio", "penthouse", "triplex"],
+  land: ["terrain", "terrain constructible"],
+  commercial: [
+    "bureau",
+    "local commercial",
+    "local et fonds de commerce",
+  ],
+  building: ["immeuble", "ensemble immobilier"],
 } as const;
 
 export type TypeGroup = keyof typeof TYPE_GROUPS;
 
+// Sprint C13 — strip accents via NFD decomposition + filtrage diacritiques.
+// Necessaire pour matcher les valeurs Apimo qui arrivent en
+// "Maison jumelee" (accent sur le e final) en lowercase + accents.
 const norm = (s: string | null | undefined): string =>
-  (s ?? "").trim().toLowerCase();
+  (s ?? "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
 
 /** Groupe d'un type (ex. "villa" → "house"), sinon null. */
 export function getTypeGroup(type: string | null | undefined): TypeGroup | null {

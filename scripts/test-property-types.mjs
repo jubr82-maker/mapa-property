@@ -32,20 +32,30 @@ assert.equal(getTypeGroup("villa"), "house"); ok("villa → house");
 assert.equal(getTypeGroup("MAISON"), "house"); ok("MAISON (casse) → house");
 assert.equal(getTypeGroup("duplex"), "apartment"); ok("duplex → apartment");
 assert.equal(getTypeGroup("penthouse"), "apartment"); ok("penthouse → apartment");
-assert.equal(getTypeGroup("terrain"), null); ok("terrain → null (hors groupe)");
+// Sprint C13 — terrain integre au groupe land.
+assert.equal(getTypeGroup("terrain"), "land"); ok("terrain → land (groupe étendu C13)");
+assert.equal(getTypeGroup("bureau"), "commercial"); ok("bureau → commercial");
+assert.equal(getTypeGroup("immeuble"), "building"); ok("immeuble → building");
 assert.equal(getTypeGroup(""), null); ok("'' → null");
 assert.equal(getTypeGroup(null), null); ok("null → null");
 
 // getEquivalentTypes
-assert.deepEqual([...getEquivalentTypes("maison")].sort(), ["maison", "villa"].sort());
-ok("maison → [maison, villa]");
 assert.deepEqual(
   [...getEquivalentTypes("appartement")].sort(),
   ["appartement", "duplex", "penthouse", "studio", "triplex"].sort(),
 );
 ok("appartement → tous les types appart");
-assert.deepEqual(getEquivalentTypes("terrain"), ["terrain"]);
-ok("terrain → [terrain] (pas d'élargissement)");
+// Sprint C13 — terrain etendu au groupe land.
+assert.deepEqual(
+  [...getEquivalentTypes("terrain")].sort(),
+  ["terrain", "terrain constructible"].sort(),
+);
+ok("terrain → [terrain, terrain constructible] (groupe land)");
+assert.deepEqual(
+  [...getEquivalentTypes("maison")].sort(),
+  ["maison", "maison jumelee", "villa"].sort(),
+);
+ok("maison étendu → [maison, maison jumelee, villa]");
 assert.deepEqual(getEquivalentTypes(""), []); ok("'' → []");
 
 // matchesTypeQuery
@@ -55,5 +65,19 @@ assert.equal(matchesTypeQuery("maison", "appartement"), false); ok("maison NE ma
 assert.equal(matchesTypeQuery("villa", ""), true); ok("pas de filtre type → true");
 assert.equal(matchesTypeQuery(null, "maison"), false); ok("bien sans type → false");
 assert.equal(matchesTypeQuery("terrain", "terrain"), true); ok("terrain == terrain (self)");
+
+// Sprint C13 — cas Apimo réels DB (Capitalized + accents + composés).
+assert.equal(matchesTypeQuery("Villa", "maison"), true); ok("Villa (Capitalized) → maison");
+assert.equal(matchesTypeQuery("Maison jumelée", "villa"), true); ok("Maison jumelée (accent) → villa via house");
+assert.equal(matchesTypeQuery("Penthouse", "appartement"), true); ok("Penthouse → appartement");
+assert.equal(matchesTypeQuery("Duplex", "studio"), true); ok("Duplex → studio via apartment");
+assert.equal(matchesTypeQuery("Triplex", "appartement"), true); ok("Triplex → appartement");
+assert.equal(matchesTypeQuery("Terrain constructible", "terrain"), true); ok("Terrain constructible → terrain via land");
+assert.equal(matchesTypeQuery("Local commercial", "bureau"), true); ok("Local commercial → bureau via commercial");
+assert.equal(matchesTypeQuery("Local et fonds de commerce", "bureau"), true); ok("Local et fonds de commerce → bureau");
+assert.equal(matchesTypeQuery("Ensemble immobilier", "immeuble"), true); ok("Ensemble immobilier → immeuble via building");
+assert.equal(matchesTypeQuery("Bureau", "maison"), false); ok("Bureau NE matche PAS maison");
+assert.equal(matchesTypeQuery("Appartement", "terrain"), false); ok("Appartement NE matche PAS terrain");
+assert.equal(matchesTypeQuery("immeuble", "ensemble immobilier"), true); ok("immeuble lowercase → ensemble immobilier (bidirectionnel)");
 
 console.log(`\n${n}/${n} assertions OK — lib/property-types.ts`);
