@@ -88,25 +88,26 @@ export default async function OffMarketListPage({
           </ul>
         </section>
 
-        {/* CTA ARCOVA — sous-section "Acquéreurs qualifiés" */}
+        {/* CTA ARCOVA — sous-section "Acquéreurs qualifiés". Sprint I18N :
+            strings migrees vers next-intl (namespace 'offmarket', keys
+            arcova_cta_*). Flèche '→' reste en dur (caractere universel). */}
         <section className="mb-14 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-bg p-6 lg:p-8">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
-              ARCOVA · Acquéreurs qualifiés
+              {t("arcova_cta_eyebrow")}
             </p>
             <p className="mt-2 font-display text-xl font-bold text-ink sm:text-2xl">
-              Vous êtes un acquéreur sous mandat de recherche ?
+              {t("arcova_cta_title")}
             </p>
             <p className="mt-1 max-w-xl text-sm text-ink-mid">
-              ARCOVA est la liste confidentielle des acquéreurs qualifiés admis
-              à recevoir les biens off-market en avant-première.
+              {t("arcova_cta_description")}
             </p>
           </div>
           <Link
             href="/off-market/arcova"
             className="inline-flex items-center gap-2 rounded-full border border-gold px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-gold-deep transition-colors hover:bg-gold/10"
           >
-            Accéder à ARCOVA →
+            {t("arcova_cta_label")} →
           </Link>
         </section>
 

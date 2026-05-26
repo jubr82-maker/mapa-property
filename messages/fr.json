@@ -431,7 +431,11 @@
     "gallery": "Galerie (verrouillée)",
     "form_eyebrow": "Demande de dossier complet",
     "form_title": "Accéder au dossier complet",
-    "form_subtitle": "Sous NDA contractuel et capacité financière vérifiée."
+    "form_subtitle": "Sous NDA contractuel et capacité financière vérifiée.",
+    "arcova_cta_eyebrow": "ARCOVA · Acquéreurs qualifiés",
+    "arcova_cta_title": "Vous êtes un acquéreur sous mandat de recherche ?",
+    "arcova_cta_description": "ARCOVA est la liste confidentielle des acquéreurs qualifiés admis à recevoir les biens off-market en avant-première.",
+    "arcova_cta_label": "Accéder à ARCOVA"
   },
   "nda": {
     "project_label": "Votre projet",

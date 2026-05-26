@@ -431,7 +431,11 @@
     "gallery": "Gallery (locked)",
     "form_eyebrow": "Request the full file",
     "form_title": "Access the full dossier",
-    "form_subtitle": "Under contractual NDA and verified financial capacity."
+    "form_subtitle": "Under contractual NDA and verified financial capacity.",
+    "arcova_cta_eyebrow": "ARCOVA · Qualified buyers",
+    "arcova_cta_title": "Are you a buyer under a search mandate?",
+    "arcova_cta_description": "ARCOVA is the confidential list of qualified buyers admitted to receive off-market properties in preview.",
+    "arcova_cta_label": "Access ARCOVA"
   },
   "nda": {
     "project_label": "Your project",

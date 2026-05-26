@@ -431,7 +431,11 @@
     "gallery": "Galerie (gesperrt)",
     "form_eyebrow": "Vollständiges Dossier anfordern",
     "form_title": "Zugang zum vollständigen Dossier",
-    "form_subtitle": "Unter vertraglicher NDA und geprüfter Finanzkraft."
+    "form_subtitle": "Unter vertraglicher NDA und geprüfter Finanzkraft.",
+    "arcova_cta_eyebrow": "ARCOVA · Qualifizierte Käufer",
+    "arcova_cta_title": "Sind Sie ein Käufer mit einem Suchmandat?",
+    "arcova_cta_description": "ARCOVA ist die vertrauliche Liste qualifizierter Käufer, die berechtigt sind, Off-Market-Objekte in Vorpremiere zu erhalten.",
+    "arcova_cta_label": "ARCOVA aufrufen"
   },
   "nda": {
     "project_label": "Ihr Projekt",
