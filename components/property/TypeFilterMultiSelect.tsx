@@ -90,17 +90,20 @@ export function TypeFilterMultiSelect({ value, onChange }: Props) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
+        {/* Sprint ELENA-NAV C1 : alignement strict sur les autres inputs
+            du FilterBar (rounded-md border border-line bg-bg px-3 py-2
+            text-sm). Label 'Type' externe via le wrapper <Field> du
+            parent, plus de label embedded. Suppression h-[38px] et
+            inline-flex au profit de flex (hauteur naturelle text-sm +
+            py-2 = ~36px, identique aux <select>/<input> natifs). */}
         <button
           type="button"
-          className="inline-flex h-[38px] w-full items-center justify-between gap-2 rounded-md border border-line bg-bg px-3 py-2 text-left text-sm transition-colors hover:border-gold focus:border-gold focus:outline-none data-[state=open]:border-gold"
+          className="flex w-full items-center justify-between gap-2 rounded-md border border-line bg-bg px-3 py-2 text-left text-sm text-ink transition-colors hover:border-gold focus:border-gold focus:outline-none data-[state=open]:border-gold"
         >
-          <span className="truncate">
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink-soft">
-              {t("type_filter.label")} :
-            </span>{" "}
-            <span className={value.length > 0 ? "text-gold-deep" : "text-ink"}>
-              {triggerLabel}
-            </span>
+          <span
+            className={`truncate ${value.length > 0 ? "text-gold-deep" : "text-ink"}`}
+          >
+            {triggerLabel}
           </span>
           <svg
             aria-hidden

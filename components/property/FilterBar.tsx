@@ -131,12 +131,12 @@ export function FilterBar() {
             ))}
           </select>
         </Field>
-        {/* Sprint C13-ter : multi-select 2 niveaux via Radix UI.
-            Hors du <label> wrapper Field car le composant gère son propre
-            trigger button + label. */}
-        <div className="flex flex-col gap-1">
+        {/* Sprint C13-ter + ELENA-NAV C1 : multi-select 2 niveaux Radix.
+            Label externe via le pattern Field standard pour alignement
+            vertical strict avec les autres inputs (px-3 py-2 text-sm). */}
+        <Field label={tSearch("type")}>
           <TypeFilterMultiSelect value={types} onChange={setTypes} />
-        </div>
+        </Field>
         <Field label={tSearch("budget_max")}>
           <input
             type="number"

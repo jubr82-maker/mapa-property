@@ -127,10 +127,15 @@ export function SearchBar() {
                   onChange={setCity}
                   placeholder={t("city_ph")}
                 />
-                {/* Sprint C13-ter : multi-select 2 niveaux Radix. */}
-                <div className="flex flex-col gap-1">
+                {/* Sprint C13-ter + ELENA-NAV C1 : multi-select 2 niveaux
+                    Radix. Label externe pour alignement strict sur les
+                    autres Select custom du form. */}
+                <label className="flex flex-col gap-1">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-ink-soft">
+                    {t("type")}
+                  </span>
                   <TypeFilterMultiSelect value={types} onChange={setTypes} />
-                </div>
+                </label>
                 <Select
                   label={t("budget_max")}
                   value={budget}
