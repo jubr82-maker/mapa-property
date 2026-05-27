@@ -580,8 +580,13 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
   await audit(id, "offmarket.update", { reference, status });
   revalidatePath("/admin/offmarket");
   revalidatePath(`/admin/offmarket/${id}/edit`);
-  revalidatePath("/fr/off-market");
-  revalidatePath(`/fr/off-market/${id}`);
+  // Sprint OPTIM-1B C3 : invalidation cross-locale (faille notee dans
+  // l'audit OPTIM-1B — auparavant SEUL /fr etait invalide -> EN et DE
+  // restaient figes jusqu'a expiration revalidate 1800s).
+  for (const locale of ["fr", "en", "de"]) {
+    revalidatePath(`/${locale}/off-market`);
+    revalidatePath(`/${locale}/off-market/${id}`);
+  }
   return { ok: true, id };
 }
 
