@@ -80,4 +80,14 @@ assert.equal(matchesTypeQuery("Bureau", "maison"), false); ok("Bureau NE matche 
 assert.equal(matchesTypeQuery("Appartement", "terrain"), false); ok("Appartement NE matche PAS terrain");
 assert.equal(matchesTypeQuery("immeuble", "ensemble immobilier"), true); ok("immeuble lowercase → ensemble immobilier (bidirectionnel)");
 
+// Sprint C13-bis C1 — contrat strict : property_type SEUL source de
+// vérité, jamais le titre. Anti-régression sur le bug 'bureau' matchant
+// un appartement dont le titre contient 'espace bureau'.
+assert.equal(matchesTypeQuery(null, "bureau"), false); ok("property_type=null → false (jamais de fallback titre)");
+assert.equal(matchesTypeQuery("", "bureau"), false); ok("property_type='' → false");
+assert.equal(matchesTypeQuery("Appartement", "bureau"), false); ok("Appartement NE matche PAS bureau (peu importe le titre)");
+assert.equal(matchesTypeQuery("Bureau", "bureau"), true); ok("Bureau matche bureau (self, group commercial)");
+assert.equal(matchesTypeQuery(null, ""), true); ok("pas de filtre type → true même si property_type null");
+assert.equal(matchesTypeQuery(null, null), true); ok("pas de filtre type (null) → true");
+
 console.log(`\n${n}/${n} assertions OK — lib/property-types.ts`);

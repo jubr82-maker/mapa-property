@@ -15,26 +15,12 @@ interface SearchParams {
   min_surface?: string;
 }
 
-// Sprint C13 : fallback title-matching pour les biens dont la colonne
-// property_type est null/vide (rare mais possible si Apimo n'a pas
-// renseigne le type). Le matching principal passe par matchesTypeQuery
-// (lib/property-types.ts) qui couvre les 5 groupes d'equivalences avec
-// normalisation accents.
-const matchTypeFromTitle = (title: string | null, type: string) => {
-  if (!title) return false;
-  const lower = title.toLowerCase();
-  const map: Record<string, string[]> = {
-    appartement: ["appart"],
-    maison: ["maison"],
-    penthouse: ["penthouse"],
-    duplex: ["duplex"],
-    villa: ["villa"],
-    immeuble: ["immeuble"],
-    terrain: ["terrain"],
-  };
-  const keywords = map[type] ?? [type];
-  return keywords.some((k) => lower.includes(k));
-};
+// Sprint C13-bis C1 : matching STRICT sur property_type. Plus de fallback
+// title-matching (ex-matchTypeFromTitle supprime). Un bien sans
+// property_type renseigne est EXCLU des resultats si un filtre type est
+// applique — regle business Julien : pas de match accidentel sur le
+// titre (bug "bureau" matchant un appartement avec "bureau" dans le
+// libelle). Quand aucun filtre type n'est passe, tous les biens passent.
 
 const filterProperties = (
   list: PropertyWithCover[],
@@ -49,21 +35,12 @@ const filterProperties = (
       return false;
     if (filters.transaction && p.transaction !== filters.transaction) return false;
     if (filters.type) {
-      // Sprint C13 : 1) match strict sur property_type via les groupes
-      // d'equivalences (maison<->villa<->maison jumelee, appartement<->
-      // duplex<->penthouse<->studio<->triplex, terrain<->terrain
-      // constructible, etc.). 2) si property_type est null/vide ->
-      // fallback title-matching legacy pour ne pas perdre les biens mal
-      // renseignes par Apimo.
-      if (p.property_type) {
-        if (!matchesTypeQuery(p.property_type, filters.type)) return false;
-      } else {
-        const titles = [p.title_fr, p.title_en, p.title_de].filter(
-          Boolean,
-        ) as string[];
-        const ok = titles.some((t) => matchTypeFromTitle(t, filters.type!));
-        if (!ok) return false;
-      }
+      // Sprint C13-bis C1 : matching STRICT property_type uniquement.
+      // Si property_type est null/vide -> bien EXCLU des resultats
+      // (pas de fallback titre). matchesTypeQuery couvre les 5 groupes
+      // d'equivalences avec normalisation accents (cf. lib/property-types.ts).
+      if (!p.property_type) return false;
+      if (!matchesTypeQuery(p.property_type, filters.type)) return false;
     }
     if (filters.budget_max) {
       const max = Number(filters.budget_max);
