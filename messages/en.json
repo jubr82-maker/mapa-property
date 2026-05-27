@@ -106,7 +106,8 @@
     "ai_placeholder": "e.g. 3-bedroom penthouse with terrace in Belair, max 3 million",
     "ai_search": "AI Search",
     "ai_thinking": "Analysing…",
-    "ai_error": "An error occurred. Please retry or use manual mode."
+    "ai_error": "An error occurred. Please retry or use manual mode.",
+    "radius_cta": "{count, plural, =1 {1 property beyond 10 km} other {# properties beyond 10 km}} in the same country — Show all"
   },
   "featured": {
     "eyebrow": "Curated picks",

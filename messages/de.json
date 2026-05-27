@@ -106,7 +106,8 @@
     "ai_placeholder": "z.B. Penthouse mit 3 Zimmern und Terrasse in Belair, max. 3 Mio.",
     "ai_search": "KI-Suche",
     "ai_thinking": "Analysiere…",
-    "ai_error": "Ein Fehler ist aufgetreten. Bitte erneut versuchen oder den manuellen Modus verwenden."
+    "ai_error": "Ein Fehler ist aufgetreten. Bitte erneut versuchen oder den manuellen Modus verwenden.",
+    "radius_cta": "{count, plural, =1 {1 Objekt über 10 km entfernt} other {# Objekte über 10 km entfernt}} im selben Land — Alle anzeigen"
   },
   "featured": {
     "eyebrow": "Auswahl",

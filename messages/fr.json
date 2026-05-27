@@ -106,7 +106,8 @@
     "ai_placeholder": "Ex. : penthouse 3 chambres avec terrasse à Belair, max 3 millions",
     "ai_search": "Recherche IA",
     "ai_thinking": "Analyse…",
-    "ai_error": "Une erreur est survenue. Réessayez ou utilisez le mode manuel."
+    "ai_error": "Une erreur est survenue. Réessayez ou utilisez le mode manuel.",
+    "radius_cta": "{count, plural, =1 {1 bien à plus de 10 km} other {# biens à plus de 10 km}} dans le même pays — Voir tout"
   },
   "featured": {
     "eyebrow": "Coups de cœur",

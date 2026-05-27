@@ -2,9 +2,14 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchAllPropertiesWithCover, type PropertyWithCover } from "@/lib/data";
 import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
+import { RadiusCTA } from "@/components/search/RadiusCTA";
 import type { Locale } from "@/lib/types";
 import { matchesTypeQuery } from "@/lib/property-types";
 import { DEFAULT_COUNTRY, matchesCountry } from "@/lib/geo/countries";
+import {
+  getLocalityCoords,
+  haversineKm,
+} from "@/lib/geo/luxembourg-communes";
 
 interface SearchParams {
   country?: string;
@@ -14,7 +19,11 @@ interface SearchParams {
   budget_max?: string;
   min_bedrooms?: string;
   min_surface?: string;
+  // Sprint C13-bis C4 : bypass rayon 10km Luxembourg (CTA "voir tout").
+  showAll?: string;
 }
+
+const RADIUS_KM = 10;
 
 // Sprint C13-bis C1 : matching STRICT sur property_type. Plus de fallback
 // title-matching (ex-matchTypeFromTitle supprime). Un bien sans
@@ -82,7 +91,71 @@ export default async function PropertiesPage({
 
   const t = await getTranslations({ locale, namespace: "property_list" });
   const allProperties = await fetchAllPropertiesWithCover();
-  const filtered = filterProperties(allProperties, filters);
+
+  // Sprint C13-bis C4 : mode rayon 10 km active si :
+  //   1. country = LU
+  //   2. city saisie
+  //   3. getLocalityCoords(city) trouve un point (sinon fallback city LIKE
+  //      via filterProperties standard).
+  // En mode rayon, on IGNORE city LIKE (le rayon remplace), et on
+  // partitionne en within/beyond. showAll=true bypass le rayon.
+  const showAll = rawFilters.showAll === "true";
+  const cityCenter =
+    filters.country === DEFAULT_COUNTRY && filters.city
+      ? getLocalityCoords(filters.city)
+      : null;
+
+  let displayed: PropertyWithCover[];
+  let beyondCount = 0;
+  let radiusActive = false;
+
+  if (cityCenter) {
+    // Mode rayon : on ignore city LIKE (filterProperties sans city), on
+    // applique tous les autres filtres standards, puis on partitionne.
+    const noCity = filterProperties(allProperties, {
+      ...filters,
+      city: undefined,
+    });
+    if (showAll) {
+      // User a clique "voir tout" -> tous les biens du pays (sans rayon,
+      // sans city LIKE).
+      displayed = noCity;
+    } else {
+      const within: PropertyWithCover[] = [];
+      const beyond: PropertyWithCover[] = [];
+      for (const p of noCity) {
+        const target = p.city ? getLocalityCoords(p.city) : null;
+        if (!target) {
+          beyond.push(p);
+          continue;
+        }
+        const km = haversineKm(
+          cityCenter.lat,
+          cityCenter.lng,
+          target.lat,
+          target.lng,
+        );
+        if (km <= RADIUS_KM) within.push(p);
+        else beyond.push(p);
+      }
+      displayed = within;
+      beyondCount = beyond.length;
+      radiusActive = true;
+    }
+  } else {
+    // Mode normal : pays != LU OU pas de city OU city inconnue dans
+    // GeoNames LU. city LIKE applique via filterProperties standard.
+    displayed = filterProperties(allProperties, filters);
+  }
+
+  // URL pour le CTA "voir tout" : preserve les filtres + showAll=true.
+  const showAllParams = new URLSearchParams();
+  for (const [k, v] of Object.entries(rawFilters)) {
+    if (v) showAllParams.set(k, v);
+  }
+  showAllParams.set("country", filters.country ?? DEFAULT_COUNTRY);
+  showAllParams.set("showAll", "true");
+  const showAllHref = `/biens?${showAllParams.toString()}`;
 
   return (
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
@@ -101,11 +174,20 @@ export default async function PropertiesPage({
 
         <div className="mt-10 mb-6 flex items-baseline justify-between">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-soft">
-            {filtered.length} {filtered.length > 1 ? t("results") : t("result")}
+            {displayed.length}{" "}
+            {displayed.length > 1 ? t("results") : t("result")}
           </p>
         </div>
 
-        <PropertyGrid properties={filtered} locale={locale as Locale} />
+        <PropertyGrid properties={displayed} locale={locale as Locale} />
+
+        {radiusActive && beyondCount > 0 && (
+          <RadiusCTA
+            count={beyondCount}
+            locale={locale}
+            showAllHref={showAllHref}
+          />
+        )}
       </div>
     </div>
   );
