@@ -2,12 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getDefaultGreeting } from "./chatbot-knowledge";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+}
+
+// Sprint ELENA-NAV C2 — intent navigate emis par l'API chatbot.
+interface NavigateIntent {
+  action: "navigate";
+  url: string;
 }
 
 const COOKIE_NAME = "elena_dismissed";
@@ -39,6 +45,7 @@ const derivePageContext = (path: string): string => {
 export function ChatbotWidget() {
   const locale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
   const pageContext = derivePageContext(pathname);
 
   const [open, setOpen] = useState(false);
@@ -105,9 +112,23 @@ export function ChatbotWidget() {
           pageContext,
         }),
       });
-      const json = await res.json();
+      const json = (await res.json()) as {
+        reply?: string;
+        intent?: NavigateIntent | null;
+      };
       const reply = json?.reply ?? "—";
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      // Sprint ELENA-NAV C2 — navigation declenchee par l'intent LLM.
+      // Delay 900ms pour laisser le temps de voir le message + scroll.
+      if (
+        json?.intent &&
+        json.intent.action === "navigate" &&
+        typeof json.intent.url === "string" &&
+        json.intent.url.startsWith("/")
+      ) {
+        const target = json.intent.url;
+        setTimeout(() => router.push(target), 900);
+      }
     } catch {
       setMessages((prev) => [
         ...prev,

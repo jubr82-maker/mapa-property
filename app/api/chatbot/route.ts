@@ -14,6 +14,57 @@ interface RequestBody {
   pageContext?: string;
 }
 
+interface NavigateIntent {
+  action: "navigate";
+  url: string;
+}
+
+// Sprint ELENA-NAV C2 — parse la reponse LLM en JSON strict {message, intent}.
+// Robuste : si parse fail OR structure invalide -> retourne le texte tel
+// quel comme message + intent=null. Validation URL : doit etre un path
+// relatif (commence par "/") pour eviter open redirect.
+function parseAssistantReply(
+  raw: string,
+): { message: string; intent: NavigateIntent | null } {
+  if (!raw) return { message: "", intent: null };
+  let parsed: unknown;
+  try {
+    // Tolere les wrappers markdown ```json ... ``` que Mistral ajoute
+    // parfois malgre le system prompt.
+    const stripped = raw
+      .trim()
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
+    parsed = JSON.parse(stripped);
+  } catch {
+    return { message: raw, intent: null };
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    typeof (parsed as { message?: unknown }).message !== "string"
+  ) {
+    return { message: raw, intent: null };
+  }
+  const obj = parsed as { message: string; intent?: unknown };
+  let intent: NavigateIntent | null = null;
+  if (
+    obj.intent &&
+    typeof obj.intent === "object" &&
+    (obj.intent as { action?: unknown }).action === "navigate" &&
+    typeof (obj.intent as { url?: unknown }).url === "string" &&
+    ((obj.intent as { url: string }).url.startsWith("/") ||
+      (obj.intent as { url: string }).url.startsWith("./"))
+  ) {
+    intent = {
+      action: "navigate",
+      url: (obj.intent as { url: string }).url,
+    };
+  }
+  return { message: obj.message, intent };
+}
+
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 const PHONE_RE = /(\+\d{1,3}[\s.-]?)?(\(?\d{2,4}\)?[\s.-]?){2,4}\d{2,4}/;
 
@@ -163,7 +214,9 @@ export async function POST(req: Request) {
   // Auto-lead detection (background, fire-and-forget)
   void tryAutoLead(messages, locale, pageContext);
 
-  return NextResponse.json({ reply });
+  // Sprint ELENA-NAV C2 — extraction message + intent du JSON LLM.
+  const { message, intent } = parseAssistantReply(reply);
+  return NextResponse.json({ reply: message, intent });
 }
 
 export const dynamic = "force-dynamic";

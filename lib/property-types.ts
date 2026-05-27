@@ -94,18 +94,20 @@ export const TYPE_GROUPS = {
 
 export type TypeGroup = keyof typeof TYPE_GROUPS;
 
-// Sprint C13-ter — normalisation enrichie :
+// Sprint C13-ter + ELENA-NAV C2 — normalisation enrichie :
 // - lowercase + trim
 // - NFD strip diacritiques (accents)
 // - apostrophes typographiques (U+2019 et U+2018) -> ASCII (U+0027)
-// - tirets/underscores -> espace (defense lookup)
+// - underscores -> espace (permet à Eléna d'émettre des URLs propres
+//   avec clés catalog ?types=maison_jumelee qui matchent 'Maison jumelée')
 const norm = (s: string | null | undefined): string =>
   (s ?? "")
     .trim()
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
-    .replace(/[‘’]/g, "'");
+    .replace(/[‘’]/g, "'")
+    .replace(/_/g, " ");
 
 /**
  * Groupe d'un type (ex. "villa" → "house", "studio" → "apartment").
