@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { getDefaultGreeting } from "./chatbot-knowledge";
 
@@ -44,6 +44,7 @@ const derivePageContext = (path: string): string => {
 
 export function ChatbotWidget() {
   const locale = useLocale();
+  const t = useTranslations("chatbot");
   const pathname = usePathname();
   const router = useRouter();
   const pageContext = derivePageContext(pathname);
@@ -258,6 +259,14 @@ export function ChatbotWidget() {
               </svg>
             </button>
           </form>
+          {/* Sprint ELENA-NAV C3 — disclaimer legal permanent. Discret
+              (text-[10px] + opacity-60) pour ne pas distraire mais
+              toujours visible. */}
+          <div className="border-t border-line bg-bg-soft px-4 py-2">
+            <p className="text-[10px] leading-snug text-ink-soft opacity-70">
+              {t("legal_disclaimer")}
+            </p>
+          </div>
         </div>
       </div>
     </>

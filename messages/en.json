@@ -1150,5 +1150,8 @@
       "p2": "MAPA Property accepts no liability for any use that may be made of this information, for decisions taken on its basis, or for any discrepancies with market reality or the user's individual situation.",
       "p3": "This data does not constitute financial, tax, legal or notarial advice. For any concrete transaction, consult the relevant professionals: notary (authentic deed, inheritance, matrimonial regime), bank or licensed credit broker (financing), tax adviser (taxation, capital gains), lawyer (legal advice)."
     }
+  },
+  "chatbot": {
+    "legal_disclaimer": "Information provided by Eléna is for informational purposes only and non-contractual. MAPA Property — a brand of MAPA Synergy Sàrl — cannot be held responsible for any decision based on this information. For confirmation: j.brebion@mapagroup.org / +352 691 620 127"
   }
 }
