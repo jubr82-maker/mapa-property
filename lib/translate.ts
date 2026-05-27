@@ -61,20 +61,35 @@ export async function translateText(
     throw new Error("[translate] MISTRAL_API_KEY missing in environment");
   }
 
-  // Sprint HTML-RENDERING C1 : prompt renforce pour preservation HTML
-  // stricte. Apimo livre certaines descriptions en HTML, et la mise en
-  // page FR doit etre conservee a l'identique en EN/DE (regle business
-  // Julien : FR = source de verite, EN/DE heritent du formatage FR).
+  // Sprint OPTIM-1B C1 : prompt renforce FIDELITE LITTERALE STRICTE.
+  // Probleme constate sur OFF-2026-001 : Mistral resumait la description
+  // FR (30 lignes : processus 5 etapes, contacts, multilingue, www) en
+  // EN/DE de ~10 lignes — processus/contacts/www SUPPRIMES. Cause : prompt
+  // precedent (Sprint HTML-RENDERING) focalise HTML uniquement, aucune
+  // instruction de longueur/fidelite -> Mistral defaut "smart summarize".
+  //
+  // Regle business Julien : FR = source de verite, EN/DE doivent etre
+  // une traduction LITTERALE phrase par phrase, meme nombre de paragraphes,
+  // longueur ~equivalente (+/-15%).
   const systemPrompt = `You are a professional translator specialized in luxury real estate.
 Translate the given ${LANG_NAME[sourceLang]} text to ${LANG_NAME[targetLang]}.
 
-CRITICAL RULES — HTML preservation:
-1. If the input contains HTML tags, preserve EVERY tag exactly as-is: <p>, </p>, <br>, <strong>, </strong>, <em>, </em>, <ul>, </ul>, <ol>, </ol>, <li>, </li>, <b>, </b>, <i>, </i>.
-2. DO NOT add new HTML tags that are not in the input.
-3. DO NOT remove existing HTML tags.
-4. Translate ONLY the text content between tags.
-5. Preserve all line breaks (\\n) and spacing.
-6. Return ONLY the translation. No preamble, no quotes, no markdown, no explanations.`;
+CRITICAL RULES — STRICT LITERAL TRANSLATION:
+1. Translate LITERALLY, sentence by sentence. DO NOT summarize. DO NOT condense. DO NOT paraphrase. DO NOT abridge.
+2. Preserve EVERY paragraph, EVERY line, EVERY bullet point, EVERY sentence in the EXACT same order.
+3. The translated text MUST have the same number of paragraphs as the input.
+4. The translated text MUST have approximately the same length as the input (within 15% tolerance).
+5. DO NOT omit any information, even if it seems redundant or repetitive.
+6. DO NOT invent or add content not present in the input.
+7. Preserve all proper nouns exactly (names, brands, places, URLs, email addresses, phone numbers).
+
+HTML PRESERVATION (if input contains HTML tags):
+8. Preserve EVERY HTML tag exactly as-is: <p>, </p>, <br>, <strong>, </strong>, <em>, </em>, <ul>, </ul>, <ol>, </ol>, <li>, </li>, <b>, </b>, <i>, </i>.
+9. DO NOT add new HTML tags. DO NOT remove existing ones.
+10. Translate ONLY the text content between tags.
+
+OUTPUT:
+11. Return ONLY the translation. No preamble, no quotes, no markdown, no explanations, no 'Here is the translation' prefix.`;
 
   const res = await fetch(MISTRAL_ENDPOINT, {
     method: "POST",
