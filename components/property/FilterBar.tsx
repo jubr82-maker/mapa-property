@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useState, useTransition, useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
+import { DEFAULT_COUNTRY, sortedCountries } from "@/lib/geo/countries";
 
 const transactions = ["sale", "rent", "offmarket"] as const;
 const types = [
@@ -19,21 +20,27 @@ const types = [
 export function FilterBar() {
   const t = useTranslations("property_list");
   const tSearch = useTranslations("search");
+  const locale = useLocale();
   const router = useRouter();
   const params = useSearchParams();
   const [, startTransition] = useTransition();
 
-  const [country, setCountry] = useState(params.get("country") ?? "");
+  // Sprint C13-bis C2 : pays obligatoire, default Luxembourg (LU).
+  // Dropdown alimente par la liste ISO 3166-1 complete (195 pays) via
+  // sortedCountries(locale) — top 20 affaires en premier.
+  const [country, setCountry] = useState(params.get("country") ?? DEFAULT_COUNTRY);
   const [city, setCity] = useState(params.get("city") ?? "");
   const [type, setType] = useState(params.get("type") ?? "");
   const [transaction, setTransaction] = useState(params.get("transaction") ?? "");
   const [budget, setBudget] = useState(params.get("budget_max") ?? "");
   const [bedrooms, setBedrooms] = useState(params.get("min_bedrooms") ?? "");
 
+  const countries = useMemo(() => sortedCountries(locale), [locale]);
+
   // Sync state when URL changes externally (e.g. user clicks suggested filter elsewhere)
   /* eslint-disable react-hooks/set-state-in-effect -- intentional: external URL → form state sync */
   useEffect(() => {
-    setCountry(params.get("country") ?? "");
+    setCountry(params.get("country") ?? DEFAULT_COUNTRY);
     setCity(params.get("city") ?? "");
     setType(params.get("type") ?? "");
     setTransaction(params.get("transaction") ?? "");
@@ -44,25 +51,26 @@ export function FilterBar() {
 
   const apply = () => {
     const sp = new URLSearchParams();
-    if (country) sp.set("country", country);
+    // Sprint C13-bis C2 : country toujours present dans l'URL (defaut LU).
+    sp.set("country", country || DEFAULT_COUNTRY);
     if (city.trim()) sp.set("city", city.trim());
     if (type) sp.set("type", type);
     if (transaction) sp.set("transaction", transaction);
     if (budget) sp.set("budget_max", budget);
     if (bedrooms) sp.set("min_bedrooms", bedrooms);
     startTransition(() => {
-      router.replace(`/biens${sp.toString() ? `?${sp.toString()}` : ""}`);
+      router.replace(`/biens?${sp.toString()}`);
     });
   };
 
   const reset = () => {
-    setCountry("");
+    setCountry(DEFAULT_COUNTRY);
     setCity("");
     setType("");
     setTransaction("");
     setBudget("");
     setBedrooms("");
-    startTransition(() => router.replace("/biens"));
+    startTransition(() => router.replace(`/biens?country=${DEFAULT_COUNTRY}`));
   };
 
   return (
@@ -75,19 +83,20 @@ export function FilterBar() {
     >
       <div className="grid gap-3 lg:grid-cols-[120px_minmax(180px,1fr)_140px_140px_160px_120px_auto_auto]">
         <Field label={tSearch("country")}>
+          {/* Sprint C13-bis C2 : pays obligatoire (pas d'option vide),
+              defaut Luxembourg, liste ISO 3166-1 complete (195 pays)
+              via Intl.DisplayNames pour les labels localises. */}
           <select
             value={country}
             onChange={(e) => setCountry(e.target.value)}
             className="w-full rounded-md border border-line bg-bg px-3 py-2 text-sm focus:border-gold focus:outline-none"
+            required
           >
-            <option value="">{tSearch("any")}</option>
-            {["LU", "FR", "BE", "DE", "CH", "MC", "ES", "PT", "IT", "AE"].map(
-              (c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ),
-            )}
+            {countries.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.label}
+              </option>
+            ))}
           </select>
         </Field>
         <Field label={tSearch("city")}>

@@ -4,6 +4,7 @@ import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import type { Locale } from "@/lib/types";
 import { matchesTypeQuery } from "@/lib/property-types";
+import { DEFAULT_COUNTRY, matchesCountry } from "@/lib/geo/countries";
 
 interface SearchParams {
   country?: string;
@@ -27,7 +28,10 @@ const filterProperties = (
   filters: SearchParams,
 ): PropertyWithCover[] => {
   return list.filter((p) => {
-    if (filters.country && p.country !== filters.country) return false;
+    // Sprint C13-bis C2 : country toujours present (defaut LU applique
+    // dans le caller). matchesCountry tolere les formats heterogenes :
+    // 'LU' (offmarket) ou 'Luxembourg' (Apimo nom FR via Intl.DisplayNames).
+    if (!matchesCountry(p.country, filters.country)) return false;
     if (
       filters.city &&
       !(p.city ?? "").toLowerCase().includes(filters.city.toLowerCase())
@@ -66,8 +70,15 @@ export default async function PropertiesPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { locale } = await params;
-  const filters = await searchParams;
+  const rawFilters = await searchParams;
   setRequestLocale(locale);
+
+  // Sprint C13-bis C2 : pays obligatoire — defaut Luxembourg si absent
+  // de l'URL. Garde-fou si le user arrive sur /biens sans query string.
+  const filters: SearchParams = {
+    ...rawFilters,
+    country: rawFilters.country || DEFAULT_COUNTRY,
+  };
 
   const t = await getTranslations({ locale, namespace: "property_list" });
   const allProperties = await fetchAllPropertiesWithCover();

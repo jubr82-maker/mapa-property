@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { DEFAULT_COUNTRY, sortedCountries } from "@/lib/geo/countries";
 
 const propertyTypes = [
   "appartement",
@@ -14,14 +15,13 @@ const propertyTypes = [
   "terrain",
 ] as const;
 
-const countries = ["LU", "FR", "BE", "DE", "CH", "MC", "ES", "PT", "IT", "AE"] as const;
-
 const budgetSteps = [
   500_000, 750_000, 1_000_000, 1_500_000, 2_000_000, 3_000_000, 5_000_000, 10_000_000,
 ] as const;
 
 export function SearchBar() {
   const t = useTranslations("search");
+  const locale = useLocale();
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [mode, setMode] = useState<"manual" | "ai">("manual");
@@ -29,11 +29,15 @@ export function SearchBar() {
   const [aiPending, setAiPending] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
-  const [country, setCountry] = useState("LU");
+  // Sprint C13-bis C2 : pays obligatoire, defaut Luxembourg, liste ISO
+  // complete via Intl.DisplayNames pour les labels localises.
+  const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [city, setCity] = useState("");
   const [type, setType] = useState("");
   const [budget, setBudget] = useState("");
   const [bedrooms, setBedrooms] = useState("");
+
+  const countries = useMemo(() => sortedCountries(locale), [locale]);
 
   // Pick default mode based on viewport on mount
   useEffect(() => {
@@ -45,7 +49,8 @@ export function SearchBar() {
   const submitManual = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    if (country) params.set("country", country);
+    // Sprint C13-bis C2 : country toujours present (defaut LU).
+    params.set("country", country || DEFAULT_COUNTRY);
     if (city.trim()) params.set("city", city.trim());
     if (type) params.set("type", type);
     if (budget) params.set("budget_max", budget);
@@ -118,7 +123,10 @@ export function SearchBar() {
                   label={t("country")}
                   value={country}
                   onChange={setCountry}
-                  options={countries.map((c) => ({ value: c, label: c }))}
+                  options={countries.map((c) => ({
+                    value: c.code,
+                    label: c.label,
+                  }))}
                 />
                 <Input
                   label={t("city")}
