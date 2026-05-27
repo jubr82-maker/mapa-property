@@ -8,6 +8,12 @@
 //                  actuelles, calcule les ratios EN/FR et DE/FR. Flag
 //                  les biens suspects (ratio <70% ou >130%). AUCUN
 //                  appel Mistral, AUCUN UPDATE DB.
+//   --fill-missing Ciblee : traduit UNIQUEMENT les langues vides
+//                  (description_en ou description_de absent / chaine
+//                  vide). Skip si EN et DE sont tous deux remplis,
+//                  peu importe leur ratio. Cas d'usage : combler les
+//                  trous DE post-OPTIM-1B sans retraduire les langues
+//                  saines (economie de quota Mistral).
 //   --force        Re-genere TOUT (tout bien avec description_fr).
 //                  Ignore le check HTML. Backup AVANT dans /tmp, log
 //                  ratio temps reel. UPDATE DB.
@@ -25,9 +31,10 @@
 //   - NEXT_PUBLIC_SUPABASE_URL
 //
 // Usage :
-//   pnpm tsx scripts/regen-apimo-descriptions.mjs               (conditionnel)
-//   pnpm tsx scripts/regen-apimo-descriptions.mjs --force-dry   (DRY-RUN)
-//   pnpm tsx scripts/regen-apimo-descriptions.mjs --force       (regenere tout)
+//   pnpm tsx scripts/regen-apimo-descriptions.mjs                  (conditionnel)
+//   pnpm tsx scripts/regen-apimo-descriptions.mjs --force-dry      (DRY-RUN)
+//   pnpm tsx scripts/regen-apimo-descriptions.mjs --fill-missing   (langues vides only)
+//   pnpm tsx scripts/regen-apimo-descriptions.mjs --force          (regenere tout)
 //
 // Rate limit : 800ms entre 2 calls Mistral.
 
@@ -48,8 +55,15 @@ const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY;
 // CLI parsing
 const ARGS = new Set(process.argv.slice(2));
 const FORCE_DRY = ARGS.has("--force-dry");
-const FORCE = ARGS.has("--force") && !FORCE_DRY;
-const MODE = FORCE_DRY ? "force-dry" : FORCE ? "force" : "conditional";
+const FILL_MISSING = ARGS.has("--fill-missing") && !FORCE_DRY;
+const FORCE = ARGS.has("--force") && !FORCE_DRY && !FILL_MISSING;
+const MODE = FORCE_DRY
+  ? "force-dry"
+  : FILL_MISSING
+    ? "fill-missing"
+    : FORCE
+      ? "force"
+      : "conditional";
 
 const RATE_LIMIT_MS = 800;
 const RATIO_LOW = 0.7;
@@ -149,8 +163,9 @@ async function main() {
     return;
   }
 
-  // ============== MODES conditional + force ==============
-  if (MODE === "force") {
+  // ============== MODES conditional + fill-missing + force ==============
+  // Backup AVANT mutation pour fill-missing et force.
+  if (MODE === "force" || MODE === "fill-missing") {
     const TS = new Date().toISOString().replace(/[:.]/g, "-");
     const BACKUP_PATH = `/tmp/backup-translations-apimo-${TS}.json`;
     const backup = rows.map((r) => ({
@@ -170,6 +185,7 @@ async function main() {
   let skippedNoFr = 0;
   let skippedNoFrHtml = 0;
   let skippedAlreadyCoherent = 0;
+  let skippedAllFilled = 0;
   let errors = 0;
   let suspectOutputs = 0;
 
@@ -204,12 +220,27 @@ async function main() {
       }
     }
 
+    // En mode fill-missing : skip si EN et DE sont tous deux remplis.
+    if (MODE === "fill-missing") {
+      const enFilled = len(row.description_en) > 0;
+      const deFilled = len(row.description_de) > 0;
+      if (enFilled && deFilled) {
+        skippedAllFilled++;
+        continue; // silencieux
+      }
+    }
+
     const update = {};
-    // En mode force : on regenere EN et DE systematiquement. En mode
-    // conditional : seulement les langues qui ne sont pas HTML.
+    // Selection des langues cibles selon le mode :
+    //   force        : EN + DE systematiquement
+    //   fill-missing : uniquement les langues vides (length 0)
+    //   conditional  : uniquement les langues non-HTML (heritage HTML)
     const targets = [];
     if (MODE === "force") {
       targets.push("EN", "DE");
+    } else if (MODE === "fill-missing") {
+      if (len(row.description_en) === 0) targets.push("EN");
+      if (len(row.description_de) === 0) targets.push("DE");
     } else {
       if (!hasHtml(row.description_en)) targets.push("EN");
       if (!hasHtml(row.description_de)) targets.push("DE");
@@ -278,6 +309,7 @@ async function main() {
   console.log(`Skipped (no FR)             : ${skippedNoFr}`);
   console.log(`Skipped (FR pas HTML)       : ${skippedNoFrHtml}`);
   console.log(`Skipped (deja coherent)     : ${skippedAlreadyCoherent}`);
+  console.log(`Skipped (EN+DE deja remplis): ${skippedAllFilled}`);
   console.log(`Suspect outputs             : ${suspectOutputs} (ratio <${RATIO_LOW * 100}% ou >${RATIO_HIGH * 100}%)`);
   console.log(`Errors                      : ${errors}`);
   console.log("=============================\n");
