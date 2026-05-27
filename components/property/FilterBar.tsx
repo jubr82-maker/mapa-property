@@ -5,17 +5,22 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { DEFAULT_COUNTRY, sortedCountries } from "@/lib/geo/countries";
+import { TypeFilterMultiSelect } from "@/components/property/TypeFilterMultiSelect";
 
 const transactions = ["sale", "rent", "offmarket"] as const;
-const types = [
-  "appartement",
-  "maison",
-  "penthouse",
-  "duplex",
-  "villa",
-  "immeuble",
-  "terrain",
-] as const;
+
+// Sprint C13-ter — URL param 'types' (comma-separated). Helpers de
+// parse / stringify pour la rétro-compat avec l'ancien 'type' single.
+function parseTypesParam(
+  paramTypes: string | null,
+  paramTypeLegacy: string | null,
+): string[] {
+  const src = paramTypes ?? paramTypeLegacy ?? "";
+  return src
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 export function FilterBar() {
   const t = useTranslations("property_list");
@@ -30,7 +35,11 @@ export function FilterBar() {
   // sortedCountries(locale) — top 20 affaires en premier.
   const [country, setCountry] = useState(params.get("country") ?? DEFAULT_COUNTRY);
   const [city, setCity] = useState(params.get("city") ?? "");
-  const [type, setType] = useState(params.get("type") ?? "");
+  // Sprint C13-ter : multi-select (array). Lit ?types= (nouveau) ou
+  // ?type= (legacy single, rétro-compat). Aucune case cochée par défaut.
+  const [types, setTypes] = useState<string[]>(
+    parseTypesParam(params.get("types"), params.get("type")),
+  );
   const [transaction, setTransaction] = useState(params.get("transaction") ?? "");
   const [budget, setBudget] = useState(params.get("budget_max") ?? "");
   const [bedrooms, setBedrooms] = useState(params.get("min_bedrooms") ?? "");
@@ -42,7 +51,7 @@ export function FilterBar() {
   useEffect(() => {
     setCountry(params.get("country") ?? DEFAULT_COUNTRY);
     setCity(params.get("city") ?? "");
-    setType(params.get("type") ?? "");
+    setTypes(parseTypesParam(params.get("types"), params.get("type")));
     setTransaction(params.get("transaction") ?? "");
     setBudget(params.get("budget_max") ?? "");
     setBedrooms(params.get("min_bedrooms") ?? "");
@@ -51,10 +60,10 @@ export function FilterBar() {
 
   const apply = () => {
     const sp = new URLSearchParams();
-    // Sprint C13-bis C2 : country toujours present dans l'URL (defaut LU).
     sp.set("country", country || DEFAULT_COUNTRY);
     if (city.trim()) sp.set("city", city.trim());
-    if (type) sp.set("type", type);
+    // Sprint C13-ter : url types= seulement si au moins 1 case cochée.
+    if (types.length > 0) sp.set("types", types.join(","));
     if (transaction) sp.set("transaction", transaction);
     if (budget) sp.set("budget_max", budget);
     if (bedrooms) sp.set("min_bedrooms", bedrooms);
@@ -66,7 +75,7 @@ export function FilterBar() {
   const reset = () => {
     setCountry(DEFAULT_COUNTRY);
     setCity("");
-    setType("");
+    setTypes([]);
     setTransaction("");
     setBudget("");
     setBedrooms("");
@@ -122,20 +131,12 @@ export function FilterBar() {
             ))}
           </select>
         </Field>
-        <Field label={tSearch("type")}>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="w-full rounded-md border border-line bg-bg px-3 py-2 text-sm focus:border-gold focus:outline-none"
-          >
-            <option value="">{tSearch("all_types")}</option>
-            {types.map((p) => (
-              <option key={p} value={p}>
-                {tSearch(`type_${p}`)}
-              </option>
-            ))}
-          </select>
-        </Field>
+        {/* Sprint C13-ter : multi-select 2 niveaux via Radix UI.
+            Hors du <label> wrapper Field car le composant gère son propre
+            trigger button + label. */}
+        <div className="flex flex-col gap-1">
+          <TypeFilterMultiSelect value={types} onChange={setTypes} />
+        </div>
         <Field label={tSearch("budget_max")}>
           <input
             type="number"

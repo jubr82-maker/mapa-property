@@ -4,16 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY, sortedCountries } from "@/lib/geo/countries";
-
-const propertyTypes = [
-  "appartement",
-  "maison",
-  "penthouse",
-  "duplex",
-  "villa",
-  "immeuble",
-  "terrain",
-] as const;
+import { TypeFilterMultiSelect } from "@/components/property/TypeFilterMultiSelect";
 
 const budgetSteps = [
   500_000, 750_000, 1_000_000, 1_500_000, 2_000_000, 3_000_000, 5_000_000, 10_000_000,
@@ -33,7 +24,8 @@ export function SearchBar() {
   // complete via Intl.DisplayNames pour les labels localises.
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [city, setCity] = useState("");
-  const [type, setType] = useState("");
+  // Sprint C13-ter : multi-select types (array de valeurs de match).
+  const [types, setTypes] = useState<string[]>([]);
   const [budget, setBudget] = useState("");
   const [bedrooms, setBedrooms] = useState("");
 
@@ -52,7 +44,8 @@ export function SearchBar() {
     // Sprint C13-bis C2 : country toujours present (defaut LU).
     params.set("country", country || DEFAULT_COUNTRY);
     if (city.trim()) params.set("city", city.trim());
-    if (type) params.set("type", type);
+    // Sprint C13-ter : multi-select types (comma-separated dans l'URL).
+    if (types.length > 0) params.set("types", types.join(","));
     if (budget) params.set("budget_max", budget);
     if (bedrooms) params.set("min_bedrooms", bedrooms);
     startTransition(() => {
@@ -134,18 +127,10 @@ export function SearchBar() {
                   onChange={setCity}
                   placeholder={t("city_ph")}
                 />
-                <Select
-                  label={t("type")}
-                  value={type}
-                  onChange={setType}
-                  options={[
-                    { value: "", label: t("all_types") },
-                    ...propertyTypes.map((p) => ({
-                      value: p,
-                      label: t(`type_${p}`),
-                    })),
-                  ]}
-                />
+                {/* Sprint C13-ter : multi-select 2 niveaux Radix. */}
+                <div className="flex flex-col gap-1">
+                  <TypeFilterMultiSelect value={types} onChange={setTypes} />
+                </div>
                 <Select
                   label={t("budget_max")}
                   value={budget}

@@ -14,6 +14,10 @@ import {
 interface SearchParams {
   country?: string;
   city?: string;
+  // Sprint C13-ter : multi-select types (comma-separated, ex.
+  // ?types=studio,villa,bureau). 'type' legacy single conserve pour
+  // retro-compat (cf. parseTypesFilter ci-dessous).
+  types?: string;
   type?: string;
   transaction?: string;
   budget_max?: string;
@@ -21,6 +25,19 @@ interface SearchParams {
   min_surface?: string;
   // Sprint C13-bis C4 : bypass rayon 10km Luxembourg (CTA "voir tout").
   showAll?: string;
+}
+
+/**
+ * Sprint C13-ter — Resolu la liste des types coches depuis l'URL.
+ * Priorite : ?types= (nouveau) > ?type= (legacy single). Retourne
+ * une chaine vide -> [] -> pas de filtre.
+ */
+function parseTypesFilter(filters: SearchParams): string[] {
+  const src = filters.types ?? filters.type ?? "";
+  return src
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 const RADIUS_KM = 10;
@@ -47,13 +64,14 @@ const filterProperties = (
     )
       return false;
     if (filters.transaction && p.transaction !== filters.transaction) return false;
-    if (filters.type) {
-      // Sprint C13-bis C1 : matching STRICT property_type uniquement.
-      // Si property_type est null/vide -> bien EXCLU des resultats
-      // (pas de fallback titre). matchesTypeQuery couvre les 5 groupes
-      // d'equivalences avec normalisation accents (cf. lib/property-types.ts).
+    // Sprint C13-ter : multi-select string[]. matchesTypeQuery(array)
+    // applique strict OR (aucun expand groupe). Si types est vide ->
+    // pas de filtre. Si types non-vide ET property_type null -> bien
+    // EXCLU (contrat strict C13-bis C1, anti-régression fallback titre).
+    const typesFilter = parseTypesFilter(filters);
+    if (typesFilter.length > 0) {
       if (!p.property_type) return false;
-      if (!matchesTypeQuery(p.property_type, filters.type)) return false;
+      if (!matchesTypeQuery(p.property_type, typesFilter)) return false;
     }
     if (filters.budget_max) {
       const max = Number(filters.budget_max);
