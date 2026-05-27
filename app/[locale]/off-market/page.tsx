@@ -5,6 +5,14 @@ import type { PropertyOffmarket } from "@/lib/types";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 import { PropertyPrice } from "@/components/property/PropertyPrice";
 
+// Sprint OPTIM-1B : ISR 30 min. Page liste off-market — fetch
+// fetchOffmarketList(locale) via VIEW Supabase. Sans revalidate explicite,
+// Next.js 16 considere la page Dynamic (Supabase fetch non-cache) ->
+// rendering a chaque visite -> writes ISR Vercel. Avec revalidate: 1800,
+// max 1 write / 30 min par locale. Invalidation immediate apres save admin
+// via revalidatePath("/fr/off-market") dans app/admin/offmarket/actions.ts.
+export const revalidate = 1800;
+
 export default async function OffMarketListPage({
   params,
 }: {

@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { fetchOffmarketById } from "@/lib/data";
+import { fetchOffmarketById, fetchOffmarketList } from "@/lib/data";
+import { routing } from "@/i18n/routing";
 import { BackButton } from "@/components/ui/BackButton";
 import { NDAForm } from "@/components/forms/NDAForm";
 import { FavoriteHeart } from "@/components/property/FavoriteHeart";
@@ -29,6 +30,36 @@ import { highlightTitles } from "@/lib/formatting/highlightTitles";
 // Spécificités off-market : cover OffmarketPlaceholder (jamais le visuel
 // réel — BUG 2), onglet "Conditions de vente" → "Processus d'accès au
 // dossier", formulaire bas = NDA "Accéder au dossier complet".
+
+// Sprint OPTIM-1B : ISR 30 min sur les fiches off-market (vs Dynamic
+// rendering avant -> chaque visite = write ISR). Pre-build via
+// generateStaticParams ci-dessous. Les biens off-market changent
+// rarement (titre/description/prix edites depuis admin invalident deja
+// /fr/off-market/[id] via revalidatePath dans app/admin/offmarket/actions.ts).
+export const revalidate = 1800;
+
+/**
+ * Sprint OPTIM-1B : pre-build des fiches off-market publiees pour les 3
+ * locales. fetchOffmarketList filtre deja is_published=true via la VIEW
+ * properties_offmarket_public. En cas d'erreur fetch au build (Supabase
+ * down), retourne [] -> Next bascule en dynamic rendering par defaut, le
+ * site reste up. Reseau dynamicParams (default true) permet aussi aux
+ * nouveaux ids non-buildes de devenir ISR a la 1ere visite.
+ */
+export async function generateStaticParams() {
+  try {
+    const list = await fetchOffmarketList();
+    const ids = list
+      .map((p) => p.id)
+      .filter((id): id is string => typeof id === "string" && id.length > 0);
+    return routing.locales.flatMap((locale) =>
+      ids.map((id) => ({ locale, id })),
+    );
+  } catch (e) {
+    console.warn("[off-market/[id]] generateStaticParams failed:", e);
+    return [];
+  }
+}
 
 export default async function OffMarketDetailPage({
   params,
