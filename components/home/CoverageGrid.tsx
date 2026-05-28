@@ -59,7 +59,7 @@ export function CoverageGrid() {
           {typologies.map((typo, idx) => {
             const isFlipped = isMobile && expandedKey === typo.key;
             return (
-              <FadeInOnScroll key={typo.key} delay={idx * 600} y={30}>
+              <FadeInOnScroll key={typo.key} delay={idx * 200} y={30}>
               <HoverFlipCard
                 height="h-40 sm:h-52 md:h-64"
                 flipped={isMobile ? expandedKey === typo.key : undefined}

@@ -68,7 +68,9 @@ export function MandatesGrid() {
         entries.forEach((entry) => {
           if (!entry.isIntersecting || triggeredRef.current) return;
           triggeredRef.current = true;
-          // 3s d'attente apres apparition
+          // Sprint UI-MAI : attente 1500ms (vs 3000ms) et stagger 150ms
+          // (vs 200ms) -> demarrage flip ~2x plus rapide pour tempo home
+          // homogene.
           window.setTimeout(() => {
             middleMandates.forEach((m, i) => {
               window.setTimeout(() => {
@@ -78,9 +80,9 @@ export function MandatesGrid() {
                 window.setTimeout(() => {
                   setFlipped((prev) => ({ ...prev, [m.key]: false }));
                 }, 1000);
-              }, i * 200);
+              }, i * 150);
             });
-          }, 3000);
+          }, 1500);
         });
       },
       { threshold: 0.5 },

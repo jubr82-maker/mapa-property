@@ -25,9 +25,10 @@ export function ProcessTable() {
           role="list"
           className="grid divide-y divide-line border-y border-line lg:grid-cols-3 lg:divide-x lg:divide-y-0"
         >
-          {/* STEP3c-1 : slide-up stagger 400ms par etape (ralenti cinematique). */}
+          {/* Sprint UI-MAI : stagger 150ms par etape (vs 400ms — accelere
+              x2.7 pour un tempo coherent avec les autres sections home). */}
           {steps.map((s, idx) => (
-            <FadeInOnScroll key={s} delay={idx * 400} y={40}>
+            <FadeInOnScroll key={s} delay={idx * 150} y={40}>
               <div
                 role="listitem"
                 className="grid grid-cols-[auto_1fr] items-baseline gap-x-4 gap-y-1 py-4 md:flex md:flex-col md:gap-3 md:py-6 lg:px-8"
