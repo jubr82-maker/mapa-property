@@ -87,6 +87,7 @@
     "hint_manual": "Nach Kriterien filtern",
     "hint_ai": "Beschreiben Sie Ihr Projekt",
     "country": "Land",
+    "all_countries": "Alle Länder",
     "city": "Stadt / Viertel",
     "city_ph": "z.B. Belair, Cannes",
     "type": "Typ",
@@ -1137,7 +1138,7 @@
     "search_mandate_text": "Vertrauen Sie uns Ihre Suche an. Wir mobilisieren alle Kanäle — offener Markt, Off-Market und privates Netzwerk.",
     "search_mandate_cta": "Suchauftrag anfragen",
     "exclusive_mandate_eyebrow": "Exklusivmandat",
-    "exclusive_mandate_title": "Verkaufen Sie eine außergewöhnliche Immobilie?",
+    "exclusive_mandate_title": "Möchten Sie Ihre Immobilie verkaufen?",
     "exclusive_mandate_text": "3% zzgl. MwSt. + 17% MwSt. Premium-Marketing, MAPA Property Exklusivität, dedizierte Verhandlung und Betreuung.",
     "exclusive_mandate_cta": "Exklusivmandat entdecken",
     "reviews_title": "Sie haben uns vertraut"

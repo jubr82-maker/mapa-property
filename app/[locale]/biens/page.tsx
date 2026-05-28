@@ -100,11 +100,14 @@ export default async function PropertiesPage({
   const rawFilters = await searchParams;
   setRequestLocale(locale);
 
-  // Sprint C13-bis C2 : pays obligatoire — defaut Luxembourg si absent
-  // de l'URL. Garde-fou si le user arrive sur /biens sans query string.
+  // Sprint UI-MAI : pays OPTIONNEL. Si l'URL ne contient pas de
+  // country, on n'applique aucun filtre pays (vide = tous les pays).
+  // matchesCountry(p.country, undefined) retourne true (cf. lib/geo/countries.ts:109).
+  // Le lien "Tous les biens" du header pointe vers /biens sans param,
+  // donc TOUS les biens (Luxembourg + secondaires + trophy) sont visibles.
   const filters: SearchParams = {
     ...rawFilters,
-    country: rawFilters.country || DEFAULT_COUNTRY,
+    country: rawFilters.country,
   };
 
   const t = await getTranslations({ locale, namespace: "property_list" });
@@ -171,7 +174,8 @@ export default async function PropertiesPage({
   for (const [k, v] of Object.entries(rawFilters)) {
     if (v) showAllParams.set(k, v);
   }
-  showAllParams.set("country", filters.country ?? DEFAULT_COUNTRY);
+  // country preserve UNIQUEMENT si l'utilisateur en a explicitement choisi un.
+  if (filters.country) showAllParams.set("country", filters.country);
   showAllParams.set("showAll", "true");
   const showAllHref = `/biens?${showAllParams.toString()}`;
 

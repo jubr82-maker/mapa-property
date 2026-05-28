@@ -20,9 +20,11 @@ export function SearchBar() {
   const [aiPending, setAiPending] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
-  // Sprint C13-bis C2 : pays obligatoire, defaut Luxembourg, liste ISO
-  // complete via Intl.DisplayNames pour les labels localises.
-  const [country, setCountry] = useState(DEFAULT_COUNTRY);
+  // Sprint UI-MAI : pays OPTIONNEL. Etat initial vide -> "Tous les pays".
+  // L'utilisateur peut selectionner un pays specifique ou laisser vide
+  // pour ne pas filtrer. Liste ISO complete via Intl.DisplayNames pour
+  // les labels localises (cf. sortedCountries).
+  const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   // Sprint C13-ter : multi-select types (array de valeurs de match).
   const [types, setTypes] = useState<string[]>([]);
@@ -41,8 +43,8 @@ export function SearchBar() {
   const submitManual = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    // Sprint C13-bis C2 : country toujours present (defaut LU).
-    params.set("country", country || DEFAULT_COUNTRY);
+    // Sprint UI-MAI : country optionnel (vide -> tous pays).
+    if (country) params.set("country", country);
     if (city.trim()) params.set("city", city.trim());
     // Sprint C13-ter : multi-select types (comma-separated dans l'URL).
     if (types.length > 0) params.set("types", types.join(","));
@@ -116,10 +118,14 @@ export function SearchBar() {
                   label={t("country")}
                   value={country}
                   onChange={setCountry}
-                  options={countries.map((c) => ({
-                    value: c.code,
-                    label: c.label,
-                  }))}
+                  options={[
+                    // Sprint UI-MAI : option "Tous les pays" en tete = vide.
+                    { value: "", label: t("all_countries") },
+                    ...countries.map((c) => ({
+                      value: c.code,
+                      label: c.label,
+                    })),
+                  ]}
                 />
                 <Input
                   label={t("city")}

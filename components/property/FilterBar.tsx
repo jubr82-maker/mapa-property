@@ -30,10 +30,10 @@ export function FilterBar() {
   const params = useSearchParams();
   const [, startTransition] = useTransition();
 
-  // Sprint C13-bis C2 : pays obligatoire, default Luxembourg (LU).
-  // Dropdown alimente par la liste ISO 3166-1 complete (195 pays) via
-  // sortedCountries(locale) — top 20 affaires en premier.
-  const [country, setCountry] = useState(params.get("country") ?? DEFAULT_COUNTRY);
+  // Sprint UI-MAI : pays OPTIONNEL. Etat initial = ce qui est dans l'URL,
+  // ou vide (= "Tous les pays"). L'utilisateur peut effacer le pays pour
+  // voir tous les biens (option vide ajoutee en tete du select).
+  const [country, setCountry] = useState(params.get("country") ?? "");
   const [city, setCity] = useState(params.get("city") ?? "");
   // Sprint C13-ter : multi-select (array). Lit ?types= (nouveau) ou
   // ?type= (legacy single, rétro-compat). Aucune case cochée par défaut.
@@ -49,7 +49,7 @@ export function FilterBar() {
   // Sync state when URL changes externally (e.g. user clicks suggested filter elsewhere)
   /* eslint-disable react-hooks/set-state-in-effect -- intentional: external URL → form state sync */
   useEffect(() => {
-    setCountry(params.get("country") ?? DEFAULT_COUNTRY);
+    setCountry(params.get("country") ?? "");
     setCity(params.get("city") ?? "");
     setTypes(parseTypesParam(params.get("types"), params.get("type")));
     setTransaction(params.get("transaction") ?? "");
@@ -60,7 +60,8 @@ export function FilterBar() {
 
   const apply = () => {
     const sp = new URLSearchParams();
-    sp.set("country", country || DEFAULT_COUNTRY);
+    // Sprint UI-MAI : country optionnel (vide -> pas de filtre pays).
+    if (country) sp.set("country", country);
     if (city.trim()) sp.set("city", city.trim());
     // Sprint C13-ter : url types= seulement si au moins 1 case cochée.
     if (types.length > 0) sp.set("types", types.join(","));
@@ -73,13 +74,15 @@ export function FilterBar() {
   };
 
   const reset = () => {
-    setCountry(DEFAULT_COUNTRY);
+    // Sprint UI-MAI : reset = vide partout, redirige vers /biens sans filtre
+    // (= tous les pays + tous les biens). L'utilisateur recommence a zero.
+    setCountry("");
     setCity("");
     setTypes([]);
     setTransaction("");
     setBudget("");
     setBedrooms("");
-    startTransition(() => router.replace(`/biens?country=${DEFAULT_COUNTRY}`));
+    startTransition(() => router.replace("/biens"));
   };
 
   return (
@@ -92,15 +95,15 @@ export function FilterBar() {
     >
       <div className="grid gap-3 lg:grid-cols-[120px_minmax(180px,1fr)_140px_140px_160px_120px_auto_auto]">
         <Field label={tSearch("country")}>
-          {/* Sprint C13-bis C2 : pays obligatoire (pas d'option vide),
-              defaut Luxembourg, liste ISO 3166-1 complete (195 pays)
-              via Intl.DisplayNames pour les labels localises. */}
+          {/* Sprint UI-MAI : pays OPTIONNEL. Premiere option vide =
+              "Tous les pays" (pas de filtre). Liste ISO 3166-1 complete
+              (195 pays) via Intl.DisplayNames pour les labels localises. */}
           <select
             value={country}
             onChange={(e) => setCountry(e.target.value)}
             className="w-full rounded-md border border-line bg-bg px-3 py-2 text-sm focus:border-gold focus:outline-none"
-            required
           >
+            <option value="">{tSearch("all_countries")}</option>
             {countries.map((c) => (
               <option key={c.code} value={c.code}>
                 {c.label}
