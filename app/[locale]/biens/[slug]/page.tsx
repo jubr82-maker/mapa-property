@@ -35,7 +35,16 @@ import { breadcrumb, propertyListing } from "@/lib/seo";
 // /fr/biens via revalidatePath dans admin/properties/actions.ts).
 // generateStaticParams ci-dessous pre-build les pages au deploy ->
 // premiere visite = HIT cache au lieu d'une regeneration ISR.
-export const revalidate = 1800;
+//
+// Sprint OPTIM-1B C5 : passage 1800s -> 86400s (24h). Cause de ~870
+// writes ISR/jour observes en prod : crawlers Google/Bing visitent les
+// ~45 fiches pre-buildees (15 biens x 3 locales) ; chaque visite apres
+// la fenetre 1800s declenchait 1 write. A 86400s, plafond ~45 writes/jour
+// (95% reduction). Fraicheur preservee : revalidatePath admin invalide
+// immediatement sur save (admin/properties/actions.ts) et le re-import
+// Apimo invalide aussi. Defaut accepte : un bien edite hors flux admin
+// (ex. SQL direct) attendra 24h pour propager publiquement.
+export const revalidate = 86400;
 
 /**
  * Sprint OPTIM-1A : pre-build des fiches biens publiees pour les 3 locales.

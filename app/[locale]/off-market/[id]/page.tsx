@@ -31,12 +31,15 @@ import { highlightTitles } from "@/lib/formatting/highlightTitles";
 // réel — BUG 2), onglet "Conditions de vente" → "Processus d'accès au
 // dossier", formulaire bas = NDA "Accéder au dossier complet".
 
-// Sprint OPTIM-1B : ISR 30 min sur les fiches off-market (vs Dynamic
-// rendering avant -> chaque visite = write ISR). Pre-build via
-// generateStaticParams ci-dessous. Les biens off-market changent
-// rarement (titre/description/prix edites depuis admin invalident deja
-// /fr/off-market/[id] via revalidatePath dans app/admin/offmarket/actions.ts).
-export const revalidate = 1800;
+// Sprint OPTIM-1B : ISR sur les fiches off-market (vs Dynamic rendering
+// avant -> chaque visite = write ISR). Pre-build via generateStaticParams
+// ci-dessous. Les biens off-market changent rarement (titre/description/
+// prix edites depuis admin invalident deja /[locale]/off-market/[id] via
+// revalidatePath cross-locale dans app/admin/offmarket/actions.ts).
+//
+// OPTIM-1B C5 : 86400s (24h) au lieu de 1800s (30 min) pour reduire la
+// pression crawlers (cf. justification dans biens/[slug]/page.tsx).
+export const revalidate = 86400;
 
 /**
  * Sprint OPTIM-1B : pre-build des fiches off-market publiees pour les 3
