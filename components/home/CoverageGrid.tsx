@@ -55,13 +55,13 @@ export function CoverageGrid() {
           <p className="mt-3 text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
         </header>
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-5 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:grid-cols-4">
           {typologies.map((typo, idx) => {
             const isFlipped = isMobile && expandedKey === typo.key;
             return (
               <FadeInOnScroll key={typo.key} delay={idx * 200} y={30}>
               <HoverFlipCard
-                height="h-40 sm:h-52 md:h-64"
+                height="h-52 sm:h-60 md:h-64"
                 flipped={isMobile ? expandedKey === typo.key : undefined}
                 onFlipToggle={
                   isMobile
@@ -79,7 +79,7 @@ export function CoverageGrid() {
                     <span className="font-mono text-[10px] font-light uppercase tracking-[0.3em] text-gold-deep">
                       {t(`${typo.key}_label`)}
                     </span>
-                    <h3 className="font-display text-base font-black leading-tight text-ink sm:text-xl md:text-3xl">
+                    <h3 className="font-display text-lg font-black leading-tight text-ink sm:text-xl md:text-3xl">
                       {t(`${typo.key}_title`)}
                     </h3>
                     {/* Desktop: hint discret "Survolez →" */}

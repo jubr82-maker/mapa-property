@@ -288,7 +288,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
       href={href}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border-subtle bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >
-      <div className="relative h-40 overflow-hidden bg-bg-deep sm:h-auto sm:aspect-[4/3]">
+      <div className="relative h-52 overflow-hidden bg-bg-deep sm:h-auto sm:aspect-[4/3]">
         {isOffmarket ? (
           <OffmarketPlaceholder
             compact
@@ -331,15 +331,15 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
           </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-1.5 p-4 md:gap-2 md:p-5">
+      <div className="flex flex-1 flex-col gap-2 p-5 md:gap-2 md:p-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
           {[item.country, item.city].filter(Boolean).join(" · ") || "—"}
         </p>
-        <h3 className="line-clamp-2 font-display text-lg font-bold leading-tight text-ink group-hover:text-gold-deep">
+        <h3 className="line-clamp-2 font-display text-xl font-bold leading-tight text-ink group-hover:text-gold-deep">
           {item.title ?? "—"}
         </h3>
         <div className="mt-auto flex items-baseline justify-between gap-3">
-          <p className="font-display text-base font-bold gold-text">
+          <p className="font-display text-lg font-bold gold-text">
             {item.price_label ?? "Prix sur demande"}
           </p>
           {(item.surface || item.bedrooms) && (
