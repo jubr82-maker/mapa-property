@@ -48,11 +48,28 @@ function FeaturedDesktop({ items }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
 
+  // Sprint UI-MAI / OPTIM-1B C8 : scroll-driven gauche->droite reversible
+  // (option A). Au lieu d'un stagger setTimeout declenche par un seul
+  // isIntersecting=true, on mappe DIRECTEMENT le progress de scroll
+  // (0->1 = section qui traverse le viewport) a la visibilite de chaque
+  // carte (seuil = i/N). Effet : au scroll descendant, les cartes
+  // apparaissent une par une de gauche a droite. Au scroll remontant,
+  // elles disparaissent dans l'ordre inverse. Reversible naturellement
+  // sans listener intersect.
+  //
+  // Garde : prefers-reduced-motion -> tout visible, pas d'animation.
+  // Throttle requestAnimationFrame, listener passive, willChange propre.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!trackRef.current) return;
+    if (!sectionRef.current || !trackRef.current || !innerRef.current) return;
+
+    const section = sectionRef.current;
+    const inner = innerRef.current;
     const cards =
       trackRef.current.querySelectorAll<HTMLElement>("[data-featured-card]");
+    const N = cards.length;
+    if (N === 0) return;
+
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
       .matches;
 
@@ -64,51 +81,19 @@ function FeaturedDesktop({ items }: Props) {
       return;
     }
 
+    // Setup initial : opacite 0, decalage 80px gauche, transition CSS douce.
     cards.forEach((card) => {
       card.style.opacity = "0";
       card.style.transform = "translateX(-80px)";
       card.style.transition =
-        "opacity 1s cubic-bezier(0.22,1,0.36,1), transform 1s cubic-bezier(0.22,1,0.36,1)";
+        "opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1)";
       card.style.willChange = "opacity, transform";
     });
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          cards.forEach((card, i) => {
-            if (entry.isIntersecting) {
-              window.setTimeout(() => {
-                card.style.opacity = "1";
-                card.style.transform = "translateX(0)";
-              }, i * 600);
-            } else {
-              const reverseIdx = cards.length - 1 - i;
-              window.setTimeout(() => {
-                card.style.opacity = "0";
-                card.style.transform = "translateX(-80px)";
-              }, reverseIdx * 200);
-            }
-          });
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -100px 0px" },
-    );
-
-    observer.observe(trackRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!sectionRef.current || !innerRef.current) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const section = sectionRef.current;
-    const inner = innerRef.current;
     inner.style.willChange = "transform";
 
     let raf = 0;
     let lastProgress = -1;
+    const visibleState = new Array<boolean>(N).fill(false);
 
     const onScroll = () => {
       if (raf) return;
@@ -116,13 +101,31 @@ function FeaturedDesktop({ items }: Props) {
         raf = 0;
         const rect = section.getBoundingClientRect();
         const vh = window.innerHeight;
-        if (rect.top >= vh || rect.bottom <= 0) return;
         const totalRange = vh + rect.height;
         const scrolled = vh - rect.top;
         const progress = Math.max(0, Math.min(1, scrolled / totalRange));
-        if (Math.abs(progress - lastProgress) < 0.001) return;
+        if (Math.abs(progress - lastProgress) < 0.002) return;
         lastProgress = progress;
-        inner.style.transform = `translateX(${-200 * progress}px)`;
+
+        // Parallax track entier : amplitude 600px (vs 200px avant) pour
+        // un defile horizontal plus marque pendant le scroll vertical.
+        inner.style.transform = `translateX(${-600 * progress}px)`;
+
+        // Mapping progress -> nb cartes visibles. Seuil par carte = i/N.
+        // Decalage 0.05 pour eviter qu'aucune carte ne soit visible
+        // exactement au demarrage (debut de section).
+        for (let i = 0; i < N; i++) {
+          const threshold = i / N;
+          const shouldBeVisible = progress >= threshold;
+          if (shouldBeVisible !== visibleState[i]) {
+            visibleState[i] = shouldBeVisible;
+            const card = cards[i];
+            card.style.opacity = shouldBeVisible ? "1" : "0";
+            card.style.transform = shouldBeVisible
+              ? "translateX(0)"
+              : "translateX(-80px)";
+          }
+        }
       });
     };
 
@@ -132,6 +135,9 @@ function FeaturedDesktop({ items }: Props) {
       window.removeEventListener("scroll", onScroll);
       if (raf) window.cancelAnimationFrame(raf);
       inner.style.willChange = "";
+      cards.forEach((card) => {
+        card.style.willChange = "";
+      });
     };
   }, []);
 
