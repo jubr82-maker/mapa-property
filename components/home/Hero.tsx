@@ -29,7 +29,13 @@ export async function Hero({ locale }: { locale: string }) {
 
   return (
     <HeroScrollContainer
-      className="relative isolate min-h-screen overflow-hidden md:min-h-[66vh] lg:min-h-screen"
+      // Sprint HERO-VIDEO-V5 : hauteur mobile compacte.
+      // Mobile : 100vw (largeur du carre video 1080x1080 affiche
+      // pleine largeur) + 5rem (espace pour le header fixed h-20).
+      // Resultat : Hero ~470px sur iPhone 6.1" au lieu de 844px
+      // (min-h-screen), supprime les bandes vides haute/basse du
+      // object-contain. Tablet/desktop inchanges (md:/lg: prefixes).
+      className="relative isolate min-h-[calc(100vw+5rem)] overflow-hidden md:min-h-[66vh] lg:min-h-screen"
       style={{
         backgroundColor: "var(--hero-bg)",
         transition: "background-color 0.4s ease",
