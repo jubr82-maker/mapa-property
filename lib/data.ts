@@ -427,6 +427,27 @@ export async function fetchOffmarketById(
   return mapPublicRows([data], locale)[0] ?? null;
 }
 
+/**
+ * Sprint UI-I18N : helper local pour servir highlights_en/_de selon la
+ * locale. Fallback cascade :
+ *   highlights_<locale> non-vide -> highlights (base FR) -> null.
+ * Note : "fr" lit `highlights` directement (la base est en FR, pas de
+ * colonne highlights_fr).
+ */
+function getLocalizedHighlights(
+  r: Record<string, unknown>,
+  locale: string,
+): string[] | null {
+  const loc = ["en", "de"].includes(locale) ? locale : null;
+  if (loc) {
+    const candidate = r[`highlights_${loc}`];
+    if (Array.isArray(candidate) && candidate.length > 0) {
+      return candidate as string[];
+    }
+  }
+  return (r.highlights as string[] | null) ?? null;
+}
+
 function mapPublicRows(
   rows: unknown[] | null,
   locale = "fr",
@@ -492,7 +513,10 @@ function mapPublicRows(
         (r.full_description as string | null) ||
         (r.description as string | null) ||
         null,
-      highlights: (r.highlights as string[] | null) ?? null,
+      // Sprint UI-I18N : highlights traduits via colonnes highlights_en/_de
+      // (migration UI-I18N + backfill Mistral). Fallback cascade :
+      //   highlights_<locale> non-vide -> base highlights (FR) -> null.
+      highlights: getLocalizedHighlights(r, locale),
       cover_image_url: (r.cover_image_url as string | null) ?? null,
       gallery_urls: (r.gallery_urls as string[] | null) ?? null,
       // POL2-10 : tolérant — colonne absente (migration non appliquée)

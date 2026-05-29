@@ -139,6 +139,22 @@ async function attachI18nTranslations(
   if ("short_pitch" in payload && typeof payload.short_pitch === "string") {
     fr.short_pitch = payload.short_pitch;
   }
+
+  // Sprint UI-I18N : highlights traduits par item via translateBatch.
+  // Encodage via cles hl_0, hl_1, ..., hl_N pour preserver l'ordre.
+  // Si highlights est array non vide, on enrichit fr avec ces cles.
+  const hlSource =
+    "highlights" in payload && Array.isArray(payload.highlights)
+      ? (payload.highlights as unknown[]).filter(
+          (h): h is string => typeof h === "string" && h.trim().length > 0,
+        )
+      : null;
+  if (hlSource && hlSource.length > 0) {
+    hlSource.forEach((h, i) => {
+      fr[`hl_${i}`] = h;
+    });
+  }
+
   if (Object.keys(fr).length === 0) return;
 
   try {
@@ -147,8 +163,22 @@ async function attachI18nTranslations(
       translateBatch(fr, "DE"),
     ]);
     for (const key of Object.keys(fr)) {
+      // Cles hl_<i> : on reconstruit l'array highlights_<lang> au passage.
+      if (key.startsWith("hl_")) continue;
       if (en[key]) payload[`${key}_en`] = en[key];
       if (de[key]) payload[`${key}_de`] = de[key];
+    }
+    // Reconstruction des arrays highlights_en/_de.
+    if (hlSource && hlSource.length > 0) {
+      const enArr: string[] = [];
+      const deArr: string[] = [];
+      for (let i = 0; i < hlSource.length; i++) {
+        const key = `hl_${i}`;
+        enArr.push(en[key] ?? hlSource[i]);
+        deArr.push(de[key] ?? hlSource[i]);
+      }
+      payload.highlights_en = enArr;
+      payload.highlights_de = deArr;
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
