@@ -70,7 +70,13 @@ export async function Hero({ locale }: { locale: string }) {
             posterUrl="https://pub-c9fa8716c00f4a0c965197a93086bdce.r2.dev/mapa-showcase-poster.jpg"
             sources={[
               { filename: "mapa-showcase-desktop-v2.mp4", media: "(min-width: 1024px)", type: "video/mp4" },
-              { filename: "mapa-showcase-mobile-v2.mp4", type: "video/mp4" },
+              // Sprint HERO-VIDEO-V2 mobile fix : v3 = profile H.264 Main
+              // (vs High v2) + bitrate allege 1600k (vs 2500k v2). Resolu
+              // par bug constate par Julien : autoplay iOS bloque sur la
+              // version v2 (profile High level 4.0 trop strict). v3 fait
+              // 4.57 MB et reste profile Main level 4.0 yuv420p, autoplay
+              // iOS Safari OK.
+              { filename: "mapa-showcase-mobile-v3.mp4", type: "video/mp4" },
             ]}
           />
         </div>
