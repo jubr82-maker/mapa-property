@@ -82,6 +82,11 @@ export default async function HomePage({
       <FadeInOnScroll>
         <MandatesGrid />
       </FadeInOnScroll>
+      {/* Sprint UI-MAI / LOT D : OffMarketBand remonte juste apres
+          MandatesGrid (avant CoverageStats). Logique editoriale : la
+          card "Mandat de Recherche" de MandatesGrid mene naturellement
+          vers la presentation off-market. */}
+      <OffMarketBand />
       {/* POL3-7a (ANTOINE) : FadeInOutSection en double-wrap autour
           du FadeInOnScroll existant — fade-in one-shot puis modulation
           opacity continue selon intersectionRatio (sections respirantes). */}
@@ -93,7 +98,6 @@ export default async function HomePage({
       <ServicesTable />
       {/* NAV7 : « mot fondateur » (QuoteBand) retiré (cf.
           docs/qa/COPY_REWRITES_TODO.md). */}
-      <OffMarketBand />
       <FadeInOnScroll>
         <FadeInOutSection>
           <ReviewsCarousel reviews={reviews} />
