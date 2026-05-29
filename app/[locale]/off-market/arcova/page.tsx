@@ -36,9 +36,18 @@ function ArcovaContent() {
       <div className="mt-12 rounded-lg border border-line bg-bg-soft p-8">
         <h2 className="t-h3">{t("waitlist_title")}</h2>
         <p className="mt-3 text-sm leading-relaxed text-ink-mid">{t("waitlist_text")}</p>
+        {/* Sprint UI-MAI : bouton "Demander une invitation". Bug constate
+            par Julien : bg-navy + text-white etait illisible en mode
+            sombre car le token --navy s'inverse (#1F221A sapin en clair
+            -> #F0E6CC creme en sombre), donc le bouton devenait creme
+            avec texte blanc = clair sur clair. Fix : bg-ink + text-bg
+            qui sont toujours opposes (bg-ink = couleur encre du theme,
+            text-bg = couleur de fond inverse) -> contraste fort dans
+            les 2 modes. text-ink seul aurait ete invisible sur bg-navy
+            car ink et navy partagent la meme valeur dans chaque mode. */}
         <Link
           href="/contact"
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-navy px-5 py-2.5 font-sans text-[12px] font-medium uppercase tracking-[0.08em] text-white transition-colors hover:bg-navy-deep"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 font-sans text-[12px] font-medium uppercase tracking-[0.08em] text-bg transition-opacity hover:opacity-85"
         >
           {t("waitlist_cta")}
           <span aria-hidden>→</span>
