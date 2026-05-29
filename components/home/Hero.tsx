@@ -57,13 +57,20 @@ export async function Hero({ locale }: { locale: string }) {
             anime 20s ease-in-out alternate compose proprement avec le
             translateY du ParallaxImage parent (transforms chaines). */}
         <div className="mapa-ken-burns absolute inset-0">
+          {/* Sprint HERO-VIDEO-V2 : nouveau montage 1080p (10 clips
+              remappes + segments choisis manuellement, two-pass 3800k
+              desktop, two-pass 2500k crop 4:5 mobile). Poster jpg pour
+              affichage instantane pendant le chargement. Suffixe -v2
+              pour cache-busting (les anciens .mp4 sans suffixe restent
+              en R2 pour rollback eventuel). */}
           <VideoR2
             className="absolute left-0 top-[-4%] h-[108%] w-full object-cover"
             ariaHidden
             preload="metadata"
+            posterUrl="https://pub-c9fa8716c00f4a0c965197a93086bdce.r2.dev/mapa-showcase-poster.jpg"
             sources={[
-              { filename: "mapa-showcase-desktop.mp4", media: "(min-width: 1024px)", type: "video/mp4" },
-              { filename: "mapa-showcase-mobile.mp4", type: "video/mp4" },
+              { filename: "mapa-showcase-desktop-v2.mp4", media: "(min-width: 1024px)", type: "video/mp4" },
+              { filename: "mapa-showcase-mobile-v2.mp4", type: "video/mp4" },
             ]}
           />
         </div>
