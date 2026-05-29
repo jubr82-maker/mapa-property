@@ -64,19 +64,24 @@ export async function Hero({ locale }: { locale: string }) {
               pour cache-busting (les anciens .mp4 sans suffixe restent
               en R2 pour rollback eventuel). */}
           <VideoR2
-            className="absolute left-0 top-[-4%] h-[108%] w-full object-cover"
+            // Sprint HERO-VIDEO-V5 (TEST) : mobile carre 1080x1080 +
+            // object-contain pour montrer l'image ENTIERE (vs object-cover
+            // qui cropait). Desktop reste object-cover (lg: prefix).
+            // Le fond visible derriere les bandes (object-contain laisse
+            // de l'espace haut/bas) = var(--hero-bg) du HeroScrollContainer
+            // (sapin foncé). Reversible : revenir a object-cover si Julien
+            // n'aime pas le rendu.
+            className="absolute left-0 top-[-4%] h-[108%] w-full object-contain lg:object-cover"
             ariaHidden
             preload="metadata"
             posterUrl="https://pub-c9fa8716c00f4a0c965197a93086bdce.r2.dev/mapa-showcase-poster.jpg"
             sources={[
               { filename: "mapa-showcase-desktop-v2.mp4", media: "(min-width: 1024px)", type: "video/mp4" },
-              // Sprint HERO-VIDEO-V2 mobile fix : v3 = profile H.264 Main
-              // (vs High v2) + bitrate allege 1600k (vs 2500k v2). Resolu
-              // par bug constate par Julien : autoplay iOS bloque sur la
-              // version v2 (profile High level 4.0 trop strict). v3 fait
-              // 4.57 MB et reste profile Main level 4.0 yuv420p, autoplay
-              // iOS Safari OK.
-              { filename: "mapa-showcase-mobile-v3.mp4", type: "video/mp4" },
+              // v5 : carre 1080x1080 (vs v3 portrait 1080x1350). Profil
+              // iOS-safe IDENTIQUE (Main level 4.0 yuv420p faststart),
+              // 4.57 MB. Le carre permet un crop large sans deformation
+              // (les v3/v4 etaient soit trop zoomes soit etires).
+              { filename: "mapa-showcase-mobile-v5.mp4", type: "video/mp4" },
             ]}
           />
         </div>
