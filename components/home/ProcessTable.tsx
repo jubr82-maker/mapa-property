@@ -3,20 +3,29 @@ import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 const steps = ["one", "two", "three"] as const;
 
-export function ProcessTable() {
+interface ProcessTableProps {
+  /** Sprint UI-MAI : masque le header interne (eyebrow + title) pour
+   *  permettre la fusion avec CoverageGrid sous un titre commun
+   *  "Methode & Couverture" dans la home. Default false (standalone). */
+  hideHeader?: boolean;
+}
+
+export function ProcessTable({ hideHeader = false }: ProcessTableProps = {}) {
   const t = useTranslations("process");
 
   return (
     <section className="px-6 py-5 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-4 max-w-2xl md:mb-12">
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
-            {t("eyebrow")}
-          </p>
-          <h2 className="mt-2 t-h2">
-            {t("title")}
-          </h2>
-        </header>
+        {!hideHeader && (
+          <header className="mb-4 max-w-2xl md:mb-12">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
+              {t("eyebrow")}
+            </p>
+            <h2 className="mt-2 t-h2">
+              {t("title")}
+            </h2>
+          </header>
+        )}
 
         {/* STEP3b : sémantique liste préservée via role=list/listitem
             (FadeInOnScroll = div wrapper) — divide-x/divide-y s'appliquent

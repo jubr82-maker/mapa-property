@@ -386,6 +386,10 @@
     "step_three_title": "ABSCHLIESSEN",
     "step_three_text": "Erstellung der Akte (KYC/AML), Vorvertrag, notarielle Begleitung, Anwesenheit bei der notariellen Urkunde."
   },
+  "method_coverage": {
+    "title": "Methode & Abdeckung",
+    "subtitle": "Vier Anlageklassen, Drei Schritte, Ein Rahmen."
+  },
   "quote_band": {
     "text": "Zusammenarbeiten ist wichtig. Den Schutz der Interessen jedes Einzelnen durch einen klaren Rahmen zu gewährleisten ist noch wichtiger.",
     "attribution": "Julien, Real Estate Director"

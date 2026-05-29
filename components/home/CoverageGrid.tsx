@@ -27,7 +27,14 @@ const typologies = [
 
 type TypoKey = (typeof typologies)[number]["key"];
 
-export function CoverageGrid() {
+interface CoverageGridProps {
+  /** Sprint UI-MAI : masque le header interne (eyebrow + title + subtitle)
+   *  pour permettre la fusion avec ProcessTable sous un titre commun
+   *  "Methode & Couverture" dans la home. Default false (rendu standalone). */
+  hideHeader?: boolean;
+}
+
+export function CoverageGrid({ hideHeader = false }: CoverageGridProps = {}) {
   const t = useTranslations("coverage");
   const [expandedKey, setExpandedKey] = useState<TypoKey | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -44,16 +51,18 @@ export function CoverageGrid() {
   return (
     <section className="px-6 py-5 md:py-20 lg:px-10 lg:py-20">
       <div className="mx-auto max-w-[1400px]">
-        <header className="mb-4 max-w-2xl md:mb-12">
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
-            {t("eyebrow")}
-          </p>
-          <h2 className="mt-2 t-h2">
-            {t("title")}
-          </h2>
-          <SignatureLine />
-          <p className="mt-3 text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
-        </header>
+        {!hideHeader && (
+          <header className="mb-4 max-w-2xl md:mb-12">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:text-xs">
+              {t("eyebrow")}
+            </p>
+            <h2 className="mt-2 t-h2">
+              {t("title")}
+            </h2>
+            <SignatureLine />
+            <p className="mt-3 text-sm text-ink-mid md:text-base">{t("subtitle")}</p>
+          </header>
+        )}
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:grid-cols-4">
           {typologies.map((typo, idx) => {

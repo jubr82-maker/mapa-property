@@ -386,6 +386,10 @@
     "step_three_title": "CLOSE",
     "step_three_text": "File preparation (KYC/AML), purchase agreement, notarial follow-up, presence at the deed."
   },
+  "method_coverage": {
+    "title": "Method & Coverage",
+    "subtitle": "Four asset families, Three steps, One framework."
+  },
   "quote_band": {
     "text": "Working together matters. Protecting each party's interest with a clear framework matters more.",
     "attribution": "Julien, Real Estate Director"

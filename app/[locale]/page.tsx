@@ -1,4 +1,4 @@
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Hero } from "@/components/home/Hero";
 import { SearchBar } from "@/components/home/SearchBar";
 import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
@@ -12,6 +12,7 @@ import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 import { FadeInOutSection } from "@/components/effects/FadeInOutSection";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 import {
   fetchHomeFeatured,
   fetchLatestBlogPosts,
@@ -27,10 +28,11 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [featured, reviews, blogPosts] = await Promise.all([
+  const [featured, reviews, blogPosts, tMC] = await Promise.all([
     fetchHomeFeatured(6, locale),
     fetchPublishedReviews(8),
     fetchLatestBlogPosts(3),
+    getTranslations({ locale, namespace: "method_coverage" }),
   ]);
 
   return (
@@ -54,7 +56,29 @@ export default async function HomePage({
       <FadeInOnScroll>
         <FeaturedCarousel items={featured} />
       </FadeInOnScroll>
-      <CoverageGrid />
+      {/* Sprint UI-MAI / LOT B : fusion des anciennes sections "Notre
+          couverture" (CoverageGrid) et "Notre methode" (ProcessTable) sous
+          un titre commun "Methode & Couverture". Les 2 composants gardent
+          leurs grilles internes mais leurs headers individuels sont masques
+          via la prop hideHeader. Le bloc affiche dans l'ordre vertical :
+          titre + sous-titre -> 4 familles d'actifs -> 3 etapes. */}
+      <FadeInOnScroll>
+        <FadeInOutSection>
+          <section className="px-6 pt-5 md:pt-20 lg:px-10 lg:pt-20">
+            <div className="mx-auto max-w-[1400px]">
+              <header className="mb-4 max-w-2xl md:mb-12">
+                <h2 className="t-h2">{tMC("title")}</h2>
+                <SignatureLine />
+                <p className="mt-3 text-sm text-ink-mid md:text-base">
+                  {tMC("subtitle")}
+                </p>
+              </header>
+            </div>
+            <CoverageGrid hideHeader />
+            <ProcessTable hideHeader />
+          </section>
+        </FadeInOutSection>
+      </FadeInOnScroll>
       <FadeInOnScroll>
         <MandatesGrid />
       </FadeInOnScroll>
@@ -64,11 +88,6 @@ export default async function HomePage({
       <FadeInOnScroll>
         <FadeInOutSection>
           <CoverageStats locale={locale} />
-        </FadeInOutSection>
-      </FadeInOnScroll>
-      <FadeInOnScroll>
-        <FadeInOutSection>
-          <ProcessTable />
         </FadeInOutSection>
       </FadeInOnScroll>
       <ServicesTable />
