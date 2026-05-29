@@ -43,6 +43,11 @@ export function ServicesTable() {
                   style={{ backgroundColor: "#e0af6e" }}
                 />
               )}
+              {/* Sprint UI-MAI / LOT C : fleche hover (->) retiree.
+                  Les 6 metiers ne sont PAS cliquables : la fleche
+                  suggererait un lien et trompait l'utilisateur. Le hover
+                  de couleur sur le titre (group-hover:text-gold-deep)
+                  est conserve, purement decoratif. */}
               <article className="group flex items-start gap-3 py-2.5 md:gap-6 md:py-7 lg:px-8">
                 <span className="font-mono text-[10px] text-ink-soft shrink-0 w-8 pt-1 md:w-10 md:text-xs">
                   0{idx + 1}.
@@ -55,12 +60,6 @@ export function ServicesTable() {
                     {t(`${s}_text`)}
                   </p>
                 </div>
-                <span
-                  aria-hidden
-                  className="font-display text-base text-gold-deep opacity-0 transition-opacity group-hover:opacity-100 md:text-xl"
-                >
-                  →
-                </span>
               </article>
             </FadeInOnScroll>
           ))}
