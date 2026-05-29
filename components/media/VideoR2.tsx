@@ -14,7 +14,7 @@
 // Cote serveur (RSC), le helper lib/r2.ts::getR2Url marche aussi mais
 // utilise R2_PUBLIC_URL non-public. Pour un usage RSC, importer getR2Url.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const PUBLIC_BASE = (
   process.env.NEXT_PUBLIC_R2_PUBLIC_URL ?? ""
@@ -59,6 +59,41 @@ export function VideoR2({
   alt,
 }: VideoR2Props) {
   const [hasError, setHasError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Sprint HERO-VIDEO-V2 : fix autoplay iOS Safari. Les props React
+  // `muted` et `playsInline` peuvent etre appliquees apres l'hydratation,
+  // mais iOS lit ces attributs des le premier rendu HTML et bloque
+  // l'autoplay si elles ne sont pas "vraies" au bon moment. Forcer
+  // videoRef.muted = true et appeler play() explicitement au mount
+  // garantit le demarrage sur mobile (Safari iOS + Chrome mobile).
+  // catch(silent) : si l'autoplay echoue malgre tout (politique navigateur,
+  // batterie low, etc.), on n'echoue pas l'app — le poster reste affiche.
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (muted) {
+      el.muted = true;
+      el.defaultMuted = true;
+    }
+    // Tenter play() au mount. Resout aussi le cas iOS ou autoplay
+    // declenche un peu apres le mount React (race au premier paint).
+    if (autoPlay) {
+      const tryPlay = () => {
+        el.play().catch(() => {
+          // Silent : iOS peut refuser sans interaction user. Le poster
+          // reste visible. La video reprendra au prochain user gesture.
+        });
+      };
+      tryPlay();
+      // Re-essai apres canplay : certaines versions Safari iOS n'autorisent
+      // play() qu'apres le buffering initial.
+      el.addEventListener("canplay", tryPlay, { once: true });
+      return () => {
+        el.removeEventListener("canplay", tryPlay);
+      };
+    }
+  }, [autoPlay, muted]);
 
   if (hasError && posterUrl) {
     return (
@@ -80,6 +115,7 @@ export function VideoR2({
 
   return (
     <video
+      ref={videoRef}
       poster={posterUrl}
       autoPlay={autoPlay}
       loop={loop}
