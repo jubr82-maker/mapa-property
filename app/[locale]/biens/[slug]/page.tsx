@@ -26,7 +26,10 @@ import { FicheConditions } from "@/components/property/fiche/FicheConditions";
 import { FicheLocation } from "@/components/property/fiche/FicheLocation";
 import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
 import { SignatureLine } from "@/components/ui/SignatureLine";
-import { parseApimoDescription } from "@/lib/property-description-parser";
+import {
+  parseApimoDescription,
+  ALL_SECTION_TITLE_KEYS,
+} from "@/lib/property-description-parser";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumb, propertyListing } from "@/lib/seo";
 
@@ -124,7 +127,16 @@ export default async function PropertyPage({
   const tf = await getTranslations({ locale, namespace: "fiche" });
   const title = pickLang(property, "title", locale as Locale);
   const description = pickLang(property, "description", locale as Locale);
-  const parsedDescription = parseApimoDescription(description);
+  // Sprint UI-I18N : on construit le dict { titleKey -> label localise }
+  // depuis le namespace fiche.section_* et on le passe au parser pour
+  // que les titres H3/H4 detectes (FR/EN/DE) soient rendus dans la
+  // locale courante au lieu d'etre hardcodes en FR.
+  const sectionTitles = Object.fromEntries(
+    ALL_SECTION_TITLE_KEYS.map((k) => [k, tf(`section_${k}`)]),
+  );
+  const parsedDescription = parseApimoDescription(description, {
+    titles: sectionTitles,
+  });
 
   type GalleryItem = { type: "image" | "video"; url: string; alt?: string };
   // Galerie photos uniquement — la vidéo est isolée en pleine largeur (cf. <section> ci-dessous).

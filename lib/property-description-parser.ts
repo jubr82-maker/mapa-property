@@ -40,81 +40,138 @@ function escapeHtml(s: string): string {
 }
 
 // ─── Marqueurs de section inline (FR/EN/DE) ───────────────────────────────
+//
+// Sprint UI-I18N : chaque marqueur a desormais une `titleKey` stable +
+// un `titleFR` (label francais hardcode comme fallback). Le caller peut
+// passer un dict { [titleKey]: labelLocalise } via parseApimoDescription
+// (cf. messages/{fr,en,de}.json namespace fiche.section.*). Si aucun
+// dict n'est passe, le fallback FR est utilise (retrocompat).
+type SectionMarker = { pattern: RegExp; titleKey: string; titleFR: string };
+
 // Niveau H3 (section principale)
-const H3_MARKERS: Array<{ pattern: RegExp; title: string }> = [
+const H3_MARKERS: SectionMarker[] = [
   {
     pattern: /\b(?:caractéristiques\s+principales|principales\s+caractéristiques|main\s+features|key\s+features|hauptmerkmale|merkmale)\s*:/gi,
-    title: "Caractéristiques principales",
+    titleKey: "caracteristiques_principales",
+    titleFR: "Caractéristiques principales",
   },
   {
     pattern: /\b(?:disposition|agencement|layout|floor\s+plan|aufteilung|raumaufteilung|grundriss)\s*:/gi,
-    title: "Disposition",
+    titleKey: "disposition",
+    titleFR: "Disposition",
   },
   {
     pattern: /\b(?:commodités\s+du\s+quartier|amenities\s+nearby|umgebung)\s*:/gi,
-    title: "Commodités du quartier",
+    titleKey: "commodites_quartier",
+    titleFR: "Commodités du quartier",
   },
   {
     pattern: /\b(?:commodités|amenities|facilities|annehmlichkeiten|einrichtungen)\s*:/gi,
-    title: "Commodités",
+    titleKey: "commodites",
+    titleFR: "Commodités",
   },
   {
     pattern: /\b(?:sécurité|security|sicherheit)\s*:/gi,
-    title: "Sécurité",
+    titleKey: "securite",
+    titleFR: "Sécurité",
   },
   {
     pattern: /\b(?:équipements?|features|comfort|ausstattung)\s*:/gi,
-    title: "Équipements",
+    titleKey: "equipements",
+    titleFR: "Équipements",
   },
   {
     pattern: /\b(?:localisation|emplacement|environnement|location|standort|lage)\s*:/gi,
-    title: "Localisation",
+    titleKey: "localisation",
+    titleFR: "Localisation",
   },
   {
     pattern: /\b(?:énergie|performance\s+énergétique|energy|dpe|energieeffizienz)\s*:/gi,
-    title: "Énergie & performance",
+    titleKey: "energie_performance",
+    titleFR: "Énergie & performance",
   },
 ];
 
+// Export pour permettre au caller de charger uniquement les titres
+// utiles (utilise dans /biens/[slug]/page.tsx pour construire le dict
+// titles via getTranslations).
+export const SECTION_TITLE_KEYS_H3 = [
+  "caracteristiques_principales",
+  "disposition",
+  "commodites_quartier",
+  "commodites",
+  "securite",
+  "equipements",
+  "localisation",
+  "energie_performance",
+] as const;
+
 // Niveau H4 (sous-section)
-const H4_MARKERS: Array<{ pattern: RegExp; title: string }> = [
+const H4_MARKERS: SectionMarker[] = [
   {
     pattern: /\b(?:distribution\s+des\s+pièces\s+de\s+nuit|night\s+zone|schlafbereich)\s*:/gi,
-    title: "Distribution des pièces de nuit",
+    titleKey: "distribution_nuit",
+    titleFR: "Distribution des pièces de nuit",
   },
   {
     pattern: /\b(?:distribution\s+des\s+pièces\s+de\s+vie|day\s+zone|reception\s+rooms|wohnbereich)\s*:/gi,
-    title: "Distribution des pièces de vie",
+    titleKey: "distribution_vie",
+    titleFR: "Distribution des pièces de vie",
   },
   {
     pattern: /\b(?:distribution|raumverteilung)\s*:/gi,
-    title: "Distribution",
+    titleKey: "distribution",
+    titleFR: "Distribution",
   },
   {
     pattern: /\b(?:hall\s+d['’]entrée|entrance\s+hall|eingangshalle)\s*:/gi,
-    title: "Hall d'entrée",
+    titleKey: "hall_entree",
+    titleFR: "Hall d'entrée",
   },
   {
     pattern: /\b(?:cuisine|kitchen|küche)\s*:/gi,
-    title: "Cuisine",
+    titleKey: "cuisine",
+    titleFR: "Cuisine",
   },
   {
     pattern: /\b(?:salle[s]?\s+de\s+bain|bathroom|badezimmer)\s*:/gi,
-    title: "Salles de bain",
+    titleKey: "salles_bain",
+    titleFR: "Salles de bain",
   },
   {
     pattern: /\b(?:chambres|bedrooms|schlafzimmer)\s*:/gi,
-    title: "Chambres",
+    titleKey: "chambres",
+    titleFR: "Chambres",
   },
   {
     pattern: /\b(?:salon|séjour|living|wohnzimmer)\s*:/gi,
-    title: "Salon",
+    titleKey: "salon",
+    titleFR: "Salon",
   },
   {
     pattern: /\b(?:extérieur[s]?|jardin|exterior|garden|garten|terrasse[s]?)\s*:/gi,
-    title: "Extérieurs",
+    titleKey: "exterieurs",
+    titleFR: "Extérieurs",
   },
 ];
+
+export const SECTION_TITLE_KEYS_H4 = [
+  "distribution_nuit",
+  "distribution_vie",
+  "distribution",
+  "hall_entree",
+  "cuisine",
+  "salles_bain",
+  "chambres",
+  "salon",
+  "exterieurs",
+] as const;
+
+/** Union de toutes les cles de section (H3 + H4) — pour build dict caller. */
+export const ALL_SECTION_TITLE_KEYS = [
+  ...SECTION_TITLE_KEYS_H3,
+  ...SECTION_TITLE_KEYS_H4,
+] as const;
 
 // ─── Stripping ────────────────────────────────────────────────────────────
 
@@ -163,16 +220,35 @@ function stripContactAndMarketing(text: string): string {
 const H3_TOKEN = "H3";
 const H4_TOKEN = "H4";
 
+// Sprint UI-I18N : on encode dans le token la `titleKey` (vs le label
+// hardcode FR avant). Le label final est resolu plus tard dans
+// parseBlocks via le dict `titles` passe par le caller (ou fallback FR).
 function injectSectionTokens(text: string): string {
   let out = text;
   // H4 d'abord (les "Distribution des pièces de nuit :" sont plus spécifiques que "Distribution :")
   for (const m of H4_MARKERS) {
-    out = out.replace(m.pattern, `\n\n${H4_TOKEN}${m.title}\n`);
+    out = out.replace(m.pattern, `\n\n${H4_TOKEN}${m.titleKey}\n`);
   }
   for (const m of H3_MARKERS) {
-    out = out.replace(m.pattern, `\n\n${H3_TOKEN}${m.title}\n`);
+    out = out.replace(m.pattern, `\n\n${H3_TOKEN}${m.titleKey}\n`);
   }
   return out;
+}
+
+// Resolveur titleKey -> label. Si le dict `titles` (passe par le caller
+// via parseApimoDescription) contient une entree pour cette cle, on
+// l'utilise. Sinon fallback sur le `titleFR` du marqueur. Permet aux
+// pages /fr de continuer a marcher sans dict (legacy) et aux pages
+// /en /de de recevoir les labels traduits.
+function resolveTitle(
+  titleKey: string,
+  titles?: Record<string, string>,
+): string {
+  if (titles && titles[titleKey]) return titles[titleKey];
+  const marker =
+    H3_MARKERS.find((m) => m.titleKey === titleKey) ??
+    H4_MARKERS.find((m) => m.titleKey === titleKey);
+  return marker?.titleFR ?? titleKey;
 }
 
 // Détecte les bullets inline ("- xxx", " 1. xxx", " 2. xxx") et insère des \n
@@ -199,7 +275,7 @@ type Block =
   | { kind: "numbered"; index: number; text: string }
   | { kind: "p"; text: string };
 
-function parseBlocks(text: string): Block[] {
+function parseBlocks(text: string, titles?: Record<string, string>): Block[] {
   const blocks: Block[] = [];
   // Sprint HTML-RENDERING C3 : normalise <br><br> (et <br/><br/> +
   // variantes) en \n\n avant le split. Apimo livre certaines
@@ -214,11 +290,13 @@ function parseBlocks(text: string): Block[] {
 
   for (const line of lines) {
     if (line.startsWith(H3_TOKEN)) {
-      blocks.push({ kind: "h3", title: line.slice(H3_TOKEN.length).trim() });
+      const key = line.slice(H3_TOKEN.length).trim();
+      blocks.push({ kind: "h3", title: resolveTitle(key, titles) });
       continue;
     }
     if (line.startsWith(H4_TOKEN)) {
-      blocks.push({ kind: "h4", title: line.slice(H4_TOKEN.length).trim() });
+      const key = line.slice(H4_TOKEN.length).trim();
+      blocks.push({ kind: "h4", title: resolveTitle(key, titles) });
       continue;
     }
     const bulletMatch = line.match(/^[-–•]\s+(.+)$/);
@@ -299,8 +377,27 @@ function formatListItem(text: string): string {
 
 // ─── API publique ─────────────────────────────────────────────────────────
 
+/**
+ * Sprint UI-I18N : Optional `titles` dict pour les labels de section.
+ * Cle = titleKey (cf. H3_MARKERS/H4_MARKERS). Valeur = label localise.
+ * Si absent ou cle manquante : fallback sur le `titleFR` du marqueur
+ * (legacy comportement, retrocompat).
+ *
+ * Exemple :
+ *   const titles = {
+ *     caracteristiques_principales: tFiche("section.caracteristiques_principales"),
+ *     disposition: tFiche("section.disposition"),
+ *     ...
+ *   };
+ *   parseApimoDescription(description, { titles });
+ */
+export type ParseOptions = {
+  titles?: Record<string, string>;
+};
+
 export function parseApimoDescription(
   rawText: string | null | undefined,
+  opts?: ParseOptions,
 ): ParsedDescription {
   if (!rawText) return { intro: "", chapters: [], html: "" };
 
@@ -318,8 +415,8 @@ export function parseApimoDescription(
   // 4. Convertir les bullets inline en lignes
   working = injectBulletNewlines(working);
 
-  // 5. Parser en blocs structurés
-  const blocks = parseBlocks(working);
+  // 5. Parser en blocs structurés (resolveTitle utilise opts.titles)
+  const blocks = parseBlocks(working, opts?.titles);
   if (blocks.length === 0) return { intro: "", chapters: [], html: "" };
 
   // 6. Extraire intro (tous les blocks "p" avant le 1er h3/h4)
