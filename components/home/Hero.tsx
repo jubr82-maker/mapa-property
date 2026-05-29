@@ -53,22 +53,55 @@ export async function Hero({ locale }: { locale: string }) {
         intensity={0.05}
         className="absolute inset-0"
       >
-        <VideoR2
-          className="absolute left-0 top-[-4%] h-[108%] w-full object-cover"
-          ariaHidden
-          preload="metadata"
-          sources={[
-            { filename: "mapa-showcase-desktop.mp4", media: "(min-width: 1024px)", type: "video/mp4" },
-            { filename: "mapa-showcase-mobile.mp4", type: "video/mp4" },
-          ]}
-        />
+        {/* Sprint HERO-STYLE : wrapper Ken Burns. Le scale 1.0 → 1.08
+            anime 20s ease-in-out alternate compose proprement avec le
+            translateY du ParallaxImage parent (transforms chaines). */}
+        <div className="mapa-ken-burns absolute inset-0">
+          <VideoR2
+            className="absolute left-0 top-[-4%] h-[108%] w-full object-cover"
+            ariaHidden
+            preload="metadata"
+            sources={[
+              { filename: "mapa-showcase-desktop.mp4", media: "(min-width: 1024px)", type: "video/mp4" },
+              { filename: "mapa-showcase-mobile.mp4", type: "video/mp4" },
+            ]}
+          />
+        </div>
       </ParallaxImage>
       </div>
 
-      {/* Gradient overlay (sapin → transparent → sapin 85%) — palette Forêt */}
+      {/* Sprint HERO-STYLE : overlay degrade sapin (55/25/70 — un cran
+          plus modere que l'ancien 65/20/85 pour laisser respirer la
+          video au centre tout en gardant la lisibilite du texte). Mobile
+          conserve les memes ratios (suffisant pour la SearchBar). */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-b from-[#1F221A]/65 via-[#1F221A]/20 to-[#1F221A]/85"
+        className="absolute inset-0 bg-gradient-to-b from-[#1F221A]/55 via-[#1F221A]/25 to-[#1F221A]/70"
+      />
+
+      {/* Sprint HERO-STYLE : teinte cuivre subtile en soft-light pour
+          rechauffer l'image et ancrer l'identite MAPA. Opacity 10%
+          uniquement -> quasi imperceptible, juste une chaleur. */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          backgroundColor: "var(--copper, #e0af6e)",
+          mixBlendMode: "soft-light",
+          opacity: 0.1,
+        }}
+      />
+
+      {/* Sprint HERO-STYLE : vignette douce — assombrissement progressif
+          des 4 coins via radial-gradient. Transparent au centre, ombre
+          ~30% max aux bords. Effet pellicule discret. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 55%, rgba(31, 34, 26, 0.30) 100%)",
+        }}
       />
 
       {/* Brackets dorés (4 coins) */}
@@ -90,8 +123,15 @@ export async function Hero({ locale }: { locale: string }) {
       >
         {/* POL4 : pill retiré (affichait "TEST CMS LIVE" via override CMS). */}
 
+        {/* Sprint HERO-STYLE : fade-up stagger 150ms (eyebrow 0 / h1 150
+            / signature 300 / subtitle 450). prefers-reduced-motion :
+            apparition immediate via .mapa-hero-fade-up override CSS. */}
+
         {/* Eyebrow */}
-        <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/70 sm:text-xs">
+        <p
+          className="mapa-hero-fade-up font-mono text-[10px] uppercase tracking-[0.4em] text-white/70 sm:text-xs"
+          style={{ animationDelay: "0ms" }}
+        >
           {eyebrow}
         </p>
 
@@ -101,7 +141,10 @@ export async function Hero({ locale }: { locale: string }) {
             editoriale copper #e0af6e italic regular, legerement plus petite
             (clamp 1.4→4.8rem ≈ 70%), meme alignement/tracking que le bloc
             titre. Conditionnel : rien si title_line_3 vide. */}
-        <h1 className="font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]">
+        <h1
+          className="mapa-hero-fade-up font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]"
+          style={{ animationDelay: "150ms" }}
+        >
           <span className="block text-white/90">{titleLine1}</span>
           <span className="block text-white">{titleLine2}</span>
           {titleLine3 && (
@@ -114,13 +157,18 @@ export async function Hero({ locale }: { locale: string }) {
           )}
         </h1>
 
-        <SignatureLine />
+        <div
+          className="mapa-hero-fade-up"
+          style={{ animationDelay: "300ms" }}
+        >
+          <SignatureLine />
+        </div>
 
         {/* STEP3c-1-bis : subtitle multi-lignes (vertus rares). \n preserves
             via whiteSpace pre-line — saut de ligne CSS sans <br/>. */}
         <p
-          className="max-w-xl text-xs leading-relaxed text-white/80 md:text-lg lg:text-xl"
-          style={{ whiteSpace: "pre-line" }}
+          className="mapa-hero-fade-up max-w-xl text-xs leading-relaxed text-white/80 md:text-lg lg:text-xl"
+          style={{ whiteSpace: "pre-line", animationDelay: "450ms" }}
         >
           {subtitle}
         </p>

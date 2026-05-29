@@ -737,3 +737,36 @@ body {
     transform: rotateY(180deg);
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   Sprint HERO-STYLE — animations premium video Hero (CSS pur).
+   ─ Ken Burns : zoom lent 1.0 → 1.08, alterne en boucle (~20s).
+   ─ Fade-up : apparition douce du texte au mount (opacity + translateY).
+   Toutes les animations respectent prefers-reduced-motion: reduce.
+   ───────────────────────────────────────────────────────────────── */
+@keyframes mapa-ken-burns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+.mapa-ken-burns {
+  animation: mapa-ken-burns 20s ease-in-out infinite alternate;
+  transform-origin: center center;
+  will-change: transform;
+}
+@keyframes mapa-hero-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mapa-hero-fade-up {
+  opacity: 0;
+  animation: mapa-hero-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: opacity, transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mapa-ken-burns { animation: none; }
+  .mapa-hero-fade-up {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
