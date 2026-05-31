@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { TrackPageView } from "@/components/tracking/TrackPageView";
 import { Suspense } from "react";
 import { Header } from "@/components/layout/Header";
+import { CtaBand } from "@/components/layout/CtaBand";
 import { Footer } from "@/components/layout/Footer";
 import { ChatbotWidgetLoader } from "@/components/chatbot/ChatbotWidgetLoader";
 import Script from "next/script";
@@ -239,6 +240,7 @@ export default async function LocaleLayout({
               style={{ position: "relative", zIndex: 1 }}
             >
               <main className="flex-1">{children}</main>
+              <CtaBand />
               <Footer />
             </div>
             <ChatbotWidgetLoader />

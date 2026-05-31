@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ContactReveal } from "@/components/contact-reveal";
-import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 
 const colServices = [
   { href: "/services/vendre", key: "sell" },
@@ -55,43 +54,8 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="footer-rounded mt-24 border-t border-line bg-bg-soft text-ink">
+    <footer className="footer-rounded mt-0 border-t border-line bg-bg-soft text-ink">
       <div className="mx-auto max-w-[1400px] px-6 py-16 lg:px-10">
-        {/* STEP3b : CTA Footer wrapped FadeInOnScroll (y=30). Bouton
-            primaire reçoit classe .cta-lime-glow (box-shadow lime mur
-            #CFE542 transition 1s — defini globals.css). */}
-        <FadeInOnScroll y={30}>
-        <div className="mb-14 grid gap-6 overflow-hidden rounded-2xl border border-gold/30 bg-bg-contrast p-8 text-text-contrast shadow-md md:grid-cols-[1fr_auto] md:items-center md:p-10">
-          <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-gold">
-              {t("cta_eyebrow")}
-            </p>
-            <h3 className="mt-2 font-display text-2xl font-black leading-tight text-text-contrast md:text-4xl">
-              {t("cta_title")}
-            </h3>
-            <p className="mt-2 max-w-xl text-sm text-text-contrast/80 md:text-base">
-              {t("cta_subtitle")}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3 md:flex-col md:items-stretch">
-            <Link
-              href="/mandats/exclusif"
-              className="cta-lime-glow inline-flex items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-ink shadow-md transition-colors hover:bg-gold-bright"
-            >
-              {t("cta_exclusive")}
-              <span aria-hidden>→</span>
-            </Link>
-            <Link
-              href="/mandats/recherche"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-gold/60 px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-gold transition-colors hover:border-gold hover:bg-gold/10"
-            >
-              {t("cta_search")}
-              <span aria-hidden>→</span>
-            </Link>
-          </div>
-        </div>
-        </FadeInOnScroll>
-
         <Logo height={56} tone="auto" />
 
         <div className="mt-12 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
