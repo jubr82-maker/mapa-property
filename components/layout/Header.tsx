@@ -61,17 +61,13 @@ export function Header() {
   }, []);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      {/* Sprint UI-NOTCH : body rounded-b-[18px] + overlay SVG dessous
-          pour notch central protrudant vers le bas + lisere dore qui
-          epouse coins arrondis + notch (cf. <svg> en fin de div). */}
-      <div
-        className={`relative rounded-b-[18px] transition-colors duration-300 ${
-          scrolled
-            ? "bg-bg/95 backdrop-blur-md"
-            : "bg-bg/85 backdrop-blur-sm"
-        }`}
-      >
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        scrolled
+          ? "border-b border-line bg-bg/95 backdrop-blur-md"
+          : "border-b border-transparent bg-bg/85 backdrop-blur-sm"
+      }`}
+    >
       {/* BUG T8 : header élargi 1400 -> 1600px (logo inchangé 56/96px,
           la nav respire et s'éloigne du centre). */}
       {/* POL2-4 : onglets + gaps doublés (POL3-4 : taille onglets
@@ -149,32 +145,6 @@ export function Header() {
             </div>
           </div>
         </div>
-      </div>
-      {/* Sprint UI-NOTCH : overlay SVG bas — notch central protrudant
-          (profondeur 30px viewBox / largeur 100 viewBox = ~140px @1400px),
-          coins bas arrondis 18px, lisere dore qui epouse TOUT le contour
-          (coins + flat + notch). preserveAspectRatio=none + vector-effect
-          non-scaling-stroke -> liseré 2px constant peu importe la largeur.
-          fill var(--bg) translucide pour matcher le body, stroke var(--gold). */}
-      <svg
-        className="pointer-events-none absolute -bottom-[30px] left-0 right-0 h-[48px] w-full"
-        viewBox="0 0 1000 48"
-        preserveAspectRatio="none"
-        aria-hidden
-      >
-        <path
-          d="M 450 18 C 450 48 550 48 550 18 Z"
-          fill="var(--bg)"
-          fillOpacity={scrolled ? 0.95 : 0.85}
-        />
-        <path
-          d="M 0 0 Q 0 18 18 18 L 450 18 C 450 48 550 48 550 18 L 982 18 Q 1000 18 1000 0"
-          fill="none"
-          stroke="var(--gold)"
-          strokeWidth="2"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
       </div>
     </header>
   );

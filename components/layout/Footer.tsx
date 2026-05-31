@@ -54,32 +54,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative mt-0 rounded-t-[24px] bg-bg-soft text-ink">
-      {/* Sprint UI-NOTCH : overlay SVG haut — notch central protrudant
-          vers le haut (profondeur 50px viewBox / largeur 140 viewBox =
-          ~196px @1400px), coins haut arrondis 24px, lisere dore qui
-          epouse TOUT le contour (coins + flat + notch). SVG positionne
-          -top-[50px] + h-[74px] -> 50px au-dessus du footer + 24px
-          d'overlap pour tracer les coins arrondis. fill var(--bg-soft)
-          (matche le footer), stroke var(--gold). */}
-      <svg
-        className="pointer-events-none absolute -top-[50px] left-0 right-0 h-[74px] w-full"
-        viewBox="0 0 1000 74"
-        preserveAspectRatio="none"
-        aria-hidden
-      >
-        <path
-          d="M 430 50 C 430 0 570 0 570 50 Z"
-          fill="var(--bg-soft)"
-        />
-        <path
-          d="M 0 74 Q 0 50 24 50 L 430 50 C 430 0 570 0 570 50 L 976 50 Q 1000 50 1000 74"
-          fill="none"
-          stroke="var(--gold)"
-          strokeWidth="2"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
+    <footer className="mt-0 border-t border-line bg-bg-soft text-ink">
       <div className="mx-auto max-w-[1400px] px-6 py-16 lg:px-10">
         <Logo height={56} tone="auto" />
 
