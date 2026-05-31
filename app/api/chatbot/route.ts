@@ -83,6 +83,10 @@ const callMistral = async (messages: Message[]) => {
         messages,
         max_tokens: 400,
         temperature: 0.6,
+        // Sprint ELENA-NAV phase 2 : fiabilise le JSON strict attendu par
+        // parseAssistantReply. mistral-small-latest supporte json_object.
+        // parseAssistantReply reste filet en cas de drift inattendu.
+        response_format: { type: "json_object" },
       }),
     });
     if (!res.ok) return null;
