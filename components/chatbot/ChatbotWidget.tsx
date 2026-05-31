@@ -1,9 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { getDefaultGreeting } from "./chatbot-knowledge";
+
+// Sprint ELENA-AVATAR : avatar photo de profil place dans public/.
+// 512x512, decline en 3 tailles via next/image + sizes (bulle 56/64,
+// header panel 40, side message 32). Ring cuivre discret autour pour
+// rester dans la charte MAPA (--gold).
+const AVATAR_SRC = "/elena-avatar.jpg";
+const AVATAR_ALT = "Eléna, conseillère MAPA Property";
 
 interface Message {
   role: "user" | "assistant";
@@ -150,17 +158,27 @@ export function ChatbotWidget() {
 
   return (
     <>
-      {/* Floating bubble */}
+      {/* Floating bubble — Sprint ELENA-AVATAR : photo de profil ronde
+          avec liseré cuivre. Pulse dot conserve sur l'angle haut-droit. */}
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="Eléna"
         aria-expanded={open}
-        className={`gold-shine-bg fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full text-ink shadow-xl shadow-gold/30 transition-all duration-300 hover:scale-105 sm:size-16 ${
+        className={`fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full shadow-xl shadow-gold/30 transition-all duration-300 hover:scale-105 sm:size-16 ${
           open ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
-        <ElenaAvatar />
+        <span className="relative block size-14 overflow-hidden rounded-full ring-2 ring-gold/70 sm:size-16">
+          <Image
+            src={AVATAR_SRC}
+            alt={AVATAR_ALT}
+            fill
+            sizes="(min-width: 640px) 64px, 56px"
+            className="object-cover"
+            priority
+          />
+        </span>
         <span aria-hidden className="absolute -right-0.5 -top-0.5 size-3 rounded-full bg-bg ring-2 ring-gold animate-pulse" />
       </button>
 
@@ -171,11 +189,18 @@ export function ChatbotWidget() {
         }`}
       >
         <div className="flex h-[min(82dvh,640px)] flex-col overflow-hidden rounded-2xl border border-gold/40 bg-bg shadow-2xl shadow-ink/20">
-          {/* Header */}
+          {/* Header — Sprint ELENA-AVATAR : avatar 40px rond + liseré
+              cuivre, aligne avec le nom "Eléna". */}
           <header className="flex items-center justify-between gap-3 border-b border-line bg-bg-soft px-5 py-4">
             <div className="flex items-center gap-3">
-              <span className="gold-shine-bg inline-flex size-9 items-center justify-center rounded-full">
-                <ElenaAvatar small />
+              <span className="relative block size-10 overflow-hidden rounded-full ring-2 ring-gold/60">
+                <Image
+                  src={AVATAR_SRC}
+                  alt={AVATAR_ALT}
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                />
               </span>
               <div>
                 <p className="font-display text-base font-bold text-ink">Eléna</p>
@@ -196,13 +221,26 @@ export function ChatbotWidget() {
             </button>
           </header>
 
-          {/* Messages */}
+          {/* Messages — Sprint ELENA-AVATAR : avatar 32px rond aligne
+              top a gauche des bulles assistant. Cote user : pas d'avatar
+              (alignement justify-end conserve). */}
           <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex items-start gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
+                {m.role === "assistant" && (
+                  <span className="relative mt-0.5 block size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-gold/40">
+                    <Image
+                      src={AVATAR_SRC}
+                      alt={AVATAR_ALT}
+                      fill
+                      sizes="32px"
+                      className="object-cover"
+                    />
+                  </span>
+                )}
                 <div
                   className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                     m.role === "user"
@@ -215,7 +253,16 @@ export function ChatbotWidget() {
               </div>
             ))}
             {pending && (
-              <div className="flex justify-start">
+              <div className="flex items-start justify-start gap-2">
+                <span className="relative mt-0.5 block size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-gold/40">
+                  <Image
+                    src={AVATAR_SRC}
+                    alt={AVATAR_ALT}
+                    fill
+                    sizes="32px"
+                    className="object-cover"
+                  />
+                </span>
                 <div className="rounded-2xl border border-line bg-bg-soft px-4 py-2.5 text-sm text-ink-soft">
                   <span className="inline-flex gap-1">
                     <span className="size-1.5 animate-bounce rounded-full bg-gold [animation-delay:0ms]" />
@@ -273,25 +320,3 @@ export function ChatbotWidget() {
   );
 }
 
-function ElenaAvatar({ small = false }: { small?: boolean }) {
-  // Silhouette féminine SVG monochrome dorée
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      className={small ? "size-5 text-ink" : "size-7 text-ink"}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinejoin="round"
-    >
-      {/* Cheveux */}
-      <path d="M9 14c0-4 3-7 7-7s7 3 7 7v2c0 1-.5 1.5-1 2 .5-.5 1-1.5 1-3 0-2.5-2-4.5-4-5h-6c-2 .5-4 2.5-4 5 0 1.5.5 2.5 1 3-.5-.5-1-1-1-2v-2z" fill="currentColor" />
-      {/* Visage */}
-      <ellipse cx="16" cy="14" rx="5" ry="6" fill="currentColor" opacity="0.15" />
-      <ellipse cx="16" cy="14" rx="5" ry="6" />
-      {/* Buste */}
-      <path d="M8 28c0-4 3.5-7 8-7s8 3 8 7v1H8v-1z" fill="currentColor" opacity="0.4" />
-      <path d="M8 28c0-4 3.5-7 8-7s8 3 8 7" />
-    </svg>
-  );
-}
