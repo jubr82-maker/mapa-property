@@ -55,7 +55,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-24 border-t border-line bg-bg-soft text-ink">
+    <footer className="footer-clip mt-24 border-t border-line bg-bg-soft text-ink">
       <div className="mx-auto max-w-[1400px] px-6 py-16 lg:px-10">
         {/* STEP3b : CTA Footer wrapped FadeInOnScroll (y=30). Bouton
             primaire reçoit classe .cta-lime-glow (box-shadow lime mur

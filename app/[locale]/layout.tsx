@@ -206,11 +206,8 @@ export default async function LocaleLayout({
         />
       </head>
       <body
-        // Sprint UI-SLAB : body fait office de "marge claire" autour de la
-        // dalle flottante. bg-bg-soft = crème -3% (mode clair) ou sapin +3%
-        // (mode sombre, mais sera moins visible car la dalle interne force
-        // .dark de toute façon).
-        className="min-h-dvh bg-bg-soft text-ink antialiased"
+        className="min-h-dvh bg-bg text-ink antialiased"
+        style={{ backgroundColor: "var(--ambient-bg)" }}
       >
         {/* STEP3a-FORET : AmbientBackgroundLite — fond crème velin
             #F0E6CC (jour) / sapin #1F221A (nuit) + 4 line-art cuivre
@@ -237,41 +234,12 @@ export default async function LocaleLayout({
               <TrackPageView />
             </Suspense>
             <Header />
-            {/* Sprint UI-SLAB — dalle flottante style landonorris.com.
-                Wrapper avec margins (visible "marges claires" tout autour)
-                + className `dark` qui force les vars CSS sombres en
-                cascade sur TOUS les descendants. Resultat : peu importe
-                le theme user (light ou dark), le contenu de la dalle
-                utilise les vars dark -> bg-bg-contrast (sapin foncé fixe)
-                + text-ink (devient creme via .dark) = lisible.
-                Le notch N2 est une languette qui depasse en haut au
-                centre de la dalle.
-                Top padding mis a pt-24 mobile / pt-28 lg pour laisser
-                la place au header H3 pilule (h-20 + margins top-3 a 4). */}
             <div
-              className="dark relative px-3 pt-24 pb-4 sm:px-4 sm:pt-28 sm:pb-6 lg:px-4 lg:pt-32 lg:pb-6"
+              className="flex min-h-dvh flex-col"
               style={{ position: "relative", zIndex: 1 }}
             >
-              {/* Notch N2 — languette arrondie qui dépasse en haut au
-                  centre de la dalle. Top calculé = pt du wrapper - 18px
-                  (la moitié de la hauteur du notch dépasse au-dessus du
-                  bord supérieur de la dalle). aria-hidden : decoratif. */}
-              {/* Top calcule pour matcher le pt responsive du wrapper :
-                  pt-24 (96px) - 18 = 78  → mobile
-                  pt-28 (112px) - 18 = 94 → sm
-                  pt-32 (128px) - 18 = 110 → lg */}
-              <div
-                aria-hidden
-                className="absolute left-1/2 top-[78px] z-10 h-[18px] w-24 -translate-x-1/2 rounded-b-2xl bg-bg-contrast sm:top-[94px] lg:top-[110px]"
-              />
-              {/* Dalle elle-meme : bg sombre figé (bg-bg-contrast =
-                  #1F221A en clair ET sombre), texte clair via cascade
-                  .dark + text-text-contrast. overflow-hidden clipe les
-                  enfants aux coins arrondis. */}
-              <div className="relative overflow-hidden rounded-[40px] bg-bg-contrast text-text-contrast shadow-2xl shadow-ink/20">
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
+              <main className="flex-1">{children}</main>
+              <Footer />
             </div>
             <ChatbotWidgetLoader />
           </NextIntlClientProvider>

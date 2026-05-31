@@ -62,16 +62,13 @@ export function Header() {
 
   return (
     <header
-      // Sprint UI-SLAB : header H3 pilule flottante. Plus de `fixed
-      // inset-x-0 top-0` (full-width), mais `fixed top-X left-X right-X`
-      // avec margins pour creer une pilule arrondie qui flotte dans la
-      // marge claire au-dessus de la dalle (style Norris). Le decroche
-      // header-clip du sprint precedent est retire (devenu doublon).
-      // border-b retire : la pilule a `border` complet pour cadre net.
-      className={`fixed top-3 left-3 right-3 z-50 rounded-full overflow-hidden transition-colors duration-300 sm:top-4 sm:left-4 sm:right-4 lg:top-4 lg:left-4 lg:right-4 ${
+      // Sprint UI-CLIP : ajout `header-clip` -> biseau asymetrique
+      // coin bas-droit (50px mobile / 80px desktop, profondeur 6px).
+      // Effet "decroche organique" discret (cf. globals.css).
+      className={`header-clip fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         scrolled
-          ? "border border-line bg-bg/95 backdrop-blur-md shadow-lg shadow-ink/10"
-          : "border border-line/60 bg-bg/85 backdrop-blur-sm"
+          ? "border-b border-line bg-bg/95 backdrop-blur-md"
+          : "border-b border-transparent bg-bg/85 backdrop-blur-sm"
       }`}
     >
       {/* BUG T8 : header élargi 1400 -> 1600px (logo inchangé 56/96px,
