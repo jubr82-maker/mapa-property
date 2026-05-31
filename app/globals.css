@@ -771,18 +771,3 @@ body {
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   Sprint UI-ROUNDED — Decroches arrondis header (leger) + footer (marque).
-   Rappel visuel discret entre haut et bas, style landonorris.com.
-   ─ Header : coins BAS arrondis ~18px (rappel leger).
-   ─ Footer : coins HAUT arrondis ~44px (decroche marque, panneau).
-   ─ Aucun changement de structure / couleur / contenu.
-   ───────────────────────────────────────────────────────────────── */
-.header-rounded {
-  border-bottom-left-radius: 18px;
-  border-bottom-right-radius: 18px;
-}
-.footer-rounded {
-  border-top-left-radius: 44px;
-  border-top-right-radius: 44px;
-}
