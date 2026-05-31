@@ -36,7 +36,7 @@ const SLUG_VILLE = process.env.SLUG_VILLE ?? "luxembourg-ville"; // slug réel (
 
 const ALL_ROUTES = [
   "/", "/biens", SLUG_BIEN && `/biens/${SLUG_BIEN}`,
-  "/off-market", "/off-market/arcova", "/arcova",
+  "/off-market", "/off-market/arcova",
   "/mandats/recherche", "/services/estimer", "/services/louer",
   "/services/vendre", "/services/rendement-locatif",
   "/services/marches-actifs", "/services/simulateurs",

@@ -33,6 +33,58 @@ function ArcovaContent() {
       </h1>
       <p className="mt-6 text-lg leading-relaxed text-ink-mid">{t("intro")}</p>
 
+      {/* Section : Le problème du off-market non régulé */}
+      <section className="mt-14">
+        <h2 className="t-h3">{t("problem_title")}</h2>
+        <p className="mt-4 text-base leading-relaxed text-ink-mid">{t("problem_text")}</p>
+      </section>
+
+      {/* Section : Les conséquences */}
+      <section className="mt-12">
+        <h2 className="t-h3">{t("consequences_title")}</h2>
+        <ul className="mt-4 space-y-3 text-base leading-relaxed text-ink-mid">
+          <li className="flex gap-3"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-gold" />{t("consequences_item_1")}</li>
+          <li className="flex gap-3"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-gold" />{t("consequences_item_2")}</li>
+          <li className="flex gap-3"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-gold" />{t("consequences_item_3")}</li>
+          <li className="flex gap-3"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-gold" />{t("consequences_item_4")}</li>
+          <li className="flex gap-3"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-gold" />{t("consequences_item_5")}</li>
+          <li className="flex gap-3"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-gold" />{t("consequences_item_6")}</li>
+        </ul>
+      </section>
+
+      {/* Paragraphe transition : valorisation */}
+      <p className="mt-10 text-base leading-relaxed text-ink-mid">{t("valuation_text")}</p>
+
+      {/* Section : La réponse ARCOVA */}
+      <section className="mt-12">
+        <h2 className="t-h3">{t("response_title")}</h2>
+        <p className="mt-4 text-base leading-relaxed text-ink-mid">{t("response_text")}</p>
+      </section>
+
+      {/* Section : Ce qu'ARCOVA protège, pour chaque profil */}
+      <section className="mt-12">
+        <h2 className="t-h3">{t("protect_title")}</h2>
+        <ul className="mt-4 space-y-4 text-base leading-relaxed text-ink-mid">
+          <li>
+            <span className="font-display font-bold text-ink">{t("protect_owners_label")}</span>
+            <span className="text-ink-mid"> — {t("protect_owners_text")}</span>
+          </li>
+          <li>
+            <span className="font-display font-bold text-ink">{t("protect_brokers_label")}</span>
+            <span className="text-ink-mid"> — {t("protect_brokers_text")}</span>
+          </li>
+          <li>
+            <span className="font-display font-bold text-ink">{t("protect_buyers_label")}</span>
+            <span className="text-ink-mid"> — {t("protect_buyers_text")}</span>
+          </li>
+        </ul>
+      </section>
+
+      {/* Note finale en EVIDENCE : encart distinct, accent cuivre */}
+      <div className="mt-14 rounded-lg border-l-4 border-gold bg-gold/10 p-6">
+        <p className="text-base leading-relaxed text-ink">{t("platform_note")}</p>
+      </div>
+
       <div className="mt-12 rounded-lg border border-line bg-bg-soft p-8">
         <h2 className="t-h3">{t("waitlist_title")}</h2>
         <p className="mt-3 text-sm leading-relaxed text-ink-mid">{t("waitlist_text")}</p>
