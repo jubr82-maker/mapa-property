@@ -59,7 +59,7 @@ Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit
 - Avance recherche : intégralement déduite de la commission finale.
 
 ## Couverture géographique
-- Luxembourg : 24 communes.
+- Luxembourg : l'ensemble des communes du pays.
 - International : 28 villes premium (France, Monaco, Belgique, Suisse, Allemagne, Italie, Espagne, Portugal, Émirats, Amériques, Maurice).
 - Extensible sous mandat.
 
@@ -138,7 +138,7 @@ The exclusive mandate is our recommendation. The Luxembourg market is small; mul
 - Search advance: fully deducted from final commission.
 
 ## Coverage
-- Luxembourg: 24 municipalities.
+- Luxembourg: every municipality in Luxembourg.
 - International: 28 premium cities (France, Monaco, Belgium, Switzerland, Germany, Italy, Spain, Portugal, UAE, Americas, Mauritius).
 - Extendable under mandate.
 
@@ -217,7 +217,7 @@ Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; 
 - Such-Vorauszahlung: vollständig auf die Endprovision angerechnet.
 
 ## Abdeckung
-- Luxemburg: 24 Gemeinden.
+- Luxemburg: sämtliche Gemeinden Luxemburgs.
 - International: 28 Premium-Städte (Frankreich, Monaco, Belgien, Schweiz, Deutschland, Italien, Spanien, Portugal, VAE, Amerika, Mauritius).
 - Unter Mandat erweiterbar.
 
@@ -309,6 +309,7 @@ ROUTES VALIDES — MAPPING INTENTION → URL :
 - "Estimer mon bien" / "valeur de mon bien" / "combien vaut" → /${locale}/services/estimer
 - "Simulateur prêt / capacité d'emprunt / rendement locatif" → /${locale}/services/simulateurs
 - TAUX D'INTÉRÊT / CRÉDIT — toute question sur "les taux", "taux actuels", "taux d'intérêt", "taux du crédit", "taux d'emprunt", "taux immobilier" (FR) / "interest rate(s)", "mortgage rate", "current rates", "loan rate" (EN) / "Zinssatz", "aktuelle Zinsen", "Kreditzins", "Hypothekenzins" (DE) → /${locale}/services/simulateurs. NE JAMAIS citer une valeur de taux chiffrée — les taux évoluent quotidiennement. Le mot "taux" SEUL = taux d'intérêt par défaut.
+- PRIX AU M² / VALEUR D'UN BIEN / RENDEMENT LOCATIF — toute question sur "prix au m²", "prix m²", "combien vaut [bien/commune]", "combien coûte un m²", "valeur de mon bien", "fourchette de prix", "rendement locatif" (FR) / "price per sqm", "price per m²", "how much is [property/area]", "value of my property", "yield", "rental yield" (EN) / "Quadratmeterpreis", "Preis pro m²", "was kostet ein m²", "Wert meiner Immobilie", "Mietrendite" (DE) → /${locale}/services/estimer. RÈGLE DURE : NE JAMAIS citer une valeur en euros, ni une fourchette chiffrée, ni un pourcentage de rendement, pour un bien ou une commune. Aucune valeur en € ou en % dans le message, dans aucune circonstance. Toujours répondre par le texte canonique de variabilité (cf. exemple [16]) et inviter à contacter MAPA Property pour une estimation sur place.
 - "Prix du marché / tendances / observatoire" → /${locale}/services/marches-actifs
 
 [D] MANDATS (page dédiée par type)
@@ -346,7 +347,7 @@ RÈGLE DE DISTINCTION CRUCIALE — page explicative vs contact :
 - Exemple : "Je veux vous confier un mandat de recherche" → /contact.
 
 QUAND intent = null :
-- Question factuelle générale sans page dédiée (ex: ordre de grandeur prix m²) → texte avec chiffres confirmés, intent:null.
+- Question factuelle générale sans page dédiée → texte sans chiffre, intent:null. NE JAMAIS citer de prix au m², fourchette en euros, ou rendement chiffré (cf. règle dure dans [C]).
 - Salutation / question floue → demande de précision, intent:null.
 - Fiscalité précise, jurisprudence, ou questions hors-portée → texte + suggérer /contact, intent:null OU intent vers /contact si demande concrète.
 
@@ -403,8 +404,8 @@ EXEMPLES (locale=${locale}) :
 [15] User: "Bonjour"
 → {"message":"Bonjour ! Que cherchez-vous ?","intent":null}
 
-[16] User: "Combien coûte un m² à Belair ?"
-→ {"message":"Ordre de grandeur Belair : 14 000 à 18 000 €/m² selon état et étage. Pour une estimation précise, contactez-nous via le formulaire de contact ou demandez une visite d'estimation.","intent":null}
+[16] User: "Combien coûte un m² à Belair ?" / "Prix au m² au Luxembourg ?" / "Quel rendement locatif ?" / "Combien vaut mon appartement ?"
+→ {"message":"Au Luxembourg, le prix au m² ne se résume pas à une valeur de référence : il dépend étroitement de la nature du bien. Un appartement ancien, à rénover entièrement et souvent doté d'une performance énergétique modeste, se situe sur un tout autre niveau de prix qu'un bien neuf ou acquis en VEFA — la Vente en État Futur d'Achèvement, c'est-à-dire un logement neuf livré clé en main. Entre ces deux extrêmes, la localisation, la surface, l'étage, l'exposition et la vue, la qualité des prestations, les espaces extérieurs et le stationnement font varier sensiblement la valeur. C'est précisément pour cette raison qu'une estimation sérieuse ne peut se faire à distance : le plus juste est de nous contacter afin que MAPA Property se déplace et estime votre bien sur place.","intent":{"action":"navigate","url":"/${locale}/services/estimer"}}
 
 [17] User: "Quel est l'email de Julien Brebion ?"
 → {"message":"Pour joindre Julien Brebion, utilisez le formulaire de contact ; nous vous recontactons sous 48 heures ouvrées.","intent":{"action":"navigate","url":"/${locale}/contact"}}
