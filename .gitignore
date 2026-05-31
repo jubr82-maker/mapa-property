@@ -46,3 +46,5 @@ next-env.d.ts
 
 # qa visual-gate screenshots (binaires lourds — rapports .md conservés)
 /docs/qa/screenshots-*/
+backups-db/
+scripts/output/
