@@ -21,6 +21,7 @@ import { Link } from "@/i18n/navigation";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import type { HomeFeatured } from "@/lib/data";
+import { resolveBadgeStyles } from "@/lib/badge-style";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 import { useDeviceMode } from "@/hooks/useDeviceMode";
@@ -332,6 +333,24 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             Off-Market
           </span>
         )}
+        {/* Sprint badges commerciaux : badge admin-driven sur biens apimo
+            uniquement (offmarket conserve sa pilule cuivre ci-dessus). */}
+        {!isOffmarket && (() => {
+          const b = resolveBadgeStyles(
+            item.badge,
+            item.badge_size,
+            item.badge_position,
+          );
+          if (!b) return null;
+          return (
+            <span
+              className={`absolute rounded-full font-mono uppercase backdrop-blur ${b.sizeClass} ${b.positionClass}`}
+              style={b.inlineStyle}
+            >
+              {item.badge}
+            </span>
+          );
+        })()}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5 md:gap-2 md:p-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">

@@ -73,6 +73,17 @@ export type HomeFeatured = {
   surface: number | null;
   bedrooms: number | null;
   created_at: string | null;
+  // Sprint badges commerciaux : badge admin-driven sur biens apimo. Pour
+  // offmarket : toujours null (offmarket conserve sa pilule cuivre dédiée
+  // côté FeaturedCarousel, géré séparément).
+  badge: string | null;
+  badge_size: "S" | "M" | "L" | null;
+  badge_position:
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right"
+    | null;
 };
 
 export async function fetchHomeFeatured(
@@ -93,7 +104,7 @@ export async function fetchHomeFeatured(
   let [apimoRes, offmarketRes] = await Promise.all([
     sb
       .from("properties")
-      .select("id,slug,title_fr,title_en,title_de,city,country,price,surface,bedrooms,created_at,property_images(url,sort)")
+      .select("id,slug,title_fr,title_en,title_de,city,country,price,surface,bedrooms,created_at,badge,badge_size,badge_position,property_images(url,sort)")
       .eq("is_published", true)
       .eq("is_featured", true)
       .order("created_at", { ascending: false })
@@ -136,6 +147,14 @@ export async function fetchHomeFeatured(
     surface: number | null;
     bedrooms: number | null;
     created_at: string | null;
+    badge: string | null;
+    badge_size: "S" | "M" | "L" | null;
+    badge_position:
+      | "top-left"
+      | "top-right"
+      | "bottom-left"
+      | "bottom-right"
+      | null;
     property_images: { url: string; sort: number | null }[] | null;
   };
   type OffmarketRow = {
@@ -174,6 +193,9 @@ export async function fetchHomeFeatured(
       surface: row.surface,
       bedrooms: row.bedrooms,
       created_at: row.created_at,
+      badge: row.badge,
+      badge_size: row.badge_size,
+      badge_position: row.badge_position,
     };
   });
 
@@ -197,6 +219,11 @@ export async function fetchHomeFeatured(
       surface: row.surface_hab,
       bedrooms: row.bedrooms,
       created_at: row.created_at,
+      // Offmarket : aucun badge commercial (signalétique Off-Market
+      // cuivre top-right gérée séparément dans FeaturedCarousel).
+      badge: null,
+      badge_size: null,
+      badge_position: null,
     }));
 
   const all = [...apimo, ...offmarket]
