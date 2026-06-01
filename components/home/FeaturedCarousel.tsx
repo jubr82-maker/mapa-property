@@ -320,7 +320,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             }}
           />
         )}
-        {isOffmarket ? (
+        {isOffmarket && (
           <span
             className="absolute right-3 top-3 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] backdrop-blur"
             style={{
@@ -330,10 +330,6 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
             }}
           >
             Off-Market
-          </span>
-        ) : (
-          <span className="absolute right-3 top-3 rounded-full bg-bg-contrast/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-text-contrast/90 backdrop-blur">
-            Apimo
           </span>
         )}
       </div>
