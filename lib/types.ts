@@ -21,6 +21,16 @@ export interface Property {
   bedrooms: number | null;
   bathrooms: number | null;
   badge: string | null;
+  // Sprint badges commerciaux : libellé admin-driven (allowlist 6 valeurs
+  // côté server action) + taille (S/M/L) + position (4 coins). Couleur
+  // dérivée du libellé via mapping côté code (PropertyCard).
+  badge_size: "S" | "M" | "L" | null;
+  badge_position:
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right"
+    | null;
   parking: number | null;
   year: number | null;
   energy: string | null;

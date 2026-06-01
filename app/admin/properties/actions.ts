@@ -65,12 +65,33 @@ export async function setPropertyFeatured(id: string, isFeatured: boolean) {
  * Champ vide ('') → null (respecte les colonnes nullable). Tous les
  * champs sont OPTIONNELS : seul ce qui est passé est mis à jour.
  */
+// Sprint badges commerciaux : allowlists strictes. Toute valeur hors
+// liste -> null (pas d'erreur, dégradation gracieuse).
+const BADGE_LABELS: readonly string[] = [
+  "Exclusivité",
+  "Nouveau",
+  "Nouveau prix",
+  "Opportunité",
+  "Investissement",
+  "À découvrir",
+];
+const BADGE_SIZES: readonly string[] = ["S", "M", "L"];
+const BADGE_POSITIONS: readonly string[] = [
+  "top-left",
+  "top-right",
+  "bottom-left",
+  "bottom-right",
+];
+
 export async function updateProperty(
   id: string,
   data: {
     title_fr?: string | null;
     description_fr?: string | null;
     price?: number | null;
+    badge?: string | null;
+    badge_size?: string | null;
+    badge_position?: string | null;
   },
 ) {
   const supabase = await createSupabaseServerClient();
@@ -86,6 +107,19 @@ export async function updateProperty(
   if (data.price !== undefined) {
     update.price =
       data.price == null || Number.isNaN(data.price) ? null : data.price;
+  }
+  if (data.badge !== undefined) {
+    const b = (data.badge ?? "").trim();
+    update.badge = b.length > 0 && BADGE_LABELS.includes(b) ? b : null;
+  }
+  if (data.badge_size !== undefined) {
+    const s = (data.badge_size ?? "").trim();
+    update.badge_size = s.length > 0 && BADGE_SIZES.includes(s) ? s : null;
+  }
+  if (data.badge_position !== undefined) {
+    const p = (data.badge_position ?? "").trim();
+    update.badge_position =
+      p.length > 0 && BADGE_POSITIONS.includes(p) ? p : null;
   }
   if (Object.keys(update).length === 0) return { ok: true };
   const slug = await fetchPropertySlug(supabase, id);

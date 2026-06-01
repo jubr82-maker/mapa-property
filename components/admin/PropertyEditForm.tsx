@@ -15,11 +15,32 @@ import { useState, useTransition } from "react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { updateProperty } from "@/app/admin/properties/actions";
 
+// Sprint badges commerciaux : options exposées en const pour cohérence
+// avec l'allowlist server-side (actions.ts).
+const BADGE_OPTIONS = [
+  "Exclusivité",
+  "Nouveau",
+  "Nouveau prix",
+  "Opportunité",
+  "Investissement",
+  "À découvrir",
+] as const;
+const BADGE_SIZE_OPTIONS = ["S", "M", "L"] as const;
+const BADGE_POSITION_OPTIONS = [
+  { value: "top-left", label: "Haut gauche" },
+  { value: "top-right", label: "Haut droit" },
+  { value: "bottom-left", label: "Bas gauche" },
+  { value: "bottom-right", label: "Bas droit" },
+] as const;
+
 interface Props {
   propertyId: string;
   initialTitle: string;
   initialDescription: string;
   initialPrice: number | null;
+  initialBadge: string | null;
+  initialBadgeSize: string | null;
+  initialBadgePosition: string | null;
 }
 
 export function PropertyEditForm({
@@ -27,11 +48,19 @@ export function PropertyEditForm({
   initialTitle,
   initialDescription,
   initialPrice,
+  initialBadge,
+  initialBadgeSize,
+  initialBadgePosition,
 }: Props) {
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
   const [price, setPrice] = useState<string>(
     initialPrice == null ? "" : String(initialPrice),
+  );
+  const [badge, setBadge] = useState<string>(initialBadge ?? "");
+  const [badgeSize, setBadgeSize] = useState<string>(initialBadgeSize ?? "M");
+  const [badgePosition, setBadgePosition] = useState<string>(
+    initialBadgePosition ?? "top-left",
   );
   const [busy, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -49,6 +78,9 @@ export function PropertyEditForm({
           title_fr: title,
           description_fr: description,
           price: priceNum,
+          badge: badge.length > 0 ? badge : null,
+          badge_size: badge.length > 0 ? badgeSize : null,
+          badge_position: badge.length > 0 ? badgePosition : null,
         });
         setFeedback("Enregistré.");
       } catch (e) {
@@ -106,6 +138,64 @@ export function PropertyEditForm({
           className={`mt-1 ${inputCls}`}
         />
       </label>
+
+      {/* Sprint badges commerciaux : libellé (FIXE par valeur, couleur déduite
+          côté PropertyCard) + taille (S/M/L) + position (4 coins). */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <label className="block">
+          <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
+            Badge
+          </span>
+          <select
+            value={badge}
+            onChange={(e) => setBadge(e.target.value)}
+            className={`mt-1 ${inputCls}`}
+          >
+            <option value="">Aucun</option>
+            {BADGE_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
+            Taille
+          </span>
+          <select
+            value={badgeSize}
+            onChange={(e) => setBadgeSize(e.target.value)}
+            disabled={badge.length === 0}
+            className={`mt-1 ${inputCls} disabled:opacity-50`}
+          >
+            {BADGE_SIZE_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
+            Position
+          </span>
+          <select
+            value={badgePosition}
+            onChange={(e) => setBadgePosition(e.target.value)}
+            disabled={badge.length === 0}
+            className={`mt-1 ${inputCls} disabled:opacity-50`}
+          >
+            {BADGE_POSITION_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <button

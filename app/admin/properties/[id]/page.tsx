@@ -20,7 +20,7 @@ export default async function AdminPropertyEditPage({
   const { data, error } = await supabase
     .from("properties")
     .select(
-      "id, slug, title_fr, description_fr, price, city, country, transaction, video_url",
+      "id, slug, title_fr, description_fr, price, city, country, transaction, video_url, badge, badge_size, badge_position",
     )
     .eq("id", id)
     .maybeSingle();
@@ -95,6 +95,9 @@ export default async function AdminPropertyEditPage({
           initialTitle={data.title_fr ?? ""}
           initialDescription={data.description_fr ?? ""}
           initialPrice={data.price ?? null}
+          initialBadge={data.badge ?? null}
+          initialBadgeSize={data.badge_size ?? null}
+          initialBadgePosition={data.badge_position ?? null}
         />
       </section>
 

@@ -85,6 +85,16 @@ body {
   --text-contrast:  #F0E6CC;                 /* crème velin sur sapin */
   --text-muted:     rgba(31, 34, 26, 0.6);
   --border-subtle:  rgba(31, 34, 26, 0.10);
+
+  /* ── Badges commerciaux (palette dédiée, hors palette stricte 4).
+     Couleurs FIGÉES jour=nuit, dupliquées dans :root.dark pour
+     explicitness (cf. pattern --bg-contrast / --text-contrast). ── */
+  --badge-exclu:        #7A3B3B;  /* Exclusivité — bordeaux */
+  --badge-nouveau:      #5A6B4A;  /* Nouveau — vert sapin */
+  --badge-nouveau-prix: #8A6D2F;  /* Nouveau prix — or bronze */
+  --badge-opportunite:  #e0af6e;  /* Opportunité — cuivre (alias --copper, texte sapin) */
+  --badge-investment:   #3E5563;  /* Investissement — bleu ardoise */
+  --badge-discover:     #1F221A;  /* À découvrir — sapin + filet cuivre, texte cuivre */
 }
 
 /* `:root.dark` (spécificité 0,2,0) et NON `.dark` (0,1,0) : sinon le
@@ -118,6 +128,14 @@ body {
   --text-contrast:  #F0E6CC;                   /* crème velin sur sapin */
   --text-muted:     rgba(240, 230, 204, 0.6);
   --border-subtle:  rgba(240, 230, 204, 0.10);
+
+  /* ── Badges commerciaux (FIGÉS jour=nuit, dupliqués depuis :root) ── */
+  --badge-exclu:        #7A3B3B;
+  --badge-nouveau:      #5A6B4A;
+  --badge-nouveau-prix: #8A6D2F;
+  --badge-opportunite:  #e0af6e;
+  --badge-investment:   #3E5563;
+  --badge-discover:     #1F221A;
 }
 
 /* Expose les variables comme tokens Tailwind */
@@ -150,6 +168,14 @@ body {
   /* STEP3a-FORET : tokens palette Forêt exposés Tailwind v4 */
   --color-accent-primary:    var(--accent-primary);   /* lime mur #CFE542 */
   --color-accent-secondary:  var(--accent-secondary); /* cuivre citron #e0af6e */
+
+  /* Badges commerciaux exposés en utilitaires Tailwind v4 */
+  --color-badge-exclu:        var(--badge-exclu);
+  --color-badge-nouveau:      var(--badge-nouveau);
+  --color-badge-nouveau-prix: var(--badge-nouveau-prix);
+  --color-badge-opportunite:  var(--badge-opportunite);
+  --color-badge-investment:   var(--badge-investment);
+  --color-badge-discover:     var(--badge-discover);
 
   --font-display: var(--font-display);
   --font-sans:    var(--font-sans);

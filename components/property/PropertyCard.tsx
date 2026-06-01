@@ -19,6 +19,50 @@ const formatPrice = (price: number | null, transaction: string) => {
   return transaction === "rent" ? `${value} / mois` : value;
 };
 
+// Sprint badges commerciaux : mapping libellé -> styles inline (bg + texte
+// + bordure). Couleurs FIXES par libellé, dérivées côté code, jamais
+// stockées en DB. Texte BLANC sauf Opportunité (cuivre -> sapin) et À
+// découvrir (sapin -> cuivre + filet cuivre 1px).
+type BadgeStyle = {
+  backgroundColor: string;
+  color: string;
+  border?: string;
+};
+const BADGE_STYLE_MAP: Record<string, BadgeStyle> = {
+  Exclusivité: { backgroundColor: "var(--badge-exclu)", color: "#FFFFFF" },
+  Nouveau: { backgroundColor: "var(--badge-nouveau)", color: "#FFFFFF" },
+  "Nouveau prix": {
+    backgroundColor: "var(--badge-nouveau-prix)",
+    color: "#FFFFFF",
+  },
+  Opportunité: {
+    backgroundColor: "var(--badge-opportunite)",
+    color: "#1F221A",
+  },
+  Investissement: {
+    backgroundColor: "var(--badge-investment)",
+    color: "#FFFFFF",
+  },
+  "À découvrir": {
+    backgroundColor: "var(--badge-discover)",
+    color: "#e0af6e",
+    border: "1px solid #e0af6e",
+  },
+};
+
+const BADGE_SIZE_CLASS: Record<string, string> = {
+  S: "px-2 py-0.5 text-[9px] tracking-[0.15em]",
+  M: "px-3 py-1 text-[10px] tracking-[0.2em]",
+  L: "px-4 py-1.5 text-[12px] tracking-[0.22em]",
+};
+
+const BADGE_POSITION_CLASS: Record<string, string> = {
+  "top-left": "left-3 top-3",
+  "top-right": "right-3 top-3",
+  "bottom-left": "left-3 bottom-3",
+  "bottom-right": "right-3 bottom-3",
+};
+
 export function PropertyCard({ property, locale, priority = false }: PropertyCardProps) {
   const title = pickLang(property, "title", locale) || "—";
   const price = formatPrice(property.price, property.transaction);
@@ -50,18 +94,19 @@ export function PropertyCard({ property, locale, priority = false }: PropertyCar
             no image
           </div>
         )}
-        {property.badge && (
-          <span className="absolute left-3 top-3 rounded-full bg-bg-contrast/85 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-text-contrast backdrop-blur">
+        {property.badge && BADGE_STYLE_MAP[property.badge] && (
+          <span
+            className={`absolute rounded-full font-mono uppercase backdrop-blur ${
+              BADGE_SIZE_CLASS[property.badge_size ?? "M"] ?? BADGE_SIZE_CLASS.M
+            } ${
+              BADGE_POSITION_CLASS[property.badge_position ?? "top-left"] ??
+              BADGE_POSITION_CLASS["top-left"]
+            }`}
+            style={BADGE_STYLE_MAP[property.badge]}
+          >
             {property.badge}
           </span>
         )}
-        <span className="absolute right-3 top-3 rounded-full bg-gold-bright/95 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ink">
-          {property.transaction === "rent"
-            ? "Location"
-            : property.transaction === "offmarket"
-              ? "Off-Market"
-              : "Vente"}
-        </span>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
