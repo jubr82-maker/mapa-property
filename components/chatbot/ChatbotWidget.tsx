@@ -165,7 +165,7 @@ export function ChatbotWidget() {
         onClick={() => setOpen((o) => !o)}
         aria-label="Eléna"
         aria-expanded={open}
-        className={`fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full shadow-xl shadow-gold/30 transition-all duration-300 hover:scale-105 sm:size-16 ${
+        className={`fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full shadow-xl shadow-gold/30 transition-all duration-300 hover:scale-105 sm:size-16 print:hidden ${
           open ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
@@ -184,7 +184,7 @@ export function ChatbotWidget() {
 
       {/* Panel */}
       <div
-        className={`fixed bottom-0 right-0 z-50 m-2 w-[calc(100%-1rem)] max-w-md transition-all duration-300 sm:bottom-5 sm:right-5 sm:m-0 sm:w-[400px] ${
+        className={`fixed bottom-0 right-0 z-50 m-2 w-[calc(100%-1rem)] max-w-md transition-all duration-300 sm:bottom-5 sm:right-5 sm:m-0 sm:w-[400px] print:hidden ${
           open ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
         }`}
       >

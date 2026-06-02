@@ -13,7 +13,7 @@
 6. Détail méthodes retenues — uniquement celles cochées en BO `/admin/estimations/[id]`, avec valeurs
 7. Conclusion + signature Real Estate Director + tampon MAPA Property
 8. Mentions légales — limites responsabilité, mention "MAPA PROPERTY – marque de MAPA Synergy Sàrl"
-9. Contact — pas de tel: en clair (idem ContactReveal), CTA www.mapaproperty.com
+9. Contact — pas de tel: en clair (idem ContactReveal), CTA www.mapaproperty.lu
 
 ## Header doc (toutes pages)
 - Logo MAPA Property centré (utiliser `public/logo-mapa-property-mono.png` couleur or `#C8A04A`)
@@ -24,7 +24,7 @@
 MAPA PROPERTY – une marque de MAPA Synergy Sàrl
 N° LBR: B241974 | TVA: LU 31988923 | AE: N°10108681 / 0–1–2–3
 Matricule: 2020 2407 901 | IBAN: LU88 0019 5655 88 84 9000 | BIC: BCEELULL
-www.mapaproperty.com
+www.mapaproperty.lu
 ```
 
 ## Architecture proposée

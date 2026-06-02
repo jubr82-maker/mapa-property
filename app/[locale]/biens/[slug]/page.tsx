@@ -296,6 +296,11 @@ export default async function PropertyPage({
     },
   ];
 
+  // URL print-only : domaine final hardcode (SITE_URL peut resoudre
+  // beta.mapaproperty.lu ou *.vercel.app en staging — inadapte pour un
+  // document imprime distribue aux clients).
+  const canonicalUrl = `https://mapaproperty.lu/${locale}/biens/${property.slug}`;
+
   return (
     <article className="pt-24 lg:pt-32">
       <PropertyViewTracker
@@ -305,6 +310,11 @@ export default async function PropertyPage({
         offmarket={false}
       />
       <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
+      {/* Print-only : entete logo sombre + URL canonique. Invisible a l'ecran. */}
+      <div data-fiche-print-header className="hidden print:block">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo_mapa_jour.png" alt="MAPA Property" />
+      </div>
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <FicheHeader
           back={<BackButton fallback="/biens" />}
@@ -320,11 +330,13 @@ export default async function PropertyPage({
 
         {/* Galerie + vidéo (POL2-10, null si absente) */}
         <PropertyGallery items={galleryItems} title={title} />
-        <PropertyVideo
-          videoUrl={property.video_url}
-          poster={galleryItems[0]?.url}
-          labels={{ eyebrow: t("video") }}
-        />
+        <div className="print:hidden">
+          <PropertyVideo
+            videoUrl={property.video_url}
+            poster={galleryItems[0]?.url}
+            labels={{ eyebrow: t("video") }}
+          />
+        </div>
 
         {/* Grille principale : specs + 4 onglets | colonne droite épurée */}
         <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_360px]">
@@ -351,13 +363,44 @@ export default async function PropertyPage({
           />
         </div>
 
+        {/* Print-only : carte conseiller en clair (telephone + emails),
+            remplace la colonne droite cachee en print. */}
+        <section
+          data-fiche-print-advisor
+          className="hidden print:block"
+        >
+          <h3 className="font-display text-base font-bold">
+            Votre conseiller — MAPA Property
+          </h3>
+          <p className="mt-2 font-display text-sm">Julien Brebion</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em]">
+            Real Estate Director · Exclusive Sourcing Specialist
+          </p>
+          <p className="mt-3 text-sm">
+            Téléphone :{" "}
+            <a href="tel:+352691620127">+352 691 620 127</a>
+          </p>
+          <p className="text-sm">
+            Email :{" "}
+            <a href="mailto:j.brebion@mapagroup.org">j.brebion@mapagroup.org</a>
+          </p>
+          <p className="text-sm">
+            Email :{" "}
+            <a href="mailto:admin@mapagroup.org">admin@mapagroup.org</a>
+          </p>
+          <p className="mt-3 text-xs">
+            Annonce complète :{" "}
+            <a href={canonicalUrl}>{canonicalUrl}</a>
+          </p>
+        </section>
+
         {/* POL3-2 : bloc avis clients retiré des fiches biens (le
             ReviewsCarousel reste sur la home). */}
 
         {/* Formulaire "Une question sur ce bien ?" */}
         <section
           id="contact-form"
-          className="mt-20 rounded-2xl border border-line bg-bg-soft p-8 sm:p-12"
+          className="mt-20 rounded-2xl border border-line bg-bg-soft p-8 sm:p-12 print:hidden"
         >
           <header className="mb-8 max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
@@ -376,7 +419,7 @@ export default async function PropertyPage({
 
         {/* Biens similaires */}
         {similar.length > 0 && (
-          <section className="mt-20 mb-16">
+          <section className="mt-20 mb-16 print:hidden">
             <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
               {t("similar")}
             </h2>
@@ -388,6 +431,18 @@ export default async function PropertyPage({
             </div>
           </section>
         )}
+
+        {/* Print-only : pied de page legal sobre. Pas d'IBAN/BIC. */}
+        <footer
+          data-fiche-print-footer
+          className="hidden print:block"
+        >
+          <p>MAPA PROPERTY — une marque de MAPA Synergy Sàrl</p>
+          <p>
+            N° LBR : B241974 · TVA : LU 31988923 · AE N°10108681 ·
+            www.mapaproperty.lu
+          </p>
+        </footer>
       </div>
     </article>
   );

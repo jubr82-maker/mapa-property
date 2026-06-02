@@ -421,9 +421,15 @@ html {
   }
   html, body {
     background: #ffffff !important;
-    color: #1A1A1A !important;
+    color: #1F221A !important;
   }
-  header, footer, nav, .print\:hidden {
+  /* Chrome global (Header, Footer, nav, CtaBand) masque ; le <header
+     data-fiche-header> de la fiche et le <footer data-fiche-print-footer>
+     print-only restent visibles. */
+  header:not([data-fiche-header]),
+  footer:not([data-fiche-print-footer]),
+  nav,
+  .print\:hidden {
     display: none !important;
   }
   a[href] {
@@ -437,6 +443,53 @@ html {
     max-width: 100%;
     page-break-inside: avoid;
   }
+  /* Fiche bien : colonne droite (advisor + mandats + ContactReveal masque)
+     remplacee par un bloc print-only avec coordonnees en clair. */
+  [data-fiche-aside] { display: none !important; }
+  /* Accordion : on garde Apercu + Description ; Localisation + Conditions
+     hors print. Force tous les panneaux a deplier (max-height inline a 0
+     sur les replies). */
+  [data-fiche-panel][data-panel-id="location"],
+  [data-fiche-panel][data-panel-id="conditions"] { display: none !important; }
+  [data-fiche-panel-shell] {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  [data-fiche-panel] button[aria-expanded] svg { display: none !important; }
+  /* Couleurs : titre sapin, prix cuivre. */
+  [data-fiche-header] h1 { color: #1F221A !important; }
+  [data-fiche-price] { color: #B8865A !important; }
+  /* Grille fiche bascule 1 colonne sur A4. */
+  .lg\:grid-cols-\[1fr_360px\] { grid-template-columns: 1fr !important; }
+  /* Galerie : la barre de thumbs reste, le lightbox (state false) n est pas
+     monte ; force flex-wrap pour eviter overflow-x non-imprimable. */
+  [data-fiche-aside] ~ * { page-break-inside: avoid; }
+  /* Bloc print-only conseiller : encadre sobre cuivre. */
+  [data-fiche-print-advisor] {
+    border: 1px solid #B8865A;
+    padding: 12mm 10mm;
+    margin-top: 10mm;
+    page-break-inside: avoid;
+  }
+  [data-fiche-print-advisor] h3 { color: #1F221A; }
+  [data-fiche-print-advisor] a { color: #1F221A; text-decoration: underline; }
+  /* Pied de page legal print-only. */
+  [data-fiche-print-footer] {
+    margin-top: 10mm;
+    padding-top: 4mm;
+    border-top: 1px solid #B8865A;
+    font-size: 9pt;
+    color: #1F221A;
+    text-align: center;
+  }
+  /* Header print-only avec logo sombre. */
+  [data-fiche-print-header] {
+    margin-bottom: 8mm;
+    padding-bottom: 4mm;
+    border-bottom: 1px solid #B8865A;
+    text-align: center;
+  }
+  [data-fiche-print-header] img { height: 40px; width: auto; margin: 0 auto; }
 }
 
 body {
