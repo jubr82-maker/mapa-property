@@ -41,136 +41,189 @@ export function FeaturedCarousel({ items }: Props) {
   return <FeaturedDesktop items={items} />;
 }
 
-/* ──────────────────────── DESKTOP (SPRINT1 — inchangé) ──────────────── */
+/* ──────────────────────── DESKTOP (Sprint PIN-FIXED) ────────────────── */
+
+type PinState = "before" | "during" | "after";
 
 function FeaturedDesktop({ items }: Props) {
   const t = useTranslations("featured");
+  const outerRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
 
-  // Sprint UI-MAI / OPTIM-1B C8 : scroll-driven gauche->droite reversible
-  // (option A). Au lieu d'un stagger setTimeout declenche par un seul
-  // isIntersecting=true, on mappe DIRECTEMENT le progress de scroll
-  // (0->1 = section qui traverse le viewport) a la visibilite de chaque
-  // carte (seuil = i/N). Effet : au scroll descendant, les cartes
-  // apparaissent une par une de gauche a droite. Au scroll remontant,
-  // elles disparaissent dans l'ordre inverse. Reversible naturellement
-  // sans listener intersect.
+  // Sprint PIN-FIXED — pin scroll-hijack robuste via position:fixed
+  // piloté JS. Validé sur /fr/test-scroll (mesures Chrome devtools +
+  // captures confirmant pin visuel à scrollY 800/1000/1500/2000/3000/
+  // 5000/7500 + transition vers state AFTER à 8500). Pattern :
   //
-  // Garde : prefers-reduced-motion -> tout visible, pas d'animation.
-  // Throttle requestAnimationFrame, listener passive, willChange propre.
+  //  - Outer wrapper : height = DIVISOR * 100vh, position: relative.
+  //  - Section : 3 états pilotés en JS (rAF, scrollY + outer rect) :
+  //      * BEFORE : in-flow au top de l'outer (aucun override).
+  //      * DURING : position:fixed; top:0; left:0; right:0; height:100vh.
+  //      * AFTER  : position:absolute; bottom:0 (collée au fond outer).
+  //  - Pendant DURING : translateX track = -progress * maxX avec
+  //      progress = (-outerTop) / (outerHeight - vh) clampé [0..1].
+  //
+  // Robuste : insensible aux parents transformés / overflow (sticky CSS
+  // échouait à cause d'ancêtres avec transform — diagnostic prod).
+  //
+  // Reduced-motion : pas de pin, fallback flux normal + scroll horizontal
+  // manuel (overflow-x:auto par défaut CSS sur trackRef).
+  // SSR-safe : tous les styles pin appliqués post-mount uniquement.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!sectionRef.current || !trackRef.current || !innerRef.current) return;
-
-    const section = sectionRef.current;
-    const inner = innerRef.current;
-    const cards =
-      trackRef.current.querySelectorAll<HTMLElement>("[data-featured-card]");
-    const N = cards.length;
-    if (N === 0) return;
+    if (!outerRef.current || !sectionRef.current || !trackRef.current) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
       .matches;
+    if (reduced) return;
 
-    if (reduced) {
-      cards.forEach((card) => {
-        card.style.opacity = "1";
-        card.style.transform = "translateX(0)";
-      });
-      return;
-    }
+    const outer = outerRef.current;
+    const section = sectionRef.current;
+    const track = trackRef.current;
 
-    // Setup initial : opacite 0, decalage 80px gauche, transition CSS douce.
-    cards.forEach((card) => {
-      card.style.opacity = "0";
-      card.style.transform = "translateX(-80px)";
-      card.style.transition =
-        "opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1)";
-      card.style.willChange = "opacity, transform";
-    });
-    inner.style.willChange = "transform";
+    const DIVISOR = 9;
+
+    outer.style.position = "relative";
+    outer.style.height = `${DIVISOR * 100}vh`;
+    section.style.height = "100vh";
+    section.style.width = "100%";
+    track.style.overflowX = "visible";
+    track.style.width = "max-content";
+    track.style.willChange = "transform";
 
     let raf = 0;
-    let lastProgress = -1;
-    const visibleState = new Array<boolean>(N).fill(false);
+    let resizeRaf = 0;
+    let lastY = -1;
+    let lastState: PinState | null = null;
 
-    const onScroll = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(() => {
-        raf = 0;
-        const rect = section.getBoundingClientRect();
-        const vh = window.innerHeight;
-        const totalRange = vh + rect.height;
-        const scrolled = vh - rect.top;
-        const progress = Math.max(0, Math.min(1, scrolled / totalRange));
-        if (Math.abs(progress - lastProgress) < 0.002) return;
-        lastProgress = progress;
+    const applyState = (state: PinState) => {
+      if (state === lastState) return;
+      lastState = state;
+      // Reset positioning props avant nouvelle pose.
+      section.style.position = "";
+      section.style.top = "";
+      section.style.bottom = "";
+      section.style.left = "";
+      section.style.right = "";
 
-        // Parallax track entier : amplitude 600px (vs 200px avant) pour
-        // un defile horizontal plus marque pendant le scroll vertical.
-        inner.style.transform = `translateX(${-600 * progress}px)`;
+      if (state === "before") {
+        // In-flow au top de l'outer. Aucun override.
+      } else if (state === "during") {
+        section.style.position = "fixed";
+        section.style.top = "0";
+        section.style.left = "0";
+        section.style.right = "0";
+      } else {
+        // after
+        section.style.position = "absolute";
+        section.style.bottom = "0";
+        section.style.left = "0";
+        section.style.right = "0";
+      }
+    };
 
-        // Mapping progress -> nb cartes visibles. Seuil par carte = i/N.
-        // Decalage 0.05 pour eviter qu'aucune carte ne soit visible
-        // exactement au demarrage (debut de section).
-        for (let i = 0; i < N; i++) {
-          const threshold = i / N;
-          const shouldBeVisible = progress >= threshold;
-          if (shouldBeVisible !== visibleState[i]) {
-            visibleState[i] = shouldBeVisible;
-            const card = cards[i];
-            card.style.opacity = shouldBeVisible ? "1" : "0";
-            card.style.transform = shouldBeVisible
-              ? "translateX(0)"
-              : "translateX(-80px)";
-          }
-        }
+    const tick = () => {
+      const y = window.scrollY;
+      if (y === lastY) {
+        raf = window.requestAnimationFrame(tick);
+        return;
+      }
+      lastY = y;
+
+      const outerRect = outer.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const outerHeight = outer.offsetHeight;
+
+      // Détermine l'état du pin.
+      let state: PinState;
+      if (outerRect.top > 0) {
+        state = "before";
+      } else if (outerRect.bottom > vh) {
+        state = "during";
+      } else {
+        state = "after";
+      }
+      applyState(state);
+
+      // Progression et translateX.
+      const courseLength = outerHeight - vh;
+      const scrolledIntoOuter = -outerRect.top;
+      const progress =
+        courseLength > 0
+          ? Math.max(0, Math.min(1, scrolledIntoOuter / courseLength))
+          : 0;
+      const maxX = Math.max(0, track.scrollWidth - window.innerWidth);
+      track.style.transform = `translate3d(${-progress * maxX}px, 0, 0)`;
+
+      raf = window.requestAnimationFrame(tick);
+    };
+
+    const onResize = () => {
+      if (resizeRaf) return;
+      resizeRaf = window.requestAnimationFrame(() => {
+        resizeRaf = 0;
+        lastY = -1; // force recompute au prochain tick
       });
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    window.addEventListener("resize", onResize, { passive: true });
+    raf = window.requestAnimationFrame(tick);
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) window.cancelAnimationFrame(raf);
-      inner.style.willChange = "";
-      cards.forEach((card) => {
-        card.style.willChange = "";
-      });
+      window.cancelAnimationFrame(raf);
+      if (resizeRaf) window.cancelAnimationFrame(resizeRaf);
+      window.removeEventListener("resize", onResize);
+      outer.style.position = "";
+      outer.style.height = "";
+      section.style.position = "";
+      section.style.top = "";
+      section.style.bottom = "";
+      section.style.left = "";
+      section.style.right = "";
+      section.style.height = "";
+      section.style.width = "";
+      track.style.overflowX = "";
+      track.style.width = "";
+      track.style.transform = "";
+      track.style.willChange = "";
     };
   }, []);
 
   return (
-    <section ref={sectionRef} className="px-6 py-5 md:py-12 lg:px-10">
-      <div className="mx-auto max-w-[1400px]">
-        <FeaturedHeader t={t} />
-      </div>
-      <div
-        ref={trackRef}
-        className="mt-6 flex gap-5 overflow-x-auto pb-4 md:mt-8 md:gap-6 lg:px-[8vw]"
-        style={{
-          scrollSnapType: "x mandatory",
-          WebkitOverflowScrolling: "touch",
-          scrollbarWidth: "none",
-        }}
+    <div ref={outerRef}>
+      <section
+        ref={sectionRef}
+        className="flex min-h-screen flex-col justify-center overflow-hidden bg-bg py-5 md:py-12"
       >
-        <div ref={innerRef} data-featured-inner className="flex gap-5 md:gap-6">
-          {items.map((item) => (
-            <article
-              key={`${item.kind}-${item.id}`}
-              data-featured-card
-              style={{ scrollSnapAlign: "start" }}
-              className="w-[78vw] shrink-0 sm:w-[48vw] lg:w-[400px]"
-            >
-              <FeaturedCard item={item} />
-            </article>
-          ))}
+        <div className="mx-auto w-full max-w-[1400px] px-6 lg:px-10">
+          <FeaturedHeader t={t} />
         </div>
-        <ViewAllCTA label={t("see_all")} />
-      </div>
-    </section>
+        <div
+          ref={trackRef}
+          className="mt-6 flex gap-5 overflow-x-auto pb-4 md:mt-8 md:gap-6 lg:px-[8vw]"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+          }}
+        >
+          <div className="flex gap-5 md:gap-6">
+            {items.map((item) => (
+              <article
+                key={`${item.kind}-${item.id}`}
+                className="w-[78vw] shrink-0 sm:w-[48vw] lg:w-[400px]"
+              >
+                <FeaturedCard item={item} />
+              </article>
+            ))}
+          </div>
+          <ViewAllCTA label={t("see_all")} />
+          {/* Sprint PIN-FIXED : marge de fin 22vw → CTA pleinement
+              révélé à progress=1 (validé maquette + /test-scroll). */}
+          <div aria-hidden className="w-[22vw] shrink-0" />
+        </div>
+      </section>
+    </div>
   );
 }
 

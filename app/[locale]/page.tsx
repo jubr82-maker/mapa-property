@@ -53,9 +53,12 @@ export default async function HomePage({
       <FadeInOnScroll>
         <SearchBar />
       </FadeInOnScroll>
-      <FadeInOnScroll>
-        <FeaturedCarousel items={featured} />
-      </FadeInOnScroll>
+      {/* Sprint PIN-FIXED : pas de wrapper FadeInOnScroll autour du
+          carrousel — son IntersectionObserver (threshold 0.15) ne se
+          déclenche jamais sur l'outer pin de 9*100vh (ratio max ~11%),
+          ce qui figeait l'opacité à 0. Le carrousel n'a pas besoin de
+          fondu d'entrée (le pin gère l'apparition). */}
+      <FeaturedCarousel items={featured} />
       {/* Sprint UI-MAI / LOT B : fusion des anciennes sections "Notre
           couverture" (CoverageGrid) et "Notre methode" (ProcessTable) sous
           un titre commun "Methode & Couverture". Les 2 composants gardent
