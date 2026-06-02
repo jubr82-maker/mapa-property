@@ -13,6 +13,7 @@ import { BlogTeaser } from "@/components/home/BlogTeaser";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 import { FadeInOutSection } from "@/components/effects/FadeInOutSection";
 import { SignatureLine } from "@/components/ui/SignatureLine";
+import { Link } from "@/i18n/navigation";
 import {
   fetchHomeFeatured,
   fetchLatestBlogPosts,
@@ -28,11 +29,12 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [featured, reviews, blogPosts, tMC] = await Promise.all([
+  const [featured, reviews, blogPosts, tMC, tWL] = await Promise.all([
     fetchHomeFeatured(6, locale),
     fetchPublishedReviews(8),
     fetchLatestBlogPosts(3),
     getTranslations({ locale, namespace: "method_coverage" }),
+    getTranslations({ locale, namespace: "home_waitlist" }),
   ]);
 
   return (
@@ -59,6 +61,31 @@ export default async function HomePage({
           ce qui figeait l'opacité à 0. Le carrousel n'a pas besoin de
           fondu d'entrée (le pin gère l'apparition). */}
       <FeaturedCarousel items={featured} />
+      {/* Sprint waitlist : accroche avant-premiere 24h, inseree entre
+          le carrousel et le bloc Methode & Couverture. CTA -> /liste-attente. */}
+      <FadeInOnScroll>
+        <section className="px-6 py-12 md:py-20 lg:px-10">
+          <div className="mx-auto max-w-[1400px]">
+            <div className="rounded-2xl border border-gold/30 bg-bg-soft px-8 py-10 md:px-12 md:py-14">
+              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-gold-deep">
+                {tWL("eyebrow")}
+              </p>
+              <h2 className="mt-3 t-h2">{tWL("title")}</h2>
+              <SignatureLine />
+              <p className="mt-3 max-w-2xl text-sm text-ink-mid md:text-base">
+                {tWL("subtitle")}
+              </p>
+              <Link
+                href="/liste-attente"
+                className="gold-shine-bg mt-6 inline-flex items-center gap-2 rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02]"
+              >
+                {tWL("cta_label")}
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </FadeInOnScroll>
       {/* Sprint UI-MAI / LOT B : fusion des anciennes sections "Notre
           couverture" (CoverageGrid) et "Notre methode" (ProcessTable) sous
           un titre commun "Methode & Couverture". Les 2 composants gardent

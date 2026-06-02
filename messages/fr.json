@@ -497,6 +497,35 @@
     "success_text": "MAPA Property vous recontactera personnellement sous 48 heures ouvrées.",
     "send_another": "Envoyer une nouvelle demande"
   },
+  "home_waitlist": {
+    "eyebrow": "Avant-première",
+    "title": "Recevez nos nouveaux biens avant tout le monde",
+    "subtitle": "Inscrivez-vous à notre liste d'attente : chaque nouveau bien acquis sous mandat exclusif vous est présenté 24 heures avant publication sur les sites d'annonces.",
+    "cta_label": "Rejoindre la liste d'attente"
+  },
+  "waitlist_page": {
+    "eyebrow": "Liste d'attente",
+    "title": "L'avant-première de nos mandats exclusifs",
+    "intro": "Avant qu'un bien soit publié sur les portails d'annonces, nous le présentons en priorité aux membres de notre liste d'attente. Vous accédez aux nouvelles offres 24 heures avant leur diffusion publique, avec le détail complet et la possibilité de positionner une visite immédiatement.",
+    "label_first_name": "Prénom",
+    "label_last_name": "Nom",
+    "label_email": "Email",
+    "label_budget": "Budget envisagé",
+    "label_budget_validated": "Ce budget est-il validé par votre banque ou votre courtier ?",
+    "label_budget_validated_yes": "Oui",
+    "label_budget_validated_no": "Non",
+    "label_search": "Ma recherche",
+    "label_rgpd": "J'accepte que mes données (prénom, nom, email, budget, projet) soient utilisées par MAPA Property pour me contacter en avant-première lorsqu'un bien correspondant à mes critères est mis sur le marché. Inscription gratuite, annulable à tout moment par simple demande à admin@mapagroup.org.",
+    "rgpd_policy_link": "Politique de confidentialité",
+    "rgpd_notice": "Aucun spam. Annulation possible à tout moment.",
+    "submit": "Rejoindre la liste",
+    "submitting": "Envoi…",
+    "success_title": "Bienvenue sur la liste d'attente.",
+    "success_text": "Votre inscription est enregistrée. Vous recevrez nos nouveaux mandats exclusifs 24 heures avant leur publication sur les portails d'annonces.",
+    "error": "Une erreur est survenue. Vérifiez vos informations et réessayez.",
+    "error_captcha": "La vérification anti-spam a échoué. Patientez quelques secondes puis réessayez.",
+    "error_invalid": "Les informations saisies ne sont pas valides. Vérifiez tous les champs obligatoires."
+  },
   "offmarket": {
     "eyebrow": "Off-Market",
     "hero_eyebrow": "Off-Market — Accès confidentiel",

@@ -497,6 +497,35 @@
     "success_text": "MAPA Property will personally get back to you within 48 business hours.",
     "send_another": "Send another request"
   },
+  "home_waitlist": {
+    "eyebrow": "Early access",
+    "title": "Receive our new properties before everyone else",
+    "subtitle": "Join our waiting list and receive every new property under exclusive mandate 24 hours before it appears on listing portals.",
+    "cta_label": "Join the waiting list"
+  },
+  "waitlist_page": {
+    "eyebrow": "Waiting list",
+    "title": "Early access to our exclusive mandates",
+    "intro": "Before a property is published on listing portals, we present it first to the members of our waiting list. You receive new offers 24 hours before their public release, with the full details and the option to schedule a viewing immediately.",
+    "label_first_name": "First name",
+    "label_last_name": "Last name",
+    "label_email": "Email",
+    "label_budget": "Indicative budget",
+    "label_budget_validated": "Has this budget been validated by your bank or mortgage broker?",
+    "label_budget_validated_yes": "Yes",
+    "label_budget_validated_no": "No",
+    "label_search": "My search",
+    "label_rgpd": "I agree that MAPA Property may use my data (first name, last name, email, budget, project) to contact me in advance when properties matching my criteria come to market. Membership is free and may be cancelled at any time on simple request to admin@mapagroup.org.",
+    "rgpd_policy_link": "Privacy policy",
+    "rgpd_notice": "No spam. Unsubscribe at any time.",
+    "submit": "Join the list",
+    "submitting": "Sending…",
+    "success_title": "Welcome to the waiting list.",
+    "success_text": "Your registration is confirmed. You will receive our new exclusive mandates 24 hours before they appear on listing portals.",
+    "error": "An error occurred. Please check your information and try again.",
+    "error_captcha": "Anti-spam verification failed. Please wait a few seconds and try again.",
+    "error_invalid": "The information provided is not valid. Please check all required fields."
+  },
   "offmarket": {
     "eyebrow": "Off-Market",
     "hero_eyebrow": "Off-Market — Confidential access",

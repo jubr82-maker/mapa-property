@@ -26,6 +26,10 @@ interface SendLeadEmailsArgs {
   source?: string;
   propertyRef?: string;
   locale?: string;
+  /** Sprint waitlist : override des destinataires internes. Si array, Resend
+   *  envoie UN email avec plusieurs To. Si undefined, fallback env vars +
+   *  INTERNAL_TO_DEFAULT (retro-compat /api/lead, /api/nda-request). */
+  internalTo?: string | string[];
 }
 
 const INTERNAL_TO_DEFAULT = "j.brebion@mapagroup.org";
@@ -192,14 +196,21 @@ function internalBody(args: SendLeadEmailsArgs & { locale: Locale; subjectStr: s
   return lines.join("\n");
 }
 
-async function sendOne(args: { to: string; subject: string; text: string; from: string }): Promise<{ ok: boolean; status?: number; body?: string; error?: string }> {
+async function sendOne(args: {
+  to: string | string[];
+  subject: string;
+  text: string;
+  from: string;
+}): Promise<{ ok: boolean; status?: number; body?: string; error?: string }> {
   const key = process.env.RESEND_API_KEY;
+  const toList = Array.isArray(args.to) ? args.to : [args.to];
+  const toLog = toList.join(", ");
   if (!key) {
     console.warn(
       "[lead-emails] RESEND_API_KEY absent — email stub:",
       args.subject,
       "→",
-      args.to,
+      toLog,
     );
     return { ok: false, error: "no_api_key" };
   }
@@ -212,7 +223,7 @@ async function sendOne(args: { to: string; subject: string; text: string; from: 
       },
       body: JSON.stringify({
         from: args.from,
-        to: [args.to],
+        to: toList,
         subject: args.subject,
         text: args.text,
       }),
@@ -223,7 +234,7 @@ async function sendOne(args: { to: string; subject: string; text: string; from: 
         "[lead-emails] Resend HTTP",
         res.status,
         "→",
-        args.to,
+        toLog,
         "|",
         bodyText.slice(0, 300),
       );
@@ -232,7 +243,7 @@ async function sendOne(args: { to: string; subject: string; text: string; from: 
     return { ok: true, status: res.status, body: bodyText.slice(0, 200) };
   } catch (e) {
     const err = (e as Error).message;
-    console.error("[lead-emails] Resend exception", err, "→", args.to);
+    console.error("[lead-emails] Resend exception", err, "→", toLog);
     return { ok: false, error: err };
   }
 }
@@ -252,10 +263,12 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
     (locale === "en" ? "there" : locale === "de" ? "geehrte/r Interessent/in" : "Madame, Monsieur");
   // Sprint C5 : fallback cascade pour compat avec env vars existantes
   // (MAPA_NOTIFICATION_EMAIL deploye depuis le 15 mai).
-  const internalTo =
-    process.env.LEAD_INTERNAL_TO?.trim() ||
-    process.env.MAPA_NOTIFICATION_EMAIL?.trim() ||
-    INTERNAL_TO_DEFAULT;
+  // Sprint waitlist : args.internalTo (string | string[]) prime sur env vars.
+  const internalTo: string | string[] =
+    args.internalTo ??
+    (process.env.LEAD_INTERNAL_TO?.trim() ||
+      process.env.MAPA_NOTIFICATION_EMAIL?.trim() ||
+      INTERNAL_TO_DEFAULT);
   const from = resolveFrom();
   const fullName = [args.firstName, args.lastName].filter(Boolean).join(" ") || "Prospect";
 

@@ -497,6 +497,35 @@
     "success_text": "MAPA Property meldet sich persönlich innerhalb von 48 Werkstunden bei Ihnen.",
     "send_another": "Neue Anfrage senden"
   },
+  "home_waitlist": {
+    "eyebrow": "Vorpremiere",
+    "title": "Erhalten Sie unsere neuen Objekte vor allen anderen",
+    "subtitle": "Tragen Sie sich in unsere Warteliste ein und erhalten Sie jedes neue Objekt unter exklusivem Mandat 24 Stunden vor seiner Veröffentlichung auf Immobilienportalen.",
+    "cta_label": "Auf die Warteliste"
+  },
+  "waitlist_page": {
+    "eyebrow": "Warteliste",
+    "title": "Vorabzugang zu unseren exklusiven Mandaten",
+    "intro": "Bevor ein Objekt auf den Immobilienportalen veröffentlicht wird, präsentieren wir es zuerst den Mitgliedern unserer Warteliste. Sie erhalten neue Angebote 24 Stunden vor der öffentlichen Freigabe — mit allen Details und der Möglichkeit, sofort eine Besichtigung zu vereinbaren.",
+    "label_first_name": "Vorname",
+    "label_last_name": "Nachname",
+    "label_email": "E-Mail",
+    "label_budget": "Budgetvorstellung",
+    "label_budget_validated": "Wurde dieses Budget von Ihrer Bank oder Ihrem Hypothekenmakler bestätigt?",
+    "label_budget_validated_yes": "Ja",
+    "label_budget_validated_no": "Nein",
+    "label_search": "Meine Suche",
+    "label_rgpd": "Ich stimme zu, dass MAPA Property meine Daten (Vorname, Nachname, E-Mail, Budget, Projekt) verwenden darf, um mich vorab zu kontaktieren, sobald passende Objekte auf den Markt kommen. Die Mitgliedschaft ist kostenlos und jederzeit auf einfache Anfrage an admin@mapagroup.org kündbar.",
+    "rgpd_policy_link": "Datenschutz",
+    "rgpd_notice": "Kein Spam. Abmeldung jederzeit möglich.",
+    "submit": "Auf die Liste setzen",
+    "submitting": "Wird gesendet…",
+    "success_title": "Willkommen auf der Warteliste.",
+    "success_text": "Ihre Registrierung ist bestätigt. Sie erhalten unsere neuen exklusiven Mandate 24 Stunden vor Veröffentlichung auf den Immobilienportalen.",
+    "error": "Ein Fehler ist aufgetreten. Bitte überprüfen Sie Ihre Angaben und versuchen Sie es erneut.",
+    "error_captcha": "Spam-Prüfung fehlgeschlagen. Bitte warten Sie einige Sekunden und versuchen Sie es erneut.",
+    "error_invalid": "Die eingegebenen Informationen sind ungültig. Bitte alle Pflichtfelder prüfen."
+  },
   "offmarket": {
     "eyebrow": "Off-Market",
     "hero_eyebrow": "Off-Market — Vertraulicher Zugang",
