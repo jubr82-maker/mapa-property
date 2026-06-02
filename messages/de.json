@@ -672,7 +672,7 @@
     "excluded_4": "Direkte Verhandlung",
     "excluded_5": "Off-Market-Verteilung",
     "when_title": "Wann Autonom wählen",
-    "when_text": "Sie sind der beste Immobilienmakler der Welt, brauchen niemanden, um Ihre außergewöhnliche und weitaus schönere Immobilie als alle anderen auf dem Markt zu verkaufen? Dann ist dieses Mandat für Sie. Nichts für ungut, wenn Sie zurückkommen — es ist schwieriger, als es aussieht."
+    "when_text": "Sie möchten den Verkauf Ihres Objekts selbst in die Hand nehmen und jeden Schritt kontrollieren? Dieses Mandat lässt Ihnen diese Freiheit. Unser Team steht Ihnen jederzeit zur Verfügung, falls Sie Begleitung wünschen."
   },
   "mandate_recherche": {
     "title": "Suchmandat",
@@ -750,7 +750,7 @@
       },
       "estimate": {
         "eyebrow": "Schätzung",
-        "title": "EVS-Bewertung",
+        "title": "Schätzung",
         "body": "Kostenlose Online-Bewertung, gefolgt von einem detaillierten Gutachten-Bericht innerhalb von 48 Werkstunden."
       },
       "simulators": {
@@ -841,7 +841,7 @@
     "help_climate_loan_title": "Klima-Darlehen (Renovierung)",
     "contact_email": "E-Mail",
     "contact_phone": "Telefon",
-    "contact_consent": "Ich willige ein, von MAPA Property zu dieser Schätzung kontaktiert zu werden.",
+    "contact_consent": "Ich stimme zu, dass MAPA Property mich zu dieser Schätzung kontaktiert — einschließlich des Angebots einer ausführlichen Wertermittlung (Avis de Valeur) und einer Verkaufsbegleitung.",
     "quartier": "Stadtteil (Luxemburg-Stadt)",
     "surface_total": "Gesamtfläche",
     "surface_total_tooltip": "Wohnfläche + Keller + ausbaubare Dachböden + integrierte Garagen. Ohne Terrassen, Balkone, Gärten.",
@@ -861,7 +861,7 @@
     "message_placeholder": "Details zu Ihrem Projekt, besondere Anforderungen, gewünschter Zeitplan…",
     "cta_rdv_expertise": "Kostenlosen Beratungstermin anfragen",
     "cta_services": "Unsere Dienstleistungen entdecken",
-    "works_help_text": "Je detaillierter Sie die durchgeführten Arbeiten beschreiben, desto präziser wird die EVS-Bewertung. Unser Motor wendet die Abschreibung pro Kategorie an.",
+    "works_help_text": "Je detaillierter Sie die durchgeführten Arbeiten beschreiben, desto präziser wird die Schätzung. Unser Motor wendet die Abschreibung pro Kategorie an.",
     "works_details_label": "Details der durchgeführten Arbeiten",
     "works_group_gros": "Rohbau / Hülle",
     "works_group_moyens": "Ausbau / Ausstattung",
@@ -1214,7 +1214,7 @@
     "reviews_title": "Sie haben uns vertraut"
   },
   "disclaimer": {
-    "short": "Unverbindliche Informationen — Indikative Daten auf Basis öffentlicher Quellen und MAPA Property-Algorithmen. Es kann keine Haftung übernommen werden. Für Finanzierung, Steuern oder notarielle Urkunden konsultieren Sie den zuständigen Fachmann.",
+    "short": "Indikative Schätzung auf Basis von Marktdaten und dem MAPA-Property-Algorithmus — sie stellt keine vertragliche Wertermittlung dar. Auf Anfrage erstellt MAPA Property eine ausführliche Wertermittlung (Avis de Valeur). Fragen zur Finanzierung und zu notariellen Formalitäten obliegen Ihrer Bank und Ihrem Notar.",
     "full": {
       "title": "Unverbindliche Informationen",
       "p1": "Die auf dieser Website dargestellten Schätzungen, Simulationen, Marktanalysen und Daten dienen Informations- und Richtzwecken. Sie stützen sich auf öffentliche Quellen (STATEC, Observatoire de l'Habitat, ABBL, Zentralbank Luxemburg) und auf die proprietären Algorithmen von MAPA Property.",

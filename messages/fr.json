@@ -672,7 +672,7 @@
     "excluded_4": "Négociation directe",
     "excluded_5": "Diffusion off-market",
     "when_title": "Quand choisir l'Autonome",
-    "when_text": "Vous êtes le meilleur agent immobilier au monde, vous n'avez besoin de personne pour vendre votre bien exceptionnel et bien plus beau que tous les autres sur le marché ? Alors ce mandat est fait pour vous. Sans rancune si vous revenez nous voir — c'est plus difficile qu'il n'y paraît."
+    "when_text": "Vous souhaitez gérer vous-même la vente de votre bien et garder la main sur chaque étape ? Ce mandat vous en laisse la liberté. Nos équipes restent disponibles si vous souhaitez, à tout moment, être accompagné."
   },
   "mandate_recherche": {
     "title": "Mandat de Recherche",
@@ -750,7 +750,7 @@
       },
       "estimate": {
         "eyebrow": "Estimation",
-        "title": "Estimation EVS",
+        "title": "Estimation",
         "body": "Estimation gratuite en ligne, suivie d'un rapport d'expertise détaillé sous 48 heures ouvrées par notre équipe."
       },
       "simulators": {
@@ -841,7 +841,7 @@
     "help_climate_loan_title": "Prêt climatique (rénovation)",
     "contact_email": "Email",
     "contact_phone": "Téléphone",
-    "contact_consent": "J'accepte d'être contacté(e) par MAPA Property au sujet de cette estimation.",
+    "contact_consent": "J'accepte d'être recontacté(e) par MAPA Property au sujet de cette estimation, y compris pour me proposer une estimation détaillée (Avis de Valeur) et un accompagnement à la vente.",
     "quartier": "Quartier (Luxembourg-Ville)",
     "surface_total": "Surface totale",
     "surface_total_tooltip": "Surface habitable + caves + greniers aménageables + garages intégrés. N'inclut pas terrasses, balcons, jardins.",
@@ -861,7 +861,7 @@
     "message_placeholder": "Précisions sur votre projet, contraintes particulières, calendrier souhaité…",
     "cta_rdv_expertise": "Demander un rendez-vous d'expertise gratuit",
     "cta_services": "Découvrir nos services",
-    "works_help_text": "Plus vous détaillez les travaux récents, plus l'estimation EVS sera précise. La vétusté de chaque poste est appliquée par notre moteur.",
+    "works_help_text": "Plus vous détaillez les travaux récents, plus l'estimation sera précise. La vétusté de chaque poste est appliquée par notre moteur.",
     "works_details_label": "Détail des travaux réalisés",
     "works_group_gros": "Gros œuvre / enveloppe",
     "works_group_moyens": "Second œuvre / équipements",
@@ -1214,7 +1214,7 @@
     "reviews_title": "Ils nous ont fait confiance"
   },
   "disclaimer": {
-    "short": "Informations non contractuelles — Données indicatives basées sur sources publiques et algorithmes MAPA Property. Aucune responsabilité ne saurait être engagée. Pour financement, fiscalité ou acte notarié, consultez le professionnel compétent.",
+    "short": "Estimation indicative établie à partir de données de marché et de l'algorithme MAPA Property — elle ne constitue pas un avis de valeur contractuel. Pour affiner cette estimation, MAPA Property réalise sur demande un Avis de Valeur détaillé. Les questions de financement et de formalités notariales relèvent de votre banque et de votre notaire.",
     "full": {
       "title": "Informations non contractuelles",
       "p1": "Les estimations, simulations, analyses de marché et données présentées sur ce site sont fournies à titre informatif et indicatif. Elles s'appuient sur des sources publiques (STATEC, Observatoire de l'Habitat, ABBL, Banque centrale du Luxembourg) et sur les algorithmes propriétaires de MAPA Property.",

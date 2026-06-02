@@ -672,7 +672,7 @@
     "excluded_4": "Direct negotiation",
     "excluded_5": "Off-market distribution",
     "when_title": "When to choose Autonomous",
-    "when_text": "You are the best real estate agent in the world, you don't need anyone to sell your exceptional property that is far more beautiful than any other on the market? Then this mandate is for you. No hard feelings if you come back to us — it's harder than it looks."
+    "when_text": "You want to handle the sale of your property yourself and keep control of every step? This mandate gives you that freedom. Our team remains available at any time should you wish to be supported."
   },
   "mandate_recherche": {
     "title": "Search Mandate",
@@ -750,7 +750,7 @@
       },
       "estimate": {
         "eyebrow": "Valuation",
-        "title": "EVS Valuation",
+        "title": "Valuation",
         "body": "Free online valuation, followed by a detailed expertise report within 48 business hours by our team."
       },
       "simulators": {
@@ -841,7 +841,7 @@
     "help_climate_loan_title": "Climate loan (renovation)",
     "contact_email": "Email",
     "contact_phone": "Phone",
-    "contact_consent": "I agree to be contacted by MAPA Property regarding this estimate.",
+    "contact_consent": "I agree to be contacted by MAPA Property regarding this estimate, including to be offered a detailed Valuation Report and support with the sale.",
     "quartier": "Neighbourhood (Luxembourg City)",
     "surface_total": "Total surface",
     "surface_total_tooltip": "Living surface + cellars + convertible attics + integrated garages. Excludes terraces, balconies, gardens.",
@@ -861,7 +861,7 @@
     "message_placeholder": "Details about your project, specific constraints, desired timeline…",
     "cta_rdv_expertise": "Request a free expert appointment",
     "cta_services": "Discover our services",
-    "works_help_text": "The more you detail recent works, the more accurate the EVS valuation. Our engine applies depreciation per work category.",
+    "works_help_text": "The more you detail recent works, the more accurate the valuation. Our engine applies depreciation per work category.",
     "works_details_label": "Details of works carried out",
     "works_group_gros": "Structural / envelope",
     "works_group_moyens": "Fit-out / equipment",
@@ -1214,7 +1214,7 @@
     "reviews_title": "They trusted us"
   },
   "disclaimer": {
-    "short": "Non-contractual information — Indicative data based on public sources and MAPA Property algorithms. No liability can be incurred. For financing, taxation or notarial deeds, consult the relevant professional.",
+    "short": "Indicative estimate based on market data and the MAPA Property algorithm — it does not constitute a contractual valuation. To refine this estimate, MAPA Property provides a detailed Valuation Report on request. Financing and notarial matters fall to your bank and notary.",
     "full": {
       "title": "Non-contractual information",
       "p1": "The estimates, simulations, market analyses and data presented on this site are provided for informational and indicative purposes. They rely on public sources (STATEC, Observatoire de l'Habitat, ABBL, Central Bank of Luxembourg) and on MAPA Property's proprietary algorithms.",
