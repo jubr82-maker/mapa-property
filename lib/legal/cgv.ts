@@ -37,7 +37,7 @@ const sectionsFr: LegalSection[] = [
       "Siège : 1, rue de la Vallée, L-3593 Dudelange.",
       "RCS Luxembourg : B241974. Autorisation d'établissement : 10108681. TVA : LU 31988923.",
       "IBAN : LU88 0019 5655 88 84 9000 — BIC : BCEELULL.",
-      "Représentant : Julien Brebion, gérant et Real Estate Director.",
+      "Représentant : Julien Brebion, Real Estate Director.",
     ],
   },
   {

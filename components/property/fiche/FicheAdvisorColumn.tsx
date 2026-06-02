@@ -58,7 +58,7 @@ export function FicheAdvisorColumn({
             <p className="font-display text-sm font-bold text-ink">
               Julien Brebion
             </p>
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+            <p className="whitespace-pre-line font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
               {labels.advisorRoles}
             </p>
           </div>
