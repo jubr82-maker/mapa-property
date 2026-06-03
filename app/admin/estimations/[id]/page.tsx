@@ -35,18 +35,6 @@ interface EstimationRow {
     inputs_snapshot: Record<string, unknown>;
     weights_used: Record<string, number>;
     computed_at: string;
-    complementary_indicators?: {
-      income_capitalization?: {
-        yield_at_estimated_price: number | null;
-        capitalization_value: number | null;
-        rent_per_m2_month: number | null;
-        annual_rent: number | null;
-        yield_used: number | null;
-        legal_max_rent_month: number | null;
-        source_note: string;
-        available: boolean;
-      };
-    };
   };
   engine: string;
   status: "new" | "in_progress" | "avis_sent" | "mandate_signed" | "closed";
@@ -59,6 +47,7 @@ interface EstimationRow {
 }
 
 const METHOD_LABEL: Record<string, string> = {
+  observatoire: "Référentiel MAPA (calibré)",
   sales_comparison: "Comparaison directe",
   hedonic: "Hédoniste enrichi",
   income_capitalization: "Capitalisation locative",
@@ -120,8 +109,6 @@ export default async function EstimationDetailPage({
   >;
   const methods = r.internal_output?.methods ?? {};
   const weights = r.internal_output?.weights_used ?? {};
-  const incomeIndicator =
-    r.internal_output?.complementary_indicators?.income_capitalization ?? null;
 
   return (
     <div className="space-y-8">
@@ -177,8 +164,6 @@ export default async function EstimationDetailPage({
         weightsInitial={weights}
         statusLabels={STATUS_LABEL}
         methodLabels={METHOD_LABEL}
-        incomeIndicator={incomeIndicator}
-        priceMid={r.client_output.price_mid}
       />
 
       {/* Inputs snapshot */}

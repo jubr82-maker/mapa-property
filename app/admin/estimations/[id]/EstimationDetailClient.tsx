@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { sendRefinement } from "@/app/admin/estimations/actions";
 
 type MethodKey =
+  | "observatoire"
   | "sales_comparison"
   | "hedonic"
   | "income_capitalization"
@@ -18,17 +19,6 @@ interface MethodResult {
   price: number | null;
   details: Record<string, unknown>;
   warnings: string[];
-}
-
-interface IncomeIndicator {
-  yield_at_estimated_price: number | null;
-  capitalization_value: number | null;
-  rent_per_m2_month: number | null;
-  annual_rent: number | null;
-  yield_used: number | null;
-  legal_max_rent_month: number | null;
-  source_note: string;
-  available: boolean;
 }
 
 interface Props {
@@ -45,8 +35,6 @@ interface Props {
   weightsInitial: Record<string, number>;
   statusLabels: Record<string, string>;
   methodLabels: Record<string, string>;
-  incomeIndicator?: IncomeIndicator | null;
-  priceMid: number;
 }
 
 type RefinementFeedback =
@@ -55,6 +43,7 @@ type RefinementFeedback =
   | null;
 
 const METHOD_ORDER: MethodKey[] = [
+  "observatoire",
   "hedonic",
   "statec_reference",
   "sales_comparison",
@@ -97,8 +86,6 @@ export function EstimationDetailClient({
   weightsInitial,
   statusLabels,
   methodLabels,
-  incomeIndicator,
-  priceMid,
 }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<Status>(initialStatus);
@@ -110,11 +97,12 @@ export function EstimationDetailClient({
     useState<RefinementFeedback>(null);
   const [isSendingRefinement, startRefinementTransition] = useTransition();
   const [weights, setWeights] = useState<Record<MethodKey, number>>({
-    sales_comparison: weightsInitial.sales_comparison ?? 0.2,
-    hedonic: weightsInitial.hedonic ?? 0.35,
-    income_capitalization: weightsInitial.income_capitalization ?? 0.05,
-    depreciated_replacement: weightsInitial.depreciated_replacement ?? 0.1,
-    statec_reference: weightsInitial.statec_reference ?? 0.3,
+    observatoire: weightsInitial.observatoire ?? 1.0,
+    sales_comparison: weightsInitial.sales_comparison ?? 0,
+    hedonic: weightsInitial.hedonic ?? 0,
+    income_capitalization: weightsInitial.income_capitalization ?? 0,
+    depreciated_replacement: weightsInitial.depreciated_replacement ?? 0,
+    statec_reference: weightsInitial.statec_reference ?? 0,
   });
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
@@ -196,11 +184,12 @@ export function EstimationDetailClient({
 
   function resetDefaultWeights() {
     setWeights({
-      sales_comparison: 0.2,
-      hedonic: 0.35,
-      income_capitalization: 0.05,
-      depreciated_replacement: 0.1,
-      statec_reference: 0.3,
+      observatoire: 1.0,
+      sales_comparison: 0,
+      hedonic: 0,
+      income_capitalization: 0,
+      depreciated_replacement: 0,
+      statec_reference: 0,
     });
   }
 
@@ -481,56 +470,6 @@ export function EstimationDetailClient({
         })()}
       </section>
 
-      {/* Indicateur complementaire — Rendement locatif (info, ne pondere RIEN) */}
-      <section className="rounded-lg border-2 border-[#9E7B2A]/50 bg-[#FBF6E9] p-5">
-        <header className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-display text-lg font-bold text-[#1A1F2A]">
-            Indicateur complémentaire — Rendement locatif
-          </h2>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[#9E7B2A]">
-            informatif · n'entre pas dans le prix retenu
-          </span>
-        </header>
-        {!incomeIndicator || !incomeIndicator.available ? (
-          <p className="mt-3 text-sm italic text-[#1A1F2A]/60">
-            Données locatives non disponibles pour cette commune.
-          </p>
-        ) : (
-          <div className="mt-4 space-y-3 text-sm text-[#1A1F2A]">
-            <p>
-              <span className="font-semibold text-[#9E7B2A]">
-                Au prix estimé de {fmtPrice(priceMid)}
-              </span>
-              {" "}
-              ce bien générerait un rendement brut de{" "}
-              <span className="font-semibold">
-                {incomeIndicator.yield_at_estimated_price?.toFixed(2) ?? "—"}%
-              </span>
-              .
-            </p>
-            <p>
-              Valeur théorique par capitalisation locative :{" "}
-              <span className="font-semibold text-[#9E7B2A]">
-                {fmtPrice(incomeIndicator.capitalization_value)}
-              </span>
-              {" "}(rendement marché {incomeIndicator.yield_used?.toFixed(2) ?? "—"}%).
-            </p>
-            <p className="text-xs text-[#1A1F2A]/70">
-              Loyer estimé{" "}
-              {incomeIndicator.rent_per_m2_month?.toFixed(2) ?? "—"} €/m²/mois —{" "}
-              {fmtPrice(incomeIndicator.annual_rent)}/an. Plafond légal : loyer
-              annuel ≤ 5% du capital ({fmtPrice(incomeIndicator.legal_max_rent_month)}/mois
-              max).
-            </p>
-            {incomeIndicator.source_note && (
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[#1A1F2A]/50">
-                {incomeIndicator.source_note}
-              </p>
-            )}
-          </div>
-        )}
-      </section>
-
       {/* Sliders re-pondération */}
       <section className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
         <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
@@ -549,7 +488,7 @@ export function EstimationDetailClient({
             onClick={resetDefaultWeights}
             className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60 hover:text-[#9E7B2A]"
           >
-            Reset défaut (35/30/20/10/5%)
+            Reset défaut (Observatoire 100%)
           </button>
         </header>
         <div className="grid gap-4 md:grid-cols-2">
