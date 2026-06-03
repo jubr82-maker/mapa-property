@@ -18,6 +18,7 @@ import {
   LayoutTemplate,
   Calculator,
   ClipboardList,
+  Handshake,
 } from "lucide-react";
 
 const items = [
@@ -28,6 +29,7 @@ const items = [
   { href: "/admin/estimations", label: "Estimations EVS", icon: Calculator, match: "prefix" as const },
   { href: "/admin/leads", label: "Leads", icon: Mail, match: "prefix" as const },
   { href: "/admin/mandats", label: "Mandats", icon: FileText, match: "prefix" as const },
+  { href: "/admin/ventes-realisees", label: "Ventes réalisées", icon: Handshake, match: "prefix" as const },
   { href: "/admin/liste-attente", label: "Liste d'attente", icon: ClipboardList, match: "prefix" as const },
   { href: "/admin/arcova", label: "ARCOVA", icon: Users, match: "prefix" as const },
   { href: "/admin/reviews", label: "Avis", icon: Star, match: "prefix" as const },
