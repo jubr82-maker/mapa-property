@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { sendRefinement } from "@/app/admin/estimations/actions";
 
 type MethodKey =
   | "sales_comparison"
@@ -25,13 +26,20 @@ interface Props {
   notes: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  contactName: string | null;
   consent: boolean;
   rgpdConsentAt?: string | null;
+  refinementSentAt: string | null;
   methods: Record<string, MethodResult>;
   weightsInitial: Record<string, number>;
   statusLabels: Record<string, string>;
   methodLabels: Record<string, string>;
 }
+
+type RefinementFeedback =
+  | { kind: "sent"; sentAt: string }
+  | { kind: "error"; message: string }
+  | null;
 
 const METHOD_ORDER: MethodKey[] = [
   "hedonic",
@@ -68,8 +76,10 @@ export function EstimationDetailClient({
   notes: initialNotes,
   contactEmail,
   contactPhone,
+  contactName,
   consent,
   rgpdConsentAt,
+  refinementSentAt: initialRefinementSentAt,
   methods,
   weightsInitial,
   statusLabels,
@@ -78,6 +88,12 @@ export function EstimationDetailClient({
   const router = useRouter();
   const [status, setStatus] = useState<Status>(initialStatus);
   const [notes, setNotes] = useState(initialNotes ?? "");
+  const [refinementSentAt, setRefinementSentAt] = useState<string | null>(
+    initialRefinementSentAt,
+  );
+  const [refinementFeedback, setRefinementFeedback] =
+    useState<RefinementFeedback>(null);
+  const [isSendingRefinement, startRefinementTransition] = useTransition();
   const [weights, setWeights] = useState<Record<MethodKey, number>>({
     sales_comparison: weightsInitial.sales_comparison ?? 0.2,
     hedonic: weightsInitial.hedonic ?? 0.35,
@@ -182,6 +198,12 @@ export function EstimationDetailClient({
             Contact client
           </h2>
           <dl className="space-y-2 text-sm">
+            {contactName && (
+              <div className="flex justify-between gap-3">
+                <dt className="text-[#1A1F2A]/60">Nom</dt>
+                <dd className="font-medium text-[#1A1F2A]">{contactName}</dd>
+              </div>
+            )}
             <div className="flex justify-between gap-3">
               <dt className="text-[#1A1F2A]/60">Email</dt>
               <dd className="font-medium text-[#1A1F2A]">
@@ -270,6 +292,96 @@ export function EstimationDetailClient({
             />
           </div>
         </div>
+      </section>
+
+      {/* Sprint 3 estimations — Bloc "Proposer un affinage au client".
+          Bouton desactive si consent absent OU mail deja envoye.
+          Server action sendRefinement (auth check + garde-fous DB). */}
+      <section className="rounded-lg border border-[#3D4F63]/15 bg-white p-5">
+        <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+          Proposer un affinage au client
+        </h2>
+        {(() => {
+          const noEmail = !contactEmail;
+          const noConsent = consent !== true;
+          const alreadySent = refinementSentAt != null;
+          const disabled =
+            noEmail || noConsent || alreadySent || isSendingRefinement;
+          let helper: string | null = null;
+          if (noEmail) {
+            helper = "Pas d'email prospect — impossible d'envoyer.";
+          } else if (noConsent) {
+            helper = "Pas de consentement recontact enregistré.";
+          } else if (alreadySent) {
+            helper = `Affinage proposé le ${new Date(refinementSentAt as string).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}.`;
+          }
+          return (
+            <>
+              <p className="text-sm text-[#1A1F2A]/70">
+                Envoie au prospect un email proposant un Avis de Valeur
+                détaillé (offert dans le cadre d&apos;un mandat exclusif ou
+                semi-exclusif). Signature Julien Brebion. Un seul envoi par
+                estimation.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => {
+                    setRefinementFeedback(null);
+                    startRefinementTransition(async () => {
+                      const res = await sendRefinement(id);
+                      if (res.ok) {
+                        setRefinementSentAt(res.sentAt);
+                        setRefinementFeedback({
+                          kind: "sent",
+                          sentAt: res.sentAt,
+                        });
+                        router.refresh();
+                        return;
+                      }
+                      const msg =
+                        res.reason === "no_email"
+                          ? "Pas d'email prospect — envoi impossible."
+                          : res.reason === "no_consent"
+                            ? "Pas de consentement recontact enregistré."
+                            : res.reason === "already_sent"
+                              ? `Déjà proposé le ${new Date(res.sentAt).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}.`
+                              : res.reason === "unauthorized"
+                                ? "Session expirée. Reconnecte-toi."
+                                : res.reason === "not_found"
+                                  ? "Estimation introuvable."
+                                  : `Erreur DB : ${res.error}`;
+                      setRefinementFeedback({ kind: "error", message: msg });
+                    });
+                  }}
+                  className="rounded-full bg-[#9E7B2A] px-5 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSendingRefinement
+                    ? "Envoi…"
+                    : alreadySent
+                      ? "Déjà proposé"
+                      : "Proposer un affinage par email"}
+                </button>
+                {helper && (
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#1A1F2A]/60">
+                    {helper}
+                  </p>
+                )}
+              </div>
+              {refinementFeedback?.kind === "sent" && (
+                <p className="mt-3 rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+                  Mail envoyé · {new Date(refinementFeedback.sentAt).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                </p>
+              )}
+              {refinementFeedback?.kind === "error" && (
+                <p className="mt-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-900">
+                  {refinementFeedback.message}
+                </p>
+              )}
+            </>
+          );
+        })()}
       </section>
 
       {/* Cards des 5 méthodes */}

@@ -252,3 +252,125 @@ export async function sendEstimationEmails(
 
   await Promise.allSettled(tasks);
 }
+
+// ============================================================================
+// Sprint 3 estimations — Mail d'affinage déclenché manuellement par l'admin
+// depuis /admin/estimations/[id]. Proposition d'un Avis de Valeur détaillé
+// offert dans le cadre d'un mandat exclusif ou semi-exclusif. UNIQUEMENT
+// au client (pas de copie interne, l'admin sait déjà qu'il l'envoie).
+// Signature Julien Brebion seul — pas de mention Frédéric Mannis.
+// ============================================================================
+
+interface SendRefinementArgs {
+  contactEmail: string;
+  contactName?: string;
+  locale?: Locale | string;
+}
+
+function refinementSubject(locale: Locale): string {
+  switch (locale) {
+    case "en":
+      return "Your MAPA Property valuation — let's go further together";
+    case "de":
+      return "Ihre MAPA Property-Schätzung — gehen wir gemeinsam weiter";
+    default:
+      return "Votre estimation MAPA Property — allons plus loin ensemble";
+  }
+}
+
+function refinementBody(locale: Locale, contactName: string | undefined): string {
+  const salutation = contactName?.trim() ? `Bonjour ${contactName.trim()},` : "Bonjour,";
+  switch (locale) {
+    case "en": {
+      const sal = contactName?.trim() ? `Hello ${contactName.trim()},` : "Hello,";
+      return [
+        sal,
+        ``,
+        `You recently valued your property on our website — thank you. The`,
+        `estimate you received is indicative: it relies on market data and our`,
+        `algorithm, but it does not capture everything that makes your`,
+        `property truly valuable — its precise condition, its strengths, its`,
+        `exact location, the context of your neighbourhood.`,
+        ``,
+        `I would like to take this further: a detailed Valuation Report, drawn`,
+        `up personally by me, which refines this initial estimate and gives`,
+        `you a reliable, argued, actionable price range to sell at the right`,
+        `value. This Valuation Report is offered free of charge as part of an`,
+        `exclusive or semi-exclusive mandate.`,
+        ``,
+        `If you would like to discuss it, simply reply to this email or call me.`,
+        ``,
+        `Kind regards,`,
+        `Julien Brebion — Real Estate Director, Exclusive Sourcing Specialist`,
+        `+352 691 620 127 · j.brebion@mapagroup.org`,
+      ].join("\n");
+    }
+    case "de": {
+      const sal = contactName?.trim() ? `Guten Tag ${contactName.trim()},` : "Guten Tag,";
+      return [
+        sal,
+        ``,
+        `Sie haben kürzlich Ihre Immobilie auf unserer Website bewertet —`,
+        `ich danke Ihnen. Die erhaltene Schätzung ist indikativ: sie stützt`,
+        `sich auf Marktdaten und unseren Algorithmus, berücksichtigt aber`,
+        `nicht alles, was den wahren Wert Ihrer Immobilie ausmacht — den`,
+        `genauen Zustand, die Vorzüge, die exakte Lage, das Umfeld Ihres`,
+        `Stadtteils.`,
+        ``,
+        `Ich schlage Ihnen vor, weiterzugehen: eine ausführliche`,
+        `Wertermittlung (Avis de Valeur), persönlich von mir erstellt, die`,
+        `diese erste Schätzung verfeinert und Ihnen eine verlässliche,`,
+        `begründete, verwendbare Preisspanne liefert, um zum richtigen Preis`,
+        `zu verkaufen. Diese Wertermittlung ist kostenlos im Rahmen eines`,
+        `exklusiven oder semi-exklusiven Mandats.`,
+        ``,
+        `Wenn Sie möchten, melden Sie sich einfach — per E-Mail oder`,
+        `Telefon — und wir sprechen darüber.`,
+        ``,
+        `Mit freundlichen Grüßen,`,
+        `Julien Brebion — Real Estate Director, Exclusive Sourcing Specialist`,
+        `+352 691 620 127 · j.brebion@mapagroup.org`,
+      ].join("\n");
+    }
+    default:
+      return [
+        salutation,
+        ``,
+        `Vous avez récemment estimé votre bien sur notre site, et je vous en`,
+        `remercie. L'estimation que vous avez reçue est indicative : elle`,
+        `s'appuie sur les données de marché et notre algorithme, mais elle ne`,
+        `tient pas compte de tout ce qui fait la vraie valeur de votre bien —`,
+        `son état précis, ses atouts, son emplacement exact, le contexte de`,
+        `votre quartier.`,
+        ``,
+        `Je vous propose d'aller plus loin : un Avis de Valeur détaillé,`,
+        `établi par mes soins, qui affine cette première estimation et vous`,
+        `donne une fourchette fiable, argumentée, exploitable pour vendre au`,
+        `juste prix. Cet Avis de Valeur est offert dans le cadre d'un mandat`,
+        `exclusif ou semi-exclusif.`,
+        ``,
+        `Si vous le souhaitez, recontactez-moi simplement — par retour de`,
+        `mail ou par téléphone — et nous en parlons.`,
+        ``,
+        `Bien à vous,`,
+        `Julien Brebion — Real Estate Director, Exclusive Sourcing Specialist`,
+        `+352 691 620 127 · j.brebion@mapagroup.org`,
+      ].join("\n");
+  }
+}
+
+/**
+ * Envoie UN mail au client (pas de copie interne) proposant un Avis de
+ * Valeur détaillé. Best-effort identique à sendEstimationEmails : si
+ * RESEND_API_KEY absent → console.warn + return, jamais de throw.
+ */
+export async function sendEstimationRefinementEmail(
+  args: SendRefinementArgs,
+): Promise<void> {
+  const locale = pickLocale(args.locale);
+  await sendOne({
+    to: args.contactEmail,
+    subject: refinementSubject(locale),
+    text: refinementBody(locale, args.contactName),
+  });
+}

@@ -8,8 +8,10 @@ interface EstimationRow {
   inputs: Record<string, unknown>;
   contact_email: string | null;
   contact_phone: string | null;
+  contact_name: string | null;
   consent: boolean;
   rgpd_consent_at?: string | null;
+  refinement_sent_at?: string | null;
   client_output: {
     price_low: number;
     price_mid: number;
@@ -148,6 +150,7 @@ export default async function EstimationDetailPage({
         notes={r.notes}
         contactEmail={r.contact_email}
         contactPhone={r.contact_phone}
+        contactName={r.contact_name}
         consent={r.consent}
         rgpdConsentAt={
           r.rgpd_consent_at ??
@@ -155,6 +158,7 @@ export default async function EstimationDetailPage({
             ? r.created_at
             : null)
         }
+        refinementSentAt={r.refinement_sent_at ?? null}
         methods={methods}
         weightsInitial={weights}
         statusLabels={STATUS_LABEL}
