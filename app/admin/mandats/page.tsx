@@ -23,7 +23,7 @@ type MandatRow = {
   client_country: string | null;
   client_city: string | null;
   property_type: string | null;
-  transaction_type: string | null;
+  type_transaction: string;
   budget_min: number | null;
   budget_max: number | null;
   zones: string[] | null;
@@ -84,9 +84,9 @@ export default async function AdminMandatsRecherchePage({
   let mandats: MandatRow[] = [];
 
   const tryNew = await supabase
-    .from("mandats_recherche")
+    .from("mandats")
     .select(
-      "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,transaction_type,budget_min,budget_max,zones,status,notes,workflow_status,next_follow_up",
+      "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,type_transaction,budget_min,budget_max,zones,status,notes,workflow_status,next_follow_up",
     )
     .order("created_at", { ascending: false })
     .limit(500);
@@ -94,9 +94,9 @@ export default async function AdminMandatsRecherchePage({
   if (tryNew.error) {
     migrationApplied = false;
     const fallback = await supabase
-      .from("mandats_recherche")
+      .from("mandats")
       .select(
-        "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,transaction_type,budget_min,budget_max,zones,status,notes",
+        "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,type_transaction,budget_min,budget_max,zones,status,notes",
       )
       .order("created_at", { ascending: false })
       .limit(500);
@@ -134,7 +134,7 @@ export default async function AdminMandatsRecherchePage({
     params.set("tab", key);
     if (sp.q) params.set("q", sp.q);
     if (sp.type) params.set("type", sp.type);
-    return `/admin/mandats-recherche?${params.toString()}`;
+    return `/admin/mandats?${params.toString()}`;
   };
 
   return (
@@ -236,7 +236,7 @@ export default async function AdminMandatsRecherchePage({
                       {m.client_name?.trim() || m.client_email || "—"}
                     </p>
                     <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#3D4F63]/60">
-                      {[m.transaction_type, m.property_type]
+                      {[m.type_transaction, m.property_type]
                         .filter(Boolean)
                         .join(" · ") || "—"}
                       {" · "}
@@ -266,7 +266,7 @@ export default async function AdminMandatsRecherchePage({
                     </span>
                   )}
                   <Link
-                    href={`/admin/mandats-recherche/${m.id}`}
+                    href={`/admin/mandats/${m.id}`}
                     className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   >
                     Voir

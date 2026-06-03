@@ -4,15 +4,13 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 
 // ============================================================================
-// Workflow admin générique sur la table `mandats_recherche`.
-// Aligné EXACTEMENT sur app/admin/leads/actions.ts (Agent 13, Phase A-quater).
-// Dégrade gracieusement si la migration 20260512_admin_workflow_mandats.sql
-// n'est pas encore appliquée : remonte l'erreur Supabase telle quelle pour
-// que l'UI affiche le message.
+// Workflow admin générique sur la table `mandats` (renommée depuis
+// mandats_recherche, sprint MANDATS-A — migration 20260603_mandats_unified).
+// Aligné EXACTEMENT sur app/admin/leads/actions.ts.
 // ============================================================================
 
-const TABLE = "mandats_recherche";
-const ROUTE = "/admin/mandats-recherche";
+const TABLE = "mandats";
+const ROUTE = "/admin/mandats";
 
 type HistoryEntry = {
   at: string;

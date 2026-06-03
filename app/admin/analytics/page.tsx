@@ -199,9 +199,9 @@ async function loadAnalytics() {
     .gte("created_at", thirtyDaysAgo.toISOString());
 
   const mandatesQ = supabase
-    .from("mandats_recherche")
+    .from("mandats")
     .select("id", { count: "exact", head: true })
-    .in("status", ["signed", "active"]);
+    .eq("status", "actif");
 
   const arcovaQ = supabase
     .from("arcova_waitlist")
@@ -789,8 +789,8 @@ export default async function AdminAnalyticsPage() {
             label="Mandats actifs"
             counter={data.pipeline.mandates}
             Icon={FileSignature}
-            hint="signed + active"
-            href="/admin/mandats-recherche"
+            hint="status actif"
+            href="/admin/mandats"
           />
           <StatCard
             label="ARCOVA inscrits"

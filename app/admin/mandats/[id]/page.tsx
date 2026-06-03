@@ -12,7 +12,7 @@ import {
   updateWorkflowStatus,
   addAdminNote,
   setNextFollowUp,
-} from "@/app/admin/mandats-recherche/actions";
+} from "@/app/admin/mandats/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +33,7 @@ type MandatFull = {
   client_country: string | null;
   client_city: string | null;
   property_type: string | null;
-  transaction_type: string | null;
+  type_transaction: string;
   budget_min: number | null;
   budget_max: number | null;
   zones: string[] | null;
@@ -46,10 +46,10 @@ type MandatFull = {
 };
 
 const FULL_SELECT =
-  "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,transaction_type,budget_min,budget_max,zones,status,notes,workflow_status,admin_notes,next_follow_up,workflow_history";
+  "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,type_transaction,budget_min,budget_max,zones,status,notes,workflow_status,admin_notes,next_follow_up,workflow_history";
 
 const FALLBACK_SELECT =
-  "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,transaction_type,budget_min,budget_max,zones,status,notes";
+  "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,type_transaction,budget_min,budget_max,zones,status,notes";
 
 function formatDateTime(iso: string) {
   try {
@@ -88,7 +88,7 @@ export default async function AdminMandatDetailPage({
   let mandat: MandatFull | null = null;
 
   const tryFull = await supabase
-    .from("mandats_recherche")
+    .from("mandats")
     .select(FULL_SELECT)
     .eq("id", id)
     .maybeSingle();
@@ -96,7 +96,7 @@ export default async function AdminMandatDetailPage({
   if (tryFull.error) {
     migrationApplied = false;
     const fallback = await supabase
-      .from("mandats_recherche")
+      .from("mandats")
       .select(FALLBACK_SELECT)
       .eq("id", id)
       .maybeSingle();
@@ -120,7 +120,7 @@ export default async function AdminMandatDetailPage({
     <div className="space-y-8">
       <div>
         <Link
-          href="/admin/mandats-recherche"
+          href="/admin/mandats"
           className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           <ArrowLeft className="size-3" />
@@ -132,7 +132,7 @@ export default async function AdminMandatDetailPage({
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
             Mandat ·{" "}
-            {[mandat.transaction_type, mandat.property_type]
+            {[mandat.type_transaction, mandat.property_type]
               .filter(Boolean)
               .join(" · ") || "recherche"}
           </p>
@@ -185,7 +185,7 @@ export default async function AdminMandatDetailPage({
               Critères de recherche
             </p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Field label="Transaction" value={mandat.transaction_type} />
+              <Field label="Transaction" value={mandat.type_transaction} />
               <Field label="Type de bien" value={mandat.property_type} />
               <Field
                 label="Budget"

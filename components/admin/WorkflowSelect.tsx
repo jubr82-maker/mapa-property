@@ -25,7 +25,7 @@ export function WorkflowSelect({
   initialStatus: string | null | undefined;
   /**
    * Server Action à appeler. Si omise, on cible /admin/leads (compat
-   * ascendante). Pour réutiliser sur mandats_recherche / arcova_waitlist /
+   * ascendante). Pour réutiliser sur mandats / arcova_waitlist /
    * offmarket_requests, passer l'action depuis le module concerné.
    */
   action?: UpdateWorkflowAction;

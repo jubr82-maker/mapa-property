@@ -43,7 +43,7 @@ export function AdminNotes({
   initialFollowUp: string | null;
   /**
    * Server Actions custom. Si omises, ciblent /admin/leads (compat
-   * ascendante). Pour réutiliser sur mandats_recherche / arcova_waitlist /
+   * ascendante). Pour réutiliser sur mandats / arcova_waitlist /
    * offmarket_requests, passer les actions du module concerné.
    */
   addNoteAction?: AddNoteAction;
