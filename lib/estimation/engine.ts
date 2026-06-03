@@ -144,6 +144,20 @@ export interface EstimationInputs {
   balconyArea?: number;
   /** Surface jardin m² (apartment only). 800€/m² plafond 50k€. */
   gardenArea?: number;
+  // ──────────────────────────────────────────────────────────────────────
+  // Sprint 2 estimations — Donnees marche commune (capitalisation locative).
+  // Optionnel. Si fourni, methodIncomeCapitalization utilise ces valeurs
+  // (issues de lu_market_prices_by_commune) ; sinon fallback hardcode
+  // (estimatedRentPerM2Month + DEFAULT_YIELD 3.5%).
+  //  - rentPerM2Month : loyer median APPARTEMENT €/m²/mois. Pour maison/villa,
+  //    le moteur applique ×0.82 (mecanisme interne).
+  //  - yieldRate : rendement locatif brut DECIMAL (0.0349 = 3.49%). La base
+  //    stocke en POURCENTAGE, l'appelant doit diviser par 100 avant de passer.
+  // ──────────────────────────────────────────────────────────────────────
+  rentData?: {
+    rentPerM2Month: number | null;
+    yieldRate: number | null;
+  };
 }
 
 // ============================================================================
@@ -996,10 +1010,39 @@ export function methodIncomeCapitalization(
   inputs: EstimationInputs,
 ): MethodResult {
   const propType = inputs.type === "maison" || inputs.type === "villa" ? "maison" : "appartement";
-  const rentPerM2 = estimatedRentPerM2Month(inputs.commune, propType);
+
+  // Sprint 2 : si rentData fourni (issu de lu_market_prices_by_commune via
+  // /api/estimate), on utilise les valeurs reelles. Le loyer en base est
+  // pour appartement -> ×0.82 si maison/villa. Le yield est en DECIMAL.
+  // Fallback hardcode (estimatedRentPerM2Month + DEFAULT_YIELD) si donnee
+  // absente ou commune introuvable.
+  const rentDataRent = inputs.rentData?.rentPerM2Month;
+  const rentDataYield = inputs.rentData?.yieldRate;
+  const usedRealRent = rentDataRent != null;
+  const usedRealYield = rentDataYield != null;
+
+  const rentPerM2 = usedRealRent
+    ? rentDataRent * (propType === "maison" ? 0.82 : 1)
+    : estimatedRentPerM2Month(inputs.commune, propType);
+  const yieldRef = usedRealYield ? rentDataYield : DEFAULT_YIELD;
+
   const annualRent = rentPerM2 * inputs.surfaceLiving * 12;
-  const yieldRef = DEFAULT_YIELD;
   const price = annualRent / yieldRef;
+
+  // Plafond legal LU : loyer annuel <= 5% du capital investi.
+  const legalMaxRentMonth =
+    inputs.surfaceLiving > 0 ? Math.round((price * 0.05) / 12) : null;
+
+  const warnings: string[] = [
+    "Méthode informative pour résidence principale (plus pertinente pour locatif).",
+  ];
+  if (usedRealRent || usedRealYield) {
+    warnings.push("Loyers/rendement : données marché commune (mai 2026).");
+  } else {
+    warnings.push(
+      "Loyers €/m² indicatifs V1 — à raffiner avec Observatoire Habitat loyers en V2.",
+    );
+  }
 
   return {
     applicable: true,
@@ -1009,11 +1052,11 @@ export function methodIncomeCapitalization(
       annual_rent: Math.round(annualRent),
       yield_used: yieldRef,
       reasoning: "Loyer mensuel estimé × 12 / yield brut référence LU",
+      legal_max_rent_month: legalMaxRentMonth,
+      legal_rent_cap_note:
+        "Plafond legal LU : loyer annuel <= 5% du capital investi.",
     },
-    warnings: [
-      "Méthode informative pour résidence principale (plus pertinente pour locatif).",
-      "Loyers €/m² indicatifs V1 — à raffiner avec Observatoire Habitat loyers en V2.",
-    ],
+    warnings,
   };
 }
 

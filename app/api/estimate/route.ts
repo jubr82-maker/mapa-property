@@ -79,6 +79,62 @@ function parseWorks(raw: unknown): WorkItem[] | undefined {
   return items.length > 0 ? items : undefined;
 }
 
+/**
+ * Sprint 2 estimations — Lookup donnees marche commune pour la methode
+ * capitalisation locative. Lecture seule sur lu_market_prices_by_commune,
+ * client Supabase anon (policy public_read).
+ *
+ * Normalisation : trim + lowercase + tirets -> espaces, cote SQL aussi
+ * (lower(replace(commune, '-', ' '))) pour matcher "Esch-sur-Alzette" avec
+ * "esch sur alzette" ou "ESCH-SUR-ALZETTE". Si plusieurs trimestres pour
+ * la meme commune, on prend le plus recent (ORDER BY trimestre DESC).
+ *
+ * Best-effort : toute erreur DB -> {null, null}, le moteur fallback dessus.
+ * Jamais de throw, jamais de blocage de l'estimation.
+ *
+ * Conversion : rendement_locatif en base est en POURCENTAGE (ex 3.49) ->
+ * on divise par 100 pour fournir le DECIMAL attendu par le moteur (0.0349).
+ */
+async function fetchRentDataForCommune(
+  commune: string,
+): Promise<{ rentPerM2Month: number | null; yieldRate: number | null }> {
+  const empty = { rentPerM2Month: null, yieldRate: null };
+  if (!commune || typeof commune !== "string") return empty;
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) return empty;
+    const sb = createClient(url, key);
+    // Recupere toutes les rows segment='global' puis matche cote JS avec
+    // la meme normalisation que le moteur (normCommune) — evite la
+    // dependance a une fonction SQL custom et reste tolerant aux
+    // variations de casse/tirets.
+    const norm = commune.trim().toLowerCase().replace(/-/g, " ");
+    const { data, error } = await sb
+      .from("lu_market_prices_by_commune")
+      .select("commune,loyer_median_m2_mensuel,rendement_locatif,trimestre")
+      .eq("segment", "global")
+      .order("trimestre", { ascending: false });
+    if (error || !data) return empty;
+    const row = (data as Array<{
+      commune: string;
+      loyer_median_m2_mensuel: number | null;
+      rendement_locatif: number | null;
+      trimestre: string;
+    }>).find(
+      (r) => r.commune.trim().toLowerCase().replace(/-/g, " ") === norm,
+    );
+    if (!row) return empty;
+    return {
+      rentPerM2Month: row.loyer_median_m2_mensuel,
+      yieldRate:
+        row.rendement_locatif != null ? row.rendement_locatif / 100 : null,
+    };
+  } catch {
+    return empty;
+  }
+}
+
 /** Best-effort persistance dans estimation_requests. Silencieux en cas d'échec. */
 async function persistEstimationRequest(args: {
   inputs: unknown;
@@ -453,6 +509,10 @@ export async function POST(req: Request) {
     },
   );
   if (evsInputs) {
+    // Sprint 2 : lookup donnees marche commune AVANT estimateEvs (le moteur
+    // reste pur, sans I/O DB). Best-effort : toute erreur DB -> rentData
+    // {null, null} -> moteur retombe sur son fallback hardcode.
+    evsInputs.rentData = await fetchRentDataForCommune(evsInputs.commune);
     try {
       const evs = estimateEvs(evsInputs);
       // GARDE LU-ONLY (POL3-6) : le moteur EVS = Luxembourg uniquement.
