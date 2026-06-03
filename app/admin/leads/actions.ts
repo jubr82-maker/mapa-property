@@ -188,7 +188,7 @@ export async function convertLeadToMandat(
   const { data: lead, error: leadError } = await sb
     .from("leads")
     .select(
-      "id,first_name,last_name,name,email,phone,country,city,type,subject,message",
+      "id,first_name,last_name,email,phone,country,city,type,subject,message",
     )
     .eq("id", leadId)
     .maybeSingle();
@@ -200,7 +200,6 @@ export async function convertLeadToMandat(
     id: string;
     first_name: string | null;
     last_name: string | null;
-    name: string | null;
     email: string;
     phone: string | null;
     country: string | null;
@@ -244,12 +243,12 @@ export async function convertLeadToMandat(
   // 4. Déduction type_mandat depuis lead.type (mapping strict).
   const type_mandat = TYPE_MANDAT_MAP[l.type ?? ""] ?? null;
 
-  // 5. Construire client_name (priorité : first+last > name > email).
+  // 5. Construire client_name (priorité : first+last > email).
   const composedName = [l.first_name, l.last_name]
     .filter(Boolean)
     .join(" ")
     .trim();
-  const client_name = composedName || l.name?.trim() || l.email;
+  const client_name = composedName || l.email;
 
   // 6. INSERT dans mandats.
   const payload = {
