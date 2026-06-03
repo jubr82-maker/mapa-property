@@ -23,7 +23,6 @@ type LeadFull = {
   created_at: string;
   first_name: string | null;
   last_name: string | null;
-  name: string | null;
   email: string;
   phone: string | null;
   type: string | null;
@@ -35,7 +34,6 @@ type LeadFull = {
   status: string | null;
   property_ref: string | null;
   notes: string | null;
-  user_agent: string | null;
   // Nouvelles colonnes (migration 20260512)
   workflow_status?: string | null;
   admin_notes?: string | null;
@@ -43,11 +41,15 @@ type LeadFull = {
   workflow_history?: HistoryEntry[] | null;
 };
 
+// Fix 404 sur la fiche detail : les colonnes `name` et `user_agent`
+// n'existent pas dans la table leads. Leur presence dans le SELECT
+// faisait echouer tryFull ET fallback avec 42703, ce qui declenchait
+// notFound() systematiquement.
 const FULL_SELECT =
-  "id,created_at,first_name,last_name,name,email,phone,type,source,country,city,message,subject,status,property_ref,notes,user_agent,workflow_status,admin_notes,next_follow_up,workflow_history";
+  "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,subject,status,property_ref,notes,workflow_status,admin_notes,next_follow_up,workflow_history";
 
 const FALLBACK_SELECT =
-  "id,created_at,first_name,last_name,name,email,phone,type,source,country,city,message,subject,status,property_ref,notes,user_agent";
+  "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,subject,status,property_ref,notes";
 
 function formatDateTime(iso: string) {
   try {
@@ -98,7 +100,6 @@ export default async function AdminLeadDetailPage({
 
   const fullName =
     [lead.first_name, lead.last_name].filter(Boolean).join(" ") ||
-    lead.name ||
     lead.email;
 
   const ws = (lead.workflow_status as WorkflowStatus | null) ?? "new";
@@ -204,17 +205,6 @@ export default async function AdminLeadDetailPage({
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {lead.notes}
-              </p>
-            </div>
-          )}
-
-          {lead.user_agent && (
-            <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                User agent
-              </p>
-              <p className="mt-2 break-all font-mono text-[11px] text-[#3D4F63]/80">
-                {lead.user_agent}
               </p>
             </div>
           )}
