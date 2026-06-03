@@ -312,6 +312,31 @@ export interface MethodResult {
   warnings: string[];
 }
 
+/**
+ * Indicateur complementaire — Rendement locatif (informatif).
+ * Sprint estimations Option C2 : range HORS du dict `methods` -> aucun
+ * impact sur le prix client ni sur le recompute pondere admin. Ne lit
+ * QUE des valeurs deja calculees ; ne modifie aucun moteur.
+ */
+export interface IncomeIndicator {
+  /** Rendement brut % que le bien rapporterait au prix retenu (mid). */
+  yield_at_estimated_price: number | null;
+  /** Valeur theorique par capitalisation locative (loyer/rendement). */
+  capitalization_value: number | null;
+  /** Loyer EUR/m2/mois utilise (ratio maison/appart applique). */
+  rent_per_m2_month: number | null;
+  /** Loyer annuel estime. */
+  annual_rent: number | null;
+  /** Rendement de reference commune (%). */
+  yield_used: number | null;
+  /** Plafond legal LU : loyer mensuel max = (capital * 5%) / 12. */
+  legal_max_rent_month: number | null;
+  /** Note source publique (jamais nommer la source reelle). */
+  source_note: string;
+  /** false = pas de rentData disponible pour la commune. */
+  available: boolean;
+}
+
 export interface EstimationResult {
   client_output: {
     price_low: number;
@@ -334,6 +359,10 @@ export interface EstimationResult {
     inputs_snapshot: EstimationInputs;
     weights_used: MethodWeights;
     computed_at: string;
+    /** Indicateurs informatifs separes des methods (jamais ponderes). */
+    complementary_indicators?: {
+      income_capitalization?: IncomeIndicator;
+    };
   };
 }
 
@@ -1360,6 +1389,7 @@ function buildEvsResult(
   inputs: EstimationInputs,
   value: number,
   details: Record<string, unknown>,
+  propType: "appartement" | "maison" = "maison",
 ): EstimationResult {
   const mid = Math.round(value);
   const synthetic: MethodResult = {
@@ -1374,6 +1404,15 @@ function buildEvsResult(
     details: { reason },
     warnings: [],
   });
+
+  // Option C2 — indicateur rendement (info), AUCUN impact sur mid/low/high.
+  const incomeIndicator = computeIncomeIndicator({
+    estimatedPrice: mid,
+    surfaceLiving: inputs.surfaceLiving,
+    propType,
+    rentData: inputs.rentData,
+  });
+
   return {
     client_output: {
       price_low: Math.round(mid * 0.9),
@@ -1396,6 +1435,9 @@ function buildEvsResult(
       inputs_snapshot: inputs,
       weights_used: DEFAULT_WEIGHTS,
       computed_at: new Date().toISOString(),
+      complementary_indicators: {
+        income_capitalization: incomeIndicator,
+      },
     },
   };
 }
@@ -1515,6 +1557,72 @@ function estimateHouse(inputs: EstimationInputs): EstimationResult {
 }
 
 // ============================================================================
+// Indicateur complementaire — Rendement locatif (Sprint estimations Option C2)
+//
+// Fonction PURE, sans I/O, sans modification d'aucun calcul existant. Calcule
+// quatre informations utiles pour les conseillers MAPA :
+//   (a) yield_at_estimated_price : rendement brut % au prix retenu par le
+//       moteur (info commerciale "que rapporte ce bien si loue").
+//   (b) capitalization_value : valeur theorique par capitalisation locative
+//       (annual_rent / yieldRate). Comparaison face au prix retenu.
+//   - rent_per_m2_month / annual_rent : detail du loyer estime.
+//   - legal_max_rent_month : plafond legal LU (5% du capital / 12).
+//
+// Rangee dans internal_output.complementary_indicators -> aucun lien avec
+// methods.income_capitalization (qui reste code mort). Ne pondere RIEN.
+// ============================================================================
+
+export function computeIncomeIndicator(args: {
+  estimatedPrice: number;
+  surfaceLiving: number;
+  propType: "appartement" | "maison";
+  rentData?: { rentPerM2Month: number | null; yieldRate: number | null };
+}): IncomeIndicator {
+  const { estimatedPrice, surfaceLiving, propType, rentData } = args;
+  const rent = rentData?.rentPerM2Month;
+  const yieldRate = rentData?.yieldRate;
+
+  if (
+    rent == null ||
+    yieldRate == null ||
+    yieldRate <= 0 ||
+    surfaceLiving <= 0 ||
+    estimatedPrice <= 0
+  ) {
+    return {
+      yield_at_estimated_price: null,
+      capitalization_value: null,
+      rent_per_m2_month: null,
+      annual_rent: null,
+      yield_used: null,
+      legal_max_rent_month: null,
+      source_note: "",
+      available: false,
+    };
+  }
+
+  // Loyer base = appartement. Ratio 0.82 si maison/villa (convention Sprint 2).
+  const adjustedRent = propType === "maison" ? rent * 0.82 : rent;
+  const annualRent = adjustedRent * surfaceLiving * 12;
+  const capitalizationValue = Math.round(annualRent / yieldRate);
+  const yieldAtPrice =
+    Math.round(((annualRent / estimatedPrice) * 100) * 100) / 100;
+  const yieldUsed = Math.round(yieldRate * 100 * 100) / 100;
+  const legalMaxRentMonth = Math.round((estimatedPrice * 0.05) / 12);
+
+  return {
+    yield_at_estimated_price: yieldAtPrice,
+    capitalization_value: capitalizationValue,
+    rent_per_m2_month: Math.round(adjustedRent * 100) / 100,
+    annual_rent: Math.round(annualRent),
+    yield_used: yieldUsed,
+    legal_max_rent_month: legalMaxRentMonth,
+    source_note: "Donnees marche Luxembourg, mai 2026",
+    available: true,
+  };
+}
+
+// ============================================================================
 // Sprint C7 — Methode Observatoire (appartements uniquement).
 //
 // Formule unique conforme standards Observatoire de l'Habitat (LISER) +
@@ -1557,7 +1665,7 @@ function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
     return buildEvsResult(inputs, 0, {
       method: "observatoire_no_baseline",
       reason: `Commune "${inputs.commune}" hors referentiel.`,
-    });
+    }, "appartement");
   }
   const pricePerM2 = baseline.pricePerM2;
   const baseValue = inputs.surfaceLiving * pricePerM2;
@@ -1601,6 +1709,14 @@ function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
     warnings: [],
   };
 
+  // Option C2 — indicateur rendement (info), AUCUN impact sur mid/low/high.
+  const incomeIndicator = computeIncomeIndicator({
+    estimatedPrice: mid,
+    surfaceLiving: inputs.surfaceLiving,
+    propType: "appartement",
+    rentData: inputs.rentData,
+  });
+
   return {
     client_output: {
       price_low: low,
@@ -1639,6 +1755,9 @@ function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
       inputs_snapshot: inputs,
       weights_used: DEFAULT_WEIGHTS,
       computed_at: new Date().toISOString(),
+      complementary_indicators: {
+        income_capitalization: incomeIndicator,
+      },
     },
   };
 }

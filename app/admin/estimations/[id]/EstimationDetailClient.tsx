@@ -20,6 +20,17 @@ interface MethodResult {
   warnings: string[];
 }
 
+interface IncomeIndicator {
+  yield_at_estimated_price: number | null;
+  capitalization_value: number | null;
+  rent_per_m2_month: number | null;
+  annual_rent: number | null;
+  yield_used: number | null;
+  legal_max_rent_month: number | null;
+  source_note: string;
+  available: boolean;
+}
+
 interface Props {
   id: string;
   status: Status;
@@ -34,6 +45,8 @@ interface Props {
   weightsInitial: Record<string, number>;
   statusLabels: Record<string, string>;
   methodLabels: Record<string, string>;
+  incomeIndicator?: IncomeIndicator | null;
+  priceMid: number;
 }
 
 type RefinementFeedback =
@@ -84,6 +97,8 @@ export function EstimationDetailClient({
   weightsInitial,
   statusLabels,
   methodLabels,
+  incomeIndicator,
+  priceMid,
 }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<Status>(initialStatus);
@@ -384,60 +399,136 @@ export function EstimationDetailClient({
         })()}
       </section>
 
-      {/* Cards des 5 méthodes */}
+      {/* Methode active + non-applicables groupees + indicateur complementaire */}
       <section>
         <h2 className="mb-4 font-display text-lg font-bold text-[#1A1F2A]">
-          Les 5 méthodes croisées (EVS / TEGoVA)
+          Méthode retenue par le moteur
         </h2>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {METHOD_ORDER.map((k) => {
-            const m = methods[k];
-            if (!m) return null;
-            return (
-              <article
-                key={k}
-                className={`rounded-lg border p-4 ${
-                  m.applicable
-                    ? "border-[#3D4F63]/20 bg-white"
-                    : "border-[#3D4F63]/10 bg-[#F5EFE1]/40"
-                }`}
-              >
-                <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-                  {methodLabels[k]}
-                </p>
-                <p
-                  className={`mt-2 font-display text-xl font-bold ${
-                    m.applicable ? "text-[#9E7B2A]" : "text-[#1A1F2A]/30"
-                  }`}
-                >
-                  {m.applicable ? fmtPrice(m.price) : "Non applicable"}
-                </p>
-                {!m.applicable && (
-                  <p className="mt-2 text-xs italic text-[#1A1F2A]/60">
-                    {(m.details as { reason?: string })?.reason ?? "—"}
+        {(() => {
+          const activeKey = METHOD_ORDER.find(
+            (k) => methods[k]?.applicable && methods[k]?.price != null,
+          );
+          const active = activeKey ? methods[activeKey] : null;
+          const activeMethodId =
+            (active?.details as { method?: string })?.method ?? "";
+          const activeTitle =
+            activeMethodId === "observatoire_c7"
+              ? "Méthode Observatoire (active)"
+              : activeMethodId === "hedonic_terrain_bati"
+                ? "Méthode bâtie + terrain (active)"
+                : activeKey
+                  ? `${methodLabels[activeKey] ?? "Méthode"} (active)`
+                  : "Méthode active";
+          const inactive = METHOD_ORDER.filter(
+            (k) => methods[k] && !methods[k].applicable,
+          );
+          return (
+            <>
+              {active ? (
+                <article className="rounded-lg border border-[#9E7B2A]/40 bg-white p-5 shadow-sm">
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[#9E7B2A]">
+                    {activeTitle}
                   </p>
-                )}
-                {m.applicable && m.details && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60 hover:text-[#9E7B2A]">
-                      Détails
-                    </summary>
-                    <pre className="mt-2 max-h-48 overflow-auto rounded bg-[#F5EFE1]/40 p-2 text-[10px] text-[#1A1F2A]/80">
-                      {JSON.stringify(m.details, null, 2)}
-                    </pre>
-                  </details>
-                )}
-                {m.warnings.length > 0 && (
-                  <ul className="mt-2 space-y-1 text-[10px] text-amber-700">
-                    {m.warnings.map((w, i) => (
-                      <li key={i}>⚠ {w}</li>
+                  <p className="mt-2 font-display text-3xl font-bold text-[#9E7B2A]">
+                    {fmtPrice(active.price)}
+                  </p>
+                  {active.details && (
+                    <details className="mt-3">
+                      <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60 hover:text-[#9E7B2A]">
+                        Détails du calcul
+                      </summary>
+                      <pre className="mt-2 max-h-64 overflow-auto rounded bg-[#F5EFE1]/40 p-2 text-[10px] text-[#1A1F2A]/80">
+                        {JSON.stringify(active.details, null, 2)}
+                      </pre>
+                    </details>
+                  )}
+                  {active.warnings.length > 0 && (
+                    <ul className="mt-2 space-y-1 text-[10px] text-amber-700">
+                      {active.warnings.map((w, i) => (
+                        <li key={i}>⚠ {w}</li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+              ) : (
+                <p className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-900">
+                  Aucune méthode applicable.
+                </p>
+              )}
+
+              {inactive.length > 0 && (
+                <details className="mt-3 rounded-lg border border-[#3D4F63]/10 bg-[#F5EFE1]/30 px-4 py-3">
+                  <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60 hover:text-[#9E7B2A]">
+                    {inactive.length} méthode{inactive.length > 1 ? "s" : ""} non retenue
+                    {inactive.length > 1 ? "s" : ""} par le moteur actuel
+                  </summary>
+                  <ul className="mt-2 space-y-1 text-xs text-[#1A1F2A]/70">
+                    {inactive.map((k) => (
+                      <li key={k}>
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+                          {methodLabels[k] ?? k}
+                        </span>
+                        <span className="ml-2 italic text-[#1A1F2A]/50">
+                          {(methods[k].details as { reason?: string })?.reason ?? "—"}
+                        </span>
+                      </li>
                     ))}
                   </ul>
-                )}
-              </article>
-            );
-          })}
-        </div>
+                </details>
+              )}
+            </>
+          );
+        })()}
+      </section>
+
+      {/* Indicateur complementaire — Rendement locatif (info, ne pondere RIEN) */}
+      <section className="rounded-lg border-2 border-[#9E7B2A]/50 bg-[#FBF6E9] p-5">
+        <header className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-lg font-bold text-[#1A1F2A]">
+            Indicateur complémentaire — Rendement locatif
+          </h2>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-[#9E7B2A]">
+            informatif · n'entre pas dans le prix retenu
+          </span>
+        </header>
+        {!incomeIndicator || !incomeIndicator.available ? (
+          <p className="mt-3 text-sm italic text-[#1A1F2A]/60">
+            Données locatives non disponibles pour cette commune.
+          </p>
+        ) : (
+          <div className="mt-4 space-y-3 text-sm text-[#1A1F2A]">
+            <p>
+              <span className="font-semibold text-[#9E7B2A]">
+                Au prix estimé de {fmtPrice(priceMid)}
+              </span>
+              {" "}
+              ce bien générerait un rendement brut de{" "}
+              <span className="font-semibold">
+                {incomeIndicator.yield_at_estimated_price?.toFixed(2) ?? "—"}%
+              </span>
+              .
+            </p>
+            <p>
+              Valeur théorique par capitalisation locative :{" "}
+              <span className="font-semibold text-[#9E7B2A]">
+                {fmtPrice(incomeIndicator.capitalization_value)}
+              </span>
+              {" "}(rendement marché {incomeIndicator.yield_used?.toFixed(2) ?? "—"}%).
+            </p>
+            <p className="text-xs text-[#1A1F2A]/70">
+              Loyer estimé{" "}
+              {incomeIndicator.rent_per_m2_month?.toFixed(2) ?? "—"} €/m²/mois —{" "}
+              {fmtPrice(incomeIndicator.annual_rent)}/an. Plafond légal : loyer
+              annuel ≤ 5% du capital ({fmtPrice(incomeIndicator.legal_max_rent_month)}/mois
+              max).
+            </p>
+            {incomeIndicator.source_note && (
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[#1A1F2A]/50">
+                {incomeIndicator.source_note}
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Sliders re-pondération */}
