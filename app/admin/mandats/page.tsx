@@ -8,10 +8,18 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// Sprint MANDATS-A PARTIE 5 — page admin /admin/mandats avec 3 sections
+// type_transaction (Vente / Recherche / Location) + onglets workflow
+// existants conserves PAR SECTION. Tri date asc/desc.
+
+type Section = "vente" | "recherche" | "location";
+type SortDir = "asc" | "desc";
+
 type SearchParams = {
+  section?: string;
   tab?: string;
   q?: string;
-  type?: string;
+  sort?: string;
 };
 
 type MandatRow = {
@@ -24,6 +32,9 @@ type MandatRow = {
   client_city: string | null;
   property_type: string | null;
   type_transaction: string;
+  type_mandat: string | null;
+  bien_adresse: string | null;
+  prix_mise_en_vente: number | null;
   budget_min: number | null;
   budget_max: number | null;
   zones: string[] | null;
@@ -33,7 +44,13 @@ type MandatRow = {
   next_follow_up?: string | null;
 };
 
-const TABS: { key: string; label: string }[] = [
+const SECTIONS: { key: Section; label: string }[] = [
+  { key: "vente", label: "Vente" },
+  { key: "recherche", label: "Recherche" },
+  { key: "location", label: "Location" },
+];
+
+const WORKFLOW_TABS: { key: string; label: string }[] = [
   { key: "new", label: "Nouveau" },
   { key: "in_progress", label: "En cours" },
   { key: "on_hold", label: "En suspens" },
@@ -42,6 +59,21 @@ const TABS: { key: string; label: string }[] = [
   { key: "completed", label: "Traités" },
   { key: "all", label: "Tous" },
 ];
+
+const TYPE_MANDAT_LABEL: Record<string, string> = {
+  exclusif: "Exclusif",
+  "semi-exclusif": "Semi-exclusif",
+  simple: "Simple",
+  autonome: "Autonome",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  actif: "Actif",
+  vendu: "Vendu",
+  loue: "Loué",
+  expire: "Expiré",
+  resilie: "Résilié",
+};
 
 function formatBudget(min: number | null, max: number | null): string {
   if (min == null && max == null) return "—";
@@ -52,7 +84,19 @@ function formatBudget(min: number | null, max: number | null): string {
   return "—";
 }
 
-function formatZones(zones: string[] | null, city: string | null): string {
+function formatPrice(value: number | null): string {
+  if (value == null) return "—";
+  return new Intl.NumberFormat("fr-LU", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatZonesOrCity(
+  zones: string[] | null,
+  city: string | null,
+): string {
   if (Array.isArray(zones) && zones.length > 0) return zones.join(", ");
   if (city) return city;
   return "—";
@@ -70,70 +114,103 @@ function isPast(dateStr: string | null | undefined): boolean {
   }
 }
 
-export default async function AdminMandatsRecherchePage({
+export default async function AdminMandatsPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
-  const tab = sp.tab && TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
+  const section: Section =
+    sp.section === "recherche" || sp.section === "location"
+      ? sp.section
+      : "vente";
+  const workflowTab =
+    sp.tab && WORKFLOW_TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
+  const sortDir: SortDir = sp.sort === "asc" ? "asc" : "desc";
+
   const supabase = await createSupabaseServerClient();
 
-  // Tentative avec les nouvelles colonnes workflow
+  // 1 SELECT global (limit 500), filtrage section + workflow + q cote JS.
+  // Pour 500 rows max en admin (table peu volumineuse) c'est plus simple
+  // que 4 requetes (1 par section + counts).
   let migrationApplied = true;
   let mandats: MandatRow[] = [];
 
+  const fullSelect =
+    "id,created_at,client_name,client_email,client_phone,client_country,client_city," +
+    "property_type,type_transaction,type_mandat,bien_adresse,prix_mise_en_vente," +
+    "budget_min,budget_max,zones,status,notes,workflow_status,next_follow_up";
+
+  const fallbackSelect =
+    "id,created_at,client_name,client_email,client_phone,client_country,client_city," +
+    "property_type,type_transaction,type_mandat,bien_adresse,prix_mise_en_vente," +
+    "budget_min,budget_max,zones,status,notes";
+
   const tryNew = await supabase
     .from("mandats")
-    .select(
-      "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,type_transaction,budget_min,budget_max,zones,status,notes,workflow_status,next_follow_up",
-    )
-    .order("created_at", { ascending: false })
+    .select(fullSelect)
+    .order("created_at", { ascending: sortDir === "asc" })
     .limit(500);
 
   if (tryNew.error) {
     migrationApplied = false;
     const fallback = await supabase
       .from("mandats")
-      .select(
-        "id,created_at,client_name,client_email,client_phone,client_country,client_city,property_type,type_transaction,budget_min,budget_max,zones,status,notes",
-      )
-      .order("created_at", { ascending: false })
+      .select(fallbackSelect)
+      .order("created_at", { ascending: sortDir === "asc" })
       .limit(500);
-    mandats = (fallback.data ?? []) as MandatRow[];
+    mandats = (fallback.data ?? []) as unknown as MandatRow[];
   } else {
-    mandats = (tryNew.data ?? []) as MandatRow[];
+    mandats = (tryNew.data ?? []) as unknown as MandatRow[];
   }
 
-  // Compteurs par statut workflow
-  const counts: Record<string, number> = { all: mandats.length };
-  for (const s of WORKFLOW_STATUSES) counts[s] = 0;
+  // Compteurs par section (sans filtre workflow).
+  const sectionCounts: Record<Section, number> = {
+    vente: 0,
+    recherche: 0,
+    location: 0,
+  };
   for (const m of mandats) {
+    const tt = m.type_transaction as Section;
+    if (tt in sectionCounts) sectionCounts[tt]++;
+  }
+
+  // Filtre par section active.
+  const inSection = mandats.filter((m) => m.type_transaction === section);
+
+  // Compteurs workflow DANS la section active.
+  const workflowCounts: Record<string, number> = { all: inSection.length };
+  for (const s of WORKFLOW_STATUSES) workflowCounts[s] = 0;
+  for (const m of inSection) {
     const ws = (m.workflow_status as WorkflowStatus | null) ?? "new";
-    if (counts[ws] !== undefined) counts[ws]++;
+    if (workflowCounts[ws] !== undefined) workflowCounts[ws]++;
   }
 
-  // Filtrage par tab
-  let filtered = mandats;
-  if (migrationApplied && tab !== "all") {
-    filtered = filtered.filter((m) => (m.workflow_status ?? "new") === tab);
+  // Filtre workflow + recherche libre.
+  let filtered = inSection;
+  if (migrationApplied && workflowTab !== "all") {
+    filtered = filtered.filter(
+      (m) => (m.workflow_status ?? "new") === workflowTab,
+    );
   }
-
-  // Filtres additionnels
-  if (sp.type) filtered = filtered.filter((m) => m.property_type === sp.type);
   if (sp.q) {
     const needle = sp.q.toLowerCase();
     filtered = filtered.filter((m) => {
-      const hay = `${m.client_email ?? ""} ${m.client_name ?? ""} ${m.client_phone ?? ""} ${m.client_city ?? ""}`.toLowerCase();
+      const hay =
+        `${m.client_email ?? ""} ${m.client_name ?? ""} ${m.client_phone ?? ""} ${m.client_city ?? ""} ${m.bien_adresse ?? ""}`.toLowerCase();
       return hay.includes(needle);
     });
   }
 
-  const buildTabHref = (key: string) => {
+  // Helpers URL preservant les autres params.
+  const buildHref = (overrides: Partial<SearchParams>) => {
     const params = new URLSearchParams();
-    params.set("tab", key);
+    params.set("section", overrides.section ?? section);
+    params.set("tab", overrides.tab ?? workflowTab);
+    if (overrides.sort ?? sortDir) {
+      params.set("sort", overrides.sort ?? sortDir);
+    }
     if (sp.q) params.set("q", sp.q);
-    if (sp.type) params.set("type", sp.type);
     return `/admin/mandats?${params.toString()}`;
   };
 
@@ -145,46 +222,83 @@ export default async function AdminMandatsRecherchePage({
             Console MAPA
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
-            Mandats de recherche
+            Mandats
           </h1>
           <p className="mt-1 text-sm text-[#3D4F63]/70">
             {filtered.length} mandat{filtered.length > 1 ? "s" : ""} affiché
-            {filtered.length > 1 ? "s" : ""} · {mandats.length} au total
+            {filtered.length > 1 ? "s" : ""} · {sectionCounts[section]} dans la
+            section · {mandats.length} au total
           </p>
         </div>
+        <Link
+          href={buildHref({ sort: sortDir === "desc" ? "asc" : "desc" })}
+          className="inline-flex items-center gap-2 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
+          aria-label={
+            sortDir === "desc"
+              ? "Trier du plus ancien au plus récent"
+              : "Trier du plus récent au plus ancien"
+          }
+        >
+          <span>Date</span>
+          <span aria-hidden>{sortDir === "desc" ? "↓" : "↑"}</span>
+        </Link>
       </header>
 
       {!migrationApplied && (
         <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-700">
-            Migration en attente
+            Données partielles
           </p>
           <p className="mt-1">
-            Les colonnes <code className="font-mono">workflow_status</code>,{" "}
-            <code className="font-mono">admin_notes</code>,{" "}
-            <code className="font-mono">next_follow_up</code> et{" "}
-            <code className="font-mono">workflow_history</code> n&apos;existent
-            pas encore. Applique{" "}
+            Les colonnes workflow (statut, notes, follow-up) ne sont pas
+            disponibles. Vérifie que la migration{" "}
             <code className="font-mono">
-              supabase/migrations/20260512_admin_workflow_mandats.sql
+              20260512_admin_workflow_mandats.sql
             </code>{" "}
-            dans le SQL Editor Supabase pour activer les sous-onglets, le
-            workflow 6 statuts et les notes admin. En attendant, vue
-            &laquo;&nbsp;Tous&nbsp;&raquo; uniquement.
+            est appliquée.
           </p>
         </div>
       )}
 
-      {/* Sous-onglets workflow */}
+      {/* Onglets section type_transaction (Vente / Recherche / Location) */}
+      <nav className="flex flex-wrap items-center gap-2 border-b border-[#3D4F63]/15 pb-3">
+        {SECTIONS.map((s) => {
+          const active = section === s.key;
+          return (
+            <Link
+              key={s.key}
+              href={buildHref({ section: s.key, tab: "all" })}
+              className={`inline-flex items-center gap-2 rounded-full px-5 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                active
+                  ? "bg-[#3D4F63] text-[#F5EFE1]"
+                  : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
+              }`}
+            >
+              <span>{s.label}</span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] ${
+                  active
+                    ? "bg-[#F5EFE1]/20 text-[#F5EFE1]"
+                    : "bg-[#3D4F63]/10 text-[#3D4F63]/70"
+                }`}
+              >
+                {sectionCounts[s.key]}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Sous-onglets workflow (preserves de l'existant) */}
       <nav className="flex flex-wrap items-center gap-2">
-        {TABS.map((t) => {
-          const active = tab === t.key;
-          const count = counts[t.key] ?? 0;
+        {WORKFLOW_TABS.map((t) => {
+          const active = workflowTab === t.key;
+          const count = workflowCounts[t.key] ?? 0;
           const disabled = !migrationApplied && t.key !== "all";
           return (
             <Link
               key={t.key}
-              href={disabled ? "#" : buildTabHref(t.key)}
+              href={disabled ? "#" : buildHref({ tab: t.key })}
               aria-disabled={disabled}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
                 active
@@ -212,7 +326,8 @@ export default async function AdminMandatsRecherchePage({
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white">
         <header className="border-b border-[#3D4F63]/10 px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-            Liste ({filtered.length})
+            Liste — {SECTIONS.find((s) => s.key === section)?.label} (
+            {filtered.length})
           </p>
         </header>
         <ul className="divide-y divide-[#3D4F63]/10">
@@ -224,6 +339,15 @@ export default async function AdminMandatsRecherchePage({
           {filtered.slice(0, 100).map((m) => {
             const ws = (m.workflow_status as WorkflowStatus | null) ?? "new";
             const followUpPast = isPast(m.next_follow_up);
+            const localite =
+              section === "recherche"
+                ? formatZonesOrCity(m.zones, m.client_city)
+                : (m.bien_adresse ?? m.client_city ?? "—");
+            const prix =
+              section === "recherche"
+                ? formatBudget(m.budget_min, m.budget_max)
+                : formatPrice(m.prix_mise_en_vente);
+            const statusLabel = m.status ? (STATUS_LABEL[m.status] ?? m.status) : "—";
             return (
               <li
                 key={`mandat-${m.id}`}
@@ -236,13 +360,14 @@ export default async function AdminMandatsRecherchePage({
                       {m.client_name?.trim() || m.client_email || "—"}
                     </p>
                     <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#3D4F63]/60">
-                      {[m.type_transaction, m.property_type]
-                        .filter(Boolean)
-                        .join(" · ") || "—"}
+                      {section === "vente" && m.type_mandat
+                        ? `${TYPE_MANDAT_LABEL[m.type_mandat] ?? m.type_mandat} · `
+                        : ""}
+                      {localite}
                       {" · "}
-                      {formatBudget(m.budget_min, m.budget_max)}
+                      {prix}
                       {" · "}
-                      {formatZones(m.zones, m.client_city)}
+                      {statusLabel}
                     </p>
                   </div>
                 </div>
