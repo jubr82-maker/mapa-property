@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 
 // ============================================================================
@@ -98,4 +99,94 @@ export async function setNextFollowUp(id: string, date: string | null) {
   if (error) throw new Error(error.message);
   revalidatePath(`${ROUTE}/${id}`);
   revalidatePath(ROUTE);
+}
+
+// ============================================================================
+// Sprint MANDATS-A PARTIE 6 — Edition champs mandat + suppression RGPD.
+// ============================================================================
+
+export type UpdateMandatFields = {
+  type_mandat?: string | null;
+  bien_adresse?: string | null;
+  bien_type?: string | null;
+  prix_mise_en_vente?: number | null;
+  commission?: string | null;
+  date_debut?: string | null;
+  date_fin?: string | null;
+  signed_at?: string | null;
+  status?: string | null;
+  notes?: string | null;
+  admin_notes?: string | null;
+};
+
+const ALLOWED_TYPE_MANDAT = new Set([
+  "exclusif",
+  "semi-exclusif",
+  "simple",
+  "autonome",
+]);
+
+const ALLOWED_STATUS = new Set([
+  "actif",
+  "vendu",
+  "loue",
+  "expire",
+  "resilie",
+]);
+
+/**
+ * Met a jour un mandat. Nettoyage : chaines vides -> null. Whitelist
+ * des valeurs sur type_mandat et status pour eviter de violer les CHECK
+ * contraintes DB et remonter une 500 floue cote UI.
+ */
+export async function updateMandat(
+  id: string,
+  fields: UpdateMandatFields,
+): Promise<{ ok: boolean; error?: string }> {
+  const sb = await createSupabaseServerClient();
+
+  const cleaned: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(fields)) {
+    if (v === undefined) continue;
+    if (typeof v === "string" && v.trim() === "") {
+      cleaned[k] = null;
+    } else {
+      cleaned[k] = v;
+    }
+  }
+
+  // Whitelist enum-like fields contre les valeurs hors CHECK.
+  if (
+    cleaned.type_mandat !== undefined &&
+    cleaned.type_mandat !== null &&
+    !ALLOWED_TYPE_MANDAT.has(cleaned.type_mandat as string)
+  ) {
+    return { ok: false, error: "invalid_type_mandat" };
+  }
+  if (
+    cleaned.status !== undefined &&
+    cleaned.status !== null &&
+    !ALLOWED_STATUS.has(cleaned.status as string)
+  ) {
+    return { ok: false, error: "invalid_status" };
+  }
+
+  const { error } = await sb.from(TABLE).update(cleaned).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`${ROUTE}/${id}`);
+  revalidatePath(ROUTE);
+  return { ok: true };
+}
+
+/**
+ * Suppression RGPD : DELETE definitif. Redirige vers la liste.
+ * La confirmation utilisateur est portee cote UI (composant client).
+ */
+export async function deleteMandat(id: string): Promise<void> {
+  const sb = await createSupabaseServerClient();
+  const { error } = await sb.from(TABLE).delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath(ROUTE);
+  redirect(ROUTE);
 }
