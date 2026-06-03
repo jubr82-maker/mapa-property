@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 
 // ---------- Existant (compat ascendante avec LeadsTable historique) ----------
@@ -128,6 +129,27 @@ export async function setNextFollowUp(leadId: string, date: string | null) {
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/leads/${leadId}`);
   revalidatePath("/admin/leads");
+}
+
+// ---------- Sprint MANDATS-A PARTIE 7 — Suppression RGPD (droit à l'oubli) ----------
+
+/**
+ * Suppression définitive d'un lead (DELETE FROM leads WHERE id = ?).
+ *
+ * Effet de bord FK (mandats_lead_id_fkey ON DELETE SET NULL) : si ce lead
+ * a déjà été converti en mandat, mandat.lead_id passe automatiquement à
+ * NULL — le mandat survit comme document commercial autonome (correct
+ * RGPD : on efface le prospect, pas la trace contractuelle).
+ *
+ * Confirmation utilisateur portée côté UI (DeleteLeadButton). Redirige
+ * vers /admin/leads après succès.
+ */
+export async function deleteLead(id: string): Promise<void> {
+  const sb = await createSupabaseServerClient();
+  const { error } = await sb.from("leads").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/leads");
+  redirect("/admin/leads");
 }
 
 // ---------- Sprint MANDATS-A PARTIE 4 — Conversion lead → mandat ----------

@@ -6,6 +6,7 @@ import { WorkflowSelect } from "@/components/admin/WorkflowSelect";
 import { AdminNotes } from "@/components/admin/AdminNotes";
 import { WorkflowBadge, type WorkflowStatus } from "@/components/admin/WorkflowBadge";
 import { ConvertToMandatButton } from "@/components/admin/ConvertToMandatButton";
+import { DeleteLeadButton } from "@/components/admin/DeleteLeadButton";
 
 export const dynamic = "force-dynamic";
 
@@ -217,6 +218,24 @@ export default async function AdminLeadDetailPage({
               </p>
             </div>
           )}
+
+          {/* Sprint MANDATS-A PARTIE 7 — Zone danger : suppression RGPD.
+              FK ON DELETE SET NULL cote mandats : si ce lead a deja ete
+              converti, le mandat survit avec lead_id=NULL. */}
+          <div className="rounded-xl border border-red-300 bg-red-50/60 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-700">
+              Zone danger
+            </p>
+            <p className="mt-2 text-sm text-red-900">
+              La suppression définitive efface ce lead de la base. Action
+              irréversible — usage RGPD (droit à l&apos;oubli). Si ce lead
+              a été converti en mandat, le mandat reste accessible sans
+              référence au lead.
+            </p>
+            <div className="mt-3">
+              <DeleteLeadButton id={lead.id} />
+            </div>
+          </div>
         </div>
 
         {/* Colonne droite : actions workflow + conversion mandat */}
