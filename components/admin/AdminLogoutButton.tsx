@@ -21,7 +21,7 @@ export function AdminLogoutButton() {
       type="button"
       onClick={logout}
       disabled={busy}
-      className="inline-flex items-center gap-2 rounded-full border border-[#F5EFE1]/30 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:opacity-50"
+      className="inline-flex items-center gap-2 rounded-full border border-bg/30 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-bg transition-colors hover:border-gold hover:text-gold disabled:opacity-50"
     >
       {busy ? "…" : "Déconnexion"}
     </button>

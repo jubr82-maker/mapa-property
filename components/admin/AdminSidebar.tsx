@@ -41,12 +41,12 @@ const items = [
 export function AdminSidebar() {
   const pathname = usePathname();
   return (
-    <aside className="flex min-h-dvh flex-col border-r border-[#3D4F63]/10 bg-[#F5EFE1] py-6">
+    <aside className="flex min-h-dvh flex-col border-r border-ink/10 bg-bg py-6">
       <div className="px-6 pb-6">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#3D4F63]/60">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
           MAPA Property
         </p>
-        <p className="font-display text-2xl font-bold text-[#3D4F63]">Console</p>
+        <p className="font-display text-2xl font-bold text-ink">Console</p>
       </div>
       <nav className="flex-1 px-3">
         <ul className="space-y-1">
@@ -62,8 +62,8 @@ export function AdminSidebar() {
                   href={item.href}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 font-sans text-sm transition-colors ${
                     active
-                      ? "bg-[#3D4F63] text-[#F5EFE1]"
-                      : "text-[#3D4F63] hover:bg-[#3D4F63]/10"
+                      ? "bg-ink text-bg"
+                      : "text-ink hover:bg-ink/10"
                   }`}
                 >
                   <Icon className="size-4" />
@@ -74,7 +74,7 @@ export function AdminSidebar() {
           })}
         </ul>
       </nav>
-      <div className="px-6 pt-4 text-[10px] font-mono uppercase tracking-[0.3em] text-[#3D4F63]/50">
+      <div className="px-6 pt-4 text-[10px] font-mono uppercase tracking-[0.3em] text-ink/50">
         v1.0 · {new Date().getFullYear()}
       </div>
     </aside>

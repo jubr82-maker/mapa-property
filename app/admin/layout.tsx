@@ -40,7 +40,7 @@ export default async function AdminLayout({
 }) {
   return (
     <html lang="fr" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
-      <body className="min-h-dvh bg-[#F5EFE1] text-[#1A1F2A] antialiased">
+      <body className="min-h-dvh bg-bg text-ink antialiased">
         <AdminShell>{children}</AdminShell>
       </body>
     </html>
@@ -59,17 +59,17 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="grid min-h-dvh grid-cols-[260px_1fr] bg-[#F5EFE1]">
+    <div className="grid min-h-dvh grid-cols-[260px_1fr] bg-bg">
       <AdminSidebar />
       <div className="flex min-h-dvh flex-col">
-        <header className="flex items-center justify-between border-b border-[#3D4F63]/15 bg-[#3D4F63] px-8 py-4 text-[#F5EFE1]">
+        <header className="flex items-center justify-between border-b border-gold bg-ink px-8 py-4 text-bg">
           <Link href="/admin" className="flex items-center gap-3">
             <span className="font-display text-xl font-bold uppercase tracking-[0.15em]">
               MAPA · Admin
             </span>
           </Link>
           <div className="flex items-center gap-4 text-sm">
-            <span className="font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1]/70">
+            <span className="font-mono text-xs uppercase tracking-[0.2em] text-bg/70">
               {user.email}
             </span>
             <AdminLogoutButton />
