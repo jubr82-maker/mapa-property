@@ -129,3 +129,137 @@ export async function setNextFollowUp(leadId: string, date: string | null) {
   revalidatePath(`/admin/leads/${leadId}`);
   revalidatePath("/admin/leads");
 }
+
+// ---------- Sprint MANDATS-A PARTIE 4 — Conversion lead → mandat ----------
+
+type ConvertResult =
+  | { ok: true; mandatId: string; alreadyExisted: boolean }
+  | { ok: false; error: string };
+
+const TYPE_MANDAT_MAP: Record<string, string> = {
+  mandate_exclusive: "exclusif",
+  mandate_semi: "semi-exclusif",
+  mandate_simple: "simple",
+  mandate_autonomous: "autonome",
+};
+
+/**
+ * Convertit un lead en mandat (table `mandats`).
+ *
+ * Anti-doublon : si un mandat existe déjà avec ce `lead_id`, on retourne
+ * `alreadyExisted: true` + l'id du mandat existant — pas d'INSERT.
+ *
+ * Déductions :
+ *  - type_transaction : 'recherche' si type=search_mandate ou subject contient
+ *    "recherche" ; 'location' si subject contient "location"/"mise_en_location" ;
+ *    'vente' sinon.
+ *  - type_mandat : mapping strict depuis lead.type (mandate_exclusive→exclusif,
+ *    etc.). null si non déductible (search_mandate, general_contact, etc.) —
+ *    à compléter à la main dans la fiche mandat.
+ */
+export async function convertLeadToMandat(
+  leadId: string,
+): Promise<ConvertResult> {
+  const sb = await createSupabaseServerClient();
+
+  // 1. Charger le lead.
+  const { data: lead, error: leadError } = await sb
+    .from("leads")
+    .select(
+      "id,first_name,last_name,name,email,phone,country,city,type,subject,message",
+    )
+    .eq("id", leadId)
+    .maybeSingle();
+
+  if (leadError) return { ok: false, error: leadError.message };
+  if (!lead) return { ok: false, error: "lead_not_found" };
+
+  type LeadRow = {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    name: string | null;
+    email: string;
+    phone: string | null;
+    country: string | null;
+    city: string | null;
+    type: string | null;
+    subject: string | null;
+    message: string | null;
+  };
+  const l = lead as LeadRow;
+
+  // 2. Anti-doublon : un mandat existe-t-il déjà pour ce lead_id ?
+  const { data: existing, error: existingError } = await sb
+    .from("mandats")
+    .select("id")
+    .eq("lead_id", leadId)
+    .maybeSingle();
+
+  if (existingError) return { ok: false, error: existingError.message };
+  if (existing) {
+    return {
+      ok: true,
+      mandatId: (existing as { id: string }).id,
+      alreadyExisted: true,
+    };
+  }
+
+  // 3. Déduction type_transaction depuis le lead.
+  const leadType = (l.type ?? "").toLowerCase();
+  const leadSubject = (l.subject ?? "").toLowerCase();
+  const isSearch =
+    leadType === "search_mandate" || leadSubject.includes("recherche");
+  const isRental =
+    leadSubject.includes("mise_en_location") ||
+    leadSubject.includes("location");
+  const type_transaction: "vente" | "recherche" | "location" = isSearch
+    ? "recherche"
+    : isRental
+      ? "location"
+      : "vente";
+
+  // 4. Déduction type_mandat depuis lead.type (mapping strict).
+  const type_mandat = TYPE_MANDAT_MAP[l.type ?? ""] ?? null;
+
+  // 5. Construire client_name (priorité : first+last > name > email).
+  const composedName = [l.first_name, l.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const client_name = composedName || l.name?.trim() || l.email;
+
+  // 6. INSERT dans mandats.
+  const payload = {
+    lead_id: leadId,
+    client_name,
+    client_email: l.email,
+    client_phone: l.phone,
+    client_country: l.country,
+    client_city: l.city,
+    bien_adresse: l.city,
+    notes: l.message,
+    type_transaction,
+    type_mandat,
+    status: "actif",
+    workflow_status: "new",
+  };
+
+  const { data: inserted, error: insertError } = await sb
+    .from("mandats")
+    .insert(payload as never)
+    .select("id")
+    .single();
+
+  if (insertError) return { ok: false, error: insertError.message };
+
+  revalidatePath("/admin/leads");
+  revalidatePath(`/admin/leads/${leadId}`);
+  revalidatePath("/admin/mandats");
+
+  return {
+    ok: true,
+    mandatId: (inserted as { id: string }).id,
+    alreadyExisted: false,
+  };
+}

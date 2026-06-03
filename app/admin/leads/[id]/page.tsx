@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { WorkflowSelect } from "@/components/admin/WorkflowSelect";
 import { AdminNotes } from "@/components/admin/AdminNotes";
 import { WorkflowBadge, type WorkflowStatus } from "@/components/admin/WorkflowBadge";
+import { ConvertToMandatButton } from "@/components/admin/ConvertToMandatButton";
 
 export const dynamic = "force-dynamic";
 
@@ -218,7 +219,7 @@ export default async function AdminLeadDetailPage({
           )}
         </div>
 
-        {/* Colonne droite : actions workflow */}
+        {/* Colonne droite : actions workflow + conversion mandat */}
         <aside className="space-y-5">
           <WorkflowSelect leadId={lead.id} initialStatus={ws} />
           <AdminNotes
@@ -226,6 +227,7 @@ export default async function AdminLeadDetailPage({
             history={history}
             initialFollowUp={lead.next_follow_up ?? null}
           />
+          <ConvertToMandatButton leadId={lead.id} />
         </aside>
       </div>
     </div>
