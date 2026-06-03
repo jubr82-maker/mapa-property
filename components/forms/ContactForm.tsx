@@ -22,6 +22,14 @@ type ErrorKind = "captcha" | "invalid" | "generic";
 const sitekey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 const turnstileEnabled = Boolean(sitekey);
 
+// Sprint MANDATS-A PARTIE 2 : detection des formulaires de mandat.
+// Pour ces types, on affiche un champ "Localite du bien" obligatoire.
+// Aucun autre usage (general_contact, property_request, nda_request,
+// waitlist, etc.) ne le voit.
+function isMandateFormType(type: string): boolean {
+  return type.startsWith("mandate_") || type === "search_mandate";
+}
+
 export function ContactForm({
   type,
   source = "website",
@@ -37,7 +45,9 @@ export function ContactForm({
   const [token, setToken] = useState<string | null>(null);
   const [captchaFailed, setCaptchaFailed] = useState(false);
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
+  const [city, setCity] = useState("");
   const [rgpd, setRgpd] = useState(false);
+  const isMandateForm = isMandateFormType(type);
 
   // Si Turnstile n'est pas configuré côté client, on autorise la soumission
   // sans token (le back-end fait le bon choix : skip dev / fail prod).
@@ -64,6 +74,9 @@ export function ContactForm({
       email: String(formData.get("email") ?? ""),
       phone: String(formData.get("phone") ?? ""),
       country,
+      // Sprint MANDATS-A PARTIE 2 : la localite n'est envoyee que pour
+      // les formulaires de mandat. /api/lead la persiste dans leads.city.
+      city: isMandateForm && city.trim() ? city.trim() : undefined,
       rgpd_consent: rgpd,
       subject: subjectRaw || undefined,
       message: String(formData.get("message") ?? ""),
@@ -101,7 +114,10 @@ export function ContactForm({
         ? t("error_invalid")
         : t("error");
   const submitDisabled =
-    status === "submitting" || !rgpd || (turnstileEnabled && !captchaReady);
+    status === "submitting" ||
+    !rgpd ||
+    (turnstileEnabled && !captchaReady) ||
+    (isMandateForm && !city.trim());
   const submitLabel =
     status === "submitting"
       ? t("submitting")
@@ -157,6 +173,23 @@ export function ContactForm({
           name="country"
         />
       </div>
+      {isMandateForm && (
+        <label className="flex flex-col gap-1.5">
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
+            {t("city_label")}
+            <span className="ml-1 text-gold-deep">*</span>
+          </span>
+          <input
+            name="city"
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder={t("city_placeholder")}
+            required
+            className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:border-gold focus:outline-none"
+          />
+        </label>
+      )}
       {showSubject && <SubjectSelect t={t} />}
       <Field
         name="message"

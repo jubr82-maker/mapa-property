@@ -476,6 +476,8 @@
     "email": "Email",
     "phone": "Téléphone",
     "country": "Pays",
+    "city_label": "Localité du bien",
+    "city_placeholder": "Commune / ville du bien (ex. Belair, Strassen…)",
     "subject": "Objet",
     "subject_select": "— Choisissez —",
     "subject_mandat_vente": "Mandat de vente",

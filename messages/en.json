@@ -476,6 +476,8 @@
     "email": "Email",
     "phone": "Phone",
     "country": "Country",
+    "city_label": "Property location",
+    "city_placeholder": "Municipality / town (e.g. Belair, Strassen…)",
     "subject": "Subject",
     "subject_select": "— Choose —",
     "subject_mandat_vente": "Sale mandate",
