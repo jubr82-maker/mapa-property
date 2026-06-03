@@ -7,6 +7,7 @@ import { AdminNotes } from "@/components/admin/AdminNotes";
 import { WorkflowBadge, type WorkflowStatus } from "@/components/admin/WorkflowBadge";
 import { ConvertToMandatButton } from "@/components/admin/ConvertToMandatButton";
 import { DeleteLeadButton } from "@/components/admin/DeleteLeadButton";
+import { ExportLeadButton } from "@/components/admin/ExportLeadButton";
 
 export const dynamic = "force-dynamic";
 
@@ -208,6 +209,23 @@ export default async function AdminLeadDetailPage({
               </p>
             </div>
           )}
+
+          {/* Sprint Export RGPD — bloc actions non destructives.
+              Droit d'acces / portabilite : telecharge le lead + mandat
+              associe eventuel au format JSON. Place AVANT la Zone danger
+              pour separer visuellement export (neutre) et delete (rouge). */}
+          <div className="rounded-xl border border-[#e0af6e]/40 bg-[#e0af6e]/5 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#9E7B2A]">
+              Actions RGPD
+            </p>
+            <p className="mt-2 text-sm text-[#1A1F2A]">
+              Télécharger toutes les données de ce contact (format JSON,
+              portabilité RGPD). Inclut le mandat associé s&apos;il existe.
+            </p>
+            <div className="mt-3">
+              <ExportLeadButton id={lead.id} />
+            </div>
+          </div>
 
           {/* Sprint MANDATS-A PARTIE 7 — Zone danger : suppression RGPD.
               FK ON DELETE SET NULL cote mandats : si ce lead a deja ete

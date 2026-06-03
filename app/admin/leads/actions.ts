@@ -285,3 +285,56 @@ export async function convertLeadToMandat(
     alreadyExisted: false,
   };
 }
+
+// ---------- Sprint Export RGPD — droit d'acces/portabilite ----------
+
+/**
+ * Exporte toutes les donnees d'un lead + le mandat associe eventuel
+ * (via mandats.lead_id) au format JSON. Cote client, l'appelant transforme
+ * en Blob et declenche le telechargement (cf. lib/admin/download.ts).
+ *
+ * Retour structure ({ok,data,filename} ou {ok,error}), jamais de throw
+ * cote UI. Le bouton est non destructif : pas de write DB.
+ */
+export async function exportLead(
+  id: string,
+): Promise<
+  | { ok: true; data: object; filename: string }
+  | { ok: false; error: string }
+> {
+  try {
+    const sb = await createSupabaseServerClient();
+
+    const { data: lead, error: leadError } = await sb
+      .from("leads")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (leadError || !lead) return { ok: false, error: "not_found" };
+
+    // Mandat associe eventuel (0 ou 1 — anti-doublon dans convertLeadToMandat).
+    const { data: mandats, error: mandatsError } = await sb
+      .from("mandats")
+      .select("*")
+      .eq("lead_id", id);
+    if (mandatsError) return { ok: false, error: "db_error" };
+    const mandat_associe =
+      Array.isArray(mandats) && mandats.length > 0 ? mandats[0] : null;
+
+    const exported_at = new Date().toISOString();
+    const data = {
+      export_type: "lead",
+      exported_at,
+      source: "MAPA Property - export RGPD",
+      lead,
+      mandat_associe,
+    };
+
+    const datePart = exported_at.slice(0, 10);
+    const filename = `mapa-lead-${id.slice(0, 8)}-${datePart}.json`;
+    return { ok: true, data, filename };
+  } catch (e) {
+    console.error("[exportLead]", (e as Error).message);
+    return { ok: false, error: "db_error" };
+  }
+}

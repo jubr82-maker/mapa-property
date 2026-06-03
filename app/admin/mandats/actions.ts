@@ -190,3 +190,45 @@ export async function deleteMandat(id: string): Promise<void> {
   revalidatePath(ROUTE);
   redirect(ROUTE);
 }
+
+// ---------- Sprint Export RGPD — droit d'acces/portabilite ----------
+
+/**
+ * Exporte toutes les donnees d'un mandat au format JSON. Le mandat
+ * contient deja les coordonnees client (client_*), inutile d'embarquer
+ * le lead d'origine — on garde juste lead_id pour info.
+ *
+ * Retour structure ({ok,data,filename} ou {ok,error}), jamais de throw
+ * cote UI. Le bouton est non destructif : pas de write DB.
+ */
+export async function exportMandat(
+  id: string,
+): Promise<
+  | { ok: true; data: object; filename: string }
+  | { ok: false; error: string }
+> {
+  try {
+    const sb = await createSupabaseServerClient();
+    const { data: mandat, error } = await sb
+      .from(TABLE)
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error || !mandat) return { ok: false, error: "not_found" };
+
+    const exported_at = new Date().toISOString();
+    const data = {
+      export_type: "mandat",
+      exported_at,
+      source: "MAPA Property - export RGPD",
+      mandat,
+    };
+
+    const datePart = exported_at.slice(0, 10);
+    const filename = `mapa-mandat-${id.slice(0, 8)}-${datePart}.json`;
+    return { ok: true, data, filename };
+  } catch (e) {
+    console.error("[exportMandat]", (e as Error).message);
+    return { ok: false, error: "db_error" };
+  }
+}

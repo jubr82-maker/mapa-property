@@ -18,6 +18,7 @@ import {
   type MandatEditable,
 } from "@/components/admin/EditMandatForm";
 import { DeleteMandatButton } from "@/components/admin/DeleteMandatButton";
+import { ExportMandatButton } from "@/components/admin/ExportMandatButton";
 
 export const dynamic = "force-dynamic";
 
@@ -334,6 +335,23 @@ export default async function AdminMandatDetailPage({
           )}
 
           <EditMandatForm id={mandat.id} initial={editable} />
+
+          {/* Sprint Export RGPD — bloc actions non destructives.
+              Droit d'acces / portabilite : telecharge le mandat au format
+              JSON. Place AVANT la Zone danger pour separer export (neutre)
+              et delete (rouge). */}
+          <div className="rounded-xl border border-[#e0af6e]/40 bg-[#e0af6e]/5 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#9E7B2A]">
+              Actions RGPD
+            </p>
+            <p className="mt-2 text-sm text-[#1A1F2A]">
+              Télécharger toutes les données de ce mandat (format JSON,
+              portabilité RGPD).
+            </p>
+            <div className="mt-3">
+              <ExportMandatButton id={mandat.id} />
+            </div>
+          </div>
 
           {/* Zone danger : suppression RGPD definitive */}
           <div className="rounded-xl border border-red-300 bg-red-50/60 p-5">
