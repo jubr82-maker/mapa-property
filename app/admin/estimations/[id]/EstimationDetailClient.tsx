@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { sendRefinement } from "@/app/admin/estimations/actions";
+import { MethodDetails } from "@/components/admin/MethodDetails";
 
 type MethodKey =
   | "observatoire"
@@ -388,86 +389,72 @@ export function EstimationDetailClient({
         })()}
       </section>
 
-      {/* Methode active + non-applicables groupees + indicateur complementaire */}
+      {/* Les 6 methodes - chacune avec son detail tabulaire repliable */}
       <section>
         <h2 className="mb-4 font-display text-lg font-bold text-[#1A1F2A]">
-          Méthode retenue par le moteur
+          Les 6 méthodes d&apos;estimation
         </h2>
-        {(() => {
-          const activeKey = METHOD_ORDER.find(
-            (k) => methods[k]?.applicable && methods[k]?.price != null,
-          );
-          const active = activeKey ? methods[activeKey] : null;
-          const activeMethodId =
-            (active?.details as { method?: string })?.method ?? "";
-          const activeTitle =
-            activeMethodId === "observatoire_c7"
-              ? "Méthode Observatoire (active)"
-              : activeMethodId === "hedonic_terrain_bati"
-                ? "Méthode bâtie + terrain (active)"
-                : activeKey
-                  ? `${methodLabels[activeKey] ?? "Méthode"} (active)`
-                  : "Méthode active";
-          const inactive = METHOD_ORDER.filter(
-            (k) => methods[k] && !methods[k].applicable,
-          );
-          return (
-            <>
-              {active ? (
-                <article className="rounded-lg border border-[#9E7B2A]/40 bg-white p-5 shadow-sm">
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[#9E7B2A]">
-                    {activeTitle}
+        <p className="mb-4 text-xs text-[#1A1F2A]/60">
+          Référentiel MAPA = source du prix retenu (poids 100% par défaut). Les
+          5 autres sont calculées indépendamment et visibles à titre comparatif.
+        </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          {METHOD_ORDER.map((k) => {
+            const m = methods[k];
+            if (!m) return null;
+            const isObservatoire = k === "observatoire";
+            const cardClass = isObservatoire
+              ? "rounded-lg border-2 border-gold bg-white p-5 shadow-sm md:col-span-2"
+              : m.applicable
+                ? "rounded-lg border border-ink/15 bg-white p-4"
+                : "rounded-lg border border-ink/10 bg-bg/40 p-4";
+            const priceClass = isObservatoire
+              ? "mt-1 font-display text-3xl font-bold text-gold"
+              : m.applicable
+                ? "mt-1 font-display text-xl font-bold text-gold"
+                : "mt-1 font-display text-base text-ink/30";
+            return (
+              <article key={k} className={cardClass}>
+                <header className="flex items-baseline justify-between gap-2">
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-gold">
+                    {methodLabels[k] ?? k}
+                    {isObservatoire && (
+                      <span className="ml-2 rounded bg-gold/10 px-1.5 py-0.5 text-[9px] text-gold">
+                        source prix retenu
+                      </span>
+                    )}
                   </p>
-                  <p className="mt-2 font-display text-3xl font-bold text-[#9E7B2A]">
-                    {fmtPrice(active.price)}
-                  </p>
-                  {active.details && (
-                    <details className="mt-3">
-                      <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60 hover:text-[#9E7B2A]">
-                        Détails du calcul
-                      </summary>
-                      <pre className="mt-2 max-h-64 overflow-auto rounded bg-[#F5EFE1]/40 p-2 text-[10px] text-[#1A1F2A]/80">
-                        {JSON.stringify(active.details, null, 2)}
-                      </pre>
-                    </details>
-                  )}
-                  {active.warnings.length > 0 && (
-                    <ul className="mt-2 space-y-1 text-[10px] text-amber-700">
-                      {active.warnings.map((w, i) => (
-                        <li key={i}>⚠ {w}</li>
-                      ))}
-                    </ul>
-                  )}
-                </article>
-              ) : (
-                <p className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-900">
-                  Aucune méthode applicable.
+                </header>
+                <p className={priceClass}>
+                  {m.applicable ? fmtPrice(m.price) : "Non applicable"}
                 </p>
-              )}
-
-              {inactive.length > 0 && (
-                <details className="mt-3 rounded-lg border border-[#3D4F63]/10 bg-[#F5EFE1]/30 px-4 py-3">
-                  <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60 hover:text-[#9E7B2A]">
-                    {inactive.length} méthode{inactive.length > 1 ? "s" : ""} non retenue
-                    {inactive.length > 1 ? "s" : ""} par le moteur actuel
-                  </summary>
-                  <ul className="mt-2 space-y-1 text-xs text-[#1A1F2A]/70">
-                    {inactive.map((k) => (
-                      <li key={k}>
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-                          {methodLabels[k] ?? k}
-                        </span>
-                        <span className="ml-2 italic text-[#1A1F2A]/50">
-                          {(methods[k].details as { reason?: string })?.reason ?? "—"}
-                        </span>
-                      </li>
+                {!m.applicable && (
+                  <p className="mt-2 text-xs italic text-ink/60">
+                    {(m.details as { reason?: string })?.reason ?? "—"}
+                  </p>
+                )}
+                {m.applicable && m.details && (
+                  <details className="mt-3" open={isObservatoire}>
+                    <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-ink/60 hover:text-gold">
+                      Détail du calcul
+                    </summary>
+                    <MethodDetails
+                      methodKey={k}
+                      details={m.details as Record<string, unknown>}
+                    />
+                  </details>
+                )}
+                {m.warnings.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-[10px] text-amber-700">
+                    {m.warnings.map((w, i) => (
+                      <li key={i}>⚠ {w}</li>
                     ))}
                   </ul>
-                </details>
-              )}
-            </>
-          );
-        })()}
+                )}
+              </article>
+            );
+          })}
+        </div>
       </section>
 
       {/* Sliders re-pondération */}
