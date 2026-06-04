@@ -914,7 +914,10 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
   }
 
   const eff = effectiveBaseline(propType, inputs, baseline);
-  const stateCoef = STATE_COEF[inputs.state];
+  // Sprint calibrage 1 — aligne l'echelle etat sur l'Observatoire (good=1.00
+  // reference, pas de majoration legacy). mapLegacyState traduit le state
+  // ancien (renovated -> excellent) avant le lookup C7.
+  const stateCoef = STATE_COEF_C7[mapLegacyState(inputs.state)] ?? 1.0;
   const energyCoef = inputs.energy ? ENERGY_COEF[inputs.energy] : 1.0;
   const yrCoef = yearCoef(inputs.yearBuilt);
   const typeCoef = TYPE_COEF[inputs.type];
@@ -924,6 +927,12 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
   const exposureBonus = inputs.exposureSouth ? 1.03 : 1.0;
   const viewBonus =
     inputs.view === "exceptional" ? 1.08 : inputs.view === "open" ? 1.05 : 1.0;
+  // Sprint calibrage 1 — degressivite surface Observatoire (apparts/penthouse/
+  // duplex uniquement). Pour les maisons, methodHedonic est appelee mais on
+  // n'applique PAS la degressivite (les maisons ont leur barème surfaceCoef
+  // legacy via estimateHouse - on ne le perturbe pas ici).
+  const surfaceDegCoef =
+    propType === "appartement" ? surfaceDegressiveCoef(inputs.surfaceLiving) : 1.0;
 
   let pricePerM2 =
     eff.pricePerM2 *
@@ -934,7 +943,8 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
     flrCoef *
     liftBonus *
     exposureBonus *
-    viewBonus;
+    viewBonus *
+    surfaceDegCoef;
 
   const bareBricks = pricePerM2 * inputs.surfaceLiving;
   let basePrice = bareBricks;
@@ -977,6 +987,7 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
         lift_bonus: liftBonus,
         exposure_bonus: exposureBonus,
         view_bonus: viewBonus,
+        surface_degressive: surfaceDegCoef,
       },
       adjusted_per_m2: Math.round(pricePerM2),
       bonus_terrace_eur: terraceBonus,
@@ -1168,10 +1179,15 @@ export function methodStatecReference(
   // même baseline effective (recalibration périphérique + garde-fou Belair)
   // et coefficient année que l'hédoniste, pour cohérence inter-méthodes.
   const eff = effectiveBaseline(propType, inputs, baseline);
-  const stateCoef = STATE_COEF[inputs.state];
+  // Sprint calibrage 1 — aligne sur l'echelle C7 (good=1.00 reference).
+  const stateCoef = STATE_COEF_C7[mapLegacyState(inputs.state)] ?? 1.0;
   const energyCoef = inputs.energy ? ENERGY_COEF[inputs.energy] : 1.0;
   const yrCoef = yearCoef(inputs.yearBuilt);
-  const adjusted = eff.pricePerM2 * stateCoef * energyCoef * yrCoef;
+  // Sprint calibrage 1 — degressivite surface (apparts/penthouse/duplex only).
+  const surfaceDegCoef =
+    propType === "appartement" ? surfaceDegressiveCoef(inputs.surfaceLiving) : 1.0;
+  const adjusted =
+    eff.pricePerM2 * stateCoef * energyCoef * yrCoef * surfaceDegCoef;
   const bareBricks = adjusted * inputs.surfaceLiving;
   // POL2-6/POL3-6 : une vente notariée bundle parking + travaux récents dans
   // le prix ; les inclure aussi ici (comme hédoniste) évite de sous-évaluer
@@ -1191,6 +1207,7 @@ export function methodStatecReference(
       state_coef: stateCoef,
       energy_coef: energyCoef,
       year_coef: yrCoef,
+      surface_degressive_coef: surfaceDegCoef,
       bonus_parking_eur: parkingValue,
       works_added_value_eur: worksValue,
       adjusted_per_m2: Math.round(adjusted),
