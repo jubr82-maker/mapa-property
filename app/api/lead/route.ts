@@ -22,6 +22,7 @@ import { isPlausiblePhone } from "@/lib/countries";
 import { insertLeadWithConsent } from "@/lib/lead-insert";
 import { shouldDropTestLead } from "@/lib/test-email";
 import { sendLeadEmails } from "@/lib/email/lead-emails";
+import { pushLeadToApimo } from "@/lib/apimo/push-lead";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -133,6 +134,40 @@ export async function POST(req: Request) {
     propertyRef: lead.property_ref,
     locale: lead.lang,
   });
+
+  // Sprint Apimo Lot D — push lead vers Apimo SI le lead porte sur un bien
+  // Apimo (properties.apimo_id non-null). Best-effort total : try/catch
+  // englobant, ne perturbe JAMAIS la reponse 200 au visiteur.
+  // No-op silencieux si :
+  //   - lead.property_ref absent (ex. estimation / mandat / contact general)
+  //   - aucun bien match par slug
+  //   - bien trouve mais apimo_id null (off-market interne)
+  //   - APIMO_* absents (pushLeadToApimo gere son propre no-op).
+  if (lead.property_ref) {
+    try {
+      const { data: matched } = await sb
+        .from("properties")
+        .select("apimo_id")
+        .eq("slug", lead.property_ref)
+        .maybeSingle();
+      const apimoId = (matched as { apimo_id?: number | null } | null)?.apimo_id;
+      if (apimoId) {
+        await pushLeadToApimo(apimoId, {
+          firstname: lead.first_name,
+          lastname: lead.last_name,
+          email: body.email,
+          phone: lead.phone,
+          message: baseMessage,
+          reference: lead.property_ref,
+          language: lead.lang,
+        });
+      }
+    } catch (e) {
+      // Filet ultime : meme un crash inattendu sur le lookup ne fait pas
+      // basculer la reponse au visiteur en erreur.
+      console.error("[api/lead] apimo push best-effort failed:", (e as Error).message);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }
