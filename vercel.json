@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/bce-rates",
       "schedule": "0 6 1 * *"
+    },
+    {
+      "path": "/api/cron/apimo-sync",
+      "schedule": "0 */6 * * *"
     }
   ]
 }
