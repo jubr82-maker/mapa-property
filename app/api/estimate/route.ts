@@ -542,8 +542,14 @@ export async function POST(req: Request) {
         helps: [],
       };
 
-      // Persistance audit trail (best-effort)
-      void persistEstimationRequest({
+      // Persistance audit trail. Bug C5-bis (juin 2026) : AWAIT obligatoire en
+      // serverless Vercel — un `void` fire-and-forget laisse le runtime tuer le
+      // process apres response avant que les INSERTs Supabase n'aient le temps
+      // de s'executer. persistEstimationRequest a un try/catch interne (best-
+      // effort, log + swallow), donc l'await ne propage jamais d'erreur au
+      // visiteur. Garantit juste que la cascade des 4 fallbacks INSERT a le
+      // temps de tenter sa chance avant le kill.
+      await persistEstimationRequest({
         inputs: body,
         client_output: evs.client_output,
         internal_output: evs.internal_output,
@@ -618,7 +624,8 @@ export async function POST(req: Request) {
 
   const result = estimateProperty(body as EstimateInput, Number(rate));
 
-  void persistEstimationRequest({
+  // Bug C5-bis : AWAIT obligatoire (cf. branche EVS plus haut). Same reason.
+  await persistEstimationRequest({
     inputs: body,
     client_output: result.range,
     internal_output: { rate_used: rate, helps: result.helps, financing: result.financing },
