@@ -10,7 +10,8 @@
     "test:engine": "tsx scripts/test-engine.mjs",
     "test:types": "node scripts/test-property-types.mjs",
     "test:geo": "node scripts/test-luxembourg-communes.mjs",
-    "purge:offmarket": "tsx scripts/purge-offmarket-isr.mjs"
+    "purge:offmarket": "tsx scripts/purge-offmarket-isr.mjs",
+    "backup": "tsx scripts/backup-supabase-to-r2.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1053.0",

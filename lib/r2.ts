@@ -13,6 +13,7 @@ import {
   S3Client,
   DeleteObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 
@@ -123,3 +124,109 @@ export type VideoMetadata = {
   contentType: string;
   size: number;
 };
+
+// ============================================================================
+// Sprint Backup Supabase -> R2 — instance dediee bucket privé "mapa-property-
+// backups" avec credentials separees (R2_BACKUP_*). Aucune interference avec
+// le pipeline videos ci-dessus.
+//
+// Credentials dediees (token R2 distinct) -> blast radius minimal : meme si
+// les creds videos fuitent, les backups restent protegees, et vice-versa.
+// L'endpoint est le meme compte Cloudflare (R2_ACCOUNT_ID partage).
+// ============================================================================
+
+const R2_BACKUP_ACCESS_KEY_ID = process.env.R2_BACKUP_ACCESS_KEY_ID ?? "";
+const R2_BACKUP_SECRET_ACCESS_KEY =
+  process.env.R2_BACKUP_SECRET_ACCESS_KEY ?? "";
+const R2_BACKUP_BUCKET_NAME = process.env.R2_BACKUP_BUCKET ?? "";
+
+const backupR2Configured = Boolean(
+  R2_ACCOUNT_ID &&
+    R2_BACKUP_ACCESS_KEY_ID &&
+    R2_BACKUP_SECRET_ACCESS_KEY &&
+    R2_BACKUP_BUCKET_NAME,
+);
+
+export const backupR2Client = new S3Client({
+  region: "auto",
+  endpoint: R2_ACCOUNT_ID
+    ? `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+    : "https://invalid.r2.cloudflarestorage.com",
+  credentials: {
+    accessKeyId: R2_BACKUP_ACCESS_KEY_ID,
+    secretAccessKey: R2_BACKUP_SECRET_ACCESS_KEY,
+  },
+});
+
+export const R2_BACKUP_BUCKET = R2_BACKUP_BUCKET_NAME;
+
+export function isBackupR2Configured(): boolean {
+  return backupR2Configured;
+}
+
+function requireBackupR2(): void {
+  if (!backupR2Configured) {
+    throw new Error(
+      "Backup R2 not configured — set R2_ACCOUNT_ID/R2_BACKUP_ACCESS_KEY_ID/R2_BACKUP_SECRET_ACCESS_KEY/R2_BACKUP_BUCKET",
+    );
+  }
+}
+
+/** Upload sur le bucket backups (privé). Pas d'URL publique exposee. */
+export async function uploadBackupToR2(
+  file: Buffer | Uint8Array,
+  key: string,
+  contentType: string,
+): Promise<{ key: string; size: number }> {
+  requireBackupR2();
+  const upload = new Upload({
+    client: backupR2Client,
+    params: {
+      Bucket: R2_BACKUP_BUCKET,
+      Key: key,
+      Body: file,
+      ContentType: contentType,
+    },
+  });
+  await upload.done();
+  return { key, size: file.byteLength };
+}
+
+/** Liste les objets du bucket backups (utile pour la rotation). */
+export async function listBackupR2Objects(prefix: string): Promise<
+  Array<{ key: string; lastModified: Date | undefined; size: number | undefined }>
+> {
+  requireBackupR2();
+  const results: Array<{
+    key: string;
+    lastModified: Date | undefined;
+    size: number | undefined;
+  }> = [];
+  let continuationToken: string | undefined;
+  do {
+    const res = await backupR2Client.send(
+      new ListObjectsV2Command({
+        Bucket: R2_BACKUP_BUCKET,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+      }),
+    );
+    for (const obj of res.Contents ?? []) {
+      if (!obj.Key) continue;
+      results.push({
+        key: obj.Key,
+        lastModified: obj.LastModified,
+        size: obj.Size,
+      });
+    }
+    continuationToken = res.IsTruncated ? res.NextContinuationToken : undefined;
+  } while (continuationToken);
+  return results;
+}
+
+export async function deleteBackupFromR2(key: string): Promise<void> {
+  requireBackupR2();
+  await backupR2Client.send(
+    new DeleteObjectCommand({ Bucket: R2_BACKUP_BUCKET, Key: key }),
+  );
+}
