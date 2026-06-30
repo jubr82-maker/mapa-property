@@ -60,7 +60,7 @@ Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit
 
 ## Couverture géographique
 - Luxembourg : l'ensemble des communes du pays.
-- International : 28 villes premium (France, Monaco, Belgique, Suisse, Allemagne, Italie, Espagne, Portugal, Émirats, Amériques, Maurice).
+- International : de nombreuses villes premium dans plusieurs pays (France, Monaco, Belgique, Suisse, Allemagne, Italie, Espagne, Portugal, Émirats, Amériques, Maurice).
 - Extensible sous mandat.
 
 ## Cadre légal Luxembourg
@@ -139,7 +139,7 @@ The exclusive mandate is our recommendation. The Luxembourg market is small; mul
 
 ## Coverage
 - Luxembourg: every municipality in Luxembourg.
-- International: 28 premium cities (France, Monaco, Belgium, Switzerland, Germany, Italy, Spain, Portugal, UAE, Americas, Mauritius).
+- International: numerous premium cities across several countries (France, Monaco, Belgium, Switzerland, Germany, Italy, Spain, Portugal, UAE, Americas, Mauritius).
 - Extendable under mandate.
 
 ## Luxembourg legal framework
@@ -218,7 +218,7 @@ Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; 
 
 ## Abdeckung
 - Luxemburg: sämtliche Gemeinden Luxemburgs.
-- International: 28 Premium-Städte (Frankreich, Monaco, Belgien, Schweiz, Deutschland, Italien, Spanien, Portugal, VAE, Amerika, Mauritius).
+- International: zahlreiche Premium-Städte in mehreren Ländern (Frankreich, Monaco, Belgien, Schweiz, Deutschland, Italien, Spanien, Portugal, VAE, Amerika, Mauritius).
 - Unter Mandat erweiterbar.
 
 ## Luxemburger Rechtsrahmen

@@ -13,10 +13,6 @@ export default async function ActiveMarketsPage({
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: "markets_page" });
-  const intlCount = internationalRegions.reduce(
-    (acc, r) => acc + r.cities.length,
-    0,
-  );
 
   return (
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
@@ -54,7 +50,7 @@ export default async function ActiveMarketsPage({
                 Luxembourg
               </h2>
               <span className="font-mono text-xs uppercase tracking-[0.2em] text-gold-deep">
-                {luxembourgCommunes.length} {t("communes")}
+                {t("lu_coverage")}
               </span>
             </div>
             <p className="mt-3 text-sm text-ink-mid">{t("lu_text")}</p>
@@ -79,7 +75,7 @@ export default async function ActiveMarketsPage({
                 International
               </h2>
               <span className="font-mono text-xs uppercase tracking-[0.2em] text-gold-deep">
-                {intlCount} {t("cities")}
+                {t("intl_coverage")}
               </span>
             </div>
             <p className="mt-3 text-sm text-ink-mid">{t("intl_text")}</p>

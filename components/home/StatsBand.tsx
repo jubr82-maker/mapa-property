@@ -1,26 +1,26 @@
 import { getTranslations } from "next-intl/server";
 import { siteContent } from "@/lib/site-content";
-import { luxembourgCommunes, internationalRegions } from "@/lib/markets";
 import { AnimatedStat } from "@/components/home/AnimatedStat";
 
-// Compteurs dérivés de la couverture réelle (lib/markets) — restent
-// justes quand la liste des communes/villes évolue (demande Julien :
-// couvrir toutes les grandes communes du pays).
-const COMMUNES_COUNT = luxembourgCommunes.length;
-const CITIES_COUNT = internationalRegions.reduce(
-  (acc, r) => acc + r.cities.length,
-  0,
-);
-
-const stats = [
-  { key: "experience", value: "8+", suffix: "y" },
-  { key: "communes", value: `${COMMUNES_COUNT}`, suffix: "LU" },
-  { key: "cities", value: `${CITIES_COUNT}`, suffix: "INTL" },
-  { key: "transactions", value: "100s", suffix: "" },
-] as const;
+// Couverture exprimée SANS chiffre : LU en « couverture nationale » et
+// l'international en formulation qualitative (villes + pays, libellé i18n).
+// Plus de nombre de villes affiché (évolutif = risque de faux), ni "86" ni "8+".
 
 export async function StatsBand({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: "stats" });
+
+  // Valeurs : ancien "8+" et "86 communes" supprimés. L'ancienneté et la
+  // couverture LU passent par des libellés i18n sans chiffre figé.
+  const stats = [
+    {
+      key: "experience",
+      value: t("experience_value"),
+      suffix: t("experience_suffix"),
+    },
+    { key: "communes", value: t("communes_value"), suffix: "" },
+    { key: "cities", value: t("cities_value"), suffix: "" },
+    { key: "transactions", value: "100s", suffix: "" },
+  ] as const;
 
   // CMS overlay (site_content) — fallback sur next-intl.
   // 1 fetch eyebrow + 2 fetch (label/text) par stat.

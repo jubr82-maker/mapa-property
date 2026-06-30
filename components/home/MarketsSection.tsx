@@ -9,10 +9,6 @@ import { SignatureLine } from "@/components/ui/SignatureLine";
 // <section>) : fusionné avec StatsBand dans un wrapper unique (home).
 export function MarketsSection() {
   const t = useTranslations("markets_home");
-  const intlCount = internationalRegions.reduce(
-    (acc, r) => acc + r.cities.length,
-    0,
-  );
 
   return (
     <div>
@@ -37,8 +33,8 @@ export function MarketsSection() {
         {/* SEO/GEO : couverture chiffrée conservée pour crawlers/LLM
             (sans la liste détaillée — allégée). */}
         <p className="sr-only">
-          {luxembourgCommunes.length} {t("communes")} · {intlCount}{" "}
-          {t("cities")} — {luxembourgCommunes.join(", ")} —{" "}
+          {t("lu_coverage")} —{" "}
+          {luxembourgCommunes.join(", ")} —{" "}
           {internationalRegions
             .map((r) => `${r.region}: ${r.cities.join(", ")}`)
             .join(" · ")}
