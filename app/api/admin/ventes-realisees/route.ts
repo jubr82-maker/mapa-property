@@ -11,8 +11,8 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 
 const ALLOWED_EMAILS = new Set([
+  "admin@mapagroup.org",
   "j.brebion@mapagroup.org",
-  "f.mannis@mapagroup.org",
 ]);
 
 const ALLOWED_AGENTS = new Set(["julien", "frederic"]);

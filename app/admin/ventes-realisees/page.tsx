@@ -1,6 +1,6 @@
 // Page admin Sprint B2 squelette — liste des ventes realisees MAPA Property.
 // Source : table public.mapa_historical_sales (RLS strict : auth.email
-// dans (j.brebion@mapagroup.org, f.mannis@mapagroup.org)).
+// dans (admin@mapagroup.org, j.brebion@mapagroup.org)).
 //
 // Scope MVP squelette :
 //   - Liste triee par date_acte DESC

@@ -79,16 +79,18 @@ CREATE TRIGGER mapa_historical_sales_touch_updated_at
 -- RLS stricte : donnees confidentielles (actes notaries).
 ALTER TABLE public.mapa_historical_sales ENABLE ROW LEVEL SECURITY;
 
--- SELECT : uniquement Julien (j.brebion@mapagroup.org) et Frederic
--- (f.mannis@mapagroup.org) via auth.email(). Service_role bypasse RLS.
+-- SELECT : uniquement les comptes admin reels (admin@mapagroup.org,
+-- j.brebion@mapagroup.org) via auth.email(). Service_role bypasse RLS.
+-- Note : liste alignee sur la migration corrective 20260701 (qui DROP+recree
+-- ces policies) — coherence historique, cf. decision allowlist option A.
 DROP POLICY IF EXISTS "mapa_historical_sales_partners_read"
   ON public.mapa_historical_sales;
 CREATE POLICY "mapa_historical_sales_partners_read"
   ON public.mapa_historical_sales FOR SELECT
   USING (
     auth.email() IN (
-      'j.brebion@mapagroup.org',
-      'f.mannis@mapagroup.org'
+      'admin@mapagroup.org',
+      'j.brebion@mapagroup.org'
     )
   );
 
@@ -99,14 +101,14 @@ CREATE POLICY "mapa_historical_sales_partners_write"
   ON public.mapa_historical_sales FOR ALL
   USING (
     auth.email() IN (
-      'j.brebion@mapagroup.org',
-      'f.mannis@mapagroup.org'
+      'admin@mapagroup.org',
+      'j.brebion@mapagroup.org'
     )
   )
   WITH CHECK (
     auth.email() IN (
-      'j.brebion@mapagroup.org',
-      'f.mannis@mapagroup.org'
+      'admin@mapagroup.org',
+      'j.brebion@mapagroup.org'
     )
   );
 
