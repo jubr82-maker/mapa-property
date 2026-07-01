@@ -215,8 +215,10 @@ export async function POST(req: Request) {
     reply = fallbackReply(locale, lastUser);
   }
 
-  // Auto-lead detection (background, fire-and-forget)
-  void tryAutoLead(messages, locale, pageContext);
+  // Auto-lead detection. AWAIT obligatoire (serverless Vercel) : sans await
+  // le process est gele apres la reponse et le lead chatbot est perdu. La
+  // fonction a son try/catch interne → ne throw jamais, ne bloque pas la reponse.
+  await tryAutoLead(messages, locale, pageContext);
 
   // Sprint ELENA-NAV C2 — extraction message + intent du JSON LLM.
   const { message, intent } = parseAssistantReply(reply);

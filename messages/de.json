@@ -1233,5 +1233,47 @@
   },
   "chatbot": {
     "legal_disclaimer": "Die von Eléna bereitgestellten Informationen sind nur zu Informationszwecken und nicht vertraglich. MAPA Property — eine Marke der MAPA Synergy Sàrl — kann für keine auf diesen Informationen basierende Entscheidung verantwortlich gemacht werden. Zur Bestätigung: j.brebion@mapagroup.org / +352 691 620 127"
+  },
+  "acquisition_simulator": {
+    "eyebrow": "Finanzierungsplan",
+    "country_not_covered_title": "Land nicht abgedeckt",
+    "country_not_covered_body": "Der Erwerbskosten-Rechner ist für dieses Land noch nicht verfügbar. MAPA Property bietet Ihnen eine individuelle Analyse mit seinen lokalen Partnern.",
+    "on_demand_title": "Personalisierte Schätzung auf Anfrage verfügbar",
+    "title": "Erwerbskosten, monatliche Rate und anwendbare Beihilfen",
+    "down_payment": "Eigenkapital",
+    "duration": "Laufzeit",
+    "years": "{count} Jahre",
+    "first_time_buyer": "Ersterwerber",
+    "couple_family": "Paar / Familie",
+    "new_build": "Neubau / VEFA",
+    "tax_resident": "Steuerlich ansässig",
+    "usage_legend": "Nutzung der Immobilie",
+    "usage_primary": "Hauptwohnsitz",
+    "usage_secondary": "Zweitwohnsitz",
+    "usage_investment": "Renditeobjekt",
+    "fees_detail": "Aufschlüsselung der Erwerbsnebenkosten",
+    "total_fees": "Gesamte Erwerbsnebenkosten",
+    "percent_of_price": "{value} % des Preises",
+    "property_price": "Immobilienpreis",
+    "borrowed_capital": "Geschätztes Darlehen",
+    "monthly_payment": "Geschätzte monatliche Rate",
+    "rate_hint": "Richtzins {rate} % · {duration} Jahre",
+    "total_acquisition_cost": "Gesamtkosten des Erwerbs",
+    "income_required": "Erforderliches Monatseinkommen (35%)",
+    "debt_ratio_hint": "Ziel-Schuldenquote {ratio} %",
+    "contact": "Kontakt",
+    "disclaimer": "Indikative Schätzung auf Basis der Vorschriften 2026.",
+    "legal_notice": "Rechtliche Hinweise",
+    "country": {
+      "LU": "Luxemburg",
+      "FR": "Frankreich",
+      "BE": "Belgien",
+      "DE": "Deutschland",
+      "MC": "Monaco",
+      "CH": "Schweiz",
+      "IT": "Italien",
+      "ES": "Spanien",
+      "PT": "Portugal"
+    }
   }
 }

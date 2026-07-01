@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { computeAcquisitionCost } from "@/lib/acquisition/country-rules";
 import type {
   AcquisitionInput,
@@ -22,18 +22,6 @@ interface Props {
 
 const DURATIONS = [10, 15, 20, 25, 30] as const;
 const COPPER = "#e0af6e";
-
-const COUNTRY_LABEL: Record<string, string> = {
-  LU: "Luxembourg",
-  FR: "France",
-  BE: "Belgique",
-  DE: "Allemagne",
-  MC: "Monaco",
-  CH: "Suisse",
-  IT: "Italie",
-  ES: "Espagne",
-  PT: "Portugal",
-};
 
 function mapCountry(raw: string): string {
   const c = (raw ?? "").toUpperCase().trim();
@@ -78,14 +66,15 @@ const SUPPORTED_CODES = ["LU", "FR", "BE", "DE", "MC", "CH", "IT", "ES", "PT"];
 
 /** Disclaimer minimaliste affiché sous le résultat. */
 function MinimalDisclaimer({ locale }: { locale: string }) {
+  const t = useTranslations("acquisition_simulator");
   return (
     <p className="mt-4 text-xs italic leading-relaxed text-ink-soft">
-      Estimation indicative basée sur la réglementation 2026.{" "}
+      {t("disclaimer")}{" "}
       <Link
         href={`/${locale}/mentions-acquisition`}
         className="underline-offset-2 hover:underline"
       >
-        Mentions légales
+        {t("legal_notice")}
       </Link>
     </p>
   );
@@ -93,6 +82,7 @@ function MinimalDisclaimer({ locale }: { locale: string }) {
 
 /** Boutons de contact : aucun numéro ni nom en SSR (anti-scraping ContactReveal). */
 function ContactButtonsRow({ locale }: { locale: string }) {
+  const t = useTranslations("acquisition_simulator");
   return (
     <div className="mt-5 flex flex-wrap items-center gap-2">
       <ContactReveal variant="compact" align="center" />
@@ -100,7 +90,7 @@ function ContactButtonsRow({ locale }: { locale: string }) {
         href={`/${locale}/contact`}
         className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
       >
-        Contact
+        {t("contact")}
       </Link>
     </div>
   );
@@ -113,6 +103,7 @@ export function AcquisitionSimulator({
   variant = "default",
 }: Props) {
   const locale = useLocale();
+  const t = useTranslations("acquisition_simulator");
   const isCompact = variant === "compact";
   const code = mapCountry(country);
   const isSupported = SUPPORTED_CODES.includes(code);
@@ -138,16 +129,14 @@ export function AcquisitionSimulator({
       >
         <header className="mb-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-            Plan de financement
+            {t("eyebrow")}
           </p>
           <h3 className="mt-1 font-display text-lg font-bold text-ink">
-            Pays non couvert
+            {t("country_not_covered_title")}
           </h3>
         </header>
         <p className="text-sm leading-relaxed text-ink-mid">
-          Le simulateur de coûts d&apos;acquisition n&apos;est pas encore
-          disponible pour ce pays. MAPA Property vous propose une analyse
-          personnalisée avec ses partenaires locaux.
+          {t("country_not_covered_body")}
         </p>
         <ContactButtonsRow locale={locale} />
         <MinimalDisclaimer locale={locale} />
@@ -179,6 +168,7 @@ function SimulatorActive({
   isCompact: boolean;
   locale: string;
 }) {
+  const t = useTranslations("acquisition_simulator");
   const [downPct, setDownPct] = useState(20);
   const [duration, setDuration] = useState<number>(25);
   const [isFirstTimeBuyer, setIsFirstTimeBuyer] = useState(false);
@@ -186,6 +176,11 @@ function SimulatorActive({
   const [propertyType, setPropertyType] = useState<"new" | "old">("old");
   const [usage, setUsage] = useState<AcquisitionInput["usage"]>("primary");
   const [isResident, setIsResident] = useState<boolean>(true);
+
+  // Libellé pays localisé (fallback : code brut si clé absente).
+  const countryLabel = t.has(`country.${country}`)
+    ? t(`country.${country}`)
+    : country;
 
   const input: AcquisitionInput = {
     countryCode: country,
@@ -248,10 +243,10 @@ function SimulatorActive({
             className="font-mono text-[10px] uppercase tracking-[0.3em]"
             style={{ color: COPPER }}
           >
-            Plan de financement · {COUNTRY_LABEL[country] ?? country}
+            {t("eyebrow")} · {countryLabel}
           </p>
           <h3 className="mt-1 font-display text-lg font-bold text-ink">
-            Estimation personnalisée disponible sur demande
+            {t("on_demand_title")}
           </h3>
         </header>
         <p className="text-sm leading-relaxed text-ink-mid">
@@ -282,11 +277,11 @@ function SimulatorActive({
           className="font-mono text-[10px] uppercase tracking-[0.3em]"
           style={{ color: COPPER }}
         >
-          Plan de financement · {COUNTRY_LABEL[country] ?? country}
+          {t("eyebrow")} · {countryLabel}
           {result.region ? ` · ${result.region}` : ""}
         </p>
         <h3 className="mt-1 font-display text-lg font-bold text-ink">
-          Coût d&apos;acquisition, mensualité et aides applicables
+          {t("title")}
         </h3>
       </header>
 
@@ -294,7 +289,7 @@ function SimulatorActive({
         <label className="block">
           <div className="flex items-baseline justify-between gap-3">
             <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-              Apport
+              {t("down_payment")}
             </span>
             <span className="font-mono text-xs font-semibold text-ink">
               {downPct}% · {fmtEur(downPayment)}
@@ -314,7 +309,7 @@ function SimulatorActive({
 
         <label className="block">
           <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-            Durée
+            {t("duration")}
           </span>
           <select
             value={duration}
@@ -323,7 +318,7 @@ function SimulatorActive({
           >
             {DURATIONS.map((d) => (
               <option key={d} value={d}>
-                {d} ans
+                {t("years", { count: d })}
               </option>
             ))}
           </select>
@@ -333,28 +328,28 @@ function SimulatorActive({
           <CheckboxField
             checked={isFirstTimeBuyer}
             onChange={setIsFirstTimeBuyer}
-            label="Primo-accédant"
+            label={t("first_time_buyer")}
           />
           <CheckboxField
             checked={isFamily}
             onChange={setIsFamily}
-            label="Couple / famille"
+            label={t("couple_family")}
           />
           <CheckboxField
             checked={propertyType === "new"}
             onChange={(v) => setPropertyType(v ? "new" : "old")}
-            label="Bien neuf / VEFA"
+            label={t("new_build")}
           />
           <CheckboxField
             checked={isResident}
             onChange={setIsResident}
-            label="Résident fiscal"
+            label={t("tax_resident")}
           />
         </fieldset>
 
         <fieldset className="space-y-2 text-sm">
           <legend className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-            Usage du bien
+            {t("usage_legend")}
           </legend>
           <div className="flex flex-wrap gap-4">
             <RadioField
@@ -362,21 +357,21 @@ function SimulatorActive({
               value="primary"
               current={usage}
               onChange={setUsage}
-              label="Résidence principale"
+              label={t("usage_primary")}
             />
             <RadioField
               name="acq-usage"
               value="secondary"
               current={usage}
               onChange={setUsage}
-              label="Résidence secondaire"
+              label={t("usage_secondary")}
             />
             <RadioField
               name="acq-usage"
               value="investment"
               current={usage}
               onChange={setUsage}
-              label="Investissement locatif"
+              label={t("usage_investment")}
             />
           </div>
         </fieldset>
@@ -384,7 +379,7 @@ function SimulatorActive({
 
       <div className="mt-6 rounded-xl border border-line bg-bg p-4">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-          Détail des frais d&apos;acquisition
+          {t("fees_detail")}
         </p>
         <ul className="mt-3 space-y-2.5">
           {lineItemsToDisplay.map((li, i) => (
@@ -444,10 +439,12 @@ function SimulatorActive({
       >
         <div className="flex items-baseline justify-between gap-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
-            Total frais d&apos;acquisition
+            {t("total_fees")}
           </p>
           <p className="font-mono text-[10px] text-ink-soft">
-            {result.totalCostPercent.toFixed(2).replace(".", ",")} % du prix
+            {t("percent_of_price", {
+              value: result.totalCostPercent.toFixed(2).replace(".", ","),
+            })}
           </p>
         </div>
         <p
@@ -459,24 +456,24 @@ function SimulatorActive({
       </div>
 
       <dl className="mt-5 grid gap-3 text-sm">
-        <Row label="Prix du bien" value={fmtEur(price)} />
+        <Row label={t("property_price")} value={fmtEur(price)} />
         <Row
-          label="Capital emprunté (estimé)"
+          label={t("borrowed_capital")}
           value={fmtEur(mortgage.borrowedAmount)}
         />
         <Row
-          label="Mensualité estimée"
+          label={t("monthly_payment")}
           value={fmtEur(mortgage.monthlyPayment)}
-          hint={`taux indicatif ${rate.toFixed(2)} % · ${duration} ans`}
+          hint={t("rate_hint", { rate: rate.toFixed(2), duration })}
         />
         <Row
-          label="Coût total acquisition"
+          label={t("total_acquisition_cost")}
           value={fmtEur(price + result.totalCost)}
         />
         <Row
-          label="Revenu mensuel requis (35%)"
+          label={t("income_required")}
           value={fmtEur(incomeRequired)}
-          hint={`taux d'endettement cible ${debtRatio.toFixed(0)} %`}
+          hint={t("debt_ratio_hint", { ratio: debtRatio.toFixed(0) })}
         />
       </dl>
 

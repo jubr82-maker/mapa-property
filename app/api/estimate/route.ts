@@ -588,7 +588,10 @@ export async function POST(req: Request) {
 
       // Sprint B1 : emails client (confirmation + promesse rapport 48h ouvrees) +
       // interne (notification lead Julien/Frederic). Best-effort, jamais bloquant.
-      void sendEstimationEmails({
+      // AWAIT obligatoire (serverless Vercel) : sans await le process est gele
+      // apres la reponse et le mail n'est jamais envoye. La fonction a son
+      // try/catch interne (Promise.allSettled) → ne throw jamais.
+      await sendEstimationEmails({
         contactEmail: body.contactEmail,
         contactName: fullName || body.contactName,
         contactPhone: body.contactPhone,
@@ -647,7 +650,8 @@ export async function POST(req: Request) {
   });
 
   // Sprint B1 : emails client + interne (cf. branche EVS ci-dessus).
-  void sendEstimationEmails({
+  // AWAIT obligatoire (serverless Vercel) — cf. note branche EVS.
+  await sendEstimationEmails({
     contactEmail: body.contactEmail,
     contactName: fullName || body.contactName,
     contactPhone: body.contactPhone,

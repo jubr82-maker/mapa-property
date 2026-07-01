@@ -1233,5 +1233,47 @@
   },
   "chatbot": {
     "legal_disclaimer": "Information provided by Eléna is for informational purposes only and non-contractual. MAPA Property — a brand of MAPA Synergy Sàrl — cannot be held responsible for any decision based on this information. For confirmation: j.brebion@mapagroup.org / +352 691 620 127"
+  },
+  "acquisition_simulator": {
+    "eyebrow": "Financing plan",
+    "country_not_covered_title": "Country not covered",
+    "country_not_covered_body": "The acquisition cost simulator is not yet available for this country. MAPA Property offers a tailored analysis through its local partners.",
+    "on_demand_title": "Personalised estimate available on request",
+    "title": "Acquisition cost, monthly payment and applicable aids",
+    "down_payment": "Down payment",
+    "duration": "Term",
+    "years": "{count} yrs",
+    "first_time_buyer": "First-time buyer",
+    "couple_family": "Couple / family",
+    "new_build": "New build / off-plan",
+    "tax_resident": "Tax resident",
+    "usage_legend": "Property use",
+    "usage_primary": "Primary residence",
+    "usage_secondary": "Second home",
+    "usage_investment": "Buy-to-let investment",
+    "fees_detail": "Acquisition cost breakdown",
+    "total_fees": "Total acquisition costs",
+    "percent_of_price": "{value}% of price",
+    "property_price": "Property price",
+    "borrowed_capital": "Borrowed capital (estimated)",
+    "monthly_payment": "Estimated monthly payment",
+    "rate_hint": "indicative rate {rate}% · {duration} yrs",
+    "total_acquisition_cost": "Total acquisition cost",
+    "income_required": "Required monthly income (35%)",
+    "debt_ratio_hint": "target debt ratio {ratio}%",
+    "contact": "Contact",
+    "disclaimer": "Indicative estimate based on 2026 regulations.",
+    "legal_notice": "Legal notice",
+    "country": {
+      "LU": "Luxembourg",
+      "FR": "France",
+      "BE": "Belgium",
+      "DE": "Germany",
+      "MC": "Monaco",
+      "CH": "Switzerland",
+      "IT": "Italy",
+      "ES": "Spain",
+      "PT": "Portugal"
+    }
   }
 }

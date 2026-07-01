@@ -20,7 +20,6 @@ interface ContactRevealProps {
 // le HTML SSR initial. Les arrays sont dans le bundle JS, mais le DOM
 // rendu cote serveur ne contient que le bouton "Nous contacter".
 const PHONE_JULIEN_PARTS = ["+352", "691", "620", "127"];
-const PHONE_SECONDARY_PARTS = ["+352", "691", "113", "018"];
 const EMAIL_USER = ["j", "brebion"];
 const EMAIL_DOMAIN = ["mapagroup", "org"];
 
@@ -166,20 +165,6 @@ export function ContactReveal({
             icon={<PhoneIcon />}
             onClick={() =>
               track("contact_reveal", { variant, target: "call_julien" })
-            }
-            linkBase={linkBase}
-            iconColor={iconColor}
-            variant={variant}
-          />
-          <ContactLine
-            display={buildPhoneDisplay(PHONE_SECONDARY_PARTS)}
-            href={`tel:${buildPhoneTel(PHONE_SECONDARY_PARTS)}`}
-            // Aucun nom dans l'aria-label — ligne secondaire anonyme
-            // (regle Julien : seul son propre nom peut apparaitre).
-            ariaLabel="Appeler le numero secondaire MAPA Property"
-            icon={<PhoneIcon />}
-            onClick={() =>
-              track("contact_reveal", { variant, target: "call_secondary" })
             }
             linkBase={linkBase}
             iconColor={iconColor}
