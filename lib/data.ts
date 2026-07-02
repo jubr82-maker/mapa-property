@@ -92,16 +92,16 @@ export async function fetchHomeFeatured(
 ): Promise<HomeFeatured[]> {
   const sb = supabaseServer();
 
-  // BUG T5 : titres localisés. `properties` (Apimo) a title_fr/_en/_de.
-  // `properties_offmarket` n'a que `title` tant que la migration
-  // 20260518_offmarket_i18n_titles n'est pas appliquée → select
-  // résilient (on retente sans title_en/_de si colonnes absentes).
-  const offmarketCols =
-    "id,reference,title,title_en,title_de,city_label,country,price_label,price_display,surface_hab,bedrooms,cover_image_url,created_at,is_coup_de_coeur,is_published,status";
-  const offmarketColsLegacy =
-    "id,reference,title,city_label,country,price_label,price_display,surface_hab,bedrooms,cover_image_url,created_at,is_coup_de_coeur,is_published,status";
+  // Sprint sécurisation off-market (étape 2) : lecture publique via la VIEW
+  // redactée properties_offmarket_public (jamais la table brute côté anon).
+  // La VIEW filtre déjà is_published + status='published', gate les médias
+  // sur photos_locked et anonymise la ville. Colonnes renommées :
+  // city_label->city_anonymized, surface_hab->surface_habitable,
+  // bedrooms->chambres. Les title_en/_de existent toujours dans la VIEW.
+  const offmarketColsView =
+    "id,reference,title,title_en,title_de,city_anonymized,country,price_label,price_display,surface_habitable,chambres,cover_image_url,created_at,is_coup_de_coeur,status";
 
-  let [apimoRes, offmarketRes] = await Promise.all([
+  const [apimoRes, offmarketRes] = await Promise.all([
     sb
       .from("properties")
       .select("id,slug,title_fr,title_en,title_de,city,country,price,surface,bedrooms,created_at,badge,badge_size,badge_position,property_images(url,sort)")
@@ -110,27 +110,12 @@ export async function fetchHomeFeatured(
       .order("created_at", { ascending: false })
       .limit(limit),
     sb
-      .from("properties_offmarket")
-      .select(offmarketCols)
+      .from("properties_offmarket_public")
+      .select(offmarketColsView)
+      .eq("is_coup_de_coeur", true)
       .order("created_at", { ascending: false })
       .limit(limit),
   ]);
-
-  if (
-    offmarketRes.error &&
-    (offmarketRes.error.code === "42703" ||
-      offmarketRes.error.code === "PGRST204" ||
-      /title_(en|de)/i.test(offmarketRes.error.message))
-  ) {
-    // Colonnes i18n offmarket pas encore migrées : fallback FR.
-    // (Le select legacy infère une shape sans title_en/_de ; on
-    // recolle au type du select i18n — mapPublicRows tolère l'absence.)
-    offmarketRes = (await sb
-      .from("properties_offmarket")
-      .select(offmarketColsLegacy)
-      .order("created_at", { ascending: false })
-      .limit(limit)) as typeof offmarketRes;
-  }
 
   if (apimoRes.error) console.error("[data] fetchHomeFeatured apimo", apimoRes.error.message);
   if (offmarketRes.error) console.error("[data] fetchHomeFeatured offmarket", offmarketRes.error.message);
@@ -163,16 +148,15 @@ export async function fetchHomeFeatured(
     title: string | null;
     title_en?: string | null;
     title_de?: string | null;
-    city_label: string | null;
+    city_anonymized: string | null;
     country: string | null;
     price_label: string | null;
     price_display: string | null;
-    surface_hab: number | null;
-    bedrooms: number | null;
+    surface_habitable: number | null;
+    chambres: number | null;
     cover_image_url: string | null;
     created_at: string | null;
     is_coup_de_coeur: boolean | null;
-    is_published: boolean | null;
     status: string | null;
   };
 
@@ -200,24 +184,21 @@ export async function fetchHomeFeatured(
   });
 
   const offmarket: HomeFeatured[] = ((offmarketRes.data as OffmarketRow[] | null) ?? [])
-    .filter(
-      (row) =>
-        row.is_coup_de_coeur === true &&
-        row.is_published === true &&
-        row.status === "published",
-    )
+    // La VIEW garantit deja is_published + status='published' et filtre
+    // is_coup_de_coeur (.eq ci-dessus) ; filtre JS defensif conserve.
+    .filter((row) => row.is_coup_de_coeur === true)
     .map((row) => ({
       id: row.id,
       kind: "offmarket",
       slug: row.reference,
       title: getLocalizedField(row, "title", locale) || row.title,
-      city: row.city_label,
+      city: row.city_anonymized,
       country: row.country,
       price: null,
       price_label: "Prix sur demande", // BUG 1 : off-market confidentiel — jamais le prix réel
       cover_url: row.cover_image_url,
-      surface: row.surface_hab,
-      bedrooms: row.bedrooms,
+      surface: row.surface_habitable,
+      bedrooms: row.chambres,
       created_at: row.created_at,
       // Offmarket : aucun badge commercial (signalétique Off-Market
       // cuivre top-right gérée séparément dans FeaturedCarousel).
@@ -405,23 +386,15 @@ export async function fetchOffmarketList(
   locale = "fr",
 ): Promise<PropertyOffmarket[]> {
   const sb = supabaseServer();
-  // Lecture publique via VIEW (champs non-confidentiels uniquement).
+  // Lecture publique EXCLUSIVEMENT via la VIEW redactée (jamais la table
+  // brute côté anon). Sprint sécurisation off-market étape 2.
   const { data, error } = await sb
     .from("properties_offmarket_public")
     .select("*")
     .order("display_order", { ascending: true });
   if (error) {
-    // Fallback : table directe avec colonnes legacy si la VIEW n'existe pas encore.
-    const fallback = await sb
-      .from("properties_offmarket")
-      .select("*")
-      .eq("is_published", true)
-      .order("display_order", { ascending: true });
-    if (fallback.error) {
-      console.error("[data] fetchOffmarketList", error.message);
-      return [];
-    }
-    return mapPublicRows(fallback.data, locale);
+    console.error("[data] fetchOffmarketList", error.message);
+    return [];
   }
   return mapPublicRows(data, locale);
 }
@@ -431,26 +404,20 @@ export async function fetchOffmarketById(
   locale = "fr",
 ): Promise<PropertyOffmarket | null> {
   const sb = supabaseServer();
+  // Lecture publique EXCLUSIVEMENT via la VIEW redactée (jamais la table
+  // brute). La VIEW filtre deja is_published + status='published' : un id
+  // non publié ou inexistant -> maybeSingle renvoie null -> on renvoie null
+  // proprement (pas d'erreur). Sprint sécurisation off-market étape 2.
   const { data, error } = await sb
-    .from("properties_offmarket")
+    .from("properties_offmarket_public")
     .select("*")
-    .eq("is_published", true)
-    .eq("status", "published")
     .eq("id", id)
     .maybeSingle();
-  if (error || !data) {
-    const fallback = await sb
-      .from("properties_offmarket")
-      .select("*")
-      .eq("id", id)
-      .eq("is_published", true)
-      .maybeSingle();
-    if (fallback.error || !fallback.data) {
-      if (error) console.error("[data] fetchOffmarketById", error.message);
-      return null;
-    }
-    return mapPublicRows([fallback.data], locale)[0] ?? null;
+  if (error) {
+    console.error("[data] fetchOffmarketById", error.message);
+    return null;
   }
+  if (!data) return null;
   return mapPublicRows([data], locale)[0] ?? null;
 }
 
