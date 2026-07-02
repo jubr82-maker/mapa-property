@@ -1,104 +1,28 @@
 // API admin POST /api/admin/ventes-realisees — insertion d'une vente
 // realisee MAPA Property dans la table mapa_historical_sales.
 //
-// Sprint B2 squelette :
-//   - Authentification : auth.email() doit etre Julien ou Frederic
-//     (verifie cote SSR + RLS Postgres en defense en profondeur)
-//   - Validation minimale (champs obligatoires + types numeriques)
-//   - INSERT direct (pas d'edition / suppression : sprint suivant)
+//   - Authentification : allowlist admin (admin@mapagroup.org +
+//     j.brebion@mapagroup.org), verifiee cote SSR + RLS Postgres (defense
+//     en profondeur). Source unique : lib/admin/sales-auth.ts.
+//   - Validation minimale partagee (parseSaleInput).
+//   - INSERT direct. Edition / suppression : /api/admin/ventes-realisees/[id].
+//   - use_as_comparable non fourni ici -> DEFAULT TRUE en base (migration
+//     20260701c).
 
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
-
-const ALLOWED_EMAILS = new Set([
-  "admin@mapagroup.org",
-  "j.brebion@mapagroup.org",
-]);
-
-const ALLOWED_AGENTS = new Set(["julien", "frederic"]);
-
-type Body = {
-  property_type?: string;
-  surface_habitable?: number;
-  surface_terrain?: number | null;
-  chambres?: number | null;
-  classe_energie?: string | null;
-  annee_construction?: number | null;
-  etat?: string | null;
-  adresse?: string;
-  commune?: string;
-  prix_vente?: number;
-  date_acte?: string;
-  agent?: string;
-  notes?: string | null;
-};
-
-function strOrNull(v: unknown): string | null {
-  if (typeof v !== "string") return null;
-  const t = v.trim();
-  return t ? t : null;
-}
-
-function numOrNull(v: unknown): number | null {
-  if (typeof v !== "number" || !Number.isFinite(v)) return null;
-  return v;
-}
+import { requireSalesAdmin, parseSaleInput } from "@/lib/admin/sales-auth";
 
 export async function POST(req: Request) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  if (!user.email || !ALLOWED_EMAILS.has(user.email)) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  const auth = await requireSalesAdmin();
+  if (!auth.ok) return auth.response;
+
+  const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+  const { insert, error: validationError } = parseSaleInput(body);
+  if (validationError || !insert) {
+    return NextResponse.json({ error: validationError ?? "invalid" }, { status: 400 });
   }
 
-  const body = (await req.json().catch(() => ({}))) as Body;
-
-  // Validation des champs obligatoires.
-  const property_type = strOrNull(body.property_type);
-  const adresse = strOrNull(body.adresse);
-  const commune = strOrNull(body.commune);
-  const date_acte = strOrNull(body.date_acte);
-  const agent = strOrNull(body.agent);
-  const surface_habitable = numOrNull(body.surface_habitable);
-  const prix_vente = numOrNull(body.prix_vente);
-
-  if (
-    !property_type ||
-    !adresse ||
-    !commune ||
-    !date_acte ||
-    !agent ||
-    !ALLOWED_AGENTS.has(agent) ||
-    !surface_habitable ||
-    surface_habitable <= 0 ||
-    !prix_vente ||
-    prix_vente <= 0
-  ) {
-    return NextResponse.json({ error: "missing_or_invalid_fields" }, { status: 400 });
-  }
-
-  const insert = {
-    property_type,
-    surface_habitable: Math.round(surface_habitable),
-    surface_terrain: numOrNull(body.surface_terrain),
-    chambres: numOrNull(body.chambres),
-    classe_energie: strOrNull(body.classe_energie),
-    annee_construction: numOrNull(body.annee_construction),
-    etat: strOrNull(body.etat),
-    adresse,
-    commune,
-    prix_vente: Math.round(prix_vente),
-    date_acte,
-    agent,
-    notes: strOrNull(body.notes),
-  };
-
-  const { data, error } = await supabase
+  const { data, error } = await auth.supabase
     .from("mapa_historical_sales")
     .insert(insert)
     .select("id")

@@ -1,0 +1,91 @@
+// Page admin — edition d'une vente realisee. Server component : auth + fetch
+// de la ligne, puis SaleForm en mode edition (PATCH /api/admin/ventes-realisees/[id]).
+
+import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { SaleForm } from "../../SaleForm";
+
+export const dynamic = "force-dynamic";
+
+const s = (v: unknown): string => (v === null || v === undefined ? "" : String(v));
+
+export default async function EditSalePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/admin/login?from=/admin/ventes-realisees/${id}/edit`);
+
+  const { data: row, error } = await supabase
+    .from("mapa_historical_sales")
+    .select(
+      "id, property_type, surface_habitable, surface_terrain, chambres, classe_energie, annee_construction, etat, adresse, commune, prix_vente, date_acte, agent, notes",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <p className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+          Erreur lecture Supabase : {error.message}
+        </p>
+        <Link href="/admin/ventes-realisees" className="text-sm underline">
+          ← Retour à la liste
+        </Link>
+      </div>
+    );
+  }
+  if (!row) notFound();
+
+  const agent = row.agent === "frederic" ? "frederic" : "julien";
+
+  return (
+    <div className="space-y-6">
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold uppercase tracking-[0.05em]">
+            Modifier une vente
+          </h1>
+          <p className="mt-1 text-xs text-[#3D4F63]/70">
+            {row.commune} · {row.adresse}
+          </p>
+        </div>
+        <Link
+          href="/admin/ventes-realisees"
+          className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] underline"
+        >
+          ← Retour
+        </Link>
+      </header>
+
+      <section className="rounded-lg border border-[#3D4F63]/20 bg-white p-6">
+        <SaleForm
+          mode="edit"
+          saleId={row.id}
+          initial={{
+            property_type: s(row.property_type),
+            surface_habitable: s(row.surface_habitable),
+            surface_terrain: s(row.surface_terrain),
+            chambres: s(row.chambres),
+            classe_energie: s(row.classe_energie),
+            annee_construction: s(row.annee_construction),
+            etat: s(row.etat),
+            adresse: s(row.adresse),
+            commune: s(row.commune),
+            prix_vente: s(row.prix_vente),
+            date_acte: s(row.date_acte).slice(0, 10),
+            agent,
+            notes: s(row.notes),
+          }}
+        />
+      </section>
+    </div>
+  );
+}

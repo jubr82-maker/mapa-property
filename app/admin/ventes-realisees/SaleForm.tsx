@@ -3,11 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Formulaire d'ajout d'une vente realisee. Sprint B2 squelette : un seul
-// formulaire 'create'. Edition / suppression : sprint suivant.
-//
-// POST vers /api/admin/ventes-realisees (cree dans le meme commit). Sur
-// success → router.refresh() pour relire la liste server-side.
+// Formulaire vente realisee — modes "create" (POST /api/admin/ventes-realisees)
+// et "edit" (PATCH /api/admin/ventes-realisees/[id]). En edition, les champs
+// sont pre-remplis via `initial` et on redirige vers la liste apres succes.
 
 type Agent = "julien" | "frederic";
 
@@ -27,7 +25,7 @@ interface State {
   notes: string;
 }
 
-const initial: State = {
+const emptyState: State = {
   property_type: "appartement",
   surface_habitable: "",
   surface_terrain: "",
@@ -57,9 +55,17 @@ const ENERGIES = ["A+", "A", "B", "C", "D", "E", "F", "G", "H", "I"];
 
 const ETATS = ["neuf", "renove", "bon", "a_renover"];
 
-export function SaleForm() {
+export function SaleForm({
+  mode = "create",
+  saleId,
+  initial,
+}: {
+  mode?: "create" | "edit";
+  saleId?: string;
+  initial?: Partial<State>;
+}) {
   const router = useRouter();
-  const [data, setData] = useState<State>(initial);
+  const [data, setData] = useState<State>({ ...emptyState, ...initial });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -73,8 +79,13 @@ export function SaleForm() {
     setSuccess(false);
     setPending(true);
     try {
-      const res = await fetch("/api/admin/ventes-realisees", {
-        method: "POST",
+      const url =
+        mode === "edit" && saleId
+          ? `/api/admin/ventes-realisees/${saleId}`
+          : "/api/admin/ventes-realisees";
+      const method = mode === "edit" ? "PATCH" : "POST";
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
@@ -94,8 +105,13 @@ export function SaleForm() {
         throw new Error(`HTTP ${res.status} — ${txt}`);
       }
       setSuccess(true);
-      setData(initial);
-      router.refresh();
+      if (mode === "edit") {
+        router.push("/admin/ventes-realisees");
+        router.refresh();
+      } else {
+        setData(emptyState);
+        router.refresh();
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -252,17 +268,30 @@ export function SaleForm() {
       )}
       {success && (
         <p className="rounded border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-700">
-          Vente enregistrée.
+          {mode === "edit" ? "Vente mise à jour." : "Vente enregistrée."}
         </p>
       )}
 
       <div className="flex items-center justify-end gap-3">
+        {mode === "edit" && (
+          <button
+            type="button"
+            onClick={() => router.push("/admin/ventes-realisees")}
+            className="rounded border border-[#3D4F63]/30 px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63]"
+          >
+            Annuler
+          </button>
+        )}
         <button
           type="submit"
           disabled={pending}
           className="rounded bg-[#9E7B2A] px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] text-white disabled:opacity-50"
         >
-          {pending ? "Enregistrement…" : "Ajouter la vente"}
+          {pending
+            ? "Enregistrement…"
+            : mode === "edit"
+              ? "Enregistrer les modifications"
+              : "Ajouter la vente"}
         </button>
       </div>
     </form>
