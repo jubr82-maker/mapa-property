@@ -20,7 +20,9 @@ interface ContactRevealProps {
 // le HTML SSR initial. Les arrays sont dans le bundle JS, mais le DOM
 // rendu cote serveur ne contient que le bouton "Nous contacter".
 const PHONE_JULIEN_PARTS = ["+352", "691", "620", "127"];
-const EMAIL_USER = ["j", "brebion"];
+const PHONE_SECONDARY_PARTS = ["+352", "691", "113", "018"];
+const EMAIL_JULIEN_USER = ["j", "brebion"];
+const EMAIL_ADMIN_USER = ["admin"];
 const EMAIL_DOMAIN = ["mapagroup", "org"];
 
 // Delai minimum entre mount et premier clic (anti-bot naif).
@@ -36,8 +38,10 @@ function buildPhoneTel(parts: string[]) {
   return parts.join("");
 }
 
-function buildEmail() {
-  return `${EMAIL_USER.join(".")}${String.fromCharCode(64)}${EMAIL_DOMAIN.join(".")}`;
+// Assemblage email cote client uniquement : user + "@" (fromCharCode 64) +
+// domaine. Aucune chaine complete "...@..." dans le SSR ni le source.
+function buildEmail(userParts: string[]) {
+  return `${userParts.join(".")}${String.fromCharCode(64)}${EMAIL_DOMAIN.join(".")}`;
 }
 
 export function ContactReveal({
@@ -158,6 +162,7 @@ export function ContactReveal({
         // ligne est un <a> cliquable (tel: ou mailto:) avec le numero /
         // email visible en texte.
         <>
+          {/* 1. Téléphone Julien */}
           <ContactLine
             display={buildPhoneDisplay(PHONE_JULIEN_PARTS)}
             href={`tel:${buildPhoneTel(PHONE_JULIEN_PARTS)}`}
@@ -170,13 +175,41 @@ export function ContactReveal({
             iconColor={iconColor}
             variant={variant}
           />
+          {/* 2. Email Julien */}
           <ContactLine
-            display={buildEmail()}
-            href={`mailto:${buildEmail()}`}
+            display={buildEmail(EMAIL_JULIEN_USER)}
+            href={`mailto:${buildEmail(EMAIL_JULIEN_USER)}`}
             ariaLabel="Ecrire un email"
             icon={<MailIcon />}
             onClick={() =>
               track("contact_reveal", { variant, target: "email" })
+            }
+            linkBase={linkBase}
+            iconColor={iconColor}
+            variant={variant}
+          />
+          {/* 3. Téléphone secondaire (ligne anonyme — regle Julien : seul son
+              propre nom peut apparaitre dans l'aria-label) */}
+          <ContactLine
+            display={buildPhoneDisplay(PHONE_SECONDARY_PARTS)}
+            href={`tel:${buildPhoneTel(PHONE_SECONDARY_PARTS)}`}
+            ariaLabel="Appeler le numero secondaire MAPA Property"
+            icon={<PhoneIcon />}
+            onClick={() =>
+              track("contact_reveal", { variant, target: "call_secondary" })
+            }
+            linkBase={linkBase}
+            iconColor={iconColor}
+            variant={variant}
+          />
+          {/* 4. Email admin */}
+          <ContactLine
+            display={buildEmail(EMAIL_ADMIN_USER)}
+            href={`mailto:${buildEmail(EMAIL_ADMIN_USER)}`}
+            ariaLabel="Ecrire un email a l'administration MAPA Property"
+            icon={<MailIcon />}
+            onClick={() =>
+              track("contact_reveal", { variant, target: "email_admin" })
             }
             linkBase={linkBase}
             iconColor={iconColor}
