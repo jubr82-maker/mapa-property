@@ -835,6 +835,8 @@
     "range_mid": "Centrale",
     "range_high": "Haute",
     "price_per_sqm": "Soit ~{value} / m² selon le profil renseigné.",
+    "methodology_with_sales": "Cette estimation croise plusieurs approches : algorithme MAPA Property, données officielles du marché et ventes réelles récentes du secteur.",
+    "methodology_without_sales": "Cette estimation croise plusieurs approches : algorithme MAPA Property et données officielles du marché luxembourgeois.",
     "financing_title": "Plan de financement indicatif",
     "max_borrowable": "Capital empruntable max",
     "monthly_max": "Mensualité max (35%)",

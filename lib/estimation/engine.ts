@@ -158,6 +158,13 @@ export interface EstimationInputs {
     rentPerM2Month: number | null;
     yieldRate: number | null;
   };
+  // Sprint Comparaison Directe — prix/m² des ventes comparables (memes
+  // commune + famille de type + regle "est comparable" deux etats), deja
+  // filtrees et chargees EN AMONT par la route (service_role, best-effort).
+  // Le moteur reste pur/sync : il ne fait que consommer cette liste. Absente
+  // ou vide -> methode non applicable -> 100% observatoire (comportement
+  // historique preserve).
+  comparablesPpsqm?: number[];
 }
 
 // ============================================================================
@@ -351,14 +358,22 @@ export interface MethodWeights {
 }
 
 /**
- * Sprint 6-methodes : Option C — observatoire 100%, autres 0%.
- * Le client_output.price_mid reste celui calcule par estimateObservatoire /
- * estimateHouse (calibrage Julien). Les 5 autres methodes sont visibles
- * mais ne ponderent rien tant que Julien n'ajuste pas les sliders admin.
+ * Ponderation par defaut du blend observatoire <-> comparaison directe.
+ *
+ * PROPOSITION A VALIDER PAR JULIEN : observatoire 0.7 / sales_comparison 0.3.
+ * Justification : l'observatoire (baseline officielle + coefficients calibres)
+ * reste le socle majoritaire ; les ventes reelles MAPA apportent un ancrage
+ * marche local mais sont peu nombreuses et heterogenes -> 30% donne un signal
+ * significatif sans dominer. Les 4 autres methodes restent a 0 (affichage).
+ *
+ * Le blend n'est actif QUE si sales_comparison est applicable (>= 1 comparable) :
+ * sinon le prix reste 100% observatoire (comportement historique preserve).
+ * Julien peut ensuite ajuster ces poids par estimation via les sliders admin
+ * (weights_used) — override manuel post-calcul.
  */
 export const DEFAULT_WEIGHTS: MethodWeights = {
-  observatoire: 1.0,
-  sales_comparison: 0,
+  observatoire: 0.7,
+  sales_comparison: 0.3,
   hedonic: 0,
   income_capitalization: 0,
   depreciated_replacement: 0,
@@ -877,23 +892,106 @@ function effectiveBaseline(
 
 // ============================================================================
 // MÉTHODE 1 — Comparaison directe (Sales Comparison Approach)
-// V1 : non applicable (pas de table internal_comparables seedée encore)
-// V2 : utilisera Supabase internal_comparables une fois alimenté par MAPA
+// Consomme inputs.comparablesPpsqm (prix/m² des ventes MAPA comparables, deja
+// filtrees commune + famille de type + regle "est comparable", chargees par la
+// route en service_role). Prix = mediane des prix/m² retenus x surface du bien.
+// Anti-outlier IQR (Tukey 1.5) applique seulement si >= 4 comparables.
+// PAS d'indexation temporelle (decision Julien : prix bruts).
 // ============================================================================
 
-export function methodSalesComparison(
-  inputs: EstimationInputs,
-): MethodResult {
+/** Mediane d'une liste non vide (interpolation lineaire au milieu). */
+function median(nums: number[]): number {
+  const s = [...nums].sort((a, b) => a - b);
+  const n = s.length;
+  const mid = Math.floor(n / 2);
+  return n % 2 === 0 ? (s[mid - 1] + s[mid]) / 2 : s[mid];
+}
+
+/** Quantile p (0..1) par interpolation lineaire sur une liste triee. */
+function quantile(sorted: number[], p: number): number {
+  const n = sorted.length;
+  if (n === 1) return sorted[0];
+  const idx = p * (n - 1);
+  const lo = Math.floor(idx);
+  const hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (idx - lo) * (sorted[hi] - sorted[lo]);
+}
+
+/**
+ * Anti-outlier robuste : bornes de Tukey [Q1 - 1.5*IQR, Q3 + 1.5*IQR].
+ * N'est applique QUE si >= 4 valeurs (sinon les quartiles ne sont pas fiables
+ * et on ne filtre pas — regle Julien : "si trop peu de comparables, ne pas
+ * filtrer agressivement"). Si le filtre viderait la liste, on garde l'original.
+ */
+function filterOutliersIqr(nums: number[]): number[] {
+  if (nums.length < 4) return nums;
+  const s = [...nums].sort((a, b) => a - b);
+  const q1 = quantile(s, 0.25);
+  const q3 = quantile(s, 0.75);
+  const iqr = q3 - q1;
+  const lo = q1 - 1.5 * iqr;
+  const hi = q3 + 1.5 * iqr;
+  const kept = s.filter((v) => v >= lo && v <= hi);
+  return kept.length > 0 ? kept : s;
+}
+
+export function methodSalesComparison(inputs: EstimationInputs): MethodResult {
+  const raw = (inputs.comparablesPpsqm ?? []).filter(
+    (v) => typeof v === "number" && Number.isFinite(v) && v > 0,
+  );
+
+  if (raw.length === 0) {
+    return {
+      applicable: false,
+      price: null,
+      details: {
+        reason:
+          "Aucune vente comparable en base (mapa_historical_sales) pour cette commune / famille de type.",
+      },
+      warnings: [
+        "Méthode comparaison directe : aucun comparable disponible — estimation basée sur l'observatoire seul.",
+      ],
+    };
+  }
+
+  const used = filterOutliersIqr(raw);
+  const medianPpsqm = median(used);
+  const price = Math.round(medianPpsqm * inputs.surfaceLiving);
+
   return {
-    applicable: false,
-    price: null,
+    applicable: true,
+    price,
     details: {
-      reason: "Pas de comparables internes seedés (V2 — table internal_comparables à alimenter).",
+      method: "sales_comparison_v1",
+      n_comparables_raw: raw.length,
+      n_comparables_used: used.length,
+      median_ppsqm: Math.round(medianPpsqm),
+      outlier_method: raw.length >= 4 ? "iqr_tukey_1.5" : "none_too_few",
+      surface: inputs.surfaceLiving,
     },
-    warnings: [
-      "Méthode comparaison directe désactivée : aucune transaction interne MAPA seedée en base.",
-    ],
+    warnings: [],
   };
+}
+
+/**
+ * Blend observatoire <-> comparaison directe. Retourne le prix pondere si
+ * sales est applicable, SINON le prix observatoire pur (comportement
+ * historique preserve). Normalise sur les 2 poids concernes uniquement.
+ */
+function blendWithSales(
+  observatoirePrice: number,
+  sales: MethodResult,
+  weights: MethodWeights,
+): number {
+  if (!sales.applicable || sales.price == null || sales.price <= 0) {
+    return observatoirePrice;
+  }
+  const wObs = weights.observatoire;
+  const wSales = weights.sales_comparison;
+  const sum = wObs + wSales;
+  if (sum <= 0) return observatoirePrice;
+  return Math.round((wObs * observatoirePrice + wSales * sales.price) / sum);
 }
 
 // ============================================================================
@@ -1390,13 +1488,18 @@ function buildEvsResult(
   value: number,
   details: Record<string, unknown>,
 ): EstimationResult {
-  const mid = Math.round(value);
+  const obsMid = Math.round(value);
   const observatoireSlot: MethodResult = {
     applicable: true,
-    price: mid,
+    price: obsMid, // valeur PROPRE observatoire/bati+terrain (avant blend)
     details,
     warnings: [],
   };
+
+  // Comparaison Directe : blend automatique si comparables disponibles.
+  // Si non applicable, `mid` = `obsMid` (100% calibrage MAPA, inchange).
+  const salesResult = methodSalesComparison(inputs);
+  const mid = blendWithSales(obsMid, salesResult, DEFAULT_WEIGHTS);
 
   return {
     client_output: {
@@ -1407,10 +1510,10 @@ function buildEvsResult(
     },
     internal_output: {
       methods: {
-        // Calibrage MAPA (bati+terrain POL3-6) - source du price_mid.
+        // Calibrage MAPA (bati+terrain POL3-6) - socle du blend.
         observatoire: observatoireSlot,
         // 5 methodes objectives : chacune dit elle-meme si applicable.
-        sales_comparison: methodSalesComparison(inputs),
+        sales_comparison: salesResult,
         hedonic: methodHedonic(inputs),
         income_capitalization: methodIncomeCapitalization(inputs),
         depreciated_replacement: methodDepreciatedReplacement(inputs),
@@ -1616,14 +1719,18 @@ function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
 
   const mid = Math.round(midBeforeAnnexes + annexes);
 
-  // Spread ±10% Observatoire (commit 8 le formalise dans buildEvsResult,
-  // ici on bypass et on construit notre propre EstimationResult).
-  const low = Math.round(mid * 0.925);
-  const high = Math.round(mid * 1.075);
+  // Comparaison Directe : blend automatique si comparables disponibles.
+  // Si non applicable, `blended` = `mid` (100% observatoire, inchange).
+  const salesResult = methodSalesComparison(inputs);
+  const blended = blendWithSales(mid, salesResult, DEFAULT_WEIGHTS);
+
+  // Spread ±7.5% autour du prix retenu (blende ou observatoire pur).
+  const low = Math.round(blended * 0.925);
+  const high = Math.round(blended * 1.075);
 
   const observatoireSlot: MethodResult = {
     applicable: true,
-    price: mid,
+    price: mid, // valeur PROPRE observatoire (avant blend)
     details: {
       method: "observatoire_c7",
       base_per_m2: pricePerM2,
@@ -1642,22 +1749,22 @@ function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
   return {
     client_output: {
       price_low: low,
-      price_mid: mid,
+      price_mid: blended,
       price_high: high,
       confidence: "MEDIUM",
     },
     internal_output: {
       methods: {
-        // Calibrage MAPA (Observatoire C7) - source du price_mid.
+        // Calibrage MAPA (Observatoire C7) - socle du blend.
         observatoire: observatoireSlot,
         // 5 methodes objectives : chacune dit elle-meme si applicable.
-        sales_comparison: methodSalesComparison(inputs),
+        sales_comparison: salesResult,
         hedonic: methodHedonic(inputs),
         income_capitalization: methodIncomeCapitalization(inputs),
         depreciated_replacement: methodDepreciatedReplacement(inputs),
         statec_reference: methodStatecReference(inputs),
       },
-      weighted_price: mid,
+      weighted_price: blended,
       std_deviation_pct: 10,
       confidence_score: 75,
       warnings: [],

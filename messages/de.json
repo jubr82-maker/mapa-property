@@ -835,6 +835,8 @@
     "range_mid": "Mitte",
     "range_high": "Hoch",
     "price_per_sqm": "Etwa {value} / qm gemäß den Eingaben.",
+    "methodology_with_sales": "Diese Schätzung kombiniert mehrere Ansätze: den MAPA Property Algorithmus, offizielle Marktdaten und tatsächliche jüngste Verkäufe in der Umgebung.",
+    "methodology_without_sales": "Diese Schätzung kombiniert mehrere Ansätze: den MAPA Property Algorithmus und offizielle Marktdaten aus Luxemburg.",
     "financing_title": "Indikativer Finanzierungsplan",
     "max_borrowable": "Maximales Darlehensvolumen",
     "monthly_max": "Maximale Rate (35%)",

@@ -17,21 +17,26 @@ export async function PATCH(
   if (!auth.ok) return auth.response;
 
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+  const hasOverride = Object.prototype.hasOwnProperty.call(body, "comparable_override");
+  const overrideValue = body.comparable_override;
+  const overrideValid = overrideValue === true || overrideValue === false || overrideValue === null;
 
-  // Cas 1 — toggle seul de use_as_comparable (case a cocher dans la liste).
-  // Detecte quand aucun champ "vente" complet n'est fourni.
-  const isToggleOnly =
-    body.property_type === undefined &&
-    body.prix_vente === undefined &&
-    typeof body.use_as_comparable === "boolean";
+  // Cas 1 — bascule seule de comparable_override (controle 3 etats dans la
+  // liste : Auto=null / Oui=true / Non=false). Detecte quand aucun champ
+  // "vente" complet n'est fourni.
+  const isOverrideOnly =
+    body.property_type === undefined && body.prix_vente === undefined && hasOverride;
 
-  if (isToggleOnly) {
+  if (isOverrideOnly) {
+    if (!overrideValid) {
+      return NextResponse.json({ error: "invalid_comparable_override" }, { status: 400 });
+    }
     const { error } = await auth.supabase
       .from("mapa_historical_sales")
-      .update({ use_as_comparable: body.use_as_comparable as boolean })
+      .update({ comparable_override: overrideValue })
       .eq("id", id);
     if (error) {
-      console.error("[admin/ventes-realisees/[id]] toggle error", error.message);
+      console.error("[admin/ventes-realisees/[id]] override error", error.message);
       return NextResponse.json({ error: "db_error", message: error.message }, { status: 500 });
     }
     return NextResponse.json({ ok: true });
@@ -44,8 +49,8 @@ export async function PATCH(
   }
 
   const update: Record<string, unknown> = { ...insert };
-  if (typeof body.use_as_comparable === "boolean") {
-    update.use_as_comparable = body.use_as_comparable;
+  if (hasOverride && overrideValid) {
+    update.comparable_override = overrideValue;
   }
 
   const { error } = await auth.supabase

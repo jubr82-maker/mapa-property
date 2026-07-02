@@ -135,6 +135,74 @@ async function fetchRentDataForCommune(
   }
 }
 
+// Familles de type pour le matching des comparables (appartement vs maison).
+const APARTMENT_FAMILY = new Set(["appartement", "penthouse", "duplex", "loft"]);
+const HOUSE_FAMILY = new Set(["maison", "villa"]);
+
+function sameFamily(estimType: PropertyType, saleType: string): boolean {
+  const s = (saleType ?? "").toLowerCase().trim();
+  return HOUSE_FAMILY.has(estimType) ? HOUSE_FAMILY.has(s) : APARTMENT_FAMILY.has(s);
+}
+
+/**
+ * Sprint Comparaison Directe — charge les prix/m² des ventes MAPA comparables
+ * pour une commune + famille de type. Lecture en SERVICE_ROLE (la table
+ * mapa_historical_sales a une RLS confidentielle admin-only ; cf. migration
+ * 20260524:15 qui prevoit le bypass service_role cote serveur).
+ *
+ * "est comparable" (deux etats) : comparable_override = true, OU
+ * (comparable_override IS NULL ET date_acte >= aujourd'hui - 12 mois).
+ * Exclut les override = false et les ventes auto de plus de 12 mois.
+ *
+ * Best-effort : ne throw JAMAIS. Toute erreur (clé absente, colonne
+ * comparable_override pas encore migree, RLS, réseau) -> [] -> le moteur
+ * reste en 100% observatoire. Ne renvoie que des prix/m² (aucune donnee
+ * confidentielle ne quitte le serveur au-dela de l'agregat median).
+ */
+async function fetchComparablesForCommune(
+  commune: string,
+  estimType: PropertyType,
+): Promise<number[]> {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !serviceKey || !commune) return [];
+    const sb = createClient(url, serviceKey, { auth: { persistSession: false } });
+
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - 12);
+    const cutoffIso = cutoff.toISOString().slice(0, 10);
+
+    const { data, error } = await sb
+      .from("mapa_historical_sales")
+      .select("prix_vente, surface_habitable, commune, property_type, date_acte, comparable_override")
+      .or(
+        `comparable_override.eq.true,and(comparable_override.is.null,date_acte.gte.${cutoffIso})`,
+      )
+      .limit(2000);
+    if (error || !data) return [];
+
+    const norm = (s: string) => s.trim().toLowerCase().replace(/-/g, " ");
+    const target = norm(commune);
+    const out: number[] = [];
+    for (const r of data as Array<{
+      prix_vente: number;
+      surface_habitable: number;
+      commune: string;
+      property_type: string;
+    }>) {
+      if (norm(r.commune) !== target) continue;
+      if (!sameFamily(estimType, r.property_type)) continue;
+      if (!r.surface_habitable || r.surface_habitable <= 0) continue;
+      const ppsqm = Number(r.prix_vente) / Number(r.surface_habitable);
+      if (Number.isFinite(ppsqm) && ppsqm > 0) out.push(ppsqm);
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
 /** Best-effort persistance dans estimation_requests. Silencieux en cas d'échec. */
 async function persistEstimationRequest(args: {
   inputs: unknown;
@@ -513,6 +581,13 @@ export async function POST(req: Request) {
     // reste pur, sans I/O DB). Best-effort : toute erreur DB -> rentData
     // {null, null} -> moteur retombe sur son fallback hardcode.
     evsInputs.rentData = await fetchRentDataForCommune(evsInputs.commune);
+    // Sprint Comparaison Directe : charge les ventes MAPA comparables (memes
+    // commune + famille de type + regle 2 etats) en service_role. Best-effort :
+    // si vide, le moteur reste 100% observatoire.
+    evsInputs.comparablesPpsqm = await fetchComparablesForCommune(
+      evsInputs.commune,
+      evsInputs.type,
+    );
     try {
       const evs = estimateEvs(evsInputs);
       // GARDE LU-ONLY (POL3-6) : le moteur EVS = Luxembourg uniquement.
@@ -610,6 +685,10 @@ export async function POST(req: Request) {
         rate: null,
         engine: "evs_5_methods",
         confidence: evs.client_output.confidence,
+        // Booleen methodo UNIQUEMENT (jamais le nombre ni le detail des
+        // ventes) : selectionne la variante de phrase methodo cote client.
+        usedComparables:
+          evs.internal_output.methods.sales_comparison.applicable === true,
       });
     } catch (err) {
       console.error("[api/estimate] EVS engine failed, fallback legacy:", err);

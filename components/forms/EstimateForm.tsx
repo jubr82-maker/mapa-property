@@ -222,6 +222,9 @@ export function EstimateForm() {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FormState>(initial);
   const [result, setResult] = useState<EstimateResult | null>(null);
+  // Booleen methodo : des ventes reelles ont-elles servi au calcul ? (jamais
+  // le nombre ni le detail cote client). Selectionne la variante de phrase.
+  const [usedComparables, setUsedComparables] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Sprint C8 — touched flags pour affichage erreurs onBlur uniquement.
@@ -400,8 +403,10 @@ export function EstimateForm() {
         result: EstimateResult;
         engine?: string;
         confidence?: string;
+        usedComparables?: boolean;
       };
       setResult(json.result);
+      setUsedComparables(json.usedComparables === true);
       setStep(4);
       track("estimation_compute", {
         country: data.country,
@@ -424,11 +429,12 @@ export function EstimateForm() {
   const reset = () => {
     setData(initial);
     setResult(null);
+    setUsedComparables(false);
     setStep(1);
   };
 
   if (result) {
-    return <ResultView result={result} onReset={reset} />;
+    return <ResultView result={result} usedComparables={usedComparables} onReset={reset} />;
   }
 
   return (
@@ -1512,9 +1518,11 @@ function BackSubmitBtn({
 
 function ResultView({
   result,
+  usedComparables,
   onReset,
 }: {
   result: EstimateResult;
+  usedComparables: boolean;
   onReset: () => void;
 }) {
   const t = useTranslations("estimate_form");
@@ -1555,6 +1563,11 @@ function ResultView({
           {t("price_per_sqm", {
             value: formatEuro(result.pricePerSqm).replace(/\s/g, " "),
           })}
+        </p>
+        {/* Phrase methodologie (2 variantes, toujours vraies). Ne revele
+            jamais le nombre ni le detail des ventes. */}
+        <p className="mt-3 border-t border-gold/20 pt-3 text-xs leading-relaxed text-ink-mid">
+          {usedComparables ? t("methodology_with_sales") : t("methodology_without_sales")}
         </p>
       </section>
 

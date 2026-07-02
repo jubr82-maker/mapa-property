@@ -835,6 +835,8 @@
     "range_mid": "Mid",
     "range_high": "High",
     "price_per_sqm": "Approximately {value} / sqm based on the inputs.",
+    "methodology_with_sales": "This estimate combines several approaches: the MAPA Property algorithm, official market data and recent actual sales in the area.",
+    "methodology_without_sales": "This estimate combines several approaches: the MAPA Property algorithm and official Luxembourg market data.",
     "financing_title": "Indicative financing plan",
     "max_borrowable": "Max borrowable capital",
     "monthly_max": "Max monthly (35%)",

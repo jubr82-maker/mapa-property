@@ -1,24 +1,24 @@
-// Page admin — ventes realisees MAPA Property (Sprint 1/3 : gestion complete).
+// Page admin — ventes realisees MAPA Property (gestion complete).
 // Source : table public.mapa_historical_sales (RLS strict : auth.email dans
 // (admin@mapagroup.org, j.brebion@mapagroup.org)).
 //
 //   - Vue LISTE (plate) : filtres commune + agent + annee, actions par ligne
-//     (editer, supprimer, case "comparable").
+//     (editer, supprimer, controle comparabilite 3 etats).
 //   - Vue PAR LOCALITE : ventes regroupees par commune (count + biens + €/m²).
 //   - Ajout via SaleForm (POST).
 //
-// use_as_comparable (migration 20260701c) : lu en best-effort — si la colonne
-// n'est pas encore appliquee en base, on degrade (defaut true) sans casser la
-// page (convention projet, cf. AGENTS.md).
-//
-// Reste (sprints suivants) : indexation prix + branchement moteur EVS.
+// Comparabilite (logique 2 etats lue par le moteur EVS) :
+//   est_comparable = comparable_override IS NOT NULL ? comparable_override
+//                                                     : (date_acte <= 12 mois)
+//   La colonne comparable_override (migration 20260701d) est lue en
+//   best-effort : si absente, on degrade (mode auto par defaut) + banniere.
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SaleForm } from "./SaleForm";
 import { DeleteSaleButton } from "./DeleteSaleButton";
-import { ComparableToggle } from "./ComparableToggle";
+import { ComparableControl } from "./ComparableControl";
 
 interface SaleRow {
   id: string;
@@ -36,11 +36,11 @@ interface SaleRow {
   agent: string;
   notes: string | null;
   created_at: string;
-  use_as_comparable: boolean;
+  comparable_override: boolean | null;
 }
 
-const SELECT_WITH_COMPARABLE =
-  "id, property_type, surface_habitable, surface_terrain, chambres, classe_energie, annee_construction, etat, adresse, commune, prix_vente, date_acte, agent, notes, created_at, use_as_comparable";
+const SELECT_WITH_OVERRIDE =
+  "id, property_type, surface_habitable, surface_terrain, chambres, classe_energie, annee_construction, etat, adresse, commune, prix_vente, date_acte, agent, notes, created_at, comparable_override";
 const SELECT_LEGACY =
   "id, property_type, surface_habitable, surface_terrain, chambres, classe_energie, annee_construction, etat, adresse, commune, prix_vente, date_acte, agent, notes, created_at";
 
@@ -87,8 +87,11 @@ export default async function AdminVentesRealiseesPage({
   const yearFilter = params.year?.trim() || undefined;
   const vue = params.vue === "commune" ? "commune" : "liste";
 
-  // Filtre commune + agent en SQL (le filtre annee est applique en JS pour
-  // pouvoir alimenter le menu deroulant des annees disponibles).
+  // Fenetre auto 12 mois (meme regle que le moteur), calculee cote serveur.
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - 12);
+  const cutoffIso = cutoff.toISOString().slice(0, 10);
+
   function buildQuery(select: string) {
     let q = supabase
       .from("mapa_historical_sales")
@@ -100,17 +103,17 @@ export default async function AdminVentesRealiseesPage({
     return q;
   }
 
-  // Best-effort : tente avec use_as_comparable, fallback si colonne absente.
-  let comparableColumnMissing = false;
-  let res = await buildQuery(SELECT_WITH_COMPARABLE);
+  // Best-effort : tente avec comparable_override, fallback si colonne absente.
+  let overrideColumnMissing = false;
+  let res = await buildQuery(SELECT_WITH_OVERRIDE);
   if (res.error) {
-    comparableColumnMissing = true;
+    overrideColumnMissing = true;
     res = await buildQuery(SELECT_LEGACY);
   }
   const error = res.error;
   const allRows: SaleRow[] = ((res.data as unknown as SaleRow[] | null) ?? []).map((r) => ({
     ...r,
-    use_as_comparable: comparableColumnMissing ? true : (r.use_as_comparable ?? true),
+    comparable_override: overrideColumnMissing ? null : (r.comparable_override ?? null),
   }));
 
   const availableYears = Array.from(new Set(allRows.map((r) => yearOf(r.date_acte))))
@@ -119,10 +122,14 @@ export default async function AdminVentesRealiseesPage({
 
   const rows = yearFilter ? allRows.filter((r) => yearOf(r.date_acte) === yearFilter) : allRows;
 
+  // Comparabilite effective (2 etats) + mode.
+  const autoEffective = (r: SaleRow) => r.date_acte >= cutoffIso;
+  const isEffective = (r: SaleRow) =>
+    r.comparable_override === null ? autoEffective(r) : r.comparable_override;
+
   const totalCount = rows.length;
   const totalVolume = rows.reduce((sum, r) => sum + Number(r.prix_vente || 0), 0);
 
-  // href helper : preserve les filtres, change la vue.
   const qs = (over: Partial<SearchParams>) => {
     const p = new URLSearchParams();
     const merged = { commune: communeFilter, agent: agentFilter, year: yearFilter, vue, ...over };
@@ -134,7 +141,6 @@ export default async function AdminVentesRealiseesPage({
     return str ? `/admin/ventes-realisees?${str}` : "/admin/ventes-realisees";
   };
 
-  // Groupement par commune (vue localite).
   const byCommune = new Map<string, SaleRow[]>();
   for (const r of rows) {
     const arr = byCommune.get(r.commune) ?? [];
@@ -151,20 +157,22 @@ export default async function AdminVentesRealiseesPage({
         </h1>
         <p className="mt-2 text-sm text-[#3D4F63]/80">
           Historique interne des actes notariés. Données strictement
-          confidentielles (RLS : admin uniquement). Sert d&apos;assise à la
-          méthode <em>Comparaison Directe</em> du moteur EVS (branchement à venir).
+          confidentielles (RLS : admin uniquement). Alimente la méthode{" "}
+          <em>Comparaison Directe</em> du moteur EVS : une vente compte si elle
+          est en mode <strong>Auto</strong> et de moins de 12 mois, ou forcée{" "}
+          <strong>Oui</strong>.
         </p>
       </header>
 
-      {comparableColumnMissing && (
+      {overrideColumnMissing && (
         <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-700">
             Migration en attente
           </p>
           <p className="mt-1">
-            Colonne <code className="font-mono">use_as_comparable</code> absente —
-            appliquer <code className="font-mono">supabase/migrations/20260701c_add_use_as_comparable.sql</code>{" "}
-            dans Supabase Studio. En attendant, toutes les ventes sont considérées comme comparables.
+            Colonne <code className="font-mono">comparable_override</code> absente —
+            appliquer <code className="font-mono">supabase/migrations/20260701d_add_comparable_override.sql</code>{" "}
+            dans Supabase Studio. En attendant, la comparabilité est en mode auto (12 mois) et non modifiable.
           </p>
         </div>
       )}
@@ -306,7 +314,17 @@ export default async function AdminVentesRealiseesPage({
                       </td>
                       <td className="px-3 py-2 text-xs capitalize">{r.agent}</td>
                       <td className="px-3 py-2">
-                        <ComparableToggle id={r.id} initial={r.use_as_comparable} />
+                        {overrideColumnMissing ? (
+                          <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-[#3D4F63]/50">
+                            {isEffective(r) ? "● Compte (auto)" : "○ Ignorée (auto)"}
+                          </span>
+                        ) : (
+                          <ComparableControl
+                            id={r.id}
+                            override={r.comparable_override}
+                            autoEffective={autoEffective(r)}
+                          />
+                        )}
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex items-center gap-2">
@@ -332,12 +350,13 @@ export default async function AdminVentesRealiseesPage({
           <div className="space-y-6">
             {communeGroups.map(([commune, list]) => {
               const vol = list.reduce((s, r) => s + Number(r.prix_vente || 0), 0);
+              const nbComparable = list.filter(isEffective).length;
               return (
                 <div key={commune} className="overflow-hidden rounded-lg border border-[#3D4F63]/20 bg-white">
                   <div className="flex items-baseline justify-between border-b border-[#3D4F63]/10 bg-[#3D4F63]/5 px-4 py-2">
                     <h3 className="font-display text-lg font-bold">{commune}</h3>
                     <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]/70">
-                      {list.length} vente{list.length > 1 ? "s" : ""} · {fmtEur(vol)}
+                      {list.length} vente{list.length > 1 ? "s" : ""} · {nbComparable} comparable{nbComparable > 1 ? "s" : ""} · {fmtEur(vol)}
                     </p>
                   </div>
                   <table className="w-full text-sm">
@@ -354,8 +373,10 @@ export default async function AdminVentesRealiseesPage({
                     <tbody className="divide-y divide-[#3D4F63]/10">
                       {list.map((r) => {
                         const ppsqm = pricePerSqm(r);
+                        const eff = isEffective(r);
+                        const mode = r.comparable_override === null ? "auto" : "forcé";
                         return (
-                          <tr key={r.id} className={r.use_as_comparable ? "" : "opacity-50"}>
+                          <tr key={r.id} className={eff ? "" : "opacity-50"}>
                             <td className="px-4 py-1.5 font-mono text-xs">{fmtDate(r.date_acte)}</td>
                             <td className="px-4 py-1.5 text-xs">{r.property_type}</td>
                             <td className="px-4 py-1.5 text-right font-mono text-xs">{r.surface_habitable} m²</td>
@@ -364,7 +385,7 @@ export default async function AdminVentesRealiseesPage({
                               {ppsqm ? `${ppsqm} €` : "—"}
                             </td>
                             <td className="px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-[#3D4F63]/60">
-                              {r.use_as_comparable ? "Oui" : "Non"}
+                              {eff ? "● Compte" : "○ Ignorée"} · {mode}
                             </td>
                           </tr>
                         );
