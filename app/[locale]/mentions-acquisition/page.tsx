@@ -108,18 +108,7 @@ export default async function MentionsAcquisitionPage({
               LU 31988923
             </li>
             <li>
-              <span className="text-ink-soft">BIC :</span> BCEELULL
-            </li>
-            <li>
-              <span className="text-ink-soft">IBAN :</span> LU88 0019 5655 88 84
-              9000
-            </li>
-            <li>
               <span className="text-ink-soft">AE :</span> N°10108681/0-1-2-3
-            </li>
-            <li>
-              <span className="text-ink-soft">{t("company_matricule_label")} :</span>{" "}
-              2020 2407 901
             </li>
           </ul>
         </section>

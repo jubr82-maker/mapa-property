@@ -1108,7 +1108,7 @@
     "s3_title": "3. Methodological limitations",
     "s3_body": "The simulator covers nine countries: Luxembourg, France, Belgium, Germany, Monaco, Switzerland, Italy, Spain and Portugal. Costs included are registration / transfer duties, regulated notarial fees, VAT applicable to new-build, and the main common-law allowances (first-time buyer, primary residence, family profile). Excluded are: agency fees, technical diagnostics, annual local taxes, condominium charges, loan interest, insurance, banking fees, currency conversion, the buyer's personal taxation (IR, IFI, capital gains) and any post-acquisition costs. Regional variability (German Länder, Spanish autonomous communities, Belgian regions, Swiss cantons) is integrated at the finest available granularity but remains indicative. Real estate regulation evolves frequently: a check with a locally licensed notary at the effective transaction date is essential.",
     "s4_title": "4. Limitation of liability — MAPA SYNERGY Sàrl",
-    "s4_body": "MAPA SYNERGY Sàrl (LBR B241974, VAT LU 31988923, AE N°10108681/0-1-2-3, registration number 2020 2407 901), operating the MAPA Property PROPERTY brand, together with its directors, employees, partners and service providers, expressly declines any civil, tax or criminal liability with respect to the accuracy, completeness, availability or timeliness of the information displayed by the simulator, and with respect to acquisition, financing or investment decisions made on the basis of these estimates. No claim for damages may be brought against MAPA SYNERGY Sàrl on this basis.",
+    "s4_body": "MAPA SYNERGY Sàrl (LBR B241974, VAT LU 31988923, AE N°10108681/0-1-2-3), operating the MAPA Property brand, together with its directors, employees, partners and service providers, expressly declines any civil, tax or criminal liability with respect to the accuracy, completeness, availability or timeliness of the information displayed by the simulator, and with respect to acquisition, financing or investment decisions made on the basis of these estimates. No claim for damages may be brought against MAPA SYNERGY Sàrl on this basis.",
     "s5_title": "5. User obligations",
     "s5_body": "The user acknowledges that use of the simulator does not in any way release them from the MANDATORY consultation of a locally licensed notary in the country of acquisition, as well as, where applicable, of an independent tax advisor and a specialised lawyer. Any binding decision (signing of a preliminary contract, payment of a deposit, loan application, tax declaration) must rely on contradictory figures provided by these professionals and not on the simulator's estimates.",
     "s6_title": "6. MAPA Property recommendation",
@@ -1235,6 +1235,9 @@
   },
   "chatbot": {
     "legal_disclaimer": "Information provided by Eléna is for informational purposes only and non-contractual. MAPA Property — a brand of MAPA Synergy Sàrl — cannot be held responsible for any decision based on this information. For confirmation: j.brebion@mapagroup.org / +352 691 620 127"
+  },
+  "financing_simulator": {
+    "disclaimer": "Disclaimer: indicative simulation for information purposes only. The amounts shown do not constitute a loan offer. The rates applied by banks vary according to the borrower profile, down payment, collateral, property type and market conditions. For a personalised study, contact MAPA Property for an appointment with a qualified banking partner."
   },
   "acquisition_simulator": {
     "eyebrow": "Financing plan",

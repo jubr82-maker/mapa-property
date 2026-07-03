@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   computeMortgage,
   computeDebtRatio,
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function FinancingSimulator({ initial }: Props) {
+  const t = useTranslations("financing_simulator");
   const [price, setPrice] = useState(initial.price);
   const [country, setCountry] = useState<CountryCode>(initial.country);
   const [downPayment, setDownPayment] = useState(initial.down);
@@ -233,12 +235,7 @@ export function FinancingSimulator({ initial }: Props) {
       )}
 
       <p className="lg:col-span-2 text-[11px] leading-relaxed text-ink-soft">
-        Disclaimer : simulation indicative à titre d&apos;information. Les
-        montants ne constituent pas une offre de prêt. Les taux pratiqués par
-        les banques varient selon le profil emprunteur, l&apos;apport, la
-        garantie, le type de bien et la conjoncture. Pour une étude
-        personnalisée, contactez MAPA Property pour un rendez-vous avec un
-        partenaire bancaire qualifié.
+        {t("disclaimer")}
       </p>
     </div>
   );
