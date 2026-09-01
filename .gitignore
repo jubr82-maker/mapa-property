@@ -49,3 +49,10 @@ next-env.d.ts
 /docs/qa/screenshots-*/
 backups-db/
 scripts/output/
+
+# Scripts ad hoc racine (service_role, non versionnés)
+/._*.mjs
+/._*.json
+/._*.md
+# Rapport d'audit interne (carte des vulnérabilités, ne jamais versionner)
+/AUDIT_CONFORMITE.md
