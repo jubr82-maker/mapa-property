@@ -1,9 +1,9 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import dynamic from "next/dynamic";
 import { fetchAllPropertiesWithCover, type PropertyWithCover } from "@/lib/data";
 import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { RadiusCTA } from "@/components/search/RadiusCTA";
-import { SiblingCarousel } from "@/components/property/SiblingCarousel";
 import type { Locale } from "@/lib/types";
 import { matchesTypeQuery } from "@/lib/property-types";
 import {
@@ -16,6 +16,18 @@ import {
   getLocalityCoords,
   haversineKm,
 } from "@/lib/geo/luxembourg-communes";
+
+// Sprint OPTIM-BIENS-3 — chargé en lazy (chunk séparé, embla-carousel-react
+// inclus) : ne pèse sur le bundle client que sur les recherches où le
+// carrousel s'affiche réellement (peu de résultats + type précis). SSR
+// conservé (pas de ssr:false — interdit en Server Component, et de toute
+// façon indésirable ici : on veut le HTML du carrousel dans la réponse
+// initiale, pas un flash de contenu).
+const SiblingCarousel = dynamic(() =>
+  import("@/components/property/SiblingCarousel").then(
+    (mod) => mod.SiblingCarousel,
+  ),
+);
 
 interface SearchParams {
   country?: string;
