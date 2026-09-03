@@ -1,121 +1,74 @@
-// lib/property-types.ts — équivalences de types de biens.
+// lib/property-types.ts — dérivé de lib/taxonomy/property-types.ts (source de
+// vérité unique). Regroupe les slugs de la taxonomie par famille
+// (TYPE_GROUPS) et fournit la recherche hiérarchique (matchesTypeQuery) :
+// un type LARGE (ex. "appartement") remonte lui-même ET tous ses enfants
+// (studio, penthouse, loft, duplex, triplex) ; un type PRÉCIS (ex.
+// "penthouse") ne remonte que lui-même. Utilisé par la recherche
+// (SearchBar / FilterBar / TypeFilterMultiSelect / filtrage biens).
 //
-// Source unique de vérité pour les synonymes de types. Utilisé par la
-// recherche (SearchBar / FilterBar / TypeFilterMultiSelect / filtrage
-// biens) ET le moteur d'estimation EVS (élargissement du pool de
-// comparables).
-//
-// Pur, sans dépendance, sans effet de bord → testable isolément
+// Pur, sans dépendance runtime hors lib/taxonomy, testable isolément
 // (scripts/test-property-types.mjs).
-//
-// ─── Sprint C13-ter — Catalogue exhaustif 8 groupes / 68 sous-types Apimo ───
-// Étend C13-bis (5 groupes) avec parking, office, industrial + tous les
-// sous-types Apimo officiels (catalogue Julien). Maisonette retirée
-// explicitement. "Hôtel particulier" est dans 2 groupes (maison +
-// building), "Box" est dans 2 groupes (parking + industrial) — voulu
-// par Apimo. Les valeurs ici sont en lowercase + sans accents + avec
-// apostrophe ASCII (apres normalisation NFD + replace) — norm() s'occupe
-// de la transformation des entrées au match. Chaque variante composée
-// est listée explicitement, pas de matching par substring (déterministe,
-// testable).
+
+import {
+  PROPERTY_TYPE_FAMILIES,
+  expandType,
+} from "./taxonomy/property-types";
+
+export const FAMILY_LABEL_BY_GROUP = {
+  residentiel: "Résidentiel",
+  professionnel_commercial: "Professionnel & commercial",
+  immeubles_investissement: "Immeubles & investissement",
+  neuf_projets: "Neuf & projets",
+  terrains: "Terrains",
+  parkings_annexes: "Parkings & annexes",
+  ruraux_specifiques: "Ruraux & spécifiques",
+  prestige_atypique: "Prestige & atypique",
+} as const;
+
+function familyTypes(label: string): string[] {
+  const family = PROPERTY_TYPE_FAMILIES.find((f) => f.label === label);
+  if (!family) {
+    throw new Error(
+      `[property-types] Famille "${label}" absente de lib/taxonomy/property-types.ts.`,
+    );
+  }
+  return family.types.map((t) => t.slug);
+}
 
 export const TYPE_GROUPS = {
-  apartment: [
-    "appartement",
-    "duplex",
-    "studio",
-    "penthouse",
-    "triplex",
-    "loft",
-    "appartement villa",
-    "appart'hotel",
-    "chambre",
-  ],
-  house: [
-    "villa",
-    "maison",
-    "maison de ville",
-    "maison de village",
-    "maison jumelee",
-    "maison prefabriquee",
-    "maison d'hotes",
-    "villa jumelee",
-    "bungalow",
-    "chalet",
-    "chateau",
-    "chaumiere",
-    "domaine equestre",
-    "ferme",
-    "fermette",
-    "grange",
-    "haras",
-    "hotel particulier",
-    "manoir",
-    "mobile home",
-    "moulin",
-    "palais",
-    "pavillon",
-    "propriete",
-    "refuge",
-    "remise",
-    "ruine",
-  ],
-  land: [
-    "terrain",
-    "terrain constructible",
-    "terrain residentiel",
-    "terrain commercial",
-    "terrain agricole",
-    "terrain inconstructible",
-    "lac",
-  ],
-  commercial: [
-    "boutique",
-    "commerce",
-    "local commercial",
-    "local et fonds de commerce",
-    "fonds de commerce",
-    "droit au bail",
-    "gerance",
-    "hotel",
-    "entreprise",
-    "exploitation agricole",
-  ],
-  parking: ["garage", "box", "parking"],
-  building: [
-    "immeuble",
-    "ensemble immobilier",
-    "lotissement",
-    "hotel particulier",
-  ],
-  office: ["bureau", "cabinet", "local"],
-  industrial: ["atelier", "entrepot", "hangar", "usine", "cave", "box"],
+  residentiel: familyTypes(FAMILY_LABEL_BY_GROUP.residentiel),
+  professionnel_commercial: familyTypes(
+    FAMILY_LABEL_BY_GROUP.professionnel_commercial,
+  ),
+  immeubles_investissement: familyTypes(
+    FAMILY_LABEL_BY_GROUP.immeubles_investissement,
+  ),
+  neuf_projets: familyTypes(FAMILY_LABEL_BY_GROUP.neuf_projets),
+  terrains: familyTypes(FAMILY_LABEL_BY_GROUP.terrains),
+  parkings_annexes: familyTypes(FAMILY_LABEL_BY_GROUP.parkings_annexes),
+  ruraux_specifiques: familyTypes(FAMILY_LABEL_BY_GROUP.ruraux_specifiques),
+  prestige_atypique: familyTypes(FAMILY_LABEL_BY_GROUP.prestige_atypique),
 } as const;
 
 export type TypeGroup = keyof typeof TYPE_GROUPS;
 
-// Sprint C13-ter + ELENA-NAV C2 — normalisation enrichie :
-// - lowercase + trim
-// - NFD strip diacritiques (accents)
-// - apostrophes typographiques (U+2019 et U+2018) -> ASCII (U+0027)
-// - underscores -> espace (permet à Eléna d'émettre des URLs propres
-//   avec clés catalog ?types=maison_jumelee qui matchent 'Maison jumelée')
+// Normalisation : minuscules, accents retirés, espaces/underscores/
+// apostrophes -> tiret. Aligne toute variante de format (legacy Apimo,
+// query Eléna avec underscores, saisie humaine) sur le slug kebab-case
+// canonique de la taxonomie (ex. "Maison jumelée" / "maison_jumelee" /
+// "maison-jumelee" -> "maison-jumelee").
 const norm = (s: string | null | undefined): string =>
   (s ?? "")
     .trim()
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
-    .replace(/[‘’]/g, "'")
-    .replace(/_/g, " ");
+    .replace(/[\s_'’‘]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 
 /**
- * Groupe d'un type (ex. "villa" → "house", "studio" → "apartment").
- * Si le type appartient a plusieurs groupes (ex. "hotel particulier"
- * dans house ET building), retourne le PREMIER trouvé selon l'ordre
- * de declaration de TYPE_GROUPS.
- *
- * @returns nom du groupe (TypeGroup) ou null si type inconnu/vide.
+ * Famille (groupe) d'un type, ou null si type inconnu/vide.
  */
 export function getTypeGroup(type: string | null | undefined): TypeGroup | null {
   const t = norm(type);
@@ -127,55 +80,39 @@ export function getTypeGroup(type: string | null | undefined): TypeGroup | null 
 }
 
 /**
- * Tous les types équivalents d'un type donné (le groupe entier).
- * Si le type n'appartient à aucun groupe → [type normalisé] (lui-même),
- * ou [] si vide. Jamais d'élargissement hasardeux.
+ * Types équivalents d'un type donné pour la recherche : lui-même + ses
+ * enfants s'il est un type large (cf. expandType), lui seul sinon.
  */
 export function getEquivalentTypes(type: string | null | undefined): string[] {
-  const g = getTypeGroup(type);
-  if (g) return [...TYPE_GROUPS[g]];
   const t = norm(type);
-  return t ? [t] : [];
+  return t ? expandType(t) : [];
 }
 
 /**
  * Le type d'un bien matche-t-il un type recherché ?
  *
- * Deux sémantiques selon le type d'entrée :
+ * Règle hiérarchique unique, identique en requête simple (string, legacy
+ * ?type=) et en multi-select (string[], UI actuelle) : chaque terme de
+ * requête est élargi indépendamment via expandType avant comparaison.
+ * - type LARGE (ex. "appartement") -> remonte lui-même ET tous ses enfants.
+ * - type PRÉCIS (ex. "penthouse") -> remonte SEULEMENT ce type.
  *
- * 1. `queryType: string` — comportement legacy C13 (synonymes inclus).
- *    Si le query est un sous-type d'un groupe, expand au groupe entier.
- *    Exemple : matchesTypeQuery("Villa", "maison") = true (groupe house).
- *    Utilisé pour la rétro-compat URL ?type=villa (C13).
- *
- * 2. `queryType: string[]` — Sprint C13-ter multi-select STRICT OR.
- *    Match exact (normalisé) si propertyType ∈ queryType (aucun expand).
- *    L'UI multi-select gère lui-même l'expansion groupe -> sous-types
- *    quand l'utilisateur coche une catégorie. Si l'utilisateur décoche
- *    tout sauf 1 sous-type, le matching est strict sur ce sous-type.
- *    Exemple : matchesTypeQuery("Penthouse", ["studio"]) = false (strict).
- *    Exemple : matchesTypeQuery("Studio", ["studio", "villa"]) = true.
- *
- * Cas limites communs :
- * - queryType vide/null/[] -> true (pas de filtre).
- * - propertyType vide/null + queryType present -> false.
+ * Cas limites : queryType vide/null/[] -> true (pas de filtre).
+ * propertyType vide/null + queryType présent -> false.
  */
 export function matchesTypeQuery(
   propertyType: string | null | undefined,
   queryType: string | string[] | null | undefined,
 ): boolean {
-  // Cas no-filter
   if (queryType == null) return true;
+  const p = norm(propertyType);
   if (Array.isArray(queryType)) {
     if (queryType.length === 0) return true;
-    const p = norm(propertyType);
     if (!p) return false;
-    // STRICT OR : match exact normalise sur n'importe quel element.
-    return queryType.some((q) => norm(q) === p);
+    return queryType.some((q) => expandType(norm(q)).includes(p));
   }
-  // string : comportement legacy C13 (expand groupe)
-  if (!norm(queryType)) return true;
-  const p = norm(propertyType);
+  const q = norm(queryType);
+  if (!q) return true;
   if (!p) return false;
-  return getEquivalentTypes(queryType).includes(p);
+  return expandType(q).includes(p);
 }
