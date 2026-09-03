@@ -1,5 +1,10 @@
 // Sprint Apimo Lot C — Cron de synchronisation Apimo -> Supabase.
 //
+// DESACTIVE le 2026-09-03 : l'entree cron a ete retiree de vercel.json (pas
+// d'acces API Apimo prevu, risque de reecrasement des modifs back-office).
+// Ce fichier reste en place, en sommeil. Voir NOTES_APIMO_CRON_DESACTIVE.md
+// a la racine pour la procedure de reactivation.
+//
 // Pattern aligne sur app/api/cron/bce-rates/route.ts :
 //   - GET + auth Bearer CRON_SECRET (Vercel cron envoie ce header)
 //   - Mode no-op si APIMO_* absents OU SUPABASE_SERVICE_ROLE_KEY absent
