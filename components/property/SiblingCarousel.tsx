@@ -9,7 +9,15 @@
 //
 // Défilement horizontal Embla (scroll tactile natif mobile) + flèches
 // précédent/suivant sur desktop, sans autoplay (bloc de suggestion, pas
-// un carrousel passif). Pas de tracking dans cette partie (à venir).
+// un carrousel passif).
+//
+// Sprint SIBLING-2 — Tracking via le système unifié existant (lib/tracking,
+// /api/track, table tracking_events). "sibling_carousel_view" fire une
+// fois par affichage réel (déps = contenu effectivement montré, pas à
+// chaque re-render) ; "sibling_carousel_click" fire au clic sur une
+// mini-fiche, sans jamais bloquer la navigation (track() est fire-and-
+// forget, aucun preventDefault). Respecte le consentement cookies déjà
+// géré par lib/tracking/track.ts (hasConsent()).
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -18,15 +26,23 @@ import type { PropertyWithCover } from "@/lib/data";
 import type { Locale } from "@/lib/types";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { SignatureLine } from "@/components/ui/SignatureLine";
+import { track } from "@/lib/tracking/track";
 
 interface Props {
   properties: PropertyWithCover[];
   /** Types larges parents des types précis filtrés (ex. ["appartement"]). */
   parentSlugs: string[];
+  /** Types précis filtrés qui ont déclenché le carrousel (ex. ["penthouse"]). */
+  triggerTypes: string[];
   locale: Locale;
 }
 
-export function SiblingCarousel({ properties, parentSlugs, locale }: Props) {
+export function SiblingCarousel({
+  properties,
+  parentSlugs,
+  triggerTypes,
+  locale,
+}: Props) {
   const t = useTranslations("property_list");
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
@@ -54,7 +70,33 @@ export function SiblingCarousel({ properties, parentSlugs, locale }: Props) {
     };
   }, [emblaApi, onSelect]);
 
+  // Clé dérivée stable (primitives) du contenu réellement affiché — évite
+  // de re-fire à chaque re-render (les tableaux props sont de nouvelles
+  // références à chaque appel serveur) tout en re-trackant un "view" si
+  // l'utilisateur change de filtre côté client et obtient un carrousel
+  // différent sans démontage complet du composant.
+  const triggerKey = triggerTypes.join(",");
+  const propertiesKey = properties.map((p) => p.id).join(",");
+
+  useEffect(() => {
+    if (properties.length === 0) return;
+    track("sibling_carousel_view", {
+      trigger_types: triggerTypes,
+      family: parentSlugs,
+      count: properties.length,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerKey, propertiesKey]);
+
   if (properties.length === 0) return null;
+
+  const handleCardClick = (property: PropertyWithCover) => {
+    track("sibling_carousel_click", {
+      property_id: property.id,
+      property_slug: property.slug ?? null,
+      trigger_types: triggerTypes,
+    });
+  };
 
   const familyLabel = parentSlugs
     .map((slug) => t(`sibling_carousel.family.${slug}`))
@@ -101,7 +143,12 @@ export function SiblingCarousel({ properties, parentSlugs, locale }: Props) {
               key={property.id}
               className="w-[280px] flex-[0_0_auto] sm:w-[300px]"
             >
-              <PropertyCard property={property} locale={locale} compact />
+              <PropertyCard
+                property={property}
+                locale={locale}
+                compact
+                onClick={() => handleCardClick(property)}
+              />
             </li>
           ))}
         </ul>

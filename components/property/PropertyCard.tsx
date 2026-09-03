@@ -14,6 +14,12 @@ interface PropertyCardProps {
    * l'usage par défaut (grilles de résultats), qui reste inchangé.
    */
   compact?: boolean;
+  /**
+   * Callback optionnel déclenché au clic, en plus de la navigation
+   * normale vers la fiche (jamais bloquée). Utilisé par SiblingCarousel
+   * pour le tracking — sans effet si non fourni.
+   */
+  onClick?: () => void;
 }
 
 const formatPrice = (price: number | null, transaction: string) => {
@@ -31,6 +37,7 @@ export function PropertyCard({
   locale,
   priority = false,
   compact = false,
+  onClick,
 }: PropertyCardProps) {
   const title = pickLang(property, "title", locale) || "—";
   const price = formatPrice(property.price, property.transaction);
@@ -45,6 +52,7 @@ export function PropertyCard({
   return (
     <Link
       href={`/biens/${target}`}
+      onClick={onClick}
       className="group flex h-full flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">

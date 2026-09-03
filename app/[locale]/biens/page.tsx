@@ -169,7 +169,11 @@ function computeSiblingSuggestions(
   displayed: PropertyWithCover[],
   filters: SearchParams,
   rawFilters: SearchParams,
-): { parentSlugs: string[]; properties: PropertyWithCover[] } | null {
+): {
+  parentSlugs: string[];
+  triggerTypes: string[];
+  properties: PropertyWithCover[];
+} | null {
   if (displayed.length > 3) return null;
 
   const typesFilter = parseTypesFilter(filters);
@@ -209,7 +213,11 @@ function computeSiblingSuggestions(
   const siblings = siblingPool.filter((p) => !displayedIds.has(p.id));
   if (siblings.length === 0) return null;
 
-  return { parentSlugs, properties: siblings.slice(0, SIBLING_LIMIT) };
+  return {
+    parentSlugs,
+    triggerTypes: normalizedTypes,
+    properties: siblings.slice(0, SIBLING_LIMIT),
+  };
 }
 
 export default async function PropertiesPage({
@@ -302,6 +310,7 @@ export default async function PropertiesPage({
           <SiblingCarousel
             properties={siblingSuggestions.properties}
             parentSlugs={siblingSuggestions.parentSlugs}
+            triggerTypes={siblingSuggestions.triggerTypes}
             locale={locale as Locale}
           />
         )}
