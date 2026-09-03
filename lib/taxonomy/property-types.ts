@@ -43,6 +43,7 @@ export const PROPERTY_TYPE_FAMILIES: PropertyTypeFamily[] = [
   {
     label: "Professionnel & commercial",
     types: [
+      { slug: "local-professionnel", label: "Local professionnel" },
       { slug: "bureau", label: "Bureau" },
       { slug: "commerce", label: "Commerce" },
       { slug: "local-commercial", label: "Local commercial" },
@@ -57,6 +58,7 @@ export const PROPERTY_TYPE_FAMILIES: PropertyTypeFamily[] = [
   {
     label: "Immeubles & investissement",
     types: [
+      { slug: "immeuble", label: "Immeuble" },
       { slug: "immeuble-residentiel", label: "Immeuble résidentiel" },
       { slug: "immeuble-de-rapport", label: "Immeuble de rapport" },
       { slug: "immeuble-mixte", label: "Immeuble mixte" },
@@ -84,6 +86,7 @@ export const PROPERTY_TYPE_FAMILIES: PropertyTypeFamily[] = [
   {
     label: "Terrains",
     types: [
+      { slug: "terrain", label: "Terrain" },
       { slug: "terrain-a-batir", label: "Terrain à bâtir" },
       { slug: "terrain-constructible", label: "Terrain constructible" },
       { slug: "terrain-avec-permis", label: "Terrain avec permis" },
@@ -144,3 +147,73 @@ export const TRANSACTION_TYPES: PropertyTypeEntry[] = [
   { slug: "cession-de-fonds-de-commerce", label: "Cession de fonds de commerce" },
   { slug: "cession-de-bail", label: "Cession de bail" },
 ];
+
+// Hiérarchie parent → enfants pour la recherche. Un type LARGE (clé de cette
+// map) regroupe des types précis : filtrer sur le large doit remonter le
+// large lui-même ET tous ses enfants ; filtrer sur un enfant ne remonte que
+// lui-même (aucune remontée inverse enfant -> large). Les familles non
+// listées ici (Neuf & projets, Ruraux & spécifiques, et les types Prestige
+// non rattachés à MAISON) n'ont pas de hiérarchie : chaque type y reste
+// autonome.
+export const PARENT_TO_CHILDREN: Record<string, string[]> = {
+  appartement: ["studio", "penthouse", "loft", "duplex", "triplex"],
+  maison: [
+    "maison-individuelle",
+    "maison-jumelee",
+    "maison-mitoyenne",
+    "villa",
+    "chalet",
+    "maison-de-maitre",
+    "chateau",
+    "manoir",
+    "propriete-domaine",
+    "hotel-particulier",
+  ],
+  immeuble: [
+    "immeuble-residentiel",
+    "immeuble-de-rapport",
+    "immeuble-mixte",
+    "immeuble-de-bureaux",
+    "immeuble-commercial",
+    "ensemble-immobilier",
+  ],
+  "local-professionnel": [
+    "bureau",
+    "commerce",
+    "local-commercial",
+    "surface-commerciale",
+    "entrepot",
+    "depot",
+    "atelier",
+    "local-industriel",
+    "fonds-de-commerce",
+  ],
+  terrain: [
+    "terrain-a-batir",
+    "terrain-constructible",
+    "terrain-avec-permis",
+    "terrain-agricole",
+    "terrain-commercial",
+    "terrain-industriel",
+    "terrain-de-loisirs",
+    "terrain-non-constructible",
+  ],
+  parking: ["garage", "box"],
+};
+
+/** Table inverse : enfant -> type large qui le contient. */
+export const CHILD_TO_PARENT: Record<string, string> = Object.fromEntries(
+  Object.entries(PARENT_TO_CHILDREN).flatMap(([parent, children]) =>
+    children.map((child) => [child, parent] as const),
+  ),
+);
+
+/**
+ * Élargit un slug pour la recherche : si `slug` est un type large, retourne
+ * [slug, ...ses enfants] ; sinon retourne [slug] seul (type précis, ou type
+ * sans hiérarchie déclarée).
+ */
+export function expandType(slug: string): string[] {
+  const children = PARENT_TO_CHILDREN[slug];
+  return children ? [slug, ...children] : [slug];
+}
