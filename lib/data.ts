@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { supabaseServer } from "./supabase-server";
 import { getLocalizedField } from "./i18n-field";
 import type {
@@ -218,26 +219,82 @@ export async function fetchHomeFeatured(
   return all;
 }
 
+// Tag de cache pour l'ensemble "liste + cartes" des biens publiés. Toute
+// Server Action admin qui modifie un bien (properties/actions.ts,
+// properties/[id]/photos/actions.ts) doit appeler
+// revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 }) après écriture, sinon
+// le site public sert des données périmées jusqu'à un redéploiement.
+export const PROPERTIES_LIST_TAG = "properties";
+
+// Colonnes réellement consommées par PropertyCard (grille /biens, biens
+// similaires sur la fiche) : identité + i18n titre + specs affichées +
+// champs de filtrage (property_type, transaction, country, city, price,
+// bedrooms, surface). PAS les descriptions FR/EN/DE (inutiles en liste,
+// coûteuses en payload) ni les autres colonnes de `properties`. Si un
+// composant listé ci-dessus a besoin d'un champ absent d'ici, l'ajouter
+// explicitement — ne pas revenir à select("*").
+const PROPERTY_CARD_COLUMNS =
+  "id, slug, transaction, property_type, country, city, title_fr, title_en, title_de, price, surface, bedrooms, bathrooms, energy, badge, badge_size, badge_position";
+
+/**
+ * Sprint OPTIM-BIENS-1 — mise en cache (tag-only invalidation, comme
+ * lib/site-content.ts) : sans ça, chaque changement de filtre sur /biens
+ * refaisait un aller-retour Supabase complet. `select` allégé aux seules
+ * colonnes de PROPERTY_CARD_COLUMNS + 1 seule photo (cover) par bien via
+ * order+limit sur la relation `property_images`, au lieu de select("*")
+ * + toutes les photos triées en JS.
+ */
+const fetchPropertiesWithCoverCached = unstable_cache(
+  async (): Promise<PropertyWithCover[]> => {
+    const sb = supabaseServer();
+    const { data, error } = await sb
+      .from("properties")
+      .select(`${PROPERTY_CARD_COLUMNS}, property_images(url, sort)`)
+      .eq("is_published", true)
+      .order("sort", { referencedTable: "property_images" })
+      .limit(1, { referencedTable: "property_images" });
+    if (error) {
+      console.error("[data] fetchAllPropertiesWithCover", error.message);
+      return [];
+    }
+    // Row = forme réelle du select allégé (pas Property complet — cf.
+    // commentaire PROPERTY_CARD_COLUMNS). Cast final assumé : les
+    // consommateurs de PropertyWithCover issus de cette fonction ne
+    // doivent lire que les champs de PROPERTY_CARD_COLUMNS + cover_url.
+    type Row = Pick<
+      Property,
+      | "id"
+      | "slug"
+      | "transaction"
+      | "property_type"
+      | "country"
+      | "city"
+      | "title_fr"
+      | "title_en"
+      | "title_de"
+      | "price"
+      | "surface"
+      | "bedrooms"
+      | "bathrooms"
+      | "energy"
+      | "badge"
+      | "badge_size"
+      | "badge_position"
+    > & { property_images: { url: string }[] | null };
+    return ((data as Row[] | null) ?? []).map(
+      (row) =>
+        ({
+          ...row,
+          cover_url: row.property_images?.[0]?.url ?? null,
+        }) as unknown as PropertyWithCover,
+    );
+  },
+  ["properties-with-cover"],
+  { revalidate: false, tags: [PROPERTIES_LIST_TAG] },
+);
+
 export async function fetchAllPropertiesWithCover(): Promise<PropertyWithCover[]> {
-  const sb = supabaseServer();
-  const { data, error } = await sb
-    .from("properties")
-    .select("*, property_images(url, sort)")
-    .eq("is_published", true);
-  if (error) {
-    console.error("[data] fetchAllPropertiesWithCover", error.message);
-    return [];
-  }
-  type Row = Property & { property_images: { url: string; sort: number | null }[] | null };
-  return ((data as Row[] | null) ?? []).map((row) => {
-    const sorted = (row.property_images ?? [])
-      .slice()
-      .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
-    return {
-      ...row,
-      cover_url: sorted[0]?.url ?? null,
-    };
-  });
+  return fetchPropertiesWithCoverCached();
 }
 
 export async function fetchPublishedProperties(): Promise<Property[]> {
