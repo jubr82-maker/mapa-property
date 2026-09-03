@@ -27,6 +27,8 @@ const VALID_EVENTS = new Set([
   "scroll_depth_75",
   "exit_intent",
   "bounce",
+  "sibling_carousel_view",
+  "sibling_carousel_click",
 ]);
 
 // Rate limit en mémoire (per Vercel function instance — best-effort, pas global)

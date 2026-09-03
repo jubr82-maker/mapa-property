@@ -17,7 +17,9 @@ export type TrackingEventType =
   | "search_query"
   | "scroll_depth_75"
   | "exit_intent"
-  | "bounce";
+  | "bounce"
+  | "sibling_carousel_view"
+  | "sibling_carousel_click";
 
 export interface TrackEventPayload {
   event_type: TrackingEventType;
