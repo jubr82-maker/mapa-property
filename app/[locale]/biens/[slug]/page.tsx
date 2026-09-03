@@ -31,7 +31,7 @@ import {
   ALL_SECTION_TITLE_KEYS,
 } from "@/lib/property-description-parser";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { breadcrumb, propertyListing } from "@/lib/seo";
+import { breadcrumb, realEstateListing } from "@/lib/seo";
 
 // Sprint OPTIM-1A : ISR 30 min (vs 60s avant). Les fiches biens changent
 // rarement (titre/description/prix edites depuis admin invalident deja
@@ -177,14 +177,19 @@ export default async function PropertyPage({
   });
   const similar = similarAll.slice(0, 4);
 
-  const productJsonLd = propertyListing({
+  const propertyJsonLd = realEstateListing({
     name: title,
     description: description.slice(0, 300),
     url: `${SITE_URL}/${locale}/biens/${property.slug}`,
     image: galleryItems[0]?.url,
-    price: property.transaction === "rent" ? null : property.price,
+    locale,
+    price: property.price,
     city: property.city,
     country: property.country,
+    surface: property.surface,
+    bedrooms: property.bedrooms,
+    bathrooms: property.bathrooms,
+    propertyType,
   });
   const breadcrumbJsonLd = breadcrumb([
     { name: "MAPA Property", url: `${SITE_URL}/${locale}` },
@@ -309,7 +314,7 @@ export default async function PropertyPage({
         price={property.price}
         offmarket={false}
       />
-      <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
+      <JsonLd data={[propertyJsonLd, breadcrumbJsonLd]} />
       {/* Print-only : entete logo sombre + URL canonique. Invisible a l'ecran. */}
       <div data-fiche-print-header className="hidden print:block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
