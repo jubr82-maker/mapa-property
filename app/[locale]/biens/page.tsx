@@ -95,23 +95,84 @@ const filterProperties = (
   });
 };
 
+/**
+ * Sprint C13-bis C4 (extrait en fonction reutilisable pour SIBLING-1) —
+ * calcule l'ensemble affiche pour un jeu de filtres donne, en respectant
+ * le mode rayon 10km (LU + ville connue) ou le filtrage standard. Seule
+ * fonction qui decide "quels biens matchent ces criteres" — reutilisee a
+ * l'identique pour les resultats principaux ET pour le pool de biens
+ * freres du carrousel de suggestions, afin qu'un bien frere respecte
+ * TOUJOURS la meme localisation/transaction/prix/chambres que la
+ * recherche courante.
+ */
+function computeDisplayed(
+  allProperties: PropertyWithCover[],
+  filters: SearchParams,
+  rawFilters: SearchParams,
+): { displayed: PropertyWithCover[]; beyondCount: number; radiusActive: boolean } {
+  const showAll = rawFilters.showAll === "true";
+  const cityCenter =
+    filters.country === DEFAULT_COUNTRY && filters.city
+      ? getLocalityCoords(filters.city)
+      : null;
+
+  if (!cityCenter) {
+    // Mode normal : pays != LU OU pas de city OU city inconnue dans
+    // GeoNames LU. city LIKE applique via filterProperties standard.
+    return { displayed: filterProperties(allProperties, filters), beyondCount: 0, radiusActive: false };
+  }
+
+  // Mode rayon : on ignore city LIKE (filterProperties sans city), on
+  // applique tous les autres filtres standards, puis on partitionne.
+  const noCity = filterProperties(allProperties, { ...filters, city: undefined });
+  if (showAll) {
+    // User a clique "voir tout" -> tous les biens du pays (sans rayon,
+    // sans city LIKE).
+    return { displayed: noCity, beyondCount: 0, radiusActive: false };
+  }
+
+  const within: PropertyWithCover[] = [];
+  const beyond: PropertyWithCover[] = [];
+  for (const p of noCity) {
+    const target = p.city ? getLocalityCoords(p.city) : null;
+    if (!target) {
+      beyond.push(p);
+      continue;
+    }
+    const km = haversineKm(cityCenter.lat, cityCenter.lng, target.lat, target.lng);
+    if (km <= RADIUS_KM) within.push(p);
+    else beyond.push(p);
+  }
+  return { displayed: within, beyondCount: beyond.length, radiusActive: true };
+}
+
 const SIBLING_LIMIT = 12;
 
 /**
  * Sprint SIBLING-1 — "Voir aussi les autres [famille]" : quand un filtre
  * de type PRÉCIS (un enfant de la hiérarchie, pas un type large comme
  * "appartement"/"maison") ramène peu de résultats (<= 3), propose les
- * biens frères de la/les même(s) famille(s) parente(s), hors résultats
- * déjà affichés et hors le(s) type(s) précis déjà regardé(s).
+ * biens frères de la/les même(s) famille(s) parente(s).
+ *
+ * CORRECTIF bug carrousel biens hors périmètre : le pool de biens frères
+ * est calculé via computeDisplayed() avec les MÊMES filtres que la
+ * recherche courante (pays, ville/rayon, transaction, prix, chambres,
+ * surface...) — seul le type précis est remplacé par la liste élargie de
+ * la famille. Un bien hors localisation/critères de la recherche en
+ * cours ne peut donc jamais apparaître dans le carrousel.
+ *
  * Retourne null si l'une des conditions d'affichage n'est pas remplie ou
  * si aucun bien frère n'est disponible.
  */
 function computeSiblingSuggestions(
   allProperties: PropertyWithCover[],
   displayed: PropertyWithCover[],
-  typesFilter: string[],
+  filters: SearchParams,
+  rawFilters: SearchParams,
 ): { parentSlugs: string[]; properties: PropertyWithCover[] } | null {
   if (displayed.length > 3) return null;
+
+  const typesFilter = parseTypesFilter(filters);
   if (typesFilter.length === 0) return null;
 
   const normalizedTypes = typesFilter.map((t) => t.trim().toLowerCase());
@@ -135,13 +196,17 @@ function computeSiblingSuggestions(
   for (const t of normalizedTypes) candidateTypes.delete(t);
   if (candidateTypes.size === 0) return null;
 
+  // Mêmes critères que la recherche courante — seul `types` change,
+  // remplacé par la famille élargie (types précis déjà filtrés exclus).
+  const siblingFilters: SearchParams = {
+    ...filters,
+    types: [...candidateTypes].join(","),
+    type: undefined,
+  };
+  const siblingPool = computeDisplayed(allProperties, siblingFilters, rawFilters).displayed;
+
   const displayedIds = new Set(displayed.map((p) => p.id));
-  const siblings = allProperties.filter(
-    (p) =>
-      p.property_type != null &&
-      candidateTypes.has(p.property_type.trim().toLowerCase()) &&
-      !displayedIds.has(p.id),
-  );
+  const siblings = siblingPool.filter((p) => !displayedIds.has(p.id));
   if (siblings.length === 0) return null;
 
   return { parentSlugs, properties: siblings.slice(0, SIBLING_LIMIT) };
@@ -178,60 +243,17 @@ export default async function PropertiesPage({
   //      via filterProperties standard).
   // En mode rayon, on IGNORE city LIKE (le rayon remplace), et on
   // partitionne en within/beyond. showAll=true bypass le rayon.
-  const showAll = rawFilters.showAll === "true";
-  const cityCenter =
-    filters.country === DEFAULT_COUNTRY && filters.city
-      ? getLocalityCoords(filters.city)
-      : null;
+  const { displayed, beyondCount, radiusActive } = computeDisplayed(
+    allProperties,
+    filters,
+    rawFilters,
+  );
 
-  let displayed: PropertyWithCover[];
-  let beyondCount = 0;
-  let radiusActive = false;
-
-  if (cityCenter) {
-    // Mode rayon : on ignore city LIKE (filterProperties sans city), on
-    // applique tous les autres filtres standards, puis on partitionne.
-    const noCity = filterProperties(allProperties, {
-      ...filters,
-      city: undefined,
-    });
-    if (showAll) {
-      // User a clique "voir tout" -> tous les biens du pays (sans rayon,
-      // sans city LIKE).
-      displayed = noCity;
-    } else {
-      const within: PropertyWithCover[] = [];
-      const beyond: PropertyWithCover[] = [];
-      for (const p of noCity) {
-        const target = p.city ? getLocalityCoords(p.city) : null;
-        if (!target) {
-          beyond.push(p);
-          continue;
-        }
-        const km = haversineKm(
-          cityCenter.lat,
-          cityCenter.lng,
-          target.lat,
-          target.lng,
-        );
-        if (km <= RADIUS_KM) within.push(p);
-        else beyond.push(p);
-      }
-      displayed = within;
-      beyondCount = beyond.length;
-      radiusActive = true;
-    }
-  } else {
-    // Mode normal : pays != LU OU pas de city OU city inconnue dans
-    // GeoNames LU. city LIKE applique via filterProperties standard.
-    displayed = filterProperties(allProperties, filters);
-  }
-
-  const typesFilter = parseTypesFilter(filters);
   const siblingSuggestions = computeSiblingSuggestions(
     allProperties,
     displayed,
-    typesFilter,
+    filters,
+    rawFilters,
   );
 
   // URL pour le CTA "voir tout" : preserve les filtres + showAll=true.
