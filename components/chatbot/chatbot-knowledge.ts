@@ -250,17 +250,23 @@ export const getKnowledge = (locale: string): string => {
   return KNOWLEDGE_FR;
 };
 
-// Sprint ELENA-NAV — Catalogue des sous-types par groupe (cle URL
-// avec underscores). Doit etre coherent avec lib/property-types-catalog.ts.
-// norm() de lib/property-types.ts decode underscore en espace au matching.
-const APARTMENT_TYPES = "appartement,studio,duplex,triplex,penthouse,loft,appartement_villa,apparthotel,chambre";
-const HOUSE_TYPES = "villa,maison,maison_de_ville,maison_de_village,maison_jumelee,maison_prefabriquee,maison_dhotes,villa_jumelee,bungalow,chalet,chateau,chaumiere,domaine_equestre,ferme,fermette,grange,haras,hotel_particulier,manoir,mobile_home,moulin,palais,pavillon,propriete,refuge,remise,ruine";
-const LAND_TYPES = "terrain,terrain_constructible,terrain_residentiel,terrain_commercial,terrain_agricole,terrain_inconstructible,lac";
-const COMMERCIAL_TYPES = "boutique,commerce,local_commercial,local_et_fonds_de_commerce,fonds_de_commerce,droit_au_bail,gerance,hotel,entreprise,exploitation_agricole";
-const PARKING_TYPES = "garage,box,parking";
-const BUILDING_TYPES = "immeuble,ensemble_immobilier,lotissement,hotel_particulier";
-const OFFICE_TYPES = "bureau,cabinet,local";
-const INDUSTRIAL_TYPES = "atelier,entrepot,hangar,usine,cave,box";
+// Sprint ELENA-NAV, mis a jour pour la taxonomie hierarchique unique
+// (lib/taxonomy/property-types.ts). Les slugs "larges" (appartement,
+// maison, immeuble, terrain, parking) s'auto-elargissent a leurs
+// sous-types via expandType/matchesTypeQuery (lib/property-types.ts) —
+// plus besoin d'enumerer chaque sous-type ici. "local-professionnel" est
+// le seul type large qui fusionne commerce/bureau/industriel ; on garde
+// des listes precises separees pour ces 3 intentions afin de ne pas
+// perdre la distinction commerce vs bureau vs industriel dans les
+// reponses d'Elena.
+const APARTMENT_TYPES = "appartement";
+const HOUSE_TYPES = "maison";
+const LAND_TYPES = "terrain";
+const COMMERCIAL_TYPES = "commerce,local-commercial,surface-commerciale,fonds-de-commerce";
+const PARKING_TYPES = "parking";
+const BUILDING_TYPES = "immeuble";
+const OFFICE_TYPES = "bureau";
+const INDUSTRIAL_TYPES = "entrepot,depot,atelier,local-industriel";
 
 export const buildSystemPrompt = (locale: string, pageContext?: string) => {
   const baseBiens = `/${locale}/biens`;
@@ -288,16 +294,16 @@ ROUTES VALIDES — MAPPING INTENTION → URL :
 → ${baseBiens}?country=XX[&city=...][&types=...][&budget_max=...][&min_bedrooms=...][&min_surface=...]
 - country : LU (défaut), FR, BE, DE, AE, ES, PT, IT, US, GB, CH, MC, MA, etc. (ISO 2 lettres).
 - city : ex Belair, Steinfort, Luxembourg, Paris, Cannes (nom littéral).
-- types (CSV avec underscores) :
-  * "appartement(s)" / "apartment(s)" / "Wohnung(en)" → types=${APARTMENT_TYPES}
-  * "maison(s)" / "house(s)" / "Haus" / "Häuser" → types=${HOUSE_TYPES}
-  * "terrain(s)" / "land" / "Grundstück(e)" → types=${LAND_TYPES}
+- types (CSV avec tirets, slugs de la taxonomie MAPA) :
+  * "appartement(s)" / "apartment(s)" / "Wohnung(en)" → types=${APARTMENT_TYPES} (large, inclut studio/penthouse/loft/duplex/triplex)
+  * "maison(s)" / "house(s)" / "Haus" / "Häuser" → types=${HOUSE_TYPES} (large, inclut villa/chalet/manoir/château/etc.)
+  * "terrain(s)" / "land" / "Grundstück(e)" → types=${LAND_TYPES} (large, inclut tous les terrain-*)
   * "commerce(s)" / "commercial" → types=${COMMERCIAL_TYPES}
-  * "parking(s)" / "Parkplatz" → types=${PARKING_TYPES}
-  * "immeuble(s)" / "building(s)" / "Gebäude" → types=${BUILDING_TYPES}
+  * "parking(s)" / "Parkplatz" → types=${PARKING_TYPES} (large, inclut garage/box)
+  * "immeuble(s)" / "building(s)" / "Gebäude" → types=${BUILDING_TYPES} (large, inclut immeuble-residentiel/de-rapport/mixte/de-bureaux/commercial/ensemble-immobilier)
   * "bureau(x)" / "office(s)" / "Büro(s)" → types=${OFFICE_TYPES}
   * "industriel" / "industrial" → types=${INDUSTRIAL_TYPES}
-- Sous-types stricts (mot précis = filtrage d'UN seul type) : penthouse, studio, manoir, chalet, chateau (sans accent), villa (STRICT, ≠ groupe maison), duplex, triplex, loft, chambre, bungalow, ferme, moulin, pavillon, atelier, entrepot, garage, hangar, boutique.
+- Sous-types stricts (mot précis = filtrage d'UN seul type, jamais de groupe) : penthouse, studio, loft, duplex, triplex, villa (STRICT, ≠ "maison" large), chalet, chateau (sans accent), manoir, maison-individuelle, maison-jumelee, maison-mitoyenne, maison-de-maitre, hotel-particulier, propriete-domaine, garage, box, atelier, entrepot, commerce, bureau.
 - budget_max=NNNN (entier sans espaces), min_bedrooms=N, min_surface=N.
 
 [B] LOCATION
