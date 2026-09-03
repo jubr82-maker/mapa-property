@@ -431,7 +431,22 @@
     "tx_sale": "Verkauf",
     "tx_rent": "Vermietung",
     "tx_offmarket": "Off-Market",
-    "reset": "Zurücksetzen"
+    "reset": "Zurücksetzen",
+    "sibling_carousel": {
+      "title": "Weitere {family} entdecken",
+      "and": "und",
+      "prev": "Vorherige Objekte",
+      "next": "Weitere Objekte",
+      "region_label": "Weitere Vorschläge",
+      "family": {
+        "appartement": "Wohnungen",
+        "maison": "Häuser",
+        "immeuble": "Gebäude",
+        "local-professionnel": "Gewerberäume",
+        "terrain": "Grundstücke",
+        "parking": "Stellplätze"
+      }
+    }
   },
   "property": {
     "tx_sale": "Verkauf",

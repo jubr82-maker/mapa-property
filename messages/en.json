@@ -431,7 +431,22 @@
     "tx_sale": "Sale",
     "tx_rent": "Rent",
     "tx_offmarket": "Off-Market",
-    "reset": "Reset"
+    "reset": "Reset",
+    "sibling_carousel": {
+      "title": "See other {family} too",
+      "and": "and",
+      "prev": "Previous properties",
+      "next": "Next properties",
+      "region_label": "Other suggested properties",
+      "family": {
+        "appartement": "apartments",
+        "maison": "houses",
+        "immeuble": "buildings",
+        "local-professionnel": "professional premises",
+        "terrain": "plots of land",
+        "parking": "parking spaces"
+      }
+    }
   },
   "property": {
     "tx_sale": "Sale",

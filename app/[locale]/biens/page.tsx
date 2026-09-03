@@ -3,8 +3,14 @@ import { fetchAllPropertiesWithCover, type PropertyWithCover } from "@/lib/data"
 import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { RadiusCTA } from "@/components/search/RadiusCTA";
+import { SiblingCarousel } from "@/components/property/SiblingCarousel";
 import type { Locale } from "@/lib/types";
 import { matchesTypeQuery } from "@/lib/property-types";
+import {
+  CHILD_TO_PARENT,
+  PARENT_TO_CHILDREN,
+  expandType,
+} from "@/lib/taxonomy/property-types";
 import { DEFAULT_COUNTRY, matchesCountry } from "@/lib/geo/countries";
 import {
   getLocalityCoords,
@@ -89,6 +95,58 @@ const filterProperties = (
   });
 };
 
+const SIBLING_LIMIT = 12;
+
+/**
+ * Sprint SIBLING-1 — "Voir aussi les autres [famille]" : quand un filtre
+ * de type PRÉCIS (un enfant de la hiérarchie, pas un type large comme
+ * "appartement"/"maison") ramène peu de résultats (<= 3), propose les
+ * biens frères de la/les même(s) famille(s) parente(s), hors résultats
+ * déjà affichés et hors le(s) type(s) précis déjà regardé(s).
+ * Retourne null si l'une des conditions d'affichage n'est pas remplie ou
+ * si aucun bien frère n'est disponible.
+ */
+function computeSiblingSuggestions(
+  allProperties: PropertyWithCover[],
+  displayed: PropertyWithCover[],
+  typesFilter: string[],
+): { parentSlugs: string[]; properties: PropertyWithCover[] } | null {
+  if (displayed.length > 3) return null;
+  if (typesFilter.length === 0) return null;
+
+  const normalizedTypes = typesFilter.map((t) => t.trim().toLowerCase());
+  // Condition (a) : uniquement des types précis — aucun type large parmi
+  // les filtres actifs (un type large est déjà une clé de PARENT_TO_CHILDREN).
+  if (normalizedTypes.some((t) => t in PARENT_TO_CHILDREN)) return null;
+
+  const parentSlugs = Array.from(
+    new Set(
+      normalizedTypes
+        .map((t) => CHILD_TO_PARENT[t])
+        .filter((p): p is string => Boolean(p)),
+    ),
+  );
+  if (parentSlugs.length === 0) return null;
+
+  const candidateTypes = new Set<string>();
+  for (const parent of parentSlugs) {
+    for (const t of expandType(parent)) candidateTypes.add(t);
+  }
+  for (const t of normalizedTypes) candidateTypes.delete(t);
+  if (candidateTypes.size === 0) return null;
+
+  const displayedIds = new Set(displayed.map((p) => p.id));
+  const siblings = allProperties.filter(
+    (p) =>
+      p.property_type != null &&
+      candidateTypes.has(p.property_type.trim().toLowerCase()) &&
+      !displayedIds.has(p.id),
+  );
+  if (siblings.length === 0) return null;
+
+  return { parentSlugs, properties: siblings.slice(0, SIBLING_LIMIT) };
+}
+
 export default async function PropertiesPage({
   params,
   searchParams,
@@ -169,6 +227,13 @@ export default async function PropertiesPage({
     displayed = filterProperties(allProperties, filters);
   }
 
+  const typesFilter = parseTypesFilter(filters);
+  const siblingSuggestions = computeSiblingSuggestions(
+    allProperties,
+    displayed,
+    typesFilter,
+  );
+
   // URL pour le CTA "voir tout" : preserve les filtres + showAll=true.
   const showAllParams = new URLSearchParams();
   for (const [k, v] of Object.entries(rawFilters)) {
@@ -208,6 +273,14 @@ export default async function PropertiesPage({
             count={beyondCount}
             locale={locale}
             showAllHref={showAllHref}
+          />
+        )}
+
+        {siblingSuggestions && (
+          <SiblingCarousel
+            properties={siblingSuggestions.properties}
+            parentSlugs={siblingSuggestions.parentSlugs}
+            locale={locale as Locale}
           />
         )}
       </div>

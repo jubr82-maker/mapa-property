@@ -431,7 +431,22 @@
     "tx_sale": "Vente",
     "tx_rent": "Location",
     "tx_offmarket": "Off-Market",
-    "reset": "Réinitialiser"
+    "reset": "Réinitialiser",
+    "sibling_carousel": {
+      "title": "Voir aussi les autres {family}",
+      "and": "et",
+      "prev": "Biens précédents",
+      "next": "Biens suivants",
+      "region_label": "Autres biens suggérés",
+      "family": {
+        "appartement": "appartements",
+        "maison": "maisons",
+        "immeuble": "immeubles",
+        "local-professionnel": "locaux professionnels",
+        "terrain": "terrains",
+        "parking": "parkings"
+      }
+    }
   },
   "property": {
     "tx_sale": "Vente",
