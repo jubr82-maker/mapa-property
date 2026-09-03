@@ -95,13 +95,13 @@ export function SiblingCarousel({ properties, parentSlugs, locale }: Props) {
       </header>
 
       <div ref={emblaRef} className="overflow-hidden">
-        <ul className="flex gap-4 md:gap-5">
+        <ul className="flex gap-4">
           {properties.map((property) => (
             <li
               key={property.id}
-              className="min-w-0 shrink-0 grow-0 basis-[78%] sm:basis-[46%] lg:basis-[31%]"
+              className="w-[280px] flex-[0_0_auto] sm:w-[300px]"
             >
-              <PropertyCard property={property} locale={locale} />
+              <PropertyCard property={property} locale={locale} compact />
             </li>
           ))}
         </ul>

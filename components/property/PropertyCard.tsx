@@ -8,6 +8,12 @@ interface PropertyCardProps {
   property: PropertyWithCover;
   locale: Locale;
   priority?: boolean;
+  /**
+   * Mini-fiche pour les carrousels (ex. SiblingCarousel) : padding et
+   * texte réduits, specs limitées à l'essentiel (chambres). N'affecte pas
+   * l'usage par défaut (grilles de résultats), qui reste inchangé.
+   */
+  compact?: boolean;
 }
 
 const formatPrice = (price: number | null, transaction: string) => {
@@ -20,7 +26,12 @@ const formatPrice = (price: number | null, transaction: string) => {
   return transaction === "rent" ? `${value} / mois` : value;
 };
 
-export function PropertyCard({ property, locale, priority = false }: PropertyCardProps) {
+export function PropertyCard({
+  property,
+  locale,
+  priority = false,
+  compact = false,
+}: PropertyCardProps) {
   const title = pickLang(property, "title", locale) || "—";
   const price = formatPrice(property.price, property.transaction);
   // La table properties n'a pas de cover_image_url ; on s'appuie uniquement
@@ -69,38 +80,70 @@ export function PropertyCard({ property, locale, priority = false }: PropertyCar
         })()}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
+      <div
+        className={
+          compact
+            ? "flex flex-1 flex-col gap-1.5 p-3"
+            : "flex flex-1 flex-col gap-3 p-5"
+        }
+      >
+        <p
+          className={
+            compact
+              ? "font-mono text-[9px] uppercase tracking-[0.2em] text-ink-soft"
+              : "font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft"
+          }
+        >
           {[property.country, property.city].filter(Boolean).join(" · ") || "—"}
         </p>
-        <h3 className="line-clamp-2 font-display text-xl font-bold leading-tight text-ink group-hover:text-gold-deep">
+        <h3
+          className={
+            compact
+              ? "line-clamp-2 font-display text-sm font-bold leading-tight text-ink group-hover:text-gold-deep"
+              : "line-clamp-2 font-display text-xl font-bold leading-tight text-ink group-hover:text-gold-deep"
+          }
+        >
           {title}
         </h3>
-        <p className="font-display text-2xl font-black tracking-tight text-ink">
+        <p
+          className={
+            compact
+              ? "font-display text-base font-black tracking-tight text-ink"
+              : "font-display text-2xl font-black tracking-tight text-ink"
+          }
+        >
           {price}
         </p>
-        <ul className="mt-auto flex flex-wrap gap-x-4 gap-y-1 pt-3 font-mono text-[11px] text-ink-mid">
-          {property.surface && (
-            <li>
-              <span className="text-ink-soft">Surf.</span> {property.surface} m²
-            </li>
-          )}
-          {property.bedrooms !== null && property.bedrooms !== undefined && (
-            <li>
+        {compact ? (
+          property.bedrooms !== null && property.bedrooms !== undefined && (
+            <p className="mt-auto pt-2 font-mono text-[10px] text-ink-mid">
               <span className="text-ink-soft">Ch.</span> {property.bedrooms}
-            </li>
-          )}
-          {property.bathrooms !== null && property.bathrooms !== undefined && (
-            <li>
-              <span className="text-ink-soft">SdB.</span> {property.bathrooms}
-            </li>
-          )}
-          {property.energy && (
-            <li>
-              <span className="text-ink-soft">DPE</span> {property.energy}
-            </li>
-          )}
-        </ul>
+            </p>
+          )
+        ) : (
+          <ul className="mt-auto flex flex-wrap gap-x-4 gap-y-1 pt-3 font-mono text-[11px] text-ink-mid">
+            {property.surface && (
+              <li>
+                <span className="text-ink-soft">Surf.</span> {property.surface} m²
+              </li>
+            )}
+            {property.bedrooms !== null && property.bedrooms !== undefined && (
+              <li>
+                <span className="text-ink-soft">Ch.</span> {property.bedrooms}
+              </li>
+            )}
+            {property.bathrooms !== null && property.bathrooms !== undefined && (
+              <li>
+                <span className="text-ink-soft">SdB.</span> {property.bathrooms}
+              </li>
+            )}
+            {property.energy && (
+              <li>
+                <span className="text-ink-soft">DPE</span> {property.energy}
+              </li>
+            )}
+          </ul>
+        )}
       </div>
     </Link>
   );
