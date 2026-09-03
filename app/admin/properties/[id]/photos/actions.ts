@@ -17,8 +17,9 @@
  * acceptée — cleanup batch séparé si besoin).
  */
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { PROPERTIES_LIST_TAG } from "@/lib/data";
 
 const BUCKET = "property-images";
 
@@ -87,6 +88,10 @@ export async function savePropertyPhotos(
     const { error: insErr } = await supabase.from("property_images").insert(rows);
     if (insErr) throw new Error(insErr.message);
   }
+  // La cover (fetchAllPropertiesWithCover) depend de property_images —
+  // invalider le cache tag pour que la grille /biens et les biens
+  // similaires reflètent immédiatement la nouvelle cover/l'ordre photos.
+  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath(`/admin/properties/${propertyId}`);
   revalidatePath("/admin/properties");
   revalidatePath("/fr/biens");

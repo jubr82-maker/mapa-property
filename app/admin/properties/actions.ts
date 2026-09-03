@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { PROPERTIES_LIST_TAG } from "@/lib/data";
 
 /**
  * Sprint OPTIM-1A : helper de lecture du slug d'un bien par id. Utilise
@@ -36,6 +37,7 @@ export async function setPropertyPublished(id: string, isPublished: boolean) {
     .update({ is_published: isPublished })
     .eq("id", id);
   if (error) throw new Error(error.message);
+  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePath("/fr/biens");
   // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
@@ -50,6 +52,7 @@ export async function setPropertyFeatured(id: string, isFeatured: boolean) {
     .update({ is_featured: isFeatured })
     .eq("id", id);
   if (error) throw new Error(error.message);
+  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePath("/fr");
   // Sprint OPTIM-1A : la fiche elle-meme peut afficher un badge featured
@@ -128,6 +131,7 @@ export async function updateProperty(
     .update(update)
     .eq("id", id);
   if (error) throw new Error(error.message);
+  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePath(`/admin/properties/${id}`);
   revalidatePath("/fr/biens");
@@ -155,6 +159,7 @@ export async function updatePropertyVideoUrl(
     .update({ video_url: normalized })
     .eq("id", propertyId);
   if (error) throw new Error(error.message);
+  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePath(`/admin/properties/${propertyId}`);
   revalidatePath("/fr/biens");
