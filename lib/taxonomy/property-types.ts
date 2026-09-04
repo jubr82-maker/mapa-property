@@ -148,6 +148,53 @@ export const TRANSACTION_TYPES: PropertyTypeEntry[] = [
   { slug: "cession-de-bail", label: "Cession de bail" },
 ];
 
+// properties.transaction reste un binaire sale/rent (CHECK constraint SQL
+// existante, cohérente avec tout le code : mapTransaction() Apimo,
+// PropertyCard, FilterBar, matchesTypeQuery...). Les 8 types de
+// TRANSACTION_TYPES sont un vocabulaire plus riche, saisi au formulaire et
+// stocké en plus dans transaction_detail — jamais à la place de
+// transaction. Ce regroupement décide quel binaire chaque type riche
+// alimente :
+// - "Cession de fonds de commerce" -> sale : transfert définitif d'un actif
+//   (le fonds de commerce), argent contre propriété — même logique
+//   économique qu'une vente, même si l'objet cédé n'est pas le bien
+//   immobilier lui-même.
+// - "Cession de bail" -> rent : transfert d'un droit d'occupation locatif
+//   en cours (le bail) — la relation sous-jacente au bien reste locative,
+//   pas une vente.
+const TRANSACTION_TO_BASE_SALE = new Set([
+  "vente",
+  "vente-en-viager",
+  "vente-occupee",
+  "cession-de-fonds-de-commerce",
+]);
+const TRANSACTION_TO_BASE_RENT = new Set([
+  "location",
+  "location-saisonniere",
+  "location-avec-option-d-achat",
+  "cession-de-bail",
+]);
+
+/** Regroupe un slug TRANSACTION_TYPES vers le binaire sale/rent attendu par
+ * properties.transaction. Retourne null si le slug est inconnu. */
+export function transactionToBase(
+  slug: string | null | undefined,
+): "sale" | "rent" | null {
+  if (!slug) return null;
+  if (TRANSACTION_TO_BASE_SALE.has(slug)) return "sale";
+  if (TRANSACTION_TO_BASE_RENT.has(slug)) return "rent";
+  return null;
+}
+
+/** Libellé riche d'un slug TRANSACTION_TYPES (ex. "vente-en-viager" ->
+ * "Vente en viager"), pour l'affichage fiche via transaction_detail. */
+export function transactionDetailLabel(
+  slug: string | null | undefined,
+): string | undefined {
+  if (!slug) return undefined;
+  return TRANSACTION_TYPES.find((t) => t.slug === slug)?.label;
+}
+
 // Hiérarchie parent → enfants pour la recherche. Un type LARGE (clé de cette
 // map) regroupe des types précis : filtrer sur le large doit remonter le
 // large lui-même ET tous ses enfants ; filtrer sur un enfant ne remonte que
