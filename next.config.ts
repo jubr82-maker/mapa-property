@@ -40,6 +40,15 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Défaut Next.js = 1 MB pour le body des Server Actions ; trop bas pour
+  // l'upload de photos brutes (2-10 Mo) avant compression côté client.
+  // 25mb absorbe même les photos non compressées, en fallback si la
+  // compression échoue côté navigateur (lib/image-compress.ts).
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "25mb",
+    },
+  },
   images: {
     remotePatterns: [
       {
