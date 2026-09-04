@@ -14,6 +14,7 @@
  */
 
 import { useState, useTransition, useRef } from "react";
+import { compressImageFile } from "@/lib/image-compress";
 
 export interface PhotoData {
   url: string;
@@ -62,8 +63,11 @@ export function PhotoManager({
     try {
       const next = [...photos];
       for (const file of Array.from(files)) {
+        // compressImageFile retombe sur le fichier original en cas
+        // d'échec — l'upload n'est jamais bloqué par la compression.
+        const compressed = await compressImageFile(file);
         const fd = new FormData();
-        fd.append("file", file);
+        fd.append("file", compressed);
         const { url, path } = await onUpload(fd);
         next.push({ url, path, isCover: false, order: next.length });
       }
