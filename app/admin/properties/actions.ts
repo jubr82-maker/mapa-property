@@ -8,6 +8,7 @@ import {
   PROPERTY_TYPE_FAMILIES,
   PROPERTY_STATES,
   TRANSACTION_TYPES,
+  transactionToBase,
 } from "@/lib/taxonomy/property-types";
 
 /**
@@ -256,6 +257,13 @@ export async function createProperty(
   if (!transaction || !TRANSACTION_TYPES.some((t) => t.slug === transaction)) {
     return { ok: false, error: "Transaction invalide." };
   }
+  // properties.transaction reste le binaire sale/rent (CHECK constraint SQL
+  // existante) ; le slug riche choisi (ex. "vente-en-viager") est conservé
+  // dans transaction_detail pour l'affichage fiche, jamais à la place.
+  const transactionBase = transactionToBase(transaction);
+  if (!transactionBase) {
+    return { ok: false, error: "Transaction invalide." };
+  }
 
   const propertyType = str(formData.get("property_type"));
   const knownType = PROPERTY_TYPE_FAMILIES.some((f) =>
@@ -285,7 +293,8 @@ export async function createProperty(
     title_fr: titleFr,
     title_en: str(formData.get("title_en")),
     title_de: str(formData.get("title_de")),
-    transaction,
+    transaction: transactionBase,
+    transaction_detail: transaction,
     property_type: propertyType,
     property_state: propertyState,
     country: str(formData.get("country")) ?? "LU",
