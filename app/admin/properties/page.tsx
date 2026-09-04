@@ -99,6 +99,12 @@ export default async function AdminPropertiesPage({
           >
             Coups de cœur uniquement
           </Link>
+          <Link
+            href="/admin/properties/new"
+            className="rounded-full bg-[#e0af6e] px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#3D4F63]"
+          >
+            + Nouveau bien
+          </Link>
         </div>
       </header>
       <PropertiesTable rows={rows} />
