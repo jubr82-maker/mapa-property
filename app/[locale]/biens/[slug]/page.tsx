@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import {
@@ -31,7 +32,7 @@ import {
   ALL_SECTION_TITLE_KEYS,
 } from "@/lib/property-description-parser";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { breadcrumb, realEstateListing } from "@/lib/seo";
+import { breadcrumb, realEstateListing, pageAlternates } from "@/lib/seo";
 
 // Sprint OPTIM-1A : ISR 30 min (vs 60s avant). Les fiches biens changent
 // rarement (titre/description/prix edites depuis admin invalident deja
@@ -93,6 +94,36 @@ const formatPrice = (
   }).format(price);
   return transaction === "rent" ? `${value} / mois` : value;
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const property = await fetchPropertyByIdOrSlug(slug);
+  if (!property) return {};
+
+  const title = pickLang(property, "title", locale as Locale);
+  const description = pickLang(property, "description", locale as Locale);
+  const images = await fetchPropertyImages(property.id);
+  const cover = images[0]?.url;
+  const path = `/biens/${property.slug}`;
+
+  return {
+    title: `${title} — MAPA Property`,
+    description: description.slice(0, 160) || undefined,
+    alternates: pageAlternates(locale, path),
+    openGraph: {
+      title,
+      description: description.slice(0, 200) || undefined,
+      url: `/${locale}${path}`,
+      siteName: "MAPA Property",
+      type: "website",
+      ...(cover ? { images: [{ url: cover }] } : {}),
+    },
+  };
+}
 
 export default async function PropertyPage({
   params,

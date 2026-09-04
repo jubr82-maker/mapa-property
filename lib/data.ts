@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { supabaseServer } from "./supabase-server";
 import { getLocalizedField } from "./i18n-field";
@@ -401,43 +402,49 @@ async function resolvePropertyOnce(
   return { data: null, transient };
 }
 
-export async function fetchPropertyByIdOrSlug(
-  identifier: string,
-): Promise<Property | null> {
-  let res = await resolvePropertyOnce(identifier);
-  if (res.data) return res.data;
-
-  // BUG T1 : on ne renvoie `null` (→ notFound) QUE si la résolution est
-  // « propre et vide ». En cas d'échec transitoire, un seul retry après
-  // un court délai (cold start Supabase / pic réseau) avant d'abandonner.
-  if (res.transient) {
-    await sleep(300);
-    res = await resolvePropertyOnce(identifier);
+// Sprint OPTIM-SEO-1 : cache() React — biens/[slug]/page.tsx appelle cette
+// fonction à la fois depuis generateMetadata() et depuis le composant de
+// page (pour la même requête). Sans ce cache request-scope, chaque visite
+// de fiche bien déclencherait 2 aller-retours Supabase identiques.
+export const fetchPropertyByIdOrSlug = cache(
+  async (identifier: string): Promise<Property | null> => {
+    let res = await resolvePropertyOnce(identifier);
     if (res.data) return res.data;
-    if (res.transient) {
-      console.error(
-        `[data] fetchPropertyByIdOrSlug "${identifier}" — échec transitoire après retry`,
-      );
-    }
-  }
-  return null;
-}
 
-export async function fetchPropertyImages(
-  propertyId: string,
-): Promise<PropertyImage[]> {
-  const sb = supabaseServer();
-  const { data, error } = await sb
-    .from("property_images")
-    .select("*")
-    .eq("property_id", propertyId)
-    .order("sort", { ascending: true });
-  if (error) {
-    console.error("[data] fetchPropertyImages", error.message);
-    return [];
-  }
-  return safeArray<PropertyImage>(data as PropertyImage[] | null);
-}
+    // BUG T1 : on ne renvoie `null` (→ notFound) QUE si la résolution est
+    // « propre et vide ». En cas d'échec transitoire, un seul retry après
+    // un court délai (cold start Supabase / pic réseau) avant d'abandonner.
+    if (res.transient) {
+      await sleep(300);
+      res = await resolvePropertyOnce(identifier);
+      if (res.data) return res.data;
+      if (res.transient) {
+        console.error(
+          `[data] fetchPropertyByIdOrSlug "${identifier}" — échec transitoire après retry`,
+        );
+      }
+    }
+    return null;
+  },
+);
+
+// Idem : cache() request-scope, même raison que fetchPropertyByIdOrSlug
+// (generateMetadata a besoin de l'image de cover pour openGraph).
+export const fetchPropertyImages = cache(
+  async (propertyId: string): Promise<PropertyImage[]> => {
+    const sb = supabaseServer();
+    const { data, error } = await sb
+      .from("property_images")
+      .select("*")
+      .eq("property_id", propertyId)
+      .order("sort", { ascending: true });
+    if (error) {
+      console.error("[data] fetchPropertyImages", error.message);
+      return [];
+    }
+    return safeArray<PropertyImage>(data as PropertyImage[] | null);
+  },
+);
 
 export async function fetchOffmarketList(
   locale = "fr",
