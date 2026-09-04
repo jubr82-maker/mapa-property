@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { sbUrl } from "@/lib/supabase-url";
 import { ContactReveal } from "@/components/contact-reveal";
+import { pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -11,7 +12,11 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "about_page" });
-  return { title: `${t("title")} — MAPA Property`, description: t("intro") };
+  return {
+    title: `${t("title")} — MAPA Property`,
+    description: t("intro"),
+    alternates: pageAlternates(locale, "/qui-sommes-nous"),
+  };
 }
 
 export default async function AboutPage({

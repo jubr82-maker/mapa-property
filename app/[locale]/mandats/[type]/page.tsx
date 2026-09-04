@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { ALL_MANDATE_SLUGS, MANDATES, type MandateType } from "@/lib/mandates";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
+import { pageAlternates } from "@/lib/seo";
 
 export function generateStaticParams() {
   return ALL_MANDATE_SLUGS.flatMap((type) =>
@@ -26,6 +27,7 @@ export async function generateMetadata({
   return {
     title: `${t("title")} — MAPA Property`,
     description: t("intro"),
+    alternates: pageAlternates(locale, `/mandats/${type}`),
   };
 }
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { WaitlistForm } from "@/components/forms/WaitlistForm";
 import { SignatureLine } from "@/components/ui/SignatureLine";
+import { pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -13,6 +14,7 @@ export async function generateMetadata({
   return {
     title: `${t("title")} — MAPA Property`,
     description: t("intro"),
+    alternates: pageAlternates(locale, "/liste-attente"),
   };
 }
 

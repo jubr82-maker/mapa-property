@@ -4,7 +4,7 @@ import { fetchBlogPostBySlug } from "@/lib/data";
 import { pickLang, type Locale } from "@/lib/types";
 import { BookletReader } from "@/components/blog/BookletReader";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { blogPosting, breadcrumb } from "@/lib/seo";
+import { blogPosting, breadcrumb, pageAlternates } from "@/lib/seo";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -23,6 +23,7 @@ export async function generateMetadata({
   return {
     title: `${title} — MAPA Property`,
     description,
+    alternates: pageAlternates(locale, `/blog/${post.slug}`),
     openGraph: post.cover_image
       ? { images: [{ url: post.cover_image }] }
       : undefined,

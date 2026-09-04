@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ALL_MANDATE_SLUGS, MANDATES } from "@/lib/mandates";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
+import { pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -10,7 +11,11 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "page_sell" });
-  return { title: `${t("title")} — MAPA Property`, description: t("intro") };
+  return {
+    title: `${t("title")} — MAPA Property`,
+    description: t("intro"),
+    alternates: pageAlternates(locale, "/services/vendre"),
+  };
 }
 
 export default async function SellPage({

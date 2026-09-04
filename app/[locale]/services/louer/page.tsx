@@ -1,5 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -8,7 +9,11 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "page_rent" });
-  return { title: `${t("title")} — MAPA Property`, description: t("intro") };
+  return {
+    title: `${t("title")} — MAPA Property`,
+    description: t("intro"),
+    alternates: pageAlternates(locale, "/services/louer"),
+  };
 }
 
 export default async function RentPage({

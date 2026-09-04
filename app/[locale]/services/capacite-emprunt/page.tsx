@@ -1,5 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { BorrowingCapacitySimulator } from "@/components/simulators/BorrowingCapacitySimulator";
+import { pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -11,6 +12,7 @@ export async function generateMetadata({
   return {
     title: t("meta_title"),
     description: t("meta_description"),
+    alternates: pageAlternates(locale, "/services/capacite-emprunt"),
   };
 }
 
