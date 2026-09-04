@@ -24,6 +24,7 @@ import {
   deleteOffmarket,
 } from "@/app/admin/offmarket/actions";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { compressImageFile } from "@/lib/image-compress";
 
 type Tab = "location" | "specs" | "content" | "identity";
 
@@ -1348,7 +1349,12 @@ function PhotosManager({ id, photos }: { id: string; photos: string[] }) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const fd = new FormData();
-    Array.from(files).forEach((f) => fd.append("photos", f));
+    // compressImageFile retombe sur le fichier original en cas d'échec —
+    // l'upload n'est jamais bloqué par la compression.
+    for (const f of Array.from(files)) {
+      const compressed = await compressImageFile(f);
+      fd.append("photos", compressed);
+    }
     startTransition(async () => {
       await uploadOffmarketPhotos(id, fd);
     });
