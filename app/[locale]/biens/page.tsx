@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import dynamic from "next/dynamic";
 import { fetchAllPropertiesWithCover, type PropertyWithCover } from "@/lib/data";
 import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { RadiusCTA } from "@/components/search/RadiusCTA";
+import { pageAlternates } from "@/lib/seo";
 import type { Locale } from "@/lib/types";
 import { matchesTypeQuery } from "@/lib/property-types";
 import {
@@ -229,6 +231,24 @@ function computeSiblingSuggestions(
     parentSlugs,
     triggerTypes: normalizedTypes,
     properties: siblings.slice(0, SIBLING_LIMIT),
+  };
+}
+
+// Canonical SANS les query params de filtre (?country=&types=&budget_max=...)
+// -> évite que Google traite chaque combinaison de filtres comme une page
+// distincte à indexer (duplication de contenu). Toutes les variantes
+// filtrées canonicalisent vers /[locale]/biens, la liste non filtrée.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "property_list" });
+  return {
+    title: `${t("title")} — MAPA Property`,
+    description: t("subtitle"),
+    alternates: pageAlternates(locale, "/biens"),
   };
 }
 
