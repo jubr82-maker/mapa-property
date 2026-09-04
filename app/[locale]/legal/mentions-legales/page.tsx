@@ -1,8 +1,19 @@
+import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 import { mentions } from "@/lib/legal/mentions";
+import { pageAlternates } from "@/lib/seo";
 
 type Locale = keyof typeof mentions;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: pageAlternates(locale, "/legal/mentions-legales") };
+}
 
 export default async function Page({
   params,

@@ -1,8 +1,19 @@
+import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { internationalRegions, luxembourgCommunes } from "@/lib/markets";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
+import { pageAlternates } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: pageAlternates(locale, "/services/marches-actifs") };
+}
 
 export default async function ActiveMarketsPage({
   params,

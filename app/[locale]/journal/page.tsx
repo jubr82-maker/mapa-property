@@ -1,11 +1,22 @@
 // /journal — alias éditorial premium de /blog (brief V3 CHANTIER 6).
 // Le contenu et la table Supabase restent sous "blog_posts" ; seule la
 // surface publique est renommée "Journal" pour un ton AD Magazine.
+import type { Metadata } from "next";
 import Image from "next/image";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchAllBlogPosts } from "@/lib/data";
 import { pickLang, type Locale } from "@/lib/types";
+import { pageAlternates } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: pageAlternates(locale, "/journal") };
+}
 
 export default async function JournalIndexPage({
   params,

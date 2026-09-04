@@ -1,7 +1,18 @@
+import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchLatestInterestRates } from "@/lib/data";
 import { SimulatorTabs } from "@/components/simulators/SimulatorTabs";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
+import { pageAlternates } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: pageAlternates(locale, "/services/simulateurs") };
+}
 
 export default async function SimulatorsPage({
   params,

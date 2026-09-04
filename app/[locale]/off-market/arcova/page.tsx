@@ -1,9 +1,20 @@
 // /off-market/arcova — sous-section ARCOVA (brief V3 CHANTIER 6).
 // ARCOVA n'apparaît plus dans le header principal : il devient une
 // page de sous-section accessible depuis /off-market.
+import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { pageAlternates } from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: pageAlternates(locale, "/off-market/arcova") };
+}
 
 export default async function OffmarketArcovaPage({
   params,

@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchOffmarketById, fetchOffmarketList } from "@/lib/data";
 import { routing } from "@/i18n/routing";
+import { pageAlternates } from "@/lib/seo";
 import { BackButton } from "@/components/ui/BackButton";
 import { NDAForm } from "@/components/forms/NDAForm";
 import { FavoriteHeart } from "@/components/property/FavoriteHeart";
@@ -62,6 +64,15 @@ export async function generateStaticParams() {
     console.warn("[off-market/[id]] generateStaticParams failed:", e);
     return [];
   }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale, id } = await params;
+  return { alternates: pageAlternates(locale, `/off-market/${id}`) };
 }
 
 export default async function OffMarketDetailPage({
