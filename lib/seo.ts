@@ -105,6 +105,46 @@ export const personJulien = () => ({
   ],
 });
 
+// ----------------------------------------------------------------------
+// alternates (canonical + hreflang) — format UNIQUE pour tout le site.
+// ----------------------------------------------------------------------
+// Bug corrigé (audit PageSpeed "canonical mène vers un hreflang") : Next.js
+// fusionne les metadata par segment de route en SHALLOW MERGE (confirmé
+// dans node_modules/next/dist/docs/.../generate-metadata.md — un champ
+// imbriqué comme `alternates`, s'il n'est pas redéfini par une page, est
+// hérité TEL QUEL du layout parent). Le layout racine déclare
+// `alternates.canonical: "/${locale}"` (la home) — sans son propre
+// `alternates`, N'IMPORTE QUELLE page hérite ce canonical vers la home,
+// et les hreflang statiques du layout, au lieu des siens.
+//
+// pageAlternates() doit être appelé par CHAQUE page (ou une valeur
+// équivalente construite à la main) pour que son canonical pointe vers
+// SA PROPRE URL et que ses hreflang listent les 3 langues de LA MÊME page.
+const LOCALES = ["fr", "en", "de"] as const;
+const HREFLANG_BY_LOCALE: Record<(typeof LOCALES)[number], string> = {
+  fr: "fr-LU",
+  en: "en-US",
+  de: "de-DE",
+};
+
+/**
+ * @param locale locale de la page courante (fr/en/de)
+ * @param path chemin SANS préfixe de locale, commençant par "/" (ex.
+ *   "/biens/86388715") — ou "" pour la home.
+ */
+export function pageAlternates(locale: string, path: string) {
+  const cleanPath = path === "/" ? "" : path;
+  const languages: Record<string, string> = {};
+  for (const l of LOCALES) {
+    languages[HREFLANG_BY_LOCALE[l]] = `/${l}${cleanPath}`;
+  }
+  languages["x-default"] = `/fr${cleanPath}`;
+  return {
+    canonical: `/${locale}${cleanPath}`,
+    languages,
+  };
+}
+
 export const website = (locale: string) => ({
   "@context": "https://schema.org",
   "@type": "WebSite",
