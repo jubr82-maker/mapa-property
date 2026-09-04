@@ -5,6 +5,10 @@ export interface Property {
   id: string;
   slug: string;
   transaction: Transaction;
+  // Slug riche optionnel (lib/taxonomy/property-types.ts TRANSACTION_TYPES,
+  // ex. "vente-en-viager"). NULL pour les biens créés avant cette colonne :
+  // l'affichage retombe alors sur transaction (Vente/Location).
+  transaction_detail?: string | null;
   country: string | null;
   city: string | null;
   title_fr: string | null;

@@ -33,6 +33,7 @@ import {
 } from "@/lib/property-description-parser";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumb, realEstateListing, pageAlternates } from "@/lib/seo";
+import { transactionDetailLabel } from "@/lib/taxonomy/property-types";
 
 // Sprint OPTIM-1A : ISR 30 min (vs 60s avant). Les fiches biens changent
 // rarement (titre/description/prix edites depuis admin invalident deja
@@ -234,7 +235,12 @@ export default async function PropertyPage({
     property.transaction,
     locale,
   );
-  const txMeta = t(`tx_${property.transaction}`);
+  // Libellé riche (ex. "Vente en viager") si transaction_detail est renseigné
+  // (saisie manuelle post sept. 2026) ; sinon Vente/Location comme avant
+  // (les 16 biens Apimo existants, sans transaction_detail).
+  const txMeta =
+    transactionDetailLabel(property.transaction_detail) ??
+    t(`tx_${property.transaction}`);
 
   // Specs — toutes les données Supabase préservées, "—" si absent.
   const specs = [
