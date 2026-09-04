@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactReveal } from "@/components/contact-reveal";
+import { pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -19,15 +20,7 @@ export async function generateMetadata({
       index: true,
       follow: true,
     },
-    alternates: {
-      canonical: `/${locale}/mentions-acquisition`,
-      languages: {
-        "fr-LU": "/fr/mentions-acquisition",
-        "en-US": "/en/mentions-acquisition",
-        "de-DE": "/de/mentions-acquisition",
-        "x-default": "/fr/mentions-acquisition",
-      },
-    },
+    alternates: pageAlternates(locale, "/mentions-acquisition"),
   };
 }
 
