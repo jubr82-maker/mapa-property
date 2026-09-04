@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { pageAlternates } from "@/lib/seo";
 import { cities, getCityBySlug, getCitySlugs, getNearbyCities, type City } from "@/lib/cities";
 import { routing } from "@/i18n/routing";
 
@@ -34,15 +35,7 @@ export async function generateMetadata({
   return {
     title: `${cityName} — Immobilier prestige · MAPA Property`,
     description: city.metaDescription[loc],
-    alternates: {
-      canonical: `${SITE_URL}/${locale}/villes/${city.slug}`,
-      languages: {
-        fr: `${SITE_URL}/fr/villes/${city.slug}`,
-        en: `${SITE_URL}/en/villes/${city.slug}`,
-        de: `${SITE_URL}/de/villes/${city.slug}`,
-        "x-default": `${SITE_URL}/fr/villes/${city.slug}`,
-      },
-    },
+    alternates: pageAlternates(locale, `/villes/${city.slug}`),
   };
 }
 
