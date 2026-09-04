@@ -7,7 +7,11 @@ import { useSearchParams } from "next/navigation";
 import { DEFAULT_COUNTRY, sortedCountries } from "@/lib/geo/countries";
 import { TypeFilterMultiSelect } from "@/components/property/TypeFilterMultiSelect";
 
-const transactions = ["sale", "rent", "offmarket"] as const;
+// "offmarket" retiré (piège UX) : properties.transaction n'accepte que
+// sale/rent (CHECK constraint), l'off-market vit dans une table séparée
+// properties_offmarket sans colonne transaction — ce filtre donnait
+// toujours 0 résultat.
+const transactions = ["sale", "rent"] as const;
 
 // Sprint C13-ter — URL param 'types' (comma-separated). Helpers de
 // parse / stringify pour la rétro-compat avec l'ancien 'type' single.
