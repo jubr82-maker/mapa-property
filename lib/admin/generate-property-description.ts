@@ -157,6 +157,69 @@ Réponds UNIQUEMENT avec un objet JSON valide de la forme exacte :
 Aucun texte avant ou après le JSON. Pas de markdown, pas de backticks.`;
 }
 
+// Plan gratuit Mistral : plafond de débit (requêtes/seconde) bas, un 429
+// "Rate limit exceeded" (code 1300) peut survenir dès le 1er essai même
+// sur un appel léger. Beaucoup de 429 passent au 2e essai — retry avec
+// backoff exponentiel, borné pour ne jamais boucler indéfiniment.
+const RETRY_DELAYS_MS = [2000, 4000, 8000];
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const RATE_LIMIT_MESSAGE =
+  "Le service de génération est momentanément saturé (limite du plan gratuit Mistral). Réessayez dans une minute.";
+
+/**
+ * Un essai initial + jusqu'à RETRY_DELAYS_MS.length réessais UNIQUEMENT
+ * sur 429 (les autres erreurs HTTP échouent immédiatement, pas de retry
+ * aveugle). Retourne le contenu brut de la réponse Mistral.
+ */
+async function fetchMistralCompletion(
+  systemPrompt: string,
+  maxTokens: number,
+  apiKey: string,
+): Promise<string> {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(MISTRAL_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: MISTRAL_MODEL,
+        temperature: 0.6,
+        max_tokens: maxTokens,
+        messages: [{ role: "system", content: systemPrompt }],
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (res.ok) {
+      const json = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      const raw = json?.choices?.[0]?.message?.content;
+      if (typeof raw !== "string" || raw.trim().length === 0) {
+        throw new Error("Réponse Mistral vide.");
+      }
+      return raw;
+    }
+
+    if (res.status === 429 && attempt < RETRY_DELAYS_MS.length) {
+      await sleep(RETRY_DELAYS_MS[attempt]);
+      continue;
+    }
+
+    if (res.status === 429) {
+      throw new Error(RATE_LIMIT_MESSAGE);
+    }
+    const body = await res.text().catch(() => "");
+    throw new Error(`Mistral HTTP ${res.status} : ${body.slice(0, 200)}`);
+  }
+}
+
 async function callMistralForTexts(
   systemPrompt: string,
   maxTokens: number,
@@ -166,33 +229,7 @@ async function callMistralForTexts(
     throw new Error("Génération IA indisponible (clé Mistral non configurée).");
   }
 
-  const res = await fetch(MISTRAL_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: MISTRAL_MODEL,
-      temperature: 0.6,
-      max_tokens: maxTokens,
-      messages: [{ role: "system", content: systemPrompt }],
-      response_format: { type: "json_object" },
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Mistral HTTP ${res.status} : ${body.slice(0, 200)}`);
-  }
-
-  const json = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const raw = json?.choices?.[0]?.message?.content;
-  if (typeof raw !== "string" || raw.trim().length === 0) {
-    throw new Error("Réponse Mistral vide.");
-  }
+  const raw = await fetchMistralCompletion(systemPrompt, maxTokens, apiKey);
 
   let parsed: unknown;
   try {
