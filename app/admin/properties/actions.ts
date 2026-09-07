@@ -99,6 +99,36 @@ const BADGE_POSITIONS: readonly string[] = [
 // fait ICI, jamais côté client : published -> true, tout le reste -> false.
 const PROPERTY_STATUSES = ["draft", "published", "sold", "withdrawn"] as const;
 
+// Colonnes INTEGER en base (douches/wc/bureaux/locaux_stockage confirmées
+// par la migration 20260904_properties_saisie_manuelle.sql ; bedrooms/
+// bathrooms/parking/year/year_built préexistantes, traitées pareil par
+// prudence). Un décimal saisi par erreur y est arrondi plutôt que de
+// planter l'update (invalid input syntax for type integer). Les colonnes
+// NUMERIC (surfaces, prix) gardent leurs décimales.
+const INTEGER_COLUMNS = new Set([
+  "bedrooms",
+  "bathrooms",
+  "douches",
+  "wc",
+  "bureaux",
+  "locaux_stockage",
+  "parking",
+  "year",
+  "year_built",
+]);
+
+/**
+ * Point unique de normalisation numérique — NaN/Infinity -> null, arrondi
+ * optionnel (colonnes INTEGER). Utilisé par createProperty (num()) et
+ * updateProperty (setNum()) pour un comportement identique.
+ */
+function parseNumOrNull(n: number, round: boolean): number | null {
+  if (!Number.isFinite(n)) return null;
+  return round ? Math.round(n) : n;
+}
+
+export type UpdatePropertyResult = { ok: true } | { ok: false; error: string };
+
 export async function updateProperty(
   id: string,
   data: {
@@ -148,9 +178,20 @@ export async function updateProperty(
     badge_size?: string | null;
     badge_position?: string | null;
   },
-) {
+): Promise<UpdatePropertyResult> {
   const supabase = await createSupabaseServerClient();
   const update: Record<string, unknown> = {};
+
+  // --- Titre FR : NOT NULL en base (cf. lib/apimo/mapper.ts) — jamais
+  // écrasé par null. Bloqué AVANT toute écriture, message clair plutôt
+  // qu'une violation de contrainte Postgres masquée en production.
+  if (data.title_fr !== undefined) {
+    const t = (data.title_fr ?? "").trim();
+    if (t.length === 0) {
+      return { ok: false, error: "Le titre (FR) est requis." };
+    }
+    update.title_fr = t;
+  }
 
   const setText = (key: string, value: string | null | undefined) => {
     if (value === undefined) return;
@@ -159,11 +200,10 @@ export async function updateProperty(
   };
   const setNum = (key: string, value: number | null | undefined) => {
     if (value === undefined) return;
-    update[key] = value == null || Number.isNaN(value) ? null : value;
+    update[key] = value == null ? null : parseNumOrNull(value, INTEGER_COLUMNS.has(key));
   };
 
   // --- Descriptions ---
-  setText("title_fr", data.title_fr);
   setText("title_en", data.title_en);
   setText("title_de", data.title_de);
   setText("description_fr", data.description_fr);
@@ -222,7 +262,7 @@ export async function updateProperty(
   // --- Statut + pont is_published ---
   if (data.status !== undefined) {
     if (!PROPERTY_STATUSES.includes(data.status as (typeof PROPERTY_STATUSES)[number])) {
-      throw new Error("Statut invalide.");
+      return { ok: false, error: "Statut invalide." };
     }
     update.status = data.status;
     update.is_published = data.status === "published";
@@ -249,7 +289,10 @@ export async function updateProperty(
     .from("properties")
     .update(update)
     .eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[admin] updateProperty", error);
+    return { ok: false, error: error.message };
+  }
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePath(`/admin/properties/${id}`);
@@ -305,10 +348,11 @@ function str(value: FormDataEntryValue | null): string | null {
   return s === "" ? null : s;
 }
 
-function num(value: FormDataEntryValue | null): number | null {
+// round=true pour les colonnes INTEGER (cf. INTEGER_COLUMNS plus haut) —
+// même logique de normalisation que updateProperty, via parseNumOrNull.
+function num(value: FormDataEntryValue | null, round = false): number | null {
   if (value == null || value === "") return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
+  return parseNumOrNull(Number(value), round);
 }
 
 function slugify(input: string): string {
