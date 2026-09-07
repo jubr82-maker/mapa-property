@@ -10,10 +10,6 @@ import {
   TRANSACTION_TYPES,
   transactionToBase,
 } from "@/lib/taxonomy/property-types";
-import {
-  translateDescriptionToEnDe,
-  translateShortPitchToEnDe,
-} from "@/lib/admin/generate-property-description";
 
 /**
  * Sprint OPTIM-1A : helper de lecture du slug d'un bien par id. Utilise
@@ -490,76 +486,4 @@ export async function createProperty(
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   redirect(`/admin/properties/${data.id}?created=1`);
-}
-
-// ============================================================================
-// Sprint BRIQUE-IA-1 — Traduction FR -> EN/DE des descriptions saisies par
-// l'admin (aucune nouvelle colonne, jamais d'enregistrement automatique :
-// le formulaire remplit juste les champs, l'admin relit et clique
-// Enregistrer lui-même côté PropertyEditForm). Ne lit plus la base : le
-// texte FR à traduire vient directement du formulaire (pas forcément
-// encore sauvegardé). Prompt/appel Groq dans
-// lib/admin/generate-property-description.ts.
-// ============================================================================
-
-export type TranslatePropertyTextResult =
-  | { ok: true; en: string; de: string }
-  | { ok: false; error: string };
-
-/**
- * Traduit la description longue FR -> EN/DE. Un seul appel Groq. Ne touche
- * jamais la base — le résultat est renvoyé au formulaire, qui l'affiche
- * pour relecture avant tout enregistrement.
- */
-export async function translatePropertyDescription(
-  textFr: string,
-): Promise<TranslatePropertyTextResult> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Authentification requise." };
-
-  if (!textFr || textFr.trim().length === 0) {
-    return { ok: false, error: "Le texte français est vide — rien à traduire." };
-  }
-
-  try {
-    const { en, de } = await translateDescriptionToEnDe(textFr);
-    return { ok: true, en, de };
-  } catch (e) {
-    console.error("[admin] translatePropertyDescription", e);
-    return {
-      ok: false,
-      error: e instanceof Error ? e.message : "Erreur de traduction IA.",
-    };
-  }
-}
-
-/**
- * Traduit le pitch court FR -> EN/DE. Appel Groq séparé, mêmes garde-fous.
- */
-export async function translatePropertyShortPitch(
-  textFr: string,
-): Promise<TranslatePropertyTextResult> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Authentification requise." };
-
-  if (!textFr || textFr.trim().length === 0) {
-    return { ok: false, error: "Le texte français est vide — rien à traduire." };
-  }
-
-  try {
-    const { en, de } = await translateShortPitchToEnDe(textFr);
-    return { ok: true, en, de };
-  } catch (e) {
-    console.error("[admin] translatePropertyShortPitch", e);
-    return {
-      ok: false,
-      error: e instanceof Error ? e.message : "Erreur de traduction IA.",
-    };
-  }
 }
