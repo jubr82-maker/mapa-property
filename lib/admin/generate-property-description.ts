@@ -9,16 +9,21 @@
 // chatbot Eléna (app/api/chatbot/route.ts) : endpoint OpenAI-compatible,
 // GROQ_API_KEY (confirmée présente en Production Vercel), JSON Object
 // Mode (response_format json_object) — documenté par Groq comme supporté
-// par TOUS les modèles, y compris llama-3.3-70b-versatile.
+// par TOUS les modèles.
 //
-// Modèle : llama-3.3-70b-versatile. Choix délibéré face à l'alternative
-// openai/gpt-oss-120b (plus gros, disponible sur Groq) : le model card
-// officiel Meta liste l'allemand et le français parmi les 8 langues pour
-// lesquelles Llama 3.3 est explicitement entraîné et optimisé
-// ("optimized for multilingual dialogue use cases"), alors que des
-// retours indépendants sur gpt-oss-120b signalent des fautes de grammaire
-// en allemand — inacceptable pour une clientèle premium trilingue.
-// Llama 3.3 est aussi déjà éprouvé en production via Eléna.
+// Modèle : qwen/qwen3.6-27b. llama-3.3-70b-versatile (choix initial) est
+// déprécié sur le tier gratuit/développeur depuis le 16/08/2026 (404
+// "does not exist or you do not have access to it") — confirmé sur
+// https://console.groq.com/docs/deprecations, qui recommande explicitement
+// deux remplacements : openai/gpt-oss-120b ou qwen/qwen3.6-27b.
+// Choix de qwen/qwen3.6-27b plutôt que gpt-oss-120b : des retours
+// indépendants documentent des fautes de grammaire en allemand sur la
+// famille gpt-oss (cf. discussions Hugging Face) — inacceptable pour une
+// clientèle premium trilingue. Qwen3 revendique un support natif de 100+
+// langues (dont l'allemand et le français) sans rapport négatif équivalent
+// trouvé à date. Aucun des deux modèles n'est un rédacteur spécialisé :
+// relecture humaine de la version allemande recommandée avant publication
+// tant que la qualité réelle n'a pas été validée sur des cas concrets.
 //
 // Garde-fou anti-hallucination (inchangé) : le prompt ne contient QUE les
 // champs renseignés du bien (buildFactSheet omet tout champ null/absent,
@@ -26,7 +31,7 @@
 // structurellement aucune autre information à sa disposition.
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const GROQ_MODEL = "qwen/qwen3.6-27b";
 
 export interface PropertyFacts {
   propertyTypeLabel: string;
