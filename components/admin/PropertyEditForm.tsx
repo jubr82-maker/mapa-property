@@ -19,8 +19,8 @@ import { useState, useTransition, useEffect } from "react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import {
   updateProperty,
-  generatePropertyDescriptions,
-  generatePropertyShortPitch,
+  translatePropertyDescription,
+  translatePropertyShortPitch,
 } from "@/app/admin/properties/actions";
 
 const BADGE_OPTIONS = [
@@ -314,23 +314,31 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
   const [error, setError] = useState<string | null>(null);
   const dirty = isDirty(form, baseline);
 
-  // Sprint BRIQUE-IA-1 : génération de descriptions via Mistral. Ne
-  // sauvegarde jamais automatiquement — remplit seulement les champs du
-  // formulaire, l'admin relit et clique Enregistrer lui-même (dirty=true
-  // via `set()` rappelle d'ailleurs le bandeau de modifications non
-  // enregistrées ci-dessus).
+  // Sprint BRIQUE-IA-1 : traduction FR -> EN/DE via Groq (le FR est écrit
+  // par l'admin, l'IA ne rédige rien de neuf). Ne sauvegarde jamais
+  // automatiquement — remplit seulement les champs EN/DE du formulaire,
+  // l'admin relit et clique Enregistrer lui-même (dirty=true via `set()`
+  // rappelle d'ailleurs le bandeau de modifications non enregistrées
+  // ci-dessus).
   const [aiPending, startAiTransition] = useTransition();
   const [aiMode, setAiMode] = useState<"long" | "short" | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
 
   function runGenerate(mode: "long" | "short") {
+    const sourceFr = mode === "long" ? form.description_fr : form.short_description_fr;
+    if (!sourceFr.trim()) {
+      setAiError(
+        mode === "long"
+          ? "Écrivez d'abord la description en français, puis cliquez pour traduire."
+          : "Écrivez d'abord le pitch court en français, puis cliquez pour traduire.",
+      );
+      return;
+    }
     const hasExisting =
       mode === "long"
-        ? form.description_fr.trim() || form.description_en.trim() || form.description_de.trim()
-        : form.short_description_fr.trim() ||
-          form.short_description_en.trim() ||
-          form.short_description_de.trim();
-    if (hasExisting && !confirm("Remplacer les descriptions existantes ?")) {
+        ? form.description_en.trim() || form.description_de.trim()
+        : form.short_description_en.trim() || form.short_description_de.trim();
+    if (hasExisting && !confirm("Remplacer les traductions existantes (EN/DE) ?")) {
       return;
     }
     setAiError(null);
@@ -339,23 +347,21 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
       try {
         const result =
           mode === "long"
-            ? await generatePropertyDescriptions(propertyId)
-            : await generatePropertyShortPitch(propertyId);
+            ? await translatePropertyDescription(sourceFr)
+            : await translatePropertyShortPitch(sourceFr);
         if (result.ok) {
           if (mode === "long") {
-            set("description_fr", result.descriptions.fr);
-            set("description_en", result.descriptions.en);
-            set("description_de", result.descriptions.de);
+            set("description_en", result.en);
+            set("description_de", result.de);
           } else {
-            set("short_description_fr", result.descriptions.fr);
-            set("short_description_en", result.descriptions.en);
-            set("short_description_de", result.descriptions.de);
+            set("short_description_en", result.en);
+            set("short_description_de", result.de);
           }
         } else {
           setAiError(result.error);
         }
       } catch (err) {
-        setAiError(err instanceof Error ? err.message : "Erreur de génération IA.");
+        setAiError(err instanceof Error ? err.message : "Erreur de traduction IA.");
       }
     });
   }
@@ -464,7 +470,7 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
               disabled={aiPending}
               className="rounded-full border border-[#e0af6e] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] transition-colors hover:bg-[#e0af6e] hover:text-white disabled:opacity-50"
             >
-              {aiPending && aiMode === "long" ? "Génération en cours…" : "Générer les descriptions (IA)"}
+              {aiPending && aiMode === "long" ? "Traduction en cours…" : "Traduire en EN/DE (IA)"}
             </button>
             <button
               type="button"
@@ -472,7 +478,7 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
               disabled={aiPending}
               className="rounded-full border border-[#e0af6e] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] transition-colors hover:bg-[#e0af6e] hover:text-white disabled:opacity-50"
             >
-              {aiPending && aiMode === "short" ? "Génération en cours…" : "Générer le pitch court (IA)"}
+              {aiPending && aiMode === "short" ? "Traduction en cours…" : "Traduire le pitch (IA)"}
             </button>
           </div>
         }
