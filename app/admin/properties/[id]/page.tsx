@@ -17,10 +17,18 @@ export default async function AdminPropertyEditPage({
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
 
+  // Sprint SAISIE-MANUELLE étape B : select élargi aux 47 + 23 colonnes
+  // réelles de `properties` (cf. lib/apimo/mapper.ts pour les colonnes
+  // historiques, supabase/migrations/20260904_properties_saisie_manuelle.sql
+  // pour les 23 nouvelles) — PropertyEditForm doit pouvoir éditer chaque
+  // champ listé par Julien.
   const { data, error } = await supabase
     .from("properties")
+    // Chaîne unique (littéral) requise : Supabase infère le type des colonnes
+    // sélectionnées à partir du littéral exact passé à .select() — une
+    // concaténation ou un .join() runtime dégrade le type en GenericStringError.
     .select(
-      "id, slug, title_fr, description_fr, price, city, country, transaction, video_url, badge, badge_size, badge_position",
+      "id, slug, title_fr, title_en, title_de, description_fr, description_en, description_de, short_description_fr, short_description_en, short_description_de, price, price_on_demand, price_min, price_max, city, country, transaction, video_url, badge, badge_size, badge_position, surface, living_surface, usable_surface, land_surface, terrace_surface, balcony_surface, garden_surface, kitchen_surface, area_total, bedrooms, bathrooms, douches, wc, bureaux, locaux_stockage, floor, has_laundry, has_dressing, has_pool, parking, energy, thermal, ges, year, year_built, amenities, current_use, potential_use, status",
     )
     .eq("id", id)
     .maybeSingle();
@@ -92,12 +100,53 @@ export default async function AdminPropertyEditPage({
         </header>
         <PropertyEditForm
           propertyId={data.id}
-          initialTitle={data.title_fr ?? ""}
-          initialDescription={data.description_fr ?? ""}
-          initialPrice={data.price ?? null}
-          initialBadge={data.badge ?? null}
-          initialBadgeSize={data.badge_size ?? null}
-          initialBadgePosition={data.badge_position ?? null}
+          initial={{
+            title_fr: data.title_fr ?? null,
+            title_en: data.title_en ?? null,
+            title_de: data.title_de ?? null,
+            description_fr: data.description_fr ?? null,
+            description_en: data.description_en ?? null,
+            description_de: data.description_de ?? null,
+            short_description_fr: data.short_description_fr ?? null,
+            short_description_en: data.short_description_en ?? null,
+            short_description_de: data.short_description_de ?? null,
+            surface: data.surface ?? null,
+            living_surface: data.living_surface ?? null,
+            usable_surface: data.usable_surface ?? null,
+            land_surface: data.land_surface ?? null,
+            terrace_surface: data.terrace_surface ?? null,
+            balcony_surface: data.balcony_surface ?? null,
+            garden_surface: data.garden_surface ?? null,
+            kitchen_surface: data.kitchen_surface ?? null,
+            area_total: data.area_total ?? null,
+            bedrooms: data.bedrooms ?? null,
+            bathrooms: data.bathrooms ?? null,
+            douches: data.douches ?? null,
+            wc: data.wc ?? null,
+            bureaux: data.bureaux ?? null,
+            locaux_stockage: data.locaux_stockage ?? null,
+            floor: data.floor ?? null,
+            has_laundry: data.has_laundry ?? false,
+            has_dressing: data.has_dressing ?? false,
+            has_pool: data.has_pool ?? false,
+            parking: data.parking ?? null,
+            energy: data.energy ?? null,
+            thermal: data.thermal ?? null,
+            ges: data.ges ?? null,
+            year: data.year ?? null,
+            year_built: data.year_built ?? null,
+            price: data.price ?? null,
+            price_on_demand: data.price_on_demand ?? false,
+            price_min: data.price_min ?? null,
+            price_max: data.price_max ?? null,
+            amenities: data.amenities ?? null,
+            current_use: data.current_use ?? null,
+            potential_use: data.potential_use ?? null,
+            status: data.status ?? "published",
+            badge: data.badge ?? null,
+            badge_size: data.badge_size ?? null,
+            badge_position: data.badge_position ?? null,
+          }}
         />
       </section>
 
