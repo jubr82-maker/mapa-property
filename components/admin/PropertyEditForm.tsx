@@ -17,11 +17,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import {
-  updateProperty,
-  translatePropertyDescription,
-  translatePropertyShortPitch,
-} from "@/app/admin/properties/actions";
+import { updateProperty } from "@/app/admin/properties/actions";
 
 const BADGE_OPTIONS = [
   "Exclusivité",
@@ -238,25 +234,18 @@ const textareaCls = `${inputCls} font-sans`;
 function Section({
   title,
   hint,
-  actions,
   children,
 }: {
   title: string;
   hint?: string;
-  actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-[#3D4F63]/10 bg-[#F5EFE1]/30 p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h3 className="font-display text-base font-bold text-[#3D4F63]">
-            {title}
-          </h3>
-          {hint && <p className="mt-1 text-xs text-[#3D4F63]/60">{hint}</p>}
-        </div>
-        {actions}
-      </div>
+      <h3 className="font-display text-base font-bold text-[#3D4F63]">
+        {title}
+      </h3>
+      {hint && <p className="mt-1 text-xs text-[#3D4F63]/60">{hint}</p>}
       <div className="mt-4 grid gap-4 md:grid-cols-2">{children}</div>
     </div>
   );
@@ -313,58 +302,6 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dirty = isDirty(form, baseline);
-
-  // Sprint BRIQUE-IA-1 : traduction FR -> EN/DE via Groq (le FR est écrit
-  // par l'admin, l'IA ne rédige rien de neuf). Ne sauvegarde jamais
-  // automatiquement — remplit seulement les champs EN/DE du formulaire,
-  // l'admin relit et clique Enregistrer lui-même (dirty=true via `set()`
-  // rappelle d'ailleurs le bandeau de modifications non enregistrées
-  // ci-dessus).
-  const [aiPending, startAiTransition] = useTransition();
-  const [aiMode, setAiMode] = useState<"long" | "short" | null>(null);
-  const [aiError, setAiError] = useState<string | null>(null);
-
-  function runGenerate(mode: "long" | "short") {
-    const sourceFr = mode === "long" ? form.description_fr : form.short_description_fr;
-    if (!sourceFr.trim()) {
-      setAiError(
-        mode === "long"
-          ? "Écrivez d'abord la description en français, puis cliquez pour traduire."
-          : "Écrivez d'abord le pitch court en français, puis cliquez pour traduire.",
-      );
-      return;
-    }
-    const hasExisting =
-      mode === "long"
-        ? form.description_en.trim() || form.description_de.trim()
-        : form.short_description_en.trim() || form.short_description_de.trim();
-    if (hasExisting && !confirm("Remplacer les traductions existantes (EN/DE) ?")) {
-      return;
-    }
-    setAiError(null);
-    setAiMode(mode);
-    startAiTransition(async () => {
-      try {
-        const result =
-          mode === "long"
-            ? await translatePropertyDescription(sourceFr)
-            : await translatePropertyShortPitch(sourceFr);
-        if (result.ok) {
-          if (mode === "long") {
-            set("description_en", result.en);
-            set("description_de", result.de);
-          } else {
-            set("short_description_en", result.en);
-            set("short_description_de", result.de);
-          }
-        } else {
-          setAiError(result.error);
-        }
-      } catch (err) {
-        setAiError(err instanceof Error ? err.message : "Erreur de traduction IA.");
-      }
-    });
-  }
 
   useEffect(() => {
     if (!dirty) return;
@@ -460,34 +397,7 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         </div>
       )}
 
-      <Section
-        title="Descriptions"
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => runGenerate("long")}
-              disabled={aiPending}
-              className="rounded-full border border-[#e0af6e] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] transition-colors hover:bg-[#e0af6e] hover:text-white disabled:opacity-50"
-            >
-              {aiPending && aiMode === "long" ? "Traduction en cours…" : "Traduire en EN/DE (IA)"}
-            </button>
-            <button
-              type="button"
-              onClick={() => runGenerate("short")}
-              disabled={aiPending}
-              className="rounded-full border border-[#e0af6e] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] transition-colors hover:bg-[#e0af6e] hover:text-white disabled:opacity-50"
-            >
-              {aiPending && aiMode === "short" ? "Traduction en cours…" : "Traduire le pitch (IA)"}
-            </button>
-          </div>
-        }
-      >
-        {aiError && (
-          <p className="md:col-span-2 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {aiError}
-          </p>
-        )}
+      <Section title="Descriptions">
         <Field label="Titre (FR)">
           <input
             value={form.title_fr}
