@@ -309,7 +309,7 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
     setError(null);
     startTransition(async () => {
       try {
-        await updateProperty(propertyId, {
+        const result = await updateProperty(propertyId, {
           title_fr: form.title_fr,
           title_en: form.title_en,
           title_de: form.title_de,
@@ -356,7 +356,11 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
           badge_size: form.badge.length > 0 ? form.badge_size : null,
           badge_position: form.badge.length > 0 ? form.badge_position : null,
         });
-        setFeedback("Enregistré.");
+        if (result.ok) {
+          setFeedback("Enregistré.");
+        } else {
+          setError(result.error);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue.");
       }
