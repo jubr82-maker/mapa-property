@@ -93,12 +93,57 @@ const BADGE_POSITIONS: readonly string[] = [
   "bottom-right",
 ];
 
+// Sprint SAISIE-MANUELLE étape B : statut riche, cohabite avec is_published
+// (CHECK constraint SQL properties_status_check, cf. migration
+// 20260904_properties_saisie_manuelle.sql). Le pont vers is_published se
+// fait ICI, jamais côté client : published -> true, tout le reste -> false.
+const PROPERTY_STATUSES = ["draft", "published", "sold", "withdrawn"] as const;
+
 export async function updateProperty(
   id: string,
   data: {
     title_fr?: string | null;
+    title_en?: string | null;
+    title_de?: string | null;
     description_fr?: string | null;
+    description_en?: string | null;
+    description_de?: string | null;
+    short_description_fr?: string | null;
+    short_description_en?: string | null;
+    short_description_de?: string | null;
+    surface?: number | null;
+    living_surface?: number | null;
+    usable_surface?: number | null;
+    land_surface?: number | null;
+    terrace_surface?: number | null;
+    balcony_surface?: number | null;
+    garden_surface?: number | null;
+    kitchen_surface?: number | null;
+    area_total?: number | null;
+    bedrooms?: number | null;
+    bathrooms?: number | null;
+    douches?: number | null;
+    wc?: number | null;
+    bureaux?: number | null;
+    locaux_stockage?: number | null;
+    floor?: string | null;
+    has_laundry?: boolean;
+    has_dressing?: boolean;
+    has_pool?: boolean;
+    parking?: number | null;
+    energy?: string | null;
+    thermal?: string | null;
+    ges?: string | null;
+    year?: number | null;
+    year_built?: number | null;
     price?: number | null;
+    price_on_demand?: boolean;
+    price_min?: number | null;
+    price_max?: number | null;
+    amenities?: string | null;
+    current_use?: string | null;
+    potential_use?: string | null;
+    status?: string;
     badge?: string | null;
     badge_size?: string | null;
     badge_position?: string | null;
@@ -106,18 +151,84 @@ export async function updateProperty(
 ) {
   const supabase = await createSupabaseServerClient();
   const update: Record<string, unknown> = {};
-  if (data.title_fr !== undefined) {
-    const t = (data.title_fr ?? "").trim();
-    update.title_fr = t.length > 0 ? t : null;
+
+  const setText = (key: string, value: string | null | undefined) => {
+    if (value === undefined) return;
+    const t = (value ?? "").trim();
+    update[key] = t.length > 0 ? t : null;
+  };
+  const setNum = (key: string, value: number | null | undefined) => {
+    if (value === undefined) return;
+    update[key] = value == null || Number.isNaN(value) ? null : value;
+  };
+
+  // --- Descriptions ---
+  setText("title_fr", data.title_fr);
+  setText("title_en", data.title_en);
+  setText("title_de", data.title_de);
+  setText("description_fr", data.description_fr);
+  setText("description_en", data.description_en);
+  setText("description_de", data.description_de);
+  setText("short_description_fr", data.short_description_fr);
+  setText("short_description_en", data.short_description_en);
+  setText("short_description_de", data.short_description_de);
+
+  // --- Surfaces ---
+  setNum("surface", data.surface);
+  setNum("living_surface", data.living_surface);
+  setNum("usable_surface", data.usable_surface);
+  setNum("land_surface", data.land_surface);
+  setNum("terrace_surface", data.terrace_surface);
+  setNum("balcony_surface", data.balcony_surface);
+  setNum("garden_surface", data.garden_surface);
+  setNum("kitchen_surface", data.kitchen_surface);
+  setNum("area_total", data.area_total);
+
+  // --- Pièces ---
+  setNum("bedrooms", data.bedrooms);
+  setNum("bathrooms", data.bathrooms);
+  setNum("douches", data.douches);
+  setNum("wc", data.wc);
+  setNum("bureaux", data.bureaux);
+  setNum("locaux_stockage", data.locaux_stockage);
+  setText("floor", data.floor);
+
+  // --- Équipements ---
+  if (data.has_laundry !== undefined) update.has_laundry = data.has_laundry;
+  if (data.has_dressing !== undefined) update.has_dressing = data.has_dressing;
+  if (data.has_pool !== undefined) update.has_pool = data.has_pool;
+  setNum("parking", data.parking);
+
+  // --- Énergie ---
+  setText("energy", data.energy);
+  setText("thermal", data.thermal);
+  setText("ges", data.ges);
+  setNum("year", data.year);
+  setNum("year_built", data.year_built);
+
+  // --- Prix ---
+  setNum("price", data.price);
+  if (data.price_on_demand !== undefined) {
+    update.price_on_demand = data.price_on_demand;
   }
-  if (data.description_fr !== undefined) {
-    const d = (data.description_fr ?? "").trim();
-    update.description_fr = d.length > 0 ? d : null;
+  setNum("price_min", data.price_min);
+  setNum("price_max", data.price_max);
+
+  // --- Prestations & usage ---
+  setText("amenities", data.amenities);
+  setText("current_use", data.current_use);
+  setText("potential_use", data.potential_use);
+
+  // --- Statut + pont is_published ---
+  if (data.status !== undefined) {
+    if (!PROPERTY_STATUSES.includes(data.status as (typeof PROPERTY_STATUSES)[number])) {
+      throw new Error("Statut invalide.");
+    }
+    update.status = data.status;
+    update.is_published = data.status === "published";
   }
-  if (data.price !== undefined) {
-    update.price =
-      data.price == null || Number.isNaN(data.price) ? null : data.price;
-  }
+
+  // --- Badges (existant, inchangé) ---
   if (data.badge !== undefined) {
     const b = (data.badge ?? "").trim();
     update.badge = b.length > 0 && BADGE_LABELS.includes(b) ? b : null;
@@ -131,6 +242,7 @@ export async function updateProperty(
     update.badge_position =
       p.length > 0 && BADGE_POSITIONS.includes(p) ? p : null;
   }
+
   if (Object.keys(update).length === 0) return { ok: true };
   const slug = await fetchPropertySlug(supabase, id);
   const { error } = await supabase
