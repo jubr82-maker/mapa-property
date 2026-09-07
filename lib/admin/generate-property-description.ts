@@ -1,190 +1,63 @@
-// Sprint BRIQUE-IA-1 — Génération de descriptions commerciales (FR/EN/DE)
-// via Groq, à partir des données STRUCTURÉES d'un bien. Distinct de
-// lib/translate.ts (qui traduit un texte déjà écrit via Mistral) : ici on
-// RÉDIGE depuis des faits, jamais depuis un texte source.
+// Sprint BRIQUE-IA-1 — Traduction des descriptions (EN/DE) à partir du
+// texte FRANÇAIS déjà rédigé par l'utilisateur, via Groq.
 //
-// Bascule Mistral -> Groq (2026-09) : le plan gratuit Mistral renvoie un
-// 429 systématique (cf. diagnostic — Mistral ne publie plus ses seuils
-// exacts). Même plomberie que le fallback Groq déjà utilisé par le
-// chatbot Eléna (app/api/chatbot/route.ts) : endpoint OpenAI-compatible,
-// GROQ_API_KEY (confirmée présente en Production Vercel), JSON Object
-// Mode (response_format json_object) — documenté par Groq comme supporté
-// par TOUS les modèles.
+// Changement d'approche (2026-09) : la version précédente REDIGEAIT les
+// 3 langues depuis une fiche de faits structurés. Nouvelle exigence :
+// l'utilisateur écrit lui-même le FR, l'IA se contente de le TRADUIRE en
+// EN/DE — fidèle au sens et au ton, jamais une nouvelle rédaction depuis
+// les caractéristiques du bien. Le FR n'est plus régénéré (déjà connu).
 //
-// Modèle : qwen/qwen3.6-27b. llama-3.3-70b-versatile (choix initial) est
-// déprécié sur le tier gratuit/développeur depuis le 16/08/2026 (404
-// "does not exist or you do not have access to it") — confirmé sur
-// https://console.groq.com/docs/deprecations, qui recommande explicitement
-// deux remplacements : openai/gpt-oss-120b ou qwen/qwen3.6-27b.
-// Choix de qwen/qwen3.6-27b plutôt que gpt-oss-120b : des retours
-// indépendants documentent des fautes de grammaire en allemand sur la
-// famille gpt-oss (cf. discussions Hugging Face) — inacceptable pour une
-// clientèle premium trilingue. Qwen3 revendique un support natif de 100+
-// langues (dont l'allemand et le français) sans rapport négatif équivalent
-// trouvé à date. Aucun des deux modèles n'est un rédacteur spécialisé :
-// relecture humaine de la version allemande recommandée avant publication
-// tant que la qualité réelle n'a pas été validée sur des cas concrets.
+// Distinct de lib/translate.ts (Mistral, traduction littérale stricte
+// phrase par phrase, historiquement pour l'off-market) : ici la
+// traduction est native et soignée plutôt que mot à mot, mais reste
+// strictement fidèle au sens — jamais une réécriture libre.
 //
-// Garde-fou anti-hallucination (inchangé) : le prompt ne contient QUE les
-// champs renseignés du bien (buildFactSheet omet tout champ null/absent,
-// et n'affiche un équipement booléen que s'il est true) — le modèle n'a
-// structurellement aucune autre information à sa disposition.
+// Plomberie : même endpoint/clé que le fallback Groq du chatbot Eléna
+// (app/api/chatbot/route.ts) — endpoint OpenAI-compatible, GROQ_API_KEY
+// (confirmée présente en Production Vercel), JSON Object Mode
+// (response_format json_object, documenté par Groq comme supporté par
+// tous les modèles).
+//
+// Modèle : qwen/qwen3.6-27b (llama-3.3-70b-versatile est déprécié sur le
+// tier gratuit/développeur depuis le 16/08/2026, cf. commit précédent).
+//
+// IMPORTANT — format de requête : Qwen sur Groq exige au moins un message
+// role:"user" ("No user query found in messages" sinon). La version
+// précédente de ce fichier n'envoyait QUE un message system — c'était le
+// bug. Le texte FR à traduire est maintenant le message user ; le prompt
+// système ne contient que les instructions.
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "qwen/qwen3.6-27b";
 
-export interface PropertyFacts {
-  propertyTypeLabel: string;
-  transactionLabel: string;
-  propertyStateLabel: string | null;
-  city: string | null;
-  country: string | null;
-  surface: number | null;
-  livingSurface: number | null;
-  usableSurface: number | null;
-  landSurface: number | null;
-  terraceSurface: number | null;
-  balconySurface: number | null;
-  gardenSurface: number | null;
-  kitchenSurface: number | null;
-  areaTotal: number | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  douches: number | null;
-  wc: number | null;
-  bureaux: number | null;
-  locauxStockage: number | null;
-  floor: string | null;
-  hasLaundry: boolean;
-  hasDressing: boolean;
-  hasPool: boolean;
-  parking: number | null;
-  energy: string | null;
-  thermal: string | null;
-  ges: string | null;
-  year: number | null;
-  amenities: string | null;
-  currentUse: string | null;
-  potentialUse: string | null;
-  price: number | null;
-  priceOnDemand: boolean;
-  priceMin: number | null;
-  priceMax: number | null;
-}
-
-export interface GeneratedTexts {
-  fr: string;
+export interface TranslatedTexts {
   en: string;
   de: string;
 }
 
-/**
- * Fiche de faits en français, une ligne par donnée RENSEIGNÉE uniquement.
- * C'est la SEULE source d'information transmise au modèle — aucun champ
- * null/absent n'apparaît, aucun équipement booléen faux n'est mentionné
- * (ni en positif ni en négatif). Le modèle ne peut pas halluciner ce
- * qu'il ne voit jamais.
- */
-function buildFactSheet(f: PropertyFacts): string {
-  const lines: string[] = [];
-  lines.push(`Type de bien : ${f.propertyTypeLabel}`);
-  lines.push(`Transaction : ${f.transactionLabel}`);
-  if (f.propertyStateLabel) lines.push(`État : ${f.propertyStateLabel}`);
-  if (f.city || f.country) {
-    lines.push(`Localisation : ${[f.city, f.country].filter(Boolean).join(", ")}`);
-  }
-  if (f.livingSurface) lines.push(`Surface habitable : ${f.livingSurface} m²`);
-  else if (f.surface) lines.push(`Surface : ${f.surface} m²`);
-  if (f.usableSurface) lines.push(`Surface utile : ${f.usableSurface} m²`);
-  if (f.landSurface) lines.push(`Terrain : ${f.landSurface} m²`);
-  if (f.terraceSurface) lines.push(`Terrasse : ${f.terraceSurface} m²`);
-  if (f.balconySurface) lines.push(`Balcon : ${f.balconySurface} m²`);
-  if (f.gardenSurface) lines.push(`Jardin : ${f.gardenSurface} m²`);
-  if (f.kitchenSurface) lines.push(`Cuisine : ${f.kitchenSurface} m²`);
-  if (f.areaTotal) lines.push(`Surface totale (immeuble) : ${f.areaTotal} m²`);
-  if (f.bedrooms != null) lines.push(`Chambres : ${f.bedrooms}`);
-  if (f.bathrooms != null) lines.push(`Salles de bain : ${f.bathrooms}`);
-  if (f.douches != null) lines.push(`Douches : ${f.douches}`);
-  if (f.wc != null) lines.push(`WC : ${f.wc}`);
-  if (f.bureaux != null) lines.push(`Bureaux : ${f.bureaux}`);
-  if (f.locauxStockage != null) lines.push(`Locaux de stockage : ${f.locauxStockage}`);
-  if (f.floor) lines.push(`Étage : ${f.floor}`);
-  if (f.hasLaundry) lines.push(`Buanderie : présente`);
-  if (f.hasDressing) lines.push(`Dressing : présent`);
-  if (f.hasPool) lines.push(`Piscine : présente`);
-  if (f.parking != null) lines.push(`Emplacements parking : ${f.parking}`);
-  if (f.energy) lines.push(`Classe énergétique (DPE) : ${f.energy}`);
-  if (f.thermal) lines.push(`Isolation thermique : ${f.thermal}`);
-  if (f.ges) lines.push(`Classe GES : ${f.ges}`);
-  if (f.year) lines.push(`Année de construction : ${f.year}`);
-  if (f.amenities) lines.push(`Prestations : ${f.amenities}`);
-  if (f.currentUse) lines.push(`Usage actuel : ${f.currentUse}`);
-  if (f.potentialUse) lines.push(`Usage potentiel : ${f.potentialUse}`);
-  if (f.priceOnDemand) lines.push(`Prix : sur demande`);
-  else if (f.price) lines.push(`Prix : ${f.price.toLocaleString("fr-FR")} €`);
-  if (f.priceMin && f.priceMax) {
-    lines.push(
-      `Fourchette de prix : ${f.priceMin.toLocaleString("fr-FR")} - ${f.priceMax.toLocaleString("fr-FR")} €`,
-    );
-  }
-  return lines.join("\n");
-}
-
-// Bloc d'exigence linguistique partagé entre les deux prompts (long et
-// court) : rédaction native (pas de traduction), grammaire irréprochable,
-// et une insistance spécifique sur l'allemand — c'est la langue la plus
+// Bloc d'exigence linguistique — l'allemand est la langue la plus
 // risquée pour un modèle non spécialisé (déclinaisons, registre
 // commercial soutenu), donc la seule sur laquelle on détaille le niveau
-// d'exigence attendu plutôt que de se contenter d'un "écris bien".
+// d'exigence attendu plutôt que de se contenter d'un "traduis bien".
 const LANGUAGE_QUALITY_RULES = `EXIGENCE DE QUALITÉ LINGUISTIQUE — NON NÉGOCIABLE :
-Tu écris comme un rédacteur natif expert dans CHAQUE langue, jamais comme un traducteur. Les 3 versions partagent les mêmes faits mais sont rédigées indépendamment, chacune directement dans sa langue.
-- Français : registre soutenu, syntaxe élégante, vocabulaire immobilier de prestige, orthographe et accords irréprochables.
+Chaque langue est une traduction NATIVE et soignée, jamais mot à mot ni mécanique : un traducteur natif expert reformulerait naturellement dans sa langue tout en restant strictement fidèle au sens du texte source.
 - Anglais : registre international premium ("luxury real estate"), fluide et naturel, pas de calque du français.
-- Allemand : attention particulière — cas et déclinaisons rigoureusement corrects (nominatif/accusatif/datif/génitif), accords adjectifs/articles corrects, registre commercial soutenu (vouvoiement implicite, style "Sie"), vocabulaire immobilier allemand idiomatique (ex. "Wohnfläche", "hochwertige Ausstattung", "gehobene Preislage", "gepflegter Zustand"). L'allemand ne doit JAMAIS être une traduction mot à mot calquée sur la structure française ou anglaise — la syntaxe (ordre des mots, subordonnées) doit être authentiquement allemande.`;
+- Allemand : attention particulière — cas et déclinaisons rigoureusement corrects (nominatif/accusatif/datif/génitif), accords adjectifs/articles corrects, registre commercial soutenu (vouvoiement implicite, style "Sie"), vocabulaire immobilier allemand idiomatique (ex. "Wohnfläche", "hochwertige Ausstattung", "gehobene Preislage", "gepflegter Zustand"). L'allemand ne doit JAMAIS être une traduction mot à mot calquée sur la structure française — la syntaxe (ordre des mots, subordonnées) doit être authentiquement allemande.`;
 
-function buildLongPrompt(factSheet: string): string {
-  return `Tu es rédacteur senior spécialisé en immobilier de prestige pour MAPA Property, agence de prestige au Luxembourg, clientèle premium trilingue. Tu rédiges des descriptions commerciales PREMIUM : factuelles, valorisantes, élégantes — jamais racoleuses, jamais pauvres.
+function buildTranslatePrompt(): string {
+  return `Tu es traducteur professionnel senior spécialisé en immobilier de prestige pour MAPA Property (Luxembourg), clientèle premium trilingue. L'utilisateur va te fournir, dans le message suivant, un texte français déjà rédigé. Ta seule tâche : le traduire fidèlement en anglais et en allemand.
 
-RÈGLE ABSOLUE — AUCUNE INVENTION :
-Tu ne dois utiliser QUE les faits listés dans la FICHE DE FAITS ci-dessous. Si une caractéristique n'y figure PAS (piscine, dressing, buanderie, terrasse, jardin, etc.), tu NE DOIS JAMAIS l'inventer, la suggérer ou l'impliquer. N'ajoute aucun chiffre, aucune surface, aucun équipement absent de la fiche.
-
-FICHE DE FAITS (source unique autorisée) :
-${factSheet}
-
-${LANGUAGE_QUALITY_RULES}
-
-CONSIGNES DE RÉDACTION :
-1. Rédige 3 descriptions commerciales complètes, une par langue : française (fr), anglaise (en), allemande (de).
-2. Ton premium, sobre, élégant. Phrases fluides en paragraphes, pas de liste à puces, pas d'emoji, pas de superlatifs vides ("incroyable", "unique au monde").
-3. Chaque description fait entre 150 et 350 mots.
-4. Ne récite pas la fiche de faits telle quelle — transforme-la en texte rédigé et engageant.
-5. N'invente ni prix, ni adresse précise, ni détail non listé dans la fiche.
-
-FORMAT DE SORTIE STRICT :
-Réponds UNIQUEMENT avec un objet JSON valide de la forme exacte :
-{"fr": "<description française>", "en": "<description anglaise>", "de": "<description allemande>"}
-Aucun texte avant ou après le JSON. Pas de markdown, pas de backticks.`;
-}
-
-function buildShortPrompt(factSheet: string): string {
-  return `Tu es rédacteur senior spécialisé en immobilier de prestige pour MAPA Property, agence de prestige au Luxembourg, clientèle premium trilingue. Tu rédiges un PITCH COURT (une phrase d'accroche) pour une fiche bien.
-
-RÈGLE ABSOLUE — AUCUNE INVENTION :
-Tu ne dois utiliser QUE les faits listés dans la FICHE DE FAITS ci-dessous. N'invente, ne suggère et n'implique aucune caractéristique absente de cette fiche.
-
-FICHE DE FAITS (source unique autorisée) :
-${factSheet}
+RÈGLES DE FIDÉLITÉ — NON NÉGOCIABLES :
+1. Traduis le SENS et le TON du texte fourni, rien de plus, rien de moins. Ne résume pas, n'enrichis pas, ne raccourcis pas, ne développe pas. N'ajoute et ne retire aucune information, aucun chiffre, aucun fait par rapport au texte source.
+2. Conserve le ton commercial (premium, sobre, élégant, ou autre) déjà présent dans le texte source — tu ne le rends ni plus, ni moins valorisant.
+3. Si le texte contient des balises HTML (<p>, <br>, <strong>, <em>, <ul>, <li>...), préserve-les exactement, dans le même ordre, en ne traduisant que le texte entre les balises. N'ajoute ni ne retire aucune balise.
+4. Ne renvoie PAS le texte français — il est déjà connu de l'utilisateur.
 
 ${LANGUAGE_QUALITY_RULES}
 
-CONSIGNES DE RÉDACTION :
-1. Rédige 3 pitchs courts, une phrase par langue : française (fr), anglaise (en), allemande (de).
-2. Une seule phrase par langue, 12 à 25 mots, ton premium et sobre, pas d'emoji, pas de superlatifs vides.
-3. N'invente ni prix, ni adresse précise, ni détail non listé dans la fiche.
-
 FORMAT DE SORTIE STRICT :
 Réponds UNIQUEMENT avec un objet JSON valide de la forme exacte :
-{"fr": "<pitch français>", "en": "<pitch anglais>", "de": "<pitch allemand>"}
+{"en": "<traduction anglaise>", "de": "<traduction allemande>"}
 Aucun texte avant ou après le JSON. Pas de markdown, pas de backticks.`;
 }
 
@@ -199,15 +72,18 @@ function sleep(ms: number): Promise<void> {
 }
 
 const RATE_LIMIT_MESSAGE =
-  "Le service de génération est momentanément saturé (limite du plan gratuit Groq). Réessayez dans une minute.";
+  "Le service de traduction est momentanément saturé (limite du plan gratuit Groq). Réessayez dans une minute.";
 
 /**
  * Un essai initial + jusqu'à RETRY_DELAYS_MS.length réessais UNIQUEMENT
  * sur 429 (les autres erreurs HTTP échouent immédiatement, pas de retry
- * aveugle). Retourne le contenu brut de la réponse.
+ * aveugle). Message system (instructions) + message user (texte FR à
+ * traduire) — Qwen exige un message user, sinon "No user query found in
+ * messages". Retourne le contenu brut de la réponse.
  */
 async function fetchGroqCompletion(
   systemPrompt: string,
+  userText: string,
   maxTokens: number,
   apiKey: string,
 ): Promise<string> {
@@ -220,9 +96,15 @@ async function fetchGroqCompletion(
       },
       body: JSON.stringify({
         model: GROQ_MODEL,
-        temperature: 0.6,
+        // Traduction fidèle : température plus basse que pour une
+        // rédaction libre (0.6 avant), pour limiter la dérive de sens
+        // tout en gardant une formulation native (pas 0 = mot à mot).
+        temperature: 0.4,
         max_tokens: maxTokens,
-        messages: [{ role: "system", content: systemPrompt }],
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userText },
+        ],
         response_format: { type: "json_object" },
       }),
     });
@@ -251,16 +133,20 @@ async function fetchGroqCompletion(
   }
 }
 
-async function callGroqForTexts(
-  systemPrompt: string,
+async function callGroqForTranslation(
+  textFr: string,
   maxTokens: number,
-): Promise<GeneratedTexts> {
+): Promise<TranslatedTexts> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    throw new Error("Génération IA indisponible (clé Groq non configurée).");
+    throw new Error("Traduction IA indisponible (clé Groq non configurée).");
+  }
+  const trimmed = textFr.trim();
+  if (!trimmed) {
+    throw new Error("Le texte français est vide — rien à traduire.");
   }
 
-  const raw = await fetchGroqCompletion(systemPrompt, maxTokens, apiKey);
+  const raw = await fetchGroqCompletion(buildTranslatePrompt(), trimmed, maxTokens, apiKey);
 
   let parsed: unknown;
   try {
@@ -270,25 +156,24 @@ async function callGroqForTexts(
   }
 
   const obj = parsed as Record<string, unknown>;
-  const fr = typeof obj.fr === "string" ? obj.fr.trim() : "";
   const en = typeof obj.en === "string" ? obj.en.trim() : "";
   const de = typeof obj.de === "string" ? obj.de.trim() : "";
-  if (!fr || !en || !de) {
-    throw new Error("Réponse Groq incomplète (fr/en/de manquant).");
+  if (!en || !de) {
+    throw new Error("Réponse Groq incomplète (en/de manquant).");
   }
-  return { fr, en, de };
+  return { en, de };
 }
 
-/** ~350 mots max/langue x 3 langues + balisage JSON — un seul appel Groq. */
-export async function generateDescriptionsFromFacts(
-  facts: PropertyFacts,
-): Promise<GeneratedTexts> {
-  return callGroqForTexts(buildLongPrompt(buildFactSheet(facts)), 1800);
+/** Traduit la description complète FR -> EN/DE. Un seul appel Groq. */
+export async function translateDescriptionToEnDe(
+  textFr: string,
+): Promise<TranslatedTexts> {
+  return callGroqForTranslation(textFr, 1400);
 }
 
-/** Pitch court (1 phrase/langue) — bonus, même garde-fous, appel séparé. */
-export async function generateShortPitchFromFacts(
-  facts: PropertyFacts,
-): Promise<GeneratedTexts> {
-  return callGroqForTexts(buildShortPrompt(buildFactSheet(facts)), 400);
+/** Traduit le pitch court FR -> EN/DE. Un seul appel Groq. */
+export async function translateShortPitchToEnDe(
+  textFr: string,
+): Promise<TranslatedTexts> {
+  return callGroqForTranslation(textFr, 300);
 }
