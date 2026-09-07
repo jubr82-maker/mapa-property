@@ -9,12 +9,10 @@ import {
   PROPERTY_STATES,
   TRANSACTION_TYPES,
   transactionToBase,
-  transactionDetailLabel,
 } from "@/lib/taxonomy/property-types";
 import {
-  generateDescriptionsFromFacts,
-  generateShortPitchFromFacts,
-  type PropertyFacts,
+  translateDescriptionToEnDe,
+  translateShortPitchToEnDe,
 } from "@/lib/admin/generate-property-description";
 
 /**
@@ -495,152 +493,73 @@ export async function createProperty(
 }
 
 // ============================================================================
-// Sprint BRIQUE-IA-1 — Génération de descriptions commerciales (FR/EN/DE)
-// via Mistral, à partir des données déjà saisies du bien (aucune nouvelle
-// colonne — écrit dans description_fr/en/de ou short_description_fr/en/de
-// existantes, jamais automatiquement : l'admin relit et clique Enregistrer
-// lui-même côté PropertyEditForm). Prompt/appel Mistral dans
+// Sprint BRIQUE-IA-1 — Traduction FR -> EN/DE des descriptions saisies par
+// l'admin (aucune nouvelle colonne, jamais d'enregistrement automatique :
+// le formulaire remplit juste les champs, l'admin relit et clique
+// Enregistrer lui-même côté PropertyEditForm). Ne lit plus la base : le
+// texte FR à traduire vient directement du formulaire (pas forcément
+// encore sauvegardé). Prompt/appel Groq dans
 // lib/admin/generate-property-description.ts.
 // ============================================================================
 
-export type GeneratePropertyTextsResult =
-  | { ok: true; descriptions: { fr: string; en: string; de: string } }
+export type TranslatePropertyTextResult =
+  | { ok: true; en: string; de: string }
   | { ok: false; error: string };
 
-function findPropertyTypeLabel(slug: string | null): string {
-  if (!slug) return "Bien immobilier";
-  for (const family of PROPERTY_TYPE_FAMILIES) {
-    const found = family.types.find((t) => t.slug === slug);
-    if (found) return found.label;
-  }
-  return slug;
-}
-
-function findPropertyStateLabel(slug: string | null): string | null {
-  if (!slug) return null;
-  return PROPERTY_STATES.find((s) => s.slug === slug)?.label ?? null;
-}
-
 /**
- * Lit les données caractéristiques d'un bien et les met en forme pour la
- * génération IA. Authentification admin vérifiée par le caller (les deux
- * Server Actions ci-dessous), pas ici — fonction interne non exportée.
+ * Traduit la description longue FR -> EN/DE. Un seul appel Groq. Ne touche
+ * jamais la base — le résultat est renvoyé au formulaire, qui l'affiche
+ * pour relecture avant tout enregistrement.
  */
-async function fetchPropertyFactsForAi(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-  propertyId: string,
-): Promise<{ ok: true; facts: PropertyFacts } | { ok: false; error: string }> {
-  const { data, error } = await supabase
-    .from("properties")
-    .select(
-      "property_type, transaction, transaction_detail, property_state, city, country, surface, living_surface, usable_surface, land_surface, terrace_surface, balcony_surface, garden_surface, kitchen_surface, area_total, bedrooms, bathrooms, douches, wc, bureaux, locaux_stockage, floor, has_laundry, has_dressing, has_pool, parking, energy, thermal, ges, year, amenities, current_use, potential_use, price, price_on_demand, price_min, price_max",
-    )
-    .eq("id", propertyId)
-    .maybeSingle();
-
-  if (error) return { ok: false, error: error.message };
-  if (!data) return { ok: false, error: "Bien introuvable." };
-
-  const transactionLabel =
-    (data.transaction_detail && transactionDetailLabel(data.transaction_detail)) ||
-    (data.transaction === "rent" ? "Location" : "Vente");
-
-  const facts: PropertyFacts = {
-    propertyTypeLabel: findPropertyTypeLabel(data.property_type),
-    transactionLabel,
-    propertyStateLabel: findPropertyStateLabel(data.property_state),
-    city: data.city,
-    country: data.country,
-    surface: data.surface,
-    livingSurface: data.living_surface,
-    usableSurface: data.usable_surface,
-    landSurface: data.land_surface,
-    terraceSurface: data.terrace_surface,
-    balconySurface: data.balcony_surface,
-    gardenSurface: data.garden_surface,
-    kitchenSurface: data.kitchen_surface,
-    areaTotal: data.area_total,
-    bedrooms: data.bedrooms,
-    bathrooms: data.bathrooms,
-    douches: data.douches,
-    wc: data.wc,
-    bureaux: data.bureaux,
-    locauxStockage: data.locaux_stockage,
-    floor: data.floor,
-    hasLaundry: data.has_laundry ?? false,
-    hasDressing: data.has_dressing ?? false,
-    hasPool: data.has_pool ?? false,
-    parking: data.parking,
-    energy: data.energy,
-    thermal: data.thermal,
-    ges: data.ges,
-    year: data.year,
-    amenities: data.amenities,
-    currentUse: data.current_use,
-    potentialUse: data.potential_use,
-    price: data.price,
-    priceOnDemand: data.price_on_demand ?? false,
-    priceMin: data.price_min,
-    priceMax: data.price_max,
-  };
-
-  return { ok: true, facts };
-}
-
-/**
- * Génère les 3 descriptions longues (150-350 mots/langue) à partir des
- * données déjà saisies du bien. Un seul appel Mistral. Ne touche jamais la
- * base — le résultat est renvoyé au formulaire, qui l'affiche pour relecture
- * avant tout enregistrement.
- */
-export async function generatePropertyDescriptions(
-  propertyId: string,
-): Promise<GeneratePropertyTextsResult> {
+export async function translatePropertyDescription(
+  textFr: string,
+): Promise<TranslatePropertyTextResult> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Authentification requise." };
 
-  const factsResult = await fetchPropertyFactsForAi(supabase, propertyId);
-  if (!factsResult.ok) return factsResult;
+  if (!textFr || textFr.trim().length === 0) {
+    return { ok: false, error: "Le texte français est vide — rien à traduire." };
+  }
 
   try {
-    const descriptions = await generateDescriptionsFromFacts(factsResult.facts);
-    return { ok: true, descriptions };
+    const { en, de } = await translateDescriptionToEnDe(textFr);
+    return { ok: true, en, de };
   } catch (e) {
-    console.error("[admin] generatePropertyDescriptions", e);
+    console.error("[admin] translatePropertyDescription", e);
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Erreur de génération IA.",
+      error: e instanceof Error ? e.message : "Erreur de traduction IA.",
     };
   }
 }
 
 /**
- * Bonus — pitch court (1 phrase/langue, 12-25 mots) à partir des mêmes
- * données. Appel Mistral séparé, mêmes garde-fous anti-invention.
+ * Traduit le pitch court FR -> EN/DE. Appel Groq séparé, mêmes garde-fous.
  */
-export async function generatePropertyShortPitch(
-  propertyId: string,
-): Promise<GeneratePropertyTextsResult> {
+export async function translatePropertyShortPitch(
+  textFr: string,
+): Promise<TranslatePropertyTextResult> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Authentification requise." };
 
-  const factsResult = await fetchPropertyFactsForAi(supabase, propertyId);
-  if (!factsResult.ok) return factsResult;
+  if (!textFr || textFr.trim().length === 0) {
+    return { ok: false, error: "Le texte français est vide — rien à traduire." };
+  }
 
   try {
-    const descriptions = await generateShortPitchFromFacts(factsResult.facts);
-    return { ok: true, descriptions };
+    const { en, de } = await translateShortPitchToEnDe(textFr);
+    return { ok: true, en, de };
   } catch (e) {
-    console.error("[admin] generatePropertyShortPitch", e);
+    console.error("[admin] translatePropertyShortPitch", e);
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Erreur de génération IA.",
+      error: e instanceof Error ? e.message : "Erreur de traduction IA.",
     };
   }
 }
