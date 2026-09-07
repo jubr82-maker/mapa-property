@@ -1,20 +1,32 @@
 // Sprint BRIQUE-IA-1 — Génération de descriptions commerciales (FR/EN/DE)
-// via Mistral, à partir des données STRUCTURÉES d'un bien. Distinct de
-// lib/translate.ts (qui traduit un texte déjà écrit) : ici on RÉDIGE depuis
-// des faits, jamais depuis un texte source.
+// via Groq, à partir des données STRUCTURÉES d'un bien. Distinct de
+// lib/translate.ts (qui traduit un texte déjà écrit via Mistral) : ici on
+// RÉDIGE depuis des faits, jamais depuis un texte source.
 //
-// Même plomberie Mistral que le reste du site (endpoint, modèle, clé) —
-// cf. lib/translate.ts et app/api/chatbot/route.ts. response_format
-// json_object réutilisé tel quel : déjà confirmé fonctionnel avec
-// mistral-small-latest dans app/api/chatbot/route.ts (Sprint ELENA-NAV).
+// Bascule Mistral -> Groq (2026-09) : le plan gratuit Mistral renvoie un
+// 429 systématique (cf. diagnostic — Mistral ne publie plus ses seuils
+// exacts). Même plomberie que le fallback Groq déjà utilisé par le
+// chatbot Eléna (app/api/chatbot/route.ts) : endpoint OpenAI-compatible,
+// GROQ_API_KEY (confirmée présente en Production Vercel), JSON Object
+// Mode (response_format json_object) — documenté par Groq comme supporté
+// par TOUS les modèles, y compris llama-3.3-70b-versatile.
 //
-// Garde-fou anti-hallucination : le prompt ne contient QUE les champs
-// renseignés du bien (buildFactSheet omet tout champ null/absent, et
-// n'affiche un équipement booléen que s'il est true) — Mistral n'a
+// Modèle : llama-3.3-70b-versatile. Choix délibéré face à l'alternative
+// openai/gpt-oss-120b (plus gros, disponible sur Groq) : le model card
+// officiel Meta liste l'allemand et le français parmi les 8 langues pour
+// lesquelles Llama 3.3 est explicitement entraîné et optimisé
+// ("optimized for multilingual dialogue use cases"), alors que des
+// retours indépendants sur gpt-oss-120b signalent des fautes de grammaire
+// en allemand — inacceptable pour une clientèle premium trilingue.
+// Llama 3.3 est aussi déjà éprouvé en production via Eléna.
+//
+// Garde-fou anti-hallucination (inchangé) : le prompt ne contient QUE les
+// champs renseignés du bien (buildFactSheet omet tout champ null/absent,
+// et n'affiche un équipement booléen que s'il est true) — le modèle n'a
 // structurellement aucune autre information à sa disposition.
 
-const MISTRAL_ENDPOINT = "https://api.mistral.ai/v1/chat/completions";
-const MISTRAL_MODEL = "mistral-small-latest";
+const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 export interface PropertyFacts {
   propertyTypeLabel: string;
@@ -63,10 +75,10 @@ export interface GeneratedTexts {
 
 /**
  * Fiche de faits en français, une ligne par donnée RENSEIGNÉE uniquement.
- * C'est la SEULE source d'information transmise à Mistral — aucun champ
+ * C'est la SEULE source d'information transmise au modèle — aucun champ
  * null/absent n'apparaît, aucun équipement booléen faux n'est mentionné
- * (ni en positif ni en négatif). Mistral ne peut pas halluciner ce qu'il
- * ne voit jamais.
+ * (ni en positif ni en négatif). Le modèle ne peut pas halluciner ce
+ * qu'il ne voit jamais.
  */
 function buildFactSheet(f: PropertyFacts): string {
   const lines: string[] = [];
@@ -113,8 +125,20 @@ function buildFactSheet(f: PropertyFacts): string {
   return lines.join("\n");
 }
 
+// Bloc d'exigence linguistique partagé entre les deux prompts (long et
+// court) : rédaction native (pas de traduction), grammaire irréprochable,
+// et une insistance spécifique sur l'allemand — c'est la langue la plus
+// risquée pour un modèle non spécialisé (déclinaisons, registre
+// commercial soutenu), donc la seule sur laquelle on détaille le niveau
+// d'exigence attendu plutôt que de se contenter d'un "écris bien".
+const LANGUAGE_QUALITY_RULES = `EXIGENCE DE QUALITÉ LINGUISTIQUE — NON NÉGOCIABLE :
+Tu écris comme un rédacteur natif expert dans CHAQUE langue, jamais comme un traducteur. Les 3 versions partagent les mêmes faits mais sont rédigées indépendamment, chacune directement dans sa langue.
+- Français : registre soutenu, syntaxe élégante, vocabulaire immobilier de prestige, orthographe et accords irréprochables.
+- Anglais : registre international premium ("luxury real estate"), fluide et naturel, pas de calque du français.
+- Allemand : attention particulière — cas et déclinaisons rigoureusement corrects (nominatif/accusatif/datif/génitif), accords adjectifs/articles corrects, registre commercial soutenu (vouvoiement implicite, style "Sie"), vocabulaire immobilier allemand idiomatique (ex. "Wohnfläche", "hochwertige Ausstattung", "gehobene Preislage", "gepflegter Zustand"). L'allemand ne doit JAMAIS être une traduction mot à mot calquée sur la structure française ou anglaise — la syntaxe (ordre des mots, subordonnées) doit être authentiquement allemande.`;
+
 function buildLongPrompt(factSheet: string): string {
-  return `Tu es rédacteur immobilier pour MAPA Property, agence de prestige au Luxembourg. Tu rédiges des descriptions commerciales PREMIUM : factuelles, valorisantes, élégantes — jamais racoleuses, jamais pauvres.
+  return `Tu es rédacteur senior spécialisé en immobilier de prestige pour MAPA Property, agence de prestige au Luxembourg, clientèle premium trilingue. Tu rédiges des descriptions commerciales PREMIUM : factuelles, valorisantes, élégantes — jamais racoleuses, jamais pauvres.
 
 RÈGLE ABSOLUE — AUCUNE INVENTION :
 Tu ne dois utiliser QUE les faits listés dans la FICHE DE FAITS ci-dessous. Si une caractéristique n'y figure PAS (piscine, dressing, buanderie, terrasse, jardin, etc.), tu NE DOIS JAMAIS l'inventer, la suggérer ou l'impliquer. N'ajoute aucun chiffre, aucune surface, aucun équipement absent de la fiche.
@@ -122,13 +146,14 @@ Tu ne dois utiliser QUE les faits listés dans la FICHE DE FAITS ci-dessous. Si 
 FICHE DE FAITS (source unique autorisée) :
 ${factSheet}
 
+${LANGUAGE_QUALITY_RULES}
+
 CONSIGNES DE RÉDACTION :
 1. Rédige 3 descriptions commerciales complètes, une par langue : française (fr), anglaise (en), allemande (de).
-2. Chaque langue est une rédaction NATIVE et indépendante (même sens, mêmes faits) — PAS une traduction mot à mot des deux autres.
-3. Ton premium, sobre, élégant. Phrases fluides en paragraphes, pas de liste à puces, pas d'emoji, pas de superlatifs vides ("incroyable", "unique au monde").
-4. Chaque description fait entre 150 et 350 mots.
-5. Ne récite pas la fiche de faits telle quelle — transforme-la en texte rédigé et engageant.
-6. N'invente ni prix, ni adresse précise, ni détail non listé dans la fiche.
+2. Ton premium, sobre, élégant. Phrases fluides en paragraphes, pas de liste à puces, pas d'emoji, pas de superlatifs vides ("incroyable", "unique au monde").
+3. Chaque description fait entre 150 et 350 mots.
+4. Ne récite pas la fiche de faits telle quelle — transforme-la en texte rédigé et engageant.
+5. N'invente ni prix, ni adresse précise, ni détail non listé dans la fiche.
 
 FORMAT DE SORTIE STRICT :
 Réponds UNIQUEMENT avec un objet JSON valide de la forme exacte :
@@ -137,7 +162,7 @@ Aucun texte avant ou après le JSON. Pas de markdown, pas de backticks.`;
 }
 
 function buildShortPrompt(factSheet: string): string {
-  return `Tu es rédacteur immobilier pour MAPA Property, agence de prestige au Luxembourg. Tu rédiges un PITCH COURT (une phrase d'accroche) pour une fiche bien.
+  return `Tu es rédacteur senior spécialisé en immobilier de prestige pour MAPA Property, agence de prestige au Luxembourg, clientèle premium trilingue. Tu rédiges un PITCH COURT (une phrase d'accroche) pour une fiche bien.
 
 RÈGLE ABSOLUE — AUCUNE INVENTION :
 Tu ne dois utiliser QUE les faits listés dans la FICHE DE FAITS ci-dessous. N'invente, ne suggère et n'implique aucune caractéristique absente de cette fiche.
@@ -145,11 +170,12 @@ Tu ne dois utiliser QUE les faits listés dans la FICHE DE FAITS ci-dessous. N'i
 FICHE DE FAITS (source unique autorisée) :
 ${factSheet}
 
+${LANGUAGE_QUALITY_RULES}
+
 CONSIGNES DE RÉDACTION :
 1. Rédige 3 pitchs courts, une phrase par langue : française (fr), anglaise (en), allemande (de).
-2. Chaque langue est une rédaction NATIVE et indépendante — PAS une traduction mot à mot.
-3. Une seule phrase par langue, 12 à 25 mots, ton premium et sobre, pas d'emoji, pas de superlatifs vides.
-4. N'invente ni prix, ni adresse précise, ni détail non listé dans la fiche.
+2. Une seule phrase par langue, 12 à 25 mots, ton premium et sobre, pas d'emoji, pas de superlatifs vides.
+3. N'invente ni prix, ni adresse précise, ni détail non listé dans la fiche.
 
 FORMAT DE SORTIE STRICT :
 Réponds UNIQUEMENT avec un objet JSON valide de la forme exacte :
@@ -157,9 +183,9 @@ Réponds UNIQUEMENT avec un objet JSON valide de la forme exacte :
 Aucun texte avant ou après le JSON. Pas de markdown, pas de backticks.`;
 }
 
-// Plan gratuit Mistral : plafond de débit (requêtes/seconde) bas, un 429
-// "Rate limit exceeded" (code 1300) peut survenir dès le 1er essai même
-// sur un appel léger. Beaucoup de 429 passent au 2e essai — retry avec
+// Groq applique aussi des limites de débit (RPM/RPD/TPM, publiées par
+// modèle sur console.groq.com/docs/rate-limits) — un 429 reste possible
+// en cas de pic de trafic (Eléna partage le même modèle). Retry avec
 // backoff exponentiel, borné pour ne jamais boucler indéfiniment.
 const RETRY_DELAYS_MS = [2000, 4000, 8000];
 
@@ -168,27 +194,27 @@ function sleep(ms: number): Promise<void> {
 }
 
 const RATE_LIMIT_MESSAGE =
-  "Le service de génération est momentanément saturé (limite du plan gratuit Mistral). Réessayez dans une minute.";
+  "Le service de génération est momentanément saturé (limite du plan gratuit Groq). Réessayez dans une minute.";
 
 /**
  * Un essai initial + jusqu'à RETRY_DELAYS_MS.length réessais UNIQUEMENT
  * sur 429 (les autres erreurs HTTP échouent immédiatement, pas de retry
- * aveugle). Retourne le contenu brut de la réponse Mistral.
+ * aveugle). Retourne le contenu brut de la réponse.
  */
-async function fetchMistralCompletion(
+async function fetchGroqCompletion(
   systemPrompt: string,
   maxTokens: number,
   apiKey: string,
 ): Promise<string> {
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(MISTRAL_ENDPOINT, {
+    const res = await fetch(GROQ_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: MISTRAL_MODEL,
+        model: GROQ_MODEL,
         temperature: 0.6,
         max_tokens: maxTokens,
         messages: [{ role: "system", content: systemPrompt }],
@@ -202,7 +228,7 @@ async function fetchMistralCompletion(
       };
       const raw = json?.choices?.[0]?.message?.content;
       if (typeof raw !== "string" || raw.trim().length === 0) {
-        throw new Error("Réponse Mistral vide.");
+        throw new Error("Réponse Groq vide.");
       }
       return raw;
     }
@@ -216,26 +242,26 @@ async function fetchMistralCompletion(
       throw new Error(RATE_LIMIT_MESSAGE);
     }
     const body = await res.text().catch(() => "");
-    throw new Error(`Mistral HTTP ${res.status} : ${body.slice(0, 200)}`);
+    throw new Error(`Groq HTTP ${res.status} : ${body.slice(0, 200)}`);
   }
 }
 
-async function callMistralForTexts(
+async function callGroqForTexts(
   systemPrompt: string,
   maxTokens: number,
 ): Promise<GeneratedTexts> {
-  const apiKey = process.env.MISTRAL_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    throw new Error("Génération IA indisponible (clé Mistral non configurée).");
+    throw new Error("Génération IA indisponible (clé Groq non configurée).");
   }
 
-  const raw = await fetchMistralCompletion(systemPrompt, maxTokens, apiKey);
+  const raw = await fetchGroqCompletion(systemPrompt, maxTokens, apiKey);
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error("Réponse Mistral non conforme (JSON invalide).");
+    throw new Error("Réponse Groq non conforme (JSON invalide).");
   }
 
   const obj = parsed as Record<string, unknown>;
@@ -243,21 +269,21 @@ async function callMistralForTexts(
   const en = typeof obj.en === "string" ? obj.en.trim() : "";
   const de = typeof obj.de === "string" ? obj.de.trim() : "";
   if (!fr || !en || !de) {
-    throw new Error("Réponse Mistral incomplète (fr/en/de manquant).");
+    throw new Error("Réponse Groq incomplète (fr/en/de manquant).");
   }
   return { fr, en, de };
 }
 
-/** ~350 mots max/langue x 3 langues + balisage JSON — un seul appel Mistral. */
+/** ~350 mots max/langue x 3 langues + balisage JSON — un seul appel Groq. */
 export async function generateDescriptionsFromFacts(
   facts: PropertyFacts,
 ): Promise<GeneratedTexts> {
-  return callMistralForTexts(buildLongPrompt(buildFactSheet(facts)), 1800);
+  return callGroqForTexts(buildLongPrompt(buildFactSheet(facts)), 1800);
 }
 
 /** Pitch court (1 phrase/langue) — bonus, même garde-fous, appel séparé. */
 export async function generateShortPitchFromFacts(
   facts: PropertyFacts,
 ): Promise<GeneratedTexts> {
-  return callMistralForTexts(buildShortPrompt(buildFactSheet(facts)), 400);
+  return callGroqForTexts(buildShortPrompt(buildFactSheet(facts)), 400);
 }
