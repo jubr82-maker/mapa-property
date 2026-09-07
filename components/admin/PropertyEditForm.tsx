@@ -15,7 +15,7 @@
  * une fois (pas de sauvegarde partielle par section).
  */
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { updateProperty } from "@/app/admin/properties/actions";
 
@@ -213,6 +213,15 @@ function toFormState(initial: PropertyEditFormInitial): FormState {
   };
 }
 
+// Ceinture-bretelles : même si les actions sœurs (photos/vidéo) ne
+// rafraîchissent plus cette page (cf. photos/actions.ts et
+// updatePropertyVideoUrl), une saisie non envoyée reste fragile face à
+// toute navigation. Comparaison superficielle suffit — FormState n'a que
+// des valeurs primitives (string/boolean).
+function isDirty(a: FormState, b: FormState): boolean {
+  return (Object.keys(a) as (keyof FormState)[]).some((k) => a[k] !== b[k]);
+}
+
 interface Props {
   propertyId: string;
   initial: PropertyEditFormInitial;
@@ -288,9 +297,21 @@ function CheckboxField({
 
 export function PropertyEditForm({ propertyId, initial }: Props) {
   const [form, setForm] = useState<FormState>(() => toFormState(initial));
+  const [baseline, setBaseline] = useState<FormState>(() => toFormState(initial));
   const [busy, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const dirty = isDirty(form, baseline);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -358,6 +379,7 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         });
         if (result.ok) {
           setFeedback("Enregistré.");
+          setBaseline(form);
         } else {
           setError(result.error);
         }
@@ -369,6 +391,12 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
 
   return (
     <form onSubmit={onSave} className="space-y-5">
+      {dirty && (
+        <div className="sticky top-2 z-10 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 shadow-sm">
+          Modifications non enregistrées — cliquez sur « Enregistrer » pour les conserver.
+        </div>
+      )}
+
       <Section title="Descriptions">
         <Field label="Titre (FR)">
           <input
