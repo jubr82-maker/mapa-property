@@ -91,8 +91,14 @@ export async function savePropertyPhotos(
   // La cover (fetchAllPropertiesWithCover) depend de property_images —
   // invalider le cache tag pour que la grille /biens et les biens
   // similaires reflètent immédiatement la nouvelle cover/l'ordre photos.
+  // PAS de revalidatePath sur /admin/properties/{id} elle-même : cette
+  // page héberge aussi PropertyEditForm, dont la saisie en cours (non
+  // encore envoyée via son propre bouton Enregistrer) serait effacée à
+  // l'affichage par le refresh RSC immédiat que revalidatePath déclenche
+  // sur la page actuellement affichée. PhotoManager reflète déjà l'état
+  // des photos localement (state client) — inutile de forcer un refresh
+  // serveur de cette page pour ça.
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
-  revalidatePath(`/admin/properties/${propertyId}`);
   revalidatePath("/admin/properties");
   revalidatePath("/fr/biens");
   // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.

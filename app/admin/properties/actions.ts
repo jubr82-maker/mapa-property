@@ -321,9 +321,13 @@ export async function updatePropertyVideoUrl(
     .update({ video_url: normalized })
     .eq("id", propertyId);
   if (error) throw new Error(error.message);
+  // PAS de revalidatePath sur /admin/properties/{propertyId} — même
+  // raison que savePropertyPhotos (photos/actions.ts) : cette page
+  // héberge PropertyEditForm, dont la saisie en cours non enregistrée
+  // serait effacée à l'affichage par le refresh RSC immédiat.
+  // PropertyVideoForm reflète déjà l'URL sauvée localement.
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePath(`/admin/properties/${propertyId}`);
   revalidatePath("/fr/biens");
   // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
   if (slug) revalidatePath(`/fr/biens/${slug}`);
