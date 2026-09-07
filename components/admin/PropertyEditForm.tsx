@@ -17,7 +17,11 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import { updateProperty } from "@/app/admin/properties/actions";
+import {
+  updateProperty,
+  generatePropertyDescriptions,
+  generatePropertyShortPitch,
+} from "@/app/admin/properties/actions";
 
 const BADGE_OPTIONS = [
   "Exclusivité",
@@ -234,18 +238,25 @@ const textareaCls = `${inputCls} font-sans`;
 function Section({
   title,
   hint,
+  actions,
   children,
 }: {
   title: string;
   hint?: string;
+  actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-[#3D4F63]/10 bg-[#F5EFE1]/30 p-5">
-      <h3 className="font-display text-base font-bold text-[#3D4F63]">
-        {title}
-      </h3>
-      {hint && <p className="mt-1 text-xs text-[#3D4F63]/60">{hint}</p>}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="font-display text-base font-bold text-[#3D4F63]">
+            {title}
+          </h3>
+          {hint && <p className="mt-1 text-xs text-[#3D4F63]/60">{hint}</p>}
+        </div>
+        {actions}
+      </div>
       <div className="mt-4 grid gap-4 md:grid-cols-2">{children}</div>
     </div>
   );
@@ -302,6 +313,52 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dirty = isDirty(form, baseline);
+
+  // Sprint BRIQUE-IA-1 : génération de descriptions via Mistral. Ne
+  // sauvegarde jamais automatiquement — remplit seulement les champs du
+  // formulaire, l'admin relit et clique Enregistrer lui-même (dirty=true
+  // via `set()` rappelle d'ailleurs le bandeau de modifications non
+  // enregistrées ci-dessus).
+  const [aiPending, startAiTransition] = useTransition();
+  const [aiMode, setAiMode] = useState<"long" | "short" | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  function runGenerate(mode: "long" | "short") {
+    const hasExisting =
+      mode === "long"
+        ? form.description_fr.trim() || form.description_en.trim() || form.description_de.trim()
+        : form.short_description_fr.trim() ||
+          form.short_description_en.trim() ||
+          form.short_description_de.trim();
+    if (hasExisting && !confirm("Remplacer les descriptions existantes ?")) {
+      return;
+    }
+    setAiError(null);
+    setAiMode(mode);
+    startAiTransition(async () => {
+      try {
+        const result =
+          mode === "long"
+            ? await generatePropertyDescriptions(propertyId)
+            : await generatePropertyShortPitch(propertyId);
+        if (result.ok) {
+          if (mode === "long") {
+            set("description_fr", result.descriptions.fr);
+            set("description_en", result.descriptions.en);
+            set("description_de", result.descriptions.de);
+          } else {
+            set("short_description_fr", result.descriptions.fr);
+            set("short_description_en", result.descriptions.en);
+            set("short_description_de", result.descriptions.de);
+          }
+        } else {
+          setAiError(result.error);
+        }
+      } catch (err) {
+        setAiError(err instanceof Error ? err.message : "Erreur de génération IA.");
+      }
+    });
+  }
 
   useEffect(() => {
     if (!dirty) return;
@@ -397,7 +454,34 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         </div>
       )}
 
-      <Section title="Descriptions">
+      <Section
+        title="Descriptions"
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => runGenerate("long")}
+              disabled={aiPending}
+              className="rounded-full border border-[#e0af6e] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] transition-colors hover:bg-[#e0af6e] hover:text-white disabled:opacity-50"
+            >
+              {aiPending && aiMode === "long" ? "Génération en cours…" : "Générer les descriptions (IA)"}
+            </button>
+            <button
+              type="button"
+              onClick={() => runGenerate("short")}
+              disabled={aiPending}
+              className="rounded-full border border-[#e0af6e] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] transition-colors hover:bg-[#e0af6e] hover:text-white disabled:opacity-50"
+            >
+              {aiPending && aiMode === "short" ? "Génération en cours…" : "Générer le pitch court (IA)"}
+            </button>
+          </div>
+        }
+      >
+        {aiError && (
+          <p className="md:col-span-2 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {aiError}
+          </p>
+        )}
         <Field label="Titre (FR)">
           <input
             value={form.title_fr}
