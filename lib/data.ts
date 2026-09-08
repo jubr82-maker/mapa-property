@@ -593,6 +593,13 @@ function mapPublicRows(
         typeof r.price_on_demand === "boolean"
           ? (r.price_on_demand as boolean)
           : null,
+      // AJOUT 2026-09-08 : tolérant — colonne absente (migration non
+      // appliquée) ⇒ undefined ⇒ null ⇒ la fiche retombe sur "Off-Market"
+      // via le fallback côté page.
+      transaction:
+        r.transaction === "sale" || r.transaction === "rent"
+          ? (r.transaction as "sale" | "rent")
+          : null,
     };
   });
 }
