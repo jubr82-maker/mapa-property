@@ -6,7 +6,9 @@ export const dynamic = "force-dynamic";
 import {
   OFFMARKET_STATUS_LABELS,
   OFFMARKET_STATUS_TONES,
+  OFFMARKET_TRANSACTION_LABELS,
   type OffmarketStatus,
+  type OffmarketTransaction,
 } from "@/lib/admin/offmarket";
 import { fetchOffmarketAdminList } from "@/lib/admin/offmarket-server";
 import { OffmarketListFilters } from "@/components/admin/OffmarketListFilters";
@@ -14,7 +16,12 @@ import { OffmarketListFilters } from "@/components/admin/OffmarketListFilters";
 export default async function AdminOffmarketListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; type?: string; q?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    type?: string;
+    transaction?: string;
+    q?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const all = await fetchOffmarketAdminList();
@@ -22,6 +29,7 @@ export default async function AdminOffmarketListPage({
   const filtered = all.filter((row) => {
     if (sp.status && row.status !== sp.status) return false;
     if (sp.type && row.property_type !== sp.type) return false;
+    if (sp.transaction && (row.transaction ?? "sale") !== sp.transaction) return false;
     if (sp.q) {
       const needle = sp.q.toLowerCase();
       const hay = `${row.reference ?? ""} ${row.title ?? ""}`.toLowerCase();
@@ -103,6 +111,9 @@ export default async function AdminOffmarketListPage({
                     </td>
                     <td className="px-4 py-3 text-xs uppercase tracking-wide text-[#3D4F63]/80">
                       {row.property_type ?? "—"}
+                      <span className="ml-1.5 text-[#e0af6e]">
+                        · {OFFMARKET_TRANSACTION_LABELS[(row.transaction ?? "sale") as OffmarketTransaction]}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-xs text-[#3D4F63]">
                       {row.price_estimate

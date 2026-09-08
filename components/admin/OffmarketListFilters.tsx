@@ -5,6 +5,8 @@ import { useTransition } from "react";
 import {
   OFFMARKET_STATUSES,
   OFFMARKET_STATUS_LABELS,
+  OFFMARKET_TRANSACTIONS,
+  OFFMARKET_TRANSACTION_LABELS,
   PROPERTY_TYPES,
 } from "@/lib/admin/offmarket";
 
@@ -52,6 +54,18 @@ export function OffmarketListFilters() {
         {PROPERTY_TYPES.map((t) => (
           <option key={t} value={t}>
             {t}
+          </option>
+        ))}
+      </select>
+      <select
+        value={sp.get("transaction") ?? ""}
+        onChange={(e) => setParam("transaction", e.target.value)}
+        className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm"
+      >
+        <option value="">Vente + Location</option>
+        {OFFMARKET_TRANSACTIONS.map((tx) => (
+          <option key={tx} value={tx}>
+            {OFFMARKET_TRANSACTION_LABELS[tx]}
           </option>
         ))}
       </select>
