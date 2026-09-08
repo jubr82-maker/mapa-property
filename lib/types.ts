@@ -64,6 +64,10 @@ export interface PropertyOffmarket {
   id: string;
   title: string | null;
   internal_ref: string | null;
+  // AJOUT 2026-09-08 : distinction Vente/Location, alignée sur les
+  // valeurs de Transaction (sale/rent). Nullable — colonne
+  // potentiellement absente tant que la migration n'est pas appliquée.
+  transaction: "sale" | "rent" | null;
   country: string | null;
   city_label: string | null;
   surface_hab: number | null;
