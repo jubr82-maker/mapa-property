@@ -6,6 +6,8 @@ import Link from "next/link";
 import {
   OFFMARKET_STATUSES,
   OFFMARKET_STATUS_LABELS,
+  OFFMARKET_TRANSACTIONS,
+  OFFMARKET_TRANSACTION_LABELS,
   PROPERTY_TYPES,
   PROPERTY_TYPE_LABELS,
   IMMEUBLE_SUB_TYPES,
@@ -229,6 +231,20 @@ export function OffmarketForm({
                 {PROPERTY_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {PROPERTY_TYPE_LABELS[t]}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Transaction">
+              <select
+                name="transaction"
+                defaultValue={row?.transaction ?? "sale"}
+                className={inputCls}
+                required
+              >
+                {OFFMARKET_TRANSACTIONS.map((tx) => (
+                  <option key={tx} value={tx}>
+                    {OFFMARKET_TRANSACTION_LABELS[tx]}
                   </option>
                 ))}
               </select>
