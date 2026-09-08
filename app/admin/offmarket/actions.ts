@@ -62,6 +62,7 @@ const OPTIONAL_OFFMARKET_COLUMNS = [
   "city_real",
   "region",
   "surface_terrain_ares",
+  "transaction",
   "price_estimate",
   "price_label",
   "reference",
@@ -238,7 +239,9 @@ function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, s
       : rawPriceMode === "on_demand"
         ? "exact"
         : rawPriceMode;
-  const priceLabelByMode = computePriceLabel(priceMode, formData);
+  const transaction: "sale" | "rent" =
+    str(formData.get("transaction")) === "rent" ? "rent" : "sale";
+  const priceLabelByMode = computePriceLabel(priceMode, formData, transaction);
 
   return {
     reference,
@@ -247,6 +250,7 @@ function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, s
     internal_ref: reference,
     property_type: propertyType,
     type: propertyType,
+    transaction,
     sub_type: str(formData.get("sub_type")),
     country: str(formData.get("country")) ?? "LU",
     region: str(formData.get("region")),
@@ -433,23 +437,27 @@ function parseCompositionFromFormData(formData: FormData): {
 function computePriceLabel(
   mode: "exact" | "range" | "custom" | "on_request" | "on_demand",
   formData: FormData,
+  transaction: "sale" | "rent" = "sale",
 ): string {
   const fmt = (n: number) =>
     new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n) + " €";
+  // Aligné sur PropertyCard.formatPrice (circuit classique) : suffixe
+  // "/ mois" pour les locations, jamais pour les ventes ni "sur demande".
+  const suffix = transaction === "rent" ? " / mois" : "";
 
   if (mode === "on_demand") {
     return "Prix sur demande";
   }
   if (mode === "exact") {
     const estimate = num(formData.get("price_estimate"));
-    return estimate ? fmt(estimate) : "Prix sur demande";
+    return estimate ? fmt(estimate) + suffix : "Prix sur demande";
   }
   if (mode === "range") {
     const min = num(formData.get("price_min"));
     const max = num(formData.get("price_max"));
-    if (min && max) return `${fmt(min)} – ${fmt(max)}`;
-    if (min) return `À partir de ${fmt(min)}`;
-    if (max) return `Jusqu'à ${fmt(max)}`;
+    if (min && max) return `${fmt(min)} – ${fmt(max)}${suffix}`;
+    if (min) return `À partir de ${fmt(min)}${suffix}`;
+    if (max) return `Jusqu'à ${fmt(max)}${suffix}`;
     return "Prix sur demande";
   }
   if (mode === "custom") {
