@@ -21,6 +21,15 @@ export const OFFMARKET_STATUS_TONES: Record<OffmarketStatus, string> = {
   withdrawn: "bg-red-100 text-red-700",
 };
 
+export type OffmarketTransaction = "sale" | "rent";
+
+export const OFFMARKET_TRANSACTIONS: OffmarketTransaction[] = ["sale", "rent"];
+
+export const OFFMARKET_TRANSACTION_LABELS: Record<OffmarketTransaction, string> = {
+  sale: "Vente",
+  rent: "Location",
+};
+
 export const PROPERTY_TYPES = [
   "maison",
   "villa",
@@ -131,6 +140,11 @@ export interface OffmarketRow {
   status: OffmarketStatus;
   title: string | null;
   property_type: string | null;
+  // AJOUT 2026-09-08 : distinction Vente/Location. Nullable côté TS
+  // (colonne potentiellement absente tant que la migration n'est pas
+  // appliquée sur tous les environnements) même si NOT NULL DEFAULT
+  // 'sale' en base.
+  transaction: OffmarketTransaction | null;
   country: string | null;
   region: string | null;
   city_anonymized: string | null;
