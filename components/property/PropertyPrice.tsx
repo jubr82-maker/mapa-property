@@ -75,6 +75,7 @@ export function PropertyPrice({
   priceEstimate,
   priceIndicative,
   priceDisplay,
+  transaction,
   locale,
   className = "",
 }: {
@@ -88,11 +89,16 @@ export function PropertyPrice({
   priceIndicative?: number | string | null;
   /** Peut être un nombre OU une chaîne numérique. Jamais un libellé legacy. */
   priceDisplay?: number | string | null;
+  /** AJOUT 2026-09-08 : 'rent' suffixe "/ mois" sur tout prix chiffré
+   *  (jamais sur "Prix sur demande"). Aligné sur PropertyCard.formatPrice
+   *  du circuit classique. undefined/null/'sale' ⇒ pas de suffixe. */
+  transaction?: string | null;
   locale: string;
   className?: string;
 }) {
   let masked = false;
   let text: string;
+  const suffix = transaction === "rent" ? " / mois" : "";
 
   const onDemandLabel = priceOnDemandLabel(locale);
 
@@ -113,16 +119,16 @@ export function PropertyPrice({
 
     if (priceMode === "range" && min != null && max != null) {
       // 3. Fourchette.
-      text = `${formatPrice(min, locale)} – ${formatPrice(max, locale)}`;
+      text = `${formatPrice(min, locale)} – ${formatPrice(max, locale)}${suffix}`;
     } else if (priceMode === "exact" && estimate != null) {
       // 4. Prix exact.
-      text = formatPrice(estimate, locale);
+      text = formatPrice(estimate, locale) + suffix;
     } else if (indicative != null) {
       // 5. Prix indicatif.
-      text = formatPrice(indicative, locale);
+      text = formatPrice(indicative, locale) + suffix;
     } else if (displayNum != null) {
       // 6. price_display numérique.
-      text = formatPrice(displayNum, locale);
+      text = formatPrice(displayNum, locale) + suffix;
     } else {
       // 7. Rien d'exploitable → sur demande.
       masked = true;
