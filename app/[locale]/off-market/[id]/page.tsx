@@ -91,6 +91,14 @@ export default async function OffMarketDetailPage({
   const tf = await getTranslations({ locale, namespace: "fiche" });
 
   const title = property.title ?? "—";
+  // AJOUT 2026-09-08 : badge meta bascule sur Vente/Location (tx_sale/
+  // tx_rent, mêmes clés que le circuit classique) — "OFF-MARKET" reste
+  // porté par l'eyebrow ci-dessous, pas de redondance. Fallback sur
+  // tx_offmarket si transaction est absente (migration pas encore
+  // appliquée / ligne pas encore backfillée).
+  const txMeta = property.transaction
+    ? tProperty(`tx_${property.transaction}`)
+    : tProperty("tx_offmarket");
 
   // Galerie verrouillée préservée (visuels floutés sous NDA).
   const lockedImages = [
@@ -218,10 +226,11 @@ export default async function OffMarketDetailPage({
               priceMax={property.price_max}
               priceEstimate={property.price_estimate}
               priceDisplay={property.price_display}
+              transaction={property.transaction}
               locale={locale}
             />
           }
-          meta={tProperty("tx_offmarket")}
+          meta={txMeta}
         />
 
         {/* Cover confidentiel standardisé (BUG 2) — jamais le visuel réel,
