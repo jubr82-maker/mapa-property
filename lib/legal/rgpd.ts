@@ -17,7 +17,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
   fr: {
     eyebrow: "Légal",
     title: "Politique de protection des données (RGPD)",
-    updatedAt: "Mise à jour : 2026-05-08",
+    updatedAt: "Mise à jour : 2026-09-14",
     pdfLabel: "Télécharger le PDF officiel",
     intro: [
       "MAPA Synergy Sàrl (« MAPA Property ») accorde une importance particulière à la protection de vos données personnelles. La présente politique vous informe sur les traitements effectués via le site mapaproperty.lu, conformément au Règlement (UE) 2016/679 (RGPD) et à la loi luxembourgeoise du 1er août 2018.",
@@ -103,7 +103,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "10. Cookies",
         paragraphs: [
-          "Le site utilise un nombre minimal de cookies techniques nécessaires à son fonctionnement (préférence de langue, mode jour/nuit, favoris). Aucun cookie publicitaire n'est utilisé. Les cookies de mesure d'audience (Vercel Analytics) sont anonymisés et ne nécessitent pas de consentement explicite au sens de l'article 5(3) ePrivacy.",
+          "Le site utilise des cookies strictement nécessaires à son fonctionnement (préférence de langue, mode jour/nuit, favoris) — toujours actifs, non désactivables. Les cookies de mesure d'audience (statistiques internes, Vercel Analytics, Google Analytics) et, à terme, les cookies marketing (Meta Pixel, Google Ads) ne sont déposés qu'après votre consentement explicite, recueilli via la bannière affichée dès votre première visite. Vous pouvez modifier votre choix à tout moment via le lien « Gérer les cookies » en pied de page.",
         ],
       },
       {
@@ -124,7 +124,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
   en: {
     eyebrow: "Legal",
     title: "Privacy Policy (GDPR)",
-    updatedAt: "Updated: 2026-05-08",
+    updatedAt: "Updated: 2026-09-14",
     pdfLabel: "Download the official PDF",
     intro: [
       "The French version of this policy is the legally binding version. The English version is provided for information only.",
@@ -188,7 +188,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "10. Cookies",
         paragraphs: [
-          "Minimal technical cookies only. Anonymised analytics. No advertising cookies.",
+          "The site uses strictly necessary cookies (language preference, dark/light mode, favourites) — always active, cannot be disabled. Audience-measurement cookies (internal statistics, Vercel Analytics, Google Analytics) and, in the future, marketing cookies (Meta Pixel, Google Ads) are only set after your explicit consent, collected via the banner shown on your first visit. You can change your choice at any time via the \"Manage cookies\" link in the footer.",
         ],
       },
       {
@@ -209,7 +209,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
   de: {
     eyebrow: "Rechtliches",
     title: "Datenschutzerklärung (DSGVO)",
-    updatedAt: "Aktualisiert: 2026-05-08",
+    updatedAt: "Aktualisiert: 2026-09-14",
     pdfLabel: "Offizielles PDF herunterladen",
     intro: [
       "Maßgeblich ist die französische Fassung dieser Erklärung. Die deutsche Fassung dient nur zur Information.",
@@ -273,7 +273,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "10. Cookies",
         paragraphs: [
-          "Minimale technische Cookies. Anonyme Statistik. Keine Werbe-Cookies.",
+          "Die Website verwendet unbedingt erforderliche Cookies (Sprachpräferenz, Hell/Dunkel-Modus, Favoriten) — immer aktiv, nicht deaktivierbar. Statistik-Cookies (interne Statistik, Vercel Analytics, Google Analytics) und künftig Marketing-Cookies (Meta Pixel, Google Ads) werden erst nach Ihrer ausdrücklichen Einwilligung gesetzt, die über das beim ersten Besuch angezeigte Banner eingeholt wird. Sie können Ihre Wahl jederzeit über den Link „Cookies verwalten“ im Footer ändern.",
         ],
       },
       {
