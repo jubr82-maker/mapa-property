@@ -7,24 +7,16 @@
  *
  * - Fire-and-forget : ne bloque jamais le rendu.
  * - Best-effort : si l'endpoint /api/track échoue, on log en console et on continue.
- * - Pas de tracking si user a refusé cookies (cf. `mp_cookie_consent` localStorage).
+ * - Opt-in strict (RGPD) : aucun événement n'est envoyé tant que le visiteur
+ *   n'a pas explicitement accepté la catégorie "Statistiques" via la
+ *   bannière cookies (cf. lib/consent/store.ts). Pas de décision ⇒ pas de
+ *   tracking, jamais d'opt-out implicite.
  */
 
 "use client";
 
+import { hasStatsConsent } from "@/lib/consent/store";
 import { SESSION_COOKIE_NAME, type TrackEventPayload, type TrackingEventType } from "./types";
-
-const CONSENT_KEY = "mp_cookie_consent";
-
-function hasConsent(): boolean {
-  if (typeof window === "undefined") return false;
-  // Par défaut on autorise (opt-out) ; explicit "denied" stoppe.
-  try {
-    return localStorage.getItem(CONSENT_KEY) !== "denied";
-  } catch {
-    return true;
-  }
-}
 
 function getOrCreateSessionId(): string {
   if (typeof document === "undefined") return "";
@@ -47,7 +39,7 @@ export function track(
   eventData?: Record<string, unknown>,
 ): void {
   if (typeof window === "undefined") return;
-  if (!hasConsent()) return;
+  if (!hasStatsConsent()) return;
 
   const sessionId = getOrCreateSessionId();
   const payload: TrackEventPayload & { session_id: string } = {
