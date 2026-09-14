@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ContactReveal } from "@/components/contact-reveal";
+import { ManageCookiesLink } from "@/components/consent/ManageCookiesLink";
 
 const colServices = [
   { href: "/services/vendre", key: "sell" },
@@ -98,6 +99,9 @@ export function Footer() {
                 {t(l.key)}
               </FooterLink>
             ))}
+            <li>
+              <ManageCookiesLink label={t("manage_cookies")} />
+            </li>
           </FooterCol>
         </div>
 
