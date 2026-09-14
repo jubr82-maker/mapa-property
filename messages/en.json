@@ -66,7 +66,8 @@
     "cta_title": "Selling a property or looking for your future home?",
     "cta_subtitle": "Entrust us with your project under mandate — exclusive sale or bespoke search, in Luxembourg and internationally.",
     "cta_exclusive": "Exclusive Mandate",
-    "cta_search": "Search Mandate"
+    "cta_search": "Search Mandate",
+    "manage_cookies": "Manage cookies"
   },
   "hero": {
     "pill": "Lux. & Intl.",
@@ -1290,5 +1291,20 @@
       "ES": "Spain",
       "PT": "Portugal"
     }
+  },
+  "cookies": {
+    "eyebrow": "Cookies & privacy",
+    "description": "We use cookies that are essential for the site to work. With your consent, we also use audience-measurement cookies and, in the future, marketing cookies.",
+    "privacy_link": "Learn more in our privacy policy",
+    "necessary_title": "Necessary",
+    "necessary_description": "Required for the site to function (language, dark/light mode, favourites). Always active.",
+    "stats_title": "Statistics",
+    "stats_description": "Anonymised audience measurement (internal statistics, Vercel Analytics, Google Analytics coming soon) to understand site usage.",
+    "marketing_title": "Marketing",
+    "marketing_description": "Targeted advertising (Meta Pixel, Google Ads) — coming soon, off by default.",
+    "accept_all": "Accept all",
+    "reject_all": "Reject all",
+    "customize": "Customize",
+    "save": "Save my choices"
   }
 }

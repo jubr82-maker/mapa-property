@@ -66,7 +66,8 @@
     "cta_title": "Vous vendez un bien ou recherchez votre futur chez-vous ?",
     "cta_subtitle": "Confiez-nous votre projet sous mandat — vente exclusive ou recherche sur-mesure, Luxembourg et international.",
     "cta_exclusive": "Mandat Exclusif",
-    "cta_search": "Mandat Recherche"
+    "cta_search": "Mandat Recherche",
+    "manage_cookies": "Gérer les cookies"
   },
   "hero": {
     "pill": "Lux. & Intl.",
@@ -1290,5 +1291,20 @@
       "ES": "Espagne",
       "PT": "Portugal"
     }
+  },
+  "cookies": {
+    "eyebrow": "Cookies & vie privée",
+    "description": "Nous utilisons des cookies indispensables au fonctionnement du site. Avec votre accord, nous utilisons aussi des cookies de mesure d'audience et, à terme, marketing.",
+    "privacy_link": "En savoir plus dans notre politique de confidentialité",
+    "necessary_title": "Nécessaires",
+    "necessary_description": "Indispensables au fonctionnement du site (langue, mode jour/nuit, favoris). Toujours actifs.",
+    "stats_title": "Statistiques",
+    "stats_description": "Mesure d'audience anonymisée (statistiques internes, Vercel Analytics, Google Analytics à venir) pour comprendre l'usage du site.",
+    "marketing_title": "Marketing",
+    "marketing_description": "Publicité ciblée (Meta Pixel, Google Ads) — fonctionnalité à venir, désactivée par défaut.",
+    "accept_all": "Tout accepter",
+    "reject_all": "Tout refuser",
+    "customize": "Personnaliser",
+    "save": "Enregistrer mes choix"
   }
 }

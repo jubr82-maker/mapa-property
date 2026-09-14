@@ -66,7 +66,8 @@
     "cta_title": "Verkaufen Sie eine Immobilie oder suchen Sie Ihr zukünftiges Zuhause?",
     "cta_subtitle": "Vertrauen Sie uns Ihr Projekt unter Mandat an — Exklusivverkauf oder maßgeschneiderte Suche, in Luxemburg und international.",
     "cta_exclusive": "Exklusivmandat",
-    "cta_search": "Suchmandat"
+    "cta_search": "Suchmandat",
+    "manage_cookies": "Cookies verwalten"
   },
   "hero": {
     "pill": "Lux. & Intl.",
@@ -1290,5 +1291,20 @@
       "ES": "Spanien",
       "PT": "Portugal"
     }
+  },
+  "cookies": {
+    "eyebrow": "Cookies & Datenschutz",
+    "description": "Wir verwenden Cookies, die für den Betrieb der Website notwendig sind. Mit Ihrer Zustimmung nutzen wir außerdem Statistik-Cookies und künftig Marketing-Cookies.",
+    "privacy_link": "Mehr dazu in unserer Datenschutzerklärung",
+    "necessary_title": "Notwendig",
+    "necessary_description": "Für den Betrieb der Website erforderlich (Sprache, Hell/Dunkel-Modus, Favoriten). Immer aktiv.",
+    "stats_title": "Statistik",
+    "stats_description": "Anonymisierte Reichweitenmessung (interne Statistik, Vercel Analytics, demnächst Google Analytics) zum Verständnis der Websitenutzung.",
+    "marketing_title": "Marketing",
+    "marketing_description": "Zielgerichtete Werbung (Meta Pixel, Google Ads) — demnächst verfügbar, standardmäßig deaktiviert.",
+    "accept_all": "Alle akzeptieren",
+    "reject_all": "Alle ablehnen",
+    "customize": "Anpassen",
+    "save": "Auswahl speichern"
   }
 }
