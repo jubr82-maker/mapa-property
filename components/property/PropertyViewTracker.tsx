@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useLocale } from "next-intl";
 import { track } from "@/lib/tracking/track";
+import { hasStatsConsent } from "@/lib/consent/store";
 
 interface Props {
   propertyId: string;
@@ -28,14 +29,19 @@ export function PropertyViewTracker({
 
   useEffect(() => {
     if (!propertyId) return;
-    fetch("/api/track-view", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ propertyId, locale }),
-      keepalive: true,
-    }).catch(() => {
-      /* silent */
-    });
+    // Opt-in strict (RGPD) : ce fetch contournait auparavant track() /
+    // hasStatsConsent() — il écrit dans property_views, donc soumis au
+    // même consentement "Statistiques" que le reste du tracking.
+    if (hasStatsConsent()) {
+      fetch("/api/track-view", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId, locale }),
+        keepalive: true,
+      }).catch(() => {
+        /* silent */
+      });
+    }
 
     track("property_view", {
       property_id: propertyId,
