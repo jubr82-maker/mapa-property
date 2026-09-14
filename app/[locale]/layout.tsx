@@ -13,6 +13,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ChatbotWidgetLoader } from "@/components/chatbot/ChatbotWidgetLoader";
 import { ConsentGatedAnalytics } from "@/components/consent/ConsentGatedAnalytics";
 import { ConsentGatedMarketing } from "@/components/consent/ConsentGatedMarketing";
+import { CookieConsentBanner } from "@/components/consent/CookieConsentBanner";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 import { AmbientBackgroundLite } from "@/components/effects/AmbientBackgroundLite";
@@ -243,6 +244,7 @@ export default async function LocaleLayout({
               <Footer />
             </div>
             <ChatbotWidgetLoader />
+            <CookieConsentBanner />
           </NextIntlClientProvider>
         </ThemeProvider>
         <ConsentGatedAnalytics cfToken={process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN} />
