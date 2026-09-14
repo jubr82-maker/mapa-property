@@ -11,9 +11,8 @@ import { Header } from "@/components/layout/Header";
 import { CtaBand } from "@/components/layout/CtaBand";
 import { Footer } from "@/components/layout/Footer";
 import { ChatbotWidgetLoader } from "@/components/chatbot/ChatbotWidgetLoader";
-import Script from "next/script";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ConsentGatedAnalytics } from "@/components/consent/ConsentGatedAnalytics";
+import { ConsentGatedMarketing } from "@/components/consent/ConsentGatedMarketing";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 import { AmbientBackgroundLite } from "@/components/effects/AmbientBackgroundLite";
@@ -246,15 +245,8 @@ export default async function LocaleLayout({
             <ChatbotWidgetLoader />
           </NextIntlClientProvider>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
-        {process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN ? (
-          <Script
-            src="https://static.cloudflareinsights.com/beacon.min.js"
-            data-cf-beacon={`{"token": "${process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN}"}`}
-            strategy="afterInteractive"
-          />
-        ) : null}
+        <ConsentGatedAnalytics cfToken={process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN} />
+        <ConsentGatedMarketing />
       </body>
     </html>
   );
