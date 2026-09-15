@@ -401,7 +401,14 @@ export default async function PropertyPage({
               searchCta: tf("search_mandate_cta"),
             }}
             searchMandateHref={`/mandats/recherche?ref=${property.slug}&type=${propertyType ?? ""}&country=${property.country ?? ""}`}
-            contact={<ContactReveal variant="sidebar" align="left" />}
+            contact={
+              <ContactReveal
+                variant="sidebar"
+                align="left"
+                propertyId={property.slug}
+                propertyTitle={title}
+              />
+            }
           />
         </div>
 

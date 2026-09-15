@@ -300,7 +300,14 @@ export default async function OffMarketDetailPage({
               searchCta: tf("search_mandate_cta"),
             }}
             searchMandateHref={`/mandats/recherche?ref=${property.id}&country=${property.country ?? ""}`}
-            contact={<ContactReveal variant="sidebar" align="left" />}
+            contact={
+              <ContactReveal
+                variant="sidebar"
+                align="left"
+                propertyId={property.id}
+                propertyTitle={title}
+              />
+            }
           />
         </div>
 

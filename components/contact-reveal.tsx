@@ -13,6 +13,10 @@ interface ContactRevealProps {
   align?: Align;
   theme?: Theme;
   className?: string;
+  /** Bien concerné (fiche bien / off-market) — transmis au tracking pour
+   *  identifier quels biens génèrent des leads. Absent hors contexte bien. */
+  propertyId?: string;
+  propertyTitle?: string;
 }
 
 // Coordonnees en pieces — assemblees uniquement APRES clic, jamais en SSR.
@@ -49,6 +53,8 @@ export function ContactReveal({
   align = "left",
   theme = "light",
   className = "",
+  propertyId,
+  propertyTitle,
 }: ContactRevealProps) {
   const t = useTranslations("contact");
   const [revealed, setRevealed] = useState(false);
@@ -80,10 +86,19 @@ export function ContactReveal({
     return true;
   }
 
+  function trackReveal(target: string) {
+    track("contact_reveal", {
+      variant,
+      target,
+      property_id: propertyId,
+      property_title: propertyTitle,
+    });
+  }
+
   function handleReveal() {
     if (!guard()) return;
     setRevealed(true);
-    track("contact_reveal", { variant, target: "reveal" });
+    trackReveal("reveal");
   }
 
   const isDark = theme === "dark";
@@ -168,9 +183,7 @@ export function ContactReveal({
             href={`tel:${buildPhoneTel(PHONE_JULIEN_PARTS)}`}
             ariaLabel="Appeler Julien Brebion"
             icon={<PhoneIcon />}
-            onClick={() =>
-              track("contact_reveal", { variant, target: "call_julien" })
-            }
+            onClick={() => trackReveal("call_julien")}
             linkBase={linkBase}
             iconColor={iconColor}
             variant={variant}
@@ -181,9 +194,7 @@ export function ContactReveal({
             href={`mailto:${buildEmail(EMAIL_JULIEN_USER)}`}
             ariaLabel="Ecrire un email"
             icon={<MailIcon />}
-            onClick={() =>
-              track("contact_reveal", { variant, target: "email" })
-            }
+            onClick={() => trackReveal("email")}
             linkBase={linkBase}
             iconColor={iconColor}
             variant={variant}
@@ -195,9 +206,7 @@ export function ContactReveal({
             href={`tel:${buildPhoneTel(PHONE_SECONDARY_PARTS)}`}
             ariaLabel="Appeler le numero secondaire MAPA Property"
             icon={<PhoneIcon />}
-            onClick={() =>
-              track("contact_reveal", { variant, target: "call_secondary" })
-            }
+            onClick={() => trackReveal("call_secondary")}
             linkBase={linkBase}
             iconColor={iconColor}
             variant={variant}
@@ -208,9 +217,7 @@ export function ContactReveal({
             href={`mailto:${buildEmail(EMAIL_ADMIN_USER)}`}
             ariaLabel="Ecrire un email a l'administration MAPA Property"
             icon={<MailIcon />}
-            onClick={() =>
-              track("contact_reveal", { variant, target: "email_admin" })
-            }
+            onClick={() => trackReveal("email_admin")}
             linkBase={linkBase}
             iconColor={iconColor}
             variant={variant}
