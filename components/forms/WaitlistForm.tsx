@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Turnstile } from "@/components/ui/Turnstile";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/tracking/track";
 
 type Status = "idle" | "submitting" | "success" | "error";
 type ErrorKind = "captcha" | "invalid" | "generic";
@@ -58,6 +59,7 @@ export function WaitlistForm() {
         setStatus("success");
         form.reset();
         setBudgetValidated("non");
+        track("form_submit", { form: "waitlist" });
         return;
       }
       if (res.status === 403) setErrorKind("captcha");
