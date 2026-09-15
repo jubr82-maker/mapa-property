@@ -7,11 +7,15 @@ import { CountrySelect } from "@/components/ui/CountrySelect";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
+import { track } from "@/lib/tracking/track";
 
 interface Props {
   type: string;
   source?: string;
   propertyRef?: string;
+  /** Titre du bien concerné (fiche bien) — transmis à GA4/tracking pour
+   *  identifier quels biens génèrent des leads. Absent hors contexte bien. */
+  propertyTitle?: string;
   defaultMessage?: string;
   showSubject?: boolean;
 }
@@ -34,6 +38,7 @@ export function ContactForm({
   type,
   source = "website",
   propertyRef,
+  propertyTitle,
   defaultMessage = "",
   showSubject = false,
 }: Props) {
@@ -95,6 +100,12 @@ export function ContactForm({
       if (res.ok) {
         setStatus("success");
         form.reset();
+        track("form_submit", {
+          form: type,
+          source,
+          property_id: propertyRef,
+          property_title: propertyTitle,
+        });
         return;
       }
       if (res.status === 403) setErrorKind("captcha");

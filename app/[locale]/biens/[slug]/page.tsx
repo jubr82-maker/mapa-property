@@ -455,6 +455,7 @@ export default async function PropertyPage({
             type="property_request"
             source={`property:${property.slug}`}
             propertyRef={property.slug}
+            propertyTitle={title}
             defaultMessage={`Bonjour, je souhaite plus d'informations sur le bien : ${title}.`}
           />
         </section>

@@ -11,12 +11,35 @@
  *   n'a pas explicitement accepté la catégorie "Statistiques" via la
  *   bannière cookies (cf. lib/consent/store.ts). Pas de décision ⇒ pas de
  *   tracking, jamais d'opt-out implicite.
+ * - Les événements "lead" (cf. GA4_LEAD_EVENTS) sont AUSSI forwardés à GA4
+ *   (gtag) en plus de /api/track — même garde hasStatsConsent(), pas de
+ *   logique de consentement dupliquée. Silencieux si GA4 n'est pas monté
+ *   (pas de NEXT_PUBLIC_GA4_MEASUREMENT_ID, cf. ConsentGatedAnalytics.tsx).
  */
 
 "use client";
 
 import { hasStatsConsent } from "@/lib/consent/store";
 import { SESSION_COOKIE_NAME, type TrackEventPayload, type TrackingEventType } from "./types";
+
+// Correspondance events internes -> conversions GA4. Seuls les types listés
+// ici partent vers GA4 (les événements d'engagement pur — page_view,
+// property_view, scroll_depth_75, sibling_carousel_*, etc. — n'y figurent
+// pas volontairement, pour ne pas polluer les conversions). generate_lead
+// = nom d'événement GA4 recommandé pour toute action avec collecte de
+// coordonnées. simulator_submit = nom distinct pour la capacité d'emprunt,
+// qui ne collecte aucune coordonnée (pas un vrai lead au sens GA4).
+const GA4_LEAD_EVENTS: Partial<Record<TrackingEventType, string>> = {
+  form_submit: "generate_lead",
+  estimation_compute: "generate_lead",
+  contact_reveal: "generate_lead",
+  emprunt_simulate: "simulator_submit",
+};
+
+function sendToGA4(gaEventName: string, eventData?: Record<string, unknown>): void {
+  if (typeof window.gtag !== "function") return;
+  window.gtag("event", gaEventName, eventData ?? {});
+}
 
 function getOrCreateSessionId(): string {
   if (typeof document === "undefined") return "";
@@ -40,6 +63,9 @@ export function track(
 ): void {
   if (typeof window === "undefined") return;
   if (!hasStatsConsent()) return;
+
+  const ga4EventName = GA4_LEAD_EVENTS[eventType];
+  if (ga4EventName) sendToGA4(ga4EventName, eventData);
 
   const sessionId = getOrCreateSessionId();
   const payload: TrackEventPayload & { session_id: string } = {
