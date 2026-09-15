@@ -98,6 +98,7 @@ export function NDAForm({ propertyRef, propertyTitle }: Props) {
       track("form_submit", {
         form: "nda_request",
         property_id: propertyRef,
+        property_title: propertyTitle,
       });
     } catch {
       setStatus("error");
