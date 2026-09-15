@@ -11,16 +11,19 @@ import {
   Sparkles,
   Calculator,
   Phone,
+  Search,
 } from "lucide-react";
 import {
   loadVisitorIntelligence,
   BUCKET_LABELS,
+  BUDGET_BAND_LABELS,
   type RankedItem,
   type ViewedConversionItem,
   type RecentAction,
 } from "@/lib/admin/visitor-intelligence";
 import { KpiCard } from "@/components/admin/analytics/KpiCard";
 import { LineChart } from "@/components/admin/analytics/LineChart";
+import { TopList } from "@/components/admin/analytics/TopList";
 
 export const dynamic = "force-dynamic";
 
@@ -427,6 +430,83 @@ export default async function AdminVisiteursPage() {
             />
             <article className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
               <RankedPropertyList items={data.ndaByProperty.top} unit="demandes" />
+            </article>
+          </>
+        )}
+      </section>
+
+      {/* ============================================================ 7 */}
+      <section className="space-y-6">
+        <SectionHeader
+          eyebrow="7"
+          title="Ce que cherchent vos visiteurs"
+          explanation="Les critères choisis quand un visiteur lance une recherche sur la page Biens — l'info clé pour cibler quels biens rentrer en mandat."
+          Icon={Search}
+        />
+        {!data.available.events ? (
+          <EmptyState>Le suivi des recherches n&apos;est pas encore actif sur ce site.</EmptyState>
+        ) : data.searchDemand.totalSearches === 0 ? (
+          <EmptyState>Aucune recherche enregistrée pour le moment.</EmptyState>
+        ) : (
+          <>
+            <KpiCard
+              label="Recherches · 90 j"
+              value={data.searchDemand.totalSearches}
+              Icon={Search}
+            />
+            <div className="grid gap-6 lg:grid-cols-2">
+              <article className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
+                <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">
+                  Types de biens les plus demandés
+                </h3>
+                <TopList
+                  items={data.searchDemand.topTypes}
+                  unit="recherches"
+                  emptyLabel="Aucun type précisé pour l'instant."
+                />
+              </article>
+              <article className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
+                <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">
+                  Zones les plus demandées
+                </h3>
+                <TopList
+                  items={data.searchDemand.topCities}
+                  unit="recherches"
+                  emptyLabel="Aucune zone précisée pour l'instant."
+                />
+              </article>
+              <article className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
+                <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">
+                  Vente vs Location
+                </h3>
+                <TopList
+                  items={[
+                    { key: "Vente", value: data.searchDemand.transactionSplit.sale },
+                    { key: "Location", value: data.searchDemand.transactionSplit.rent },
+                  ]}
+                  unit="recherches"
+                  emptyLabel="Aucune transaction précisée pour l'instant."
+                />
+              </article>
+              <article className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
+                <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">
+                  Budgets demandés
+                </h3>
+                <TopList
+                  items={data.searchDemand.budgetBands.map((b) => ({
+                    key: BUDGET_BAND_LABELS[b.key],
+                    value: b.value,
+                  }))}
+                  unit="recherches"
+                  emptyLabel="Aucun budget précisé pour l'instant."
+                />
+              </article>
+            </div>
+            <article className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
+              <h3 className="mb-4 font-display text-lg font-bold text-[#3D4F63]">
+                Évolution · recherches par jour, 30 derniers jours
+              </h3>
+              <LineChart data={data.searchDemand.dailySeries} label="recherches" />
             </article>
           </>
         )}
