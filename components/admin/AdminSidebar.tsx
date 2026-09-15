@@ -19,11 +19,13 @@ import {
   Calculator,
   ClipboardList,
   Handshake,
+  Radar,
 } from "lucide-react";
 
 const items = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, match: "exact" as const },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3, match: "prefix" as const },
+  { href: "/admin/visiteurs", label: "Intelligence visiteurs", icon: Radar, match: "prefix" as const },
   { href: "/admin/performance", label: "Performance", icon: Gauge, match: "prefix" as const },
   { href: "/admin/offmarket", label: "Off-Market", icon: Lock, match: "prefix" as const },
   { href: "/admin/estimations", label: "Estimations EVS", icon: Calculator, match: "prefix" as const },
