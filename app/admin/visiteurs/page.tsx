@@ -273,7 +273,7 @@ export default async function AdminVisiteursPage() {
         <SectionHeader
           eyebrow="2"
           title="Biens à retravailler"
-          explanation="Consultés au moins une fois mais jamais contactés — des candidats à revoir (prix, photos, description). Biens classiques uniquement : l'off-market n'a pas encore de compteur de vues."
+          explanation="Consultés au moins une fois mais jamais contactés — des candidats à revoir (prix, photos, description). Biens classiques et off-market."
           Icon={EyeOff}
         />
         {!data.available.views ? (
@@ -302,7 +302,7 @@ export default async function AdminVisiteursPage() {
         <SectionHeader
           eyebrow="3"
           title="Taux de conversion — de la vue au contact"
-          explanation="Sur les biens vus au moins une fois, quelle proportion a généré un contact. Biens classiques uniquement (même limite que ci-dessus)."
+          explanation="Sur les biens vus au moins une fois, quelle proportion a généré un contact. Biens classiques et off-market."
           Icon={TrendingUp}
         />
         {!data.available.views ? (
