@@ -10,6 +10,7 @@ import { NDAForm } from "@/components/forms/NDAForm";
 import { FavoriteHeart } from "@/components/property/FavoriteHeart";
 import { ContactReveal } from "@/components/contact-reveal";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
+import { PropertyViewTracker } from "@/components/property/PropertyViewTracker";
 import { PropertyPrice } from "@/components/property/PropertyPrice";
 import { PropertyVideo } from "@/components/property/PropertyVideo";
 import { FicheHeader } from "@/components/property/fiche/FicheHeader";
@@ -209,6 +210,12 @@ export default async function OffMarketDetailPage({
 
   return (
     <article className="pt-24 lg:pt-32">
+      <PropertyViewTracker
+        propertyId={property.id}
+        commune={property.city_label ?? undefined}
+        price={property.price_estimate}
+        offmarket
+      />
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <FicheHeader
           back={<BackButton fallback="/off-market" />}
