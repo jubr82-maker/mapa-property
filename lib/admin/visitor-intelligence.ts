@@ -129,6 +129,31 @@ function bucketOf(e: Pick<TrackingRow, "event_type" | "event_data">): Bucket | n
   }
 }
 
+export type BudgetBand = "<500k" | "500k-1M" | "1M-2M" | ">2M";
+
+export const BUDGET_BAND_LABELS: Record<BudgetBand, string> = {
+  "<500k": "Moins de 500 000 €",
+  "500k-1M": "500 000 € – 1 M€",
+  "1M-2M": "1 M€ – 2 M€",
+  ">2M": "Plus de 2 M€",
+};
+
+function budgetBandOf(value: number): BudgetBand {
+  if (value < 500_000) return "<500k";
+  if (value < 1_000_000) return "500k-1M";
+  if (value < 2_000_000) return "1M-2M";
+  return ">2M";
+}
+
+export interface SearchDemand {
+  totalSearches: number;
+  topTypes: { key: string; value: number }[];
+  topCities: { key: string; value: number }[];
+  transactionSplit: { sale: number; rent: number };
+  budgetBands: { key: BudgetBand; value: number }[];
+  dailySeries: { date: string; value: number }[];
+}
+
 export interface VisitorIntelligence {
   available: {
     leads: boolean;
@@ -153,6 +178,7 @@ export interface VisitorIntelligence {
     top: RankedItem[];
     total: number;
   };
+  searchDemand: SearchDemand;
 }
 
 export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
@@ -170,7 +196,13 @@ export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
     supabase
       .from("tracking_events")
       .select("event_type,event_data,created_at")
-      .in("event_type", ["contact_reveal", "form_submit", "estimation_compute", "emprunt_simulate"])
+      .in("event_type", [
+        "contact_reveal",
+        "form_submit",
+        "estimation_compute",
+        "emprunt_simulate",
+        "search_query",
+      ])
       .gte("created_at", since(WINDOW_EVENTS_DAYS))
       .order("created_at", { ascending: false })
       .limit(5000),
@@ -382,6 +414,62 @@ export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
     .slice(0, 10);
   const ndaTotal = Array.from(ndaCountByRef.values()).reduce((a, b) => a + b, 0);
 
+  // --- Widget 7 : ce que cherchent les visiteurs (search_query) -----------
+  const searchRows = eventsRows.filter((e) => e.event_type === "search_query");
+
+  const typeCounts: Record<string, number> = {};
+  const cityCounts: Record<string, { label: string; count: number }> = {};
+  const transactionSplit = { sale: 0, rent: 0 };
+  const budgetCounts: Record<BudgetBand, number> = { "<500k": 0, "500k-1M": 0, "1M-2M": 0, ">2M": 0 };
+  const searchDailyTotals: Record<string, number> = {};
+  for (let i = RECENT_DAYS - 1; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86400 * 1000);
+    searchDailyTotals[d.toISOString().slice(0, 10)] = 0;
+  }
+
+  for (const e of searchRows) {
+    const data = e.event_data ?? {};
+
+    const types = Array.isArray(data.types) ? (data.types as unknown[]) : [];
+    for (const t of types) {
+      if (typeof t !== "string" || !t) continue;
+      typeCounts[t] = (typeCounts[t] ?? 0) + 1;
+    }
+
+    if (typeof data.city === "string" && data.city.trim()) {
+      const label = data.city.trim();
+      const key = label.toLowerCase();
+      cityCounts[key] = { label, count: (cityCounts[key]?.count ?? 0) + 1 };
+    }
+
+    if (data.transaction === "sale") transactionSplit.sale += 1;
+    else if (data.transaction === "rent") transactionSplit.rent += 1;
+
+    if (typeof data.budget_max === "number" && data.budget_max > 0) {
+      budgetCounts[budgetBandOf(data.budget_max)] += 1;
+    }
+
+    const day = e.created_at.slice(0, 10);
+    if (day in searchDailyTotals) searchDailyTotals[day] += 1;
+  }
+
+  const topTypes = Object.entries(typeCounts)
+    .map(([key, value]) => ({ key, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+  const topCities = Object.values(cityCounts)
+    .map(({ label, count }) => ({ key: label, value: count }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+  const budgetBands = (Object.keys(BUDGET_BAND_LABELS) as BudgetBand[]).map((key) => ({
+    key,
+    value: budgetCounts[key],
+  }));
+  const searchDailySeries = Object.entries(searchDailyTotals).map(([date, value]) => ({
+    date,
+    value,
+  }));
+
   return {
     available: { leads: leadsAvailable, events: eventsAvailable, views: viewsAvailable },
     topDemand,
@@ -395,5 +483,13 @@ export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
     volumeByType: { dailySeries, counts30d, counts90d },
     recentFeed,
     ndaByProperty: { top: ndaTop, total: ndaTotal },
+    searchDemand: {
+      totalSearches: searchRows.length,
+      topTypes,
+      topCities,
+      transactionSplit,
+      budgetBands,
+      dailySeries: searchDailySeries,
+    },
   };
 }
