@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { DEFAULT_COUNTRY, sortedCountries } from "@/lib/geo/countries";
 import { TypeFilterMultiSelect } from "@/components/property/TypeFilterMultiSelect";
+import { track } from "@/lib/tracking/track";
 
 // "offmarket" retiré (piège UX) : properties.transaction n'accepte que
 // sale/rent (CHECK constraint), l'off-market vit dans une table séparée
@@ -72,6 +73,17 @@ export function FilterBar() {
     if (transaction) sp.set("transaction", transaction);
     if (budget) sp.set("budget_max", budget);
     if (bedrooms) sp.set("min_bedrooms", bedrooms);
+    // Un seul event par recherche appliquée (submit du formulaire) —
+    // jamais à la frappe, jamais sur reset(). Gate consentement "stats"
+    // déjà géré dans track() lui-même.
+    track("search_query", {
+      country: country || undefined,
+      city: city.trim() || undefined,
+      types: types.length > 0 ? types : undefined,
+      transaction: transaction || undefined,
+      budget_max: budget ? Number(budget) : undefined,
+      min_bedrooms: bedrooms ? Number(bedrooms) : undefined,
+    });
     startTransition(() => {
       router.replace(`/biens?${sp.toString()}`);
     });
