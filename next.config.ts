@@ -6,7 +6,11 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
+  // GA4 (gtag.js) — chargé uniquement après consentement "Statistiques"
+  // (cf. ConsentGatedAnalytics.tsx) mais nécessite ces domaines en CSP
+  // pour fonctionner du tout quand il est monté, sinon le script/les
+  // hits de mesure sont bloqués silencieusement par le navigateur.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://www.googletagmanager.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https: blob:",
   // media-src indispensable pour la vidéo hero Supabase (cross-origin).
@@ -14,7 +18,7 @@ const csp = [
   // ressource <video> hors origine, ce qui causait le hero noir.
   "media-src 'self' https://*.supabase.co https: blob: data:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://sdw-wsrest.ecb.europa.eu https://cloudflareinsights.com https://api.qrserver.com",
+  "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://sdw-wsrest.ecb.europa.eu https://cloudflareinsights.com https://api.qrserver.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com",
   "frame-src https://challenges.cloudflare.com",
   "object-src 'none'",
   "base-uri 'self'",
