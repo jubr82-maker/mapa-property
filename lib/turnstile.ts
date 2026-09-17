@@ -10,7 +10,11 @@ export async function verifyTurnstile(
     }
     return true;
   }
-  if (!token) return false;
+  if (!token) {
+    // DEBUG TEMPORAIRE — voir conversation "bug Turnstile 300010".
+    console.error("[turnstile][debug] no token received from client (widget never produced one)");
+    return false;
+  }
   try {
     const formData = new URLSearchParams({ secret, response: token });
     if (ip) formData.append("remoteip", ip);
@@ -22,7 +26,15 @@ export async function verifyTurnstile(
         body: formData,
       },
     );
-    const data = (await res.json()) as { success?: boolean };
+    const data = (await res.json()) as {
+      success?: boolean;
+      "error-codes"?: string[];
+    };
+    // DEBUG TEMPORAIRE — voir conversation "bug Turnstile 300010".
+    console.error("[turnstile][debug] siteverify response", {
+      success: data.success,
+      errorCodes: data["error-codes"],
+    });
     return Boolean(data.success);
   } catch (err) {
     console.error("[turnstile] verify failed", err);
