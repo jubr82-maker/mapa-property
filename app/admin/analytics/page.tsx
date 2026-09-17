@@ -22,6 +22,8 @@ import {
   Zap,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 import { AnalyticsHealthPill } from "@/components/admin/AnalyticsHealthPill";
 import { KpiCard } from "@/components/admin/analytics/KpiCard";
 import { TokenMissingCard } from "@/components/admin/analytics/TokenMissingCard";
@@ -187,13 +189,18 @@ type OffmarketMini = {
 // ---------------------------------------------------------------------------
 
 async function loadAnalytics() {
+  await requireAdminPage();
   const supabase = await createSupabaseServerClient();
+  // leads / arcova_waitlist / offmarket_requests : service_role (pas de
+  // policy SELECT authenticated confirmée). Le reste (mandats, estimations,
+  // properties*, property_views) reste sur le client session, fonctionnel.
+  const svc = supabaseService();
 
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
   // --- Pipeline ----------------------------------------------------------
-  const leadsMonthQ = supabase
+  const leadsMonthQ = svc
     .from("leads")
     .select("id", { count: "exact", head: true })
     .gte("created_at", thirtyDaysAgo.toISOString());
@@ -203,11 +210,11 @@ async function loadAnalytics() {
     .select("id", { count: "exact", head: true })
     .eq("status", "actif");
 
-  const arcovaQ = supabase
+  const arcovaQ = svc
     .from("arcova_waitlist")
     .select("id", { count: "exact", head: true });
 
-  const offmarketRequestsQ = supabase
+  const offmarketRequestsQ = svc
     .from("offmarket_requests")
     .select("id", { count: "exact", head: true });
 
@@ -239,7 +246,7 @@ async function loadAnalytics() {
     .eq("is_coup_de_coeur", true);
 
   // --- Pipeline détails leads (status + 12 mois) -------------------------
-  const leadsByStatusQ = supabase
+  const leadsByStatusQ = svc
     .from("leads")
     .select("id,created_at,status,type")
     .gte("created_at", new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString())

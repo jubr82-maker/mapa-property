@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 
 interface EstimationRow {
   id: string;
@@ -45,11 +45,8 @@ function fmtDate(iso: string) {
 }
 
 export default async function AdminEstimationsPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/login?from=/admin/estimations");
+  await requireAdminPage();
+  const supabase = supabaseService();
 
   const { data: rows, error } = await supabase
     .from("estimation_requests")

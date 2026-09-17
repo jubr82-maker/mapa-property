@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 type Status = "new" | "in_progress" | "avis_sent" | "mandate_signed" | "closed";
 const VALID_STATUS: Status[] = [
@@ -26,13 +27,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const admin = await requireAdminRoute();
+  if (!admin.ok) return admin.response;
+  const supabase = supabaseService();
 
   const body = (await req.json().catch(() => ({}))) as PatchBody;
   const update: Record<string, unknown> = {};
@@ -90,13 +87,17 @@ export async function PATCH(
     return NextResponse.json({ error: "no_fields" }, { status: 400 });
   }
 
-  const { error: updErr } = await supabase
+  const { data: updated, error: updErr } = await supabase
     .from("estimation_requests")
     .update(update)
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (updErr) {
     return NextResponse.json({ error: updErr.message }, { status: 500 });
+  }
+  if (!updated || updated.length === 0) {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
   return NextResponse.json({ ok: true });
@@ -109,18 +110,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const admin = await requireAdminRoute();
+  if (!admin.ok) return admin.response;
+  const supabase = supabaseService();
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("estimation_requests")
     .update({ status: "deleted" })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     // CHECK status non encore élargi (migration 20260518_estimation_
@@ -135,6 +133,9 @@ export async function DELETE(
       },
       { status: isCheck ? 409 : 500 },
     );
+  }
+  if (!updated || updated.length === 0) {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
   return NextResponse.json({ ok: true });
 }

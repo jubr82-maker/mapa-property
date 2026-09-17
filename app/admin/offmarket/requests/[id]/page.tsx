@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 import { WorkflowSelect } from "@/components/admin/WorkflowSelect";
 import { AdminNotes } from "@/components/admin/AdminNotes";
 import {
@@ -77,7 +78,8 @@ export default async function AdminOffmarketRequestDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  await requireAdminPage();
+  const supabase = supabaseService();
 
   let migrationApplied = true;
   let item: RequestFull | null = null;

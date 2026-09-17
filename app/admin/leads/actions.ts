@@ -2,27 +2,36 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdmin } from "@/lib/admin/require-admin";
 
 // ---------- Existant (compat ascendante avec LeadsTable historique) ----------
 
 export async function updateLeadStatus(id: string, status: string) {
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const supabase = supabaseService();
+  const { data, error } = await supabase
     .from("leads")
     .update({ status })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
   revalidatePath("/admin/leads");
 }
 
 export async function updateLeadNotes(id: string, notes: string) {
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const supabase = supabaseService();
+  const { data, error } = await supabase
     .from("leads")
     .update({ notes })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
   revalidatePath("/admin/leads");
 }
 
@@ -47,7 +56,9 @@ export async function updateWorkflowStatus(
   newStatus: string,
   reason?: string,
 ) {
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
 
   // Lecture défensive : si les colonnes n'existent pas, on récupère null
   const { data: lead } = await sb
@@ -70,12 +81,14 @@ export async function updateWorkflowStatus(
     reason: reason ?? null,
   });
 
-  const { error } = await sb
+  const { data: updated, error } = await sb
     .from("leads")
     .update({ workflow_status: newStatus, workflow_history: history })
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .select("id");
 
   if (error) throw new Error(error.message);
+  if (!updated || updated.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
 
   revalidatePath("/admin/leads");
   revalidatePath(`/admin/leads/${leadId}`);
@@ -90,7 +103,9 @@ export async function addAdminNote(leadId: string, noteText: string) {
   const trimmed = noteText.trim();
   if (!trimmed) return;
 
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
 
   const { data: lead } = await sb
     .from("leads")
@@ -106,12 +121,14 @@ export async function addAdminNote(leadId: string, noteText: string) {
 
   history.push({ at: new Date().toISOString(), note: trimmed });
 
-  const { error } = await sb
+  const { data: updated, error } = await sb
     .from("leads")
     .update({ workflow_history: history, admin_notes: trimmed })
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .select("id");
 
   if (error) throw new Error(error.message);
+  if (!updated || updated.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
 
   revalidatePath(`/admin/leads/${leadId}`);
 }
@@ -121,12 +138,16 @@ export async function addAdminNote(leadId: string, noteText: string) {
  * Passer `null` pour effacer.
  */
 export async function setNextFollowUp(leadId: string, date: string | null) {
-  const sb = await createSupabaseServerClient();
-  const { error } = await sb
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
+  const { data, error } = await sb
     .from("leads")
     .update({ next_follow_up: date })
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .select("id");
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
   revalidatePath(`/admin/leads/${leadId}`);
   revalidatePath("/admin/leads");
 }
@@ -145,9 +166,12 @@ export async function setNextFollowUp(leadId: string, date: string | null) {
  * vers /admin/leads après succès.
  */
 export async function deleteLead(id: string): Promise<void> {
-  const sb = await createSupabaseServerClient();
-  const { error } = await sb.from("leads").delete().eq("id", id);
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
+  const { data, error } = await sb.from("leads").delete().eq("id", id).select("id");
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("lead introuvable — aucune ligne supprimée");
   revalidatePath("/admin/leads");
   redirect("/admin/leads");
 }
@@ -182,10 +206,14 @@ const TYPE_MANDAT_MAP: Record<string, string> = {
 export async function convertLeadToMandat(
   leadId: string,
 ): Promise<ConvertResult> {
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) return { ok: false, error: "unauthorized" };
+  // mandats reste sur le client session (RLS fonctionnelle, hors périmètre
+  // de ce correctif) ; leads passe par service_role (cf. plus haut).
+  const sb = admin.supabase;
 
   // 1. Charger le lead.
-  const { data: lead, error: leadError } = await sb
+  const { data: lead, error: leadError } = await supabaseService()
     .from("leads")
     .select(
       "id,first_name,last_name,email,phone,country,city,type,subject,message",
@@ -302,9 +330,11 @@ export async function exportLead(
   | { ok: false; error: string }
 > {
   try {
-    const sb = await createSupabaseServerClient();
+    const admin = await requireAdmin();
+    if (!admin.ok) return { ok: false, error: "unauthorized" };
+    const sb = admin.supabase;
 
-    const { data: lead, error: leadError } = await sb
+    const { data: lead, error: leadError } = await supabaseService()
       .from("leads")
       .select("*")
       .eq("id", id)

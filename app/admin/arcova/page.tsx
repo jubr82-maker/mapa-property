@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 import {
   WorkflowBadge,
   WORKFLOW_STATUSES,
@@ -59,7 +60,8 @@ export default async function AdminArcovaPage({
 }) {
   const sp = await searchParams;
   const tab = sp.tab && TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
-  const supabase = await createSupabaseServerClient();
+  await requireAdminPage();
+  const supabase = supabaseService();
 
   let migrationApplied = true;
   let items: ArcovaRow[] = [];

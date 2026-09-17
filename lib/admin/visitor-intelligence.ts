@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 
 // ============================================================================
 // MAPA Property — Tableau de bord "Intelligence visiteurs" (admin)
@@ -183,6 +184,7 @@ export interface VisitorIntelligence {
 }
 
 export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
+  await requireAdminPage();
   const supabase = await createSupabaseServerClient();
   const now = new Date();
   const since = (days: number) => new Date(now.getTime() - days * 86400 * 1000).toISOString();

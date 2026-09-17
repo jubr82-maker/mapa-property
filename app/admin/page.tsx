@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 
 export const dynamic = "force-dynamic";
 
 async function loadStats() {
+  await requireAdminPage();
   const supabase = await createSupabaseServerClient();
+  // leads / arcova_waitlist / offmarket_requests : service_role (pas de
+  // policy SELECT authenticated confirmée). mandats / properties_offmarket /
+  // reviews / blog_posts restent sur le client session (fonctionnels).
+  const svc = supabaseService();
 
   const monthStart = new Date();
   monthStart.setDate(1);
@@ -12,7 +19,7 @@ async function loadStats() {
 
   const [leads, mandates, offmarket, arcova, reviews, blog, recentLeads, recentRequests] =
     await Promise.all([
-      supabase
+      svc
         .from("leads")
         .select("id", { count: "exact", head: true })
         .gte("created_at", monthStart.toISOString()),
@@ -24,7 +31,7 @@ async function loadStats() {
         .from("properties_offmarket")
         .select("id", { count: "exact", head: true })
         .eq("status", "published"),
-      supabase
+      svc
         .from("arcova_waitlist")
         .select("id", { count: "exact", head: true }),
       supabase
@@ -35,12 +42,12 @@ async function loadStats() {
         .from("blog_posts")
         .select("id", { count: "exact", head: true })
         .eq("is_published", true),
-      supabase
+      svc
         .from("leads")
         .select("id,created_at,first_name,last_name,email,type")
         .order("created_at", { ascending: false })
         .limit(5),
-      supabase
+      svc
         .from("offmarket_requests")
         .select("id,created_at,prenom,nom,email,status,property_id")
         .order("created_at", { ascending: false })

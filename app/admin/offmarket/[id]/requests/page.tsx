@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 import { fetchOffmarketAdminById } from "@/lib/admin/offmarket-server";
 import { RequestRow } from "@/components/admin/RequestRow";
 
@@ -12,10 +13,13 @@ export default async function OffmarketRequestsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  await requireAdminPage();
+  // offmarket_requests : service_role (cf. app/admin/leads/page.tsx).
+  // fetchOffmarketAdminById lit properties_offmarket (table publique en
+  // lecture, client session inchangé).
   const [property, requestsRes] = await Promise.all([
     fetchOffmarketAdminById(id),
-    supabase
+    supabaseService()
       .from("offmarket_requests")
       .select("*")
       .eq("property_id", id)

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 import { WorkflowSelect } from "@/components/admin/WorkflowSelect";
 import { AdminNotes } from "@/components/admin/AdminNotes";
 import { WorkflowBadge, type WorkflowStatus } from "@/components/admin/WorkflowBadge";
@@ -72,6 +73,7 @@ export default async function AdminLeadDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  await requireAdminPage();
   // Lecture leads via service_role : cf. app/admin/leads/page.tsx.
   const supabase = supabaseService();
 

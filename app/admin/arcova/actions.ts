@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdmin } from "@/lib/admin/require-admin";
 
 // ============================================================================
 // Workflow admin générique sur la table `arcova_waitlist`.
@@ -27,7 +28,9 @@ export async function updateWorkflowStatus(
   newStatus: string,
   reason?: string,
 ) {
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
 
   const { data: current } = await sb
     .from(TABLE)
@@ -50,12 +53,14 @@ export async function updateWorkflowStatus(
     reason: reason ?? null,
   });
 
-  const { error } = await sb
+  const { data: updated, error } = await sb
     .from(TABLE)
     .update({ workflow_status: newStatus, workflow_history: history })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) throw new Error(error.message);
+  if (!updated || updated.length === 0) throw new Error("inscription introuvable — aucune ligne modifiée");
 
   revalidatePath(ROUTE);
   revalidatePath(`${ROUTE}/${id}`);
@@ -65,7 +70,9 @@ export async function addAdminNote(id: string, noteText: string) {
   const trimmed = noteText.trim();
   if (!trimmed) return;
 
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
 
   const { data: current } = await sb
     .from(TABLE)
@@ -81,23 +88,29 @@ export async function addAdminNote(id: string, noteText: string) {
 
   history.push({ at: new Date().toISOString(), note: trimmed });
 
-  const { error } = await sb
+  const { data: updated, error } = await sb
     .from(TABLE)
     .update({ workflow_history: history, admin_notes: trimmed })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) throw new Error(error.message);
+  if (!updated || updated.length === 0) throw new Error("inscription introuvable — aucune ligne modifiée");
 
   revalidatePath(`${ROUTE}/${id}`);
 }
 
 export async function setNextFollowUp(id: string, date: string | null) {
-  const sb = await createSupabaseServerClient();
-  const { error } = await sb
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
+  const { data, error } = await sb
     .from(TABLE)
     .update({ next_follow_up: date })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("inscription introuvable — aucune ligne modifiée");
   revalidatePath(`${ROUTE}/${id}`);
   revalidatePath(ROUTE);
 }

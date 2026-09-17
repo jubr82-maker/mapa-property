@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdmin } from "@/lib/admin/require-admin";
 import {
   generateOffmarketReference,
   PROPERTY_TYPES,
@@ -756,7 +758,9 @@ export async function updateRequestStatus(
   if (!ALLOWED_REQUEST_STATUSES.includes(status as RequestStatus)) {
     throw new Error("Statut invalide.");
   }
-  const supabase = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const supabase = supabaseService();
   const update: Record<string, unknown> = { status };
   if (notes !== null) update.notes_admin = notes;
 
@@ -779,7 +783,9 @@ export async function updateRequestStatus(
 }
 
 export async function updateRequestNotes(requestId: string, notes: string) {
-  const supabase = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const supabase = supabaseService();
   const { data, error } = await supabase
     .from("offmarket_requests")
     .update({ notes_admin: notes })
@@ -820,7 +826,9 @@ export async function updateRequestWorkflowStatus(
   newStatus: string,
   reason?: string,
 ) {
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
 
   const { data: current } = await sb
     .from(WORKFLOW_TABLE)
@@ -844,12 +852,14 @@ export async function updateRequestWorkflowStatus(
     reason: reason ?? null,
   });
 
-  const { error } = await sb
+  const { data: updated, error } = await sb
     .from(WORKFLOW_TABLE)
     .update({ workflow_status: newStatus, workflow_history: history })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) throw new Error(error.message);
+  if (!updated || updated.length === 0) throw new Error("demande introuvable — aucune ligne modifiée");
 
   const propertyId = (current as { property_id?: string } | null)?.property_id;
   revalidatePath(WORKFLOW_LIST_ROUTE);
@@ -863,7 +873,9 @@ export async function addRequestAdminNote(id: string, noteText: string) {
   const trimmed = noteText.trim();
   if (!trimmed) return;
 
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
 
   const { data: current } = await sb
     .from(WORKFLOW_TABLE)
@@ -880,12 +892,14 @@ export async function addRequestAdminNote(id: string, noteText: string) {
 
   history.push({ at: new Date().toISOString(), note: trimmed });
 
-  const { error } = await sb
+  const { data: updated, error } = await sb
     .from(WORKFLOW_TABLE)
     .update({ workflow_history: history, admin_notes: trimmed })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) throw new Error(error.message);
+  if (!updated || updated.length === 0) throw new Error("demande introuvable — aucune ligne modifiée");
 
   const propertyId = (current as { property_id?: string } | null)?.property_id;
   revalidatePath(`${WORKFLOW_LIST_ROUTE}/${id}`);
@@ -898,7 +912,9 @@ export async function setRequestNextFollowUp(
   id: string,
   date: string | null,
 ) {
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
   const { data, error } = await sb
     .from(WORKFLOW_TABLE)
     .update({ next_follow_up: date })
@@ -906,6 +922,7 @@ export async function setRequestNextFollowUp(
     .select("property_id")
     .maybeSingle();
   if (error) throw new Error(error.message);
+  if (!data) throw new Error("demande introuvable — aucune ligne modifiée");
   revalidatePath(`${WORKFLOW_LIST_ROUTE}/${id}`);
   revalidatePath(WORKFLOW_LIST_ROUTE);
   const propertyId = (data as { property_id?: string } | null)?.property_id;

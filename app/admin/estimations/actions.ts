@@ -6,7 +6,8 @@
 // app/admin/mandats/actions.ts (auth check, retour structure, no throw).
 
 import { revalidatePath } from "next/cache";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdmin } from "@/lib/admin/require-admin";
 import { sendEstimationRefinementEmail } from "@/lib/email/estimation-emails";
 
 type RefinementResult =
@@ -38,12 +39,9 @@ type RefinementResult =
 export async function sendRefinement(
   id: string,
 ): Promise<RefinementResult> {
-  const sb = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await sb.auth.getUser();
-  if (!user) return { ok: false, reason: "unauthorized" };
+  const admin = await requireAdmin();
+  if (!admin.ok) return { ok: false, reason: "unauthorized" };
+  const sb = supabaseService();
 
   const { data, error } = await sb
     .from("estimation_requests")
@@ -78,13 +76,17 @@ export async function sendRefinement(
   });
 
   const sentAt = new Date().toISOString();
-  const { error: updateError } = await sb
+  const { data: updated, error: updateError } = await sb
     .from("estimation_requests")
     .update({ refinement_sent_at: sentAt })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (updateError) {
     return { ok: false, reason: "db_error", error: updateError.message };
+  }
+  if (!updated || updated.length === 0) {
+    return { ok: false, reason: "not_found" };
   }
 
   revalidatePath(`/admin/estimations/${id}`);

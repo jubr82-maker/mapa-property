@@ -4,19 +4,17 @@
 // l'admin fournit lui-même la fourchette. Écrit dans estimation_requests
 // (table déjà écrite par le tunnel public + le PATCH admin).
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 const num = (v: unknown) =>
   typeof v === "number" && Number.isFinite(v) ? v : undefined;
 
 export async function POST(req: Request) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const admin = await requireAdminRoute();
+  if (!admin.ok) return admin.response;
+  const { user } = admin;
+  const supabase = supabaseService();
 
   const body = (await req.json().catch(() => ({}))) as {
     type?: string;

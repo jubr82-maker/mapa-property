@@ -1,6 +1,7 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 import { EstimationDetailClient } from "./EstimationDetailClient";
 
 interface EstimationRow {
@@ -88,11 +89,8 @@ export default async function EstimationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect(`/admin/login?from=/admin/estimations/${id}`);
+  await requireAdminPage();
+  const supabase = supabaseService();
 
   const { data: row, error } = await supabase
     .from("estimation_requests")
