@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
 
 // ============================================================================
 // MAPA Property — Tableau de bord "Intelligence visiteurs" (admin)
@@ -186,8 +187,12 @@ export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
   const now = new Date();
   const since = (days: number) => new Date(now.getTime() - days * 86400 * 1000).toISOString();
 
+  // leads via service_role : table sans policy SELECT confirmée pour le
+  // rôle authenticated (cf. app/admin/leads/page.tsx). tracking_events et
+  // property_views restent sur le client anon+session (fonctionnels,
+  // aucune preuve d'un problème équivalent).
   const [leadsR, eventsR, viewsR] = await Promise.all([
-    supabase
+    supabaseService()
       .from("leads")
       .select("id,created_at,type,property_ref")
       .gte("created_at", since(WINDOW_LEADS_DAYS))

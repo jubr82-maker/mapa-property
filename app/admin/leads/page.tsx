@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
 import { LeadsTable } from "@/components/admin/LeadsTable";
 import {
   WorkflowBadge,
@@ -70,7 +70,11 @@ export default async function AdminLeadsPage({
 }) {
   const sp = await searchParams;
   const tab = sp.tab && TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
-  const supabase = await createSupabaseServerClient();
+  // Lecture leads via service_role : table sans policy SELECT confirmée
+  // pour le rôle authenticated (cf. lib/lead-insert.ts, leads est
+  // write-only par design — brief MAPA_BRIEF_CLAUDE_CODE.md). Page
+  // protégée en amont par l'auth admin (proxy.ts, middleware /admin/*).
+  const supabase = supabaseService();
 
   // Tentative avec les nouvelles colonnes (workflow_status, next_follow_up)
   let migrationApplied = true;
