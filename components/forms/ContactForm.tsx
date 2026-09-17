@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Turnstile } from "@/components/ui/Turnstile";
+import { Turnstile, type TurnstileHandle } from "@/components/ui/Turnstile";
 import { CountrySelect } from "@/components/ui/CountrySelect";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
@@ -49,6 +49,7 @@ export function ContactForm({
   const [errorKind, setErrorKind] = useState<ErrorKind>("generic");
   const [token, setToken] = useState<string | null>(null);
   const [captchaFailed, setCaptchaFailed] = useState(false);
+  const turnstileRef = useRef<TurnstileHandle>(null);
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [city, setCity] = useState("");
   const [rgpd, setRgpd] = useState(false);
@@ -112,9 +113,18 @@ export function ContactForm({
       else if (res.status === 400) setErrorKind("invalid");
       else setErrorKind("generic");
       setStatus("error");
+      // Le token Turnstile est a usage unique (5 min) : sans reset, un
+      // second essai renverrait le meme token deja consomme/expire et
+      // echouerait systematiquement (timeout-or-duplicate cote Cloudflare).
+      setToken(null);
+      setCaptchaFailed(false);
+      turnstileRef.current?.reset();
     } catch {
       setErrorKind("generic");
       setStatus("error");
+      setToken(null);
+      setCaptchaFailed(false);
+      turnstileRef.current?.reset();
     }
   };
 
@@ -211,6 +221,7 @@ export function ContactForm({
       />
 
       <Turnstile
+        ref={turnstileRef}
         onToken={setToken}
         onUnavailable={() => setCaptchaFailed(true)}
         className="mt-2"

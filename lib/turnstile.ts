@@ -3,6 +3,12 @@ export async function verifyTurnstile(
   ip?: string,
 ): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
+  console.error("[DIAG-CONTACT] verifyTurnstile: secret", { // DIAG-CONTACT TEMPORAIRE A RETIRER
+    present: Boolean(secret), // DIAG-CONTACT TEMPORAIRE A RETIRER
+    length: secret?.length ?? 0, // DIAG-CONTACT TEMPORAIRE A RETIRER
+    prefix4: secret ? secret.slice(0, 4) : null, // DIAG-CONTACT TEMPORAIRE A RETIRER
+    hasWhitespace: secret ? /\s/.test(secret) : false, // DIAG-CONTACT TEMPORAIRE A RETIRER
+  }); // DIAG-CONTACT TEMPORAIRE A RETIRER
   if (!secret) {
     if (process.env.NODE_ENV === "production") {
       console.error("[turnstile] TURNSTILE_SECRET_KEY missing");
@@ -10,11 +16,11 @@ export async function verifyTurnstile(
     }
     return true;
   }
-  if (!token) {
-    // DEBUG TEMPORAIRE — voir conversation "bug Turnstile 300010".
-    console.error("[turnstile][debug] no token received from client (widget never produced one)");
-    return false;
-  }
+  console.error("[DIAG-CONTACT] verifyTurnstile: token", { // DIAG-CONTACT TEMPORAIRE A RETIRER
+    present: Boolean(token), // DIAG-CONTACT TEMPORAIRE A RETIRER
+    length: token?.length ?? 0, // DIAG-CONTACT TEMPORAIRE A RETIRER
+  }); // DIAG-CONTACT TEMPORAIRE A RETIRER
+  if (!token) return false;
   try {
     const formData = new URLSearchParams({ secret, response: token });
     if (ip) formData.append("remoteip", ip);
@@ -29,12 +35,15 @@ export async function verifyTurnstile(
     const data = (await res.json()) as {
       success?: boolean;
       "error-codes"?: string[];
+      hostname?: string;
+      action?: string;
     };
-    // DEBUG TEMPORAIRE — voir conversation "bug Turnstile 300010".
-    console.error("[turnstile][debug] siteverify response", {
-      success: data.success,
-      errorCodes: data["error-codes"],
-    });
+    console.error("[DIAG-CONTACT] verifyTurnstile: siteverify response", { // DIAG-CONTACT TEMPORAIRE A RETIRER
+      success: data.success, // DIAG-CONTACT TEMPORAIRE A RETIRER
+      errorCodes: data["error-codes"], // DIAG-CONTACT TEMPORAIRE A RETIRER
+      hostname: data.hostname, // DIAG-CONTACT TEMPORAIRE A RETIRER
+      action: data.action, // DIAG-CONTACT TEMPORAIRE A RETIRER
+    }); // DIAG-CONTACT TEMPORAIRE A RETIRER
     return Boolean(data.success);
   } catch (err) {
     console.error("[turnstile] verify failed", err);

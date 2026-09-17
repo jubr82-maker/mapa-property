@@ -53,12 +53,19 @@ function extractMissingColumn(message: string | undefined): string | null {
  * Pas de .select()/RETURNING (tables privées : pas de policy SELECT
  * anon — cf. /api/nda-request). Retourne { ok, degraded }.
  */
+export interface LeadInsertError {
+  message: string;
+  code?: string;
+  details?: string;
+  hint?: string;
+}
+
 export async function insertLeadWithConsent(
   sb: SupabaseClient,
   table: string,
   row: Row,
   consentAt?: string,
-): Promise<{ ok: boolean; degraded: boolean; error?: string }> {
+): Promise<{ ok: boolean; degraded: boolean; error?: LeadInsertError }> {
   let payload: Row = consentAt
     ? { ...row, rgpd_consent_at: consentAt }
     : { ...row };
@@ -71,13 +78,19 @@ export async function insertLeadWithConsent(
     if (!error) {
       return { ok: true, degraded };
     }
+    const errInfo: LeadInsertError = {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    };
     if (!isUnknownColumnError(error)) {
-      return { ok: false, degraded, error: error.message };
+      return { ok: false, degraded, error: errInfo };
     }
     const col = extractMissingColumn(error.message);
     if (!col || !(col in payload)) {
       // Erreur "unknown column" sans nom extractible → on abandonne.
-      return { ok: false, degraded, error: error.message };
+      return { ok: false, degraded, error: errInfo };
     }
     console.warn(
       `[lead-insert] ${table}.${col} absente (migration a appliquer) — ` +
@@ -88,5 +101,9 @@ export async function insertLeadWithConsent(
     payload = next;
     degraded = true;
   }
-  return { ok: false, degraded, error: "too_many_unknown_column_retries" };
+  return {
+    ok: false,
+    degraded,
+    error: { message: "too_many_unknown_column_retries" },
+  };
 }

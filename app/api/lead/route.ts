@@ -34,6 +34,7 @@ export async function POST(req: Request) {
     namespace: "lead",
   });
   if (!limit.ok) {
+    console.error("[DIAG-CONTACT] /api/lead: rejet rate_limited"); // DIAG-CONTACT TEMPORAIRE A RETIRER
     return NextResponse.json(
       { error: "rate_limited", retry_in_ms: limit.resetIn },
       { status: 429 },
@@ -45,9 +46,11 @@ export async function POST(req: Request) {
   };
 
   if (!isEmail(body.email)) {
+    console.error("[DIAG-CONTACT] /api/lead: rejet invalid_email, champ: email"); // DIAG-CONTACT TEMPORAIRE A RETIRER
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
   if (typeof body.type !== "string" || !body.type) {
+    console.error("[DIAG-CONTACT] /api/lead: rejet missing_type, champ: type"); // DIAG-CONTACT TEMPORAIRE A RETIRER
     return NextResponse.json({ error: "missing_type" }, { status: 400 });
   }
   // BUG T7 : en prod, emails de test E2E -> OK sans INSERT (anti-pollution).
@@ -57,6 +60,7 @@ export async function POST(req: Request) {
 
   const turnstileOk = await verifyTurnstile(body.turnstile_token, clientIp(req));
   if (!turnstileOk) {
+    console.error("[DIAG-CONTACT] /api/lead: rejet turnstile_failed"); // DIAG-CONTACT TEMPORAIRE A RETIRER
     return NextResponse.json({ error: "turnstile_failed" }, { status: 403 });
   }
 
@@ -104,6 +108,7 @@ export async function POST(req: Request) {
     subject,
   };
 
+  console.error("[DIAG-CONTACT] /api/lead: insert leads via client anon (NEXT_PUBLIC_SUPABASE_ANON_KEY), pas service_role"); // DIAG-CONTACT TEMPORAIRE A RETIRER
   const sb = supabaseServer();
   const res = await insertLeadWithConsent(
     sb,
@@ -113,8 +118,15 @@ export async function POST(req: Request) {
   );
   if (!res.ok) {
     console.error("[api/lead] supabase insert", res.error);
+    console.error("[DIAG-CONTACT] /api/lead: rejet db_error, table: leads", { // DIAG-CONTACT TEMPORAIRE A RETIRER
+      code: res.error?.code, // DIAG-CONTACT TEMPORAIRE A RETIRER
+      message: res.error?.message, // DIAG-CONTACT TEMPORAIRE A RETIRER
+      details: res.error?.details, // DIAG-CONTACT TEMPORAIRE A RETIRER
+      hint: res.error?.hint, // DIAG-CONTACT TEMPORAIRE A RETIRER
+    }); // DIAG-CONTACT TEMPORAIRE A RETIRER
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
+  console.error("[DIAG-CONTACT] OK — insert leads reussi"); // DIAG-CONTACT TEMPORAIRE A RETIRER
 
   // Sprint C3 → C5 : emails client (confirmation 48h ouvrees) + interne
   // (notification Julien). AWAIT obligatoire en serverless Vercel : un

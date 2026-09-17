@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { useTheme } from "next-themes";
 
 declare global {
@@ -31,6 +37,14 @@ interface Props {
   // CSP/adblock/réseau, erreur CF, ou pas de token sous 10 s).
   onUnavailable?: () => void;
   className?: string;
+}
+
+// Widget non réinitialisé après un échec (BUG diag contact 2026-09-17) :
+// un token Turnstile est à usage unique / expire à 5 min. Sans reset(),
+// un formulaire qui échoue puis est resoumis renvoie le même token déjà
+// consommé -> Cloudflare répond systématiquement timeout-or-duplicate.
+export interface TurnstileHandle {
+  reset: () => void;
 }
 
 const FALLBACK_MS = 10_000;
@@ -66,12 +80,24 @@ function ensureScript(onFail: () => void) {
   document.head.appendChild(s);
 }
 
-export function Turnstile({ onToken, onUnavailable, className = "" }: Props) {
+export const Turnstile = forwardRef<TurnstileHandle, Props>(function Turnstile(
+  { onToken, onUnavailable, className = "" },
+  handleRef,
+) {
   const ref = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
   const settled = useRef(false);
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
+
+  useImperativeHandle(handleRef, () => ({
+    reset: () => {
+      if (widgetId.current && window.turnstile) {
+        settled.current = false;
+        window.turnstile.reset(widgetId.current);
+      }
+    },
+  }));
 
   // Callbacks figés dans des refs : le widget ne se re-monte JAMAIS
   // quand le parent re-render (cause n°1 du flicker — onUnavailable
@@ -144,4 +170,4 @@ export function Turnstile({ onToken, onUnavailable, className = "" }: Props) {
       aria-busy={!mounted}
     />
   );
-}
+});
