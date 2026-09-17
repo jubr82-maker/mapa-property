@@ -11,7 +11,7 @@
 // array passe a sendLeadEmails. No-op silencieux si RESEND_API_KEY
 // absent (config IONOS DNS Resend a venir).
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase-server";
+import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { checkHoneypot } from "@/lib/honeypot";
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     `[OBJET] ${SUBJECT}\n` +
     `[RGPD] consentement accordé le ${consentAt}`;
 
-  const sb = supabaseServer();
+  const sb = supabaseService();
   const res = await insertLeadWithConsent(
     sb,
     "leads",

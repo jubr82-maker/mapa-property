@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
-import { supabaseServer } from "@/lib/supabase-server";
+import { supabaseService } from "@/lib/supabase-service";
 
 export const runtime = "nodejs"; // node:crypto requis
 export const dynamic = "force-dynamic";
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     .slice(0, 32);
 
   try {
-    const sb = supabaseServer();
+    const sb = supabaseService();
     const { error } = await sb.from("property_views").insert({
       property_id: body.propertyId,
       visitor_hash: visitorHash,

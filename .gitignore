@@ -40,6 +40,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# supabase CLI — contient des credentials de connexion en clair
+supabase/.temp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase-server";
+import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { checkHoneypot } from "@/lib/honeypot";
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "turnstile_failed" }, { status: 403 });
   }
 
-  const sb = supabaseServer();
+  const sb = supabaseService();
   const { error } = await sb.from("leads").insert({
     name: body.name,
     email: body.email,

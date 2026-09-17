@@ -15,6 +15,7 @@
 // qu'aucune ligne n'a été créée.
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
+import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import type { LeadInsert } from "@/lib/types";
@@ -108,10 +109,10 @@ export async function POST(req: Request) {
     subject,
   };
 
-  console.error("[DIAG-CONTACT] /api/lead: insert leads via client anon (NEXT_PUBLIC_SUPABASE_ANON_KEY), pas service_role"); // DIAG-CONTACT TEMPORAIRE A RETIRER
-  const sb = supabaseServer();
+  console.error("[DIAG-CONTACT] /api/lead: insert leads via client service_role"); // DIAG-CONTACT TEMPORAIRE A RETIRER
+  const sbWrite = supabaseService();
   const res = await insertLeadWithConsent(
-    sb,
+    sbWrite,
     "leads",
     lead as unknown as Record<string, unknown>,
     consentAt,
@@ -157,7 +158,8 @@ export async function POST(req: Request) {
   //   - APIMO_* absents (pushLeadToApimo gere son propre no-op).
   if (lead.property_ref) {
     try {
-      const { data: matched } = await sb
+      // Lecture publique properties : reste sur le client anon (inchange).
+      const { data: matched } = await supabaseServer()
         .from("properties")
         .select("apimo_id")
         .eq("slug", lead.property_ref)

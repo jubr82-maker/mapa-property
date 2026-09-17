@@ -241,8 +241,8 @@ async function persistEstimationRequest(args: {
   garden_area?: number;
 }) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) return;
   // BUG T7 : en prod, ne pas persister les estimations de test E2E
   // (le calcul/résultat est tout de même renvoyé à l'appelant).
   if (shouldDropTestLead(args.contact_email)) return;
@@ -301,7 +301,7 @@ async function persistEstimationRequest(args: {
     locale: args.locale ?? null,
   };
   try {
-    const supabase = createClient(url, key);
+    const supabase = createClient(url, serviceKey, { auth: { persistSession: false } });
     // Consentement RGPD (BUG 7) : on tente AVEC les colonnes
     // rgpd_consent_at/consent ; si la migration 20260518_rgpd_consent.sql
     // n'est pas encore appliquée (colonne inconnue), on retente SANS

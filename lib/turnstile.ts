@@ -2,7 +2,7 @@ export async function verifyTurnstile(
   token: string | undefined,
   ip?: string,
 ): Promise<boolean> {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
+  const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
   console.error("[DIAG-CONTACT] verifyTurnstile: secret", { // DIAG-CONTACT TEMPORAIRE A RETIRER
     present: Boolean(secret), // DIAG-CONTACT TEMPORAIRE A RETIRER
     length: secret?.length ?? 0, // DIAG-CONTACT TEMPORAIRE A RETIRER

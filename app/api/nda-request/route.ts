@@ -10,7 +10,7 @@
 // Email : si RESEND_API_KEY présent → notification à
 // j.brebion@mapagroup.org. Sinon log warn (jamais de throw).
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase-server";
+import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { checkHoneypot } from "@/lib/honeypot";
@@ -117,7 +117,7 @@ export async function POST(req: Request) {
   // retour, comme /api/lead (chemin prouvé). Le type "offmarket_request"
   // est RLS-safe ; la nature NDA est portée par `source` (filtrable
   // admin) et l'audit consentement reste dans `message`.
-  const sb = supabaseServer();
+  const sb = supabaseService();
   const ins = await insertLeadWithConsent(
     sb,
     "leads",

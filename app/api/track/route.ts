@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseService } from "@/lib/supabase-service";
 import { createHash } from "node:crypto";
 
 /**
@@ -77,12 +77,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, rate_limited: true }, { status: 200 });
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!supabaseUrl || !supabaseKey) {
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.SUPABASE_SERVICE_ROLE_KEY
+    ) {
       return NextResponse.json({ ok: true }, { status: 200 });
     }
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = supabaseService();
 
     await supabase.from("tracking_events").insert({
       session_id: body.session_id,
