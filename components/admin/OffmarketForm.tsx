@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   OFFMARKET_STATUSES,
@@ -21,12 +20,9 @@ import {
 import {
   createOffmarket,
   updateOffmarket,
-  uploadOffmarketPhotos,
-  reorderOffmarketPhotos,
   deleteOffmarket,
 } from "@/app/admin/offmarket/actions";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import { compressImageFile } from "@/lib/image-compress";
 
 type Tab = "location" | "specs" | "content" | "identity";
 
@@ -40,13 +36,9 @@ const TABS: { id: Tab; label: string }[] = [
 export function OffmarketForm({
   row,
   mode,
-  signedPhotoUrls,
 }: {
   row: OffmarketRow | null;
   mode: "create" | "edit";
-  // URL signées (60 min), une par URL permanente de la galerie — pour
-  // l'affichage uniquement. Cf. lib/storage-signed-url.ts et PhotosManager.
-  signedPhotoUrls?: Record<string, string>;
 }) {
   const [tab, setTab] = useState<Tab>(mode === "create" ? "location" : "identity");
   // En création : on commence par Localisation (workflow 1→4).
@@ -98,10 +90,6 @@ export function OffmarketForm({
   };
 
   const ref = row?.reference ?? generateOffmarketReference();
-  const photos =
-    (row?.photo_urls as string[] | null) ??
-    (row?.gallery_urls as string[] | null) ??
-    [];
 
   return (
     <form action={submit} className="space-y-8">
@@ -624,18 +612,6 @@ export function OffmarketForm({
               </label>
             </Field>
           </Section>
-
-          {mode === "edit" && row && (
-            <Section title="Photos">
-              <div className="md:col-span-2">
-                <PhotosManager
-                  id={row.id}
-                  photos={photos}
-                  signedUrls={signedPhotoUrls ?? {}}
-                />
-              </div>
-            </Section>
-          )}
         </div>
       )}
 
@@ -1365,123 +1341,3 @@ function DeleteButton({ id }: { id: string }) {
   );
 }
 
-function PhotosManager({
-  id,
-  photos,
-  signedUrls,
-}: {
-  id: string;
-  photos: string[];
-  // Cle = URL permanente d'origine (identite, reorder/suppression,
-  // ecriture en base inchangee), valeur = URL signee pour l'affichage
-  // uniquement. Repli sur l'URL d'origine si absente de la map (fichier
-  // pas encore signe / signature echouee) — le bucket reste lisible tant
-  // que les policies ne sont pas resserrees en base.
-  signedUrls: Record<string, string>;
-}) {
-  const [list, setList] = useState(photos);
-  const [busy, startTransition] = useTransition();
-
-  const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    const fd = new FormData();
-    // compressImageFile retombe sur le fichier original en cas d'échec —
-    // l'upload n'est jamais bloqué par la compression.
-    for (const f of Array.from(files)) {
-      const compressed = await compressImageFile(f);
-      fd.append("photos", compressed);
-    }
-    startTransition(async () => {
-      await uploadOffmarketPhotos(id, fd);
-    });
-    e.target.value = "";
-  };
-
-  const move = (index: number, direction: -1 | 1) => {
-    const next = [...list];
-    const target = index + direction;
-    if (target < 0 || target >= next.length) return;
-    [next[index], next[target]] = [next[target], next[index]];
-    setList(next);
-    startTransition(async () => {
-      await reorderOffmarketPhotos(id, next);
-    });
-  };
-
-  const remove = (url: string) => {
-    const next = list.filter((u) => u !== url);
-    setList(next);
-    startTransition(async () => {
-      await reorderOffmarketPhotos(id, next);
-    });
-  };
-
-  return (
-    <div className="mt-3 space-y-4">
-      <label className="block rounded-xl border-2 border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-6 text-center hover:border-[#e0af6e]">
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={onUpload}
-          className="hidden"
-        />
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63]">
-          {busy ? "Upload en cours…" : "Cliquer pour ajouter des photos"}
-        </p>
-        <p className="mt-1 text-xs text-[#3D4F63]/60">JPG/PNG/WebP — la première sert de cover.</p>
-      </label>
-
-      {list.length > 0 && (
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {list.map((url, i) => (
-            <li key={url} className="group relative overflow-hidden rounded-xl border border-[#3D4F63]/15 bg-white">
-              <div className="relative aspect-[4/3]">
-                <Image
-                  src={signedUrls[url] ?? url}
-                  alt={`Photo ${i + 1}`}
-                  fill
-                  sizes="220px"
-                  className="object-cover"
-                />
-                {i === 0 && (
-                  <span className="absolute left-2 top-2 rounded-full bg-[#e0af6e] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
-                    Cover
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center justify-between gap-2 px-2 py-2 text-[10px] uppercase tracking-[0.15em]">
-                <div className="flex gap-1">
-                  <button
-                    type="button"
-                    onClick={() => move(i, -1)}
-                    disabled={i === 0 || busy}
-                    className="rounded border border-[#3D4F63]/20 px-2 py-1 hover:border-[#e0af6e] disabled:opacity-40"
-                  >
-                    ←
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => move(i, 1)}
-                    disabled={i === list.length - 1 || busy}
-                    className="rounded border border-[#3D4F63]/20 px-2 py-1 hover:border-[#e0af6e] disabled:opacity-40"
-                  >
-                    →
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => remove(url)}
-                  className="rounded border border-red-200 px-2 py-1 text-red-700 hover:bg-red-50"
-                >
-                  Retirer
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}

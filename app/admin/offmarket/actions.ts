@@ -678,67 +678,12 @@ export async function duplicateOffmarket(id: string) {
   redirect(`/admin/offmarket/${data.id}/edit`);
 }
 
-export async function uploadOffmarketPhotos(id: string, formData: FormData) {
-  const supabase = await createSupabaseServerClient();
-  const files = formData.getAll("photos") as File[];
-  if (files.length === 0) return;
-
-  const uploaded: string[] = [];
-  for (const file of files) {
-    if (!file || !(file instanceof File) || file.size === 0) continue;
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage
-      .from("offmarket-photos")
-      .upload(path, file, { contentType: file.type, upsert: false });
-    if (error) {
-      console.error("[admin] uploadOffmarketPhotos", error);
-      continue;
-    }
-    const { data: publicUrl } = supabase.storage
-      .from("offmarket-photos")
-      .getPublicUrl(path);
-    uploaded.push(publicUrl.publicUrl);
-  }
-
-  if (uploaded.length === 0) return;
-
-  const { data: current } = await supabase
-    .from("properties_offmarket")
-    .select("cover_image_url,gallery_urls")
-    .eq("id", id)
-    .maybeSingle();
-
-  const existingGallery = (current?.gallery_urls as string[] | null) ?? [];
-  const newGallery = [...existingGallery, ...uploaded];
-  const newCover = current?.cover_image_url ?? uploaded[0];
-
-  await supabase
-    .from("properties_offmarket")
-    .update({
-      cover_image_url: newCover,
-      gallery_urls: newGallery,
-      photo_urls: newGallery,
-    })
-    .eq("id", id);
-
-  await audit(id, "offmarket.photos.upload", { count: uploaded.length });
-  revalidatePath(`/admin/offmarket/${id}/edit`);
-}
-
-export async function reorderOffmarketPhotos(id: string, urls: string[]) {
-  const supabase = await createSupabaseServerClient();
-  await supabase
-    .from("properties_offmarket")
-    .update({
-      cover_image_url: urls[0] ?? null,
-      gallery_urls: urls,
-      photo_urls: urls,
-    })
-    .eq("id", id);
-  await audit(id, "offmarket.photos.reorder");
-  revalidatePath(`/admin/offmarket/${id}/edit`);
-}
+// uploadOffmarketPhotos / reorderOffmarketPhotos retirees (decision Julien,
+// 2026-09-18) : un bien off-market n'a jamais de photo, la fiche publique
+// affiche toujours le placeholder OFF MARKET. Plus aucune Server Action de
+// ce fichier n'ecrit dans le bucket "offmarket-photos". Les colonnes
+// cover_image_url / gallery_urls / photo_urls restent en base (non
+// supprimees) mais ne sont plus alimentees ni lues cote public.
 
 const ALLOWED_REQUEST_STATUSES: RequestStatus[] = [
   "pending",

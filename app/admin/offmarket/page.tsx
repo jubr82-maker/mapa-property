@@ -1,6 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
-import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 
 export const dynamic = "force-dynamic";
 import {
@@ -12,7 +10,6 @@ import {
 } from "@/lib/admin/offmarket";
 import { fetchOffmarketAdminList } from "@/lib/admin/offmarket-server";
 import { requireAdminPage } from "@/lib/admin/require-admin";
-import { toSignedUrl } from "@/lib/storage-signed-url";
 import { OffmarketListFilters } from "@/components/admin/OffmarketListFilters";
 
 export default async function AdminOffmarketListPage({
@@ -28,18 +25,6 @@ export default async function AdminOffmarketListPage({
   await requireAdminPage();
   const sp = await searchParams;
   const all = await fetchOffmarketAdminList();
-
-  // Vignette dérivée à chaque rendu depuis le chemin du fichier (URL
-  // signée, 60 min) — jamais l'URL permanente stockée en colonne
-  // cover_image_url. Cf. lib/storage-signed-url.ts.
-  const signedCoverById = new Map<string, string | null>(
-    await Promise.all(
-      all.map(
-        async (row) =>
-          [row.id, await toSignedUrl("offmarket-photos", row.cover_image_url)] as const,
-      ),
-    ),
-  );
 
   const filtered = all.filter((row) => {
     if (sp.status && row.status !== sp.status) return false;
@@ -82,7 +67,6 @@ export default async function AdminOffmarketListPage({
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
               <th className="px-4 py-3">Référence</th>
-              <th className="px-4 py-3">Cover</th>
               <th className="px-4 py-3">Titre · Localisation</th>
               <th className="px-4 py-3">Type</th>
               <th className="px-4 py-3 text-right">Prix estimé</th>
@@ -95,28 +79,18 @@ export default async function AdminOffmarketListPage({
           <tbody className="divide-y divide-[#3D4F63]/10">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
+                <td colSpan={8} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
                   Aucun bien correspondant.
                 </td>
               </tr>
             ) : (
               filtered.map((row) => {
-                const cover = signedCoverById.get(row.id) ?? null;
                 const city = row.city_label ?? row.city_anonymized ?? "—";
                 const status = (row.status ?? "draft") as OffmarketStatus;
                 return (
                   <tr key={row.id} className="hover:bg-[#3D4F63]/5">
                     <td className="px-4 py-3 font-mono text-[11px] uppercase tracking-[0.15em] text-[#e0af6e]">
                       {row.reference}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="relative h-12 w-16 overflow-hidden rounded-md bg-[#3D4F63]/10">
-                        {cover ? (
-                          <Image src={cover} alt="" fill sizes="64px" className="object-cover" />
-                        ) : (
-                          <OffmarketPlaceholder showLabel={false} />
-                        )}
-                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-[#1A1F2A]">{row.title ?? "—"}</p>

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchOffmarketById, fetchOffmarketList } from "@/lib/data";
@@ -19,7 +18,6 @@ import { FicheAccordion } from "@/components/property/fiche/FicheAccordion";
 import { FicheConditions } from "@/components/property/fiche/FicheConditions";
 import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
 import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
-import { SignatureLine } from "@/components/ui/SignatureLine";
 import { highlightTitles } from "@/lib/formatting/highlightTitles";
 
 // POL2-9 : le prix off-market est désormais pilotable depuis le BO via
@@ -100,12 +98,6 @@ export default async function OffMarketDetailPage({
   const txMeta = property.transaction
     ? tProperty(`tx_${property.transaction}`)
     : tProperty("tx_offmarket");
-
-  // Galerie verrouillée préservée (visuels floutés sous NDA).
-  const lockedImages = [
-    ...(property.cover_image_url ? [property.cover_image_url] : []),
-    ...(property.gallery_urls ?? []),
-  ];
 
   // Specs — toutes les données Supabase préservées, "—" si absent.
   const specs = [
@@ -262,35 +254,6 @@ export default async function OffMarketDetailPage({
           <div className="space-y-12">
             <FicheSpecs heading={tProperty("specs")} items={specs} />
             <FicheAccordion panels={panels} />
-
-            {/* Galerie verrouillée préservée (visuels sous NDA) */}
-            {lockedImages.length > 1 && (
-              <section data-fiche-locked-gallery>
-                <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
-                  {t("gallery")}
-                </h2>
-                <SignatureLine width="w-8" />
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {lockedImages.slice(1, 7).map((url, i) => (
-                    <div
-                      key={i}
-                      className="relative aspect-[4/3] overflow-hidden rounded-md bg-bg-deep"
-                    >
-                      <Image
-                        src={url}
-                        alt=""
-                        fill
-                        sizes="(min-width:1024px) 25vw, 50vw"
-                        className="scale-105 object-cover blur-md"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-bg-contrast/30 font-mono text-[10px] uppercase tracking-[0.3em] text-text-contrast/80">
-                        NDA
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
           </div>
 
           <FicheAdvisorColumn
