@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "./i18n/routing";
+import { isAdminEmail } from "@/lib/admin/admin-emails";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -43,6 +44,14 @@ export default async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
+    // Allowlist email — même source que lib/admin/require-admin.ts. Un
+    // utilisateur Supabase Auth authentifié mais hors allowlist (ex. compte
+    // d'un autre projet sur la même base) est traité comme non-admin ici.
+    const isAllowedAdmin = Boolean(user && isAdminEmail(user.email));
+    if (user && !isAllowedAdmin) {
+      console.warn("admin access denied");
+    }
+
     const isPublicAdminPath = ADMIN_PUBLIC_PATHS.has(pathname);
 
     // Anti-cache : aucune réponse admin (200, 307, redirect) ne doit
@@ -53,13 +62,13 @@ export default async function middleware(request: NextRequest) {
       return res;
     };
 
-    if (!user && !isPublicAdminPath) {
+    if (!isAllowedAdmin && !isPublicAdminPath) {
       const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("from", pathname);
       return noStore(NextResponse.redirect(loginUrl));
     }
 
-    if (user && pathname === "/admin/login") {
+    if (isAllowedAdmin && pathname === "/admin/login") {
       return noStore(NextResponse.redirect(new URL("/admin", request.url)));
     }
 

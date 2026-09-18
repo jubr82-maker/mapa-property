@@ -62,7 +62,7 @@ export async function POST(req: Request) {
   }
 
   if (!process.env.RESEND_API_KEY) {
-    console.log("[api/nda-offmarket] Resend stubbed:", { email: body.email });
+    console.log("[api/nda-offmarket] Resend stubbed");
   }
 
   return NextResponse.json({ ok: true, nda_id: (data as { id?: string } | null)?.id });

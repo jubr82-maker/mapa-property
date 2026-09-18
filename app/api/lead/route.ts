@@ -113,12 +113,12 @@ export async function POST(req: Request) {
     consentAt,
   );
   if (!res.ok) {
-    // Log permanent, sans donnée personnelle ni info sur les clés.
+    // Log permanent, sans donnée personnelle : ni "details" ni "hint", qui
+    // peuvent échoer la valeur fautive sur une violation de contrainte
+    // Postgres (ex. "Key (email)=(x@y.com) already exists.").
     console.error("[api/lead] supabase insert", {
       code: res.error?.code,
       message: res.error?.message,
-      details: res.error?.details,
-      hint: res.error?.hint,
     });
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }

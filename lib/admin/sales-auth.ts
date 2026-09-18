@@ -9,14 +9,21 @@
 // Meme modele de securite partout : session Supabase + allowlist email
 // (admin@mapagroup.org + j.brebion@mapagroup.org), en defense-en-profondeur
 // avec la RLS Postgres (policies partners_read/write, migration 20260701).
+//
+// Source des 2 adresses : lib/admin/admin-emails.ts (source unique du
+// projet). On importe les 2 constantes nommées explicitement plutot que
+// le tableau ADMIN_EMAILS complet : si l'allowlist admin générale
+// s'élargit un jour, cette page ne doit pas hériter silencieusement du
+// nouvel accès.
 
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { ADMIN_EMAIL_JULIEN, ADMIN_EMAIL_JBREBION } from "@/lib/admin/admin-emails";
 
 export const SALES_ALLOWED_EMAILS = new Set([
-  "admin@mapagroup.org",
-  "j.brebion@mapagroup.org",
+  ADMIN_EMAIL_JULIEN,
+  ADMIN_EMAIL_JBREBION,
 ]);
 
 const ALLOWED_AGENTS = new Set(["julien", "frederic"]);

@@ -2,12 +2,23 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdmin } from "@/lib/admin/require-admin";
 
 // ============================================================================
 // Workflow admin générique sur la table `mandats` (renommée depuis
 // mandats_recherche, sprint MANDATS-A — migration 20260603_mandats_unified).
 // Aligné EXACTEMENT sur app/admin/leads/actions.ts.
+//
+// Durci (sept. 2026) : ces actions n'appelaient PAS requireAdmin() et
+// lisaient/écrivaient via le client de session, couvert par la policy RLS
+// "authenticated all mandats" (USING auth.uid() IS NOT NULL — cf. migration
+// 20260603_mandats_unified.sql:44-47) : tout utilisateur Supabase Auth
+// authentifié, même issu d'un autre projet sur la même base, pouvait lire/
+// modifier/supprimer n'importe quel mandat. Traitement aligné sur leads :
+// requireAdmin() (allowlist email) + supabaseService() (service_role).
+// La policy RLS elle-même reste permissive — hors périmètre de cette passe
+// (aucun SQL) — cf. rapport.
 // ============================================================================
 
 const TABLE = "mandats";
@@ -26,7 +37,9 @@ export async function updateWorkflowStatus(
   newStatus: string,
   reason?: string,
 ) {
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
 
   const { data: current } = await sb
     .from(TABLE)
@@ -64,7 +77,9 @@ export async function addAdminNote(id: string, noteText: string) {
   const trimmed = noteText.trim();
   if (!trimmed) return;
 
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
 
   const { data: current } = await sb
     .from(TABLE)
@@ -91,7 +106,9 @@ export async function addAdminNote(id: string, noteText: string) {
 }
 
 export async function setNextFollowUp(id: string, date: string | null) {
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
   const { error } = await sb
     .from(TABLE)
     .update({ next_follow_up: date })
@@ -143,7 +160,9 @@ export async function updateMandat(
   id: string,
   fields: UpdateMandatFields,
 ): Promise<{ ok: boolean; error?: string }> {
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) return { ok: false, error: "unauthorized" };
+  const sb = supabaseService();
 
   const cleaned: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(fields)) {
@@ -184,7 +203,9 @@ export async function updateMandat(
  * La confirmation utilisateur est portee cote UI (composant client).
  */
 export async function deleteMandat(id: string): Promise<void> {
-  const sb = await createSupabaseServerClient();
+  const admin = await requireAdmin();
+  if (!admin.ok) throw new Error("unauthorized");
+  const sb = supabaseService();
   const { error } = await sb.from(TABLE).delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath(ROUTE);
@@ -208,7 +229,9 @@ export async function exportMandat(
   | { ok: false; error: string }
 > {
   try {
-    const sb = await createSupabaseServerClient();
+    const admin = await requireAdmin();
+    if (!admin.ok) return { ok: false, error: "unauthorized" };
+    const sb = supabaseService();
     const { data: mandat, error } = await sb
       .from(TABLE)
       .select("*")

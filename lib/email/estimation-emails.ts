@@ -181,15 +181,13 @@ async function sendOne(args: {
   to: string;
   subject: string;
   text: string;
+  kind: "client" | "internal";
 }): Promise<void> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
-    console.warn(
-      "[email/estimation] Resend non configuré — email stub:",
-      args.subject,
-      "→",
-      args.to,
-    );
+    console.warn("[email/estimation] Resend non configuré — email stub", {
+      kind: args.kind,
+    });
     return;
   }
   try {
@@ -207,10 +205,10 @@ async function sendOne(args: {
       }),
     });
     if (!res.ok) {
-      console.error("[email/estimation] Resend HTTP", res.status, args.subject);
+      console.error("[email/estimation] Resend HTTP", { kind: args.kind, status: res.status });
     }
   } catch (e) {
-    console.error("[email/estimation] Resend error", (e as Error).message);
+    console.error("[email/estimation] Resend error", { kind: args.kind, error: (e as Error).message });
   }
 }
 
@@ -238,6 +236,7 @@ export async function sendEstimationEmails(
         to: args.contactEmail,
         subject: clientSubject(locale, commune),
         text: clientBody({ locale, name, commune, range: args.range }),
+        kind: "client",
       }),
     );
   }
@@ -247,6 +246,7 @@ export async function sendEstimationEmails(
       to: internalTo,
       subject: internalSubject({ commune, type: args.type }),
       text: internalBody(args),
+      kind: "internal",
     }),
   );
 
@@ -372,5 +372,6 @@ export async function sendEstimationRefinementEmail(
     to: args.contactEmail,
     subject: refinementSubject(locale),
     text: refinementBody(locale, args.contactName),
+    kind: "client",
   });
 }

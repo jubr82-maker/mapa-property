@@ -137,7 +137,12 @@ export async function POST(req: Request) {
   );
 
   if (!ins.ok) {
-    console.error("[api/nda-request] supabase insert", ins.error);
+    // Pas de "details"/"hint" : peuvent échoer la valeur fautive sur une
+    // violation de contrainte Postgres (cf. api/lead/route.ts).
+    console.error("[api/nda-request] supabase insert", {
+      code: ins.error?.code,
+      message: ins.error?.message,
+    });
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 

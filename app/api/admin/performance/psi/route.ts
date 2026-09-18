@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { isAdminEmail } from "@/lib/admin/admin-emails";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -44,6 +45,10 @@ async function requireAdmin(): Promise<AuthResult> {
     } = await supabase.auth.getUser();
     if (!user) {
       return { ok: false, status: 401, body: { ok: false, reason: "unauthorized" } };
+    }
+    if (!isAdminEmail(user.email)) {
+      console.warn("admin access denied");
+      return { ok: false, status: 403, body: { ok: false, reason: "forbidden" } };
     }
     return { ok: true };
   } catch {

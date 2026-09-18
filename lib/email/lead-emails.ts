@@ -201,17 +201,15 @@ async function sendOne(args: {
   subject: string;
   text: string;
   from: string;
-}): Promise<{ ok: boolean; status?: number; body?: string; error?: string }> {
+  kind: "client" | "internal";
+}): Promise<{ ok: boolean; status?: number; error?: string }> {
   const key = process.env.RESEND_API_KEY;
   const toList = Array.isArray(args.to) ? args.to : [args.to];
-  const toLog = toList.join(", ");
   if (!key) {
-    console.warn(
-      "[lead-emails] RESEND_API_KEY absent — email stub:",
-      args.subject,
-      "→",
-      toLog,
-    );
+    console.warn("[lead-emails] RESEND_API_KEY absent — email stub", {
+      kind: args.kind,
+      recipients: toList.length,
+    });
     return { ok: false, error: "no_api_key" };
   }
   try {
@@ -228,22 +226,24 @@ async function sendOne(args: {
         text: args.text,
       }),
     });
-    const bodyText = await res.text().catch(() => "");
     if (!res.ok) {
-      console.error(
-        "[lead-emails] Resend HTTP",
-        res.status,
-        "→",
-        toLog,
-        "|",
-        bodyText.slice(0, 300),
-      );
-      return { ok: false, status: res.status, body: bodyText.slice(0, 300) };
+      // Pas de bodyText loggé : Resend peut échoer l'adresse fautive dans
+      // le corps d'une erreur de validation ("to"/"from" invalide).
+      console.error("[lead-emails] Resend HTTP", {
+        kind: args.kind,
+        status: res.status,
+        recipients: toList.length,
+      });
+      return { ok: false, status: res.status };
     }
-    return { ok: true, status: res.status, body: bodyText.slice(0, 200) };
+    return { ok: true, status: res.status };
   } catch (e) {
     const err = (e as Error).message;
-    console.error("[lead-emails] Resend exception", err, "→", toLog);
+    console.error("[lead-emails] Resend exception", {
+      kind: args.kind,
+      error: err,
+      recipients: toList.length,
+    });
     return { ok: false, error: err };
   }
 }
@@ -273,14 +273,13 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
   const fullName = [args.firstName, args.lastName].filter(Boolean).join(" ") || "Prospect";
 
   console.log("[lead-emails] start", {
-    to: internalTo,
-    from,
     hasApiKey: !!process.env.RESEND_API_KEY,
-    clientEmail: args.contactEmail ?? "(none)",
+    hasClientEmail: Boolean(args.contactEmail),
+    internalRecipients: Array.isArray(internalTo) ? internalTo.length : 1,
     subject: subjectStr,
   });
 
-  const tasks: Array<Promise<{ ok: boolean; status?: number; body?: string; error?: string }>> = [];
+  const tasks: Array<Promise<{ ok: boolean; status?: number; error?: string }>> = [];
   const labels: string[] = [];
 
   if (args.contactEmail) {
@@ -291,6 +290,7 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
         from,
         subject: clientSubject(locale),
         text: clientBody({ locale, firstName, subjectStr }),
+        kind: "client",
       }),
     );
   }
@@ -302,15 +302,24 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
       from,
       subject: internalSubject({ subjectStr, name: fullName }),
       text: internalBody({ ...args, locale, subjectStr }),
+      kind: "internal",
     }),
   );
 
   const results = await Promise.allSettled(tasks);
   results.forEach((r, i) => {
     if (r.status === "fulfilled") {
-      console.log(`[lead-emails] ${labels[i]}`, r.value);
+      console.log(`[lead-emails] ${labels[i]}`, {
+        ok: r.value.ok,
+        status: r.value.status,
+        error: r.value.error,
+      });
     } else {
-      console.error(`[lead-emails] ${labels[i]} rejected`, r.reason);
+      const reason = r.reason as unknown;
+      console.error(
+        `[lead-emails] ${labels[i]} rejected`,
+        reason instanceof Error ? reason.message : String(reason),
+      );
     }
   });
 }

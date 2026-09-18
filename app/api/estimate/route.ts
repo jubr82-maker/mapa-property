@@ -543,16 +543,8 @@ export async function POST(req: Request) {
           lastRes.error ??
           emailRes.error ??
           phoneRes.error) ?? "unknown";
-      const valueByField: Record<string, string> = {
-        contactFirstName: firstName,
-        contactLastName: lastName,
-        contactEmail: body.contactEmail ?? "",
-        contactPhone: body.contactPhone ?? "",
-      };
       console.warn(
-        `[api/estimate] Validation failed: field=${field} value=${valueByField[
-          field
-        ].slice(0, 30)} reason=${reason}`,
+        `[api/estimate] Validation failed: field=${field} reason=${reason}`,
       );
       return NextResponse.json(
         { error: "invalid_payload", field, reason },

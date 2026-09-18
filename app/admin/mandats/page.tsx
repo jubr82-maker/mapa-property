@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { supabaseService } from "@/lib/supabase-service";
+import { requireAdminPage } from "@/lib/admin/require-admin";
 import {
   WorkflowBadge,
   WORKFLOW_STATUSES,
@@ -128,7 +129,8 @@ export default async function AdminMandatsPage({
     sp.tab && WORKFLOW_TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
   const sortDir: SortDir = sp.sort === "asc" ? "asc" : "desc";
 
-  const supabase = await createSupabaseServerClient();
+  await requireAdminPage();
+  const supabase = supabaseService();
 
   // 1 SELECT global (limit 500), filtrage section + workflow + q cote JS.
   // Pour 500 rows max en admin (table peu volumineuse) c'est plus simple

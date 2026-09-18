@@ -85,7 +85,6 @@ export async function POST(req: Request) {
 
   if (!process.env.RESEND_API_KEY) {
     console.log("[api/offmarket-request] Resend stubbed:", {
-      email: body.email,
       property_id: body.property_id,
       request_id: (data as { id?: string } | null)?.id,
     });

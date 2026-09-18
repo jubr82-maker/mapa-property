@@ -113,7 +113,12 @@ export async function POST(req: Request) {
     consentAt,
   );
   if (!res.ok) {
-    console.error("[api/liste-attente] supabase insert", res.error);
+    // Pas de "details"/"hint" : peuvent échoer la valeur fautive sur une
+    // violation de contrainte Postgres (cf. api/lead/route.ts).
+    console.error("[api/liste-attente] supabase insert", {
+      code: res.error?.code,
+      message: res.error?.message,
+    });
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 

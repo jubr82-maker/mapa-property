@@ -53,7 +53,7 @@ export async function POST(req: Request) {
   }
 
   if (!process.env.RESEND_API_KEY) {
-    console.log("[api/arcova-waitlist] Resend stubbed:", { email, first_name, last_name });
+    console.log("[api/arcova-waitlist] Resend stubbed");
   }
 
   return NextResponse.json({ ok: true });

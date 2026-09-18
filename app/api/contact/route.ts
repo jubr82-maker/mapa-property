@@ -57,7 +57,7 @@ export async function POST(req: Request) {
   if (process.env.RESEND_API_KEY) {
     // Branchement Resend prévu, voir NIGHT_REPORT
   } else {
-    console.log("[api/contact] Resend stubbed:", { email: body.email, subject: body.subject });
+    console.log("[api/contact] Resend stubbed");
   }
 
   return NextResponse.json({ ok: true });

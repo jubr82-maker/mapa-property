@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Big_Shoulders, Archivo, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 import "../globals.css";
@@ -52,6 +53,11 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (user && !isAdminEmail(user.email)) {
+    console.warn("admin access denied");
+    redirect("/admin/login");
+  }
 
   // Login page : pas de shell admin
   if (!user) {
