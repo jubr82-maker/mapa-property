@@ -40,9 +40,13 @@ const TABS: { id: Tab; label: string }[] = [
 export function OffmarketForm({
   row,
   mode,
+  signedPhotoUrls,
 }: {
   row: OffmarketRow | null;
   mode: "create" | "edit";
+  // URL signées (60 min), une par URL permanente de la galerie — pour
+  // l'affichage uniquement. Cf. lib/storage-signed-url.ts et PhotosManager.
+  signedPhotoUrls?: Record<string, string>;
 }) {
   const [tab, setTab] = useState<Tab>(mode === "create" ? "location" : "identity");
   // En création : on commence par Localisation (workflow 1→4).
@@ -624,7 +628,11 @@ export function OffmarketForm({
           {mode === "edit" && row && (
             <Section title="Photos">
               <div className="md:col-span-2">
-                <PhotosManager id={row.id} photos={photos} />
+                <PhotosManager
+                  id={row.id}
+                  photos={photos}
+                  signedUrls={signedPhotoUrls ?? {}}
+                />
               </div>
             </Section>
           )}
@@ -1357,7 +1365,20 @@ function DeleteButton({ id }: { id: string }) {
   );
 }
 
-function PhotosManager({ id, photos }: { id: string; photos: string[] }) {
+function PhotosManager({
+  id,
+  photos,
+  signedUrls,
+}: {
+  id: string;
+  photos: string[];
+  // Cle = URL permanente d'origine (identite, reorder/suppression,
+  // ecriture en base inchangee), valeur = URL signee pour l'affichage
+  // uniquement. Repli sur l'URL d'origine si absente de la map (fichier
+  // pas encore signe / signature echouee) — le bucket reste lisible tant
+  // que les policies ne sont pas resserrees en base.
+  signedUrls: Record<string, string>;
+}) {
   const [list, setList] = useState(photos);
   const [busy, startTransition] = useTransition();
 
@@ -1417,7 +1438,13 @@ function PhotosManager({ id, photos }: { id: string; photos: string[] }) {
           {list.map((url, i) => (
             <li key={url} className="group relative overflow-hidden rounded-xl border border-[#3D4F63]/15 bg-white">
               <div className="relative aspect-[4/3]">
-                <Image src={url} alt={`Photo ${i + 1}`} fill sizes="220px" className="object-cover" />
+                <Image
+                  src={signedUrls[url] ?? url}
+                  alt={`Photo ${i + 1}`}
+                  fill
+                  sizes="220px"
+                  className="object-cover"
+                />
                 {i === 0 && (
                   <span className="absolute left-2 top-2 rounded-full bg-[#e0af6e] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
                     Cover

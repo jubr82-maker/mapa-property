@@ -11,6 +11,8 @@ import {
   type OffmarketTransaction,
 } from "@/lib/admin/offmarket";
 import { fetchOffmarketAdminList } from "@/lib/admin/offmarket-server";
+import { requireAdminPage } from "@/lib/admin/require-admin";
+import { toSignedUrl } from "@/lib/storage-signed-url";
 import { OffmarketListFilters } from "@/components/admin/OffmarketListFilters";
 
 export default async function AdminOffmarketListPage({
@@ -23,8 +25,21 @@ export default async function AdminOffmarketListPage({
     q?: string;
   }>;
 }) {
+  await requireAdminPage();
   const sp = await searchParams;
   const all = await fetchOffmarketAdminList();
+
+  // Vignette dérivée à chaque rendu depuis le chemin du fichier (URL
+  // signée, 60 min) — jamais l'URL permanente stockée en colonne
+  // cover_image_url. Cf. lib/storage-signed-url.ts.
+  const signedCoverById = new Map<string, string | null>(
+    await Promise.all(
+      all.map(
+        async (row) =>
+          [row.id, await toSignedUrl("offmarket-photos", row.cover_image_url)] as const,
+      ),
+    ),
+  );
 
   const filtered = all.filter((row) => {
     if (sp.status && row.status !== sp.status) return false;
@@ -86,7 +101,7 @@ export default async function AdminOffmarketListPage({
               </tr>
             ) : (
               filtered.map((row) => {
-                const cover = row.cover_image_url;
+                const cover = signedCoverById.get(row.id) ?? null;
                 const city = row.city_label ?? row.city_anonymized ?? "—";
                 const status = (row.status ?? "draft") as OffmarketStatus;
                 return (

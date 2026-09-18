@@ -1,14 +1,27 @@
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { requireAdminPage } from "@/lib/admin/require-admin";
+import { toSignedUrl } from "@/lib/storage-signed-url";
 import { DocumentsManager } from "@/components/admin/DocumentsManager";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDocumentsPage() {
+  await requireAdminPage();
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("documents")
     .select("id,title,category,file_url,is_public,created_at")
     .order("created_at", { ascending: false });
+
+  // Le lien affiche est derive a chaque rendu a partir du chemin du
+  // fichier (URL signee, 60 min) — jamais l'URL permanente stockee en
+  // colonne file_url. Cf. lib/storage-signed-url.ts.
+  const documents = await Promise.all(
+    (data ?? []).map(async (doc) => ({
+      ...doc,
+      signed_url: await toSignedUrl("documents", doc.file_url),
+    })),
+  );
 
   return (
     <div className="space-y-8">
@@ -20,10 +33,10 @@ export default async function AdminDocumentsPage() {
           Documents
         </h1>
         <p className="mt-1 text-sm text-[#3D4F63]/70">
-          {data?.length ?? 0} document{(data?.length ?? 0) > 1 ? "s" : ""}
+          {documents.length} document{documents.length > 1 ? "s" : ""}
         </p>
       </header>
-      <DocumentsManager documents={data ?? []} />
+      <DocumentsManager documents={documents} />
     </div>
   );
 }

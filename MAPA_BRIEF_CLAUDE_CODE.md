@@ -45,7 +45,7 @@ Versioning : GitHub
 ```bash
 # Supabase (anon key publique, sans risque)
 NEXT_PUBLIC_SUPABASE_URL=https://dutfkblygfvhhwpzxmfz.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1dGZrYmx5Z2Z2aGh3cHp4bWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTcxMTMsImV4cCI6MjA5MTA5MzExM30.iauOM8aJhvdMCD1Cz4TzFLBTDKLO5tUc_fb1rTuUxrQ
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<voir .env.local / variables d'environnement Vercel>
 
 # Email (à compléter quand dispo)
 RESEND_API_KEY=

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { fetchOffmarketAdminById } from "@/lib/admin/offmarket-server";
+import { requireAdminPage } from "@/lib/admin/require-admin";
+import { toSignedUrl } from "@/lib/storage-signed-url";
 import { OffmarketForm } from "@/components/admin/OffmarketForm";
 
 export const dynamic = "force-dynamic";
@@ -12,10 +14,29 @@ export default async function EditOffmarketPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ created?: string }>;
 }) {
+  await requireAdminPage();
   const { id } = await params;
   const sp = await searchParams;
   const row = await fetchOffmarketAdminById(id);
   if (!row) notFound();
+
+  // Galerie affichée via des URL signées (60 min), dérivées à chaque
+  // rendu depuis le chemin du fichier — jamais les URL permanentes
+  // stockées en colonnes cover_image_url/gallery_urls/photo_urls.
+  // L'identité utilisée pour le tri/la suppression/l'écriture en base
+  // (reorderOffmarketPhotos) reste l'URL permanente d'origine, jamais
+  // l'URL signée. Cf. lib/storage-signed-url.ts.
+  const rawPhotoUrls: string[] =
+    (row.photo_urls as string[] | null) ?? (row.gallery_urls as string[] | null) ?? [];
+  const signedPhotoUrls: Record<string, string> = Object.fromEntries(
+    (
+      await Promise.all(
+        rawPhotoUrls.map(
+          async (url) => [url, await toSignedUrl("offmarket-photos", url)] as const,
+        ),
+      )
+    ).filter((entry): entry is [string, string] => entry[1] !== null),
+  );
 
   return (
     <div className="space-y-8">
@@ -41,7 +62,7 @@ export default async function EditOffmarketPage({
           « Publié » quand prêt.
         </p>
       )}
-      <OffmarketForm row={row} mode="edit" />
+      <OffmarketForm row={row} mode="edit" signedPhotoUrls={signedPhotoUrls} />
     </div>
   );
 }

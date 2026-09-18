@@ -12,6 +12,9 @@ type Doc = {
   title: string;
   category: string | null;
   file_url: string;
+  // URL signee (60 min), derivee du chemin du fichier a chaque rendu
+  // serveur — jamais l'URL permanente file_url. Cf. lib/storage-signed-url.ts.
+  signed_url: string | null;
   is_public: boolean | null;
   created_at: string;
 };
@@ -153,14 +156,20 @@ function DocRow({ doc }: { doc: Doc }) {
         </label>
       </td>
       <td className="px-4 py-3">
-        <a
-          href={doc.file_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
-        >
-          Ouvrir ↗
-        </a>
+        {doc.signed_url ? (
+          <a
+            href={doc.signed_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
+          >
+            Ouvrir ↗
+          </a>
+        ) : (
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/40">
+            Indisponible
+          </span>
+        )}
       </td>
       <td className="px-4 py-3 text-right">
         <button

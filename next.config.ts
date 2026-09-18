@@ -61,6 +61,14 @@ const nextConfig: NextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
       {
+        // URL signees (buckets prives "documents"/"offmarket-photos" —
+        // cf. lib/storage-signed-url.ts) : chemin /object/sign/, distinct
+        // du chemin /object/public/ ci-dessus.
+        protocol: "https",
+        hostname: "dutfkblygfvhhwpzxmfz.supabase.co",
+        pathname: "/storage/v1/object/sign/**",
+      },
+      {
         protocol: "https",
         hostname: "media.apimo.pro",
       },
