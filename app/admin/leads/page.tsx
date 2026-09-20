@@ -2,6 +2,7 @@ import Link from "next/link";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { LeadsTable } from "@/components/admin/LeadsTable";
+import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 import {
   WorkflowBadge,
   WORKFLOW_STATUSES,
@@ -171,6 +172,10 @@ export default async function AdminLeadsPage({
             {filtered.length > 1 ? "s" : ""} · {leads.length} au total
           </p>
         </div>
+        <ExcelExportButton
+          exportPath="/api/admin/exports/leads"
+          params={{ tab, type: sp.type, status: sp.status, q: sp.q }}
+        />
       </header>
 
       {!migrationApplied && (

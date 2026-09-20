@@ -6,6 +6,7 @@ import {
   WORKFLOW_STATUSES,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
+import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -232,18 +233,24 @@ export default async function AdminMandatsPage({
             section · {mandats.length} au total
           </p>
         </div>
-        <Link
-          href={buildHref({ sort: sortDir === "desc" ? "asc" : "desc" })}
-          className="inline-flex items-center gap-2 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
-          aria-label={
-            sortDir === "desc"
-              ? "Trier du plus ancien au plus récent"
-              : "Trier du plus récent au plus ancien"
-          }
-        >
-          <span>Date</span>
-          <span aria-hidden>{sortDir === "desc" ? "↓" : "↑"}</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <ExcelExportButton
+            exportPath="/api/admin/exports/mandats"
+            params={{ section, tab: workflowTab, q: sp.q }}
+          />
+          <Link
+            href={buildHref({ sort: sortDir === "desc" ? "asc" : "desc" })}
+            className="inline-flex items-center gap-2 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
+            aria-label={
+              sortDir === "desc"
+                ? "Trier du plus ancien au plus récent"
+                : "Trier du plus récent au plus ancien"
+            }
+          >
+            <span>Date</span>
+            <span aria-hidden>{sortDir === "desc" ? "↓" : "↑"}</span>
+          </Link>
+        </div>
       </header>
 
       {!migrationApplied && (

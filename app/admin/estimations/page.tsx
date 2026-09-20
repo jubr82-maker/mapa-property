@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
+import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 
 interface EstimationRow {
   id: string;
@@ -73,6 +74,7 @@ export default async function AdminEstimationsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <ExcelExportButton exportPath="/api/admin/exports/estimations" />
           <Link
             href="/admin/estimations/new"
             className="rounded-full bg-[#9E7B2A] px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#e0af6e]"

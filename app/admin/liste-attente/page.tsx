@@ -6,6 +6,7 @@ import {
   WORKFLOW_STATUSES,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
+import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -128,6 +129,10 @@ export default async function AdminWaitlistPage({
             {rows.length} au total
           </p>
         </div>
+        <ExcelExportButton
+          exportPath="/api/admin/exports/liste-attente"
+          params={{ tab, q: sp.q }}
+        />
       </header>
 
       {!migrationApplied && (

@@ -20,6 +20,7 @@ import {
 } from "@/components/admin/EditMandatForm";
 import { DeleteMandatButton } from "@/components/admin/DeleteMandatButton";
 import { ExportMandatButton } from "@/components/admin/ExportMandatButton";
+import { PdfExportButton } from "@/components/admin/PdfExportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -225,7 +226,10 @@ export default async function AdminMandatDetailPage({
             Créé le {formatDateTime(mandat.created_at)} · Statut {statusLabel}
           </p>
         </div>
-        <WorkflowBadge status={ws} size="md" />
+        <div className="flex items-center gap-3">
+          <PdfExportButton href={`/api/admin/exports/mandats/${mandat.id}`} />
+          <WorkflowBadge status={ws} size="md" />
+        </div>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">

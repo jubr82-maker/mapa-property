@@ -6,6 +6,7 @@ import {
   WORKFLOW_STATUSES,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
+import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -144,6 +145,10 @@ export default async function AdminOffmarketRequestsPage({
             {filtered.length > 1 ? "s" : ""} · {list.length} au total
           </p>
         </div>
+        <ExcelExportButton
+          exportPath="/api/admin/exports/offmarket-requests"
+          params={{ tab, property: sp.property, q: sp.q }}
+        />
       </header>
 
       {!migrationApplied && (

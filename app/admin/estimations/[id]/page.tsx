@@ -3,6 +3,7 @@ import Link from "next/link";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { EstimationDetailClient } from "./EstimationDetailClient";
+import { PdfExportButton } from "@/components/admin/PdfExportButton";
 
 interface EstimationRow {
   id: string;
@@ -129,16 +130,19 @@ export default async function EstimationDetailPage({
             {r.locale && <> · locale {r.locale}</>}
           </p>
         </div>
-        <div className="rounded-md border border-[#3D4F63]/15 bg-white px-4 py-3 text-right">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-            Prix retenu (client)
-          </p>
-          <p className="font-display text-2xl font-black text-[#9E7B2A]">
-            {fmtPrice(r.client_output.price_mid)}
-          </p>
-          <p className="font-mono text-[10px] text-[#1A1F2A]/60">
-            {fmtPrice(r.client_output.price_low)} – {fmtPrice(r.client_output.price_high)}
-          </p>
+        <div className="flex items-start gap-3">
+          <div className="rounded-md border border-[#3D4F63]/15 bg-white px-4 py-3 text-right">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+              Prix retenu (client)
+            </p>
+            <p className="font-display text-2xl font-black text-[#9E7B2A]">
+              {fmtPrice(r.client_output.price_mid)}
+            </p>
+            <p className="font-mono text-[10px] text-[#1A1F2A]/60">
+              {fmtPrice(r.client_output.price_low)} – {fmtPrice(r.client_output.price_high)}
+            </p>
+          </div>
+          <PdfExportButton href={`/api/admin/exports/estimations/${r.id}`} />
         </div>
       </header>
 
