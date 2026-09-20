@@ -6,6 +6,7 @@ import { supabaseService } from "@/lib/supabase-service";
 import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel";
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
 import { toDateOrNull, fullName, orDash } from "@/lib/admin/exports/format";
+import { rawTypeLabel, subjectLabel, sourceLabel, workflowStatusLabel } from "@/lib/admin/exports/labels";
 
 interface LeadExportRow {
   id: string;
@@ -27,19 +28,19 @@ interface LeadExportRow {
 }
 
 const COLUMNS: ExcelColumn<LeadExportRow>[] = [
-  { header: "Date", key: "date", format: "date", value: (r) => toDateOrNull(r.created_at) },
-  { header: "Nom", key: "nom", value: (r) => fullName(r.first_name, r.last_name) },
-  { header: "Email", key: "email", value: (r) => r.email, width: 28 },
-  { header: "Téléphone", key: "tel", value: (r) => orDash(r.phone) },
-  { header: "Type", key: "type", value: (r) => orDash(r.type) },
-  { header: "Sujet", key: "sujet", value: (r) => orDash(r.subject) },
-  { header: "Source", key: "source", value: (r) => orDash(r.source) },
-  { header: "Pays", key: "pays", value: (r) => orDash(r.country) },
-  { header: "Ville", key: "ville", value: (r) => orDash(r.city) },
-  { header: "Bien référencé", key: "bien", value: (r) => orDash(r.property_ref) },
-  { header: "Statut workflow", key: "workflow", value: (r) => orDash(r.workflow_status ?? "new") },
-  { header: "Prochain suivi", key: "suivi", format: "date", value: (r) => toDateOrNull(r.next_follow_up) },
-  { header: "Message", key: "message", width: 50, value: (r) => orDash(r.message) },
+  { header: "Date", key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
+  { header: "Nom", key: "nom", type: "text", value: (r) => fullName(r.first_name, r.last_name) },
+  { header: "Email", key: "email", type: "text", width: 28, value: (r) => r.email },
+  { header: "Téléphone", key: "tel", type: "text", value: (r) => orDash(r.phone) },
+  { header: "Type", key: "type", type: "text", value: (r) => rawTypeLabel(r.type) },
+  { header: "Sujet", key: "sujet", type: "text", value: (r) => subjectLabel(r.subject) },
+  { header: "Source", key: "source", type: "text", value: (r) => sourceLabel(r.source) },
+  { header: "Pays", key: "pays", type: "text", value: (r) => orDash(r.country) },
+  { header: "Ville", key: "ville", type: "text", value: (r) => orDash(r.city) },
+  { header: "Bien référencé", key: "bien", type: "text", value: (r) => orDash(r.property_ref) },
+  { header: "Statut workflow", key: "workflow", type: "text", value: (r) => workflowStatusLabel(r.workflow_status) },
+  { header: "Prochain suivi", key: "suivi", type: "date", value: (r) => toDateOrNull(r.next_follow_up) },
+  { header: "Message", key: "message", type: "longText", value: (r) => orDash(r.message) },
 ];
 
 export async function GET(req: Request) {

@@ -6,6 +6,7 @@ import { supabaseService } from "@/lib/supabase-service";
 import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel";
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
 import { toDateOrNull, orDash } from "@/lib/admin/exports/format";
+import { propertyTypeLabel, engineLabel, estimationStatusLabel, confidenceLabel } from "@/lib/admin/exports/labels";
 
 interface EstimationExportRow {
   id: string;
@@ -23,37 +24,31 @@ interface EstimationExportRow {
   created_at: string;
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  new: "Nouveau",
-  in_progress: "En cours",
-  avis_sent: "Avis envoyé",
-  mandate_signed: "Mandat signé",
-  closed: "Clos",
-};
-
 const COLUMNS: ExcelColumn<EstimationExportRow>[] = [
-  { header: "Date", key: "date", format: "date", value: (r) => toDateOrNull(r.created_at) },
+  { header: "Date", key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
   {
     header: "Type de bien",
     key: "type",
-    value: (r) => orDash((r.inputs as { type?: string })?.type),
+    type: "text",
+    value: (r) => propertyTypeLabel((r.inputs as { type?: string })?.type),
   },
   {
     header: "Commune / pays",
     key: "commune",
+    type: "text",
     value: (r) => {
       const i = r.inputs as { commune?: string; country?: string };
       return orDash(i?.commune ?? i?.country);
     },
   },
-  { header: "Email", key: "email", value: (r) => orDash(r.contact_email), width: 28 },
-  { header: "Téléphone", key: "tel", value: (r) => orDash(r.contact_phone) },
-  { header: "Estimation basse", key: "low", format: "currency", value: (r) => r.client_output?.price_low ?? null },
-  { header: "Estimation médiane", key: "mid", format: "currency", value: (r) => r.client_output?.price_mid ?? null },
-  { header: "Estimation haute", key: "high", format: "currency", value: (r) => r.client_output?.price_high ?? null },
-  { header: "Confiance", key: "confidence", value: (r) => orDash(r.client_output?.confidence) },
-  { header: "Moteur", key: "engine", value: (r) => (r.engine === "evs_5_methods" ? "EVS" : "Hédoniste") },
-  { header: "Statut", key: "statut", value: (r) => STATUS_LABEL[r.status] ?? orDash(r.status) },
+  { header: "Email", key: "email", type: "text", width: 28, value: (r) => orDash(r.contact_email) },
+  { header: "Téléphone", key: "tel", type: "text", value: (r) => orDash(r.contact_phone) },
+  { header: "Estimation basse", key: "low", type: "amount", value: (r) => r.client_output?.price_low ?? null },
+  { header: "Estimation médiane", key: "mid", type: "amount", value: (r) => r.client_output?.price_mid ?? null },
+  { header: "Estimation haute", key: "high", type: "amount", value: (r) => r.client_output?.price_high ?? null },
+  { header: "Confiance", key: "confidence", type: "text", value: (r) => confidenceLabel(r.client_output?.confidence) },
+  { header: "Moteur", key: "engine", type: "text", value: (r) => engineLabel(r.engine) },
+  { header: "Statut", key: "statut", type: "text", value: (r) => estimationStatusLabel(r.status) },
 ];
 
 export async function GET() {

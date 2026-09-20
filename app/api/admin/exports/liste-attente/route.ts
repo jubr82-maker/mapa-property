@@ -6,6 +6,7 @@ import { supabaseService } from "@/lib/supabase-service";
 import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel";
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
 import { toDateOrNull, fullName, orDash } from "@/lib/admin/exports/format";
+import { workflowStatusLabel } from "@/lib/admin/exports/labels";
 
 interface WaitlistExportRow {
   id: string;
@@ -32,15 +33,15 @@ function extractTag(message: string | null, tag: string): string | null {
 }
 
 const COLUMNS: ExcelColumn<WaitlistExportRow>[] = [
-  { header: "Date", key: "date", format: "date", value: (r) => toDateOrNull(r.created_at) },
-  { header: "Nom", key: "nom", value: (r) => fullName(r.first_name, r.last_name) },
-  { header: "Email", key: "email", value: (r) => r.email, width: 28 },
-  { header: "Budget", key: "budget", value: (r) => orDash(extractTag(r.message, "BUDGET")) },
-  { header: "Budget validé", key: "budget_valide", value: (r) => orDash(extractTag(r.message, "BUDGET_VALIDE")) },
-  { header: "Recherche", key: "recherche", width: 40, value: (r) => orDash(extractTag(r.message, "RECHERCHE")) },
-  { header: "Source", key: "source", value: (r) => orDash(r.source) },
-  { header: "Statut workflow", key: "workflow", value: (r) => orDash(r.workflow_status ?? "new") },
-  { header: "Prochain suivi", key: "suivi", format: "date", value: (r) => toDateOrNull(r.next_follow_up) },
+  { header: "Date", key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
+  { header: "Nom", key: "nom", type: "text", value: (r) => fullName(r.first_name, r.last_name) },
+  { header: "Email", key: "email", type: "text", width: 28, value: (r) => r.email },
+  { header: "Budget", key: "budget", type: "text", value: (r) => orDash(extractTag(r.message, "BUDGET")) },
+  { header: "Budget validé", key: "budget_valide", type: "text", value: (r) => orDash(extractTag(r.message, "BUDGET_VALIDE")) },
+  { header: "Recherche", key: "recherche", type: "longText", value: (r) => orDash(extractTag(r.message, "RECHERCHE")) },
+  { header: "Source", key: "source", type: "text", value: (r) => orDash(r.source) },
+  { header: "Statut workflow", key: "workflow", type: "text", value: (r) => workflowStatusLabel(r.workflow_status) },
+  { header: "Prochain suivi", key: "suivi", type: "date", value: (r) => toDateOrNull(r.next_follow_up) },
 ];
 
 export async function GET(req: Request) {

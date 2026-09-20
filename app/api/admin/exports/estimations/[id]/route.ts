@@ -1,10 +1,19 @@
-// Export PDF de la fiche d'une estimation (Avis de Valeur interne).
+// Export PDF de la fiche d'une estimation (Avis de Valeur interne) — sur
+// le modèle validé.
 import { NextResponse } from "next/server";
 import { requireAdminRoute } from "@/lib/admin/require-admin";
 import { supabaseService } from "@/lib/supabase-service";
-import { buildFichePdf, type PdfFicheSection } from "@/lib/admin/exports/pdf";
+import { buildFichePdf, type PdfSection } from "@/lib/admin/exports/pdf";
 import { pdfResponse, exportFicheFilename } from "@/lib/admin/exports/http";
-import { fmtDateTimeFr, fmtEuro, orDash } from "@/lib/admin/exports/format";
+import { fmtDateTimeShort, fmtEuro, fmtSurface, orDash } from "@/lib/admin/exports/format";
+import {
+  etatLabel,
+  engineLabel,
+  estimationStatusLabel,
+  methodLabel,
+  confidenceLabel,
+  propertyTypeLabel,
+} from "@/lib/admin/exports/labels";
 
 interface EstimationFull {
   id: string;
@@ -28,23 +37,6 @@ interface EstimationFull {
   created_at: string;
 }
 
-const METHOD_LABEL: Record<string, string> = {
-  observatoire: "Référentiel MAPA (calibré)",
-  sales_comparison: "Comparaison directe",
-  hedonic: "Hédoniste enrichi",
-  income_capitalization: "Capitalisation locative",
-  depreciated_replacement: "Coût de remplacement",
-  statec_reference: "STATEC référentiel",
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  new: "Nouveau",
-  in_progress: "En cours",
-  avis_sent: "Avis envoyé",
-  mandate_signed: "Mandat signé",
-  closed: "Clos",
-};
-
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -55,12 +47,7 @@ export async function GET(
   const { id } = await params;
   const supabase = supabaseService();
 
-  const { data: row } = await supabase
-    .from("estimation_requests")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
+  const { data: row } = await supabase.from("estimation_requests").select("*").eq("id", id).maybeSingle();
   if (!row) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
@@ -75,40 +62,47 @@ export async function GET(
   };
   const methods = est.internal_output?.methods ?? {};
 
-  const sections: PdfFicheSection[] = [
+  const sections: PdfSection[] = [
     {
+      kind: "table",
       heading: "Prospect",
-      fields: [
+      rows: [
         { label: "Nom", value: orDash(est.contact_name) },
         { label: "Email", value: orDash(est.contact_email) },
         { label: "Téléphone", value: orDash(est.contact_phone) },
-        { label: "Reçue le", value: fmtDateTimeFr(est.created_at) },
+        { label: "Reçue le", value: fmtDateTimeShort(est.created_at) },
       ],
     },
     {
+      kind: "table",
       heading: "Bien estimé",
-      fields: [
-        { label: "Type", value: orDash(inputs.type) },
+      rows: [
+        { label: "Type", value: propertyTypeLabel(inputs.type) },
         { label: "Commune / pays", value: orDash(inputs.commune ?? inputs.country) },
-        { label: "Surface habitable", value: inputs.livingSurface ? `${inputs.livingSurface} m²` : "—" },
-        { label: "État", value: orDash(inputs.state) },
+        {
+          label: "Surface habitable",
+          value: inputs.livingSurface ? fmtSurface(Number(inputs.livingSurface)) : "—",
+        },
+        { label: "État", value: etatLabel(inputs.state) },
         { label: "Classe énergie", value: orDash(inputs.energy) },
       ],
     },
     {
+      kind: "table",
       heading: "Estimation (fourchette client)",
-      fields: [
+      rows: [
         { label: "Basse", value: fmtEuro(est.client_output?.price_low) },
         { label: "Médiane", value: fmtEuro(est.client_output?.price_mid) },
         { label: "Haute", value: fmtEuro(est.client_output?.price_high) },
-        { label: "Confiance", value: orDash(est.client_output?.confidence) },
-        { label: "Moteur", value: est.engine === "evs_5_methods" ? "EVS 5 méthodes" : "Hédoniste legacy" },
+        { label: "Confiance", value: confidenceLabel(est.client_output?.confidence) },
+        { label: "Moteur", value: engineLabel(est.engine) },
       ],
     },
     {
+      kind: "table",
       heading: "Suivi interne",
-      fields: [
-        { label: "Statut", value: STATUS_LABEL[est.status] ?? orDash(est.status) },
+      rows: [
+        { label: "Statut", value: estimationStatusLabel(est.status) },
         { label: "Notes", value: orDash(est.notes) },
       ],
     },
@@ -117,9 +111,10 @@ export async function GET(
   const methodEntries = Object.entries(methods).filter(([, m]) => m.applicable);
   if (methodEntries.length > 0) {
     sections.splice(3, 0, {
+      kind: "table",
       heading: "Détail des méthodes (usage interne)",
-      fields: methodEntries.map(([key, m]) => ({
-        label: METHOD_LABEL[key] ?? key,
+      rows: methodEntries.map(([key, m]) => ({
+        label: methodLabel(key),
         value: fmtEuro(m.price),
       })),
     });
@@ -127,7 +122,16 @@ export async function GET(
 
   const buffer = await buildFichePdf({
     documentTitle: "Fiche estimation",
-    reference: `Estimation #${est.id.slice(0, 8)}`,
+    subtitle: orDash(inputs.commune ?? inputs.country),
+    reference: `ESTIM-${est.id.slice(0, 8).toUpperCase()}`,
+    kpis: [
+      { label: "Estimation médiane", value: fmtEuro(est.client_output?.price_mid) },
+      {
+        label: "Fourchette",
+        value: `${fmtEuro(est.client_output?.price_low)} – ${fmtEuro(est.client_output?.price_high)}`,
+      },
+      { label: "Confiance", value: confidenceLabel(est.client_output?.confidence) },
+    ],
     sections,
   });
 

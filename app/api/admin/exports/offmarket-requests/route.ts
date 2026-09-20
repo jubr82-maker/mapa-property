@@ -7,6 +7,7 @@ import { supabaseService } from "@/lib/supabase-service";
 import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel";
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
 import { toDateOrNull, fullName, orDash } from "@/lib/admin/exports/format";
+import { workflowStatusLabel, requestStatusLabel } from "@/lib/admin/exports/labels";
 
 interface RequestExportRow {
   id: string;
@@ -31,20 +32,20 @@ interface RequestExportRow {
 }
 
 const COLUMNS: ExcelColumn<RequestExportRow>[] = [
-  { header: "Date", key: "date", format: "date", value: (r) => toDateOrNull(r.created_at) },
-  { header: "Demandeur", key: "nom", value: (r) => fullName(r.prenom, r.nom) },
-  { header: "Email", key: "email", value: (r) => orDash(r.email), width: 28 },
-  { header: "Téléphone", key: "tel", value: (r) => orDash(r.telephone) },
-  { header: "Référence bien", key: "ref", value: (r) => orDash(r.properties_offmarket?.reference) },
-  { header: "Titre bien", key: "titre", width: 28, value: (r) => orDash(r.properties_offmarket?.title) },
-  { header: "Pays recherché", key: "pays", value: (r) => orDash(r.pays_recherche) },
-  { header: "Ville / quartier", key: "ville", value: (r) => orDash(r.ville_quartier) },
-  { header: "Budget max", key: "budget", format: "currency", value: (r) => r.budget_max_eur },
-  { header: "Surface souhaitée (m²)", key: "surface", value: (r) => r.surface_souhaitee_m2 },
-  { header: "Statut", key: "statut", value: (r) => orDash(r.status) },
-  { header: "Statut workflow", key: "workflow", value: (r) => orDash(r.workflow_status ?? "new") },
-  { header: "Prochain suivi", key: "suivi", format: "date", value: (r) => toDateOrNull(r.next_follow_up) },
-  { header: "Notes admin", key: "notes", width: 40, value: (r) => orDash(r.notes_admin) },
+  { header: "Date", key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
+  { header: "Demandeur", key: "nom", type: "text", value: (r) => fullName(r.prenom, r.nom) },
+  { header: "Email", key: "email", type: "text", width: 28, value: (r) => orDash(r.email) },
+  { header: "Téléphone", key: "tel", type: "text", value: (r) => orDash(r.telephone) },
+  { header: "Référence bien", key: "ref", type: "text", value: (r) => orDash(r.properties_offmarket?.reference) },
+  { header: "Titre bien", key: "titre", type: "text", width: 28, value: (r) => orDash(r.properties_offmarket?.title) },
+  { header: "Pays recherché", key: "pays", type: "text", value: (r) => orDash(r.pays_recherche) },
+  { header: "Ville / quartier", key: "ville", type: "text", value: (r) => orDash(r.ville_quartier) },
+  { header: "Budget max", key: "budget", type: "amount", value: (r) => r.budget_max_eur },
+  { header: "Surface souhaitée (m²)", key: "surface", type: "number", value: (r) => r.surface_souhaitee_m2 },
+  { header: "Statut", key: "statut", type: "text", value: (r) => requestStatusLabel(r.status) },
+  { header: "Statut workflow", key: "workflow", type: "text", value: (r) => workflowStatusLabel(r.workflow_status) },
+  { header: "Prochain suivi", key: "suivi", type: "date", value: (r) => toDateOrNull(r.next_follow_up) },
+  { header: "Notes admin", key: "notes", type: "longText", value: (r) => orDash(r.notes_admin) },
 ];
 
 export async function GET(req: Request) {

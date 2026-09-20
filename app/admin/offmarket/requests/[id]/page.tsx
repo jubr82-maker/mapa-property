@@ -14,6 +14,7 @@ import {
   addRequestAdminNote,
   setRequestNextFollowUp,
 } from "@/app/admin/offmarket/actions";
+import { PdfExportButton } from "@/components/admin/PdfExportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -136,7 +137,10 @@ export default async function AdminOffmarketRequestDetailPage({
             Reçue le {formatDateTime(item.created_at)}
           </p>
         </div>
-        <WorkflowBadge status={ws} size="md" />
+        <div className="flex items-center gap-3">
+          <PdfExportButton href={`/api/admin/exports/offmarket-requests/${item.id}`} />
+          <WorkflowBadge status={ws} size="md" />
+        </div>
       </header>
 
       {!migrationApplied && (
