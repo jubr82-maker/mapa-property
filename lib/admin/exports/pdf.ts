@@ -7,32 +7,92 @@
 // en dur dans ce fichier.
 //
 // POLICES : l'admin charge Big Shoulders / Archivo / JetBrains Mono via
-// next/font/google (app/admin/layout.tsx:3,11-29) — polices Google web,
-// aucun fichier .ttf/.otf n'est présent dans ce dépôt, et aucun ne doit
-// être téléchargé sans décision explicite (cf. rapport de mission :
-// fichiers à ajouter, avec licence, pour un rendu exact). En attendant :
-// les 14 polices standard PDF, les plus proches disponibles :
-//   - titres (Big Shoulders, condensée)     -> Helvetica-Bold (pas de
-//     condensée dans les polices standard PDF — substitut le plus proche,
-//     limitation assumée et documentée)
-//   - texte courant (Archivo)                -> Helvetica
-//   - petites capitales / références / dates
-//     à chasse fixe (JetBrains Mono)          -> Courier / Courier-Bold
+// next/font/google (app/admin/layout.tsx:3,11-29). Ce module embarque les
+// vraies polices (statiques, pas variables — cf. justification ci-dessous)
+// si leurs fichiers sont présents dans public/fonts/, avec repli
+// AUTOMATIQUE et SILENCIEUX sur les 14 polices standard PDF sinon (aucune
+// génération ne doit jamais échouer faute de fichier de police) :
+//   public/fonts/BigShouldersDisplay-Bold.ttf -> titres   (repli Helvetica-Bold)
+//   public/fonts/Archivo-Regular.ttf           -> texte    (repli Helvetica)
+//   public/fonts/Archivo-SemiBold.ttf          -> texte gras (repli Helvetica-Bold)
+//   public/fonts/JetBrainsMono-Regular.ttf     -> chasse fixe (repli Courier)
+//   public/fonts/JetBrainsMono-Bold.ttf        -> chasse fixe grasse (repli Courier-Bold)
+//
+// STATIQUE, PAS VARIABLE — PROUVÉ par lecture du code source de pdfkit
+// (node_modules/pdfkit/js/pdfkit.standalone.js:3774-3791,
+// `PDFFontFactory.open()`) : pdfkit appelle `fontkit.create(src, family)`
+// et embarque tel quel l'instance qu'il retourne, sans jamais appeler
+// `font.getVariation(...)` (API que fontkit expose pourtant, cf.
+// node_modules/fontkit@2.0.4/README.md:137-152 — variationAxes,
+// namedVariations, getVariation). Un fichier de police variable serait
+// donc TOUJOURS embarqué avec son instance par défaut (souvent le poids
+// le plus fin), sans aucun moyen de sélectionner "Bold"/"Black" via
+// l'API pdfkit — d'où l'usage de fichiers statiques, un par graisse.
 //
 // DÉFAUT CORRIGÉ (espace insécable étroite dans les montants) : tout le
 // texte affiché ici passe par lib/admin/exports/format.ts, qui construit
 // les nombres à la main avec une espace ASCII normale — jamais
 // Intl.NumberFormat / toLocaleString.
 import PDFDocument from "pdfkit";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { DARK, GOLD, GOLD_DARK, CREAM, CREAM_VERY_LIGHT } from "@/lib/admin/exports/theme";
 
-const FONT_TITLE = "Helvetica-Bold";
-const FONT_BODY = "Helvetica";
-const FONT_BODY_BOLD = "Helvetica-Bold";
-const FONT_MONO = "Courier";
-const FONT_MONO_BOLD = "Courier-Bold";
+const FONT_DIR = path.join(process.cwd(), "public", "fonts");
+
+interface FontSpec {
+  file: string;
+  fallback: string;
+}
+
+const FONT_SOURCES = {
+  title: { file: "BigShouldersDisplay-Bold.ttf", fallback: "Helvetica-Bold" },
+  body: { file: "Archivo-Regular.ttf", fallback: "Helvetica" },
+  bodyBold: { file: "Archivo-SemiBold.ttf", fallback: "Helvetica-Bold" },
+  mono: { file: "JetBrainsMono-Regular.ttf", fallback: "Courier" },
+  monoBold: { file: "JetBrainsMono-Bold.ttf", fallback: "Courier-Bold" },
+} satisfies Record<string, FontSpec>;
+
+interface ResolvedFonts {
+  title: string;
+  body: string;
+  bodyBold: string;
+  mono: string;
+  monoBold: string;
+  /** true pour chaque graisse effectivement embarquée (fichier trouvé et
+   * valide) — false = repli sur la police standard, silencieusement. */
+  embedded: Record<keyof typeof FONT_SOURCES, boolean>;
+}
+
+/**
+ * Enregistre sur ce document (par nom) chaque police dont le fichier est
+ * présent dans public/fonts/, et retourne les noms à utiliser dans tout
+ * le reste du rendu. Ne lève jamais : un fichier absent, illisible ou
+ * corrompu retombe silencieusement sur la police standard correspondante.
+ */
+function resolveFonts(doc: PDFKit.PDFDocument): ResolvedFonts {
+  const fonts = {} as ResolvedFonts;
+  const embedded = {} as ResolvedFonts["embedded"];
+  for (const key of Object.keys(FONT_SOURCES) as (keyof typeof FONT_SOURCES)[]) {
+    const spec = FONT_SOURCES[key];
+    const filePath = path.join(FONT_DIR, spec.file);
+    let ok = false;
+    if (existsSync(filePath)) {
+      try {
+        const name = `mapa-${key}`;
+        doc.registerFont(name, filePath);
+        fonts[key] = name;
+        ok = true;
+      } catch {
+        // Fichier present mais illisible/corrompu : repli silencieux.
+      }
+    }
+    if (!ok) fonts[key] = spec.fallback;
+    embedded[key] = ok;
+  }
+  fonts.embedded = embedded;
+  return fonts;
+}
 
 const PAGE_MARGIN = 50;
 const BANNER_HEIGHT_FIRST = 104;
@@ -110,11 +170,12 @@ interface Ctx {
   title: string;
   subtitle?: string;
   reference: string;
+  fonts: ResolvedFonts;
 }
 
 // ---------- Primitive : bandeau ----------
 function drawBanner(ctx: Ctx, continuation: boolean): void {
-  const { doc, title, subtitle, reference } = ctx;
+  const { doc, title, subtitle, reference, fonts } = ctx;
   const width = doc.page.width;
   const height = continuation ? BANNER_HEIGHT_CONT : BANNER_HEIGHT_FIRST;
 
@@ -141,38 +202,38 @@ function drawBanner(ctx: Ctx, continuation: boolean): void {
 
   if (continuation) {
     const contTitle = `${title} (suite)`;
-    const size = fittedFontSize(doc, FONT_TITLE, contTitle, titleMaxWidth, 15, 9);
+    const size = fittedFontSize(doc, fonts.title, contTitle, titleMaxWidth, 15, 9);
     doc
-      .font(FONT_TITLE)
+      .font(fonts.title)
       .fontSize(size)
       .fillColor(CREAM)
       .text(contTitle, textX, height / 2 - size / 2, { width: titleMaxWidth, lineBreak: false });
     doc
-      .font(FONT_MONO)
+      .font(fonts.mono)
       .fontSize(8)
       .fillColor(GOLD)
       .text(reference, refX, height / 2 - 4, { width: refWidth, align: "right", lineBreak: false });
   } else {
-    const size = fittedFontSize(doc, FONT_TITLE, title, titleMaxWidth, 26, 15);
+    const size = fittedFontSize(doc, fonts.title, title, titleMaxWidth, 26, 15);
     doc
-      .font(FONT_TITLE)
+      .font(fonts.title)
       .fontSize(size)
       .fillColor(CREAM)
       .text(title, textX, 30, { width: titleMaxWidth, lineBreak: false });
     if (subtitle) {
       doc
-        .font(FONT_BODY)
+        .font(fonts.body)
         .fontSize(10)
         .fillColor(GOLD)
         .text(subtitle, textX, 62, { width: titleMaxWidth, lineBreak: false });
     }
     doc
-      .font(FONT_MONO)
+      .font(fonts.mono)
       .fontSize(9)
       .fillColor(GOLD)
       .text(reference, refX, 34, { width: refWidth, align: "right", lineBreak: false });
     doc
-      .font(FONT_BODY)
+      .font(fonts.body)
       .fontSize(8)
       .fillColor(GOLD)
       .text(`Édité le ${editionDateShort()}`, refX, 50, { width: refWidth, align: "right", lineBreak: false });
@@ -223,7 +284,7 @@ function ensureSpace(ctx: Ctx, neededHeight: number): void {
 // ---------- Primitive : cartouches (3 chiffres clés) ----------
 function drawKpis(ctx: Ctx, kpis: PdfKpi[]): void {
   if (kpis.length === 0) return;
-  const { doc } = ctx;
+  const { doc, fonts } = ctx;
   const contentWidth = doc.page.width - PAGE_MARGIN * 2;
   const gap = 14;
   const cardWidth = (contentWidth - gap * (kpis.length - 1)) / kpis.length;
@@ -237,7 +298,7 @@ function drawKpis(ctx: Ctx, kpis: PdfKpi[]): void {
       .fill(CREAM);
 
     doc
-      .font(FONT_MONO_BOLD)
+      .font(fonts.monoBold)
       .fontSize(8.5)
       .fillColor(GOLD_DARK)
       .text(kpi.label.toUpperCase(), x + 14, top + 12, {
@@ -249,7 +310,7 @@ function drawKpis(ctx: Ctx, kpis: PdfKpi[]): void {
     // Réduction automatique de la taille si la valeur déborde.
     let fontSize = 22;
     const maxWidth = cardWidth - 28;
-    doc.font(FONT_TITLE);
+    doc.font(fonts.title);
     while (fontSize > 10) {
       doc.fontSize(fontSize);
       if (doc.widthOfString(kpi.value) <= maxWidth) break;
@@ -267,10 +328,10 @@ function drawKpis(ctx: Ctx, kpis: PdfKpi[]): void {
 
 // ---------- Primitive : titre de section + filet doré ----------
 function drawSectionHeading(ctx: Ctx, heading: string): void {
-  const { doc } = ctx;
+  const { doc, fonts } = ctx;
   const width = doc.page.width - PAGE_MARGIN * 2;
   doc
-    .font(FONT_MONO_BOLD)
+    .font(fonts.monoBold)
     .fontSize(10)
     .fillColor(DARK)
     .text(heading.toUpperCase(), PAGE_MARGIN, doc.y, { characterSpacing: 1.2, lineBreak: false });
@@ -284,18 +345,19 @@ function drawSectionHeading(ctx: Ctx, heading: string): void {
 const ROW_V_PADDING = 7;
 const LABEL_COLUMN_WIDTH = VALUE_COLUMN_X - PAGE_MARGIN - 10;
 
-function measureRowHeight(doc: PDFKit.PDFDocument, row: PdfTableRow): number {
+function measureRowHeight(ctx: Ctx, row: PdfTableRow): number {
+  const { doc, fonts } = ctx;
   const valueWidth = doc.page.width - PAGE_MARGIN - VALUE_COLUMN_X;
-  const labelH = doc.font(FONT_BODY_BOLD).fontSize(9.5).heightOfString(row.label, { width: LABEL_COLUMN_WIDTH });
-  const valueH = doc.font(FONT_BODY).fontSize(9.5).heightOfString(row.value || "—", { width: valueWidth });
+  const labelH = doc.font(fonts.bodyBold).fontSize(9.5).heightOfString(row.label, { width: LABEL_COLUMN_WIDTH });
+  const valueH = doc.font(fonts.body).fontSize(9.5).heightOfString(row.value || "—", { width: valueWidth });
   return Math.max(labelH, valueH) + ROW_V_PADDING * 2;
 }
 
 function drawTableRow(ctx: Ctx, row: PdfTableRow, index: number): void {
-  const { doc } = ctx;
+  const { doc, fonts } = ctx;
   const width = doc.page.width - PAGE_MARGIN * 2;
   const valueWidth = doc.page.width - PAGE_MARGIN - VALUE_COLUMN_X;
-  const rowHeight = measureRowHeight(doc, row);
+  const rowHeight = measureRowHeight(ctx, row);
   const top = doc.y;
 
   if (index % 2 === 1) {
@@ -303,12 +365,12 @@ function drawTableRow(ctx: Ctx, row: PdfTableRow, index: number): void {
   }
 
   doc
-    .font(FONT_BODY_BOLD)
+    .font(fonts.bodyBold)
     .fontSize(9.5)
     .fillColor(DARK)
     .text(row.label, PAGE_MARGIN, top + ROW_V_PADDING, { width: LABEL_COLUMN_WIDTH });
   doc
-    .font(FONT_BODY)
+    .font(fonts.body)
     .fontSize(9.5)
     .fillColor(DARK)
     .text(row.value || "—", VALUE_COLUMN_X, top + ROW_V_PADDING, { width: valueWidth, align: "right" });
@@ -320,23 +382,21 @@ function drawTableRow(ctx: Ctx, row: PdfTableRow, index: number): void {
 function drawTableSection(ctx: Ctx, section: PdfTableSection): void {
   const { doc } = ctx;
   const headingHeight = 12 + 12; // taille approx. titre + filet + marge (cf. drawSectionHeading)
-  const totalRowsHeight = section.rows.reduce((acc, r) => acc + measureRowHeight(doc, r), 0);
 
   // La section entière tient-elle au moins pour son en-tête + 1 ligne ?
   // Si non, on la fait basculer intégralement en page suivante.
   if (section.rows.length > 0) {
-    ensureSpace(ctx, headingHeight + measureRowHeight(doc, section.rows[0]));
+    ensureSpace(ctx, headingHeight + measureRowHeight(ctx, section.rows[0]));
   } else {
     ensureSpace(ctx, headingHeight);
   }
-  void totalRowsHeight;
 
   drawSectionHeading(ctx, section.heading);
 
   section.rows.forEach((row, i) => {
     // Garde-fou par ligne : jamais une ligne coupée entre deux pages,
     // même si la section entière dépasse une page.
-    ensureSpace(ctx, measureRowHeight(doc, row));
+    ensureSpace(ctx, measureRowHeight(ctx, row));
     drawTableRow(ctx, row, i);
   });
 
@@ -344,13 +404,13 @@ function drawTableSection(ctx: Ctx, section: PdfTableSection): void {
 }
 
 // ---------- Primitive : frise (historique) ----------
-function measureTimelineEntryHeight(doc: PDFKit.PDFDocument, entry: PdfTimelineEntry, textWidth: number): number {
-  const h = doc.font(FONT_BODY).fontSize(9.5).heightOfString(entry.text, { width: textWidth });
+function measureTimelineEntryHeight(ctx: Ctx, entry: PdfTimelineEntry, textWidth: number): number {
+  const h = ctx.doc.font(ctx.fonts.body).fontSize(9.5).heightOfString(entry.text, { width: textWidth });
   return Math.max(h, 12) + 10;
 }
 
 function drawTimelineSection(ctx: Ctx, section: PdfTimelineSection): void {
-  const { doc } = ctx;
+  const { doc, fonts } = ctx;
   const dateColWidth = 90;
   const bulletX = PAGE_MARGIN;
   const dateX = PAGE_MARGIN + 10;
@@ -359,22 +419,22 @@ function drawTimelineSection(ctx: Ctx, section: PdfTimelineSection): void {
 
   if (section.entries.length === 0) return;
 
-  ensureSpace(ctx, 24 + measureTimelineEntryHeight(doc, section.entries[0], textWidth));
+  ensureSpace(ctx, 24 + measureTimelineEntryHeight(ctx, section.entries[0], textWidth));
   drawSectionHeading(ctx, section.heading);
 
   for (const entry of section.entries) {
-    const rowHeight = measureTimelineEntryHeight(doc, entry, textWidth);
+    const rowHeight = measureTimelineEntryHeight(ctx, entry, textWidth);
     ensureSpace(ctx, rowHeight);
     const top = doc.y;
 
     doc.circle(bulletX + 2, top + 6, 2.5).fill(GOLD);
     doc
-      .font(FONT_MONO)
+      .font(fonts.mono)
       .fontSize(9)
       .fillColor(GOLD_DARK)
       .text(entry.date, dateX, top, { width: dateColWidth - 8, lineBreak: false });
     doc
-      .font(FONT_BODY)
+      .font(fonts.body)
       .fontSize(9.5)
       .fillColor(DARK)
       .text(entry.text, textX, top, { width: textWidth });
@@ -388,33 +448,34 @@ function drawTimelineSection(ctx: Ctx, section: PdfTimelineSection): void {
 
 // ---------- Primitive : bloc de texte libre ----------
 function drawFreeTextSection(ctx: Ctx, section: PdfFreeTextSection): void {
-  const { doc } = ctx;
+  const { doc, fonts } = ctx;
   const width = doc.page.width - PAGE_MARGIN * 2;
   const text = section.text || "—";
-  const textHeight = doc.font(FONT_BODY).fontSize(9.5).heightOfString(text, { width });
+  const textHeight = doc.font(fonts.body).fontSize(9.5).heightOfString(text, { width });
   const pageContentHeight = doc.page.height - FOOTER_ZONE - (BANNER_HEIGHT_CONT + 22);
 
   ensureSpace(ctx, 24 + Math.min(textHeight, pageContentHeight));
   drawSectionHeading(ctx, section.heading);
 
-  doc.font(FONT_BODY).fontSize(9.5).fillColor(DARK).text(text, PAGE_MARGIN, doc.y, { width });
+  doc.font(fonts.body).fontSize(9.5).fillColor(DARK).text(text, PAGE_MARGIN, doc.y, { width });
   doc.x = PAGE_MARGIN;
   doc.y += 14;
 }
 
 // ---------- Primitive : pied de page (chaque page) ----------
-function drawFooter(doc: PDFKit.PDFDocument, reference: string, pageLabel: string): void {
+function drawFooter(ctx: Ctx, pageLabel: string): void {
+  const { doc, fonts, reference } = ctx;
   const width = doc.page.width - PAGE_MARGIN * 2;
   const y = doc.page.height - FOOTER_ZONE + 10;
   doc.rect(PAGE_MARGIN, y, width, 1).fill(GOLD);
   doc
-    .font(FONT_BODY)
+    .font(fonts.body)
     .fontSize(7.5)
     .fillColor(DARK)
     .text(FOOTER_LINE_1, PAGE_MARGIN, y + 8, { width, align: "center" })
     .text(FOOTER_LINE_2, PAGE_MARGIN, y + 19, { width, align: "center" });
   doc
-    .font(FONT_MONO)
+    .font(fonts.mono)
     .fontSize(7)
     .fillColor(GOLD_DARK)
     .text(`${reference} — édité le ${editionDateShort()} — ${pageLabel}`, PAGE_MARGIN, y + 32, {
@@ -422,6 +483,11 @@ function drawFooter(doc: PDFKit.PDFDocument, reference: string, pageLabel: strin
       align: "center",
     });
 }
+
+/** Exposé pour le rapport de mission / les scripts de preuve locaux :
+ * quelles graisses ont réellement été embarquées (fichier trouvé et
+ * valide) lors du dernier appel à buildFichePdf. */
+export let lastFontsEmbedded: ResolvedFonts["embedded"] | null = null;
 
 export function buildFichePdf(options: PdfDocumentOptions): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -436,7 +502,15 @@ export function buildFichePdf(options: PdfDocumentOptions): Promise<Buffer> {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    const ctx: Ctx = { doc, title: options.documentTitle, subtitle: options.subtitle, reference: options.reference };
+    const fonts = resolveFonts(doc);
+    lastFontsEmbedded = fonts.embedded;
+    const ctx: Ctx = {
+      doc,
+      title: options.documentTitle,
+      subtitle: options.subtitle,
+      reference: options.reference,
+      fonts,
+    };
 
     drawBanner(ctx, false);
     drawKpis(ctx, options.kpis);
@@ -450,7 +524,7 @@ export function buildFichePdf(options: PdfDocumentOptions): Promise<Buffer> {
     const range = doc.bufferedPageRange();
     for (let i = range.start; i < range.start + range.count; i++) {
       doc.switchToPage(i);
-      drawFooter(doc, options.reference, `Page ${i - range.start + 1} / ${range.count}`);
+      drawFooter(ctx, `Page ${i - range.start + 1} / ${range.count}`);
     }
 
     doc.end();

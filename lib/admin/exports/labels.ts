@@ -120,11 +120,15 @@ export function etatLabel(value: string | null | undefined): string {
 }
 
 // ---------- Moteur d'estimation ----------
-// Source : app/admin/estimations/page.tsx:180 et
-// app/admin/estimations/[id]/page.tsx:127 (ternaire déjà en place dans
-// le code — reproduit ici comme correspondance à 1 valeur connue).
+// Source : app/api/estimate/route.ts:593,623,671,678 ("evs_5_methods") et
+// :706,735,739 ("hedonic_legacy") — les 2 SEULES valeurs réellement
+// écrites dans estimation_requests.engine (recherche exhaustive).
+const ENGINE_LABEL: Record<string, string> = {
+  evs_5_methods: "EVS 5 méthodes",
+  hedonic_legacy: "Hédoniste (legacy)",
+};
 export function engineLabel(value: string | null | undefined): string {
-  return value === "evs_5_methods" ? "EVS 5 méthodes" : "Hédoniste legacy";
+  return lookup(ENGINE_LABEL, value);
 }
 
 // ---------- Statut de l'estimation ----------
@@ -155,24 +159,91 @@ export function methodLabel(value: string | null | undefined): string {
   return lookup(METHOD_LABEL, value);
 }
 
-// ---------- CHAMPS SANS CORRESPONDANCE CONNUE DANS LE CODE ----------
-// Aucune traduction n'existe nulle part dans le dépôt pour ces champs —
-// PROUVÉ par recherche exhaustive (cf. rapport de mission) : fallback
-// `capitalizeFallback` uniquement, listés explicitement pour que le
-// rapport les signale.
-//   - leads.type            (ex. "property_request", "general_contact",
-//                             "search_mandate", "mandate_exclusive"...)
-//   - leads.source / offmarket_requests source
-//   - estimation_requests.client_output.confidence ("HIGH"/"MEDIUM"/"LOW")
+// ---------- Type de demande (leads.type) ----------
+// Liste établie par lecture exhaustive de TOUT le code qui écrit
+// leads.type (routes publiques + lib partagée) — aucune valeur devinée :
+//   general_contact   -> app/[locale]/contact/page.tsx:46
+//   property_request  -> app/[locale]/biens/[slug]/page.tsx:462
+//   mandate_exclusive -> lib/mandates.ts:22
+//   mandate_semi      -> lib/mandates.ts:35
+//   mandate_simple    -> lib/mandates.ts:48
+//   mandate_autonomous-> lib/mandates.ts:61
+//   search_mandate    -> lib/mandates.ts:74
+//   offmarket_request -> app/api/nda-request/route.ts:130,
+//                        app/api/offmarket-request/route.ts:51
+//   waitlist          -> app/api/liste-attente/route.ts:108,137
+//   chatbot           -> app/api/chatbot/route.ts:175 (auto-lead Éléna)
+// `components/admin/LeadsTable.tsx:51-63` liste aussi "contact", "buy",
+// "sell", "rent", "estimate", "mandate_search" dans son filtre déroulant
+// admin — AUCUNE trace trouvée d'un code qui écrit ces valeurs
+// exactes dans leads.type (recherche exhaustive) : probablement des
+// options de filtre obsolètes/historiques. Non traduites ici par
+// prudence (ne pas deviner) ; signalé dans le rapport de mission.
+const LEAD_TYPE_LABEL: Record<string, string> = {
+  general_contact: "Contact général",
+  property_request: "Demande sur un bien",
+  mandate_exclusive: "Mandat exclusif",
+  mandate_semi: "Mandat semi-exclusif",
+  mandate_simple: "Mandat simple",
+  mandate_autonomous: "Mandat autonome",
+  search_mandate: "Mandat de recherche",
+  offmarket_request: "Demande off-market",
+  waitlist: "Liste d'attente",
+  chatbot: "Chatbot (Éléna)",
+};
 export function rawTypeLabel(value: string | null | undefined): string {
-  return capitalizeFallback(value);
+  return lookup(LEAD_TYPE_LABEL, value);
 }
+
+// ---------- Source (leads.source / leads via flux off-market) ----------
+// Valeurs fixes confirmées par lecture du code :
+//   website       -> components/forms/ContactForm.tsx:39 (défaut)
+//   contact       -> app/[locale]/contact/page.tsx:46,
+//                    app/api/contact/route.ts:49
+//   waitlist-home -> app/api/liste-attente/route.ts:109,138
+// Valeurs gabarits (préfixe fixe + identifiant variable, jamais une
+// liste finie) :
+//   property:<slug>              -> app/[locale]/biens/[slug]/page.tsx:463
+//   mandate:<slug-mandat>        -> app/[locale]/mandats/[type]/page.tsx:218
+//     (5 slugs possibles : exclusif/semi-exclusif/simple/autonome/recherche,
+//      lib/mandates.ts:18,31,44,57,70)
+//   offmarket:<property_id>      -> app/api/offmarket-request/route.ts:52
+//   nda_request:offmarket:<ref>  -> app/api/nda-request/route.ts:132
+// `offmarket_requests` n'a PAS de colonne source (vérifié : absente du
+// SELECT admin app/admin/offmarket/requests/page.tsx) — seules les
+// LEADS générées par le flux off-market (nda-request/offmarket-request)
+// portent un `source`, ci-dessus.
+const SOURCE_LABEL: Record<string, string> = {
+  website: "Site web",
+  contact: "Formulaire de contact",
+  "waitlist-home": "Page liste d'attente",
+};
+const SOURCE_PREFIX_LABEL: [prefix: string, label: string][] = [
+  ["nda_request:offmarket:", "Demande NDA off-market — bien "],
+  ["offmarket:", "Demande off-market — bien "],
+  ["property:", "Fiche bien — "],
+  ["mandate:", "Page mandat — "],
+];
 export function sourceLabel(value: string | null | undefined): string {
+  if (!value) return "—";
+  if (SOURCE_LABEL[value]) return SOURCE_LABEL[value];
+  for (const [prefix, label] of SOURCE_PREFIX_LABEL) {
+    if (value.startsWith(prefix)) return `${label}${value.slice(prefix.length)}`;
+  }
   return capitalizeFallback(value);
 }
+
+// ---------- Niveau de confiance de l'estimation ----------
+// Aucune correspondance FR trouvée ailleurs dans le code (recherche
+// exhaustive) — traduction fournie explicitement par Julien (mission
+// 2026-09-22, étape 2) : HIGH/MEDIUM/LOW -> Élevée/Moyenne/Faible.
+const CONFIDENCE_LABEL: Record<string, string> = {
+  HIGH: "Élevée",
+  MEDIUM: "Moyenne",
+  LOW: "Faible",
+};
 export function confidenceLabel(value: string | null | undefined): string {
-  if (!value) return "—";
-  return capitalizeFallback(value.toLowerCase());
+  return lookup(CONFIDENCE_LABEL, value);
 }
 
 export type { WorkflowStatus, PropertyType };
