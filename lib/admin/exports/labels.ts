@@ -175,10 +175,11 @@ export function methodLabel(value: string | null | undefined): string {
 //   chatbot           -> app/api/chatbot/route.ts:175 (auto-lead Éléna)
 // `components/admin/LeadsTable.tsx:51-63` liste aussi "contact", "buy",
 // "sell", "rent", "estimate", "mandate_search" dans son filtre déroulant
-// admin — AUCUNE trace trouvée d'un code qui écrit ces valeurs
-// exactes dans leads.type (recherche exhaustive) : probablement des
-// options de filtre obsolètes/historiques. Non traduites ici par
-// prudence (ne pas deviner) ; signalé dans le rapport de mission.
+// admin — aucune trace trouvée d'un code qui écrit ces valeurs exactes
+// dans leads.type (recherche exhaustive, cf. rapport de mission
+// 2026-09-21). Traductions fournies explicitement par Julien (mission
+// 2026-09-23, étape 2) pour couvrir ces options malgré tout ; le filtre
+// admin lui-même (LeadsTable.tsx) n'est pas modifié.
 const LEAD_TYPE_LABEL: Record<string, string> = {
   general_contact: "Contact général",
   property_request: "Demande sur un bien",
@@ -188,6 +189,12 @@ const LEAD_TYPE_LABEL: Record<string, string> = {
   mandate_autonomous: "Mandat autonome",
   search_mandate: "Mandat de recherche",
   offmarket_request: "Demande off-market",
+  contact: "Contact",
+  buy: "Achat",
+  sell: "Vente",
+  rent: "Location",
+  estimate: "Estimation",
+  mandate_search: "Mandat de recherche",
   waitlist: "Liste d'attente",
   chatbot: "Chatbot (Éléna)",
 };
