@@ -1197,7 +1197,7 @@ function WorksDetailsBlock({
                                   ? "border-accent-warm focus:border-accent-warm"
                                   : "border-line focus:border-gold"
                               }`}
-                              aria-label={`${t(`works_cat_${cat}`)} — ${t("works_year_label")}`}
+                              aria-label={`${t(`works_cat_${cat}`)} : ${t("works_year_label")}`}
                               aria-invalid={yearErr || undefined}
                             />
                             <div className="relative">
@@ -1212,7 +1212,7 @@ function WorksDetailsBlock({
                                     ? "border-accent-warm focus:border-accent-warm"
                                     : "border-line focus:border-gold"
                                 }`}
-                                aria-label={`${t(`works_cat_${cat}`)} — ${t("works_amount_label")}`}
+                                aria-label={`${t(`works_cat_${cat}`)} : ${t("works_amount_label")}`}
                                 aria-invalid={amountErr || undefined}
                               />
                               <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-ink-soft">

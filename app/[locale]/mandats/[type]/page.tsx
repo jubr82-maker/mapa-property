@@ -25,7 +25,7 @@ export async function generateMetadata({
     namespace: `mandate_${type.replace("-", "_")}`,
   });
   return {
-    title: `${t("title")} — MAPA Property`,
+    title: `${t("title")}, MAPA Property`,
     description: t("intro"),
     alternates: pageAlternates(locale, `/mandats/${type}`),
   };

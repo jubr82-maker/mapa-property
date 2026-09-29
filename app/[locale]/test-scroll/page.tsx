@@ -16,7 +16,7 @@ import { FeaturedDesktopTest } from "./FeaturedDesktopTest";
  */
 
 export const metadata: Metadata = {
-  title: "Test scroll-hijack — MAPA Property",
+  title: "Test scroll-hijack, MAPA Property",
   robots: { index: false, follow: false },
 };
 

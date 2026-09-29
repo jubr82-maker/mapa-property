@@ -33,7 +33,7 @@ export async function generateMetadata({
   const loc = locale as Locale;
   const cityName = city.name[loc];
   return {
-    title: `${cityName} — Immobilier prestige · MAPA Property`,
+    title: `${cityName}, Immobilier prestige · MAPA Property`,
     description: city.metaDescription[loc],
     alternates: pageAlternates(locale, `/villes/${city.slug}`),
   };
@@ -91,7 +91,7 @@ function buildJsonLd(city: City, locale: Locale) {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "@id": `${url}#mapa-${city.slug}`,
-      name: `MAPA Property — ${city.name[locale]}`,
+      name: `MAPA Property : ${city.name[locale]}`,
       url,
       areaServed: { "@type": "Place", name: city.name[locale] },
       address: { "@type": "PostalAddress", addressLocality: city.name[locale], addressCountry: "LU" },

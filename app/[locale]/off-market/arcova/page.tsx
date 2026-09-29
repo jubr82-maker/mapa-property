@@ -78,15 +78,15 @@ function ArcovaContent() {
         <ul className="mt-4 space-y-4 text-base leading-relaxed text-ink-mid">
           <li>
             <span className="font-display font-bold text-ink">{t("protect_owners_label")}</span>
-            <span className="text-ink-mid"> — {t("protect_owners_text")}</span>
+            <span className="text-ink-mid"> : {t("protect_owners_text")}</span>
           </li>
           <li>
             <span className="font-display font-bold text-ink">{t("protect_brokers_label")}</span>
-            <span className="text-ink-mid"> — {t("protect_brokers_text")}</span>
+            <span className="text-ink-mid"> : {t("protect_brokers_text")}</span>
           </li>
           <li>
             <span className="font-display font-bold text-ink">{t("protect_buyers_label")}</span>
-            <span className="text-ink-mid"> — {t("protect_buyers_text")}</span>
+            <span className="text-ink-mid"> : {t("protect_buyers_text")}</span>
           </li>
         </ul>
       </section>

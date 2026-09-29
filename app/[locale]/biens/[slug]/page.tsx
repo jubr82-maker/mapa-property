@@ -112,7 +112,7 @@ export async function generateMetadata({
   const path = `/biens/${property.slug}`;
 
   return {
-    title: `${title} — MAPA Property`,
+    title: `${title}, MAPA Property`,
     description: description.slice(0, 160) || undefined,
     alternates: pageAlternates(locale, path),
     openGraph: {
@@ -420,7 +420,7 @@ export default async function PropertyPage({
           className="hidden print:block"
         >
           <h3 className="font-display text-base font-bold">
-            Votre conseiller — MAPA Property
+            Votre conseiller, MAPA Property
           </h3>
           <p className="mt-2 font-display text-sm">Julien Brebion</p>
           <p className="font-mono text-[10px] uppercase tracking-[0.25em]">
@@ -488,7 +488,7 @@ export default async function PropertyPage({
           data-fiche-print-footer
           className="hidden print:block"
         >
-          <p>MAPA PROPERTY — une marque de MAPA Synergy Sàrl</p>
+          <p>MAPA PROPERTY, une marque de MAPA Synergy Sàrl</p>
           <p>
             N° LBR : B241974 · TVA : LU 31988923 · AE N°10108681 ·
             www.mapaproperty.lu

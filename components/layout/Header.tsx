@@ -103,7 +103,7 @@ export function Header() {
               descendu de 8px (pt-2). */}
           <Link
             href="/"
-            aria-label={`MAPA Property — ${t("home")}`}
+            aria-label={`MAPA Property, ${t("home")}`}
             className="inline-flex shrink-0 pt-2 transition-opacity hover:opacity-80"
           >
             <span className="lg:hidden">

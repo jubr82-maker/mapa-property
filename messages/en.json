@@ -1,14 +1,14 @@
 {
   "meta": {
     "site_name": "MAPA Property",
-    "default_title": "MAPA Property — Luxembourg real estate agency & international broker",
+    "default_title": "MAPA Property, Luxembourg real estate agency & international broker",
     "default_description": "Luxembourg real estate agency and international broker. Sales, rentals, off-market, trophy assets. Under mandate, within a framework, in your sole interest."
   },
   "common": {
     "language": "Language",
     "theme_light": "Light mode",
     "theme_dark": "Dark mode",
-    "loading": "Loading…",
+    "loading": "Loading...",
     "back": "Back",
     "phone_too_short": "Number too short"
   },
@@ -65,7 +65,7 @@
     "micro_legal": "MAPA Property · Luxembourg real estate agency · International broker · Contact us to book an appointment.",
     "cta_eyebrow": "Take action",
     "cta_title": "Selling a property or looking for your future home?",
-    "cta_subtitle": "Entrust us with your project under mandate — exclusive sale or bespoke search, in Luxembourg and internationally.",
+    "cta_subtitle": "Entrust us with your project under mandate: exclusive sale or bespoke search, in Luxembourg and internationally.",
     "cta_exclusive": "Exclusive Mandate",
     "cta_search": "Search Mandate",
     "manage_cookies": "Manage cookies"
@@ -108,9 +108,9 @@
     "ai_label": "Describe your project",
     "ai_placeholder": "e.g. 3-bedroom penthouse with terrace in Belair, max 3 million",
     "ai_search": "AI Search",
-    "ai_thinking": "Analysing…",
+    "ai_thinking": "Analysing...",
     "ai_error": "An error occurred. Please retry or use manual mode.",
-    "radius_cta": "{count, plural, =1 {1 property beyond 10 km} other {# properties beyond 10 km}} in the same country — Show all",
+    "radius_cta": "{count, plural, =1 {1 property beyond 10 km} other {# properties beyond 10 km}} in the same country. Show all",
     "type_filter": {
       "label": "Type",
       "all": "All types",
@@ -239,7 +239,7 @@
     "valuation_title": "Valuation and expertise",
     "valuation_text": "Hedonic model calibrated on Observatoire de l'Habitat data and on our recorded actual sale prices, complemented by an on-site visit by one of our advisors.",
     "search_title": "Search mandate",
-    "search_text": "The European answer to the buyer's agent — defending the buyer's sole interest in Luxembourg and abroad.",
+    "search_text": "The European answer to the buyer's agent, defending the buyer's sole interest in Luxembourg and abroad.",
     "negotiation_title": "Negotiation and defence",
     "negotiation_text": "Offer strategy, due diligence, notarial coordination. We speak on your behalf when it serves your interest.",
     "transaction_title": "Sale and acquisition",
@@ -252,7 +252,7 @@
   "offmarket_band": {
     "eyebrow": "Off-Market",
     "title": "The properties that aren't seen.",
-    "description": "A significant share of prestige transactions are concluded outside the open market. Under NDA and mandate, MAPA Property gives you access to a confidential selection — never published online.",
+    "description": "A significant share of prestige transactions are concluded outside the open market. Under NDA and mandate, MAPA Property gives you access to a confidential selection, never published online.",
     "benefit_1": "Contractual NDA",
     "benefit_2": "Never published",
     "benefit_3": "Verified financial capacity",
@@ -267,7 +267,7 @@
     "vendre_subtitle": "Selling with MAPA Property means choosing the level of engagement that matches your project.",
     "acheter_eyebrow": "Search Mandate",
     "acheter_title": "Buy with MAPA Property",
-    "acheter_subtitle": "Buying with MAPA Property means entrusting your property search to an agency that does this for a living: activating discreet networks, identifying off-market opportunities, negotiating on your behalf. Exceptional properties are rarely traded through public listings — you still need access.",
+    "acheter_subtitle": "Buying with MAPA Property means entrusting your property search to an agency that does this for a living: activating discreet networks, identifying off-market opportunities, negotiating on your behalf. Exceptional properties are rarely traded through public listings: you still need access.",
     "signature_vendeur_label": "Our signature format for sellers",
     "signature_acheteur_label": "Our signature format for buyers",
     "view_detail": "View details",
@@ -281,7 +281,7 @@
     "simple_title": "Simple",
     "simple_text": "For sought-after properties where multiple channels can run in parallel. 5% excl. VAT + 17% VAT, 2-month renewable term.",
     "autonomous_title": "Autonomous",
-    "autonomous_text": "For sellers who wish to manage their own viewings. 1% excl. VAT + 17% VAT, 2-month renewable term — legal and notarial backup.",
+    "autonomous_text": "For sellers who wish to manage their own viewings. 1% excl. VAT + 17% VAT, 2-month renewable term (legal and notarial backup).",
     "recherche_title": "Search Mandate",
     "recherche_subtitle": "Exclusive sourcing",
     "recherche_rate": "From 3% excl. VAT",
@@ -305,7 +305,7 @@
       "rate_suffix": "excl. VAT + 17% VAT",
       "short_desc": "Full MAPA Property commitment. Premium marketing, exclusivity, expert negotiation.",
       "long_desc": "The most committed mandate: MAPA Property defends your property as if it were its own. A single point of contact, a dedicated marketing strategy and a negotiation led solely in your interest through to the notarial deed. 3-month renewable term.",
-      "bullet_1": "MAPA Property exclusivity — one single point of contact",
+      "bullet_1": "MAPA Property exclusivity: one single point of contact",
       "bullet_2": "Premium marketing and HDR photo reportage",
       "bullet_3": "Negotiation and defence of your price",
       "bullet_4": "Dedicated follow-up through to the notarial deed"
@@ -329,7 +329,7 @@
       "rate_suffix": "excl. VAT + 17% VAT",
       "short_desc": "Multiple channels activated in parallel for sought-after properties.",
       "long_desc": "The most open mandate: MAPA Property markets your property alongside other channels you freely activate. Suited to highly sought-after properties where competition accelerates the sale. 2-month renewable term.",
-      "bullet_1": "Non-exclusive mandate — multiple channels",
+      "bullet_1": "Non-exclusive mandate: multiple channels",
       "bullet_2": "Distribution across all MAPA Property media",
       "bullet_3": "Flexible coordination with your other channels",
       "bullet_4": "Support through to the notarial deed"
@@ -350,7 +350,7 @@
   "markets_home": {
     "eyebrow": "Active markets",
     "title": "From the Grand Duchy to global cities",
-    "subtitle": "Regular coverage in Luxembourg and across premium international cities — extendable under mandate.",
+    "subtitle": "Regular coverage in Luxembourg and across premium international cities, extendable under mandate.",
     "luxembourg": "Luxembourg",
     "communes": "communes",
     "lu_coverage": "Nationwide coverage",
@@ -376,7 +376,7 @@
     "cities_label": "INTL coverage",
     "cities_text": "Premium cities worldwide, under search mandate.",
     "transactions_label": "Transactions",
-    "transactions_text": "Several hundred clients supported — discreetly."
+    "transactions_text": "Several hundred clients supported, discreetly."
   },
   "process": {
     "eyebrow": "Our method",
@@ -384,7 +384,7 @@
     "step_one_title": "MANDATE",
     "step_one_text": "It all starts with a signed mandate. Sale, search, off-market: we only act under mandate and always in your sole interest.",
     "step_two_title": "SOURCE",
-    "step_two_text": "We activate our network — partner agencies, direct owners, confidential sources — in Luxembourg and internationally. Selection, viewings, negotiation.",
+    "step_two_text": "We activate our network (partner agencies, direct owners, confidential sources) in Luxembourg and internationally. Selection, viewings, negotiation.",
     "step_three_title": "CLOSE",
     "step_three_text": "File preparation (KYC/AML), purchase agreement, notarial follow-up, presence at the deed."
   },
@@ -408,7 +408,7 @@
   "contact_cta": {
     "eyebrow": "A conversation can change everything",
     "title": "Let's talk about your project.",
-    "description": "Sale mandate, property search, off-market access, wealth advice — every request is handled personally by MAPA Property.",
+    "description": "Sale mandate, property search, off-market access, wealth advice: every request is handled personally by MAPA Property.",
     "call_label": "Call directly",
     "email_label": "Send an email",
     "cta": "Book a meeting"
@@ -417,16 +417,16 @@
     "call_button": "Call",
     "email_button": "Email",
     "contact_button": "Contact us",
-    "loading": "Loading…",
+    "loading": "Loading...",
     "error": "Try again shortly"
   },
   "home": {
-    "placeholder": "MAPA Property — homepage under construction."
+    "placeholder": "MAPA Property, homepage under construction."
   },
   "property_list": {
     "eyebrow": "Catalogue",
     "title": "All our properties",
-    "subtitle": "Filter by country, city, type, budget — or let Eléna guide you from the chatbot.",
+    "subtitle": "Filter by country, city, type, budget, or let Eléna guide you from the chatbot.",
     "results": "results",
     "result": "result",
     "transaction": "Transaction",
@@ -468,7 +468,7 @@
     "video": "Property video",
     "reviews": "Client reviews",
     "advisor": "Your advisor",
-    "advisor_photo_alt": "Julien Brebion — Real Estate Director, MAPA Property",
+    "advisor_photo_alt": "Julien Brebion, Real Estate Director, MAPA Property",
     "advisor_block_title": "Advice & support",
     "advisor_block_roles": "Real Estate Director\nExclusive Sourcing Specialist",
     "form_eyebrow": "Information request",
@@ -495,19 +495,19 @@
     "phone": "Phone",
     "country": "Country",
     "city_label": "Property location",
-    "city_placeholder": "Municipality / town (e.g. Belair, Strassen…)",
+    "city_placeholder": "Municipality / town (e.g. Belair, Strassen...)",
     "subject": "Subject",
-    "subject_select": "— Choose —",
+    "subject_select": "Choose",
     "subject_mandat_vente": "Sale mandate",
     "subject_mandat_recherche": "Search mandate",
     "subject_estimation": "Valuation",
     "subject_mise_en_location": "Put up for rent",
     "subject_informations": "Request information",
-    "subject_offmarket_arcova": "Off-Market — ARCOVA",
+    "subject_offmarket_arcova": "Off-Market: ARCOVA",
     "message": "Message",
     "submit": "Send",
-    "submitting": "Sending…",
-    "captcha_pending": "Anti-spam verification in progress…",
+    "submitting": "Sending...",
+    "captcha_pending": "Anti-spam verification in progress...",
     "error": "An error occurred. Please check your details and try again.",
     "error_captcha": "Anti-spam verification failed. Please wait a few seconds and try again.",
     "error_invalid": "The information provided is invalid. Please check your email and message.",
@@ -539,7 +539,7 @@
     "rgpd_policy_link": "Privacy policy",
     "rgpd_notice": "No spam. Unsubscribe at any time.",
     "submit": "Join the list",
-    "submitting": "Sending…",
+    "submitting": "Sending...",
     "success_title": "Welcome to the waiting list.",
     "success_text": "Your registration is confirmed. You will receive our new exclusive mandates 24 hours before they appear on listing portals.",
     "error": "An error occurred. Please check your information and try again.",
@@ -548,7 +548,7 @@
   },
   "offmarket": {
     "eyebrow": "Off-Market",
-    "hero_eyebrow": "Off-Market — Confidential access",
+    "hero_eyebrow": "Off-Market: confidential access",
     "hero_title": "Exclusive Off-Market",
     "hero_subtitle": "Under mandate. Under NDA. Off the portals.",
     "back": "Back",
@@ -613,7 +613,7 @@
     "form_eyebrow": "Get started",
     "form_subtitle": "MAPA Property will personally get back to you within 24 working hours.",
     "reco_label": "Our recommendation",
-    "reco_text": "The exclusive mandate remains our recommendation. The Luxembourg market is small; listing the same property with several agencies exposes it on the same platforms and signals a rushed sale — often unfavourable in negotiation."
+    "reco_text": "The exclusive mandate remains our recommendation. The Luxembourg market is small; listing the same property with several agencies exposes it on the same platforms and signals a rushed sale, often unfavourable in negotiation."
   },
   "mandate_exclusif": {
     "title": "Exclusive Mandate",
@@ -625,7 +625,7 @@
     "highlight_3_title": "Off-market first",
     "highlight_3_text": "Activation of our qualified database and partners before any public listing.",
     "highlight_4_title": "Preferred rate",
-    "highlight_4_text": "3% excl. VAT (+ 17% VAT) — the most advantageous formula for committed sellers. 2-month renewable term.",
+    "highlight_4_text": "3% excl. VAT (+ 17% VAT): the most advantageous formula for committed sellers. 2-month renewable term.",
     "service_1": "Briefing visit and detailed valuation",
     "service_2": "Professional HDR photo shoot",
     "service_3": "Distribution to our qualified database + off-market partners",
@@ -634,7 +634,7 @@
     "service_6": "Distribution on specialised property portals and international platforms",
     "excluded_1": "Professional Video Pack (paid option, deductible)",
     "when_title": "When to choose Exclusive",
-    "when_text": "You want to sell quickly, properly, and consistently. You appreciate having a single dedicated contact who defends your price and your privacy. Statistically the best-performing mandate — and the most cost-effective."
+    "when_text": "You want to sell quickly, properly, and consistently. You appreciate having a single dedicated contact who defends your price and your privacy. Statistically the best-performing mandate, and the most cost-effective."
   },
   "mandate_semi_exclusif": {
     "title": "Semi-Exclusive Mandate",
@@ -661,7 +661,7 @@
     "highlight_1_title": "No exclusivity",
     "highlight_1_text": "You retain full freedom to mandate other professionals.",
     "highlight_2_title": "Moderate MAPA Property engagement",
-    "highlight_2_text": "Listing and moderate channel activation — full marketing investment is reserved for Exclusive.",
+    "highlight_2_text": "Listing and moderate channel activation: full marketing investment is reserved for Exclusive.",
     "highlight_3_title": "Higher fees",
     "highlight_3_text": "5% excl. VAT (+ 17% VAT) to offset commercial risk.",
     "service_1": "Valuation",
@@ -672,7 +672,7 @@
     "excluded_2": "Premium off-market distribution",
     "excluded_3": "Priority accompanied viewings",
     "when_title": "When to choose Simple",
-    "when_text": "Your property is highly sought-after and you want to maximise the number of channels active simultaneously, accepting that coordination will be less fluid. Statistically the least performing — but sometimes relevant."
+    "when_text": "Your property is highly sought-after and you want to maximise the number of channels active simultaneously, accepting that coordination will be less fluid. Statistically the least performing, but sometimes relevant."
   },
   "mandate_autonome": {
     "title": "Autonomous Mandate",
@@ -680,7 +680,7 @@
     "highlight_1_title": "You stay in the driver's seat",
     "highlight_1_text": "Listing, viewings, negotiation: you handle it. We step in on request.",
     "highlight_2_title": "Legal safety",
-    "highlight_2_text": "Compromise, suspensive conditions, notarial coordination — handled by MAPA Property.",
+    "highlight_2_text": "Compromise, suspensive conditions, notarial coordination: handled by MAPA Property.",
     "highlight_3_title": "Fixed fees",
     "highlight_3_text": "1% excl. VAT (+ 17% VAT) for the legal and notarial side only.",
     "service_1": "Initial valuation",
@@ -696,7 +696,7 @@
   },
   "mandate_recherche": {
     "title": "Search Mandate",
-    "intro": "The European answer to the buyer's agent. You entrust us with the mission of finding and negotiating your future property — in Luxembourg or abroad. Under exclusive mandate, in your sole interest.",
+    "intro": "The European answer to the buyer's agent. You entrust us with the mission of finding and negotiating your future property, in Luxembourg or abroad. Under exclusive mandate, in your sole interest.",
     "highlight_1_title": "Advice that serves only one master",
     "highlight_1_text": "We defend exclusively your buyer's interest. No double agency.",
     "highlight_2_title": "Off-market search included",
@@ -712,12 +712,12 @@
     "service_5": "Negotiation and due diligence",
     "service_6": "International notarial coordination",
     "when_title": "When to choose the search mandate",
-    "when_text": "You don't have the time or the network to identify the ideal property yourself, or you are looking abroad (where market opacity is high). You want advice that defends exclusively your interest — not a broker serving two masters."
+    "when_text": "You don't have the time or the network to identify the ideal property yourself, or you are looking abroad (where market opacity is high). You want advice that defends exclusively your interest, not a broker serving two masters."
   },
   "page_sell": {
     "eyebrow": "Sell with MAPA Property",
     "title": "Entrust the sale of your property.",
-    "intro": "One rule: consistency. Four formulas to sell according to your level of engagement, and a single method — ours.",
+    "intro": "One rule: consistency. Four formulas to sell according to your level of engagement, and a single method: ours.",
     "step_one_title": "Valuation and framing",
     "step_one_text": "Visit, audit, market study, presentation price calibration.",
     "step_two_title": "Mandate and marketing",
@@ -776,7 +776,7 @@
       "simulators": {
         "eyebrow": "Simulators",
         "title": "Financial simulators",
-        "body": "Monthly payment, borrowing capacity, rental yield — pre-filled with Luxembourg market rates."
+        "body": "Monthly payment, borrowing capacity, rental yield: pre-filled with Luxembourg market rates."
       },
       "markets": {
         "eyebrow": "Active markets",
@@ -801,8 +801,8 @@
     "intro": "Our simulator relies on public data from the Observatoire de l'Habitat, continuously adapted by our agency to market trends.",
     "disclaimer_title": "Our simulator gives you an indicative range. The visit makes it accurate.",
     "disclaimer_p1": "Our simulator is based on public data from the Observatoire de l'Habitat (Luxembourg Ministry of Housing), continuously adapted by our agency to market trends.",
-    "disclaimer_p2": "For an actionable value, a visit by one of our advisors remains essential — it is the only way to account for the view, orientation, layout, actual condition and specifics of the property.",
-    "source": "— Source: MAPA Property — © 2026. All rights reserved. Reproduction prohibited."
+    "disclaimer_p2": "For an actionable value, a visit by one of our advisors remains essential: it is the only way to account for the view, orientation, layout, actual condition and specifics of the property.",
+    "source": "Source: MAPA Property. © 2026. All rights reserved. Reproduction prohibited."
   },
   "estimate_form": {
     "step1_label": "The property",
@@ -840,7 +840,7 @@
     "back": "Back",
     "next": "Next",
     "compute": "Estimate",
-    "computing": "Calculating…",
+    "computing": "Calculating...",
     "restart": "Restart estimation",
     "error": "An error occurred. Please check the required fields and try again.",
     "range_label": "Indicative range",
@@ -880,7 +880,7 @@
     "contact_last_name": "Last name",
     "contact_last_name_placeholder": "Brebion",
     "message": "Message (optional)",
-    "message_placeholder": "Details about your project, specific constraints, desired timeline…",
+    "message_placeholder": "Details about your project, specific constraints, desired timeline...",
     "cta_rdv_expertise": "Request a free expert appointment",
     "cta_services": "Discover our services",
     "works_help_text": "The more you detail recent works, the more accurate the valuation. Our engine applies depreciation per work category.",
@@ -936,10 +936,10 @@
     "result_view": {
       "footer_combined": {
         "title": "Our simulator gives you an indicative price range. An on-site visit makes it accurate.",
-        "p1": "Methodology aligned with the Observatoire de l'Habitat (Luxembourg Ministry of Housing — LISER) standards and the Luxembourg hedonic model, continuously adapted by our agency to current market trends.",
-        "p2": "For an enforceable valuation, a visit by one of our advisors remains essential — it is the only way to account for the view, orientation, layout, actual condition and specific features of the property.",
+        "p1": "Methodology aligned with the Observatoire de l'Habitat (Luxembourg Ministry of Housing, LISER) standards and the Luxembourg hedonic model, continuously adapted by our agency to current market trends.",
+        "p2": "For an enforceable valuation, a visit by one of our advisors remains essential: it is the only way to account for the view, orientation, layout, actual condition and specific features of the property.",
         "p3": "This estimate is not a contractual valuation. MAPA Property provides a detailed Valuation Report on request. Financing and notarial matters fall to your bank and notary.",
-        "source": "— SOURCE: MAPA PROPERTY — © 2026. ALL RIGHTS RESERVED."
+        "source": "SOURCE: MAPA PROPERTY. © 2026. ALL RIGHTS RESERVED."
       }
     },
     "works_cat_toiture": "Roof",
@@ -962,8 +962,8 @@
       "last_name_too_short": "Last name too short (minimum 2 characters)",
       "last_name_too_long": "Last name too long (maximum 40 characters)",
       "last_name_format": "Invalid last name (letters, hyphens and apostrophes only)",
-      "name_too_short": "Too short — full first and last name required",
-      "name_format": "Invalid format — letters, hyphens and apostrophes only",
+      "name_too_short": "Too short: full first and last name required",
+      "name_format": "Invalid format: letters, hyphens and apostrophes only",
       "email_required": "Email required",
       "email_format": "Invalid email format",
       "email_local_too_short": "Local part too short (minimum 2 characters before @)",
@@ -979,11 +979,11 @@
   "simulators_page": {
     "eyebrow": "Financial tools",
     "title": "Three instant calculators.",
-    "intro": "Monthly payment, rental yield, borrowing capacity — pre-filled with the latest Luxembourg market rates.",
+    "intro": "Monthly payment, rental yield, borrowing capacity: pre-filled with the latest Luxembourg market rates.",
     "disclaimer_title": "Indicative tools only, non-contractual.",
     "disclaimer_p1": "Our simulator is based on public data from the Observatoire de l'Habitat (Luxembourg Ministry of Housing) and reference rates from the Banque centrale du Luxembourg (BCL), continuously adapted by our agency to market trends.",
     "disclaimer_p2": "Usual prudential debt threshold (35%). Luxembourg rent cap: 5% of invested capital per year. Notary fees ~7% of acquisition price in Luxembourg. Bëllegen Akt: tax credit of up to €40,000 per buyer (€80,000 for a couple buying together) on registration duty, subject to effective occupation as primary residence.",
-    "source": "— Source: MAPA Property — © 2026. All rights reserved. Reproduction prohibited."
+    "source": "Source: MAPA Property. © 2026. All rights reserved. Reproduction prohibited."
   },
   "simulators": {
     "tab_mortgage": "Mortgage payment",
@@ -996,7 +996,7 @@
     "monthly_label": "Monthly",
     "total_paid": "Total cost",
     "total_interest": "Total interest",
-    "source_label": "Sources: BCL and accredited Luxembourg brokers — {month}",
+    "source_label": "Sources: BCL and accredited Luxembourg brokers ({month})",
     "purchase_price": "Purchase price",
     "rent_monthly": "Monthly rent",
     "charges_year": "Annual charges",
@@ -1017,32 +1017,32 @@
     "rate_type_fixed": "Fixed rate",
     "rate_type_variable": "Variable rate",
     "customize_rate": "Customize rate",
-    "rate_auto_tooltip": "Rate automatically set by duration — tick to override."
+    "rate_auto_tooltip": "Rate automatically set by duration, tick to override."
   },
   "about_page": {
     "eyebrow": "Nearly ten years of experience",
     "title": "Real estate isn't sold. It's entrusted.",
-    "intro": "MAPA Property — Luxembourg real estate agency and international broker. Under mandate, within a framework, in your sole interest.",
+    "intro": "MAPA Property: Luxembourg real estate agency and international broker. Under mandate, within a framework, in your sole interest.",
     "h1_line1": "Real estate isn't sold.",
     "h1_line2": "It's entrusted.",
-    "para_1": "MAPA Property is two partners who have practised real estate for nearly ten years, and an agency they founded in Luxembourg in 2024. Before building the firm, we worked in a financial environment that teaches you two things quickly: that a detail left unchecked costs dearly, and that one does not discuss other people's affairs. Both have stayed with us.",
-    "para_2": "What sets us apart is not a slogan; it is a way of working that few agencies practise in Luxembourg. Most brokers take their fee from the seller while claiming to advise the buyer — they serve two sides at once. We do not. We work under mandate, for a single interest at a time. It is the model of the Anglo-Saxon buyer's agent: when we represent a buyer, we defend that buyer alone, all the way to signing. This clarity changes everything, and our clients feel it from the very first conversation.",
-    "para_3": "Artificial intelligence is part of our everyday toolkit. We use it to cross-reference market data, to spot properties before they reach the market, to structure an analysis in a few hours where it once took days. But no algorithm walks through a door in our place, reads a room, or senses what is truly at stake in a negotiation. Technology saves us time; judgement remains ours.",
-    "para_4": "A good part of our work appears nowhere. Confidential sales, off-market properties, bespoke searches: we often operate far from the shop window, because that is exactly what our clients come for. Everything is set within a written framework — signed mandate, defined mission, contractual confidentiality. That is what lets us work swiftly and with peace of mind, and it is what explains our effectiveness.",
-    "para_5": "In nearly ten years, we have supported several hundred clients: international families, executives, investors, family offices. Many would tell you they have never once come across us in an advertisement. That is by design.",
-    "para_6": "Where we operate: MAPA Property is a Luxembourg real estate agency coupled with an international brokerage business.",
-    "para_7": "In the Grand Duchy, we cover the entire territory, with a strong presence across the centre, the south and the west. Internationally, we support our clients on specific request, wherever their projects require it, relying on partners we choose one by one, held to the very standards we set for ourselves.",
+    "para_1": "MAPA Property brings together two partners who have practised real estate for nearly ten years, and an agency founded in Luxembourg in 2024. Our backgrounds in finance taught us the discipline of the verified detail and the value of discretion. These two principles shape the way we work.",
+    "para_2": "We work under mandate, for a single interest at a time. This is the Anglo-Saxon buyer's agent model: when we represent a buyer, we defend that buyer alone, from the search through to signing. When we represent a seller, we defend their price and their terms. Our clients sense this clarity from the very first conversation.",
+    "para_3": "Artificial intelligence is part of our everyday toolkit. It helps us cross-reference market data, spot properties before they come to market, and structure an analysis in a few hours where it once took days. But no algorithm walks through a door in our place, reads a room, or senses what is really at stake in a negotiation. Technology saves time. Judgement remains ours.",
+    "para_4": "A significant part of our activity never appears anywhere. Confidential sales, off-market properties, bespoke searches: we operate away from the shop window, because that is exactly what our clients come to us for. Everything runs through a written framework: signed mandate, defined brief, contractual confidentiality. This discipline lets us move quickly and with peace of mind.",
+    "para_5": "Over nearly ten years in the profession, we have advised several hundred clients: international families, executives, investors, family offices. Many would tell you they have never come across us in an advertisement. That is by design.",
     "bio_julien": "I am the co-founder of MAPA Property and my role is Real Estate Director and also Exclusive Sourcing Specialist.",
     "director_label": "Co-founder · Real Estate Director · Exclusive Sourcing Specialist",
-    "portrait_alt": "Julien Brebion — Real Estate Director, MAPA Property",
+    "portrait_alt": "Julien Brebion, Real Estate Director, MAPA Property",
     "cta_title": "A conversation can change everything.",
     "cta_button": "Book a meeting",
-    "copyright": "Source: MAPA Property (https://www.mapaproperty.lu) — © 2026. All rights reserved. Reproduction prohibited."
+    "copyright": "Source: MAPA Property (https://www.mapaproperty.lu). © 2026. All rights reserved. Reproduction prohibited.",
+    "coverage_eyebrow": "Where we operate",
+    "coverage_text": "MAPA Property is a Luxembourg real estate agency combined with an international broking practice. Within the Grand Duchy, we cover the whole territory, with a strong presence in the centre, the south and the west. Internationally, we support our clients on request, wherever their projects take them, working with partners we select one by one, to the same standards we hold ourselves to."
   },
   "contact_page": {
     "eyebrow": "Contact",
     "title": "A conversation can change everything.",
-    "intro": "Sale mandate, search, off-market access, wealth advice — every request is handled personally by MAPA Property within 24 working hours.",
+    "intro": "Sale mandate, search, off-market access, wealth advice: every request is handled personally by MAPA Property within 24 working hours.",
     "form_title": "Write to us",
     "call_label": "Call",
     "email_label": "Email",
@@ -1064,19 +1064,19 @@
     "next": "Next page"
   },
   "arcova": {
-    "eyebrow": "ARCOVA — Private space",
+    "eyebrow": "ARCOVA: private space",
     "title": "ARCOVA · the MAPA Property private access",
     "intro": "ARCOVA is the confidential space reserved for qualified clients under MAPA Property mandate: complete off-market files, confidential proposals and secure exchanges, by invitation only.",
     "problem_title": "The problem of unregulated off-market",
-    "problem_text": "In premium real estate, the bulk of high-value transactions are negotiated privately, outside the public market — close to two-thirds of high-end operations go through private and advised channels rather than open listings. But without a common framework, this so-called \"confidential\" market is rarely confidential in practice: a single property circulates from network to network, by email and messaging, through multiple intermediaries within weeks. The owner loses control of distribution, the price drifts with each intermediary, the property's characteristics end up diverging from one version to another — and there is neither traceability, nor protection, nor recourse in case of a leak.",
+    "problem_text": "In premium real estate, the bulk of high-value transactions are negotiated privately, outside the public market: close to two-thirds of high-end operations go through private and advised channels rather than open listings. But without a common framework, this so-called \"confidential\" market is rarely confidential in practice: a single property circulates from network to network, by email and messaging, through multiple intermediaries within weeks. The owner loses control of distribution, the price drifts with each intermediary, the property's characteristics end up diverging from one version to another. There is neither traceability, nor protection, nor recourse in case of a leak.",
     "consequences_title": "The consequences are systematic",
-    "consequences_item_1": "Price inflation — each intermediary adds their margin, and the displayed price drifts away from the real one.",
-    "consequences_item_2": "Information drift — surface, rooms, land, sale terms diverge from one version to another.",
-    "consequences_item_3": "Reputational damage — to the owner as much as to the mandated professional.",
-    "consequences_item_4": "Over-exposure — the property paradoxically becomes more visible than a public listing.",
-    "consequences_item_5": "Limited conversion — qualified buyers have already received several contradictory versions.",
-    "consequences_item_6": "No recourse — without a contractual framework, neither evidence nor protection in case of a leak.",
-    "valuation_text": "Conversely, a truly controlled and confidential off-market property is better valued: private prestige transactions close with a meaningful premium compared to publicly marketed equivalents. Properly protected confidentiality is an asset — not a weakness.",
+    "consequences_item_1": "Price inflation: each intermediary adds their margin, and the displayed price drifts away from the real one.",
+    "consequences_item_2": "Information drift: surface, rooms, land, sale terms diverge from one version to another.",
+    "consequences_item_3": "Reputational damage: to the owner as much as to the mandated professional.",
+    "consequences_item_4": "Over-exposure: the property paradoxically becomes more visible than a public listing.",
+    "consequences_item_5": "Limited conversion: qualified buyers have already received several contradictory versions.",
+    "consequences_item_6": "No recourse: without a contractual framework, neither evidence nor protection in case of a leak.",
+    "valuation_text": "Conversely, a truly controlled and confidential off-market property is better valued: private prestige transactions close with a meaningful premium compared to publicly marketed equivalents. Properly protected confidentiality is an asset, not a weakness.",
     "response_title": "The ARCOVA response",
     "response_text": "ARCOVA enforces a qualified and traceable access protocol. Each member is verified (KYC/AML) and signs a contractual NDA before any access. Each file becomes a unique time-stamped reference; each consultation is logged. The confidentiality of the property, the control over its distribution and the interest of each party are protected end to end.",
     "protect_title": "What ARCOVA protects, for each profile",
@@ -1086,7 +1086,7 @@
     "protect_brokers_text": "preserved reputation, unique and consistent file version, protected commission, reduced bypass risk.",
     "protect_buyers_label": "Investors & buyers",
     "protect_buyers_text": "access to genuinely off-market properties, reliable and verified information, end-to-end secure transactions, protective legal framework.",
-    "platform_note": "The ARCOVA platform will be available very shortly. In the meantime, we already apply all these conditions — qualified access, contractual confidentiality, NDA — through direct request by email or message.",
+    "platform_note": "The ARCOVA platform will be available very shortly. In the meantime, we already apply all these conditions (qualified access, contractual confidentiality, NDA) through direct request by email or message.",
     "waitlist_title": "Access request",
     "waitlist_text": "ARCOVA access is granted case by case, after an interview and the signature of a contractual NDA. To join the waitlist, contact us directly.",
     "waitlist_cta": "Request an invitation",
@@ -1099,7 +1099,7 @@
     "found_p2": "To secure legal compliance in each jurisdiction, we operate internationally exclusively as a broker, under search mandate signed in Luxembourg, with selected and licensed local partners.",
     "found_p3": "This approach allows us to support our clients on Trophy Assets, prestige secondary residences, wealth investments or off-market assets in the most sought-after markets in Europe, the UAE and the Americas.",
     "found_p4": "Each international search is handled with the same rigour as in the Grand Duchy: local due diligence, coordinated notarial expertise, contractual confidentiality.",
-    "found_source": "Source: MAPA Property (https://www.mapaproperty.lu) — © 2026. All rights reserved. Reproduction prohibited.",
+    "found_source": "Source: MAPA Property (https://www.mapaproperty.lu). © 2026. All rights reserved. Reproduction prohibited.",
     "communes": "municipalities",
     "lu_coverage": "Nationwide",
     "lu_text": "Across the entire Grand Duchy, including all premium districts of the capital. Click to see published properties.",
@@ -1109,10 +1109,10 @@
     "disclaimer": "This list reflects our regular coverage but is not restrictive: under mandate, we can operate in any city, region or country depending on the nature of your project and the availability of qualified, trusted local partners."
   },
   "mentions_acquisition": {
-    "meta_title": "Legal notice — Real estate acquisition cost simulator | MAPA Property",
+    "meta_title": "Legal notice, real estate acquisition cost simulator | MAPA Property",
     "meta_description": "Legal information and limitations of the MAPA Property acquisition cost simulator.",
     "eyebrow": "Legal notice",
-    "title": "Acquisition cost simulator — Full legal notice",
+    "title": "Acquisition cost simulator, full legal notice",
     "updated_at": "Sources last verified: 12 May 2026",
     "intro": "The real estate acquisition cost simulator provided by MAPA Property is a decision-support tool. The notices below set out its scope, limitations and the legal framework applicable to its use.",
     "s1_title": "1. Nature of the information displayed",
@@ -1121,7 +1121,7 @@
     "s2_body": "The figures displayed are strictly indicative. They do not constitute an offer, a commitment, or any form of tax, legal, notarial, financial or investment advice. They may not be relied upon as binding against MAPA SYNERGY Sàrl or any of its representatives. No document generated by the simulator has any evidentiary or contractual value before a notary, tax authority, bank or court.",
     "s3_title": "3. Methodological limitations",
     "s3_body": "The simulator covers nine countries: Luxembourg, France, Belgium, Germany, Monaco, Switzerland, Italy, Spain and Portugal. Costs included are registration / transfer duties, regulated notarial fees, VAT applicable to new-build, and the main common-law allowances (first-time buyer, primary residence, family profile). Excluded are: agency fees, technical diagnostics, annual local taxes, condominium charges, loan interest, insurance, banking fees, currency conversion, the buyer's personal taxation (IR, IFI, capital gains) and any post-acquisition costs. Regional variability (German Länder, Spanish autonomous communities, Belgian regions, Swiss cantons) is integrated at the finest available granularity but remains indicative. Real estate regulation evolves frequently: a check with a locally licensed notary at the effective transaction date is essential.",
-    "s4_title": "4. Limitation of liability — MAPA SYNERGY Sàrl",
+    "s4_title": "4. Limitation of liability, MAPA SYNERGY Sàrl",
     "s4_body": "MAPA SYNERGY Sàrl (LBR B241974, VAT LU 31988923, AE N°10108681/0-1-2-3), operating the MAPA Property brand, together with its directors, employees, partners and service providers, expressly declines any civil, tax or criminal liability with respect to the accuracy, completeness, availability or timeliness of the information displayed by the simulator, and with respect to acquisition, financing or investment decisions made on the basis of these estimates. No claim for damages may be brought against MAPA SYNERGY Sàrl on this basis.",
     "s5_title": "5. User obligations",
     "s5_body": "The user acknowledges that use of the simulator does not in any way release them from the MANDATORY consultation of a locally licensed notary in the country of acquisition, as well as, where applicable, of an independent tax advisor and a specialised lawyer. Any binding decision (signing of a preliminary contract, payment of a deposit, loan application, tax declaration) must rely on contradictory figures provided by these professionals and not on the simulator's estimates.",
@@ -1140,7 +1140,7 @@
     "contact_block_intro": "For any question regarding the use of the simulator or your acquisition project:",
     "contact_block_phone_label": "Phone",
     "contact_block_email_label": "Email",
-    "copyright": "© 2026 MAPA SYNERGY Sàrl — MAPA Property. All rights reserved. Reproduction prohibited."
+    "copyright": "© 2026 MAPA SYNERGY Sàrl (MAPA Property). All rights reserved. Reproduction prohibited."
   },
   "rendement_locatif": {
     "eyebrow": "RENTAL YIELD",
@@ -1156,11 +1156,11 @@
     "source": "Source: BCL / Statec / ABBL"
   },
   "borrowing_capacity": {
-    "meta_title": "Borrowing Capacity — MAPA Property",
+    "meta_title": "Borrowing Capacity, MAPA Property",
     "meta_description": "Estimate your real estate borrowing capacity in Luxembourg. Indicative tool, subject to bank approval.",
     "eyebrow": "BORROWING CAPACITY",
     "title": "What budget can I finance?",
-    "intro": "Indicative decision-support tool. Enter your income, fixed expenses and down payment — we estimate a borrowing envelope consistent with a reasonable debt-to-income ratio (≤ 40%).",
+    "intro": "Indicative decision-support tool. Enter your income, fixed expenses and down payment: we estimate a borrowing envelope consistent with a reasonable debt-to-income ratio (≤ 40%).",
     "inputs_title": "Your parameters",
     "inputs_subtitle": "All fields below are required for the calculation.",
     "income_label": "Net monthly household income",
@@ -1185,7 +1185,7 @@
     "total_budget": "Total acquisition budget",
     "total_budget_hint": "(borrowing capacity + down payment)",
     "debt_ratio": "Debt-to-income ratio",
-    "debt_safe": "Comfort zone — safety margin preserved.",
+    "debt_safe": "Comfort zone: safety margin preserved.",
     "debt_acceptable": "Within the acceptable limit for most Luxembourg banks.",
     "debt_high": "Above 40%: difficult file to present, needs rework.",
     "disclaimer_eyebrow": "IMPORTANT DISCLAIMER",
@@ -1230,7 +1230,7 @@
     "advisor_contact": "Contact",
     "search_mandate_eyebrow": "Search mandate",
     "search_mandate_title": "Looking for a similar property?",
-    "search_mandate_text": "Entrust us with your search. We mobilise all our channels — open market, off-market and private network.",
+    "search_mandate_text": "Entrust us with your search. We mobilise all our channels: open market, off-market and private network.",
     "search_mandate_cta": "Request a search mandate",
     "exclusive_mandate_eyebrow": "Exclusive Mandate",
     "exclusive_mandate_title": "Looking to sell your property?",
@@ -1239,7 +1239,7 @@
     "reviews_title": "They trusted us"
   },
   "disclaimer": {
-    "short": "Indicative estimate based on market data and the MAPA Property algorithm — it does not constitute a contractual valuation. To refine this estimate, MAPA Property provides a detailed Valuation Report on request. Financing and notarial matters fall to your bank and notary.",
+    "short": "Indicative estimate based on market data and the MAPA Property algorithm: it does not constitute a contractual valuation. To refine this estimate, MAPA Property provides a detailed Valuation Report on request. Financing and notarial matters fall to your bank and notary.",
     "full": {
       "title": "Non-contractual information",
       "p1": "The estimates, simulations, market analyses and data presented on this site are provided for informational and indicative purposes. They rely on public sources (STATEC, Observatoire de l'Habitat, ABBL, Central Bank of Luxembourg) and on MAPA Property's proprietary algorithms.",
@@ -1248,7 +1248,7 @@
     }
   },
   "chatbot": {
-    "legal_disclaimer": "Information provided by Eléna is for informational purposes only and non-contractual. MAPA Property — a brand of MAPA Synergy Sàrl — cannot be held responsible for any decision based on this information. For confirmation: j.brebion@mapagroup.org / +352 691 620 127"
+    "legal_disclaimer": "Information provided by Eléna is for informational purposes only and non-contractual. MAPA Property (a brand of MAPA Synergy Sàrl) cannot be held responsible for any decision based on this information. For confirmation: j.brebion@mapagroup.org / +352 691 620 127"
   },
   "financing_simulator": {
     "disclaimer": "Disclaimer: indicative simulation for information purposes only. The amounts shown do not constitute a loan offer. The rates applied by banks vary according to the borrower profile, down payment, collateral, property type and market conditions. For a personalised study, contact MAPA Property for an appointment with a qualified banking partner."
@@ -1304,7 +1304,7 @@
     "stats_title": "Statistics",
     "stats_description": "Anonymised audience measurement (internal statistics, Vercel Analytics, Google Analytics coming soon) to understand site usage.",
     "marketing_title": "Marketing",
-    "marketing_description": "Targeted advertising (Meta Pixel, Google Ads) — coming soon, off by default.",
+    "marketing_description": "Targeted advertising (Meta Pixel, Google Ads), coming soon, off by default.",
     "accept_all": "Accept all",
     "reject_all": "Reject all",
     "customize": "Customize",

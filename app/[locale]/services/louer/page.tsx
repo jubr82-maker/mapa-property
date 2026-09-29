@@ -10,7 +10,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "page_rent" });
   return {
-    title: `${t("title")} — MAPA Property`,
+    title: `${t("title")}, MAPA Property`,
     description: t("intro"),
     alternates: pageAlternates(locale, "/services/louer"),
   };

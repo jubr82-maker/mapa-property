@@ -122,7 +122,7 @@ export default function FicheLocationMap({
           ref={containerRef}
           data-fiche-map
           data-level={geo.level}
-          aria-label={`Carte — ${geo.label}`}
+          aria-label={`Carte : ${geo.label}`}
           role="img"
           className="size-full"
         />

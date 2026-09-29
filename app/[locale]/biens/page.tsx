@@ -246,7 +246,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "property_list" });
   return {
-    title: `${t("title")} — MAPA Property`,
+    title: `${t("title")}, MAPA Property`,
     description: t("subtitle"),
     alternates: pageAlternates(locale, "/biens"),
   };

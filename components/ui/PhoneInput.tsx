@@ -69,7 +69,7 @@ export function PhoneInput({
       </span>
       <div className="flex gap-2">
         <select
-          aria-label={`${label} — indicatif`}
+          aria-label={`${label} : indicatif`}
           value={code}
           onChange={(e) => {
             setCode(e.target.value);

@@ -22,7 +22,7 @@ export async function generateMetadata({
   const description =
     post.meta_description ?? pickLang(post, "excerpt", locale as Locale);
   return {
-    title: `${title} — MAPA Property`,
+    title: `${title}, MAPA Property`,
     description,
     alternates: pageAlternates(locale, `/blog/${post.slug}`),
     openGraph: post.cover_image

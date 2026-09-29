@@ -33,8 +33,7 @@ export function MarketsSection() {
         {/* SEO/GEO : couverture chiffrée conservée pour crawlers/LLM
             (sans la liste détaillée — allégée). */}
         <p className="sr-only">
-          {t("lu_coverage")} —{" "}
-          {luxembourgCommunes.join(", ")} —{" "}
+          {t("lu_coverage")}: {luxembourgCommunes.join(", ")}.{" "}
           {internationalRegions
             .map((r) => `${r.region}: ${r.cities.join(", ")}`)
             .join(" · ")}

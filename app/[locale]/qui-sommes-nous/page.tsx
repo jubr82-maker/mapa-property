@@ -16,7 +16,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "about_page" });
   return {
-    title: `${t("title")} — MAPA Property`,
+    title: `${t("title")}, MAPA Property`,
     description: t("intro"),
     alternates: pageAlternates(locale, "/qui-sommes-nous"),
   };
@@ -55,8 +55,6 @@ export default async function AboutPage({
             <p>{t("para_3")}</p>
             <p>{t("para_4")}</p>
             <p>{t("para_5")}</p>
-            <p>{t("para_6")}</p>
-            <p>{t("para_7")}</p>
           </div>
 
           <aside className="lg:sticky lg:top-32">
@@ -93,6 +91,16 @@ export default async function AboutPage({
               </div>
             </div>
           </aside>
+        </section>
+
+        {/* Où nous intervenons */}
+        <section className="mb-16">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
+            {t("coverage_eyebrow")}
+          </p>
+          <p className="mt-4 max-w-3xl text-base leading-relaxed text-ink-mid sm:text-lg">
+            {t("coverage_text")}
+          </p>
         </section>
 
         {/* CTA */}
