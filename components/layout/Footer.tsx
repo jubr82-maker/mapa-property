@@ -110,9 +110,16 @@ export function Footer() {
 
         <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-sans text-[13px] leading-relaxed text-ink-mid">
-            © {year} MAPA Property — MAPA Synergy Sàrl
+            © {year} MAPA Property, MAPA Synergy Sàrl
             <br />
             <span className="text-ink-soft">{t("baseline")}</span>
+            <br />
+            <Link
+              href="/legal/intelligence-artificielle"
+              className="text-ink-soft hover:underline"
+            >
+              {t("ai_mention")}
+            </Link>
           </p>
 
           <ul className="flex items-center gap-2">

@@ -68,7 +68,8 @@
     "cta_subtitle": "Entrust us with your project under mandate: exclusive sale or bespoke search, in Luxembourg and internationally.",
     "cta_exclusive": "Exclusive Mandate",
     "cta_search": "Search Mandate",
-    "manage_cookies": "Manage cookies"
+    "manage_cookies": "Manage cookies",
+    "ai_mention": "Some visuals and content on this site are produced with the assistance of artificial intelligence."
   },
   "hero": {
     "pill": "Lux. & Intl.",
@@ -1311,8 +1312,6 @@
     "save": "Save my choices"
   },
   "ai_transparency": {
-    "note_portrait": "Portrait retouched with the assistance of artificial intelligence.",
-    "note_journal": "Writing assisted by artificial intelligence, content reviewed and validated by MAPA Property.",
     "note_gallery": "Some photographs may have been enhanced through digital processing."
   }
 }

@@ -30,7 +30,6 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "about_page" });
-  const tAi = await getTranslations({ locale, namespace: "ai_transparency" });
 
   return (
     <article className="pt-24 lg:pt-32">
@@ -69,14 +68,6 @@ export default async function AboutPage({
                   className="object-cover"
                 />
               </div>
-              <p className="px-5 pt-3 font-mono text-[10px] leading-snug text-ink-soft">
-                <Link
-                  href="/legal/intelligence-artificielle"
-                  className="transition-colors hover:text-gold"
-                >
-                  {tAi("note_portrait")}
-                </Link>
-              </p>
               <div className="p-5">
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
                   {t("director_label")}

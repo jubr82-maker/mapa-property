@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { fetchBlogPostBySlug } from "@/lib/data";
 import { pickLang, type Locale } from "@/lib/types";
 import { BookletReader } from "@/components/blog/BookletReader";
@@ -43,7 +42,6 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   await getTranslations({ locale, namespace: "booklet" });
-  const tAi = await getTranslations({ locale, namespace: "ai_transparency" });
 
   const title = pickLang(post, "title", locale as Locale);
   const content = pickLang(post, "content", locale as Locale);
@@ -77,14 +75,6 @@ export default async function BlogPostPage({
           primaryTag={post.primary_tag}
           contentHtml={content}
         />
-        <p className="mx-auto mt-8 max-w-[65ch] font-mono text-[10px] leading-snug text-ink-soft">
-          <Link
-            href="/legal/intelligence-artificielle"
-            className="transition-colors hover:text-gold"
-          >
-            {tAi("note_journal")}
-          </Link>
-        </p>
       </div>
     </div>
   );

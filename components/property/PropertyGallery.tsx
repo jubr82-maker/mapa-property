@@ -108,16 +108,13 @@ export function PropertyGallery({ items, title }: Props) {
             ))}
           </div>
         )}
-
-        <p className="mt-3 font-mono text-[10px] leading-snug text-ink-soft">
-          <Link
-            href="/legal/intelligence-artificielle"
-            className="transition-colors hover:text-gold"
-          >
-            {tAi("note_gallery")}
-          </Link>
-        </p>
       </div>
+
+      <p className="mt-3 font-mono text-[10px] leading-snug text-ink-soft">
+        <Link href="/legal/intelligence-artificielle" className="hover:underline">
+          {tAi("note_gallery")}
+        </Link>
+      </p>
 
       {lightbox && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-bg-contrast/95 p-4 backdrop-blur">

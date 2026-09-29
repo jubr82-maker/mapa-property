@@ -68,7 +68,8 @@
     "cta_subtitle": "Vertrauen Sie uns Ihr Projekt unter Mandat an: Exklusivverkauf oder maßgeschneiderte Suche, in Luxemburg und international.",
     "cta_exclusive": "Exklusivmandat",
     "cta_search": "Suchmandat",
-    "manage_cookies": "Cookies verwalten"
+    "manage_cookies": "Cookies verwalten",
+    "ai_mention": "Einige Bilder und Inhalte dieser Website werden mit Unterstützung künstlicher Intelligenz erstellt."
   },
   "hero": {
     "pill": "Lux. & Intl.",
@@ -1311,8 +1312,6 @@
     "save": "Auswahl speichern"
   },
   "ai_transparency": {
-    "note_portrait": "Porträt mit Unterstützung künstlicher Intelligenz bearbeitet.",
-    "note_journal": "Mit Unterstützung künstlicher Intelligenz verfasst, Inhalt von MAPA Property geprüft und freigegeben.",
     "note_gallery": "Einige Fotografien können digital nachbearbeitet worden sein."
   }
 }

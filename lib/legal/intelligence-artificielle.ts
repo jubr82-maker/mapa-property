@@ -50,9 +50,15 @@ export const intelligenceArtificielle: Record<"fr" | "en" | "de", LegalContent> 
         ],
       },
       {
+        heading: "Cadre européen",
+        paragraphs: [
+          "L'utilisation de l'intelligence artificielle sur ce site s'inscrit dans le cadre du règlement (UE) 2024/1689 sur l'intelligence artificielle. Les usages décrits ci-dessus, assistante conversationnelle, retouche d'image, aide à la rédaction, relèvent d'obligations de transparence et non de catégories à haut risque. MAPA Property s'engage à respecter les obligations d'information qui en découlent.",
+        ],
+      },
+      {
         heading: "Notre engagement",
         paragraphs: [
-          "Nous nous engageons à ne jamais publier un visuel — portrait, photographie de bien ou autre — donnant une image trompeuse de la réalité. Pour toute question sur l'usage de l'intelligence artificielle sur ce site, contactez-nous via la page Contact.",
+          "Nous nous engageons à ne jamais publier un visuel, portrait, photographie de bien ou autre, donnant une image trompeuse de la réalité. Pour toute question sur l'usage de l'intelligence artificielle sur ce site, contactez-nous via la page Contact.",
         ],
       },
     ],
@@ -91,9 +97,15 @@ export const intelligenceArtificielle: Record<"fr" | "en" | "de", LegalContent> 
         ],
       },
       {
+        heading: "European framework",
+        paragraphs: [
+          "The use of artificial intelligence on this site falls within the scope of Regulation (EU) 2024/1689 on artificial intelligence. The uses described above, conversational assistant, image retouching, writing assistance, fall under transparency obligations rather than high risk categories. MAPA Property is committed to complying with the resulting information obligations.",
+        ],
+      },
+      {
         heading: "Our commitment",
         paragraphs: [
-          "We commit to never publishing a visual — portrait, property photograph or otherwise — that gives a misleading picture of reality. For any question about the use of artificial intelligence on this site, please contact us via the Contact page.",
+          "We commit to never publishing a visual, portrait, property photograph or otherwise, that gives a misleading picture of reality. For any question about the use of artificial intelligence on this site, please contact us via the Contact page.",
         ],
       },
     ],
@@ -132,9 +144,15 @@ export const intelligenceArtificielle: Record<"fr" | "en" | "de", LegalContent> 
         ],
       },
       {
+        heading: "Europäischer Rahmen",
+        paragraphs: [
+          "Der Einsatz künstlicher Intelligenz auf dieser Website erfolgt im Rahmen der Verordnung (EU) 2024/1689 über künstliche Intelligenz. Die oben beschriebenen Anwendungen, virtuelle Assistentin, Bildbearbeitung, Unterstützung bei der Texterstellung, fallen unter Transparenzpflichten und nicht unter Hochrisikokategorien. MAPA Property verpflichtet sich, die daraus resultierenden Informationspflichten einzuhalten.",
+        ],
+      },
+      {
         heading: "Unsere Verpflichtung",
         paragraphs: [
-          "Wir verpflichten uns, niemals ein Bildmaterial — Porträt, Immobilienfoto oder anderes — zu veröffentlichen, das ein irreführendes Bild der Realität vermittelt. Für Fragen zum Einsatz künstlicher Intelligenz auf dieser Website kontaktieren Sie uns bitte über die Kontaktseite.",
+          "Wir verpflichten uns, niemals ein Bildmaterial, Porträt, Immobilienfoto oder anderes, zu veröffentlichen, das ein irreführendes Bild der Realität vermittelt. Für Fragen zum Einsatz künstlicher Intelligenz auf dieser Website kontaktieren Sie uns bitte über die Kontaktseite.",
         ],
       },
     ],
