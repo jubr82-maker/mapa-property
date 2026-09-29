@@ -9,8 +9,11 @@
 
 import Image from "next/image";
 import { Link as IntlLink } from "@/i18n/navigation";
-import { sbUrl } from "@/lib/supabase-url";
 import type { ReactNode } from "react";
+
+// Sprint IA-TRANSPARENCE : portrait local optimise (webp, cadrage visage),
+// remplace l'ancienne photo distante sbUrl("photos","IMG_2461.jpg").
+const ADVISOR_PHOTO_SRC = "/images/julien-brebion-2026-avatar.webp";
 
 export function FicheAdvisorColumn({
   labels,
@@ -20,6 +23,7 @@ export function FicheAdvisorColumn({
   labels: {
     advisor: string;
     advisorRoles: string;
+    advisorPhotoAlt: string;
     exclusiveEyebrow: string;
     exclusiveTitle: string;
     exclusiveText: string;
@@ -47,8 +51,8 @@ export function FicheAdvisorColumn({
         <div className="mt-4 flex items-center gap-3">
           <div className="relative size-14 shrink-0 overflow-hidden rounded-full border border-gold/40">
             <Image
-              src={sbUrl("photos", "IMG_2461.jpg")}
-              alt="Julien Brebion — Real Estate Director MAPA Property"
+              src={ADVISOR_PHOTO_SRC}
+              alt={labels.advisorPhotoAlt}
               fill
               sizes="56px"
               className="object-cover"

@@ -260,6 +260,7 @@ export default async function OffMarketDetailPage({
             labels={{
               advisor: tProperty("advisor"),
               advisorRoles: tProperty("advisor_block_roles"),
+              advisorPhotoAlt: tProperty("advisor_photo_alt"),
               exclusiveEyebrow: tf("exclusive_mandate_eyebrow"),
               exclusiveTitle: tf("exclusive_mandate_title"),
               exclusiveText: tf("exclusive_mandate_text"),

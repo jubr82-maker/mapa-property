@@ -59,6 +59,7 @@
     "tos_sale": "Terms of Sale",
     "privacy": "Privacy / GDPR",
     "fees_pdf": "Fees (PDF)",
+    "ai_transparency": "Artificial intelligence",
     "cookies": "Cookies policy",
     "baseline": "Luxembourg real estate agency · International broker",
     "micro_legal": "MAPA Property · Luxembourg real estate agency · International broker · Contact us to book an appointment.",
@@ -467,6 +468,7 @@
     "video": "Property video",
     "reviews": "Client reviews",
     "advisor": "Your advisor",
+    "advisor_photo_alt": "Julien Brebion — Real Estate Director, MAPA Property",
     "advisor_block_title": "Advice & support",
     "advisor_block_roles": "Real Estate Director\nExclusive Sourcing Specialist",
     "form_eyebrow": "Information request",
@@ -1032,6 +1034,7 @@
     "para_7": "In the Grand Duchy, we cover the entire territory, with a strong presence across the centre, the south and the west. Internationally, we support our clients on specific request, wherever their projects require it, relying on partners we choose one by one, held to the very standards we set for ourselves.",
     "bio_julien": "I am the co-founder of MAPA Property and my role is Real Estate Director and also Exclusive Sourcing Specialist.",
     "director_label": "Co-founder · Real Estate Director · Exclusive Sourcing Specialist",
+    "portrait_alt": "Julien Brebion — Real Estate Director, MAPA Property",
     "cta_title": "A conversation can change everything.",
     "cta_button": "Book a meeting",
     "copyright": "Source: MAPA Property (https://www.mapaproperty.lu) — © 2026. All rights reserved. Reproduction prohibited."
@@ -1306,5 +1309,10 @@
     "reject_all": "Reject all",
     "customize": "Customize",
     "save": "Save my choices"
+  },
+  "ai_transparency": {
+    "note_portrait": "Portrait retouched with the assistance of artificial intelligence.",
+    "note_journal": "Writing assisted by artificial intelligence, content reviewed and validated by MAPA Property.",
+    "note_gallery": "Some photographs may have been enhanced through digital processing."
   }
 }

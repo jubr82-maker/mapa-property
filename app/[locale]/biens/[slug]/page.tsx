@@ -391,6 +391,7 @@ export default async function PropertyPage({
             labels={{
               advisor: t("advisor"),
               advisorRoles: t("advisor_block_roles"),
+              advisorPhotoAlt: t("advisor_photo_alt"),
               exclusiveEyebrow: tf("exclusive_mandate_eyebrow"),
               exclusiveTitle: tf("exclusive_mandate_title"),
               exclusiveText: tf("exclusive_mandate_text"),

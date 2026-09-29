@@ -59,6 +59,7 @@
     "tos_sale": "CGV",
     "privacy": "RGPD",
     "fees_pdf": "Honoraires PDF",
+    "ai_transparency": "Intelligence artificielle",
     "cookies": "Politique cookies",
     "baseline": "Agence immobilière au Luxembourg · Broker international",
     "micro_legal": "MAPA Property · Agence immobilière au Luxembourg · Broker (courtier) international · Contactez-nous pour toute prise de rendez-vous.",
@@ -467,6 +468,7 @@
     "video": "Vidéo de présentation",
     "reviews": "Avis clients",
     "advisor": "Votre conseiller",
+    "advisor_photo_alt": "Julien Brebion — Directeur Immobilier, MAPA Property",
     "advisor_block_title": "Conseil & accompagnement",
     "advisor_block_roles": "Real Estate Director\nExclusive Sourcing Specialist",
     "form_eyebrow": "Demande d'information",
@@ -1032,6 +1034,7 @@
     "para_7": "Au Grand-Duché, nous couvrons l'ensemble du territoire, avec une présence forte sur le centre, le sud et l'ouest. À l'international, nous accompagnons nos clients sur demande spécifique, partout où leurs projets l'exigent, en nous appuyant sur des partenaires que nous choisissons un par un, selon les mêmes exigences que celles que nous nous imposons.",
     "bio_julien": "Je suis le co-fondateur de MAPA Property et mon rôle est Directeur Immobilier mais aussi Exclusive Sourcing Specialist.",
     "director_label": "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
+    "portrait_alt": "Julien Brebion — Directeur Immobilier, MAPA Property",
     "cta_title": "Une conversation peut tout changer.",
     "cta_button": "Prendre rendez-vous",
     "copyright": "Source : MAPA Property (https://www.mapaproperty.lu) — © 2026. Tous droits réservés. Toute reproduction interdite."
@@ -1306,5 +1309,10 @@
     "reject_all": "Tout refuser",
     "customize": "Personnaliser",
     "save": "Enregistrer mes choix"
+  },
+  "ai_transparency": {
+    "note_portrait": "Portrait retouché avec l'assistance de l'intelligence artificielle.",
+    "note_journal": "Rédaction assistée par intelligence artificielle, contenu vérifié et validé par MAPA Property.",
+    "note_gallery": "Certaines photographies peuvent avoir été améliorées par traitement numérique."
   }
 }

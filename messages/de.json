@@ -59,6 +59,7 @@
     "tos_sale": "AGB Verkauf",
     "privacy": "Datenschutz / DSGVO",
     "fees_pdf": "Honorare (PDF)",
+    "ai_transparency": "Künstliche Intelligenz",
     "cookies": "Cookie-Richtlinie",
     "baseline": "Luxemburger Immobilienagentur · Internationaler Broker",
     "micro_legal": "MAPA Property · Luxemburger Immobilienagentur · Internationaler Broker · Kontaktieren Sie uns für einen Termin.",
@@ -467,6 +468,7 @@
     "video": "Präsentationsvideo",
     "reviews": "Kundenstimmen",
     "advisor": "Ihr Berater",
+    "advisor_photo_alt": "Julien Brebion — Real Estate Director, MAPA Property",
     "advisor_block_title": "Beratung & Begleitung",
     "advisor_block_roles": "Real Estate Director\nExclusive Sourcing Specialist",
     "form_eyebrow": "Informationsanfrage",
@@ -1032,6 +1034,7 @@
     "para_7": "Im Großherzogtum decken wir das gesamte Land ab, mit einer starken Präsenz im Zentrum, im Süden und im Westen. International begleiten wir unsere Kunden auf gezielte Anfrage, überall dort, wo ihre Projekte es erfordern, gestützt auf Partner, die wir einzeln auswählen, nach denselben Maßstäben, die wir an uns selbst anlegen.",
     "bio_julien": "Ich bin Mitgründer von MAPA Property; meine Rolle ist Real Estate Director sowie Exclusive Sourcing Specialist.",
     "director_label": "Mitgründer · Real Estate Director · Exclusive Sourcing Specialist",
+    "portrait_alt": "Julien Brebion — Real Estate Director, MAPA Property",
     "cta_title": "Ein Gespräch kann alles verändern.",
     "cta_button": "Termin vereinbaren",
     "copyright": "Quelle: MAPA Property (https://www.mapaproperty.lu) — © 2026. Alle Rechte vorbehalten. Vervielfältigung untersagt."
@@ -1306,5 +1309,10 @@
     "reject_all": "Alle ablehnen",
     "customize": "Anpassen",
     "save": "Auswahl speichern"
+  },
+  "ai_transparency": {
+    "note_portrait": "Porträt mit Unterstützung künstlicher Intelligenz bearbeitet.",
+    "note_journal": "Mit Unterstützung künstlicher Intelligenz verfasst, Inhalt von MAPA Property geprüft und freigegeben.",
+    "note_gallery": "Einige Fotografien können digital nachbearbeitet worden sein."
   }
 }

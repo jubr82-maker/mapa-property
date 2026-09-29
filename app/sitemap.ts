@@ -32,6 +32,7 @@ const STATIC_PATHS = [
   "/legal/cgv",
   "/legal/rgpd",
   "/legal/honoraires",
+  "/legal/intelligence-artificielle",
 ];
 
 const buildAlternates = (path: string) =>

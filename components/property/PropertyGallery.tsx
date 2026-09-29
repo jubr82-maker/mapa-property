@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 interface GalleryItem {
   type: "image" | "video";
@@ -15,6 +17,7 @@ interface Props {
 }
 
 export function PropertyGallery({ items, title }: Props) {
+  const tAi = useTranslations("ai_transparency");
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
 
@@ -105,6 +108,15 @@ export function PropertyGallery({ items, title }: Props) {
             ))}
           </div>
         )}
+
+        <p className="mt-3 font-mono text-[10px] leading-snug text-ink-soft">
+          <Link
+            href="/legal/intelligence-artificielle"
+            className="transition-colors hover:text-gold"
+          >
+            {tAi("note_gallery")}
+          </Link>
+        </p>
       </div>
 
       {lightbox && (

@@ -28,6 +28,7 @@ const colLegal = [
   { href: "/legal/cgv", key: "tos_sale" },
   { href: "/legal/rgpd", key: "privacy" },
   { href: "/legal/honoraires", key: "fees_pdf" },
+  { href: "/legal/intelligence-artificielle", key: "ai_transparency" },
 ] as const;
 
 const socials = [

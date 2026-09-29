@@ -1,9 +1,12 @@
 import Image from "next/image";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { sbUrl } from "@/lib/supabase-url";
 import { ContactReveal } from "@/components/contact-reveal";
 import { pageAlternates } from "@/lib/seo";
+
+// Sprint IA-TRANSPARENCE : portrait local optimise (webp, cadrage buste),
+// remplace l'ancienne photo distante sbUrl("photos","IMG_2461.jpg").
+const JULIEN_PORTRAIT_SRC = "/images/julien-brebion-2026-portrait.webp";
 
 export async function generateMetadata({
   params,
@@ -27,7 +30,7 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "about_page" });
-  const julienPhoto = sbUrl("photos", "IMG_2461.jpg");
+  const tAi = await getTranslations({ locale, namespace: "ai_transparency" });
 
   return (
     <article className="pt-24 lg:pt-32">
@@ -60,14 +63,22 @@ export default async function AboutPage({
             <div className="overflow-hidden rounded-2xl border border-gold/40 bg-bg-soft">
               <div className="relative aspect-[3/4]">
                 <Image
-                  src={julienPhoto}
-                  alt="Julien Brebion — Real Estate Director, MAPA Property"
+                  src={JULIEN_PORTRAIT_SRC}
+                  alt={t("portrait_alt")}
                   fill
                   sizes="(min-width: 1024px) 320px, 50vw"
                   priority
                   className="object-cover"
                 />
               </div>
+              <p className="px-5 pt-3 font-mono text-[10px] leading-snug text-ink-soft">
+                <Link
+                  href="/legal/intelligence-artificielle"
+                  className="transition-colors hover:text-gold"
+                >
+                  {tAi("note_portrait")}
+                </Link>
+              </p>
               <div className="p-5">
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
                   {t("director_label")}
