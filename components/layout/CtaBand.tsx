@@ -23,7 +23,7 @@ export function CtaBand() {
           <div className="flex flex-wrap gap-3 md:flex-col md:items-stretch">
             <Link
               href="/mandats/exclusif"
-              className="cta-lime-glow inline-flex items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-ink shadow-md transition-colors hover:bg-gold-bright"
+              className="cta-lime-glow inline-flex items-center justify-center gap-2 rounded-full bg-gold px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-bg-contrast shadow-md transition-colors hover:bg-gold-bright"
             >
               {t("cta_exclusive")}
               <span aria-hidden>→</span>

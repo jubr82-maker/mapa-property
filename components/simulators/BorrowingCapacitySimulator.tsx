@@ -177,7 +177,7 @@ export function BorrowingCapacitySimulator() {
 
         <button
           type="submit"
-          className="mt-6 rounded-full bg-gold px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.25em] text-bg transition-colors hover:bg-gold-deep"
+          className="mt-6 rounded-full bg-gold px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.25em] text-bg-contrast transition-colors hover:bg-gold-deep"
         >
           {t("submit")}
         </button>

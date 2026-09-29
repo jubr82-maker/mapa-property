@@ -48,7 +48,7 @@ export default async function OffMarketListPage({
         <div className="relative h-[70vh] min-h-[480px] w-full">
           <Link
             href="/"
-            className="absolute right-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-bg/30 bg-bg/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-bg/90 backdrop-blur transition-colors hover:border-gold hover:text-gold lg:right-10 lg:top-10"
+            className="absolute right-6 top-6 z-20 inline-flex items-center gap-2 rounded-full border border-text-contrast/30 bg-text-contrast/5 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.3em] text-text-contrast/90 backdrop-blur transition-colors hover:border-gold hover:text-gold lg:right-10 lg:top-10"
           >
             <span aria-hidden>←</span>
             {t("back")}
@@ -61,10 +61,10 @@ export default async function OffMarketListPage({
             <h1 className="t-h1-contrast">
               {t("hero_title")}
             </h1>
-            <p className="font-serif text-xl italic leading-relaxed text-bg/85 sm:text-2xl">
+            <p className="font-serif text-xl italic leading-relaxed text-text-contrast/85 sm:text-2xl">
               {t("hero_subtitle")}
             </p>
-            <p className="mt-2 max-w-2xl text-base leading-relaxed text-bg/70 sm:text-lg">
+            <p className="mt-2 max-w-2xl text-base leading-relaxed text-text-contrast/70 sm:text-lg">
               {t("description")}
             </p>
           </div>
@@ -109,10 +109,11 @@ export default async function OffMarketListPage({
           </ul>
         </section>
 
-        {/* CTA ARCOVA — sous-section "Acquéreurs qualifiés". Sprint I18N :
-            strings migrees vers next-intl (namespace 'offmarket', keys
-            arcova_cta_*). Flèche '→' reste en dur (caractere universel). */}
-        <section className="mb-14 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-bg p-6 lg:p-8">
+        {/* CTA ARCOVA — sous-section texte ARCOVA (mission lisibilite).
+            Sprint I18N : strings migrees vers next-intl (namespace
+            'offmarket', keys arcova_cta_*). Fleche '→' reste en dur
+            (caractere universel). */}
+        <section className="mb-14 flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-gold/30 bg-bg p-6 lg:p-8">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-deep">
               {t("arcova_cta_eyebrow")}
@@ -120,9 +121,11 @@ export default async function OffMarketListPage({
             <p className="mt-2 font-display text-xl font-bold text-ink sm:text-2xl">
               {t("arcova_cta_title")}
             </p>
-            <p className="mt-1 max-w-xl text-sm text-ink-mid">
-              {t("arcova_cta_description")}
-            </p>
+            <div className="mt-2 max-w-xl space-y-2 text-sm text-ink-mid">
+              <p>{t("arcova_cta_p1")}</p>
+              <p>{t("arcova_cta_p2")}</p>
+              <p>{t("arcova_cta_p3")}</p>
+            </div>
           </div>
           <Link
             href="/off-market/arcova"
@@ -178,7 +181,7 @@ function OffMarketTeaser({
       className="group flex flex-col overflow-hidden rounded-xl border border-line bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >
       {/* Cover confidentiel standardisé (BUG 2) — jamais le visuel réel. */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
+      <div className="relative aspect-[2/1] overflow-hidden bg-bg-deep">
         <OffmarketPlaceholder
           compact
           title={t("cover_title")}

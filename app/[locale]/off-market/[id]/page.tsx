@@ -234,7 +234,7 @@ export default async function OffMarketDetailPage({
 
         {/* Cover confidentiel standardisé (BUG 2) — jamais le visuel réel,
             même flouté, même si une image custom existe en base. */}
-        <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-bg-deep">
+        <div className="relative aspect-[2/1] overflow-hidden rounded-xl bg-bg-deep">
           <OffmarketPlaceholder
             title={t("cover_title")}
             subtitle={t("cover_subtitle")}

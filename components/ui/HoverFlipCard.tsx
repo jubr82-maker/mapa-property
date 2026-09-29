@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface HoverFlipCardProps {
   front: React.ReactNode;
@@ -32,7 +32,21 @@ export function HoverFlipCard({
   const [internalFlipped, setInternalFlipped] = useState(false);
   const active = isControlled ? flipped : internalFlipped;
 
+  // Le survol CSS pilote seul le retournement sur les pointeurs qui le
+  // supportent (souris) : le tap/clic ne doit agir que sur écran tactile,
+  // sinon un clic laisse la carte "coincee" retournee une fois le curseur
+  // sorti (is-flipped force le rotateY malgre la fin du :hover).
+  const [canHover, setCanHover] = useState(true);
+  useEffect(() => {
+    const mql = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const update = () => setCanHover(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+
   const toggle = () => {
+    if (canHover) return;
     if (isControlled) {
       onFlipToggle?.();
     } else {

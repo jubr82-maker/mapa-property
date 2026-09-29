@@ -879,7 +879,7 @@ function Stepper({
                 active
                   ? "bg-ink text-bg"
                   : done
-                    ? "bg-gold text-ink"
+                    ? "bg-gold text-bg-contrast"
                     : "border border-line text-ink-soft"
               }`}
             >

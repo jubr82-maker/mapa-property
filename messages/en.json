@@ -575,10 +575,12 @@
     "form_eyebrow": "Request the full file",
     "form_title": "Access the full dossier",
     "form_subtitle": "Under contractual NDA and verified financial capacity.",
-    "arcova_cta_eyebrow": "ARCOVA · Qualified buyers",
-    "arcova_cta_title": "Are you a buyer under a search mandate?",
-    "arcova_cta_description": "Confidential space reserved for qualified clients under MAPA Property mandate: complete off-market files and confidential proposals, by invitation.",
-    "arcova_cta_label": "Access ARCOVA"
+    "arcova_cta_eyebrow": "ARCOVA",
+    "arcova_cta_title": "ARCOVA, confidential access",
+    "arcova_cta_label": "Register for ARCOVA",
+    "arcova_cta_p1": "Are you looking for an off-market property, or wish to sell yours with complete discretion?",
+    "arcova_cta_p2": "ARCOVA is the confidential space of MAPA Property. A secure qualification and matchmaking platform will open shortly. Register now for priority access.",
+    "arcova_cta_p3": "While we await its launch, every request is handled personally, just as we do today for our clients."
   },
   "nda": {
     "project_label": "Your project",
@@ -1315,6 +1317,7 @@
     "save": "Save my choices"
   },
   "ai_transparency": {
-    "note_gallery": "Some photographs may have been enhanced through digital processing."
+    "note_gallery": "Some photographs may have been enhanced through digital processing.",
+    "note_journal": "Writing assisted by artificial intelligence, content reviewed and validated by MAPA Property."
   }
 }

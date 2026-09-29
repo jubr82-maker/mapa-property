@@ -575,10 +575,12 @@
     "form_eyebrow": "Vollständiges Dossier anfordern",
     "form_title": "Zugang zum vollständigen Dossier",
     "form_subtitle": "Unter vertraglicher NDA und geprüfter Finanzkraft.",
-    "arcova_cta_eyebrow": "ARCOVA · Qualifizierte Käufer",
-    "arcova_cta_title": "Sind Sie ein Käufer mit einem Suchmandat?",
-    "arcova_cta_description": "Vertraulicher Bereich, der qualifizierten Kunden unter MAPA Property-Mandat vorbehalten ist: vollständige Off-Market-Dossiers und vertrauliche Angebote, auf Einladung.",
-    "arcova_cta_label": "ARCOVA aufrufen"
+    "arcova_cta_eyebrow": "ARCOVA",
+    "arcova_cta_title": "ARCOVA, vertraulicher Zugang",
+    "arcova_cta_label": "Bei ARCOVA anmelden",
+    "arcova_cta_p1": "Suchen Sie ein Off-Market-Objekt, oder möchten Sie Ihres diskret veräußern?",
+    "arcova_cta_p2": "ARCOVA ist der vertrauliche Bereich von MAPA Property. Eine sichere Plattform für Qualifizierung und Vermittlung wird in Kürze eröffnet. Melden Sie sich jetzt an, um vorrangigen Zugang zu erhalten.",
+    "arcova_cta_p3": "Bis zur Eröffnung wird jede Anfrage persönlich bearbeitet, so wie wir es heute für unsere Kunden tun."
   },
   "nda": {
     "project_label": "Ihr Projekt",
@@ -1315,6 +1317,7 @@
     "save": "Auswahl speichern"
   },
   "ai_transparency": {
-    "note_gallery": "Einige Fotografien können digital nachbearbeitet worden sein."
+    "note_gallery": "Einige Fotografien können digital nachbearbeitet worden sein.",
+    "note_journal": "Mit Unterstützung künstlicher Intelligenz verfasst, Inhalt von MAPA Property geprüft und freigegeben."
   }
 }

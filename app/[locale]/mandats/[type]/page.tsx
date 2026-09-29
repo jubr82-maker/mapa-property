@@ -100,12 +100,14 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
           </aside>
         </header>
 
-        {/* Highlights */}
-        <section className="mb-16">
-          <h2 className="mb-6 font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+        {/* ZONE : le mandat en detail (highlights + inclus/exclus regroupes
+            dans un seul bloc borde, pour une lecture en diagonale sans
+            empiler des sections isolees de meme poids visuel). */}
+        <section className="mb-16 rounded-2xl border border-line p-6 sm:p-8 lg:p-10">
+          <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
             {tCommon("highlights")}
           </h2>
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: config.highlights }).map((_, i) => (
               <li
                 key={i}
@@ -123,49 +125,49 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
               </li>
             ))}
           </ul>
-        </section>
 
-        {/* Services included / excluded */}
-        <section className="mb-16 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-xl border border-line bg-bg p-6">
-            <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
-              {tCommon("included_title")}
-            </h2>
-            <ul className="mt-5 space-y-2.5">
-              {Array.from({ length: config.servicesIncluded }).map((_, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-ink-mid">
-                  <span aria-hidden className="mt-0.5 text-gold-deep">
-                    ✓
-                  </span>
-                  {t(`service_${i + 1}`)}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {config.servicesExcluded > 0 && (
-            <div className="rounded-xl border border-line bg-bg-soft p-6">
-              <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
-                {tCommon("excluded_title")}
-              </h2>
+          <div className="mt-10 grid gap-6 border-t border-line pt-10 lg:grid-cols-2">
+            <div className="rounded-xl border border-line bg-bg p-6">
+              <h3 className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
+                {tCommon("included_title")}
+              </h3>
               <ul className="mt-5 space-y-2.5">
-                {Array.from({ length: config.servicesExcluded }).map((_, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-3 text-sm text-ink-soft"
-                  >
-                    <span aria-hidden className="mt-0.5">
-                      ×
+                {Array.from({ length: config.servicesIncluded }).map((_, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-ink-mid">
+                    <span aria-hidden className="mt-0.5 text-gold-deep">
+                      ✓
                     </span>
-                    {t(`excluded_${i + 1}`)}
+                    {t(`service_${i + 1}`)}
                   </li>
                 ))}
               </ul>
             </div>
-          )}
+
+            {config.servicesExcluded > 0 && (
+              <div className="rounded-xl border border-line bg-bg-soft p-6">
+                <h3 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+                  {tCommon("excluded_title")}
+                </h3>
+                <ul className="mt-5 space-y-2.5">
+                  {Array.from({ length: config.servicesExcluded }).map((_, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-3 text-sm text-ink-soft"
+                    >
+                      <span aria-hidden className="mt-0.5">
+                        ×
+                      </span>
+                      {t(`excluded_${i + 1}`)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </section>
 
-        {/* Process / when to choose */}
+        {/* ZONE : pourquoi ce mandat (process + avance sur frais recherche
+            regroupes dans le meme bloc, plutot que deux sections isolees). */}
         <section className="mb-16 rounded-2xl border border-line bg-bg p-8">
           <h2 className="t-h2">
             {t("when_title")}
@@ -173,21 +175,21 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
           <p className="mt-3 max-w-3xl text-base leading-relaxed text-ink-mid">
             {t("when_text")}
           </p>
+
+          {config.slug === "recherche" && (
+            <div className="mt-10 border-t border-line pt-10">
+              <h3 className="t-h3">{t("advance_title")}</h3>
+              <div className="mt-3 max-w-3xl space-y-3 text-base leading-relaxed text-ink-mid">
+                <p>{t("advance_p1")}</p>
+                <p>{t("advance_p2")}</p>
+                <p>{t("advance_p3")}</p>
+              </div>
+            </div>
+          )}
         </section>
 
-        {/* Avance sur frais de recherche : uniquement sur le mandat de recherche. */}
-        {config.slug === "recherche" && (
-          <section className="mb-16 rounded-2xl border border-line bg-bg-soft p-8">
-            <h2 className="t-h2">{t("advance_title")}</h2>
-            <div className="mt-3 max-w-3xl space-y-3 text-base leading-relaxed text-ink-mid">
-              <p>{t("advance_p1")}</p>
-              <p>{t("advance_p2")}</p>
-              <p>{t("advance_p3")}</p>
-            </div>
-          </section>
-        )}
-
-        {/* SPRINT0 : Comparator agrandi 2x + bordure lime mur sur les pills.
+        {/* ZONE : comparer et demarrer.
+            SPRINT0 : Comparator agrandi 2x + bordure lime mur sur les pills.
             Auparavant : pills compactes border-line. Maintenant : padding
             20px 32px / text-base / bordure 2px lime / hover background lime
             + texte sapin. Le mandat de la page courante est exclu (filter). */}

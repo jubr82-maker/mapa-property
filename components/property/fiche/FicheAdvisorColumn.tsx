@@ -108,7 +108,7 @@ export function FicheAdvisorColumn({
         <p className="mt-2 text-sm text-ink-mid">{labels.searchText}</p>
         <IntlLink
           href={searchMandateHref}
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-deep px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-bg transition-colors hover:bg-gold"
+          className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold-deep px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-bg-contrast transition-colors hover:bg-gold"
         >
           {labels.searchCta} <span aria-hidden>→</span>
         </IntlLink>
