@@ -11,7 +11,11 @@ interface LegalContent {
 }
 
 const COPYRIGHT_FR =
-  "© 2026 MAPA Synergy Sàrl — MAPA Property. Tous droits réservés. Toute reproduction interdite.";
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Tous droits réservés. Toute reproduction interdite.";
+const COPYRIGHT_EN =
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. All rights reserved. Reproduction prohibited.";
+const COPYRIGHT_DE =
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Alle Rechte vorbehalten. Vervielfältigung untersagt.";
 
 export const cgu: Record<"fr" | "en" | "de", LegalContent> = {
   fr: {
@@ -77,7 +81,7 @@ export const cgu: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "8. Cookies",
         paragraphs: [
           "Le site utilise un nombre minimal de cookies techniques nécessaires à son fonctionnement (préférence de langue, mode jour/nuit, panier off-market, mesure d'audience anonyme).",
-          "Les détails sont précisés dans la Politique cookies (à venir) et la Politique RGPD.",
+          "Les détails sont précisés dans la Politique RGPD (section Cookies) et via la bannière de consentement accessible sur le site.",
         ],
       },
       {
@@ -196,7 +200,7 @@ export const cgu: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
     ],
-    copyright: COPYRIGHT_FR,
+    copyright: COPYRIGHT_EN,
   },
   de: {
     eyebrow: "Rechtliches",
@@ -206,66 +210,76 @@ export const cgu: Record<"fr" | "en" | "de", LegalContent> = {
     intro: [
       "Die französische Fassung dieser Nutzungsbedingungen ist rechtsverbindlich. Die deutsche Fassung dient nur zur Information.",
       "Diese Bedingungen regeln den Zugriff auf und die Nutzung von mapaproperty.lu, herausgegeben von MAPA Synergy Sàrl („MAPA Property\").",
+      "Der Zugriff auf die Website setzt die vollständige und uneingeschränkte Annahme dieser Nutzungsbedingungen voraus.",
     ],
     sections: [
       {
-        heading: "1. Zweck",
+        heading: "1. Zweck der Website",
         paragraphs: [
-          "Die Site stellt die Leistungen von MAPA Property dar. Informationen sind rein informativ und stellen kein vertragliches Angebot dar.",
+          "Die Website mapaproperty.lu stellt die Leistungen von MAPA Property vor: luxemburgische Immobilienagentur und internationaler Broker, Verkauf, Vermietung, Off-Market, Mandate, Bewertung, Simulatoren, redaktionelle Inhalte.",
+          "Die angezeigten Informationen dienen ausschließlich zur Information und stellen kein vertragliches Angebot dar. Jede Transaktion erfordert die Unterzeichnung eines gesonderten Mandats.",
         ],
       },
       {
-        heading: "2. Zugang",
+        heading: "2. Zugang zur Website",
         paragraphs: [
-          "Der Zugang ist kostenlos. Einige Funktionen erfordern personenbezogene Daten (siehe Datenschutzerklärung).",
+          "Der Zugang ist frei und kostenlos. Einige Funktionen (Formulare, Off-Market) erfordern die Übermittlung personenbezogener Daten (siehe Datenschutzerklärung).",
+          "MAPA Property behält sich das Recht vor, die Website ganz oder teilweise ohne Vorankündigung zu ändern, auszusetzen oder einzustellen.",
         ],
       },
       {
         heading: "3. Geistiges Eigentum",
         paragraphs: [
-          "Die Website ist ausschließliches Eigentum von MAPA Synergy Sàrl. Vervielfältigung ohne vorherige schriftliche Zustimmung untersagt.",
+          "Der Quellcode dieser Website sowie ihre Struktur, ihr Design, ihre Text- und Bildinhalte, Fotografien, Videos und Objektbeschreibungen sind ausschließliches Eigentum von MAPA Synergy Sàrl oder ihrer lizenzierten Partner.",
+          "Jede Vervielfältigung, Darstellung, Änderung oder Verwertung, ganz oder teilweise, gleich mit welchem Verfahren, ist ohne vorherige schriftliche Genehmigung von MAPA Synergy Sàrl strikt untersagt.",
         ],
       },
       {
-        heading: "4. Anti-Scraping",
+        heading: "4. Anti-Scraping und Schutz der Datenbanken",
         paragraphs: [
-          "Die automatisierte Extraktion von Daten ist gemäß luxemburgischem Datenbankschutzrecht (Gesetz vom 18. April 2001) und Artikel 509-1 des luxemburgischen Strafgesetzbuches strikt untersagt.",
+          "Jede automatisierte Extraktion von Daten der Website, insbesondere Objektbeschreibungen, Fotografien und Preise, ist strikt untersagt und stellt eine Verletzung des Schutzrechts sui generis des Datenbankherstellers (Gesetz vom 18. April 2001) sowie einen Angriff auf automatisierte Datenverarbeitungssysteme dar (Artikel 509-1 des luxemburgischen Strafgesetzbuches).",
+          "Jeder Verstoß wird zivil- und strafrechtlich verfolgt.",
+          "Die Nutzung automatisierter Werkzeuge (Scraper, Bots, Crawler Dritter) ohne schriftliche Genehmigung ist ausdrücklich untersagt und führt zur sofortigen Sperrung sowie zu rechtlichen Schritten.",
         ],
       },
       {
         heading: "5. Technisches Logging",
         paragraphs: [
-          "Jeder Zugriff wird technisch protokolliert (anonymisierte IP, Timestamp, Seiten, User-Agent) und 13 Monate lang aufbewahrt.",
+          "Jeder Zugriff auf die Website wird technisch protokolliert (anonymisierte IP-Adresse, Zeitstempel, aufgerufene Seiten, User-Agent). Diese Daten werden 13 Monate lang zu Sicherheitszwecken, zur Missbrauchsprävention und zur Einhaltung gesetzlicher Vorgaben aufbewahrt.",
+          "Die Einzelheiten der Verarbeitung und die Rechtsgrundlagen sind in der Datenschutzerklärung festgelegt.",
         ],
       },
       {
         heading: "6. Externe Links",
         paragraphs: [
-          "MAPA Property haftet nicht für Inhalte verlinkter Drittseiten.",
+          "Die Website kann Links zu Websites Dritter enthalten (Immobilienportale, institutionelle Quellen, Partner). MAPA Property übt keinerlei Kontrolle über diese Websites aus und lehnt jede Verantwortung für deren Inhalt ab.",
         ],
       },
       {
-        heading: "7. Nutzerverhalten",
+        heading: "7. Verhalten des Nutzers",
         paragraphs: [
-          "Nutzer dürfen die Site nicht stören, keine Schadinhalte einbringen, keine Rechte Dritter verletzen.",
+          "Der Nutzer verpflichtet sich, den Betrieb der Website nicht zu stören, nicht zu versuchen, schädliche Inhalte einzubringen, keine Rechte Dritter zu verletzen und die geltenden Rechtsvorschriften einzuhalten.",
+          "Jedes zuwiderlaufende Verhalten kann Sanktionen, die Sperrung des Zugangs und rechtliche Schritte zur Folge haben.",
         ],
       },
       {
         heading: "8. Cookies",
         paragraphs: [
-          "Minimale technische Cookies (Sprache, Theme, Off-Market-Korb, anonyme Statistik).",
+          "Die Website verwendet eine minimale Anzahl technischer Cookies, die für ihren Betrieb erforderlich sind (Sprachpräferenz, Hell/Dunkel-Modus, Off-Market-Merkliste, anonyme Reichweitenmessung).",
+          "Die Einzelheiten sind in der Datenschutzerklärung (Abschnitt Cookies) sowie über das auf der Website verfügbare Einwilligungsbanner festgelegt.",
         ],
       },
       {
-        heading: "9. Haftung",
+        heading: "9. Haftungsbeschränkung",
         paragraphs: [
-          "MAPA Property bemüht sich um Genauigkeit und Aktualität, gewährt aber keine Garantie. Haftung für direkte und indirekte Schäden ausgeschlossen.",
+          "MAPA Property bemüht sich um die Richtigkeit und Aktualität der veröffentlichten Informationen. Es wird jedoch keine Gewähr für deren Vollständigkeit, Genauigkeit oder ständige Verfügbarkeit übernommen.",
+          "MAPA Property lehnt jede Haftung für direkte oder indirekte Schäden ab, die sich aus der Nutzung der Website ergeben, insbesondere bei Nichtverfügbarkeit, Anzeigefehlern bei Preisen oder Beschreibungen oder Datenverlust.",
         ],
       },
       {
-        heading: "10. Änderungen",
+        heading: "10. Änderung der Nutzungsbedingungen",
         paragraphs: [
-          "Wesentliche Änderungen werden sichtbar mitgeteilt.",
+          "MAPA Property behält sich das Recht vor, diese Nutzungsbedingungen jederzeit zu ändern. Maßgeblich ist die zum Zeitpunkt der Nutzung auf der Website verfügbare Fassung. Eine wesentliche Änderung wird durch einen sichtbaren Hinweis mitgeteilt.",
         ],
       },
       {
@@ -277,12 +291,12 @@ export const cgu: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
       {
-        heading: "12. Recht und Gerichtsstand",
+        heading: "12. Anwendbares Recht und Gerichtsstand",
         paragraphs: [
-          "Luxemburgisches Recht. Ausschließlicher Gerichtsstand: Luxemburg-Stadt.",
+          "Diese Nutzungsbedingungen unterliegen luxemburgischem Recht. Jeder Streit über ihre Auslegung oder Erfüllung fällt in die ausschließliche Zuständigkeit der Gerichte der Stadt Luxemburg, vorbehaltlich zwingender gegenteiliger Bestimmungen zugunsten des Verbrauchers.",
         ],
       },
     ],
-    copyright: COPYRIGHT_FR,
+    copyright: COPYRIGHT_DE,
   },
 };

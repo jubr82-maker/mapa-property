@@ -490,7 +490,7 @@ export default async function PropertyPage({
         >
           <p>MAPA PROPERTY, une marque de MAPA Synergy Sàrl</p>
           <p>
-            N° LBR : B241974 · TVA : LU 31988923 · AE N°10108681 ·
+            RCS Luxembourg B241974 · TVA : LU 31988923 · AE N°10108681/0-1-2-3 ·
             www.mapaproperty.lu
           </p>
         </footer>

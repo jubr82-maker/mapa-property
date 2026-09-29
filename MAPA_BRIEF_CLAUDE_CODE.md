@@ -57,8 +57,7 @@ TURNSTILE_SECRET_KEY=
 
 # Mistral AI pour le chatbot (gratuit sur console.mistral.ai)
 MISTRAL_API_KEY=
-# Fallback Groq (gratuit sur console.groq.com)
-GROQ_API_KEY=
+# GROQ_API_KEY : non utilisee, moteur de secours Groq retire du chatbot.
 
 # Site
 NEXT_PUBLIC_SITE_URL=https://mapaproperty.lu
@@ -223,7 +222,7 @@ mapa-property/
 │   │       ├── rgpd/page.tsx
 │   │       └── honoraires/page.tsx
 │   ├── api/
-│   │   ├── chatbot/route.ts               # proxy vers Mistral + Groq fallback
+│   │   ├── chatbot/route.ts               # proxy vers Mistral, fallback heuristique
 │   │   ├── lead/route.ts                  # POST → Supabase + Resend
 │   │   ├── estimate/route.ts              # logique estimateur server-side
 │   │   └── bcl-rates/route.ts             # fetch taux BCL (cron daily)
@@ -304,8 +303,8 @@ mapa-property/
 | Sujet | Décision |
 |---|---|
 | **Leads** | INSERT direct dans `public.leads` Supabase. Email mailto en parallèle EN ATTENDANT que Resend soit configuré. Quand `RESEND_API_KEY` est présente, basculer sur Resend. |
-| **Chatbot LLM** | Mistral Small (gratuit, 1 req/sec) en principal, Groq Llama 3.3 70B (gratuit) en fallback automatique. Edge function Next.js qui essaie Mistral puis Groq si erreur. |
-| **Hébergement** | Vercel Hobby (gratuit). DNS + WAF + Turnstile chez Cloudflare devant. |
+| **Chatbot LLM** | Mistral Small (gratuit, 1 req/sec) en principal, fallback heuristique multilingue si Mistral indisponible. Groq retire, plus utilise. |
+| **Hébergement** | Vercel Hobby (gratuit). Cloudflare pour la protection anti-robots des formulaires et le stockage de fichiers, pas pour le DNS ni le pare-feu du site. |
 | **Tracking analytics** | Vercel Analytics + Speed Insights (gratuit, RGPD-friendly, sans cookies). + table custom `analytics_events` (à créer plus tard) pour tracking détaillé. Pas de Google Analytics au démarrage (lourd, RGPD compliqué). |
 | **Compte utilisateur favoris** | localStorage uniquement pour MVP. Pas d'auth Supabase au démarrage. Le cœur sur une fiche stocke l'ID en local. |
 | **Téléchargement fiches** | PDF généré côté client avec `@react-pdf/renderer`, format A4 propre, pré-formaté MAPA. |
@@ -570,11 +569,11 @@ L'utilisateur peut fermer (croix). Un cookie `elena_dismissed=true` (durée 7 jo
   1. Reçoit historique conversation + message + lang + page contexte
   2. Construit prompt système avec base de connaissance MAPA
   3. Appelle Mistral Small via `https://api.mistral.ai/v1/chat/completions`
-  4. Si erreur (rate limit, panne), fallback sur Groq `https://api.groq.com/openai/v1/chat/completions` avec Llama 3.3 70B
+  4. Si erreur (rate limit, panne), fallback heuristique multilingue local (Groq retire)
   5. Retourne la réponse au client
 
 **Base de connaissance** dans `components/chatbot/chatbot-knowledge.ts` (~500 lignes, en FR/EN/DE) :
-- Histoire MAPA depuis 2018, fondation 2020
+- Associes en activite depuis 2018, agence MAPA Property fondee en 2024
 - 4 mandats détaillés avec verbatim
 - Off-Market : process 6 étapes, NDA, capacité financière
 - Mandat de recherche LU/EU/Hors EU avec tarifs
@@ -1158,7 +1157,7 @@ Créer `.env.local` avec variables section 2.
 - ChatbotWidget visible permanent
 - Panel d'ouverture
 - Base de connaissance (~500 lignes)
-- API route `/api/chatbot` avec Mistral + fallback Groq
+- API route `/api/chatbot` avec Mistral + fallback heuristique
 - Trigger 10s + cookies dismiss
 
 **Étape 10 — SEO + Sitemap + JSON-LD (2h)**
@@ -1218,7 +1217,7 @@ Puis configurer DNS Cloudflare pour pointer `mapaproperty.lu` vers Vercel via CN
 - [ ] Form off-market NDA INSERT OK
 - [ ] Estimateur calcule correctement
 - [ ] Simulateurs marchent + taux BCL pré-rempli
-- [ ] Chatbot Eléna : ouverture, conversation, fallback Groq
+- [ ] Chatbot Eléna : ouverture, conversation, fallback heuristique
 - [ ] Cloudflare Turnstile actif sur tous forms
 - [ ] Sitemap.xml valide
 - [ ] Robots.txt OK
@@ -1272,8 +1271,7 @@ Puis configurer DNS Cloudflare pour pointer `mapaproperty.lu` vers Vercel via CN
 2. **Vercel** : compte Hobby gratuit, connecter au repo GitHub
 3. **Cloudflare** : déjà existant. Activer Turnstile (Add Site → mapaproperty.lu) et récupérer site key + secret key
 4. **Mistral AI** : créer compte sur console.mistral.ai (gratuit), créer API key
-5. **Groq** : créer compte sur console.groq.com (gratuit), créer API key
-6. **Resend** : créer compte sur resend.com, vérifier domaine mapaproperty.lu, créer API key (à finaliser plus tard)
+5. **Resend** : créer compte sur resend.com, vérifier domaine mapaproperty.lu, créer API key (à finaliser plus tard)
 
 Coller toutes les clés dans `.env.local` et dans Vercel env vars.
 

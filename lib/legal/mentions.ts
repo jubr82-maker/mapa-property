@@ -11,11 +11,11 @@ interface LegalContent {
 }
 
 const COPYRIGHT_FR =
-  "© 2026 MAPA Synergy Sàrl — MAPA Property. Source : MAPA Property (https://www.mapaproperty.lu). Tous droits réservés. Toute reproduction interdite.";
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Source : MAPA Property (https://www.mapaproperty.lu). Tous droits réservés. Toute reproduction interdite.";
 const COPYRIGHT_EN =
-  "© 2026 MAPA Synergy Sàrl — MAPA Property. Source: MAPA Property (https://www.mapaproperty.lu). All rights reserved. Reproduction prohibited.";
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Source: MAPA Property (https://www.mapaproperty.lu). All rights reserved. Reproduction prohibited.";
 const COPYRIGHT_DE =
-  "© 2026 MAPA Synergy Sàrl — MAPA Property. Quelle: MAPA Property (https://www.mapaproperty.lu). Alle Rechte vorbehalten. Vervielfältigung untersagt.";
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Quelle: MAPA Property (https://www.mapaproperty.lu). Alle Rechte vorbehalten. Vervielfältigung untersagt.";
 
 export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
   fr: {
@@ -29,25 +29,16 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
         paragraphs: [
           "MAPA Synergy Sàrl, opérant sous le nom commercial MAPA Property.",
           "Forme juridique : Société à responsabilité limitée de droit luxembourgeois.",
-          "Siège social : 1, rue de la Vallée, L-3593 Dudelange, Grand-Duché de Luxembourg.",
-          "RCS Luxembourg : B241974.",
-          "Autorisation d'établissement (AE) : 10108681.",
+          "Siège social : 26, rue du Commerce, L-3450 Dudelange, Grand-Duché de Luxembourg.",
+          "RCS Luxembourg B241974.",
+          "Autorisation d'établissement (AE) : 10108681/0-1-2-3.",
           "TVA intracommunautaire : LU 31988923.",
-          "IBAN : LU88 0019 5655 88 84 9000 — BIC : BCEELULL (BCEE).",
         ],
       },
       {
         heading: "Directeur de la publication",
         paragraphs: [
-          "Julien Brebion, Real Estate Director.",
-          "Téléphone : disponible via le bouton « Nous contacter » en bas de page.",
-          "Email : disponible via le bouton « Nous contacter » en bas de page.",
-        ],
-      },
-      {
-        heading: "Gérant",
-        paragraphs: [
-          "Frédéric Mannis.",
+          "Frédéric Mannis, Gérant.",
           "Téléphone : disponible via le bouton « Nous contacter » en bas de page.",
           "Email : disponible via le bouton « Nous contacter » en bas de page.",
         ],
@@ -55,9 +46,11 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Hébergement",
         paragraphs: [
-          "Hébergeur : Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA.",
-          "Reverse-proxy, DNS, WAF et anti-bot : Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA.",
-          "Base de données : Supabase, hébergée en Union Européenne (eu-central-1).",
+          "Hébergeur du site : Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis. Les pages et fonctions du site sont exécutées dans la région de Stockholm.",
+          "Base de données : Supabase, hébergée dans la région de Stockholm.",
+          "Protection anti-robots des formulaires et stockage de fichiers : Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, États-Unis.",
+          "Nom de domaine : Gandi SAS, Paris, France.",
+          "Ces prestataires établis aux États-Unis sont encadrés par les garanties prévues par le RGPD, dont la certification de Vercel au cadre de protection des données entre l'Union européenne et les États-Unis.",
         ],
       },
       {
@@ -79,7 +72,7 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Données personnelles",
         paragraphs: [
           "Le traitement des données personnelles est encadré par notre Politique de confidentialité (RGPD) accessible sur le site.",
-          "Référent données : Julien Brebion. Autorité de contrôle : Commission nationale pour la protection des données (CNPD), www.cnpd.lu.",
+          "Référent données : Frédéric Mannis. Autorité de contrôle : Commission nationale pour la protection des données (CNPD), www.cnpd.lu.",
         ],
       },
       {
@@ -112,29 +105,25 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
         paragraphs: [
           "MAPA Synergy Sàrl, trading as MAPA Property.",
           "Legal form: Luxembourg limited liability company.",
-          "Registered office: 1, rue de la Vallée, L-3593 Dudelange, Grand Duchy of Luxembourg.",
-          "RCS Luxembourg: B241974. Establishment authorisation: 10108681. VAT: LU 31988923.",
-          "IBAN: LU88 0019 5655 88 84 9000 — BIC: BCEELULL.",
+          "Registered office: 26, rue du Commerce, L-3450 Dudelange, Grand Duchy of Luxembourg.",
+          "RCS Luxembourg B241974. Establishment authorisation: 10108681/0-1-2-3. VAT: LU 31988923.",
         ],
       },
       {
         heading: "Publication director",
         paragraphs: [
-          "Julien Brebion, Real Estate Director.",
-          "Coordonnées disponibles via le bouton « Nous contacter » en bas de page.",
-        ],
-      },
-      {
-        heading: "Manager",
-        paragraphs: [
-          "Frédéric Mannis.",
-          "Coordonnées disponibles via le bouton « Nous contacter » en bas de page.",
+          "Frédéric Mannis, Manager.",
+          "Contact details available via the \"Contact us\" button at the bottom of the page.",
         ],
       },
       {
         heading: "Hosting",
         paragraphs: [
-          "Vercel Inc. (USA). Cloudflare reverse-proxy, DNS, WAF (USA). Supabase database (EU).",
+          "Site hosting: Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, USA. Pages and functions run in the Stockholm region.",
+          "Database: Supabase, hosted in the Stockholm region.",
+          "Form anti-bot protection and file storage: Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, USA.",
+          "Domain name: Gandi SAS, Paris, France.",
+          "These US-based providers are covered by GDPR safeguards, including Vercel's certification under the EU-US Data Privacy Framework.",
         ],
       },
       {
@@ -147,6 +136,20 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Anti-scraping",
         paragraphs: [
           "Automated extraction of site data is strictly prohibited and constitutes a violation of Luxembourg database protection law (April 18, 2001) and Article 509-1 of the Luxembourg Criminal Code. Civil and criminal proceedings will follow any infringement.",
+        ],
+      },
+      {
+        heading: "Personal data",
+        paragraphs: [
+          "The processing of personal data is governed by our Privacy Policy (GDPR) available on the site.",
+          "Data referent: Frédéric Mannis. Supervisory authority: National Commission for Data Protection (CNPD), www.cnpd.lu.",
+        ],
+      },
+      {
+        heading: "Credits",
+        paragraphs: [
+          "Design and development: MAPA Property with AI assistance (Claude Code, Anthropic).",
+          "Photographs: MAPA Property and licensed partners. Reproduction prohibited.",
         ],
       },
       {
@@ -172,29 +175,25 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
         paragraphs: [
           "MAPA Synergy Sàrl, Geschäftsname MAPA Property.",
           "Rechtsform: Luxemburger Gesellschaft mit beschränkter Haftung.",
-          "Sitz: 1, rue de la Vallée, L-3593 Dudelange, Großherzogtum Luxemburg.",
-          "RCS Luxemburg: B241974. Niederlassungsgenehmigung: 10108681. UStId: LU 31988923.",
-          "IBAN: LU88 0019 5655 88 84 9000 — BIC: BCEELULL.",
+          "Sitz: 26, rue du Commerce, L-3450 Dudelange, Großherzogtum Luxemburg.",
+          "RCS Luxemburg B241974. Niederlassungsgenehmigung: 10108681/0-1-2-3. USt-IdNr.: LU 31988923.",
         ],
       },
       {
         heading: "Verantwortlich",
         paragraphs: [
-          "Julien Brebion, Real Estate Director.",
-          "Coordonnées disponibles via le bouton « Nous contacter » en bas de page.",
-        ],
-      },
-      {
-        heading: "Geschäftsführer",
-        paragraphs: [
-          "Frédéric Mannis.",
-          "Coordonnées disponibles via le bouton « Nous contacter » en bas de page.",
+          "Frédéric Mannis, Geschäftsführer.",
+          "Kontaktdaten verfügbar über die Schaltfläche „Kontakt\" am Seitenende.",
         ],
       },
       {
         heading: "Hosting",
         paragraphs: [
-          "Vercel Inc. (USA). Cloudflare Reverse-Proxy, DNS, WAF (USA). Supabase-Datenbank (EU).",
+          "Hosting der Website: Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, USA. Seiten und Funktionen laufen in der Region Stockholm.",
+          "Datenbank: Supabase, in der Region Stockholm gehostet.",
+          "Anti-Bot-Schutz der Formulare und Dateispeicherung: Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, USA.",
+          "Domainname: Gandi SAS, Paris, Frankreich.",
+          "Diese in den USA ansässigen Anbieter unterliegen den von der DSGVO vorgesehenen Garantien, darunter die Zertifizierung von Vercel im Rahmen des Data Privacy Framework zwischen der EU und den USA.",
         ],
       },
       {
@@ -207,6 +206,20 @@ export const mentions: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Anti-Scraping",
         paragraphs: [
           "Die automatisierte Extraktion von Site-Daten ist strikt untersagt und stellt einen Verstoß gegen das luxemburgische Datenbankschutzrecht (Gesetz vom 18. April 2001) sowie Artikel 509-1 des luxemburgischen Strafgesetzbuches dar. Zivil- und Strafverfahren folgen.",
+        ],
+      },
+      {
+        heading: "Personenbezogene Daten",
+        paragraphs: [
+          "Die Verarbeitung personenbezogener Daten unterliegt unserer Datenschutzerklärung (DSGVO), die auf der Website verfügbar ist.",
+          "Datenschutzreferent: Frédéric Mannis. Aufsichtsbehörde: Commission nationale pour la protection des données (CNPD), www.cnpd.lu.",
+        ],
+      },
+      {
+        heading: "Credits",
+        paragraphs: [
+          "Konzeption und Entwicklung: MAPA Property mit KI-Unterstützung (Claude Code, Anthropic).",
+          "Fotografien: MAPA Property und lizenzierte Partner. Vervielfältigung untersagt.",
         ],
       },
       {

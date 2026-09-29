@@ -87,7 +87,7 @@ function clientBody(args: {
         `MAPA Property team`,
         ``,
         `— — —`,
-        `MAPA SYNERGY Sàrl · LBR B241974 · TVA LU 31988923`,
+        `MAPA SYNERGY Sàrl · RCS Luxembourg B241974 · TVA LU 31988923`,
         `Independent real estate boutique — Luxembourg`,
       ].join("\n");
     case "de":
@@ -108,7 +108,7 @@ function clientBody(args: {
         `MAPA Property Team`,
         ``,
         `— — —`,
-        `MAPA SYNERGY Sàrl · LBR B241974 · TVA LU 31988923`,
+        `MAPA SYNERGY Sàrl · RCS Luxembourg B241974 · TVA LU 31988923`,
         `Unabhängige Immobilien-Boutique — Luxemburg`,
       ].join("\n");
     default:
@@ -129,7 +129,7 @@ function clientBody(args: {
         `L'équipe MAPA Property`,
         ``,
         `— — —`,
-        `MAPA SYNERGY Sàrl · LBR B241974 · TVA LU 31988923`,
+        `MAPA SYNERGY Sàrl · RCS Luxembourg B241974 · TVA LU 31988923`,
         `Boutique immobilière indépendante — Luxembourg`,
       ].join("\n");
   }

@@ -11,7 +11,11 @@ interface LegalContent {
 }
 
 const COPYRIGHT_FR =
-  "© 2026 MAPA Synergy Sàrl — MAPA Property. Tous droits réservés. Honoraires HT, TVA luxembourgeoise applicable.";
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Tous droits réservés. Honoraires HT, TVA luxembourgeoise applicable.";
+const COPYRIGHT_EN =
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. All rights reserved. Fees excl. VAT, Luxembourg VAT applicable.";
+const COPYRIGHT_DE =
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Alle Rechte vorbehalten. Honorare zzgl. MwSt., luxemburgische MwSt. anwendbar.";
 
 export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
   fr: {
@@ -26,7 +30,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Mandats de vente",
         paragraphs: [
-          "Mandat Exclusif : 3 % HT du prix net vendeur. Pack Vidéo inclus.",
+          "Mandat Exclusif : 3 % HT du prix net vendeur. Pack Vidéo en option.",
           "Mandat Semi-Exclusif : 4 % HT du prix net vendeur. Pack Vidéo en option.",
           "Mandat Simple : 5 % HT du prix net vendeur.",
           "Mandat Autonome : 1 % HT du prix net vendeur (backup juridique et notarial, assistance ponctuelle).",
@@ -36,11 +40,17 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Mandats de Recherche – Sourcing Exclusif",
         paragraphs: [
           "Luxembourg : 3 % à 5 % HT du prix d'acquisition.",
-          "France (transfrontalier et national) : selon barème France ci-dessus.",
-          "Europe (hors Luxembourg) : 3 % à 8 % HT selon complexité et pays.",
+          "Europe (y compris France) : 3 % à 8 % HT selon complexité et pays.",
           "International : sur devis, à définir au mandat.",
-          "Avance sur frais : une avance forfaitaire est exigible à la signature du mandat. Elle est intégralement déduite de la commission finale due. Le montant de l'avance est défini au mandat selon la zone géographique et la complexité de la mission.",
           "Couverture : Luxembourg, Union européenne, hors UE (Émirats, Royaume-Uni, Suisse, Amériques).",
+        ],
+      },
+      {
+        heading: "Avance sur frais de recherche",
+        paragraphs: [
+          "Toute mission de recherche donne lieu à une avance sur frais, intégralement déduite de nos honoraires si la transaction se conclut avec MAPA Property.",
+          "Luxembourg : 250 € hors TVA. Régions limitrophes, jusqu'à 100 km : à partir de 500 € hors TVA. Autres pays : sur devis, selon les déplacements nécessaires.",
+          "Pourquoi cette avance : un mandat de recherche nous engage à travailler exclusivement sur votre projet. Nous cessons de proposer les biens identifiés à d'autres acquéreurs, nous activons notre réseau, nous visitons et qualifions avant de vous présenter quoi que ce soit. Ce temps est réel, il précède toute transaction, et il ne peut pas être gratuit. L'avance formalise cet engagement réciproque : vous vous engagez sur un projet défini, nous y consacrons nos moyens.",
         ],
       },
       {
@@ -54,7 +64,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Pack Vidéo",
         paragraphs: [
-          "Inclus dans le Mandat Exclusif. En option pour les autres mandats : devis sur demande.",
+          "Toujours en option, sur devis, quel que soit le mandat souscrit.",
           "Comprend tournage professionnel, drone si pertinent, post-production, masters HD pour réseaux et site.",
         ],
       },
@@ -75,7 +85,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Frais annexes (à la charge du Mandant)",
         paragraphs: [
-          "Frais d'enregistrement et de notaire : payés au notaire (~7 % au Luxembourg). Le Bëllegen Akt est un crédit d'impôt jusqu'à 40 000 € par acquéreur, sans condition d'âge ni de primo-accession, pour toute résidence principale.",
+          "Frais d'enregistrement et de notaire : environ 6 % de droits d'enregistrement, 1 % de droit de transcription et environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % au Luxembourg. Le Bëllegen Akt est un crédit d'impôt jusqu'à 40 000 € par acquéreur, sans condition d'âge ni de primo-accession, pour toute résidence principale.",
           "Frais d'huissier en cas de procédure : à la charge du Mandant.",
           "Frais de déplacement à l'international au-delà de 200 km du siège : forfait kilométrique sur devis.",
         ],
@@ -101,7 +111,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Sale mandates",
         paragraphs: [
-          "Exclusive: 3% (excl. VAT) of net seller price. Video Pack included.",
+          "Exclusive: 3% (excl. VAT) of net seller price. Video Pack optional.",
           "Semi-Exclusive: 4%. Video Pack optional.",
           "Simple: 5%.",
           "Autonomous: 1% (excl. VAT) of net seller price (legal and notarial backup, à la carte assistance).",
@@ -111,11 +121,17 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Search Mandates – Exclusive Sourcing",
         paragraphs: [
           "Luxembourg: 3% to 5% (excl. VAT) of acquisition price.",
-          "France (cross-border and national): per France schedule above.",
-          "Europe (outside Luxembourg): 3% to 8% (excl. VAT) depending on complexity and country.",
+          "Europe (including France): 3% to 8% (excl. VAT) depending on complexity and country.",
           "International: on quote, to be defined at mandate signing.",
-          "Retainer: a flat retainer is due at mandate signing. It is fully deducted from the final commission. The retainer amount is defined at mandate signing based on geographic scope and mission complexity.",
           "Coverage: Luxembourg, EU, outside EU (UAE, UK, Switzerland, Americas).",
+        ],
+      },
+      {
+        heading: "Search fee advance",
+        paragraphs: [
+          "Every search mandate carries a fee advance, fully deducted from our fees if the transaction concludes with MAPA Property.",
+          "Luxembourg: €250 excluding VAT. Neighbouring regions, up to 100 km: from €500 excluding VAT. Other countries: by quotation, depending on the travel required.",
+          "Why this advance: a search mandate commits us to working exclusively on your project. We stop offering the properties we identify to other buyers, we activate our network, we visit and qualify before presenting anything to you. This time is real, it precedes any transaction, and it cannot be free. The advance formalises this mutual commitment: you commit to a defined project, and we commit our resources to it.",
         ],
       },
       {
@@ -129,7 +145,8 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Video Pack",
         paragraphs: [
-          "Included in Exclusive mandate. Optional elsewhere — quote on request.",
+          "Always optional, by quotation, regardless of the mandate signed.",
+          "Includes professional filming, drone footage where relevant, post-production, HD masters for social media and the site.",
         ],
       },
       {
@@ -149,7 +166,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Ancillary fees (Mandant's expense)",
         paragraphs: [
-          "Notary fees ~7% in Luxembourg. The Bëllegen Akt is a tax credit of up to €40,000 per buyer on registration duty, for any primary residence, no age or first-time buyer condition.",
+          "Registration and notary fees: approximately 6% registration duty, 1% transcription duty and approximately 1% notary fees, for an indicative total close to 8% in Luxembourg. The Bëllegen Akt is a tax credit of up to €40,000 per buyer on registration duty, for any primary residence, no age or first-time buyer condition.",
           "Bailiff fees if proceedings.",
           "International travel beyond 200 km from HQ: per-quote.",
         ],
@@ -161,7 +178,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
     ],
-    copyright: COPYRIGHT_FR,
+    copyright: COPYRIGHT_EN,
   },
   de: {
     eyebrow: "Rechtliches",
@@ -175,7 +192,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Verkaufsmandate",
         paragraphs: [
-          "Exklusiv: 3 % zzgl. MwSt. des Nettoverkäuferpreises. Videopaket inklusive.",
+          "Exklusiv: 3 % zzgl. MwSt. des Nettoverkäuferpreises. Videopaket optional.",
           "Halb-Exklusiv: 4 %. Videopaket optional.",
           "Einfach: 5 %.",
           "Autonom: 1 % zzgl. MwSt. (juristische und notarielle Rückendeckung, punktuelle Unterstützung).",
@@ -185,11 +202,17 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Suchmandate – Exklusives Sourcing",
         paragraphs: [
           "Luxemburg: 3 % bis 5 % zzgl. MwSt. des Kaufpreises.",
-          "Frankreich (grenzüberschreitend und national): gemäß französischem Tarif oben.",
-          "Europa (außer Luxemburg): 3 % bis 8 % zzgl. MwSt. je nach Komplexität und Land.",
+          "Europa (einschließlich Frankreich): 3 % bis 8 % zzgl. MwSt. je nach Komplexität und Land.",
           "International: nach Angebot, zum Zeitpunkt der Mandatsunterzeichnung festgelegt.",
-          "Vorschuss: Bei Unterzeichnung des Mandats wird ein pauschaler Vorschuss fällig. Er wird vollständig von der Endprovision abgezogen. Die Höhe des Vorschusses wird im Mandat je nach geografischem Geltungsbereich und Komplexität festgelegt.",
           "Abdeckung: Luxemburg, EU, außerhalb EU (VAE, UK, Schweiz, Amerika).",
+        ],
+      },
+      {
+        heading: "Vorschuss auf Suchkosten",
+        paragraphs: [
+          "Jeder Suchauftrag zieht einen Vorschuss auf Kosten nach sich, der vollständig von unserem Honorar abgezogen wird, wenn das Geschäft mit MAPA Property abgeschlossen wird.",
+          "Luxemburg: 250 € zzgl. MwSt. Angrenzende Regionen, bis 100 km: ab 500 € zzgl. MwSt. Andere Länder: auf Angebot, je nach erforderlichen Reisen.",
+          "Warum dieser Vorschuss: Ein Suchmandat verpflichtet uns, ausschließlich an Ihrem Vorhaben zu arbeiten. Wir bieten die identifizierten Objekte keinen anderen Käufern mehr an, wir aktivieren unser Netzwerk, wir besichtigen und qualifizieren, bevor wir Ihnen überhaupt etwas vorstellen. Diese Zeit ist real, sie geht jeder Transaktion voraus, und sie kann nicht kostenlos sein. Der Vorschuss formalisiert dieses gegenseitige Engagement: Sie verpflichten sich auf ein definiertes Vorhaben, wir setzen dafür unsere Mittel ein.",
         ],
       },
       {
@@ -203,7 +226,8 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Videopaket",
         paragraphs: [
-          "Im Exklusivmandat enthalten. Andernorts optional auf Angebot.",
+          "Immer optional, auf Angebot, unabhängig vom unterzeichneten Mandat.",
+          "Umfasst professionellen Dreh, Drohnenaufnahmen falls relevant, Postproduktion, HD-Master für soziale Netzwerke und die Website.",
         ],
       },
       {
@@ -223,7 +247,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Nebenkosten (zu Lasten des Mandanten)",
         paragraphs: [
-          "Notarkosten ~7 % in Luxemburg. Der Bëllegen Akt ist eine Steuergutschrift von bis zu 40 000 € pro Käufer auf die Eintragungsgebühr für jeden Hauptwohnsitz, ohne Alters- oder Erstkäufer-Bedingung.",
+          "Eintragungs- und Notarkosten: etwa 6 % Eintragungsgebühr, 1 % Übertragungsgebühr und etwa 1 % Notarhonorar, insgesamt indikativ nahe 8 % in Luxemburg. Der Bëllegen Akt ist eine Steuergutschrift von bis zu 40 000 € pro Käufer auf die Eintragungsgebühr für jeden Hauptwohnsitz, ohne Alters- oder Erstkäufer-Bedingung.",
           "Gerichtsvollzieherkosten bei Verfahren.",
           "Internationale Reisen über 200 km vom Sitz: auf Angebot.",
         ],
@@ -235,6 +259,6 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
     ],
-    copyright: COPYRIGHT_FR,
+    copyright: COPYRIGHT_DE,
   },
 };

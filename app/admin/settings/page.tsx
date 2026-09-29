@@ -44,12 +44,13 @@ export default async function AdminSettingsPage() {
           Sous-traitants RGPD
         </h2>
         <ul className="mt-4 space-y-2 text-sm text-[#3D4F63]/80">
-          <li>• <strong>Supabase</strong> (Postgres, Storage, Auth) — base de données et fichiers</li>
-          <li>• <strong>Vercel</strong> — hébergement web</li>
-          <li>• <strong>Cloudflare</strong> — DNS, WAF, Turnstile, Analytics</li>
+          <li>• <strong>Vercel</strong> — hébergement des pages et fonctions du site (région Stockholm)</li>
+          <li>• <strong>Supabase</strong> (Postgres, Auth) — base de données (région Stockholm) et stockage de fichiers</li>
+          <li>• <strong>Cloudflare</strong> — protection anti-robots des formulaires et stockage de fichiers (pas de DNS ni de pare-feu du site)</li>
           <li>• <strong>Resend</strong> — envoi d&apos;emails transactionnels</li>
           <li>• <strong>Apimo</strong> — sync biens classiques (lecture seule)</li>
-          <li>• <strong>Mistral / Groq</strong> — chatbot Eléna (modèles IA)</li>
+          <li>• <strong>Mistral AI</strong> — chatbot Eléna (modèle IA, société française)</li>
+          <li>• <strong>Gandi</strong> — nom de domaine</li>
         </ul>
       </section>
     </div>

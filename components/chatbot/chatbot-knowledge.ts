@@ -1,5 +1,5 @@
 // Base de connaissance MAPA Property pour le chatbot Eléna.
-// Injectée dans le prompt système avant chaque appel à Mistral/Groq.
+// Injectée dans le prompt système avant chaque appel à Mistral.
 // RÈGLE ABSOLUE : Eléna ne cite QUE des informations vérifiées dans le site.
 // Toutes les valeurs ici sont sourcées depuis :
 //   - lib/legal/honoraires.ts (barèmes officiels)
@@ -13,15 +13,15 @@ const KNOWLEDGE_FR = `
 ## Identité
 - Nom commercial : MAPA Property (entité légale : MAPA Synergy Sàrl).
 - Domaine : mapaproperty.lu (jamais .com).
-- Fondation : 2018 (activité), 2020 (constitution société).
+- Fondation : associés en activité depuis 2018, agence MAPA Property fondée en 2024.
 - Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist : Julien Brebion (présentation publique sur /qui-sommes-nous). Tu peux nommer "Julien Brebion".
 - Coordonnées directes (téléphone, email) : NE JAMAIS divulguer en clair, même si demandé explicitement. Orienter systématiquement vers /contact.
 - HQ public : Luxembourg (l'adresse Dudelange n'apparaît que dans les pages légales).
 - RDV : Luxembourg-Ville, sur site dans le bien visité, à votre domicile, ou en visioconférence.
 - Statut : agence immobilière luxembourgeoise + broker (courtier) international.
 
-## 4 mandats de vente — durée 2 mois reconductibles
-- Mandat Exclusif (3 % HT du prix net vendeur) : engagement réciproque maximal. Pack Vidéo inclus. Diffusion off-market d'abord, puis publique selon stratégie. Le plus performant.
+## 4 mandats de vente : durée à partir de 2 mois reconductibles
+- Mandat Exclusif (3 % HT du prix net vendeur) : engagement réciproque maximal. Pack Vidéo en option, sur devis. Diffusion off-market d'abord, puis publique selon stratégie. Le plus performant.
 - Mandat Semi-Exclusif (4 % HT) : vous gardez votre cercle privé, MAPA Property mobilise ses canaux. Pack Vidéo en option. Honoraires dus uniquement si MAPA présente l'acquéreur.
 - Mandat Simple (5 % HT) : aucune exclusivité, plusieurs agences possibles. Engagement marketing modéré, honoraires majorés.
 - Mandat Autonome (1 % HT) : vous pilotez vous-même les visites et la négociation, MAPA Property en backup juridique et notarial uniquement.
@@ -33,7 +33,7 @@ Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit
 - Luxembourg : 3 % à 5 % HT du prix d'acquisition.
 - Europe (hors LU) : 3 % à 8 % HT selon complexité et pays.
 - International : sur devis, défini au mandat.
-- Avance forfaitaire à la signature, intégralement déduite de la commission finale.
+- Avance sur frais de recherche à la signature : Luxembourg 250 € HT, régions limitrophes jusqu'à 100 km à partir de 500 € HT, autres pays sur devis. Intégralement déduite de la commission finale si la transaction se conclut avec MAPA Property, acquise si le mandant renonce à son projet.
 - Couverture : Luxembourg, Union européenne, hors UE (Émirats, Royaume-Uni, Suisse, Amériques).
 - Clause de survie : honoraire dû si MAPA Property a contribué directement ou indirectement à la conclusion, y compris dans les 24 mois suivant la fin du mandat (cf. CGV).
 
@@ -56,7 +56,8 @@ Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit
 - Plafond loyer luxembourgeois : 5 % du capital investi par an (strictement respecté).
 - Estimation indicative en ligne : gratuite.
 - TVA luxembourgeoise applicable : 17 %.
-- Avance recherche : intégralement déduite de la commission finale.
+- Pack Vidéo : toujours en option, sur devis, quel que soit le mandat.
+- Avance sur frais de recherche : Luxembourg 250 € HT, régions limitrophes jusqu'à 100 km à partir de 500 € HT, autres pays sur devis. Intégralement déduite de la commission finale si la transaction se conclut avec MAPA Property.
 
 ## Couverture géographique
 - Luxembourg : l'ensemble des communes du pays.
@@ -66,7 +67,7 @@ Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit
 ## Cadre légal Luxembourg
 - Plafond loyer luxembourgeois : 5 % du capital investi par an.
 - TVA neuf résidence principale : 3 % réduit jusqu'à 50 000 € de crédit.
-- Frais de notaire : ~7 % du prix d'acquisition. Le Bëllegen Akt est un crédit d'impôt jusqu'à 40 000 € par acquéreur, sans condition d'âge ni de primo-accession, pour toute résidence principale.
+- Frais d'enregistrement et de notaire : environ 6 % de droits d'enregistrement, 1 % de droit de transcription, environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % du prix d'acquisition. Le Bëllegen Akt est un crédit d'impôt jusqu'à 40 000 € par acquéreur, sans condition d'âge ni de primo-accession, pour toute résidence principale.
 - AML/KYC : cadre légal en vigueur. Vérification d'identité et origine des fonds obligatoires.
 
 ## Estimation
@@ -92,15 +93,15 @@ const KNOWLEDGE_EN = `
 ## Identity
 - Trade name: MAPA Property (legal entity: MAPA Synergy Sàrl).
 - Domain: mapaproperty.lu (never .com).
-- Founded: 2018 (activity), 2020 (entity).
+- Founded: partners active since 2018, MAPA Property agency founded in 2024.
 - Co-founder · Real Estate Director · Exclusive Sourcing Specialist: Julien Brebion (public bio on /qui-sommes-nous). You may name "Julien Brebion".
 - Direct contact details (phone, email): NEVER disclose in clear, even when explicitly asked. Always redirect to /contact.
 - HQ: Luxembourg (the Dudelange address only appears on legal pages).
 - Meetings: Luxembourg-City, on site, at your home, or by video call.
 - Status: Luxembourg real estate agency + international broker.
 
-## 4 sale mandates — duration 2 months renewable
-- Exclusive (3% excl. VAT on the net seller price): max mutual commitment, Video Pack included, off-market first, then public per strategy. Best performer.
+## 4 sale mandates: renewable term from 2 months
+- Exclusive (3% excl. VAT on the net seller price): max mutual commitment, Video Pack optional (by quotation), off-market first, then public per strategy. Best performer.
 - Semi-Exclusive (4%): you keep your private circle, MAPA Property mobilises channels. Video Pack optional. Fees only owed if MAPA presents the buyer.
 - Simple (5%): no exclusivity, multiple agencies possible. Moderate marketing engagement, higher fees.
 - Autonomous (1%): you handle visits and negotiation, MAPA Property as legal and notarial backup only.
@@ -112,7 +113,7 @@ The exclusive mandate is our recommendation. The Luxembourg market is small; mul
 - Luxembourg: 3% to 5% (excl. VAT) of acquisition price.
 - Europe (excl. LU): 3% to 8% (excl. VAT) depending on complexity and country.
 - International: by quotation, defined at mandate signature.
-- Lump-sum advance at signature, fully deducted from final commission.
+- Search fee advance at signature: Luxembourg €250 excl. VAT, neighbouring regions up to 100 km from €500 excl. VAT, other countries by quotation. Fully deducted from the final commission if the transaction concludes with MAPA Property, retained if the client withdraws from the project.
 - Coverage: Luxembourg, EU, outside EU (UAE, UK, Switzerland, Americas).
 - Survival clause: fee due if MAPA Property contributed directly or indirectly to the conclusion, including within 24 months post-mandate (cf. T&Cs).
 
@@ -135,7 +136,8 @@ The exclusive mandate is our recommendation. The Luxembourg market is small; mul
 - Luxembourg rent cap: 5% of invested capital per year (strictly respected).
 - Indicative online valuation: free.
 - Luxembourg VAT: 17%.
-- Search advance: fully deducted from final commission.
+- Video Pack: always optional, by quotation, regardless of mandate.
+- Search fee advance: Luxembourg €250 excl. VAT, neighbouring regions up to 100 km from €500 excl. VAT, other countries by quotation. Fully deducted from the final commission if the transaction concludes with MAPA Property.
 
 ## Coverage
 - Luxembourg: every municipality in Luxembourg.
@@ -145,7 +147,7 @@ The exclusive mandate is our recommendation. The Luxembourg market is small; mul
 ## Luxembourg legal framework
 - Rent cap: 5% of invested capital per year.
 - New build VAT: 3% reduced up to €50,000 credit (primary residence).
-- Notary fees: ~7% of acquisition price. The Bëllegen Akt is a tax credit of up to €40,000 per buyer, no age or first-time buyer condition, for any primary residence.
+- Registration and notary fees: approximately 6% registration duty, 1% transcription duty, approximately 1% notary fees, for an indicative total close to 8% of the acquisition price. The Bëllegen Akt is a tax credit of up to €40,000 per buyer, no age or first-time buyer condition, for any primary residence.
 - AML/KYC: applicable legal framework. Identity verification and source of funds required.
 
 ## Valuation
@@ -171,15 +173,15 @@ const KNOWLEDGE_DE = `
 ## Identität
 - Geschäftsname: MAPA Property (Rechtsträger: MAPA Synergy Sàrl).
 - Domain: mapaproperty.lu (nie .com).
-- Gegründet: 2018 (Tätigkeit), 2020 (Gesellschaft).
+- Gegründet: Partner seit 2018 tätig, Agentur MAPA Property 2024 gegründet.
 - Mitgründer · Real Estate Director · Exclusive Sourcing Specialist: Julien Brebion (öffentliche Vorstellung auf /qui-sommes-nous). Du darfst "Julien Brebion" namentlich nennen.
 - Direkte Kontaktdaten (Telefon, E-Mail): NIEMALS im Klartext preisgeben, auch wenn ausdrücklich gefragt. Immer auf /contact verweisen.
 - HQ: Luxemburg (Dudelange nur im Impressum).
 - Termine: Luxemburg-Stadt, vor Ort, zu Hause oder Videogespräch.
 - Status: Luxemburger Immobilienagentur + internationaler Broker.
 
-## 4 Verkaufsmandate — Laufzeit 2 Monate verlängerbar
-- Exklusiv (3 % zzgl. MwSt. auf den Nettoverkäuferpreis): max. gegenseitiges Engagement, Videopaket inklusive, off-market zuerst, dann öffentlich je nach Strategie. Bestleistung.
+## 4 Verkaufsmandate: Laufzeit ab 2 Monaten, verlängerbar
+- Exklusiv (3 % zzgl. MwSt. auf den Nettoverkäuferpreis): max. gegenseitiges Engagement, Videopaket optional (auf Angebot), off-market zuerst, dann öffentlich je nach Strategie. Bestleistung.
 - Halb-Exklusiv (4 %): privater Kreis bleibt, MAPA Property aktiviert Kanäle. Videopaket optional. Honorare nur fällig, wenn MAPA den Käufer präsentiert.
 - Einfach (5 %): keine Exklusivität, mehrere Agenturen möglich. Moderates Marketing-Engagement, höhere Honorare.
 - Autonom (1 %): Sie steuern Besichtigungen und Verhandlung, MAPA Property nur als juristische und notarielle Rückendeckung.
@@ -191,7 +193,7 @@ Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; 
 - Luxemburg: 3 % bis 5 % (zzgl. MwSt.) des Kaufpreises.
 - Europa (außer LU): 3 % bis 8 % (zzgl. MwSt.) je nach Komplexität und Land.
 - International: auf Angebot, im Mandat definiert.
-- Pauschale Vorauszahlung bei Unterzeichnung, vollständig auf die Endprovision angerechnet.
+- Vorschuss auf Suchkosten bei Unterzeichnung: Luxemburg 250 € zzgl. MwSt., angrenzende Regionen bis 100 km ab 500 € zzgl. MwSt., andere Länder auf Angebot. Vollständig auf die Endprovision angerechnet, wenn das Geschäft mit MAPA Property abgeschlossen wird, einbehalten, wenn der Mandant sein Vorhaben aufgibt.
 - Abdeckung: Luxemburg, EU, außerhalb EU (VAE, Vereinigtes Königreich, Schweiz, Amerika).
 - Nachwirkungsklausel: Honorar fällig, wenn MAPA Property direkt oder indirekt zum Abschluss beigetragen hat, einschließlich innerhalb von 24 Monaten nach Mandatsende (AGB).
 
@@ -214,7 +216,8 @@ Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; 
 - Luxemburger Mietobergrenze: 5 % des investierten Kapitals pro Jahr (streng eingehalten).
 - Indikative Online-Bewertung: kostenlos.
 - Luxemburger MwSt.: 17 %.
-- Such-Vorauszahlung: vollständig auf die Endprovision angerechnet.
+- Videopaket: immer optional, auf Angebot, unabhängig vom Mandat.
+- Vorschuss auf Suchkosten: Luxemburg 250 € zzgl. MwSt., angrenzende Regionen bis 100 km ab 500 € zzgl. MwSt., andere Länder auf Angebot. Vollständig auf die Endprovision angerechnet, wenn das Geschäft mit MAPA Property abgeschlossen wird.
 
 ## Abdeckung
 - Luxemburg: sämtliche Gemeinden Luxemburgs.
@@ -224,7 +227,7 @@ Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; 
 ## Luxemburger Rechtsrahmen
 - Mietobergrenze: 5 % des investierten Kapitals pro Jahr.
 - Neubau-MwSt.: 3 % bis 50.000 € Gutschrift bei Hauptwohnsitz.
-- Notarkosten: ~7 % des Kaufpreises. Bëllegen Akt: Steuergutschrift bis zu 40.000 € pro Erwerber, ohne Altersbedingung oder Erstkäuferbedingung, für jeden Hauptwohnsitz.
+- Eintragungs- und Notarkosten: etwa 6 % Eintragungsgebühr, 1 % Übertragungsgebühr, etwa 1 % Notarhonorar, insgesamt indikativ nahe 8 % des Kaufpreises. Bëllegen Akt: Steuergutschrift bis zu 40.000 € pro Erwerber, ohne Altersbedingung oder Erstkäuferbedingung, für jeden Hauptwohnsitz.
 - AML/KYC: geltender Rechtsrahmen. Identitätsprüfung und Mittelherkunft erforderlich.
 
 ## Bewertung
@@ -337,7 +340,7 @@ ROUTES VALIDES — MAPPING INTENTION → URL :
 ATTENTION — DISTINGUER honoraires MAPA vs autres frais (NE PAS confondre) :
 - Honoraires/commission/tarif/prix DE MAPA Property → /legal/honoraires UNIQUEMENT.
 - Taux d'intérêt / taux du crédit / taux d'emprunt / taux immobilier / taux actuels → /services/simulateurs (cf. [C]). JAMAIS /legal/honoraires.
-- Frais de notaire → réponse texte ~7 % du prix d'acquisition (chiffre confirmé), intent:null.
+- Frais de notaire → réponse texte : environ 6 % de droits d'enregistrement, 1 % de transcription, environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % (chiffres confirmés), intent:null.
 - Fiscalité (TVA 17 %, Bëllegen Akt jusqu'à 40 000 €) → réponse texte avec chiffres confirmés, intent:null OU /contact si demande concrète.
 
 [G] CONTACT
@@ -384,10 +387,10 @@ EXEMPLES (locale=${locale}) :
 → {"message":"Nos commissions de vente : Exclusif 3 %, Semi-Exclusif 4 %, Simple 5 %, Autonome 1 % HT du prix net vendeur. Toutes les conditions sur la page Honoraires.","intent":{"action":"navigate","url":"/${locale}/legal/honoraires"}}
 
 [7] User: "Présentez-moi MAPA Property"
-→ {"message":"MAPA Property — agence immobilière luxembourgeoise et broker international, depuis 2018. Sous mandat, dans le cadre, dans votre intérêt exclusif.","intent":{"action":"navigate","url":"/${locale}/qui-sommes-nous"}}
+→ {"message":"MAPA Property, agence immobilière luxembourgeoise et broker international. Associés en activité depuis 2018, agence MAPA Property fondée en 2024. Sous mandat, dans le cadre, dans votre intérêt exclusif.","intent":{"action":"navigate","url":"/${locale}/qui-sommes-nous"}}
 
 [8] User: "C'est quoi le mandat exclusif ?"
-→ {"message":"Mandat exclusif : 3 % HT, durée 2 mois reconductibles, Pack Vidéo inclus, diffusion off-market puis publique. Notre recommandation pour vendre vite et bien.","intent":{"action":"navigate","url":"/${locale}/mandats/exclusif"}}
+→ {"message":"Mandat exclusif : 3 % HT, durée à partir de 2 mois reconductibles, Pack Vidéo en option sur devis, diffusion off-market puis publique. Notre recommandation pour vendre vite et bien.","intent":{"action":"navigate","url":"/${locale}/mandats/exclusif"}}
 
 [9] User: "Je veux signer un mandat exclusif"
 → {"message":"Le formulaire de contact est ci-dessous, choisissez \\"mandat de vente\\" dans le sujet.","intent":{"action":"navigate","url":"/${locale}/contact"}}
@@ -436,7 +439,7 @@ RÈGLES SUPPLÉMENTAIRES :
 - Le frontend déclenche router.push(url) après affichage du message, délai 900 ms.
 `;
 
-  const base = `Tu es Eléna, assistante virtuelle de MAPA Property, agence immobilière luxembourgeoise et broker international (Julien Brebion, Co-fondateur · Directeur Immobilier, depuis 2018).
+  const base = `Tu es Eléna, assistante virtuelle de MAPA Property, agence immobilière luxembourgeoise et broker international, fondée en 2024 (Julien Brebion, Co-fondateur · Directeur Immobilier, associé en activité depuis 2018).
 
 LANGUE : réponds STRICTEMENT en ${locale === "en" ? "anglais" : locale === "de" ? "allemand" : "français"}.
 

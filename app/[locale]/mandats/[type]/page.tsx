@@ -175,6 +175,18 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
           </p>
         </section>
 
+        {/* Avance sur frais de recherche : uniquement sur le mandat de recherche. */}
+        {config.slug === "recherche" && (
+          <section className="mb-16 rounded-2xl border border-line bg-bg-soft p-8">
+            <h2 className="t-h2">{t("advance_title")}</h2>
+            <div className="mt-3 max-w-3xl space-y-3 text-base leading-relaxed text-ink-mid">
+              <p>{t("advance_p1")}</p>
+              <p>{t("advance_p2")}</p>
+              <p>{t("advance_p3")}</p>
+            </div>
+          </section>
+        )}
+
         {/* SPRINT0 : Comparator agrandi 2x + bordure lime mur sur les pills.
             Auparavant : pills compactes border-line. Maintenant : padding
             20px 32px / text-base / bordure 2px lime / hover background lime

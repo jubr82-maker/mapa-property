@@ -97,34 +97,6 @@ const callMistral = async (messages: Message[]) => {
   }
 };
 
-const callGroq = async (messages: Message[]) => {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return null;
-  try {
-    const res = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages,
-          max_tokens: 400,
-          temperature: 0.6,
-        }),
-      },
-    );
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json?.choices?.[0]?.message?.content as string | null;
-  } catch {
-    return null;
-  }
-};
-
 const fallbackReply = (locale: string, lastUser: string): string => {
   const lower = lastUser.toLowerCase();
   if (locale === "en") {
@@ -208,7 +180,6 @@ export async function POST(req: Request) {
   ];
 
   let reply = await callMistral(fullMessages);
-  if (!reply) reply = await callGroq(fullMessages);
 
   if (!reply) {
     const lastUser = messages.filter((m) => m.role === "user").pop()?.content ?? "";
