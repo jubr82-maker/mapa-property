@@ -35,7 +35,8 @@ Voir `.env.example`. Comportements quand une clé est absente :
 
 | Variable | Absente → comportement |
 |---|---|
-| `RESEND_API_KEY` | Leads INSERT Supabase only, pas d'email envoyé |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | Leads INSERT Supabase only, pas d'email envoyé |
+| `RESEND_API_KEY` | Non utilisée, Resend retiré au profit du SMTP IONOS |
 | `MISTRAL_API_KEY` | Chatbot Eléna utilise fallback heuristique |
 | `GROQ_API_KEY` | Non utilisée, moteur de secours Groq retiré du chatbot |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Composant Turnstile no-op, validation serveur permissive |
@@ -65,7 +66,7 @@ app/[locale]/          → routing i18n FR/EN/DE
   └── legal/           → mentions, cgu, cgv, rgpd, honoraires
 
 app/api/               → routes serveur
-  ├── lead             → POST INSERT Supabase + Resend (TODO)
+  ├── lead             → POST INSERT Supabase + email SMTP IONOS
   ├── chatbot          → POST Mistral + fallback heuristique
   ├── estimate         → POST modèle hédoniste + aides LU
   └── search-ia        → POST parse demande → filtres /biens

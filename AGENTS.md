@@ -45,6 +45,6 @@ Cf. `.env.example`. Si une clé est absente, le code dégrade gracieusement (cf.
 
 - `lib/data.ts` : tous les fetchers Supabase loggent `console.error` et retournent `[]` ou `null` plutôt que de throw.
 - `lib/use-favorites.ts` : localStorage avec event `mapa-favorites-change` pour sync inter-onglets.
-- `app/api/lead/route.ts` : Turnstile verify si `TURNSTILE_SECRET_KEY` présent, sinon skip. Resend si `RESEND_API_KEY` présent, sinon INSERT Supabase only.
+- `app/api/lead/route.ts` : Turnstile verify si `TURNSTILE_SECRET_KEY` présent, sinon skip. Email via SMTP IONOS (`lib/email/smtp.ts`) si les 4 variables `SMTP_*` sont présentes, sinon INSERT Supabase only.
 - `app/api/chatbot/route.ts` : Mistral → fallback heuristique, dans cet ordre. Groq retiré.
 - Auto-lead chatbot : si email/phone détecté dans la conversation, INSERT silencieux dans `leads`.

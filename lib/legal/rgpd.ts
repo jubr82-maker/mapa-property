@@ -66,7 +66,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
         ],
         bullets: [
           "Notaires et avocats partenaires lorsque la transaction le requiert.",
-          "Sous-traitants techniques : hébergement des pages et fonctions du site (Vercel Inc.), base de données (Supabase), stockage de fichiers (Supabase et Cloudflare, Inc.), protection anti-robots des formulaires (Cloudflare, Inc.), envoi d'emails transactionnels (Resend), traitement des échanges avec le chatbot Eléna (Mistral AI, société française), sous accords de sous-traitance conformes RGPD.",
+          "Sous-traitants techniques : hébergement des pages et fonctions du site (Vercel Inc.), base de données (Supabase), stockage de fichiers (Supabase et Cloudflare, Inc.), protection anti-robots des formulaires (Cloudflare, Inc.), envoi d'emails transactionnels (IONOS), traitement des échanges avec le chatbot Eléna (Mistral AI, société française), sous accords de sous-traitance conformes RGPD.",
           "L'équipe MAPA Property, via des exports de données réalisés depuis l'espace d'administration, pour la gestion des mandats et des demandes reçues.",
           "Autorités publiques sur réquisition légale uniquement.",
         ],
@@ -163,7 +163,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "5. Recipients",
         paragraphs: [
-          "Notaries and partner lawyers when needed; technical subprocessors: site hosting (Vercel Inc.), database (Supabase), file storage (Supabase and Cloudflare, Inc.), form anti-bot protection (Cloudflare, Inc.), transactional emails (Resend), processing of chatbot conversations with Eléna (Mistral AI, a French company), under GDPR-compliant data processing agreements; the MAPA Property team, through data exports generated from the administration area, for managing mandates and incoming requests; public authorities upon legal request only.",
+          "Notaries and partner lawyers when needed; technical subprocessors: site hosting (Vercel Inc.), database (Supabase), file storage (Supabase and Cloudflare, Inc.), form anti-bot protection (Cloudflare, Inc.), transactional emails (IONOS), processing of chatbot conversations with Eléna (Mistral AI, a French company), under GDPR-compliant data processing agreements; the MAPA Property team, through data exports generated from the administration area, for managing mandates and incoming requests; public authorities upon legal request only.",
         ],
       },
       {
@@ -248,7 +248,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "5. Empfänger",
         paragraphs: [
-          "Partner-Notare und Anwälte; technische Auftragsverarbeiter: Hosting der Seiten und Funktionen (Vercel Inc.), Datenbank (Supabase), Dateispeicherung (Supabase und Cloudflare, Inc.), Anti-Bot-Schutz der Formulare (Cloudflare, Inc.), Versand transaktionaler E-Mails (Resend), Verarbeitung der Chatbot-Gespräche mit Eléna (Mistral AI, ein französisches Unternehmen), unter DSGVO-konformen AVV; das MAPA Property-Team, über Datenexporte aus dem Administrationsbereich, zur Verwaltung von Mandaten und eingehenden Anfragen; Behörden nur auf Rechtsverlangen.",
+          "Partner-Notare und Anwälte; technische Auftragsverarbeiter: Hosting der Seiten und Funktionen (Vercel Inc.), Datenbank (Supabase), Dateispeicherung (Supabase und Cloudflare, Inc.), Anti-Bot-Schutz der Formulare (Cloudflare, Inc.), Versand transaktionaler E-Mails (IONOS), Verarbeitung der Chatbot-Gespräche mit Eléna (Mistral AI, ein französisches Unternehmen), unter DSGVO-konformen AVV; das MAPA Property-Team, über Datenexporte aus dem Administrationsbereich, zur Verwaltung von Mandaten und eingehenden Anfragen; Behörden nur auf Rechtsverlangen.",
         ],
       },
       {

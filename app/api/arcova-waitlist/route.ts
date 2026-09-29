@@ -3,6 +3,7 @@ import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { checkHoneypot } from "@/lib/honeypot";
+import { sendLeadEmails } from "@/lib/email/lead-emails";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -48,13 +49,27 @@ export async function POST(req: Request) {
   } as never);
 
   if (error) {
-    console.error("[api/arcova-waitlist]", error.message);
+    console.error("[api/arcova-waitlist]", { code: error.code });
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  if (!process.env.RESEND_API_KEY) {
-    console.log("[api/arcova-waitlist] Resend stubbed");
-  }
+  const messageLines = [
+    `[Société] ${str(body.company) ?? "—"}`,
+    `[Fonction] ${str(body.role) ?? "—"}`,
+    `[Pays] ${str(body.country) ?? "—"}`,
+    `[Message] ${str(body.message) ?? "—"}`,
+  ];
+  await sendLeadEmails({
+    contactEmail: email,
+    firstName: first_name,
+    lastName: last_name,
+    phone: str(body.phone),
+    subject: "Inscription ARCOVA",
+    message: messageLines.join("\n"),
+    type: "arcova_waitlist",
+    source: "arcova-landing",
+    locale: str(body.lang),
+  });
 
   return NextResponse.json({ ok: true });
 }

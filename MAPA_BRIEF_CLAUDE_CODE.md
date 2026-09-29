@@ -27,7 +27,7 @@ Tailwind CSS v4
 shadcn/ui (sélectif)
 next-intl pour i18n FR/EN/DE
 Supabase JS v2 (lecture + écriture leads uniquement)
-Resend (à brancher quand clé API dispo)
+SMTP IONOS (lib/email/smtp.ts, nodemailer)
 Cloudflare Turnstile sur tous les formulaires
 Vercel Analytics + Speed Insights
 Hébergement : Vercel (Hobby tier gratuit)
@@ -47,7 +47,12 @@ Versioning : GitHub
 NEXT_PUBLIC_SUPABASE_URL=https://dutfkblygfvhhwpzxmfz.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<voir .env.local / variables d'environnement Vercel>
 
-# Email (à compléter quand dispo)
+# Email (SMTP IONOS, cf. lib/email/smtp.ts)
+SMTP_HOST=smtp.ionos.fr
+SMTP_PORT=465
+SMTP_USER=site@mapagroup.org
+SMTP_PASSWORD=
+# RESEND_API_KEY : non utilisee, Resend retire au profit du SMTP ci-dessus.
 RESEND_API_KEY=
 MAPA_NOTIFICATION_EMAIL=j.brebion@mapagroup.org
 
@@ -223,7 +228,7 @@ mapa-property/
 │   │       └── honoraires/page.tsx
 │   ├── api/
 │   │   ├── chatbot/route.ts               # proxy vers Mistral, fallback heuristique
-│   │   ├── lead/route.ts                  # POST → Supabase + Resend
+│   │   ├── lead/route.ts                  # POST → Supabase + email SMTP IONOS
 │   │   ├── estimate/route.ts              # logique estimateur server-side
 │   │   └── bcl-rates/route.ts             # fetch taux BCL (cron daily)
 │   ├── globals.css                        # variables CSS + Tailwind base
@@ -302,7 +307,7 @@ mapa-property/
 
 | Sujet | Décision |
 |---|---|
-| **Leads** | INSERT direct dans `public.leads` Supabase. Email mailto en parallèle EN ATTENDANT que Resend soit configuré. Quand `RESEND_API_KEY` est présente, basculer sur Resend. |
+| **Leads** | INSERT direct dans `public.leads` Supabase. Email de notification et accusé de réception envoyés via SMTP IONOS (lib/email/smtp.ts), des lors que les 4 variables SMTP_* sont renseignees. |
 | **Chatbot LLM** | Mistral Small (gratuit, 1 req/sec) en principal, fallback heuristique multilingue si Mistral indisponible. Groq retire, plus utilise. |
 | **Hébergement** | Vercel Hobby (gratuit). Cloudflare pour la protection anti-robots des formulaires et le stockage de fichiers, pas pour le DNS ni le pare-feu du site. |
 | **Tracking analytics** | Vercel Analytics + Speed Insights (gratuit, RGPD-friendly, sans cookies). + table custom `analytics_events` (à créer plus tard) pour tracking détaillé. Pas de Google Analytics au démarrage (lourd, RGPD compliqué). |
@@ -1053,34 +1058,23 @@ Contactez-nous pour toute prise de rendez-vous.
 
 ---
 
-## 30. Connexion Resend (à activer dès que clé dispo)
+## 30. Envoi d'email (SMTP IONOS, implemente)
 
-Quand `RESEND_API_KEY` est présente dans `.env.local` :
+L'envoi passe par `lib/email/smtp.ts` (nodemailer), pas par Resend. Connexion
+port 465, TLS implicite, authentification via les 4 variables `SMTP_HOST`,
+`SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` (Vercel, Production et Preview).
 
-1. `npm install resend`
-2. `lib/resend.ts` :
-```typescript
-import { Resend } from 'resend';
-export const resend = new Resend(process.env.RESEND_API_KEY!);
-```
-3. Dans `/api/lead/route.ts`, après INSERT Supabase OK :
-```typescript
-await resend.emails.send({
-  from: 'MAPA Property <noreply@mapaproperty.lu>',
-  to: process.env.MAPA_NOTIFICATION_EMAIL!,
-  subject: `Nouveau lead — ${type}`,
-  html: emailTemplate(leadData),
-  replyTo: leadData.email,
-});
-```
-4. Templates HTML dans `lib/email-templates.ts` — design sobre, brand MAPA, en-tête doré.
+Deux fichiers de templates appellent `sendMail()` :
+- `lib/email/lead-emails.ts` : tous les flux "formulaire simple" (contact,
+  demande de bien, NDA off-market, demande off-market, liste d'attente,
+  inscription ARCOVA, lead chatbot).
+- `lib/email/estimation-emails.ts` : le simulateur d'estimation, template
+  plus riche (fourchette de prix).
 
-**Setup Resend** (pour Julien) :
-1. Créer compte sur resend.com
-2. Vérifier domaine `mapaproperty.lu` (ajouter DNS records SPF, DKIM)
-3. Créer API key, coller dans `.env.local` puis dans Vercel env vars
-
-Tant que clé absente : INSERT Supabase only, pas de fallback mailto (lourd UX). Eléna chatbot peut prévenir "Votre demande a été enregistrée. Julien Brebion vous recontactera sous 24h."
+Expediteur fixe : MAPA Property <site@mapagroup.org>. Reponse : redirigee
+vers j.brebion@mapagroup.org. Destinataire interne par defaut : idem.
+Si l'une des 4 variables SMTP manque, l'envoi est ignore et journalise,
+jamais de throw, jamais de blocage de la reponse au visiteur.
 
 ---
 
@@ -1271,7 +1265,7 @@ Puis configurer DNS Cloudflare pour pointer `mapaproperty.lu` vers Vercel via CN
 2. **Vercel** : compte Hobby gratuit, connecter au repo GitHub
 3. **Cloudflare** : déjà existant. Activer Turnstile (Add Site → mapaproperty.lu) et récupérer site key + secret key
 4. **Mistral AI** : créer compte sur console.mistral.ai (gratuit), créer API key
-5. **Resend** : créer compte sur resend.com, vérifier domaine mapaproperty.lu, créer API key (à finaliser plus tard)
+5. **IONOS** : recuperer les identifiants SMTP (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD) aupres de l'hebergeur de la boite mail site@mapagroup.org
 
 Coller toutes les clés dans `.env.local` et dans Vercel env vars.
 

@@ -113,22 +113,21 @@ export async function POST(req: Request) {
     consentAt,
   );
   if (!res.ok) {
-    // Log permanent, sans donnée personnelle : ni "details" ni "hint", qui
-    // peuvent échoer la valeur fautive sur une violation de contrainte
-    // Postgres (ex. "Key (email)=(x@y.com) already exists.").
+    // Log permanent, sans donnée personnelle : ni "details" ni "hint" ni
+    // "message", qui peuvent échoer la valeur fautive sur une violation
+    // de contrainte Postgres (ex. "Key (email)=(x@y.com) already exists.").
     console.error("[api/lead] supabase insert", {
       code: res.error?.code,
-      message: res.error?.message,
     });
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  // Sprint C3 → C5 : emails client (confirmation 48h ouvrees) + interne
+  // Sprint C3 a C5 : emails client (accuse de reception) et interne
   // (notification Julien). AWAIT obligatoire en serverless Vercel : un
-  // 'void' fire-and-forget laisse le runtime tuer le process apres
-  // response avant que le fetch vers api.resend.com ait ete initie
-  // (cause racine bug C5). sendLeadEmails ne throw jamais (Promise.allSettled
-  // interne) donc l'await est sur — au pire +500-800ms de latence.
+  // 'void' fire-and-forget laisse le runtime tuer le process avant que
+  // l'envoi SMTP ait ete initie (cause racine bug C5). sendLeadEmails ne
+  // throw jamais (Promise.allSettled interne) donc l'await est sur, au
+  // pire quelques centaines de ms de latence supplementaires.
   await sendLeadEmails({
     contactEmail: body.email,
     firstName: lead.first_name,

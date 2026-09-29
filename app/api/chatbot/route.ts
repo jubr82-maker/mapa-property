@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { buildSystemPrompt } from "@/components/chatbot/chatbot-knowledge";
 import { supabaseServer } from "@/lib/supabase-server";
 import { rateLimit } from "@/lib/rate-limit";
+import { sendLeadEmails } from "@/lib/email/lead-emails";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -148,8 +149,17 @@ const tryAutoLead = async (
       source: `chatbot:${pageContext || "home"}`,
       lang: locale,
     });
+    await sendLeadEmails({
+      contactEmail: email,
+      phone,
+      subject: "Conversation Eléna",
+      message: userText.slice(0, 2000),
+      type: "chatbot",
+      source: `chatbot:${pageContext || "home"}`,
+      locale,
+    });
   } catch {
-    // silent fail — chatbot continues even if insert fails
+    // echec silencieux : le chatbot continue meme si insert/email echoue
   }
 };
 

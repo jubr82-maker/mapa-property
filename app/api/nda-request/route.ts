@@ -7,8 +7,9 @@
 // `rgpd_consent_at` (no-op tant que la migration BUG 7 n'est pas
 // appliquée — n'échoue jamais l'enregistrement).
 //
-// Email : si RESEND_API_KEY présent → notification à
-// j.brebion@mapagroup.org. Sinon log warn (jamais de throw).
+// Email : notification interne + accusé de réception client, via la
+// couche SMTP partagée (lib/email/lead-emails.ts). Best effort, ne
+// throw jamais.
 import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
@@ -17,40 +18,11 @@ import { checkHoneypot } from "@/lib/honeypot";
 import { isPlausiblePhone } from "@/lib/countries";
 import { insertLeadWithConsent } from "@/lib/lead-insert";
 import { shouldDropTestLead } from "@/lib/test-email";
+import { sendLeadEmails } from "@/lib/email/lead-emails";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 const str = (v: unknown) => (typeof v === "string" ? v : undefined);
-
-const NDA_NOTIFY_TO = "j.brebion@mapagroup.org";
-
-async function notifyResend(subject: string, text: string) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
-    console.warn("[api/nda-request] Resend non configuré — email stub:", subject);
-    return;
-  }
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "MAPA Property <noreply@mapaproperty.lu>",
-        to: [NDA_NOTIFY_TO],
-        subject,
-        text,
-      }),
-    });
-    if (!res.ok) {
-      console.error("[api/nda-request] Resend HTTP", res.status);
-    }
-  } catch (e) {
-    console.error("[api/nda-request] Resend error", (e as Error).message);
-  }
-}
 
 export async function POST(req: Request) {
   const limit = rateLimit(req, {
@@ -141,22 +113,26 @@ export async function POST(req: Request) {
     // violation de contrainte Postgres (cf. api/lead/route.ts).
     console.error("[api/nda-request] supabase insert", {
       code: ins.error?.code,
-      message: ins.error?.message,
     });
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  await notifyResend(
-    `Nouvelle demande NDA — ${propertyTitle}`,
-    `Nouvelle demande de NDA contractuel.\n\n` +
-      `Bien : ${propertyTitle} (réf ${propertyRef})\n` +
-      `Demandeur : ${firstName} ${lastName}\n` +
-      `Email : ${body.email}\n` +
-      `Téléphone : ${phone ?? "—"}\n` +
-      `Pays : ${str(body.country) ?? "—"}\n` +
-      `Projet : ${project || "—"}\n\n` +
-      `NDA accepté · capacité confirmée · RGPD ${consentAt}`,
-  );
+  await sendLeadEmails({
+    contactEmail: body.email,
+    firstName,
+    lastName,
+    phone,
+    subject: `NDA, ${propertyTitle}`,
+    message:
+      `[Bien] ${propertyTitle} (${propertyRef})\n` +
+      `[NDA accepté] oui\n` +
+      `[Capacité financière confirmée] oui\n\n` +
+      (project || ""),
+    type: "offmarket_request",
+    source: `nda_request:offmarket:${propertyRef}`,
+    propertyRef,
+    locale: str(body.lang),
+  });
 
   return NextResponse.json({ ok: true });
 }

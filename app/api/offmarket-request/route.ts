@@ -3,6 +3,7 @@ import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { checkHoneypot } from "@/lib/honeypot";
+import { sendLeadEmails } from "@/lib/email/lead-emails";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -79,16 +80,29 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    console.error("[api/offmarket-request]", error.message);
+    console.error("[api/offmarket-request]", { code: error.code });
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  if (!process.env.RESEND_API_KEY) {
-    console.log("[api/offmarket-request] Resend stubbed:", {
-      property_id: body.property_id,
-      request_id: (data as { id?: string } | null)?.id,
-    });
-  }
+  const messageLines = [
+    `[Pays recherché] ${str(body.pays_recherche) ?? "—"}`,
+    `[Ville / quartier] ${str(body.ville_quartier) ?? "—"}`,
+    `[Budget max] ${num(body.budget_max_eur) ? `${num(body.budget_max_eur)} €` : "—"}`,
+    `[Surface souhaitée] ${num(body.surface_souhaitee_m2) ? `${num(body.surface_souhaitee_m2)} m²` : "—"}`,
+    `[Critères] ${str(body.criteres_precis) ?? "—"}`,
+  ];
+  await sendLeadEmails({
+    contactEmail: body.email,
+    firstName: body.prenom,
+    lastName: body.nom,
+    phone: str(body.telephone),
+    subject: "Demande off-market",
+    message: messageLines.join("\n"),
+    type: "offmarket_request",
+    source: `offmarket:${body.property_id}`,
+    propertyRef: body.property_id,
+    locale: str(body.lang),
+  });
 
   return NextResponse.json({
     ok: true,

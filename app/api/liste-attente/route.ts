@@ -8,8 +8,8 @@
 // convention [CHAMP] (parsable cote admin).
 //
 // Emails : destinataires internes = j.brebion + admin via internalTo
-// array passe a sendLeadEmails. No-op silencieux si RESEND_API_KEY
-// absent (config IONOS DNS Resend a venir).
+// array passe a sendLeadEmails (SMTP IONOS). No-op silencieux si la
+// configuration SMTP est absente.
 import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
@@ -30,7 +30,7 @@ const WAITLIST_INTERNAL_TO = [
   "admin@mapagroup.org",
 ];
 
-const SUBJECT = "Liste d'attente — nouvelle inscription";
+const SUBJECT = "Liste d'attente, nouvelle inscription";
 
 export async function POST(req: Request) {
   const limit = rateLimit(req, {
@@ -113,18 +113,17 @@ export async function POST(req: Request) {
     consentAt,
   );
   if (!res.ok) {
-    // Pas de "details"/"hint" : peuvent échoer la valeur fautive sur une
-    // violation de contrainte Postgres (cf. api/lead/route.ts).
+    // Pas de "details"/"hint"/"message" : peuvent échoer la valeur fautive
+    // sur une violation de contrainte Postgres (cf. api/lead/route.ts).
     console.error("[api/liste-attente] supabase insert", {
       code: res.error?.code,
-      message: res.error?.message,
     });
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
   // Emails best-effort : 2 destinataires internes (Julien + admin) +
   // confirmation client. AWAIT obligatoire en serverless Vercel (cf.
-  // /api/lead). No-op silencieux si RESEND_API_KEY absent.
+  // /api/lead). No-op silencieux si la configuration SMTP est absente.
   await sendLeadEmails({
     contactEmail: email,
     firstName,

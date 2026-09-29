@@ -3,6 +3,7 @@ import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { checkHoneypot } from "@/lib/honeypot";
+import { sendLeadEmails } from "@/lib/email/lead-emails";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -57,13 +58,27 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    console.error("[api/nda-offmarket]", error.message);
+    console.error("[api/nda-offmarket]", { code: error.code });
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  if (!process.env.RESEND_API_KEY) {
-    console.log("[api/nda-offmarket] Resend stubbed");
-  }
+  const messageLines = [
+    `[Capacité] ${str(body.capacity_range) ?? "—"}`,
+    `[Types de biens] ${strArr(body.property_types)?.join(", ") ?? "—"}`,
+    `[Zones] ${str(body.zones) ?? "—"}`,
+    `[Calendrier] ${str(body.timeline) ?? "—"}`,
+    `[NDA accepté] ${body.nda_accepted === true ? "oui" : "non"}`,
+  ];
+  await sendLeadEmails({
+    contactEmail: body.email,
+    firstName: fullName,
+    phone: str(body.phone),
+    subject: "NDA off-market",
+    message: messageLines.join("\n"),
+    type: "nda_offmarket",
+    source: "nda-offmarket",
+    locale: str(body.lang),
+  });
 
   return NextResponse.json({ ok: true, nda_id: (data as { id?: string } | null)?.id });
 }

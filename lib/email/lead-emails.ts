@@ -1,17 +1,19 @@
-// MAPA Property — Emails Sprint C3 (lead /api/lead).
+// MAPA Property — emails partages pour tous les flux "formulaire simple"
+// (nom, email, telephone, message) : lead generique, contact, demande de
+// bien, NDA off-market, demande off-market, inscription liste d'attente,
+// inscription ARCOVA, lead chatbot.
 //
-// Helper unique pour envoyer 2 emails apres un POST /api/lead reussi :
-//   1. CLIENT : confirmation reception + promesse rappel sous 48h
-//      ouvrees + signature MAPA Property. Envoye si email present.
-//   2. INTERNE : notification a j.brebion@mapagroup.org (var
-//      LEAD_INTERNAL_TO surcharge possible) avec tous les champs +
-//      lien admin /admin/leads.
+// Deux emails envoyes en parallele via lib/email/smtp.ts (IONOS) :
+//   1. CLIENT : accusé de réception sobre, dans la langue du visiteur,
+//      sans promesse de délai autre que celle déjà affichée sur le site.
+//      Envoyé si un email est présent.
+//   2. INTERNE : notification complète à j.brebion@mapagroup.org (ou une
+//      liste de destinataires fournie), avec tous les champs transmis.
 //
-// Pattern identique a lib/email/estimation-emails.ts :
-//   - Si RESEND_API_KEY absent → log warn + no-op (jamais de throw).
-//   - From : "MAPA Property <noreply@mapaproperty.lu>"
-//   - Templates textuels FR/EN/DE inline.
-//   - Promise.allSettled : 2 envois en parallele, erreurs swallowed.
+// Best effort : ne throw jamais. Aucune donnée personnelle dans les
+// journaux (compteurs et codes de statut uniquement, cf. lib/email/smtp.ts).
+
+import { sendMail, SMTP_INTERNAL_TO } from "./smtp";
 
 type Locale = "fr" | "en" | "de";
 
@@ -26,26 +28,8 @@ interface SendLeadEmailsArgs {
   source?: string;
   propertyRef?: string;
   locale?: string;
-  /** Sprint waitlist : override des destinataires internes. Si array, Resend
-   *  envoie UN email avec plusieurs To. Si undefined, fallback env vars +
-   *  INTERNAL_TO_DEFAULT (retro-compat /api/lead, /api/nda-request). */
+  /** Override des destinataires internes (liste d'attente : Julien + admin). */
   internalTo?: string | string[];
-}
-
-const INTERNAL_TO_DEFAULT = "j.brebion@mapagroup.org";
-// Sprint C5 : compat env vars Vercel. RESEND_FROM_EMAIL peut etre defini
-// avec un sender deja verifie (ex: 'onboarding@resend.dev' tant que le
-// domaine mapaproperty.lu n'est pas verifie en DNS Resend). Fallback :
-// 'onboarding@resend.dev' qui est toujours accepte par Resend sans
-// verification de domaine.
-function resolveFrom(): string {
-  const raw = process.env.RESEND_FROM_EMAIL?.trim();
-  if (raw) {
-    // Si la var contient deja un nom + email (ex: 'MAPA <x@y>'), on garde.
-    // Sinon on l'enveloppe avec le nom de la marque.
-    return raw.includes("<") ? raw : `MAPA Property <${raw}>`;
-  }
-  return "MAPA Property <onboarding@resend.dev>";
 }
 
 function pickLocale(input: string | undefined): Locale {
@@ -53,9 +37,9 @@ function pickLocale(input: string | undefined): Locale {
   return "fr";
 }
 
-// Mapping subject → libelle humain pour les 6 sujets pre-cadres du
-// formulaire /contact (sprint B3). Fallback : la valeur brute si subject
-// hors enumeration (formulaires NDA/mandat/etc.).
+// Libellé humain pour les sujets pré-cadrés du formulaire /contact.
+// Fallback : la valeur brute si le sujet est hors énumération (NDA,
+// mandat, off-market, ARCOVA, liste d'attente, etc.).
 const SUBJECT_LABELS: Record<Locale, Record<string, string>> = {
   fr: {
     mandat_vente: "Mandat de vente",
@@ -63,7 +47,7 @@ const SUBJECT_LABELS: Record<Locale, Record<string, string>> = {
     estimation: "Estimation",
     mise_en_location: "Mettre en location",
     informations: "Demande d'informations",
-    offmarket_arcova: "Off-Market — ARCOVA",
+    offmarket_arcova: "Off-Market, ARCOVA",
   },
   en: {
     mandat_vente: "Sale mandate",
@@ -71,7 +55,7 @@ const SUBJECT_LABELS: Record<Locale, Record<string, string>> = {
     estimation: "Valuation",
     mise_en_location: "Put up for rent",
     informations: "Information request",
-    offmarket_arcova: "Off-Market — ARCOVA",
+    offmarket_arcova: "Off-Market, ARCOVA",
   },
   de: {
     mandat_vente: "Verkaufsmandat",
@@ -79,23 +63,35 @@ const SUBJECT_LABELS: Record<Locale, Record<string, string>> = {
     estimation: "Schätzung",
     mise_en_location: "Zur Vermietung anbieten",
     informations: "Informationsanfrage",
-    offmarket_arcova: "Off-Market — ARCOVA",
+    offmarket_arcova: "Off-Market, ARCOVA",
   },
 };
 
 function subjectLabel(subject: string | undefined, locale: Locale): string {
-  if (!subject) return locale === "en" ? "Contact" : locale === "de" ? "Kontakt" : "Contact";
+  if (!subject) return locale === "de" ? "Kontakt" : "Contact";
   return SUBJECT_LABELS[locale][subject] ?? subject;
+}
+
+// Pied de page commun : jamais de RCS, de TVA, ni d'adresse complète.
+function footer(locale: Locale): string {
+  switch (locale) {
+    case "en":
+      return "MAPA Property, a brand of MAPA Synergy Sàrl.\nLuxembourg.";
+    case "de":
+      return "MAPA Property, eine Marke der MAPA Synergy Sàrl.\nLuxemburg.";
+    default:
+      return "MAPA Property, une marque de MAPA Synergy Sàrl.\nLuxembourg.";
+  }
 }
 
 function clientSubject(locale: Locale): string {
   switch (locale) {
     case "en":
-      return "Request received — MAPA Property";
+      return "Request received, MAPA Property";
     case "de":
-      return "Anfrage erhalten — MAPA Property";
+      return "Anfrage erhalten, MAPA Property";
     default:
-      return "Demande reçue — MAPA Property";
+      return "Demande reçue, MAPA Property";
   }
 }
 
@@ -104,16 +100,16 @@ function clientBody(args: {
   firstName: string;
   subjectStr: string;
 }): string {
-  const { firstName, subjectStr } = args;
-  switch (args.locale) {
+  const { firstName, subjectStr, locale } = args;
+  switch (locale) {
     case "en":
       return [
         `Hello ${firstName},`,
         ``,
         `We have received your request regarding "${subjectStr}".`,
         ``,
-        `The MAPA Property team will get back to you personally within`,
-        `48 business hours.`,
+        `The MAPA Property team will get back to you personally, within the`,
+        `timeframe indicated on our site for this type of request.`,
         ``,
         `For any urgent matter, you can also reach us via`,
         `https://mapaproperty.lu/contact.`,
@@ -121,9 +117,7 @@ function clientBody(args: {
         `Best regards,`,
         `MAPA Property team`,
         ``,
-        `— — —`,
-        `MAPA SYNERGY Sàrl · RCS Luxembourg B241974 · TVA LU 31988923`,
-        `Independent real estate boutique — Luxembourg`,
+        footer(locale),
       ].join("\n");
     case "de":
       return [
@@ -131,8 +125,8 @@ function clientBody(args: {
         ``,
         `wir haben Ihre Anfrage zu „${subjectStr}" erhalten.`,
         ``,
-        `Das MAPA Property Team wird Sie persönlich innerhalb von`,
-        `48 Werkstunden kontaktieren.`,
+        `Das MAPA Property Team wird sich persönlich bei Ihnen melden,`,
+        `innerhalb der auf unserer Website für diese Anfrageart angegebenen Frist.`,
         ``,
         `Bei dringenden Anliegen erreichen Sie uns auch über`,
         `https://mapaproperty.lu/contact.`,
@@ -140,9 +134,7 @@ function clientBody(args: {
         `Mit freundlichen Grüßen,`,
         `MAPA Property Team`,
         ``,
-        `— — —`,
-        `MAPA SYNERGY Sàrl · RCS Luxembourg B241974 · TVA LU 31988923`,
-        `Unabhängige Immobilien-Boutique — Luxemburg`,
+        footer(locale),
       ].join("\n");
     default:
       return [
@@ -150,8 +142,8 @@ function clientBody(args: {
         ``,
         `Nous avons bien reçu votre demande concernant « ${subjectStr} ».`,
         ``,
-        `L'équipe MAPA Property vous recontactera personnellement sous`,
-        `48 heures ouvrées.`,
+        `L'équipe MAPA Property vous recontactera personnellement, dans le`,
+        `délai indiqué sur notre site pour ce type de demande.`,
         ``,
         `Pour toute urgence, vous pouvez également nous joindre via`,
         `https://mapaproperty.lu/contact.`,
@@ -159,29 +151,29 @@ function clientBody(args: {
         `Bien cordialement,`,
         `L'équipe MAPA Property`,
         ``,
-        `— — —`,
-        `MAPA SYNERGY Sàrl · RCS Luxembourg B241974 · TVA LU 31988923`,
-        `Boutique immobilière indépendante — Luxembourg`,
+        footer(locale),
       ].join("\n");
   }
 }
 
 function internalSubject(args: { subjectStr: string; name: string }): string {
-  return `🔔 Nouveau lead contact — ${args.subjectStr} — ${args.name}`;
+  return `Nouveau lead, ${args.subjectStr}, ${args.name}`;
 }
 
-function internalBody(args: SendLeadEmailsArgs & { locale: Locale; subjectStr: string }): string {
+function internalBody(
+  args: SendLeadEmailsArgs & { locale: Locale; subjectStr: string },
+): string {
   const fullName = [args.firstName, args.lastName].filter(Boolean).join(" ") || "—";
   const lines: string[] = [
-    `Nouveau lead recu via /api/lead (formulaire ${args.source ?? "website"}).`,
+    `Nouveau lead reçu via le site (formulaire ${args.source ?? "website"}).`,
     ``,
-    `═ PROSPECT ═`,
+    `= PROSPECT =`,
     `Nom         : ${fullName}`,
     `Email       : ${args.contactEmail ?? "—"}`,
     `Téléphone   : ${args.phone ?? "—"}`,
     `Locale      : ${args.locale}`,
     ``,
-    `═ DEMANDE ═`,
+    `= DEMANDE =`,
     `Objet       : ${args.subjectStr}`,
     `Type form   : ${args.type ?? "—"}`,
     `Source      : ${args.source ?? "—"}`,
@@ -190,119 +182,57 @@ function internalBody(args: SendLeadEmailsArgs & { locale: Locale; subjectStr: s
     lines.push(`Bien réf.   : ${args.propertyRef}`);
   }
   if (args.message) {
-    lines.push(``, `═ MESSAGE ═`, args.message);
+    lines.push(``, `= MESSAGE =`, args.message);
   }
-  lines.push(``, `═ ADMIN ═`, `Liste leads : https://mapaproperty.lu/admin/leads`);
+  lines.push(``, `= ADMIN =`, `Liste leads : https://mapaproperty.lu/admin/leads`);
   return lines.join("\n");
 }
 
-async function sendOne(args: {
-  to: string | string[];
-  subject: string;
-  text: string;
-  from: string;
-  kind: "client" | "internal";
-}): Promise<{ ok: boolean; status?: number; error?: string }> {
-  const key = process.env.RESEND_API_KEY;
-  const toList = Array.isArray(args.to) ? args.to : [args.to];
-  if (!key) {
-    console.warn("[lead-emails] RESEND_API_KEY absent — email stub", {
-      kind: args.kind,
-      recipients: toList.length,
-    });
-    return { ok: false, error: "no_api_key" };
-  }
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: args.from,
-        to: toList,
-        subject: args.subject,
-        text: args.text,
-      }),
-    });
-    if (!res.ok) {
-      // Pas de bodyText loggé : Resend peut échoer l'adresse fautive dans
-      // le corps d'une erreur de validation ("to"/"from" invalide).
-      console.error("[lead-emails] Resend HTTP", {
-        kind: args.kind,
-        status: res.status,
-        recipients: toList.length,
-      });
-      return { ok: false, status: res.status };
-    }
-    return { ok: true, status: res.status };
-  } catch (e) {
-    const err = (e as Error).message;
-    console.error("[lead-emails] Resend exception", {
-      kind: args.kind,
-      error: err,
-      recipients: toList.length,
-    });
-    return { ok: false, error: err };
-  }
-}
-
 /**
- * Envoie en parallele :
- *   - 1 email au client (si email present) avec confirmation 48h ouvrees
- *   - 1 email interne a Julien (toujours)
+ * Envoie en parallèle :
+ *   - 1 email au client (si email présent), accusé de réception sobre.
+ *   - 1 email interne (toujours), notification complète.
  *
- * Best-effort : ne throw jamais. Logs uniquement.
+ * Best effort : ne throw jamais. Ne bloque jamais la réponse au visiteur.
  */
 export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
   const locale = pickLocale(args.locale);
   const subjectStr = subjectLabel(args.subject, locale);
   const firstName =
     args.firstName ??
-    (locale === "en" ? "there" : locale === "de" ? "geehrte/r Interessent/in" : "Madame, Monsieur");
-  // Sprint C5 : fallback cascade pour compat avec env vars existantes
-  // (MAPA_NOTIFICATION_EMAIL deploye depuis le 15 mai).
-  // Sprint waitlist : args.internalTo (string | string[]) prime sur env vars.
-  const internalTo: string | string[] =
-    args.internalTo ??
-    (process.env.LEAD_INTERNAL_TO?.trim() ||
-      process.env.MAPA_NOTIFICATION_EMAIL?.trim() ||
-      INTERNAL_TO_DEFAULT);
-  const from = resolveFrom();
+    (locale === "en"
+      ? "there"
+      : locale === "de"
+        ? "geehrte/r Interessent/in"
+        : "Madame, Monsieur");
+  const internalTo: string | string[] = args.internalTo ?? SMTP_INTERNAL_TO;
   const fullName = [args.firstName, args.lastName].filter(Boolean).join(" ") || "Prospect";
 
   console.log("[lead-emails] start", {
-    hasApiKey: !!process.env.RESEND_API_KEY,
     hasClientEmail: Boolean(args.contactEmail),
     internalRecipients: Array.isArray(internalTo) ? internalTo.length : 1,
-    subject: subjectStr,
   });
 
-  const tasks: Array<Promise<{ ok: boolean; status?: number; error?: string }>> = [];
+  const tasks: Array<Promise<{ ok: boolean; error?: string }>> = [];
   const labels: string[] = [];
 
   if (args.contactEmail) {
     labels.push("client_email_result");
     tasks.push(
-      sendOne({
+      sendMail({
         to: args.contactEmail,
-        from,
         subject: clientSubject(locale),
         text: clientBody({ locale, firstName, subjectStr }),
-        kind: "client",
       }),
     );
   }
 
   labels.push("internal_email_result");
   tasks.push(
-    sendOne({
+    sendMail({
       to: internalTo,
-      from,
       subject: internalSubject({ subjectStr, name: fullName }),
       text: internalBody({ ...args, locale, subjectStr }),
-      kind: "internal",
     }),
   );
 
@@ -311,15 +241,10 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
     if (r.status === "fulfilled") {
       console.log(`[lead-emails] ${labels[i]}`, {
         ok: r.value.ok,
-        status: r.value.status,
         error: r.value.error,
       });
     } else {
-      const reason = r.reason as unknown;
-      console.error(
-        `[lead-emails] ${labels[i]} rejected`,
-        reason instanceof Error ? reason.message : String(reason),
-      );
+      console.error(`[lead-emails] ${labels[i]} rejected`);
     }
   });
 }
