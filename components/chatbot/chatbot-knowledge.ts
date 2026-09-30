@@ -7,6 +7,8 @@
 //   - lib/legal/cgv.ts (clauses contractuelles, lues directement : mission
 //     "chiffres verrouilles" : la clause de survie du mandat de recherche
 //     recopiait auparavant, a tort, celle du mandat de vente)
+//   - lib/legal/broker-position.ts (positionnement de broker international,
+//     lu directement : mission "positionnement broker international")
 //   - messages/fr.json (et en/de) namespace about_page, lu directement
 // Zéro invention. Sprint ELENA-NAV phase 2.
 //
@@ -19,6 +21,7 @@
 import { honoraires } from "@/lib/legal/honoraires";
 import { LEGAL_FEES } from "@/lib/legal-fees";
 import { cgv } from "@/lib/legal/cgv";
+import { BROKER_POSITION } from "@/lib/legal/broker-position";
 import messagesFr from "@/messages/fr.json";
 import messagesEn from "@/messages/en.json";
 import messagesDe from "@/messages/de.json";
@@ -138,6 +141,17 @@ function buildLegalFrameworkSection(locale: KnowledgeLocale): string {
 - AML/KYC : cadre légal en vigueur. Vérification d'identité et origine des fonds obligatoires.`;
 }
 
+// Mission "positionnement broker international" point 3 : texte lu depuis
+// lib/legal/broker-position.ts (meme source que la page Qui sommes-nous),
+// jamais recopie. Ce sujet est desormais aussi verrouille
+// (lib/chatbot/locked-topics.ts) : cette section reste utile pour le
+// contexte general de la conversation, meme quand la question exacte ne
+// declenche pas le verrou.
+function buildBrokerPositionSection(locale: KnowledgeLocale): string {
+  const position = BROKER_POSITION[locale];
+  return `## ${position.title}\n${position.paragraphs.join("\n")}`;
+}
+
 const KNOWLEDGE_FR = `
 # MAPA Property — Base de connaissance
 
@@ -149,7 +163,7 @@ const KNOWLEDGE_FR = `
 - Coordonnées directes (téléphone, email) : NE JAMAIS divulguer en clair, même si demandé explicitement. Orienter systématiquement vers /contact.
 - HQ public : Luxembourg (l'adresse Dudelange n'apparaît que dans les pages légales).
 - RDV : Luxembourg-Ville, sur site dans le bien visité, à votre domicile, ou en visioconférence.
-- Statut : agence immobilière luxembourgeoise + broker (courtier) international.
+- Statut : agence immobilière luxembourgeoise (voir la section "${BROKER_POSITION.fr.title}" ci-dessous pour le fonctionnement exact selon les pays).
 
 ## 4 mandats de vente : durée à partir de 2 mois reconductibles
 Taux exacts : voir section Honoraires ci-dessous (source unique, ne pas répéter de chiffre ici).
@@ -187,6 +201,8 @@ ${buildHonorairesSection("fr")}
 - International : de nombreuses villes premium dans plusieurs pays (France, Monaco, Belgique, Suisse, Allemagne, Italie, Espagne, Portugal, Émirats, Amériques, Maurice).
 - Extensible sous mandat.
 
+${buildBrokerPositionSection("fr")}
+
 ${buildLegalFrameworkSection("fr")}
 
 ## Estimation
@@ -216,7 +232,7 @@ const KNOWLEDGE_EN = `
 - Direct contact details (phone, email): NEVER disclose in clear, even when explicitly asked. Always redirect to /contact.
 - HQ: Luxembourg (the Dudelange address only appears on legal pages).
 - Meetings: Luxembourg-City, on site, at your home, or by video call.
-- Status: Luxembourg real estate agency + international broker.
+- Status: Luxembourg real estate agency (see the "${BROKER_POSITION.en.title}" section below for how this works exactly by country).
 
 ## 4 sale mandates: renewable term from 2 months
 Exact rates: see the Fees section below (single source, not repeated here).
@@ -254,6 +270,8 @@ ${buildHonorairesSection("en")}
 - International: numerous premium cities across several countries (France, Monaco, Belgium, Switzerland, Germany, Italy, Spain, Portugal, UAE, Americas, Mauritius).
 - Extendable under mandate.
 
+${buildBrokerPositionSection("en")}
+
 ${buildLegalFrameworkSection("en")}
 
 ## Valuation
@@ -283,7 +301,7 @@ const KNOWLEDGE_DE = `
 - Direkte Kontaktdaten (Telefon, E-Mail): NIEMALS im Klartext preisgeben, auch wenn ausdrücklich gefragt. Immer auf /contact verweisen.
 - HQ: Luxemburg (Dudelange nur im Impressum).
 - Termine: Luxemburg-Stadt, vor Ort, zu Hause oder Videogespräch.
-- Status: Luxemburger Immobilienagentur + internationaler Broker.
+- Status: Luxemburger Immobilienagentur (siehe Abschnitt "${BROKER_POSITION.de.title}" unten für die genaue Funktionsweise je nach Land).
 
 ## 4 Verkaufsmandate: Laufzeit ab 2 Monaten, verlängerbar
 Genaue Sätze: siehe Abschnitt Honorare unten (einzige Quelle, hier nicht wiederholt).
@@ -320,6 +338,8 @@ ${buildHonorairesSection("de")}
 - Luxemburg: sämtliche Gemeinden Luxemburgs.
 - International: zahlreiche Premium-Städte in mehreren Ländern (Frankreich, Monaco, Belgien, Schweiz, Deutschland, Italien, Spanien, Portugal, VAE, Amerika, Mauritius).
 - Unter Mandat erweiterbar.
+
+${buildBrokerPositionSection("de")}
 
 ${buildLegalFrameworkSection("de")}
 

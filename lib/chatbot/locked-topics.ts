@@ -8,13 +8,20 @@
 // au modele pour reformulation. Le modele garde la main sur toute la
 // conversation qui ne declenche aucun de ces motifs.
 //
-// Sujets verrouilles (6, cf. rapport de mission) :
+// Sujets verrouilles (7, cf. rapport de mission) :
 //   1. Frais d'acquisition (droits d'enregistrement, transcription, notaire)
 //   2. Bëllegen Akt
 //   3. TVA
 //   4. Taux des mandats (commissions MAPA Property)
 //   5. Avance sur frais de recherche
 //   6. Durée des mandats de vente
+//   7. Positionnement de broker international (mission "positionnement
+//      broker international") : sujet de conformite reglementaire, pas de
+//      style. MAPA Property n'est habilitee a conduire elle-meme la
+//      negociation et la transaction qu'au Luxembourg et, via la carte
+//      professionnelle europeenne, en France, en Allemagne et en Italie.
+//      Partout ailleurs elle intervient comme broker, via une agence locale
+//      habilitee. Le modele ne doit jamais reformuler ce point.
 //
 // Cas d'un message qui melange un sujet verrouille et autre chose : le
 // verrou est prioritaire et repond ENTIEREMENT avec la ou les phrases
@@ -28,6 +35,7 @@
 import { honoraires } from "@/lib/legal/honoraires";
 import { LEGAL_FEES } from "@/lib/legal-fees";
 import { cgv } from "@/lib/legal/cgv";
+import { BROKER_POSITION } from "@/lib/legal/broker-position";
 import messagesFr from "@/messages/fr.json";
 import messagesEn from "@/messages/en.json";
 import messagesDe from "@/messages/de.json";
@@ -175,6 +183,16 @@ function buildMandateDurationReply(locale: Locale): string {
   return `Nos mandats de vente ont une durée à partir de ${months} mois, reconductibles.`;
 }
 
+// ---------------------------------------------------------------------------
+// 7. Positionnement de broker international : lu depuis
+// lib/legal/broker-position.ts (meme source que la page Qui sommes-nous),
+// jamais recopie. Question de conformite reglementaire : reponse figee,
+// jamais reformulee, meme partiellement.
+// ---------------------------------------------------------------------------
+function buildBrokerPositionReply(locale: Locale): string {
+  return BROKER_POSITION[locale].paragraphs.join(" ");
+}
+
 interface LockedTopic {
   id: string;
   pattern: RegExp;
@@ -213,6 +231,11 @@ const LOCKED_TOPICS: LockedTopic[] = [
     id: "mandate_duration",
     pattern: /durée.*mandat|duree.*mandat|mandate duration|how long.*mandate|mandatsdauer|laufzeit.*mandat/i,
     build: buildMandateDurationReply,
+  },
+  {
+    id: "broker_position",
+    pattern: /\bbroker\b|carte professionnelle européenne|european professional card|europäischer berufsausweis|(habilité|habilitée|licensed|zugelassen)[^.?!]{0,25}(international|étranger|abroad|ausland)|(négociez|vendez|verhandeln sie|do you negotiate|do you sell)[^.?!]{0,25}(international|étranger|abroad|ausland)/i,
+    build: buildBrokerPositionReply,
   },
 ];
 

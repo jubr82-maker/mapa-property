@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
 import { pageAlternates } from "@/lib/seo";
+import { BROKER_POSITION } from "@/lib/legal/broker-position";
 
 // Sprint IA-TRANSPARENCE : portrait local optimise (webp, cadrage buste),
 // remplace l'ancienne photo distante sbUrl("photos","IMG_2461.jpg").
@@ -30,6 +31,8 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "about_page" });
+  const brokerPosition =
+    BROKER_POSITION[locale as keyof typeof BROKER_POSITION] ?? BROKER_POSITION.fr;
 
   return (
     <article className="pt-24 lg:pt-32">
@@ -92,6 +95,21 @@ export default async function AboutPage({
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-ink-mid sm:text-lg">
             {t("coverage_text")}
           </p>
+        </section>
+
+        {/* Positionnement broker international : source unique
+            lib/legal/broker-position.ts, mission "positionnement broker
+            international". Prolonge la section couverture ci-dessus sans en
+            dupliquer le contenu. */}
+        <section className="mb-16">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
+            {brokerPosition.title}
+          </p>
+          <div className="mt-4 max-w-3xl space-y-4 text-base leading-relaxed text-ink-mid sm:text-lg">
+            {brokerPosition.paragraphs.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
         </section>
 
         {/* CTA */}

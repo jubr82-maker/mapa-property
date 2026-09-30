@@ -287,7 +287,7 @@
     "recherche_subtitle": "Exclusive sourcing",
     "recherche_rate": "From 3% excl. VAT",
     "recherche_rate_note": "*see Agency Fees",
-    "recherche_text": "Under exclusive mandate, MAPA Property identifies and negotiates off-market properties for you in Luxembourg and abroad.",
+    "recherche_text": "Under exclusive mandate, MAPA Property identifies off-market properties for you in Luxembourg and oversees their acquisition abroad, with a locally licensed partner.",
     "recherche_coverage": "Luxembourg · European Union · International (UAE, UK, Switzerland, Americas)",
     "recherche_avance_note": "A retainer is due at mandate signing, fully deducted from the commission at the notarial deed.",
     "featured_badge": "Flagship"
@@ -385,7 +385,7 @@
     "step_one_title": "MANDATE",
     "step_one_text": "It all starts with a signed mandate. Sale, search, off-market: we only act under mandate and always in your sole interest.",
     "step_two_title": "SOURCE",
-    "step_two_text": "We activate our network (partner agencies, direct owners, confidential sources) in Luxembourg and internationally. Selection, viewings, negotiation.",
+    "step_two_text": "We activate our network (partner agencies, direct owners, confidential sources) in Luxembourg and internationally. Selection, viewings, negotiation conducted directly or overseen through our locally licensed partners.",
     "step_three_title": "CLOSE",
     "step_three_text": "File preparation (KYC/AML), purchase agreement, notarial follow-up, presence at the deed."
   },
@@ -699,7 +699,7 @@
   },
   "mandate_recherche": {
     "title": "Search Mandate",
-    "intro": "The European answer to the buyer's agent. You entrust us with the mission of finding and negotiating your future property, in Luxembourg or abroad. Under exclusive mandate, in your sole interest.",
+    "intro": "The European answer to the buyer's agent. You entrust us with the mission of finding your future property and overseeing its acquisition, in Luxembourg or abroad. Under exclusive mandate, in your sole interest.",
     "highlight_1_title": "Advice that serves only one master",
     "highlight_1_text": "We defend exclusively your buyer's interest. No double agency.",
     "highlight_2_title": "Off-market search included",
@@ -712,7 +712,7 @@
     "service_2": "Activation of our off-market network",
     "service_3": "Active sourcing across relevant channels",
     "service_4": "Pre-qualified viewings on your behalf",
-    "service_5": "Negotiation and due diligence",
+    "service_5": "Negotiation, conducted directly or overseen through our locally licensed partner abroad, and due diligence",
     "service_6": "International notarial coordination",
     "when_title": "When to choose the search mandate",
     "when_text": "You don't have the time or the network to identify the ideal property yourself, or you are looking abroad (where market opacity is high). You want advice that defends exclusively your interest, not a broker serving two masters.",

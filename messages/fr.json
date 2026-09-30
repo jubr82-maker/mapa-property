@@ -287,7 +287,7 @@
     "recherche_subtitle": "Sourcing exclusif",
     "recherche_rate": "À partir de 3% HT",
     "recherche_rate_note": "*voir Honoraires d'agence",
-    "recherche_text": "Sous mandat exclusif, MAPA Property identifie et négocie pour vous des biens off-market au Luxembourg et à l'international.",
+    "recherche_text": "Sous mandat exclusif, MAPA Property identifie vos biens off-market au Luxembourg et pilote leur acquisition à l'international, avec un partenaire local habilité.",
     "recherche_coverage": "Luxembourg · Union européenne · International (Émirats, Royaume-Uni, Suisse, Amériques)",
     "recherche_avance_note": "Une avance sur frais est exigible à la signature du mandat, intégralement déduite de la commission à la signature de l'acte authentique.",
     "featured_badge": "Phare"
@@ -385,7 +385,7 @@
     "step_one_title": "MANDATER",
     "step_one_text": "Tout commence par un mandat signé. Vente, recherche, off-market : nous n'agissons que sous mandat et toujours dans votre intérêt exclusif.",
     "step_two_title": "SOURCER",
-    "step_two_text": "Nous activons notre réseau (agences partenaires, propriétaires directs, sources confidentielles) au Luxembourg et à l'international. Sélection, visites, négociation.",
+    "step_two_text": "Nous activons notre réseau (agences partenaires, propriétaires directs, sources confidentielles) au Luxembourg et à l'international. Sélection, visites, négociation menée directement ou pilotée via nos partenaires locaux habilités.",
     "step_three_title": "CONCLURE",
     "step_three_text": "Constitution du dossier (KYC/AML), compromis, suivi notarial, présence à l'acte authentique."
   },
@@ -699,7 +699,7 @@
   },
   "mandate_recherche": {
     "title": "Mandat de Recherche",
-    "intro": "Le buyer's agent. Vous nous confiez la mission de trouver et de négocier votre futur bien, au Luxembourg ou à l'international. Sous mandat exclusif, dans votre intérêt seul.",
+    "intro": "Le buyer's agent. Vous nous confiez la mission de trouver votre futur bien et de piloter son acquisition, au Luxembourg ou à l'international. Sous mandat exclusif, dans votre intérêt seul.",
     "highlight_1_title": "Un conseil qui ne sert qu'un maître",
     "highlight_1_text": "Nous défendons exclusivement votre intérêt d'acquéreur. Pas de double mandat.",
     "highlight_2_title": "Recherche off-market incluse",
@@ -712,7 +712,7 @@
     "service_2": "Activation de notre réseau off-market",
     "service_3": "Sourcing actif sur tous canaux pertinents",
     "service_4": "Visites pré-qualifiées en votre nom",
-    "service_5": "Négociation et due diligence",
+    "service_5": "Négociation, menée directement ou pilotée via notre partenaire local habilité à l'international, et due diligence",
     "service_6": "Coordination notariale internationale",
     "when_title": "Quand choisir le mandat de recherche",
     "when_text": "Vous n'avez pas le temps ou le réseau pour identifier vous-même le bien idéal, ou vous cherchez à l'international (où l'opacité du marché est élevée). Vous voulez un conseil qui défend exclusivement votre intérêt, pas un courtier qui sert deux maîtres.",
