@@ -11,16 +11,22 @@
  * via les 3 callbacks server actions (onUpload / onSave / onDelete).
  *
  * Type `PhotoData` : { url, path, isCover, order }.
+ *
+ * Mission "envoi de photos robuste et erreurs visibles" — réécriture de
+ * handleFiles (cf. commentaire détaillé sur la fonction) : traitement
+ * strictement séquentiel, un `setPhotos` par fichier réussi (jamais un
+ * seul commit global en fin de boucle), progression visible, limite de
+ * taille vérifiée avant l'envoi, échecs par fichier collectés et affichés
+ * sans jamais casser l'affichage de la liste ni du compteur.
  */
 
 import { useState, useTransition, useRef } from "react";
 import { compressImageFile } from "@/lib/image-compress";
+import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 
 // Valeur large (HEIC/HEIF sans type MIME reconnu sur certains OS/
 // navigateurs) : le controle reel du format se fait server-side, par le
-// contenu, pas ici — cf. lib/images/process-upload.ts. Constante inline
-// (et non importee depuis ce module) car il embarque `sharp`, un module
-// natif Node qui ne doit jamais atteindre un bundle client.
+// contenu, pas ici — cf. lib/images/process-upload.ts.
 const ACCEPT_ATTRIBUTE = "image/*,.heic,.heif,.jpg,.jpeg,.png,.webp,.tif,.tiff";
 
 export interface PhotoData {
@@ -30,14 +36,19 @@ export interface PhotoData {
   order: number;
 }
 
+type UploadResult =
+  | { ok: true; url: string; path: string }
+  | { ok: false; error: string };
+type ActionResult = { ok: true } | { ok: false; error: string };
+
 interface Props {
   initialPhotos: PhotoData[];
-  /** Upload un fichier vers Storage. Retourne url + path (clé bucket). */
-  onUpload: (formData: FormData) => Promise<{ url: string; path: string }>;
-  /** Persiste l'état complet (ordre + cover). */
-  onSave: (photos: PhotoData[]) => Promise<{ ok: true }>;
-  /** Supprime un fichier du Storage. */
-  onDelete: (path: string) => Promise<{ ok: true }>;
+  /** Upload un fichier vers Storage. Ne throw jamais : résultat structuré. */
+  onUpload: (formData: FormData) => Promise<UploadResult>;
+  /** Persiste l'état complet (ordre + cover). Ne throw jamais. */
+  onSave: (photos: PhotoData[]) => Promise<ActionResult>;
+  /** Supprime un fichier du Storage. Ne throw jamais. */
+  onDelete: (path: string) => Promise<ActionResult>;
 }
 
 export function PhotoManager({
@@ -52,7 +63,8 @@ export function PhotoManager({
     initialPhotos.map((p, i) => ({ ...p, order: i, isCover: i === 0 })),
   );
   const [busy, startTransition] = useTransition();
-  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
+  const [uploadErrors, setUploadErrors] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dragSrcIdx = useRef<number | null>(null);
@@ -62,29 +74,59 @@ export function PhotoManager({
     return list.map((p, i) => ({ ...p, order: i, isCover: i === 0 }));
   }
 
+  // Traite les fichiers un par un, jamais en une seule fois (mission point
+  // 2) : chaque fichier réussi est commité immédiatement à l'état
+  // (setPhotos) au lieu d'accumuler dans une variable locale envoyée en
+  // un seul bloc en fin de boucle. Ainsi, si un fichier échoue (taille,
+  // conversion, réseau), les photos déjà envoyées avant lui restent
+  // visibles et le compteur reste exact — jamais de "0 photo" après un
+  // échec partiel. La progression ("2/8…") est visible pendant l'envoi et
+  // les échecs sont listés individuellement, jamais un message générique
+  // opaque.
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     setError(null);
     setFeedback(null);
-    setUploading(true);
-    try {
-      const next = [...photos];
-      for (const file of Array.from(files)) {
+    const list = Array.from(files);
+    const failures: string[] = [];
+    setUploadErrors([]);
+    setUploadProgress({ done: 0, total: list.length });
+
+    for (let i = 0; i < list.length; i++) {
+      const file = list[i];
+      const label = file.name || `fichier ${i + 1}`;
+
+      if (file.size > MAX_PHOTO_BYTES) {
+        failures.push(`${label} : dépasse ${MAX_PHOTO_MB} Mo, non envoyé.`);
+        setUploadProgress({ done: i + 1, total: list.length });
+        continue;
+      }
+
+      try {
         // compressImageFile retombe sur le fichier original en cas
-        // d'échec — l'upload n'est jamais bloqué par la compression.
+        // d'échec (ex. HEIC non décodable par le navigateur) — la
+        // conversion faite ensuite côté serveur reste autoritaire.
         const compressed = await compressImageFile(file);
         const fd = new FormData();
         fd.append("file", compressed);
-        const { url, path } = await onUpload(fd);
-        next.push({ url, path, isCover: false, order: next.length });
+        const result = await onUpload(fd);
+        if (!result.ok) {
+          failures.push(`${label} : ${result.error}`);
+        } else {
+          // Commit immédiat, un par un — jamais de batch en fin de boucle.
+          setPhotos((prev) => renormalize([...prev, { url: result.url, path: result.path, isCover: false, order: prev.length }]));
+        }
+      } catch {
+        // Filet ultime (ex. coupure réseau pendant l'appel) : jamais
+        // laisser une exception non gérée remonter hors de cette boucle.
+        failures.push(`${label} : échec réseau, réessayez.`);
       }
-      setPhotos(renormalize(next));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur upload.");
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      setUploadProgress({ done: i + 1, total: list.length });
     }
+
+    setUploadProgress(null);
+    setUploadErrors(failures);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   function onDragStart(idx: number) {
@@ -127,11 +169,15 @@ export function PhotoManager({
     setFeedback(null);
     startTransition(async () => {
       try {
-        await onDelete(p.path);
+        const result = await onDelete(p.path);
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
         const next = photos.filter((_, i) => i !== idx);
         setPhotos(renormalize(next));
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Erreur suppression.");
+      } catch {
+        setError("Erreur suppression, réessayez.");
       }
     });
   }
@@ -141,10 +187,14 @@ export function PhotoManager({
     setFeedback(null);
     startTransition(async () => {
       try {
-        await onSave(photos);
+        const result = await onSave(photos);
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
         setFeedback("Ordre et cover enregistrés.");
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Erreur enregistrement.");
+      } catch {
+        setError("Erreur enregistrement, réessayez.");
       }
     });
   }
@@ -161,13 +211,30 @@ export function PhotoManager({
           className="hidden"
         />
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63]">
-          {uploading ? "Upload en cours…" : "Cliquer pour ajouter des photos"}
+          {uploadProgress
+            ? `Envoi ${uploadProgress.done}/${uploadProgress.total}…`
+            : "Cliquer pour ajouter des photos"}
         </p>
         <p className="mt-1 text-xs text-[#3D4F63]/60">
-          HEIC / HEIF / JPG / PNG / WebP / TIFF — converties automatiquement.
-          La première (sort 0) sert de cover publique.
+          HEIC / HEIF / JPG / PNG / WebP / TIFF — converties automatiquement,
+          {MAX_PHOTO_MB} Mo max par fichier. La première (sort 0) sert de
+          cover publique.
         </p>
       </label>
+
+      {uploadErrors.length > 0 && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-red-700/80">
+            {uploadErrors.length} photo{uploadErrors.length > 1 ? "s" : ""} non
+            envoyée{uploadErrors.length > 1 ? "s" : ""}
+          </p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-5">
+            {uploadErrors.map((msg, i) => (
+              <li key={i}>{msg}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {photos.length > 0 && (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -230,7 +297,7 @@ export function PhotoManager({
         <button
           type="button"
           onClick={save}
-          disabled={busy || uploading || photos.length === 0}
+          disabled={busy || uploadProgress != null || photos.length === 0}
           className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
         >
           {busy ? "Enregistrement…" : "Enregistrer l'ordre"}
