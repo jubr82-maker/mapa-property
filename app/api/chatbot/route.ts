@@ -139,9 +139,14 @@ const tryAutoLead = async (
   const email = userText.match(EMAIL_RE)?.[0];
   const phone = userText.match(PHONE_RE)?.[0];
   if (!email && !phone) return;
+
+  // Insertion et email traites dans deux blocs separes : un echec de
+  // l'un ne doit jamais empecher la tentative de l'autre. Chaque echec
+  // est journalise avec son code technique uniquement (jamais l'email,
+  // le telephone ou le contenu du message).
   try {
     const sb = supabaseServer();
-    await sb.from("leads").insert({
+    const { error } = await sb.from("leads").insert({
       email: email ?? "no-email@chatbot.mapaproperty.lu",
       phone: phone ?? undefined,
       message: userText.slice(0, 2000),
@@ -149,6 +154,18 @@ const tryAutoLead = async (
       source: `chatbot:${pageContext || "home"}`,
       lang: locale,
     });
+    if (error) {
+      console.error("[api/chatbot] auto-lead insert echoue", {
+        code: error.code,
+      });
+    }
+  } catch (e) {
+    console.error("[api/chatbot] auto-lead insert exception", {
+      code: (e as { code?: string })?.code ?? "unknown_error",
+    });
+  }
+
+  try {
     await sendLeadEmails({
       contactEmail: email,
       phone,
@@ -158,8 +175,10 @@ const tryAutoLead = async (
       source: `chatbot:${pageContext || "home"}`,
       locale,
     });
-  } catch {
-    // echec silencieux : le chatbot continue meme si insert/email echoue
+  } catch (e) {
+    console.error("[api/chatbot] auto-lead email exception", {
+      code: (e as { code?: string })?.code ?? "unknown_error",
+    });
   }
 };
 

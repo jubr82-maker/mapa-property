@@ -313,10 +313,9 @@ async function persistEstimationRequest(args: {
         rgpd_consent_at: args.rgpd_consent_at,
       });
       if (!error) return;
-      console.warn(
-        "[api/estimate] insert dégradé (colonnes B1 ou rgpd absentes):",
-        error.message,
-      );
+      console.warn("[api/estimate] insert dégradé (colonnes B1 ou rgpd absentes)", {
+        code: error.code,
+      });
     }
     // Premier fallback : avec toutes les colonnes B1+C1+C7 mais sans RGPD.
     const { error: e2 } = await supabase
@@ -345,10 +344,25 @@ async function persistEstimationRequest(args: {
       .from("estimation_requests")
       .insert(baseB1C1);
     if (!e3) return;
+    console.warn("[api/estimate] insert degrade (colonnes B1+C1 absentes)", {
+      code: e3.code,
+    });
     // Dernier fallback : schema legacy strict (migration B1 non appliquée).
-    await supabase.from("estimation_requests").insert(baseLegacy);
+    const { error: e4 } = await supabase
+      .from("estimation_requests")
+      .insert(baseLegacy);
+    if (e4) {
+      // Les 3 (ou 4) formats ont tous echoue : la demande d'estimation
+      // n'a pas ete enregistree alors que le visiteur a recu un message
+      // de succes. Log distinct et explicite pour etre repere facilement.
+      console.error("[api/estimate] PERTE ESTIMATION, tous les formats d'insertion ont echoue", {
+        code: e4.code,
+      });
+    }
   } catch (err) {
-    console.error("[api/estimate] persist failed:", err);
+    console.error("[api/estimate] persist failed", {
+      code: (err as { code?: string })?.code ?? "unknown_error",
+    });
   }
 }
 
