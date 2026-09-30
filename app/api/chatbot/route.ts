@@ -163,11 +163,24 @@ async function logChatbotInteraction(entry: {
   }
 }
 
-const callMistral = async (
+// Sprint MODELE-DEBIT — modele change de mistral-small-latest (plafond
+// compte : 20 000 jetons/min, 1 req/s, PROUVE epuise en 2-3 echanges vu le
+// prompt systeme complet a chaque appel) vers ministral-3b-2512 (meme
+// compte : 1 300 000 jetons/min, 12,5 req/s). Nom exact verifie sur la
+// documentation officielle Mistral (docs.mistral.ai/models/ministral-3-3b-25-12,
+// qui cite litteralement "ministral-3b-2512" comme identifiant d'API),
+// jamais devine.
+const MISTRAL_MODEL = "ministral-3b-2512";
+const MISTRAL_RETRY_DELAY_MS = 1000;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function callMistralOnce(
+  apiKey: string,
   messages: Message[],
-): Promise<{ text: string | null; failureCode: string | null }> => {
-  const apiKey = process.env.MISTRAL_API_KEY;
-  if (!apiKey) return { text: null, failureCode: "no_api_key" };
+): Promise<{ text: string | null; failureCode: string | null }> {
   try {
     const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
       method: "POST",
@@ -176,12 +189,12 @@ const callMistral = async (
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "mistral-small-latest",
+        model: MISTRAL_MODEL,
         messages,
         max_tokens: 400,
         temperature: 0.6,
         // Sprint ELENA-NAV phase 2 : fiabilise le JSON strict attendu par
-        // parseAssistantReply. mistral-small-latest supporte json_object.
+        // parseAssistantReply. Ministral 3B supporte aussi json_object.
         // parseAssistantReply reste filet en cas de drift inattendu.
         response_format: { type: "json_object" },
       }),
@@ -194,6 +207,32 @@ const callMistral = async (
   } catch {
     return { text: null, failureCode: "mistral_exception" };
   }
+}
+
+// Une seule nouvelle tentative, uniquement sur 429 (plafond de debit
+// depasse), apres 1 seconde d'attente. Toute autre erreur (cle absente,
+// 4xx/5xx non lie au debit, exception reseau) tombe directement sur le
+// repli heuristique, sans attendre inutilement le visiteur.
+const callMistral = async (
+  messages: Message[],
+): Promise<{ text: string | null; failureCode: string | null }> => {
+  const apiKey = process.env.MISTRAL_API_KEY;
+  if (!apiKey) return { text: null, failureCode: "no_api_key" };
+
+  const first = await callMistralOnce(apiKey, messages);
+  if (first.text || first.failureCode !== "mistral_http_429") return first;
+
+  console.warn("[api/chatbot] mistral 429, nouvelle tentative dans 1s", {
+    code: first.failureCode,
+  });
+  await sleep(MISTRAL_RETRY_DELAY_MS);
+  const retry = await callMistralOnce(apiKey, messages);
+  if (!retry.text) {
+    console.error("[api/chatbot] mistral 429 persiste apres nouvelle tentative", {
+      code: retry.failureCode,
+    });
+  }
+  return retry;
 };
 
 // Sprint ELENA-REFONTE point 4 — repli professionnel. Les reponses

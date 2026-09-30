@@ -19,6 +19,27 @@ import { LEGAL_FEES } from "@/lib/legal-fees";
 
 type KnowledgeLocale = "fr" | "en" | "de";
 
+// Sections de lib/legal/honoraires.ts volontairement exclues de l'extrait
+// envoye au modele (mission "modele chatbot adapte aux limites de debit",
+// point 3) : ni l'une ni l'autre n'est utile a une question de visiteur.
+// - "Modalites de facturation" / "Billing" / "Abrechnung" : delais de
+//   paiement internes, jamais demandes par un visiteur.
+// - "Frais annexes..." / "Ancillary fees..." / "Nebenkosten..." : deja
+//   couverte, de facon plus concise, par buildLegalFrameworkSection()
+//   ci-dessous (memes chiffres, meme source lib/legal-fees.ts) — la garder
+//   ici aurait ete une duplication pure, pas une information supplementaire.
+// - "Disclaimer" / "Hinweis" : deja couvert par les regles strictes du
+//   prompt de base ("Tu ne cites que des informations verifiees...").
+// Mesure (fr) : 1190 caracteres retires sur les 3353 de la section
+// honoraires, ~9 % du prompt systeme total. Rien d'autre n'est coupe :
+// les mandats, l'avance sur frais, la location/gestion et l'estimation
+// restent integralement transmis.
+const HONORAIRES_EXCLUDED_HEADINGS: Record<KnowledgeLocale, string[]> = {
+  fr: ["Modalités de facturation", "Frais annexes (à la charge du Mandant)", "Disclaimer"],
+  en: ["Billing", "Ancillary fees (Mandant's expense)", "Disclaimer"],
+  de: ["Abrechnung", "Nebenkosten (zu Lasten des Mandanten)", "Hinweis"],
+};
+
 // Genere la section honoraires directement depuis lib/legal/honoraires.ts
 // (source unique consommee aussi par /legal/honoraires) plutot que de
 // recopier les chiffres en dur ici.
@@ -33,7 +54,9 @@ function buildHonorairesSection(locale: KnowledgeLocale): string {
         ? "(Quelle: Seite /legal/honoraires)"
         : "(source : page /legal/honoraires)";
   const intro = (content.intro ?? []).join(" ");
+  const excluded = HONORAIRES_EXCLUDED_HEADINGS[locale];
   const sections = content.sections
+    .filter((s) => !excluded.includes(s.heading ?? ""))
     .map((s) => `### ${s.heading ?? ""}\n${s.paragraphs.join("\n")}`)
     .join("\n\n");
   return `${heading} ${source}\n${intro}\n\n${sections}`;
