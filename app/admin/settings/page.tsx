@@ -29,7 +29,10 @@ export default async function AdminSettingsPage() {
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <Info label="Téléphone" value="Voir mentions légales (source unique)" />
           <Info label="Email" value="Voir mentions légales (source unique)" />
-          <Info label="Notification admin" value="admin@mapagroup.org" />
+          <Info
+            label="Notification admin"
+            value="Configurable via MAPA_NOTIFICATION_EMAILS (Vercel)"
+          />
           <Info label="Siège (privé)" value="Dudelange, Luxembourg" />
         </dl>
         <p className="mt-3 text-xs text-[#3D4F63]/60">

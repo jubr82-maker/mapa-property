@@ -7,9 +7,9 @@
 // Budget/budget valide/recherche serialises dans `message` via la
 // convention [CHAMP] (parsable cote admin).
 //
-// Emails : destinataires internes = j.brebion + admin via internalTo
-// array passe a sendLeadEmails (SMTP IONOS). No-op silencieux si la
-// configuration SMTP est absente.
+// Emails : destinataires internes = configuration partagee de
+// lib/email/smtp.ts (MAPA_NOTIFICATION_EMAILS), pas de liste propre a ce
+// flux. No-op silencieux si la configuration SMTP est absente.
 import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
@@ -24,11 +24,6 @@ const isEmail = (s: unknown): s is string =>
 
 const str = (v: unknown): string | undefined =>
   typeof v === "string" && v.trim().length > 0 ? v.trim() : undefined;
-
-const WAITLIST_INTERNAL_TO = [
-  "j.brebion@mapagroup.org",
-  "admin@mapagroup.org",
-];
 
 const SUBJECT = "Liste d'attente, nouvelle inscription";
 
@@ -121,9 +116,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  // Emails best-effort : 2 destinataires internes (Julien + admin) +
-  // confirmation client. AWAIT obligatoire en serverless Vercel (cf.
-  // /api/lead). No-op silencieux si la configuration SMTP est absente.
+  // Emails best-effort : destinataires internes configures (cf.
+  // lib/email/smtp.ts, MAPA_NOTIFICATION_EMAILS) + confirmation client.
+  // AWAIT obligatoire en serverless Vercel (cf. /api/lead). No-op
+  // silencieux si la configuration SMTP est absente.
   await sendLeadEmails({
     contactEmail: email,
     firstName,
@@ -136,7 +132,6 @@ export async function POST(req: Request) {
     type: "waitlist",
     source: "waitlist-home",
     locale: lang,
-    internalTo: WAITLIST_INTERNAL_TO,
   });
 
   return NextResponse.json({ ok: true });

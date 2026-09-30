@@ -23,8 +23,40 @@ import nodemailer, { type Transporter } from "nodemailer";
 
 const FROM_NAME = "MAPA Property";
 const FROM_ADDRESS = "site@mapagroup.org";
+// Adresse de reponse (Reply-To) : volontairement fixe, inchangee par la
+// configuration des destinataires internes ci-dessous — une reponse du
+// prospect part toujours vers cette adresse, quel que soit le nombre de
+// personnes notifiees en interne.
 export const SMTP_REPLY_TO = "j.brebion@mapagroup.org";
-export const SMTP_INTERNAL_TO = "j.brebion@mapagroup.org";
+
+// Destinataires des notifications internes (lead recu), pour tous les
+// flux qui utilisent cette couche d'envoi (formulaires, chatbot, liste
+// d'attente, estimations). Configurable via la variable d'environnement
+// MAPA_NOTIFICATION_EMAILS (plusieurs adresses separees par des virgules).
+// Absente ou vide -> repli sur l'adresse historique, pour ne rien casser
+// avant que la variable soit renseignee dans Vercel.
+const DEFAULT_INTERNAL_RECIPIENT = "j.brebion@mapagroup.org";
+
+/** Nettoie une liste d'adresses : espaces superflus, entrees vides, doublons
+ * (comparaison insensible a la casse, casse de la premiere occurrence conservee). */
+function parseRecipients(raw: string | undefined, fallback: string[]): string[] {
+  const cleaned: string[] = [];
+  const seen = new Set<string>();
+  for (const part of (raw ?? "").split(",")) {
+    const email = part.trim();
+    if (!email) continue;
+    const key = email.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    cleaned.push(email);
+  }
+  return cleaned.length > 0 ? cleaned : fallback;
+}
+
+export const INTERNAL_NOTIFICATION_RECIPIENTS: string[] = parseRecipients(
+  process.env.MAPA_NOTIFICATION_EMAILS,
+  [DEFAULT_INTERNAL_RECIPIENT],
+);
 
 // Retenu : 50 emails/heure la premiere semaine d'usage du serveur IONOS,
 // puis 500/heure ensuite. Ajustable sans redeploiement de code via la

@@ -4,11 +4,12 @@
 //   1. CLIENT : accusé de réception + fourchette indicative, dans la
 //      langue du visiteur, sans promesse de délai autre que celle déjà
 //      affichée sur le site. Envoyé si contactEmail + fourchette valide.
-//   2. INTERNE : notification complète à j.brebion@mapagroup.org.
+//   2. INTERNE : notification complète aux destinataires configurés via
+//      MAPA_NOTIFICATION_EMAILS (cf. lib/email/smtp.ts).
 //
 // Best effort : ne throw jamais, ne bloque jamais la réponse au visiteur.
 
-import { sendMail, SMTP_INTERNAL_TO } from "./smtp";
+import { sendMail, INTERNAL_NOTIFICATION_RECIPIENTS } from "./smtp";
 
 type Locale = "fr" | "en" | "de";
 
@@ -206,7 +207,7 @@ export async function sendEstimationEmails(
 
   tasks.push(
     sendMail({
-      to: SMTP_INTERNAL_TO,
+      to: INTERNAL_NOTIFICATION_RECIPIENTS,
       subject: internalSubject({ commune, type: args.type }),
       text: internalBody(args),
     }),

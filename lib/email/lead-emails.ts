@@ -7,13 +7,15 @@
 //   1. CLIENT : accusé de réception sobre, dans la langue du visiteur,
 //      sans promesse de délai autre que celle déjà affichée sur le site.
 //      Envoyé si un email est présent.
-//   2. INTERNE : notification complète à j.brebion@mapagroup.org (ou une
-//      liste de destinataires fournie), avec tous les champs transmis.
+//   2. INTERNE : notification complète aux destinataires configurés via
+//      MAPA_NOTIFICATION_EMAILS (cf. lib/email/smtp.ts), ou à la liste
+//      fournie explicitement via l'argument internalTo, avec tous les
+//      champs transmis.
 //
 // Best effort : ne throw jamais. Aucune donnée personnelle dans les
 // journaux (compteurs et codes de statut uniquement, cf. lib/email/smtp.ts).
 
-import { sendMail, SMTP_INTERNAL_TO } from "./smtp";
+import { sendMail, INTERNAL_NOTIFICATION_RECIPIENTS } from "./smtp";
 
 type Locale = "fr" | "en" | "de";
 
@@ -205,7 +207,8 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
       : locale === "de"
         ? "geehrte/r Interessent/in"
         : "Madame, Monsieur");
-  const internalTo: string | string[] = args.internalTo ?? SMTP_INTERNAL_TO;
+  const internalTo: string | string[] =
+    args.internalTo ?? INTERNAL_NOTIFICATION_RECIPIENTS;
   const fullName = [args.firstName, args.lastName].filter(Boolean).join(" ") || "Prospect";
 
   console.log("[lead-emails] start", {
