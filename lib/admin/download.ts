@@ -1,7 +1,6 @@
 // Sprint Export RGPD — helper client de telechargement.
 //
-// Factorise le pattern Blob utilise dans components/admin/ArcovaTable.tsx
-// (~lignes 35-58) mais en JSON et reutilisable depuis n'importe quel
+// Pattern Blob generique en JSON, reutilisable depuis n'importe quel
 // composant admin client.
 //
 // Cote SSR : la fonction throw immediatement (URL.createObjectURL +

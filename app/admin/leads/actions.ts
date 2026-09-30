@@ -5,22 +5,6 @@ import { redirect } from "next/navigation";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdmin } from "@/lib/admin/require-admin";
 
-// ---------- Existant (compat ascendante avec LeadsTable historique) ----------
-
-export async function updateLeadStatus(id: string, status: string) {
-  const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
-  const supabase = supabaseService();
-  const { data, error } = await supabase
-    .from("leads")
-    .update({ status })
-    .eq("id", id)
-    .select("id");
-  if (error) throw new Error(error.message);
-  if (!data || data.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
-  revalidatePath("/admin/leads");
-}
-
 export async function updateLeadNotes(id: string, notes: string) {
   const admin = await requireAdmin();
   if (!admin.ok) throw new Error("unauthorized");

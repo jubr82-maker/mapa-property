@@ -2,11 +2,11 @@ import Link from "next/link";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import {
-  WorkflowBadge,
   WORKFLOW_STATUSES,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
 import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
+import { WaitlistTable } from "@/components/admin/WaitlistTable";
 
 export const dynamic = "force-dynamic";
 
@@ -34,22 +34,6 @@ const TABS: { key: string; label: string }[] = [
   { key: "completed", label: "Traités" },
   { key: "all", label: "Tous" },
 ];
-
-// Parse les tags [CHAMP] inseres dans `message` par l'endpoint
-// /api/liste-attente. Supporte la forme inline ([BUDGET] X) et la forme
-// bloc multilignes ([RECHERCHE]\n...\n jusqu'au prochain [TAG] ou EOF).
-function extractTag(message: string | null, tag: string): string | null {
-  if (!message) return null;
-  const inline = message.match(
-    new RegExp(`\\[${tag}\\][ \\t]+([^\\n]+)`, "i"),
-  );
-  if (inline) return inline[1].trim();
-  const block = message.match(
-    new RegExp(`\\[${tag}\\]\\s*\\n([\\s\\S]*?)(?=\\n\\[[A-Z_]+\\]|$)`, "i"),
-  );
-  if (block) return block[1].trim();
-  return null;
-}
 
 export default async function AdminWaitlistPage({
   searchParams,
@@ -188,66 +172,7 @@ export default async function AdminWaitlistPage({
             Inscriptions ({filtered.length})
           </p>
         </header>
-        <ul className="divide-y divide-[#3D4F63]/10">
-          {filtered.length === 0 && (
-            <li className="px-4 py-6 text-center text-sm text-[#3D4F63]/60">
-              Aucune inscription pour cette sélection.
-            </li>
-          )}
-          {filtered.map((r) => {
-            const fullName = [r.first_name, r.last_name]
-              .filter(Boolean)
-              .join(" ");
-            const ws = (r.workflow_status as WorkflowStatus | null) ?? "new";
-            const budget = extractTag(r.message, "BUDGET");
-            const budgetValidated = extractTag(r.message, "BUDGET_VALIDE");
-            const search = extractTag(r.message, "RECHERCHE");
-            return (
-              <li key={r.id} className="px-4 py-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <WorkflowBadge status={ws} />
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-[#1A1F2A]">
-                        {fullName || r.email}
-                      </p>
-                      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#3D4F63]/60">
-                        {r.email}
-                      </p>
-                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/50">
-                        {new Date(r.created_at).toLocaleString("fr-LU")}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right text-xs text-[#3D4F63]/80">
-                    <p>
-                      <span className="font-mono uppercase tracking-[0.15em] text-[#3D4F63]/50">
-                        Budget
-                      </span>{" "}
-                      {budget ?? "—"}
-                    </p>
-                    <p>
-                      <span className="font-mono uppercase tracking-[0.15em] text-[#3D4F63]/50">
-                        Validé
-                      </span>{" "}
-                      {budgetValidated ?? "—"}
-                    </p>
-                  </div>
-                </div>
-                {search && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60 hover:text-[#e0af6e]">
-                      Recherche
-                    </summary>
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-[#1A1F2A]">
-                      {search}
-                    </p>
-                  </details>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+        <WaitlistTable items={filtered} />
       </section>
     </div>
   );
