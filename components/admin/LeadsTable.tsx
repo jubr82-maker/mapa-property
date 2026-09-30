@@ -2,7 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
-import { updateLeadStatus, updateLeadNotes } from "@/app/admin/leads/actions";
+import { updateWorkflowStatus, updateLeadNotes } from "@/app/admin/leads/actions";
+import {
+  WORKFLOW_STATUSES,
+  WORKFLOW_LABELS,
+  WorkflowBadge,
+  type WorkflowStatus,
+} from "@/components/admin/WorkflowBadge";
 
 type Lead = {
   id: string;
@@ -20,6 +26,8 @@ type Lead = {
   property_ref: string | null;
   /** Sprint C3 : sujet pre-cadre depuis /contact (NULLABLE). */
   subject?: string | null;
+  /** Statut workflow partage avec la page /admin/mandats (migration 20260512). */
+  workflow_status?: string | null;
 };
 
 // Sprint C3 : libelle humain pour les 6 sujets pre-cadres du formulaire
@@ -38,15 +46,6 @@ function subjectLabel(s: string | null | undefined): string {
   if (!s) return "—";
   return SUBJECT_LABELS[s] ?? s;
 }
-
-const LEAD_STATUSES = ["pending", "contacted", "qualified", "converted", "rejected"] as const;
-const LEAD_STATUS_LABELS: Record<string, string> = {
-  pending: "En attente",
-  contacted: "Contacté",
-  qualified: "Qualifié",
-  converted: "Converti",
-  rejected: "Refusé",
-};
 
 const LEAD_TYPES = [
   "contact",
@@ -99,18 +98,6 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
             </option>
           ))}
         </select>
-        <select
-          value={sp.get("status") ?? ""}
-          onChange={(e) => setParam("status", e.target.value)}
-          className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm"
-        >
-          <option value="">Tous statuts</option>
-          {LEAD_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {LEAD_STATUS_LABELS[s]}
-            </option>
-          ))}
-        </select>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-[#3D4F63]/15 bg-white">
@@ -159,13 +146,17 @@ function LeadRow({
   open: boolean;
   onToggle: () => void;
 }) {
-  const [status, setStatus] = useState(lead.status ?? "pending");
+  const [status, setStatus] = useState<WorkflowStatus>(
+    lead.workflow_status && WORKFLOW_STATUSES.includes(lead.workflow_status as WorkflowStatus)
+      ? (lead.workflow_status as WorkflowStatus)
+      : "new",
+  );
   const [notes, setNotes] = useState("");
   const [busy, startTransition] = useTransition();
 
-  const changeStatus = (next: string) => {
+  const changeStatus = (next: WorkflowStatus) => {
     setStatus(next);
-    startTransition(() => updateLeadStatus(lead.id, next));
+    startTransition(() => updateWorkflowStatus(lead.id, next));
   };
 
   const saveNotes = () => {
@@ -207,9 +198,7 @@ function LeadRow({
           {[lead.country, lead.city].filter(Boolean).join(" · ") || "—"}
         </td>
         <td className="px-4 py-3">
-          <span className="rounded-full bg-[#3D4F63]/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]">
-            {LEAD_STATUS_LABELS[status] ?? status}
-          </span>
+          <WorkflowBadge status={status} />
         </td>
         <td className="px-4 py-3 text-right font-mono text-xs text-[#3D4F63]/60">
           {open ? "▴" : "▾"}
@@ -243,7 +232,7 @@ function LeadRow({
                     Workflow
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {LEAD_STATUSES.map((s) => (
+                    {WORKFLOW_STATUSES.map((s) => (
                       <button
                         key={s}
                         type="button"
@@ -255,7 +244,7 @@ function LeadRow({
                             : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e]"
                         }`}
                       >
-                        {LEAD_STATUS_LABELS[s]}
+                        {WORKFLOW_LABELS[s]}
                       </button>
                     ))}
                   </div>
