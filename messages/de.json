@@ -1254,7 +1254,35 @@
     }
   },
   "chatbot": {
-    "legal_disclaimer": "Die von Eléna bereitgestellten Informationen sind nur zu Informationszwecken und nicht vertraglich. MAPA Property (eine Marke der MAPA Synergy Sàrl) kann für keine auf diesen Informationen basierende Entscheidung verantwortlich gemacht werden. Zur Bestätigung: j.brebion@mapagroup.org / +352 691 620 127"
+    "legal_disclaimer": "Die von Eléna bereitgestellten Informationen sind nur zu Informationszwecken und nicht vertraglich. MAPA Property (eine Marke der MAPA Synergy Sàrl) kann für keine auf diesen Informationen basierende Entscheidung verantwortlich gemacht werden.",
+    "contact_prefix": "Zur Bestätigung kontaktieren Sie uns:",
+    "ai_notice": "Virtuelle Assistentin mit künstlicher Intelligenz",
+    "greeting_ai_suffix": "Ich bin eine virtuelle Assistentin, die künstliche Intelligenz nutzt.",
+    "greeting_default": "Hallo, ich bin Eléna. Wie kann ich Ihnen helfen?",
+    "greeting_property": "Möchten Sie das vollständige Dossier dieses Objekts?",
+    "greeting_offmarket": "Interesse an diesem Objekt? Ich kann Ihnen die NDA zusenden.",
+    "greeting_mandate": "Brauchen Sie Hilfe bei der Wahl unserer 4 Mandatsformeln?",
+    "greeting_service": "Eine Frage zu unseren Leistungen?",
+    "invite_property": "Eine Frage zu diesem Objekt? Ich bin gerne für Sie da.",
+    "invite_offmarket": "Interesse an diesem Objekt? Ich gebe Ihnen gerne Auskunft.",
+    "invite_dismiss": "Vorschlag schließen",
+    "input_placeholder": "Nachricht schreiben…",
+    "close_label": "Schließen",
+    "send_label": "Senden",
+    "avatar_alt": "Eléna, MAPA Property Beraterin",
+    "network_error": "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie uns über die Kontakt-Buttons auf der Website.",
+    "fallback_reply": "Ich kann Ihnen gerade nicht antworten. Versuchen Sie es gleich noch einmal, oder nutzen Sie unser Kontaktformular: ein Berater meldet sich persönlich bei Ihnen.",
+    "fallback_offmarket": "Der Off-Market-Zugang erfordert eine vertragliche NDA und geprüfte Finanzkraft. Ich kann Sie gerne mit Julien verbinden, nutzen Sie bitte die Kontakt-Buttons auf der Website.",
+    "fallback_fees": "Verkaufsmandate: Exklusiv 3 %, Halb-Exklusiv 4 %, Einfach 5 %, Autonom 1 % (zzgl. MwSt.). Suchmandat 1-3 %. Details auf der Honorare-Seite.",
+    "fallback_mandate": "Wir bieten 4 Verkaufsmandate (Exklusiv, Halb-Exklusiv, Einfach, Autonom) und ein Suchmandat. Jedes definiert das Engagement und die Honorare.",
+    "fallback_estimate": "Unser Online-Schätzer gibt Ihnen in weniger als 2 Minuten eine Spanne: /services/estimer. Die Besichtigung macht sie präzise.",
+    "rate_limit_reached": "Sie haben das heutige Nachrichtenlimit erreicht. Kontaktieren Sie die Agentur direkt, ein Berater hilft Ihnen gerne weiter.",
+    "consent_prompt": "Möchten Sie, dass ich Ihre Kontaktdaten an MAPA Property weitergebe, damit sich ein Berater bei Ihnen meldet? Gemäß unserer Datenschutzrichtlinie werden sie nur zu diesem Zweck verwendet.",
+    "consent_accept": "Ja, meine Daten weitergeben",
+    "consent_decline": "Nein danke",
+    "consent_accepted": "Vielen Dank, ein Berater von MAPA Property meldet sich in Kürze bei Ihnen.",
+    "consent_declined": "In Ordnung, es wird nichts weitergegeben. Sie können es sich jederzeit anders überlegen.",
+    "consent_error": "Die Übermittlung ist fehlgeschlagen. Versuchen Sie es erneut oder nutzen Sie unser Kontaktformular."
   },
   "financing_simulator": {
     "disclaimer": "Haftungsausschluss: indikative Simulation zu Informationszwecken. Die angegebenen Beträge stellen kein Kreditangebot dar. Die von den Banken angewandten Zinssätze variieren je nach Kreditnehmerprofil, Eigenkapital, Sicherheiten, Immobilientyp und Marktlage. Für eine persönliche Analyse kontaktieren Sie MAPA Property für einen Termin mit einem qualifizierten Bankpartner."

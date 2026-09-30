@@ -1254,7 +1254,35 @@
     }
   },
   "chatbot": {
-    "legal_disclaimer": "Information provided by Eléna is for informational purposes only and non-contractual. MAPA Property (a brand of MAPA Synergy Sàrl) cannot be held responsible for any decision based on this information. For confirmation: j.brebion@mapagroup.org / +352 691 620 127"
+    "legal_disclaimer": "Information provided by Eléna is for informational purposes only and non-contractual. MAPA Property (a brand of MAPA Synergy Sàrl) cannot be held responsible for any decision based on this information.",
+    "contact_prefix": "For confirmation, contact us:",
+    "ai_notice": "Virtual assistant using artificial intelligence",
+    "greeting_ai_suffix": "I am a virtual assistant using artificial intelligence.",
+    "greeting_default": "Hello, I'm Eléna. How may I help you?",
+    "greeting_property": "Would you like the full file for this property?",
+    "greeting_offmarket": "Interested in this property? I can send you the NDA.",
+    "greeting_mandate": "Need help choosing between our 4 mandate formulas?",
+    "greeting_service": "Any question about our services?",
+    "invite_property": "A question about this property? I'm here to help.",
+    "invite_offmarket": "Interested in this property? I can tell you more.",
+    "invite_dismiss": "Close suggestion",
+    "input_placeholder": "Type your message…",
+    "close_label": "Close",
+    "send_label": "Send",
+    "avatar_alt": "Eléna, MAPA Property advisor",
+    "network_error": "An error occurred. Please contact us via the contact buttons on the site.",
+    "fallback_reply": "I cannot answer right now. Please try again in a moment, or use our contact form: an advisor will get back to you personally.",
+    "fallback_offmarket": "Off-market access requires a contractual NDA and verified financial capacity. I'd be glad to put you in touch with Julien, please use the contact buttons on the site.",
+    "fallback_fees": "Sale mandates: Exclusive 3%, Semi-Exclusive 4%, Simple 5%, Autonomous 1% (excl. VAT). Search mandate 1-3%. Full details on the Fees page.",
+    "fallback_mandate": "We offer 4 sale mandates (Exclusive, Semi, Simple, Autonomous) and a Search mandate. Each defines the engagement and fees.",
+    "fallback_estimate": "Our online estimator gives you a range in under 2 minutes: /services/estimer. The visit makes it accurate.",
+    "rate_limit_reached": "You have reached today's message limit. Please contact the agency directly, an advisor will be glad to help.",
+    "consent_prompt": "Would you like me to pass your details on to MAPA Property so an advisor can contact you? In line with our privacy policy, they will only be used for that purpose.",
+    "consent_accept": "Yes, share my details",
+    "consent_decline": "No thanks",
+    "consent_accepted": "Thank you, a MAPA Property advisor will get back to you shortly.",
+    "consent_declined": "No problem, nothing is shared. Feel free to change your mind at any time.",
+    "consent_error": "Sending failed. Please try again or use our contact form."
   },
   "financing_simulator": {
     "disclaimer": "Disclaimer: indicative simulation for information purposes only. The amounts shown do not constitute a loan offer. The rates applied by banks vary according to the borrower profile, down payment, collateral, property type and market conditions. For a personalised study, contact MAPA Property for an appointment with a qualified banking partner."

@@ -2,10 +2,74 @@
 // Injectée dans le prompt système avant chaque appel à Mistral.
 // RÈGLE ABSOLUE : Eléna ne cite QUE des informations vérifiées dans le site.
 // Toutes les valeurs ici sont sourcées depuis :
-//   - lib/legal/honoraires.ts (barèmes officiels)
+//   - lib/legal/honoraires.ts (barèmes officiels, lu directement, jamais recopié)
+//   - lib/legal-fees.ts (frais de notaire/enregistrement et Bëllegen Akt LU, lu directement)
 //   - messages/fr.json namespaces mandate_* et offmarket et about_page
 //   - app/[locale]/qui-sommes-nous/page.tsx
 // Zéro invention. Sprint ELENA-NAV phase 2.
+//
+// Le plafond loyer luxembourgeois (5 % du capital investi par an) reste
+// une valeur statique ci-dessous : aucune constante unique ne l'expose
+// ailleurs dans le code (verifie par recherche dans lib/estimation/*,
+// lib/legal-fees.ts, lib/state-aids.ts — absente). A sourcer si une
+// reference legale canonique est ajoutee au code.
+
+import { honoraires } from "@/lib/legal/honoraires";
+import { LEGAL_FEES } from "@/lib/legal-fees";
+
+type KnowledgeLocale = "fr" | "en" | "de";
+
+// Genere la section honoraires directement depuis lib/legal/honoraires.ts
+// (source unique consommee aussi par /legal/honoraires) plutot que de
+// recopier les chiffres en dur ici.
+function buildHonorairesSection(locale: KnowledgeLocale): string {
+  const content = honoraires[locale];
+  const heading =
+    locale === "en" ? "## Fees" : locale === "de" ? "## Honorare" : "## Honoraires";
+  const source =
+    locale === "en"
+      ? "(source: /legal/honoraires page)"
+      : locale === "de"
+        ? "(Quelle: Seite /legal/honoraires)"
+        : "(source : page /legal/honoraires)";
+  const intro = (content.intro ?? []).join(" ");
+  const sections = content.sections
+    .map((s) => `### ${s.heading ?? ""}\n${s.paragraphs.join("\n")}`)
+    .join("\n\n");
+  return `${heading} ${source}\n${intro}\n\n${sections}`;
+}
+
+// Genere le rappel des frais d'acquisition luxembourgeois depuis
+// lib/legal-fees.ts (meme source que le simulateur d'acquisition),
+// plutot que de recopier des pourcentages en dur.
+function buildLegalFrameworkSection(locale: KnowledgeLocale): string {
+  const lu = LEGAL_FEES.LU;
+  const bellegenAkt = lu.aids.find((a) => a.name === "Bëllegen Akt");
+  const registrationPct = Math.round(lu.registration_rights * 100);
+  const notaryPct = Math.round(lu.notary_fees_pct * 100);
+  const totalPct = registrationPct + notaryPct;
+  const bellegenAmount = bellegenAkt?.amount_per_person ?? 0;
+
+  if (locale === "en") {
+    return `## Luxembourg legal framework
+- Rent cap: 5% of invested capital per year (static value, no single code source, cf. dev note).
+- Registration and notary fees (source: lib/legal-fees.ts, LU): approximately ${registrationPct}% registration duty plus approximately ${notaryPct}% notary fees, for an indicative total close to ${totalPct}% of the acquisition price.
+- The Bëllegen Akt (source: lib/legal-fees.ts, LU aids) is a tax credit of up to €${bellegenAmount.toLocaleString("en-US")} per buyer, ${bellegenAkt?.conditions ?? ""}.
+- AML/KYC: applicable legal framework. Identity verification and source of funds required.`;
+  }
+  if (locale === "de") {
+    return `## Luxemburger Rechtsrahmen
+- Mietobergrenze: 5 % des investierten Kapitals pro Jahr (statischer Wert, keine einzelne Code-Quelle, vgl. Entwicklerhinweis).
+- Eintragungs- und Notarkosten (Quelle: lib/legal-fees.ts, LU): etwa ${registrationPct} % Eintragungsgebühr sowie etwa ${notaryPct} % Notarhonorar, insgesamt indikativ nahe ${totalPct} % des Kaufpreises.
+- Der Bëllegen Akt (Quelle: lib/legal-fees.ts, LU aids) ist eine Steuergutschrift bis zu ${bellegenAmount.toLocaleString("de-DE")} € pro Erwerber, ${bellegenAkt?.conditions ?? ""}.
+- AML/KYC: geltender Rechtsrahmen. Identitätsprüfung und Mittelherkunft erforderlich.`;
+  }
+  return `## Cadre légal Luxembourg
+- Plafond loyer luxembourgeois : 5 % du capital investi par an (valeur statique, aucune source unique en code, cf. note développeur).
+- Frais d'enregistrement et de notaire (source : lib/legal-fees.ts, LU) : environ ${registrationPct} % de droits d'enregistrement et environ ${notaryPct} % d'honoraires de notaire, soit un total indicatif proche de ${totalPct} % du prix d'acquisition.
+- Le Bëllegen Akt (source : lib/legal-fees.ts, aides LU) est un crédit d'impôt jusqu'à ${bellegenAmount.toLocaleString("fr-FR")} € par acquéreur, ${bellegenAkt?.conditions ?? ""}.
+- AML/KYC : cadre légal en vigueur. Vérification d'identité et origine des fonds obligatoires.`;
+}
 
 const KNOWLEDGE_FR = `
 # MAPA Property — Base de connaissance
@@ -48,27 +112,14 @@ Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit
 - Référence unique horodatée + log de chaque consultation.
 - La plateforme sera très prochainement disponible. En attendant, ces conditions s'appliquent déjà via demande directe par mail ou message.
 
-## Honoraires (cf. /legal/honoraires)
-- Vente : Exclusif 3 %, Semi-Exclusif 4 %, Simple 5 %, Autonome 1 % HT (du prix net vendeur).
-- Recherche : LU 3-5 % HT, Europe 3-8 % HT, International sur devis.
-- Mise en location : 1 mois de loyer HT, partagé 50/50 ou bailleur seul selon mandat.
-- Gestion locative : 6 % à 8 % HT des loyers encaissés.
-- Plafond loyer luxembourgeois : 5 % du capital investi par an (strictement respecté).
-- Estimation indicative en ligne : gratuite.
-- TVA luxembourgeoise applicable : 17 %.
-- Pack Vidéo : toujours en option, sur devis, quel que soit le mandat.
-- Avance sur frais de recherche : Luxembourg 250 € HT, régions limitrophes jusqu'à 100 km à partir de 500 € HT, autres pays sur devis. Intégralement déduite de la commission finale si la transaction se conclut avec MAPA Property.
+${buildHonorairesSection("fr")}
 
 ## Couverture géographique
 - Luxembourg : l'ensemble des communes du pays.
 - International : de nombreuses villes premium dans plusieurs pays (France, Monaco, Belgique, Suisse, Allemagne, Italie, Espagne, Portugal, Émirats, Amériques, Maurice).
 - Extensible sous mandat.
 
-## Cadre légal Luxembourg
-- Plafond loyer luxembourgeois : 5 % du capital investi par an.
-- TVA neuf résidence principale : 3 % réduit jusqu'à 50 000 € de crédit.
-- Frais d'enregistrement et de notaire : environ 6 % de droits d'enregistrement, 1 % de droit de transcription, environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % du prix d'acquisition. Le Bëllegen Akt est un crédit d'impôt jusqu'à 40 000 € par acquéreur, sans condition d'âge ni de primo-accession, pour toute résidence principale.
-- AML/KYC : cadre légal en vigueur. Vérification d'identité et origine des fonds obligatoires.
+${buildLegalFrameworkSection("fr")}
 
 ## Estimation
 - Modèle calibré sur données Observatoire de l'Habitat.
@@ -128,27 +179,14 @@ The exclusive mandate is our recommendation. The Luxembourg market is small; mul
 - Unique time-stamped reference + each consultation logged.
 - The platform will be available very shortly. Meanwhile, these conditions already apply through direct request by email or message.
 
-## Fees (cf. /legal/honoraires)
-- Sale: Exclusive 3%, Semi-Exclusive 4%, Simple 5%, Autonomous 1% (excl. VAT, on the net seller price).
-- Search: LU 3-5%, Europe 3-8%, International by quotation.
-- Letting: 1 month rent (excl. VAT), split 50/50 or fully landlord-borne per mandate.
-- Rental management: 6% to 8% (excl. VAT) of collected rents.
-- Luxembourg rent cap: 5% of invested capital per year (strictly respected).
-- Indicative online valuation: free.
-- Luxembourg VAT: 17%.
-- Video Pack: always optional, by quotation, regardless of mandate.
-- Search fee advance: Luxembourg €250 excl. VAT, neighbouring regions up to 100 km from €500 excl. VAT, other countries by quotation. Fully deducted from the final commission if the transaction concludes with MAPA Property.
+${buildHonorairesSection("en")}
 
 ## Coverage
 - Luxembourg: every municipality in Luxembourg.
 - International: numerous premium cities across several countries (France, Monaco, Belgium, Switzerland, Germany, Italy, Spain, Portugal, UAE, Americas, Mauritius).
 - Extendable under mandate.
 
-## Luxembourg legal framework
-- Rent cap: 5% of invested capital per year.
-- New build VAT: 3% reduced up to €50,000 credit (primary residence).
-- Registration and notary fees: approximately 6% registration duty, 1% transcription duty, approximately 1% notary fees, for an indicative total close to 8% of the acquisition price. The Bëllegen Akt is a tax credit of up to €40,000 per buyer, no age or first-time buyer condition, for any primary residence.
-- AML/KYC: applicable legal framework. Identity verification and source of funds required.
+${buildLegalFrameworkSection("en")}
 
 ## Valuation
 - Model calibrated on Observatoire de l'Habitat data.
@@ -208,27 +246,14 @@ Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; 
 - Einmalige zeitgestempelte Referenz + jede Einsichtnahme protokolliert.
 - Die Plattform wird in Kürze verfügbar sein. In der Zwischenzeit gelten diese Bedingungen bereits per direkter Anfrage per E-Mail oder Nachricht.
 
-## Honorare (vgl. /legal/honoraires)
-- Verkauf: Exklusiv 3 %, Halb-Exklusiv 4 %, Einfach 5 %, Autonom 1 % (zzgl. MwSt., auf den Nettoverkäuferpreis).
-- Suche: LU 3-5 %, Europa 3-8 %, International auf Angebot.
-- Vermietung: 1 Monatsmiete (zzgl. MwSt.), 50/50 geteilt oder vom Vermieter allein je nach Mandat.
-- Mietverwaltung: 6 % bis 8 % (zzgl. MwSt.) der eingenommenen Mieten.
-- Luxemburger Mietobergrenze: 5 % des investierten Kapitals pro Jahr (streng eingehalten).
-- Indikative Online-Bewertung: kostenlos.
-- Luxemburger MwSt.: 17 %.
-- Videopaket: immer optional, auf Angebot, unabhängig vom Mandat.
-- Vorschuss auf Suchkosten: Luxemburg 250 € zzgl. MwSt., angrenzende Regionen bis 100 km ab 500 € zzgl. MwSt., andere Länder auf Angebot. Vollständig auf die Endprovision angerechnet, wenn das Geschäft mit MAPA Property abgeschlossen wird.
+${buildHonorairesSection("de")}
 
 ## Abdeckung
 - Luxemburg: sämtliche Gemeinden Luxemburgs.
 - International: zahlreiche Premium-Städte in mehreren Ländern (Frankreich, Monaco, Belgien, Schweiz, Deutschland, Italien, Spanien, Portugal, VAE, Amerika, Mauritius).
 - Unter Mandat erweiterbar.
 
-## Luxemburger Rechtsrahmen
-- Mietobergrenze: 5 % des investierten Kapitals pro Jahr.
-- Neubau-MwSt.: 3 % bis 50.000 € Gutschrift bei Hauptwohnsitz.
-- Eintragungs- und Notarkosten: etwa 6 % Eintragungsgebühr, 1 % Übertragungsgebühr, etwa 1 % Notarhonorar, insgesamt indikativ nahe 8 % des Kaufpreises. Bëllegen Akt: Steuergutschrift bis zu 40.000 € pro Erwerber, ohne Altersbedingung oder Erstkäuferbedingung, für jeden Hauptwohnsitz.
-- AML/KYC: geltender Rechtsrahmen. Identitätsprüfung und Mittelherkunft erforderlich.
+${buildLegalFrameworkSection("de")}
 
 ## Bewertung
 - Modell kalibriert auf Daten des Observatoire de l'Habitat.
@@ -463,34 +488,33 @@ ${getKnowledge(locale)}`;
   return base;
 };
 
-export const getDefaultGreeting = (
-  locale: string,
-  pageContext?: string,
-): string => {
-  const isProperty = pageContext?.startsWith("property:");
-  const isOffmarket = pageContext?.startsWith("offmarket:");
-  const isMandate = pageContext?.includes("mandat");
-  const isService = pageContext?.includes("service");
+// Deduit le contexte de page depuis le pathname (partage entre la bulle
+// discrete et le panneau du chatbot).
+export const derivePageContext = (path: string): string => {
+  if (/\/biens\/[^/]+/.test(path)) return `property:${path.split("/").pop()}`;
+  if (/\/off-market\/[^/]+/.test(path))
+    return `offmarket:${path.split("/").pop()}`;
+  if (path.includes("/mandats")) return "mandate";
+  if (path.includes("/services")) return "service";
+  if (path.includes("/blog")) return "blog";
+  if (path.includes("/legal")) return "legal";
+  return "home";
+};
 
-  if (locale === "en") {
-    if (isProperty) return "Would you like the full file for this property?";
-    if (isOffmarket) return "Interested in this property? I can send you the NDA.";
-    if (isMandate) return "Need help choosing between our 4 mandate formulas?";
-    if (isService) return "Any question about our services?";
-    return "Hello, I'm Eléna. How may I help you?";
-  }
-  if (locale === "de") {
-    if (isProperty) return "Möchten Sie das vollständige Dossier dieses Objekts?";
-    if (isOffmarket)
-      return "Interesse an diesem Objekt? Ich kann Ihnen die NDA zusenden.";
-    if (isMandate) return "Brauchen Sie Hilfe bei der Wahl unserer 4 Mandatsformeln?";
-    if (isService) return "Eine Frage zu unseren Leistungen?";
-    return "Hallo, ich bin Eléna. Wie kann ich Ihnen helfen?";
-  }
-  if (isProperty) return "Souhaitez-vous le dossier complet de ce bien ?";
-  if (isOffmarket)
-    return "Cette propriété vous intéresse ? Je peux vous transmettre l'NDA.";
-  if (isMandate) return "Besoin d'aide pour choisir entre nos 4 formules ?";
-  if (isService) return "Une question sur nos prestations ?";
-  return "Bonjour, je suis Eléna. Comment puis-je vous aider ?";
+// Determine uniquement la CLE de traduction du message d'accueil selon le
+// contexte de page. Aucun texte en dur ici : le composant client resout la
+// clef via next-intl (namespace "chatbot"), dans les 3 langues.
+export type GreetingKey =
+  | "greeting_property"
+  | "greeting_offmarket"
+  | "greeting_mandate"
+  | "greeting_service"
+  | "greeting_default";
+
+export const getGreetingKey = (pageContext?: string): GreetingKey => {
+  if (pageContext?.startsWith("property:")) return "greeting_property";
+  if (pageContext?.startsWith("offmarket:")) return "greeting_offmarket";
+  if (pageContext?.includes("mandat")) return "greeting_mandate";
+  if (pageContext?.includes("service")) return "greeting_service";
+  return "greeting_default";
 };

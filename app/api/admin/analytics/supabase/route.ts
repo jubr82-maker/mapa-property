@@ -54,7 +54,7 @@ export async function GET() {
     // Table optionnelle — graceful si absente
     supabase
       .from("chatbot_logs")
-      .select("query")
+      .select("question")
       .gte("created_at", thirtyDaysAgo.toISOString())
       .limit(1000),
   ]);
@@ -124,8 +124,8 @@ export async function GET() {
   const searchAvailable = !isMissingTable(searchLogsR.error);
   if (searchAvailable && Array.isArray(searchLogsR.data)) {
     const termCounts: Record<string, number> = {};
-    for (const row of searchLogsR.data as { query?: string }[]) {
-      const q = (row.query ?? "").trim().toLowerCase();
+    for (const row of searchLogsR.data as { question?: string }[]) {
+      const q = (row.question ?? "").trim().toLowerCase();
       if (!q || q.length < 3) continue;
       termCounts[q] = (termCounts[q] ?? 0) + 1;
     }

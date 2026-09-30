@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
+import { createHash } from "crypto";
+import { getTranslations } from "next-intl/server";
 import { buildSystemPrompt } from "@/components/chatbot/chatbot-knowledge";
-import { supabaseServer } from "@/lib/supabase-server";
+import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendLeadEmails } from "@/lib/email/lead-emails";
+import { insertLeadWithConsent } from "@/lib/lead-insert";
+import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -10,9 +14,16 @@ interface Message {
 }
 
 interface RequestBody {
+  action?: "consent";
   messages?: Message[];
   locale?: string;
   pageContext?: string;
+  // Sprint ELENA-REFONTE — action de consentement explicite (point 5).
+  decision?: "accept" | "decline";
+  email?: string;
+  phone?: string;
+  transcript?: string;
+  turnstileToken?: string;
 }
 
 interface NavigateIntent {
@@ -69,9 +80,94 @@ function parseAssistantReply(
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 const PHONE_RE = /(\+\d{1,3}[\s.-]?)?(\(?\d{2,4}\)?[\s.-]?){2,4}\d{2,4}/;
 
-const callMistral = async (messages: Message[]) => {
+// Sprint ELENA-REFONTE point 6 — limite quotidienne par visiteur, en plus
+// du limiteur en memoire existant (30 req/min, cf. lib/rate-limit.ts qui
+// couvre les rafales mais repart a zero a chaque redemarrage du process).
+// 40 messages/jour : une session legitime tourne autour de 5 a 10 echanges
+// sur un sujet ; 40 laisse la place a plusieurs sessions dans la journee
+// (le visiteur revient apres reflexion) tout en bornant tres largement le
+// cout API et le risque d'abus scripte, qui envoie generalement des
+// centaines de requetes, pas quelques dizaines.
+const CHATBOT_DAILY_LIMIT = 40;
+
+function hashVisitor(ip: string): string {
+  const salt = process.env.TRACKING_IP_SALT ?? "mapa_default_salt_change_me_2026";
+  return createHash("sha256").update(ip + salt).digest("hex").slice(0, 32);
+}
+
+function isMissingTable(error: { code?: string } | null | undefined): boolean {
+  if (!error) return false;
+  return error.code === "42P01" || error.code === "PGRST205";
+}
+
+// Verifie la limite quotidienne via chatbot_logs (persistante des que la
+// migration supabase/migrations/20260930_chatbot_logs.sql est appliquee).
+// Degrade gracieusement si la table est absente : le limiteur en memoire
+// (rateLimit ci-dessus) reste la seule protection active dans ce cas.
+async function checkDailyLimit(visitorHash: string): Promise<boolean> {
+  try {
+    const sb = supabaseService();
+    const startOfDay = new Date();
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const { count, error } = await sb
+      .from("chatbot_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("visitor_hash", visitorHash)
+      .gte("created_at", startOfDay.toISOString());
+    if (error) {
+      if (!isMissingTable(error)) {
+        console.error("[api/chatbot] daily limit check echoue", { code: error.code });
+      }
+      return true;
+    }
+    return (count ?? 0) < CHATBOT_DAILY_LIMIT;
+  } catch (e) {
+    console.error("[api/chatbot] daily limit check exception", {
+      code: (e as { code?: string })?.code ?? "unknown_error",
+    });
+    return true;
+  }
+}
+
+// Journalisation best-effort d'un echange (point 8). Ne bloque jamais la
+// reponse au visiteur. Aucune donnee personnelle non volontairement
+// transmise : question/reponse sont le texte tel que saisi/genere, jamais
+// enrichi (pas d'IP en clair, uniquement son empreinte hachee).
+async function logChatbotInteraction(entry: {
+  locale: string;
+  pageContext: string;
+  engine: "mistral" | "fallback" | "consent_accept" | "consent_decline";
+  question: string;
+  answer: string;
+  leadCreated: boolean;
+  visitorHash?: string;
+}): Promise<void> {
+  try {
+    const sb = supabaseService();
+    const { error } = await sb.from("chatbot_logs").insert({
+      locale: entry.locale,
+      page_context: entry.pageContext || "home",
+      engine: entry.engine,
+      question: entry.question.slice(0, 2000),
+      answer: entry.answer.slice(0, 2000),
+      lead_created: entry.leadCreated,
+      visitor_hash: entry.visitorHash,
+    });
+    if (error && !isMissingTable(error)) {
+      console.error("[api/chatbot] log echoue", { code: error.code });
+    }
+  } catch (e) {
+    console.error("[api/chatbot] log exception", {
+      code: (e as { code?: string })?.code ?? "unknown_error",
+    });
+  }
+}
+
+const callMistral = async (
+  messages: Message[],
+): Promise<{ text: string | null; failureCode: string | null }> => {
   const apiKey = process.env.MISTRAL_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey) return { text: null, failureCode: "no_api_key" };
   try {
     const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
       method: "POST",
@@ -90,97 +186,132 @@ const callMistral = async (messages: Message[]) => {
         response_format: { type: "json_object" },
       }),
     });
-    if (!res.ok) return null;
+    if (!res.ok) return { text: null, failureCode: `mistral_http_${res.status}` };
     const json = await res.json();
-    return json?.choices?.[0]?.message?.content as string | null;
+    const text = json?.choices?.[0]?.message?.content as string | null;
+    if (!text) return { text: null, failureCode: "mistral_empty_response" };
+    return { text, failureCode: null };
   } catch {
-    return null;
+    return { text: null, failureCode: "mistral_exception" };
   }
 };
 
-const fallbackReply = (locale: string, lastUser: string): string => {
+// Sprint ELENA-REFONTE point 4 — repli professionnel. Les reponses
+// specifiques (off-market, honoraires, mandats, estimation) restent
+// utiles et exactes ; seul le message generique changeait de ton avant
+// cette passe ("chatbot non active", faux et pejoratif). Toutes les
+// chaines passent desormais par next-intl (namespace chatbot), 3 langues.
+async function fallbackReply(locale: string, lastUser: string): Promise<string> {
+  const t = await getTranslations({ locale, namespace: "chatbot" });
   const lower = lastUser.toLowerCase();
-  if (locale === "en") {
-    if (/(off.?market|nda)/.test(lower))
-      return "Off-market access requires a contractual NDA and verified financial capacity. I'd be glad to put you in touch with Julien — please use the contact buttons on the site.";
-    if (/(fee|honor|price|cost)/.test(lower))
-      return "Sale mandates: Exclusive 3%, Semi-Exclusive 4%, Simple 5%, Autonomous 1% (excl. VAT). Search mandate 1-3%. Full details on the Fees page.";
-    if (/(mandat|exclusive|search)/.test(lower))
-      return "We offer 4 sale mandates (Exclusive, Semi, Simple, Autonomous) and a Search mandate. Each defines the engagement and fees.";
-    return "Thank you for your message. The chatbot AI is not yet active here — for an immediate response, contact Julien via the contact buttons available on the site.";
-  }
-  if (locale === "de") {
-    if (/(off.?market|nda)/.test(lower))
-      return "Der Off-Market-Zugang erfordert eine vertragliche NDA und geprüfte Finanzkraft. Ich kann Sie gerne mit Julien verbinden — nutzen Sie bitte die Kontakt-Buttons auf der Website.";
-    if (/(honorar|preis|kost)/.test(lower))
-      return "Verkaufsmandate: Exklusiv 3 %, Halb-Exklusiv 4 %, Einfach 5 %, Autonom 1 % (zzgl. MwSt.). Suchmandat 1-3 %. Details auf der Honorare-Seite.";
-    return "Danke für Ihre Nachricht. Der KI-Chatbot ist hier noch nicht aktiv — für eine sofortige Antwort kontaktieren Sie bitte Julien über die Kontakt-Buttons auf der Website.";
-  }
-  if (/(off.?market|nda)/.test(lower))
-    return "L'accès off-market nécessite un NDA contractuel et une capacité financière vérifiée. Je vous mets volontiers en relation avec Julien — utilisez les boutons de contact disponibles sur le site.";
-  if (/(honorair|prix|tarif|coût|cout)/.test(lower))
-    return "Mandats de vente : Exclusif 3 %, Semi-Exclusif 4 %, Simple 5 %, Autonome 1 % (HT). Mandat de recherche 1-3 %. Détails sur la page Honoraires.";
-  if (/(mandat|exclusif|recherche)/.test(lower))
-    return "Nous proposons 4 mandats de vente (Exclusif, Semi, Simple, Autonome) et un mandat de recherche. Chacun définit l'engagement et les honoraires.";
-  if (/(estim|valeur|prix|combien)/.test(lower))
-    return "Notre estimateur en ligne vous donne une fourchette en moins de 2 minutes : /services/estimer. La visite la rend juste.";
-  return "Merci pour votre message. Le chatbot IA n'est pas encore activé ici — pour une réponse immédiate, contactez Julien via les boutons de contact disponibles sur le site.";
-};
+  if (/(off.?market|nda)/.test(lower)) return t("fallback_offmarket");
+  if (/(fee|honor|price|cost|honorair|prix|tarif|coût|cout)/.test(lower))
+    return t("fallback_fees");
+  if (/(mandat|exclusive|search|exclusif|recherche)/.test(lower))
+    return t("fallback_mandate");
+  if (/(estim|valeur|value|combien|how much)/.test(lower))
+    return t("fallback_estimate");
+  return t("fallback_reply");
+}
 
-const tryAutoLead = async (
-  conversation: Message[],
-  locale: string,
-  pageContext: string,
-) => {
+// Sprint ELENA-REFONTE point 5 — detection de coordonnees, SANS creation
+// de lead. Retourne les coordonnees detectees pour que le client propose
+// explicitement le consentement ; la creation reste conditionnee a un
+// accord explicite (cf. action:"consent" ci-dessous).
+function detectContact(conversation: Message[]): { email?: string; phone?: string } | null {
   const userText = conversation
     .filter((m) => m.role === "user")
     .map((m) => m.content)
     .join("\n");
   const email = userText.match(EMAIL_RE)?.[0];
   const phone = userText.match(PHONE_RE)?.[0];
-  if (!email && !phone) return;
+  if (!email && !phone) return null;
+  return { email, phone };
+}
 
-  // Insertion et email traites dans deux blocs separes : un echec de
-  // l'un ne doit jamais empecher la tentative de l'autre. Chaque echec
-  // est journalise avec son code technique uniquement (jamais l'email,
-  // le telephone ou le contenu du message).
-  try {
-    const sb = supabaseServer();
-    const { error } = await sb.from("leads").insert({
-      email: email ?? "no-email@chatbot.mapaproperty.lu",
-      phone: phone ?? undefined,
-      message: userText.slice(0, 2000),
+async function handleConsent(req: Request, body: RequestBody): Promise<Response> {
+  const locale = body.locale ?? "fr";
+  const pageContext = body.pageContext ?? "";
+
+  if (body.decision !== "accept") {
+    await logChatbotInteraction({
+      locale,
+      pageContext,
+      engine: "consent_decline",
+      question: "[consentement refuse]",
+      answer: "[aucun lead cree]",
+      leadCreated: false,
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  // Turnstile verifie uniquement au moment de la creation effective du
+  // lead (point 6) : aucune friction sur les messages ordinaires, un seul
+  // controle au moment ou une donnee personnelle quitte reellement le
+  // chatbot, comme sur les autres formulaires du site.
+  const turnstileOk = await verifyTurnstile(body.turnstileToken, clientIp(req));
+  if (!turnstileOk) {
+    return NextResponse.json({ ok: false, error: "turnstile_failed" }, { status: 403 });
+  }
+
+  if (!body.email && !body.phone) {
+    return NextResponse.json({ ok: false, error: "missing_contact" }, { status: 400 });
+  }
+
+  const consentAt = new Date().toISOString();
+  const sb = supabaseService();
+  const res = await insertLeadWithConsent(
+    sb,
+    "leads",
+    {
+      email: body.email ?? "no-email@chatbot.mapaproperty.lu",
+      phone: body.phone ?? undefined,
+      message: (body.transcript ?? "").slice(0, 2000),
       type: "chatbot",
       source: `chatbot:${pageContext || "home"}`,
       lang: locale,
+    },
+    consentAt,
+  );
+
+  if (!res.ok) {
+    console.error("[api/chatbot] consent lead insert echoue", {
+      code: res.error?.code,
     });
-    if (error) {
-      console.error("[api/chatbot] auto-lead insert echoue", {
-        code: error.code,
-      });
-    }
-  } catch (e) {
-    console.error("[api/chatbot] auto-lead insert exception", {
-      code: (e as { code?: string })?.code ?? "unknown_error",
+    await logChatbotInteraction({
+      locale,
+      pageContext,
+      engine: "consent_accept",
+      question: "[consentement accepte]",
+      answer: "[echec insertion lead]",
+      leadCreated: false,
     });
+    return NextResponse.json({ ok: false, error: "db_error" }, { status: 500 });
   }
 
-  try {
-    await sendLeadEmails({
-      contactEmail: email,
-      phone,
-      subject: "Conversation Eléna",
-      message: userText.slice(0, 2000),
-      type: "chatbot",
-      source: `chatbot:${pageContext || "home"}`,
-      locale,
-    });
-  } catch (e) {
-    console.error("[api/chatbot] auto-lead email exception", {
-      code: (e as { code?: string })?.code ?? "unknown_error",
-    });
-  }
-};
+  // Meme chemin que les formulaires : couche d'envoi existante, aucun
+  // mecanisme d'envoi parallele.
+  await sendLeadEmails({
+    contactEmail: body.email,
+    phone: body.phone,
+    subject: "Conversation Eléna",
+    message: (body.transcript ?? "").slice(0, 2000),
+    type: "chatbot",
+    source: `chatbot:${pageContext || "home"}`,
+    locale,
+  });
+
+  await logChatbotInteraction({
+    locale,
+    pageContext,
+    engine: "consent_accept",
+    question: "[consentement accepte]",
+    answer: "[lead cree]",
+    leadCreated: true,
+  });
+
+  return NextResponse.json({ ok: true });
+}
 
 export async function POST(req: Request) {
   const limit = rateLimit(req, {
@@ -196,10 +327,29 @@ export async function POST(req: Request) {
   }
 
   const body = (await req.json().catch(() => ({}))) as RequestBody;
+
+  if (body.action === "consent") {
+    return handleConsent(req, body);
+  }
+
   const { messages = [], locale = "fr", pageContext = "" } = body;
 
   if (messages.length === 0) {
     return NextResponse.json({ error: "missing_messages" }, { status: 400 });
+  }
+
+  const ip = clientIp(req);
+  const visitorHash = ip ? hashVisitor(ip) : undefined;
+  if (visitorHash) {
+    const withinDailyLimit = await checkDailyLimit(visitorHash);
+    if (!withinDailyLimit) {
+      const t = await getTranslations({ locale, namespace: "chatbot" });
+      return NextResponse.json({
+        reply: t("rate_limit_reached"),
+        intent: null,
+        contactDetected: null,
+      });
+    }
   }
 
   const systemPrompt = buildSystemPrompt(locale, pageContext);
@@ -208,21 +358,43 @@ export async function POST(req: Request) {
     ...messages,
   ];
 
-  let reply = await callMistral(fullMessages);
+  const lastUser = messages.filter((m) => m.role === "user").pop()?.content ?? "";
+  const { text: mistralText, failureCode } = await callMistral(fullMessages);
 
-  if (!reply) {
-    const lastUser = messages.filter((m) => m.role === "user").pop()?.content ?? "";
-    reply = fallbackReply(locale, lastUser);
+  let reply: string;
+  let engine: "mistral" | "fallback";
+  if (mistralText) {
+    reply = mistralText;
+    engine = "mistral";
+  } else {
+    // Point 4 — la vraie cause de l'echec est journalisee cote serveur,
+    // sans donnee personnelle (code technique uniquement, jamais le texte
+    // de l'utilisateur ni sa reponse). Lecture : cf. rapport de mission
+    // (Vercel Runtime Logs du projet, filtre "[api/chatbot] mistral").
+    console.error("[api/chatbot] mistral indisponible, repli heuristique", {
+      code: failureCode ?? "unknown",
+    });
+    reply = await fallbackReply(locale, lastUser);
+    engine = "fallback";
   }
 
-  // Auto-lead detection. AWAIT obligatoire (serverless Vercel) : sans await
-  // le process est gele apres la reponse et le lead chatbot est perdu. La
-  // fonction a son try/catch interne → ne throw jamais, ne bloque pas la reponse.
-  await tryAutoLead(messages, locale, pageContext);
+  // Point 5 — detection sans creation silencieuse. Le client affiche la
+  // demande de consentement explicite ; rien n'est ecrit en base ici.
+  const contactDetected = detectContact(messages);
 
-  // Sprint ELENA-NAV C2 — extraction message + intent du JSON LLM.
   const { message, intent } = parseAssistantReply(reply);
-  return NextResponse.json({ reply: message, intent });
+
+  await logChatbotInteraction({
+    locale,
+    pageContext,
+    engine,
+    question: lastUser,
+    answer: message,
+    leadCreated: false,
+    visitorHash,
+  });
+
+  return NextResponse.json({ reply: message, intent, contactDetected });
 }
 
 export const dynamic = "force-dynamic";

@@ -1,19 +1,12 @@
 "use client";
 
-// Wrapper Client : permet de charger ChatbotWidget en dynamic import sans SSR,
-// pour qu'il ne pèse pas sur le bundle JS initial / le LCP de la home et des
-// fiches biens. Le widget n'apparaît qu'après hydratation (impact UX nul,
-// il s'ouvre déjà au clic utilisateur).
-import dynamic from "next/dynamic";
-
-const ChatbotWidget = dynamic(
-  () => import("./ChatbotWidget").then((m) => ({ default: m.ChatbotWidget })),
-  {
-    ssr: false,
-    loading: () => null,
-  },
-);
+// Point d'entree stable pour app/[locale]/layout.tsx. La bulle (petite,
+// toujours visible) est importee normalement : c'est volontaire, elle doit
+// s'afficher des l'hydratation. Le panneau de conversation, lui, n'est
+// importe qu'a l'ouverture (cf. next/dynamic dans ChatbotBubble.tsx) —
+// c'est lui qui pesait sur le JS charge sur chaque page avant cette passe.
+import { ChatbotBubble } from "./ChatbotBubble";
 
 export function ChatbotWidgetLoader() {
-  return <ChatbotWidget />;
+  return <ChatbotBubble />;
 }

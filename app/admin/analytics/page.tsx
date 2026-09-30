@@ -1236,7 +1236,7 @@ export default async function AdminAnalyticsPage() {
             <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
               <header className="mb-4 flex items-center justify-between">
                 <h3 className="font-display text-lg font-bold text-[#3D4F63]">
-                  Top recherches IA
+                  Top questions chatbot
                 </h3>
                 <Search className="size-5 text-[#e0af6e]" />
               </header>
