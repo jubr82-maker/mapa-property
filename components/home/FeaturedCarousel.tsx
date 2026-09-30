@@ -15,7 +15,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import useEmblaCarousel from "embla-carousel-react";
@@ -25,6 +25,7 @@ import { resolveBadgeStyles } from "@/lib/badge-style";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 import { useDeviceMode } from "@/hooks/useDeviceMode";
+import { formatPrice, priceOnDemandLabel } from "@/lib/format/numbers";
 
 interface Props {
   items: HomeFeatured[];
@@ -336,6 +337,7 @@ function ViewAllCTA({ label, inline = false }: { label: string; inline?: boolean
 
 function FeaturedCard({ item }: { item: HomeFeatured }) {
   const tOff = useTranslations("offmarket");
+  const locale = useLocale();
   const isOffmarket = item.kind === "offmarket";
   const href = isOffmarket
     ? `/off-market/${item.id}`
@@ -414,7 +416,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
         </h3>
         <div className="mt-auto flex items-baseline justify-between gap-3">
           <p className="font-display text-lg font-bold gold-text">
-            {item.price_label ?? "Prix sur demande"}
+            {item.price ? formatPrice(item.price, locale) : priceOnDemandLabel(locale)}
           </p>
           {(item.surface || item.bedrooms) && (
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">

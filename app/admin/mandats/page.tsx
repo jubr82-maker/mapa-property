@@ -7,6 +7,7 @@ import {
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
 import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
+import { formatPrice as formatPriceShared } from "@/lib/format/numbers";
 
 export const dynamic = "force-dynamic";
 
@@ -88,11 +89,7 @@ function formatBudget(min: number | null, max: number | null): string {
 
 function formatPrice(value: number | null): string {
   if (value == null) return "—";
-  return new Intl.NumberFormat("fr-LU", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return formatPriceShared(value, "fr");
 }
 
 function formatZonesOrCity(

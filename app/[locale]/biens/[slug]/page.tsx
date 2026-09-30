@@ -18,6 +18,7 @@ import { BackButton } from "@/components/ui/BackButton";
 import { ContactReveal } from "@/components/contact-reveal";
 import { AcquisitionSimulator } from "@/components/property/AcquisitionSimulator";
 import { PropertyMagazineDescription } from "@/components/property/PropertyMagazineDescription";
+import { formatPrice as formatPriceShared, formatSurface } from "@/lib/format/numbers";
 import { PropertyVideo } from "@/components/property/PropertyVideo";
 import { PropertyViewTracker } from "@/components/property/PropertyViewTracker";
 import { FicheHeader } from "@/components/property/fiche/FicheHeader";
@@ -82,17 +83,17 @@ export async function generateStaticParams() {
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
 
+// Bug corrige (mission "surfaces decimales, formats de nombres...") :
+// l'ancienne version formatait toujours en "fr-LU" pour fr ET en, ce qui
+// affichait "500.000 €" (convention allemande) sur les fiches anglaises
+// au lieu de "€500,000". Remplacee par la fonction partagee.
 const formatPrice = (
   price: number | null,
   transaction: string,
   locale: string,
 ) => {
   if (!price) return "—";
-  const value = new Intl.NumberFormat(locale === "de" ? "de-LU" : "fr-LU", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(price);
+  const value = formatPriceShared(price, locale);
   return transaction === "rent" ? `${value} / mois` : value;
 };
 
@@ -244,15 +245,15 @@ export default async function PropertyPage({
 
   // Specs — toutes les données Supabase préservées, "—" si absent.
   const specs = [
-    { label: t("living_surface"), value: property.living_surface ? `${property.living_surface} m²` : "—" },
-    { label: t("surface"), value: property.surface ? `${property.surface} m²` : "—" },
+    { label: t("living_surface"), value: property.living_surface ? formatSurface(property.living_surface, locale) : "—" },
+    { label: t("surface"), value: property.surface ? formatSurface(property.surface, locale) : "—" },
     { label: t("bedrooms"), value: property.bedrooms != null ? String(property.bedrooms) : "—" },
     { label: t("bathrooms"), value: property.bathrooms != null ? String(property.bathrooms) : "—" },
     { label: t("energy"), value: property.energy ?? "—" },
     { label: t("parking"), value: property.parking != null ? String(property.parking) : "—" },
     { label: t("year"), value: property.year ? String(property.year) : "—" },
-    { label: t("land_surface"), value: property.land_surface ? `${property.land_surface} m²` : "—" },
-    { label: t("terrace_surface"), value: property.terrace_surface ? `${property.terrace_surface} m²` : "—" },
+    { label: t("land_surface"), value: property.land_surface ? formatSurface(property.land_surface, locale) : "—" },
+    { label: t("terrace_surface"), value: property.terrace_surface ? formatSurface(property.terrace_surface, locale) : "—" },
   ];
 
   const hasDescription =

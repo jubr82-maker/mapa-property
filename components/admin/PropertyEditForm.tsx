@@ -18,6 +18,7 @@
 import { useState, useTransition, useEffect } from "react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { updateProperty } from "@/app/admin/properties/actions";
+import { parseDecimalInput } from "@/lib/format/numbers";
 
 const BADGE_OPTIONS = [
   "Exclusivité",
@@ -317,11 +318,30 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  // Champs surface (mission "surfaces decimales...") : type="number" natif
+  // rejette la virgule au clavier sur la plupart des navigateurs/claviers
+  // (le separateur decimal HTML5 est toujours le point, quelle que soit la
+  // locale de saisie). Passage en saisie texte libre + filtrage manuel :
+  // chiffres uniquement, un seul separateur (virgule OU point), 2
+  // decimales maximum. La conversion finale (numOrNull) tolere les deux.
+  function setDecimal(key: keyof FormState, raw: string) {
+    const digitsAndSep = raw.replace(/[^\d,.]/g, "");
+    const sepIdx = digitsAndSep.search(/[,.]/);
+    const cleaned =
+      sepIdx === -1
+        ? digitsAndSep
+        : digitsAndSep.slice(0, sepIdx) +
+          digitsAndSep[sepIdx] +
+          digitsAndSep.slice(sepIdx + 1).replace(/[,.]/g, "").slice(0, 2);
+    set(key, cleaned);
+  }
+
+  // parseDecimalInput tolere la virgule ET le point comme separateur
+  // decimal (mission "surfaces decimales, formats de nombres...") —
+  // necessaire des que les champs surface passent en saisie texte libre
+  // pour accepter la virgule au clavier (type="number" natif la rejette).
   function numOrNull(key: (typeof NUMERIC_KEYS)[number]): number | null {
-    const raw = form[key].trim();
-    if (raw === "") return null;
-    const n = Number(raw);
-    return Number.isNaN(n) ? null : n;
+    return parseDecimalInput(form[key]);
   }
 
   const onSave = (e: React.FormEvent) => {
@@ -475,30 +495,30 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         </Field>
       </Section>
 
-      <Section title="Surfaces" hint="Toutes en m² — laisser vide si non applicable.">
+      <Section title="Surfaces" hint="Toutes en m², jusqu'à 2 décimales (virgule ou point) — laisser vide si non applicable.">
         <Field label="Surface (référence)">
-          <input type="number" min="0" step="0.1" value={form.surface} onChange={(e) => set("surface", e.target.value)} className={inputCls} />
+          <input type="text" inputMode="decimal" value={form.surface} onChange={(e) => setDecimal("surface", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Surface habitable">
-          <input type="number" min="0" step="0.1" value={form.living_surface} onChange={(e) => set("living_surface", e.target.value)} className={inputCls} />
+          <input type="text" inputMode="decimal" value={form.living_surface} onChange={(e) => setDecimal("living_surface", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Surface utile">
-          <input type="number" min="0" step="0.1" value={form.usable_surface} onChange={(e) => set("usable_surface", e.target.value)} className={inputCls} />
+          <input type="text" inputMode="decimal" value={form.usable_surface} onChange={(e) => setDecimal("usable_surface", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Surface terrain">
-          <input type="number" min="0" step="0.1" value={form.land_surface} onChange={(e) => set("land_surface", e.target.value)} className={inputCls} />
+          <input type="text" inputMode="decimal" value={form.land_surface} onChange={(e) => setDecimal("land_surface", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Terrasse">
-          <input type="number" min="0" step="0.1" value={form.terrace_surface} onChange={(e) => set("terrace_surface", e.target.value)} className={inputCls} />
+          <input type="text" inputMode="decimal" value={form.terrace_surface} onChange={(e) => setDecimal("terrace_surface", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Balcon">
-          <input type="number" min="0" step="0.1" value={form.balcony_surface} onChange={(e) => set("balcony_surface", e.target.value)} className={inputCls} />
+          <input type="text" inputMode="decimal" value={form.balcony_surface} onChange={(e) => setDecimal("balcony_surface", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Jardin">
-          <input type="number" min="0" step="0.1" value={form.garden_surface} onChange={(e) => set("garden_surface", e.target.value)} className={inputCls} />
+          <input type="text" inputMode="decimal" value={form.garden_surface} onChange={(e) => setDecimal("garden_surface", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Cuisine">
-          <input type="number" min="0" step="0.1" value={form.kitchen_surface} onChange={(e) => set("kitchen_surface", e.target.value)} className={inputCls} />
+          <input type="text" inputMode="decimal" value={form.kitchen_surface} onChange={(e) => setDecimal("kitchen_surface", e.target.value)} className={inputCls} />
         </Field>
         <Field label="Surface totale (immeuble)">
           <input type="number" min="0" step="0.1" value={form.area_total} onChange={(e) => set("area_total", e.target.value)} className={inputCls} />

@@ -23,33 +23,11 @@
 // que les migrations ne sont pas appliquées → traitée comme « non
 // renseignée » et on tombe dans la branche suivante (jamais de throw).
 
-const ON_DEMAND_LABEL: Record<string, string> = {
-  fr: "Prix sur demande",
-  en: "Price on request",
-  de: "Preis auf Anfrage",
-};
-
-export function priceOnDemandLabel(locale: string): string {
-  return ON_DEMAND_LABEL[locale] ?? ON_DEMAND_LABEL.fr;
-}
-
-// Locales Intl par langue UI. fr → "5 000 000 €", en → "€5,000,000",
-// de → "5.000.000 €".
-const NUMBER_LOCALE: Record<string, string> = {
-  fr: "fr-FR",
-  en: "en-IE", // € en préfixe, séparateur virgule (style demandé)
-  de: "de-DE",
-};
-
-export function formatPrice(value: number, locale: string): string {
-  const nf = new Intl.NumberFormat(NUMBER_LOCALE[locale] ?? "fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-    minimumFractionDigits: 0,
-  });
-  return nf.format(value);
-}
+// Formatage partage (mission "surfaces decimales, formats de nombres...") :
+// source unique dans lib/format/numbers.ts, reexportee ici pour compat
+// ascendante avec les imports existants depuis ce module.
+export { formatPrice, priceOnDemandLabel } from "@/lib/format/numbers";
+import { formatPrice, priceOnDemandLabel } from "@/lib/format/numbers";
 
 /** Convertit une valeur tolérante (number | string | null | undefined) en
  *  nombre fini strictement positif, ou null si non exploitable. */

@@ -18,6 +18,7 @@ import {
   WorkflowBadge,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
+import { formatPrice, formatSurface } from "@/lib/format/numbers";
 
 type Request = {
   id: string;
@@ -114,7 +115,7 @@ export function RequestRow({ request }: { request: Request }) {
               label="Budget max"
               value={
                 request.budget_max_eur
-                  ? request.budget_max_eur.toLocaleString("fr-FR") + " €"
+                  ? formatPrice(request.budget_max_eur, "fr")
                   : null
               }
             />
@@ -122,7 +123,7 @@ export function RequestRow({ request }: { request: Request }) {
               label="Surface souhaitée"
               value={
                 request.surface_souhaitee_m2
-                  ? `${request.surface_souhaitee_m2} m²`
+                  ? formatSurface(request.surface_souhaitee_m2, "fr")
                   : null
               }
             />

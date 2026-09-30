@@ -13,6 +13,7 @@ import {
   type RequestStatus,
 } from "@/lib/admin/offmarket";
 import { translateBatch } from "@/lib/translate";
+import { formatPrice as formatPriceShared, parseDecimalInput } from "@/lib/format/numbers";
 
 // Colonnes potentiellement absentes selon l'état d'application des migrations.
 // Si Postgres remonte "column does not exist" sur l'une d'elles, on la retire
@@ -198,10 +199,12 @@ export type ActionResult = { ok: true; id?: string } | { ok: false; error: strin
 
 const ALLOWED_STATUSES: OffmarketStatus[] = ["draft", "published", "sold", "withdrawn"];
 
+// parseDecimalInput tolere virgule ET point (mission "surfaces decimales,
+// formats de nombres...") : necessaire depuis que les champs surface sont
+// passes en saisie texte libre pour accepter la virgule au clavier.
 function num(value: FormDataEntryValue | null): number | null {
-  if (value == null || value === "") return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
+  if (value == null || value instanceof File) return null;
+  return parseDecimalInput(value);
 }
 
 function str(value: FormDataEntryValue | null): string | null {
@@ -441,8 +444,7 @@ function computePriceLabel(
   formData: FormData,
   transaction: "sale" | "rent" = "sale",
 ): string {
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n) + " €";
+  const fmt = (n: number) => formatPriceShared(n, "fr");
   // Aligné sur PropertyCard.formatPrice (circuit classique) : suffixe
   // "/ mois" pour les locations, jamais pour les ventes ni "sur demande".
   const suffix = transaction === "rent" ? " / mois" : "";

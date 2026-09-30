@@ -124,6 +124,22 @@ export function getLocalityCoords(
   return null;
 }
 
+// Mission "saisie et affichage des biens", point 3 — liste de noms
+// dedupliques et tries pour l'auto-suggestion du champ ville admin.
+// Volontairement legere (juste les noms) : LOCALITIES porte aussi les
+// alternateNames multilingues (~160 Ko), utiles au lookup radius mais
+// inutiles a une liste deroulante — a n'importer que cote serveur (cf.
+// composant appelant) pour ne jamais alourdir un bundle client.
+let cachedNames: string[] | null = null;
+export function getLuxembourgLocalityNames(): string[] {
+  if (!cachedNames) {
+    cachedNames = Array.from(new Set(LOCALITIES.map((l) => l.name))).sort(
+      (a, b) => a.localeCompare(b, "fr"),
+    );
+  }
+  return cachedNames;
+}
+
 function pickBest(candidates: Locality[]): LookupResult {
   // Population la plus haute en premier (le user veut la commune la plus
   // probable avec ce nom).

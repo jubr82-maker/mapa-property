@@ -20,6 +20,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PROPERTIES_LIST_TAG } from "@/lib/data";
+import { processUploadedImage } from "@/lib/images/process-upload";
 
 const BUCKET = "property-images";
 
@@ -36,13 +37,36 @@ export async function uploadPropertyPhoto(
 ): Promise<{ url: string; path: string }> {
   const file = formData.get("file");
   if (!(file instanceof File)) throw new Error("Aucun fichier reçu.");
+
+  // Mission "saisie et affichage des biens", point 4 — conversion server-
+  // side systematique, quel que soit le format recu (HEIC/HEIF/JPEG/PNG/
+  // WebP/TIFF) : oriente correctement, metadonnees EXIF/GPS retirees,
+  // redimensionnee, encodee en WebP. Remplace la seule compression cote
+  // navigateur (lib/image-compress.ts), qui ne sait pas decoder le HEIC
+  // et retombait silencieusement sur le fichier brut non affichable.
+  const inputBuffer = Buffer.from(await file.arrayBuffer());
+  let processed;
+  try {
+    processed = await processUploadedImage(inputBuffer);
+  } catch (e) {
+    console.error("[admin/properties/photos] conversion echouee", {
+      code: (e as { code?: string })?.code ?? "unknown_error",
+    });
+    throw new Error(
+      "Ce fichier ne peut pas être converti en image (format non reconnu ou fichier corrompu).",
+    );
+  }
+
   const supabase = await createSupabaseServerClient();
-  const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${processed.extension}`;
   const path = `${propertyId}/${filename}`;
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(path, file, { cacheControl: "3600", upsert: false });
+    .upload(path, processed.buffer, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: processed.contentType,
+    });
   if (error) throw new Error(error.message);
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
   return { url: data.publicUrl, path };

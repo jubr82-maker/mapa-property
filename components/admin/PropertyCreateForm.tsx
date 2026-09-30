@@ -21,6 +21,7 @@ import {
   PROPERTY_STATES,
   TRANSACTION_TYPES,
 } from "@/lib/taxonomy/property-types";
+import { CitySuggestInput } from "@/components/admin/CitySuggestInput";
 
 const inputCls =
   "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none";
@@ -80,7 +81,12 @@ const COUNTRIES = [
   { value: "ES", label: "Espagne" },
 ];
 
-export function PropertyCreateForm() {
+export function PropertyCreateForm({
+  citySuggestions,
+}: {
+  /** Communes/localites luxembourgeoises proposees (cf. page parente). */
+  citySuggestions: string[];
+}) {
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [priceOnDemand, setPriceOnDemand] = useState(false);
@@ -186,7 +192,11 @@ export function PropertyCreateForm() {
           </select>
         </Field>
         <Field label="Ville">
-          <input name="city" className={inputCls} />
+          <CitySuggestInput
+            name="city"
+            suggestions={citySuggestions}
+            className={inputCls}
+          />
         </Field>
       </Section>
 

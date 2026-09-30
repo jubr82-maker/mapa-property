@@ -8,6 +8,7 @@ import {
   setPropertyPublished,
   setPropertyFeatured,
 } from "@/app/admin/properties/actions";
+import { formatPrice, formatSurface } from "@/lib/format/numbers";
 
 type Row = {
   id: string;
@@ -128,10 +129,10 @@ function PropertyRow({ row }: { row: Row }) {
         {row.transaction ?? "—"}
       </td>
       <td className="px-4 py-3 text-right font-mono text-xs">
-        {row.price ? row.price.toLocaleString("fr-FR") + " €" : "—"}
+        {row.price ? formatPrice(row.price, "fr") : "—"}
       </td>
       <td className="px-4 py-3 text-right font-mono text-xs">
-        {row.surface ? `${row.surface} m²` : "—"} · {row.bedrooms ?? "—"} ch
+        {row.surface ? formatSurface(row.surface, "fr") : "—"} · {row.bedrooms ?? "—"} ch
       </td>
       <td className="px-4 py-3 text-center">
         <Switch checked={pub} onChange={onPub} busy={busy} />

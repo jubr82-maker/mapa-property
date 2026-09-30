@@ -10,6 +10,7 @@ import {
 } from "@/lib/admin/offmarket";
 import { fetchOffmarketAdminList } from "@/lib/admin/offmarket-server";
 import { requireAdminPage } from "@/lib/admin/require-admin";
+import { formatPrice } from "@/lib/format/numbers";
 import { OffmarketListFilters } from "@/components/admin/OffmarketListFilters";
 
 export default async function AdminOffmarketListPage({
@@ -106,7 +107,7 @@ export default async function AdminOffmarketListPage({
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-xs text-[#3D4F63]">
                       {row.price_estimate
-                        ? row.price_estimate.toLocaleString("fr-FR") + " €"
+                        ? formatPrice(row.price_estimate, "fr")
                         : "—"}
                     </td>
                     <td className="px-4 py-3">

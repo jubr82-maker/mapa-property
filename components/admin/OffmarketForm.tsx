@@ -277,8 +277,8 @@ export function OffmarketForm({
               <Field label="Surface habitable (m²)">
                 <input
                   name="surface_habitable"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
                   defaultValue={row?.surface_habitable ?? row?.surface_hab ?? ""}
                   className={inputCls}
                 />
@@ -289,8 +289,8 @@ export function OffmarketForm({
                 <Field label="Surface utile (m²)">
                   <input
                     name="surface_utile"
-                    type="number"
-                    min="0"
+                    type="text"
+                    inputMode="decimal"
                     defaultValue={row?.surface_utile ?? ""}
                     className={inputCls}
                   />
@@ -298,9 +298,8 @@ export function OffmarketForm({
                 <Field label="Surface pondérée (m²)">
                   <input
                     name="surface_ponderee"
-                    type="number"
-                    min="0"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     defaultValue={row?.surface_ponderee ?? ""}
                     className={inputCls}
                   />
@@ -317,8 +316,8 @@ export function OffmarketForm({
             >
               <input
                 name="surface_terrain"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
                 defaultValue={row?.surface_terrain ?? ""}
                 className={inputCls}
               />

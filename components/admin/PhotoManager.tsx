@@ -16,6 +16,13 @@
 import { useState, useTransition, useRef } from "react";
 import { compressImageFile } from "@/lib/image-compress";
 
+// Valeur large (HEIC/HEIF sans type MIME reconnu sur certains OS/
+// navigateurs) : le controle reel du format se fait server-side, par le
+// contenu, pas ici — cf. lib/images/process-upload.ts. Constante inline
+// (et non importee depuis ce module) car il embarque `sharp`, un module
+// natif Node qui ne doit jamais atteindre un bundle client.
+const ACCEPT_ATTRIBUTE = "image/*,.heic,.heif,.jpg,.jpeg,.png,.webp,.tif,.tiff";
+
 export interface PhotoData {
   url: string;
   path: string;
@@ -149,7 +156,7 @@ export function PhotoManager({
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/*"
+          accept={ACCEPT_ATTRIBUTE}
           onChange={(e) => handleFiles(e.target.files)}
           className="hidden"
         />
@@ -157,7 +164,8 @@ export function PhotoManager({
           {uploading ? "Upload en cours…" : "Cliquer pour ajouter des photos"}
         </p>
         <p className="mt-1 text-xs text-[#3D4F63]/60">
-          JPG / PNG / WebP — la première (sort 0) sert de cover publique.
+          HEIC / HEIF / JPG / PNG / WebP / TIFF — converties automatiquement.
+          La première (sort 0) sert de cover publique.
         </p>
       </label>
 

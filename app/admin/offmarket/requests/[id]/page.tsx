@@ -15,6 +15,7 @@ import {
   setRequestNextFollowUp,
 } from "@/app/admin/offmarket/actions";
 import { PdfExportButton } from "@/components/admin/PdfExportButton";
+import { formatPrice, formatSurface } from "@/lib/format/numbers";
 
 export const dynamic = "force-dynamic";
 
@@ -199,7 +200,7 @@ export default async function AdminOffmarketRequestDetailPage({
                 label="Budget max"
                 value={
                   item.budget_max_eur
-                    ? `${item.budget_max_eur.toLocaleString("fr-FR")} €`
+                    ? formatPrice(item.budget_max_eur, "fr")
                     : "—"
                 }
               />
@@ -207,7 +208,7 @@ export default async function AdminOffmarketRequestDetailPage({
                 label="Surface souhaitée"
                 value={
                   item.surface_souhaitee_m2
-                    ? `${item.surface_souhaitee_m2} m²`
+                    ? formatSurface(item.surface_souhaitee_m2, "fr")
                     : "—"
                 }
               />

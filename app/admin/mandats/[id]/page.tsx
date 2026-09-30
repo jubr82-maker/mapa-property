@@ -9,6 +9,7 @@ import {
   WorkflowBadge,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
+import { formatPrice as formatPriceShared, formatSurface as formatSurfaceShared } from "@/lib/format/numbers";
 import {
   updateWorkflowStatus,
   addAdminNote,
@@ -125,18 +126,12 @@ function formatDate(iso: string | null): string {
 
 function formatPrice(value: number | null): string {
   if (value == null) return "—";
-  return new Intl.NumberFormat("fr-LU", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return formatPriceShared(value, "fr");
 }
 
 function formatBudget(min: number | null, max: number | null): string {
   if (min == null && max == null) return "—";
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n) +
-    " €";
+  const fmt = (n: number) => formatPriceShared(n, "fr");
   if (min != null && max != null) return `${fmt(min)} – ${fmt(max)}`;
   if (min != null) return `≥ ${fmt(min)}`;
   if (max != null) return `≤ ${fmt(max)}`;
@@ -295,7 +290,7 @@ export default async function AdminMandatDetailPage({
                   label="Surface min. (m²)"
                   value={
                     mandat.min_surface != null
-                      ? String(mandat.min_surface)
+                      ? formatSurfaceShared(mandat.min_surface, "fr", { withUnit: false })
                       : null
                   }
                 />

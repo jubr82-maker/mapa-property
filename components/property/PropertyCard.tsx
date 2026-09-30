@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { pickLang, type Locale } from "@/lib/types";
 import type { PropertyWithCover } from "@/lib/data";
 import { resolveBadgeStyles } from "@/lib/badge-style";
+import { formatPrice as formatPriceShared, formatSurface } from "@/lib/format/numbers";
 
 interface PropertyCardProps {
   property: PropertyWithCover;
@@ -22,13 +23,14 @@ interface PropertyCardProps {
   onClick?: () => void;
 }
 
-const formatPrice = (price: number | null, transaction: string) => {
+// Bug corrige (mission "surfaces decimales, formats de nombres...") :
+// cette fonction locale forcait la locale "fr-LU" (separateur de milliers
+// par point, ex. "500.000 €") quelle que soit la langue affichee, et
+// dupliquait components/property/PropertyPrice.tsx. Remplacee par la
+// fonction partagee, sensible a la locale reelle de la carte.
+const formatPrice = (price: number | null, transaction: string, locale: string) => {
   if (!price) return "—";
-  const value = new Intl.NumberFormat("fr-LU", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(price);
+  const value = formatPriceShared(price, locale);
   return transaction === "rent" ? `${value} / mois` : value;
 };
 
@@ -40,7 +42,7 @@ export function PropertyCard({
   onClick,
 }: PropertyCardProps) {
   const title = pickLang(property, "title", locale) || "—";
-  const price = formatPrice(property.price, property.transaction);
+  const price = formatPrice(property.price, property.transaction, locale);
   // La table properties n'a pas de cover_image_url ; on s'appuie uniquement
   // sur cover_url (calculé depuis property_images via les fetchers data.ts).
   const cover = property.cover_url;
@@ -132,7 +134,7 @@ export function PropertyCard({
           <ul className="mt-auto flex flex-wrap gap-x-4 gap-y-1 pt-3 font-mono text-[11px] text-ink-mid">
             {property.surface && (
               <li>
-                <span className="text-ink-soft">Surf.</span> {property.surface} m²
+                <span className="text-ink-soft">Surf.</span> {formatSurface(property.surface, locale)}
               </li>
             )}
             {property.bedrooms !== null && property.bedrooms !== undefined && (

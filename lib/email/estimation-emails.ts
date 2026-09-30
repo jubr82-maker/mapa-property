@@ -10,6 +10,7 @@
 // Best effort : ne throw jamais, ne bloque jamais la réponse au visiteur.
 
 import { sendMail, INTERNAL_NOTIFICATION_RECIPIENTS } from "./smtp";
+import { formatNumber, formatSurface } from "@/lib/format/numbers";
 
 type Locale = "fr" | "en" | "de";
 
@@ -29,10 +30,11 @@ interface SendEstimationEmailsArgs {
   leadId?: string;
 }
 
-function fmtEur(n: number): string {
-  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(
-    Math.round(n),
-  );
+// Bug corrige (mission "surfaces decimales, formats de nombres...") :
+// cette fonction ignorait la locale du destinataire, si bien qu'un client
+// anglophone recevait des chiffres au format francais (espace insecable).
+function fmtEur(n: number, locale: string): string {
+  return formatNumber(Math.round(n), locale);
 }
 
 function pickLocale(input: string | undefined): Locale {
@@ -70,9 +72,9 @@ function clientBody(args: {
   range: Range;
 }): string {
   const { name, commune, range, locale } = args;
-  const low = fmtEur(range.low);
-  const mid = fmtEur(range.mid);
-  const high = fmtEur(range.high);
+  const low = fmtEur(range.low, locale);
+  const mid = fmtEur(range.mid, locale);
+  const high = fmtEur(range.high, locale);
   switch (locale) {
     case "en":
       return [
@@ -153,12 +155,12 @@ function internalBody(args: SendEstimationEmailsArgs): string {
     `= BIEN =`,
     `Type        : ${args.type ?? "—"}`,
     `Commune     : ${args.commune ?? "—"}`,
-    `Surface     : ${args.surfaceLiving ? `${args.surfaceLiving} m²` : "—"}`,
+    `Surface     : ${args.surfaceLiving ? formatSurface(args.surfaceLiving, "fr") : "—"}`,
     ``,
     `= ESTIMATION CLIENT (${args.engine}) =`,
-    `Low         : ${fmtEur(args.range.low)} €`,
-    `Mid         : ${fmtEur(args.range.mid)} €`,
-    `High        : ${fmtEur(args.range.high)} €`,
+    `Low         : ${fmtEur(args.range.low, "fr")} €`,
+    `Mid         : ${fmtEur(args.range.mid, "fr")} €`,
+    `High        : ${fmtEur(args.range.high, "fr")} €`,
     ``,
   ];
   if (args.message) {

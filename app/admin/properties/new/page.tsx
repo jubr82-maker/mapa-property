@@ -1,8 +1,13 @@
 import { PropertyCreateForm } from "@/components/admin/PropertyCreateForm";
+import { getLuxembourgLocalityNames } from "@/lib/geo/luxembourg-communes";
 
 export const dynamic = "force-dynamic";
 
 export default function NewPropertyPage() {
+  // Calcule cote serveur : la liste complete (avec noms alternatifs
+  // multilingues) ne doit jamais atteindre le bundle client, seule cette
+  // liste de noms deja allegee est transmise en prop.
+  const citySuggestions = getLuxembourgLocalityNames();
   return (
     <div className="space-y-8">
       <header>
@@ -17,7 +22,7 @@ export default function NewPropertyPage() {
           photos…) se complète après création, depuis la page d&apos;édition.
         </p>
       </header>
-      <PropertyCreateForm />
+      <PropertyCreateForm citySuggestions={citySuggestions} />
     </div>
   );
 }
