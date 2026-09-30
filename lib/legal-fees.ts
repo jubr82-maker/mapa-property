@@ -10,6 +10,14 @@ export type CountryCode = "LU" | "FR" | "BE" | "DE" | "PT" | "AE";
 export interface CountryFees {
   name: string;
   registration_rights: number;
+  /** Sous-detail de registration_rights pour le Luxembourg (droits
+   * d'enregistrement proprement dits). Optionnel : seul LU le renseigne
+   * pour le moment. Utilise par le chatbot (mission "chiffres verrouilles")
+   * pour ne jamais fusionner taxes et honoraires de notaire en un total. */
+  registration_duty_pct?: number;
+  /** Sous-detail de registration_rights pour le Luxembourg (droit de
+   * transcription). Meme usage que registration_duty_pct. */
+  transcription_duty_pct?: number;
   notary_fees_pct: number;
   mortgage_fees: number;
   aids: Aid[];
@@ -25,6 +33,10 @@ export interface Aid {
   rate?: string;
   type?: string;
   conditions?: string;
+  /** Traduction de `conditions` pour les contextes multilingues (ex.
+   * chatbot). Optionnel : `conditions` (FR) reste la valeur affichee par
+   * les composants existants (simulateurs), inchangee. */
+  conditions_i18n?: { fr: string; en: string; de: string };
   legal_ref?: string;
   source_url?: string;
 }
@@ -33,6 +45,8 @@ export const LEGAL_FEES: Record<CountryCode, CountryFees> = {
   LU: {
     name: "Luxembourg",
     registration_rights: 0.07,
+    registration_duty_pct: 0.06,
+    transcription_duty_pct: 0.01,
     notary_fees_pct: 0.01,
     mortgage_fees: 5000,
     aids: [
@@ -40,6 +54,11 @@ export const LEGAL_FEES: Record<CountryCode, CountryFees> = {
         name: "Bëllegen Akt",
         amount_per_person: 40000,
         conditions: "Résidence principale (occupation 2 ans, 4 ans VEFA), sans condition d'âge ni de primo-accession",
+        conditions_i18n: {
+          fr: "résidence principale (occupation 2 ans, 4 ans en VEFA), sans condition d'âge ni de primo-accession",
+          en: "primary residence (2 years of occupancy, 4 years for off-plan/VEFA purchases), no age or first-time buyer condition",
+          de: "Hauptwohnsitz (2 Jahre Nutzung, 4 Jahre bei Kauf vom Plan/VEFA), ohne Alters- oder Erstkäuferbedingung",
+        },
         legal_ref: "Loi du 3 juillet 2025 (définitif)",
         source_url: "https://logement.public.lu/fr/aides-logement/bellegen-akt.html",
       },

@@ -4,20 +4,54 @@
 // Toutes les valeurs ici sont sourcées depuis :
 //   - lib/legal/honoraires.ts (barèmes officiels, lu directement, jamais recopié)
 //   - lib/legal-fees.ts (frais de notaire/enregistrement et Bëllegen Akt LU, lu directement)
-//   - messages/fr.json namespaces mandate_* et offmarket et about_page
-//   - app/[locale]/qui-sommes-nous/page.tsx
+//   - lib/legal/cgv.ts (clauses contractuelles, lues directement : mission
+//     "chiffres verrouilles" : la clause de survie du mandat de recherche
+//     recopiait auparavant, a tort, celle du mandat de vente)
+//   - messages/fr.json (et en/de) namespace about_page, lu directement
 // Zéro invention. Sprint ELENA-NAV phase 2.
 //
 // Le plafond loyer luxembourgeois (5 % du capital investi par an) reste
 // une valeur statique ci-dessous : aucune constante unique ne l'expose
 // ailleurs dans le code (verifie par recherche dans lib/estimation/*,
-// lib/legal-fees.ts, lib/state-aids.ts — absente). A sourcer si une
+// lib/legal-fees.ts, lib/state-aids.ts, absente). A sourcer si une
 // reference legale canonique est ajoutee au code.
 
 import { honoraires } from "@/lib/legal/honoraires";
 import { LEGAL_FEES } from "@/lib/legal-fees";
+import { cgv } from "@/lib/legal/cgv";
+import messagesFr from "@/messages/fr.json";
+import messagesEn from "@/messages/en.json";
+import messagesDe from "@/messages/de.json";
 
 type KnowledgeLocale = "fr" | "en" | "de";
+
+const MESSAGES: Record<KnowledgeLocale, typeof messagesFr> = {
+  fr: messagesFr,
+  en: messagesEn as typeof messagesFr,
+  de: messagesDe as typeof messagesFr,
+};
+
+/** Texte jusqu'au premier point inclus, ou la chaine entiere si aucun point. */
+function firstSentence(text: string): string {
+  const idx = text.indexOf(".");
+  return idx === -1 ? text : text.slice(0, idx + 1);
+}
+
+/** Paragraphe d'une section CGV reperee par son numero ("10. ..."), quelle
+ * que soit la langue de l'intitule, lu depuis lib/legal/cgv.ts, jamais
+ * recopie. Meme fonction que lib/chatbot/locked-topics.ts (duplication
+ * volontairement minimale : deux consommateurs independants, l'un pour la
+ * base de connaissance generale, l'autre pour le verrou de sujet). */
+function cgvParagraph(
+  locale: KnowledgeLocale,
+  sectionNumberPrefix: string,
+  paragraphIndex: number,
+): string {
+  const section = cgv[locale].sections.find((s) =>
+    (s.heading ?? "").startsWith(sectionNumberPrefix),
+  );
+  return section?.paragraphs?.[paragraphIndex] ?? "";
+}
 
 // Sections de lib/legal/honoraires.ts volontairement exclues de l'extrait
 // envoye au modele (mission "modele chatbot adapte aux limites de debit",
@@ -26,7 +60,7 @@ type KnowledgeLocale = "fr" | "en" | "de";
 //   paiement internes, jamais demandes par un visiteur.
 // - "Frais annexes..." / "Ancillary fees..." / "Nebenkosten..." : deja
 //   couverte, de facon plus concise, par buildLegalFrameworkSection()
-//   ci-dessous (memes chiffres, meme source lib/legal-fees.ts) — la garder
+//   ci-dessous (memes chiffres, meme source lib/legal-fees.ts), la garder
 //   ici aurait ete une duplication pure, pas une information supplementaire.
 // - "Disclaimer" / "Hinweis" : deja couvert par les regles strictes du
 //   prompt de base ("Tu ne cites que des informations verifiees...").
@@ -65,32 +99,42 @@ function buildHonorairesSection(locale: KnowledgeLocale): string {
 // Genere le rappel des frais d'acquisition luxembourgeois depuis
 // lib/legal-fees.ts (meme source que le simulateur d'acquisition),
 // plutot que de recopier des pourcentages en dur.
+// Mission "chiffres verrouilles" point 1 : formulation retenue par
+// Julien, jamais de total fusionnant taxes et honoraires de notaire :
+// droits d'enregistrement + transcription = taxes ; notaire ajoute a
+// part. Chiffres lus depuis lib/legal-fees.ts (registration_duty_pct,
+// transcription_duty_pct, notary_fees_pct), jamais recopies. Ce meme
+// sujet est desormais aussi verrouille (lib/chatbot/locked-topics.ts) :
+// cette section reste utile pour le contexte general de la conversation,
+// meme quand la question exacte ne declenche pas le verrou.
 function buildLegalFrameworkSection(locale: KnowledgeLocale): string {
   const lu = LEGAL_FEES.LU;
   const bellegenAkt = lu.aids.find((a) => a.name === "Bëllegen Akt");
-  const registrationPct = Math.round(lu.registration_rights * 100);
+  const registrationPct = Math.round((lu.registration_duty_pct ?? 0) * 100);
+  const transcriptionPct = Math.round((lu.transcription_duty_pct ?? 0) * 100);
+  const taxPct = registrationPct + transcriptionPct;
   const notaryPct = Math.round(lu.notary_fees_pct * 100);
-  const totalPct = registrationPct + notaryPct;
   const bellegenAmount = bellegenAkt?.amount_per_person ?? 0;
+  const conditions = bellegenAkt?.conditions_i18n?.[locale] ?? bellegenAkt?.conditions ?? "";
 
   if (locale === "en") {
     return `## Luxembourg legal framework
 - Rent cap: 5% of invested capital per year (static value, no single code source, cf. dev note).
-- Registration and notary fees (source: lib/legal-fees.ts, LU): approximately ${registrationPct}% registration duty plus approximately ${notaryPct}% notary fees, for an indicative total close to ${totalPct}% of the acquisition price.
-- The Bëllegen Akt (source: lib/legal-fees.ts, LU aids) is a tax credit of up to €${bellegenAmount.toLocaleString("en-US")} per buyer, ${bellegenAkt?.conditions ?? ""}.
+- Registration duty (source: lib/legal-fees.ts, LU): ${registrationPct}%, and transcription duty: ${transcriptionPct}%, for ${taxPct}% in taxes. Notary fees are added separately, approximately ${notaryPct}%: never merge these into a single total.
+- The Bëllegen Akt (source: lib/legal-fees.ts, LU aids) is a tax credit of up to €${bellegenAmount.toLocaleString("en-US")} per buyer, for a ${conditions}.
 - AML/KYC: applicable legal framework. Identity verification and source of funds required.`;
   }
   if (locale === "de") {
     return `## Luxemburger Rechtsrahmen
 - Mietobergrenze: 5 % des investierten Kapitals pro Jahr (statischer Wert, keine einzelne Code-Quelle, vgl. Entwicklerhinweis).
-- Eintragungs- und Notarkosten (Quelle: lib/legal-fees.ts, LU): etwa ${registrationPct} % Eintragungsgebühr sowie etwa ${notaryPct} % Notarhonorar, insgesamt indikativ nahe ${totalPct} % des Kaufpreises.
-- Der Bëllegen Akt (Quelle: lib/legal-fees.ts, LU aids) ist eine Steuergutschrift bis zu ${bellegenAmount.toLocaleString("de-DE")} € pro Erwerber, ${bellegenAkt?.conditions ?? ""}.
+- Eintragungsgebühr (Quelle: lib/legal-fees.ts, LU): ${registrationPct} %, und Übertragungsgebühr: ${transcriptionPct} %, zusammen ${taxPct} % Steuern. Die Notarkosten kommen getrennt hinzu, etwa ${notaryPct} %: niemals zu einer einzigen Summe zusammenfassen.
+- Der Bëllegen Akt (Quelle: lib/legal-fees.ts, LU aids) ist eine Steuergutschrift bis zu ${bellegenAmount.toLocaleString("de-DE")} € pro Erwerber, für einen ${conditions}.
 - AML/KYC: geltender Rechtsrahmen. Identitätsprüfung und Mittelherkunft erforderlich.`;
   }
   return `## Cadre légal Luxembourg
 - Plafond loyer luxembourgeois : 5 % du capital investi par an (valeur statique, aucune source unique en code, cf. note développeur).
-- Frais d'enregistrement et de notaire (source : lib/legal-fees.ts, LU) : environ ${registrationPct} % de droits d'enregistrement et environ ${notaryPct} % d'honoraires de notaire, soit un total indicatif proche de ${totalPct} % du prix d'acquisition.
-- Le Bëllegen Akt (source : lib/legal-fees.ts, aides LU) est un crédit d'impôt jusqu'à ${bellegenAmount.toLocaleString("fr-FR")} € par acquéreur, ${bellegenAkt?.conditions ?? ""}.
+- Droits d'enregistrement (source : lib/legal-fees.ts, LU) : ${registrationPct} %, et droit de transcription : ${transcriptionPct} %, soit ${taxPct} % de taxes. Les honoraires de notaire s'ajoutent à part, environ ${notaryPct} % : ne jamais fusionner ces deux postes en un seul total.
+- Le Bëllegen Akt (source : lib/legal-fees.ts, aides LU) est un crédit d'impôt jusqu'à ${bellegenAmount.toLocaleString("fr-FR")} € par acquéreur, pour une ${conditions}.
 - AML/KYC : cadre légal en vigueur. Vérification d'identité et origine des fonds obligatoires.`;
 }
 
@@ -100,7 +144,7 @@ const KNOWLEDGE_FR = `
 ## Identité
 - Nom commercial : MAPA Property (entité légale : MAPA Synergy Sàrl).
 - Domaine : mapaproperty.lu (jamais .com).
-- Fondation : associés en activité depuis 2018, agence MAPA Property fondée en 2024.
+- Fondation : ${firstSentence(MESSAGES.fr.about_page.para_1)}
 - Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist : Julien Brebion (présentation publique sur /qui-sommes-nous). Tu peux nommer "Julien Brebion".
 - Coordonnées directes (téléphone, email) : NE JAMAIS divulguer en clair, même si demandé explicitement. Orienter systématiquement vers /contact.
 - HQ public : Luxembourg (l'adresse Dudelange n'apparaît que dans les pages légales).
@@ -108,10 +152,11 @@ const KNOWLEDGE_FR = `
 - Statut : agence immobilière luxembourgeoise + broker (courtier) international.
 
 ## 4 mandats de vente : durée à partir de 2 mois reconductibles
-- Mandat Exclusif (3 % HT du prix net vendeur) : engagement réciproque maximal. Pack Vidéo en option, sur devis. Diffusion off-market d'abord, puis publique selon stratégie. Le plus performant.
-- Mandat Semi-Exclusif (4 % HT) : vous gardez votre cercle privé, MAPA Property mobilise ses canaux. Pack Vidéo en option. Honoraires dus uniquement si MAPA présente l'acquéreur.
-- Mandat Simple (5 % HT) : aucune exclusivité, plusieurs agences possibles. Engagement marketing modéré, honoraires majorés.
-- Mandat Autonome (1 % HT) : vous pilotez vous-même les visites et la négociation, MAPA Property en backup juridique et notarial uniquement.
+Taux exacts : voir section Honoraires ci-dessous (source unique, ne pas répéter de chiffre ici).
+- Mandat Exclusif : engagement réciproque maximal. Pack Vidéo en option, sur devis. Diffusion off-market d'abord, puis publique selon stratégie. Le plus performant.
+- Mandat Semi-Exclusif : vous gardez votre cercle privé, MAPA Property mobilise ses canaux. Pack Vidéo en option. Honoraires dus uniquement si MAPA présente l'acquéreur.
+- Mandat Simple : aucune exclusivité, plusieurs agences possibles. Engagement marketing modéré, honoraires majorés.
+- Mandat Autonome : vous pilotez vous-même les visites et la négociation, MAPA Property en backup juridique et notarial uniquement.
 
 ## Recommandation MAPA Property
 Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit ; multiplier la même annonce dans plusieurs agences expose votre bien sur les mêmes plateformes et donne un signal de vente pressée — souvent défavorable à la négociation.
@@ -122,7 +167,7 @@ Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit
 - International : sur devis, défini au mandat.
 - Avance sur frais de recherche à la signature : Luxembourg 250 € HT, régions limitrophes jusqu'à 100 km à partir de 500 € HT, autres pays sur devis. Intégralement déduite de la commission finale si la transaction se conclut avec MAPA Property, acquise si le mandant renonce à son projet.
 - Couverture : Luxembourg, Union européenne, hors UE (Émirats, Royaume-Uni, Suisse, Amériques).
-- Clause de survie : honoraire dû si MAPA Property a contribué directement ou indirectement à la conclusion, y compris dans les 24 mois suivant la fin du mandat (cf. CGV).
+- Clause de survie (source : CGV §10, lue directement) : ${cgvParagraph("fr", "10.", 1)}
 
 ## Off-Market
 - Process en 3 étapes : demande motivée (formulaire NDA) → vérification capacité financière + signature NDA contractuel → transmission dossier complet + visites.
@@ -146,8 +191,7 @@ ${buildLegalFrameworkSection("fr")}
 
 ## Estimation
 - Modèle calibré sur données Observatoire de l'Habitat.
-- Estimation indicative en ligne : ~2 minutes.
-- Visite + rapport écrit : 48 à 72 heures.
+- ${MESSAGES.fr.services_page.cards.estimate.body}
 - Disclaimer : "Notre simulateur vous donne une fourchette indicative. La visite la rend juste."
 
 ## Méthode MAPA Property
@@ -167,7 +211,7 @@ const KNOWLEDGE_EN = `
 ## Identity
 - Trade name: MAPA Property (legal entity: MAPA Synergy Sàrl).
 - Domain: mapaproperty.lu (never .com).
-- Founded: partners active since 2018, MAPA Property agency founded in 2024.
+- Founded: ${firstSentence(MESSAGES.en.about_page.para_1)}
 - Co-founder · Real Estate Director · Exclusive Sourcing Specialist: Julien Brebion (public bio on /qui-sommes-nous). You may name "Julien Brebion".
 - Direct contact details (phone, email): NEVER disclose in clear, even when explicitly asked. Always redirect to /contact.
 - HQ: Luxembourg (the Dudelange address only appears on legal pages).
@@ -175,10 +219,11 @@ const KNOWLEDGE_EN = `
 - Status: Luxembourg real estate agency + international broker.
 
 ## 4 sale mandates: renewable term from 2 months
-- Exclusive (3% excl. VAT on the net seller price): max mutual commitment, Video Pack optional (by quotation), off-market first, then public per strategy. Best performer.
-- Semi-Exclusive (4%): you keep your private circle, MAPA Property mobilises channels. Video Pack optional. Fees only owed if MAPA presents the buyer.
-- Simple (5%): no exclusivity, multiple agencies possible. Moderate marketing engagement, higher fees.
-- Autonomous (1%): you handle visits and negotiation, MAPA Property as legal and notarial backup only.
+Exact rates: see the Fees section below (single source, not repeated here).
+- Exclusive: max mutual commitment, Video Pack optional (by quotation), off-market first, then public per strategy. Best performer.
+- Semi-Exclusive: you keep your private circle, MAPA Property mobilises channels. Video Pack optional. Fees only owed if MAPA presents the buyer.
+- Simple: no exclusivity, multiple agencies possible. Moderate marketing engagement, higher fees.
+- Autonomous: you handle visits and negotiation, MAPA Property as legal and notarial backup only.
 
 ## MAPA Property recommendation
 The exclusive mandate is our recommendation. The Luxembourg market is small; multiplying the same listing across multiple agencies exposes the property on the same platforms and signals a rushed sale — typically detrimental in negotiation.
@@ -189,7 +234,7 @@ The exclusive mandate is our recommendation. The Luxembourg market is small; mul
 - International: by quotation, defined at mandate signature.
 - Search fee advance at signature: Luxembourg €250 excl. VAT, neighbouring regions up to 100 km from €500 excl. VAT, other countries by quotation. Fully deducted from the final commission if the transaction concludes with MAPA Property, retained if the client withdraws from the project.
 - Coverage: Luxembourg, EU, outside EU (UAE, UK, Switzerland, Americas).
-- Survival clause: fee due if MAPA Property contributed directly or indirectly to the conclusion, including within 24 months post-mandate (cf. T&Cs).
+- Survival clause (source: T&Cs §10, read directly): ${cgvParagraph("en", "10.", 1)}
 
 ## Off-Market
 - 3 steps: qualified request (NDA form) → financial capacity verification + contractual NDA signature → full file transmission + visits.
@@ -213,8 +258,7 @@ ${buildLegalFrameworkSection("en")}
 
 ## Valuation
 - Model calibrated on Observatoire de l'Habitat data.
-- Indicative online valuation: ~2 minutes.
-- Visit + written report: 48 to 72 hours.
+- ${MESSAGES.en.services_page.cards.estimate.body}
 - Disclaimer: "Our simulator gives you an indicative range. The visit makes it accurate."
 
 ## Method
@@ -234,7 +278,7 @@ const KNOWLEDGE_DE = `
 ## Identität
 - Geschäftsname: MAPA Property (Rechtsträger: MAPA Synergy Sàrl).
 - Domain: mapaproperty.lu (nie .com).
-- Gegründet: Partner seit 2018 tätig, Agentur MAPA Property 2024 gegründet.
+- Gegründet: ${firstSentence(MESSAGES.de.about_page.para_1)}
 - Mitgründer · Real Estate Director · Exclusive Sourcing Specialist: Julien Brebion (öffentliche Vorstellung auf /qui-sommes-nous). Du darfst "Julien Brebion" namentlich nennen.
 - Direkte Kontaktdaten (Telefon, E-Mail): NIEMALS im Klartext preisgeben, auch wenn ausdrücklich gefragt. Immer auf /contact verweisen.
 - HQ: Luxemburg (Dudelange nur im Impressum).
@@ -242,10 +286,11 @@ const KNOWLEDGE_DE = `
 - Status: Luxemburger Immobilienagentur + internationaler Broker.
 
 ## 4 Verkaufsmandate: Laufzeit ab 2 Monaten, verlängerbar
-- Exklusiv (3 % zzgl. MwSt. auf den Nettoverkäuferpreis): max. gegenseitiges Engagement, Videopaket optional (auf Angebot), off-market zuerst, dann öffentlich je nach Strategie. Bestleistung.
-- Halb-Exklusiv (4 %): privater Kreis bleibt, MAPA Property aktiviert Kanäle. Videopaket optional. Honorare nur fällig, wenn MAPA den Käufer präsentiert.
-- Einfach (5 %): keine Exklusivität, mehrere Agenturen möglich. Moderates Marketing-Engagement, höhere Honorare.
-- Autonom (1 %): Sie steuern Besichtigungen und Verhandlung, MAPA Property nur als juristische und notarielle Rückendeckung.
+Genaue Sätze: siehe Abschnitt Honorare unten (einzige Quelle, hier nicht wiederholt).
+- Exklusiv: max. gegenseitiges Engagement, Videopaket optional (auf Angebot), off-market zuerst, dann öffentlich je nach Strategie. Bestleistung.
+- Halb-Exklusiv: privater Kreis bleibt, MAPA Property aktiviert Kanäle. Videopaket optional. Honorare nur fällig, wenn MAPA den Käufer präsentiert.
+- Einfach: keine Exklusivität, mehrere Agenturen möglich. Moderates Marketing-Engagement, höhere Honorare.
+- Autonom: Sie steuern Besichtigungen und Verhandlung, MAPA Property nur als juristische und notarielle Rückendeckung.
 
 ## MAPA-Empfehlung
 Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; dasselbe Inserat in mehreren Agenturen zu vervielfachen, exponiert das Objekt auf denselben Plattformen und signalisiert einen eiligen Verkauf — meist nachteilig in der Verhandlung.
@@ -256,7 +301,7 @@ Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; 
 - International: auf Angebot, im Mandat definiert.
 - Vorschuss auf Suchkosten bei Unterzeichnung: Luxemburg 250 € zzgl. MwSt., angrenzende Regionen bis 100 km ab 500 € zzgl. MwSt., andere Länder auf Angebot. Vollständig auf die Endprovision angerechnet, wenn das Geschäft mit MAPA Property abgeschlossen wird, einbehalten, wenn der Mandant sein Vorhaben aufgibt.
 - Abdeckung: Luxemburg, EU, außerhalb EU (VAE, Vereinigtes Königreich, Schweiz, Amerika).
-- Nachwirkungsklausel: Honorar fällig, wenn MAPA Property direkt oder indirekt zum Abschluss beigetragen hat, einschließlich innerhalb von 24 Monaten nach Mandatsende (AGB).
+- Nachwirkungsklausel (Quelle: AGB §10, direkt gelesen): ${cgvParagraph("de", "10.", 1)}
 
 ## Off-Market
 - 3 Schritte: qualifizierte Anfrage (NDA-Formular) → Finanzprüfung + Unterzeichnung der vertraglichen NDA → Übermittlung des vollständigen Dossiers + Besichtigungen.
@@ -280,8 +325,7 @@ ${buildLegalFrameworkSection("de")}
 
 ## Bewertung
 - Modell kalibriert auf Daten des Observatoire de l'Habitat.
-- Indikative Online-Bewertung: ~2 Minuten.
-- Besichtigung + schriftlicher Bericht: 48 bis 72 Stunden.
+- ${MESSAGES.de.services_page.cards.estimate.body}
 - Disclaimer: „Unser Simulator gibt Ihnen eine indikative Spanne. Die Besichtigung macht sie präzise."
 
 ## Methode
@@ -382,14 +426,14 @@ ROUTES VALIDES — MAPPING INTENTION → URL :
 
 [F] AGENCE / CONTENU
 - "Qui êtes-vous / présentation de l'agence" → /${locale}/qui-sommes-nous
-- COÛT DE MAPA PROPERTY uniquement — "Combien vous prenez", "Combien prenez-vous", "Quels sont vos honoraires", "Vos tarifs", "Quelle est votre commission", "Quel est votre prix", "Combien ça coûte de passer par MAPA / par vous", "Vos barèmes" (FR) / "What do you charge", "Your fees", "Your commission", "Your rates", "How much does MAPA cost" (EN) / "Was kostet das bei Ihnen", "Ihre Honorare", "Ihre Provision", "Ihre Tarife" (DE) → /${locale}/legal/honoraires. Si un mandat précis est nommé, citer le bon chiffre dans le message (Exclusif 3 %, Semi 4 %, Simple 5 %, Autonome 1 %, Recherche LU 3-5 %).
+- COÛT DE MAPA PROPERTY uniquement — "Combien vous prenez", "Combien prenez-vous", "Quels sont vos honoraires", "Vos tarifs", "Quelle est votre commission", "Quel est votre prix", "Combien ça coûte de passer par MAPA / par vous", "Vos barèmes" (FR) / "What do you charge", "Your fees", "Your commission", "Your rates", "How much does MAPA cost" (EN) / "Was kostet das bei Ihnen", "Ihre Honorare", "Ihre Provision", "Ihre Tarife" (DE) → /${locale}/legal/honoraires. Si un mandat précis est nommé, cite le taux exact depuis la section Honoraires de la base de connaissance ci-dessous (source unique, ne jamais inventer ni arrondir un chiffre).
 - "Articles / actualités / conseils / journal" → /${locale}/journal
 
 ATTENTION — DISTINGUER honoraires MAPA vs autres frais (NE PAS confondre) :
 - Honoraires/commission/tarif/prix DE MAPA Property → /legal/honoraires UNIQUEMENT.
 - Taux d'intérêt / taux du crédit / taux d'emprunt / taux immobilier / taux actuels → /services/simulateurs (cf. [C]). JAMAIS /legal/honoraires.
-- Frais de notaire → réponse texte : environ 6 % de droits d'enregistrement, 1 % de transcription, environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % (chiffres confirmés), intent:null.
-- Fiscalité (TVA 17 %, Bëllegen Akt jusqu'à 40 000 €) → réponse texte avec chiffres confirmés, intent:null OU /contact si demande concrète.
+- Frais de notaire → réponse texte à partir de la section Cadre légal Luxembourg de la base de connaissance ci-dessous (source unique, ne jamais fusionner droits d'enregistrement et honoraires de notaire en un seul total), intent:null.
+- Fiscalité (TVA, Bëllegen Akt) → réponse texte à partir de la section Cadre légal Luxembourg ci-dessous (source unique), intent:null OU /contact si demande concrète.
 
 [G] CONTACT
 - "Vous contacter / prendre rendez-vous / poser une question / être recontacté" → /${locale}/contact
@@ -425,17 +469,8 @@ EXEMPLES (locale=${locale}) :
 [5] User: "Je veux vendre mon appartement"
 → {"message":"Voici notre méthode et nos 4 formules de mandats de vente.","intent":{"action":"navigate","url":"/${locale}/services/vendre"}}
 
-[6] User: "Quels sont vos honoraires ?" (variantes acceptées : "Combien vous prenez ?", "Vos tarifs ?", "Votre commission ?", "Combien ça coûte de passer par vous ?", "Prix de votre agence ?")
-→ {"message":"Mandats vente : Exclusif 3 %, Semi-Exclusif 4 %, Simple 5 %, Autonome 1 % HT. Mandat recherche Luxembourg 3-5 %, Europe 3-8 %, international sur devis. Détails complets sur la page Honoraires.","intent":{"action":"navigate","url":"/${locale}/legal/honoraires"}}
-
-[6a] User: "Combien vous prenez ?"
-→ {"message":"Cela dépend du mandat : Exclusif 3 %, Semi-Exclusif 4 %, Simple 5 %, Autonome 1 % HT pour la vente ; Recherche Luxembourg 3-5 % HT. Détails complets sur la page Honoraires.","intent":{"action":"navigate","url":"/${locale}/legal/honoraires"}}
-
-[6b] User: "Quelle est votre commission ?"
-→ {"message":"Nos commissions de vente : Exclusif 3 %, Semi-Exclusif 4 %, Simple 5 %, Autonome 1 % HT du prix net vendeur. Toutes les conditions sur la page Honoraires.","intent":{"action":"navigate","url":"/${locale}/legal/honoraires"}}
-
 [7] User: "Présentez-moi MAPA Property"
-→ {"message":"MAPA Property, agence immobilière luxembourgeoise et broker international. Associés en activité depuis 2018, agence MAPA Property fondée en 2024. Sous mandat, dans le cadre, dans votre intérêt exclusif.","intent":{"action":"navigate","url":"/${locale}/qui-sommes-nous"}}
+→ {"message":"MAPA Property, agence immobilière luxembourgeoise et broker international. ${firstSentence(MESSAGES.fr.about_page.para_1)} Sous mandat, dans le cadre, dans votre intérêt exclusif.","intent":{"action":"navigate","url":"/${locale}/qui-sommes-nous"}}
 
 [8] User: "C'est quoi le mandat exclusif ?"
 → {"message":"Mandat exclusif : 3 % HT, durée à partir de 2 mois reconductibles, Pack Vidéo en option sur devis, diffusion off-market puis publique. Notre recommandation pour vendre vite et bien.","intent":{"action":"navigate","url":"/${locale}/mandats/exclusif"}}
@@ -444,7 +479,7 @@ EXEMPLES (locale=${locale}) :
 → {"message":"Le formulaire de contact est ci-dessous, choisissez \\"mandat de vente\\" dans le sujet.","intent":{"action":"navigate","url":"/${locale}/contact"}}
 
 [10] User: "Comment estimer mon bien ?"
-→ {"message":"Notre simulateur vous donne une fourchette indicative en moins de 2 minutes, basée sur les données de l'Observatoire de l'Habitat. Le rapport visite est rendu sous 48 à 72 heures.","intent":{"action":"navigate","url":"/${locale}/services/estimer"}}
+→ {"message":"Notre simulateur vous donne une fourchette indicative en moins de 2 minutes, basée sur les données de l'Observatoire de l'Habitat. ${MESSAGES.fr.services_page.cards.estimate.body}","intent":{"action":"navigate","url":"/${locale}/services/estimer"}}
 
 [11] User: "Off-market, comment ça marche ?"
 → {"message":"L'accès off-market suit 3 étapes : demande motivée et NDA, vérification de capacité, transmission du dossier complet et visites.","intent":{"action":"navigate","url":"/${locale}/off-market"}}
@@ -487,7 +522,7 @@ RÈGLES SUPPLÉMENTAIRES :
 - Le frontend déclenche router.push(url) après affichage du message, délai 900 ms.
 `;
 
-  const base = `Tu es Eléna, assistante virtuelle de MAPA Property, agence immobilière luxembourgeoise et broker international, fondée en 2024 (Julien Brebion, Co-fondateur · Directeur Immobilier, associé en activité depuis 2018).
+  const base = `Tu es Eléna, assistante virtuelle de MAPA Property, agence immobilière luxembourgeoise et broker international. ${firstSentence(MESSAGES.fr.about_page.para_1)} Co-fondateur : Julien Brebion, Directeur Immobilier.
 
 LANGUE : réponds STRICTEMENT en ${locale === "en" ? "anglais" : locale === "de" ? "allemand" : "français"}.
 

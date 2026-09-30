@@ -7,6 +7,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { sendLeadEmails } from "@/lib/email/lead-emails";
 import { insertLeadWithConsent } from "@/lib/lead-insert";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
+import { getLockedTopicsReply } from "@/lib/chatbot/locked-topics";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -136,7 +137,7 @@ async function checkDailyLimit(visitorHash: string): Promise<boolean> {
 async function logChatbotInteraction(entry: {
   locale: string;
   pageContext: string;
-  engine: "mistral" | "fallback" | "consent_accept" | "consent_decline";
+  engine: "mistral" | "fallback" | "locked" | "consent_accept" | "consent_decline";
   question: string;
   answer: string;
   leadCreated: boolean;
@@ -391,37 +392,53 @@ export async function POST(req: Request) {
     }
   }
 
-  const systemPrompt = buildSystemPrompt(locale, pageContext);
-  const fullMessages: Message[] = [
-    { role: "system", content: systemPrompt },
-    ...messages,
-  ];
-
   const lastUser = messages.filter((m) => m.role === "user").pop()?.content ?? "";
-  const { text: mistralText, failureCode } = await callMistral(fullMessages);
 
   let reply: string;
-  let engine: "mistral" | "fallback";
-  if (mistralText) {
-    reply = mistralText;
-    engine = "mistral";
+  let engine: "mistral" | "fallback" | "locked";
+  let intent: NavigateIntent | null = null;
+
+  // Mission "chiffres verrouilles" : sujets a fort risque (frais
+  // d'acquisition, Bëllegen Akt, TVA, taux de mandats, avance sur frais,
+  // durees de mandat) : reponse figee construite depuis les sources
+  // uniques, jamais transmise au modele pour reformulation. Court-circuite
+  // entierement l'appel a Mistral pour ce tour (cf. commentaire dans
+  // lib/chatbot/locked-topics.ts pour le cas d'un message mixte).
+  const lockedReply = getLockedTopicsReply(lastUser, locale);
+
+  if (lockedReply) {
+    reply = lockedReply;
+    engine = "locked";
   } else {
-    // Point 4 — la vraie cause de l'echec est journalisee cote serveur,
-    // sans donnee personnelle (code technique uniquement, jamais le texte
-    // de l'utilisateur ni sa reponse). Lecture : cf. rapport de mission
-    // (Vercel Runtime Logs du projet, filtre "[api/chatbot] mistral").
-    console.error("[api/chatbot] mistral indisponible, repli heuristique", {
-      code: failureCode ?? "unknown",
-    });
-    reply = await fallbackReply(locale, lastUser);
-    engine = "fallback";
+    const systemPrompt = buildSystemPrompt(locale, pageContext);
+    const fullMessages: Message[] = [
+      { role: "system", content: systemPrompt },
+      ...messages,
+    ];
+    const { text: mistralText, failureCode } = await callMistral(fullMessages);
+
+    if (mistralText) {
+      const parsed = parseAssistantReply(mistralText);
+      reply = parsed.message;
+      intent = parsed.intent;
+      engine = "mistral";
+    } else {
+      // Point 4 — la vraie cause de l'echec est journalisee cote serveur,
+      // sans donnee personnelle (code technique uniquement, jamais le texte
+      // de l'utilisateur ni sa reponse). Lecture : cf. rapport de mission
+      // (Vercel Runtime Logs du projet, filtre "[api/chatbot] mistral").
+      console.error("[api/chatbot] mistral indisponible, repli heuristique", {
+        code: failureCode ?? "unknown",
+      });
+      reply = await fallbackReply(locale, lastUser);
+      engine = "fallback";
+    }
   }
 
   // Point 5 — detection sans creation silencieuse. Le client affiche la
   // demande de consentement explicite ; rien n'est ecrit en base ici.
   const contactDetected = detectContact(messages);
-
-  const { message, intent } = parseAssistantReply(reply);
+  const message = reply;
 
   await logChatbotInteraction({
     locale,
