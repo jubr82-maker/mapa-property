@@ -55,7 +55,9 @@ export interface VdlQuartierPrices {
 }
 
 export const LUXEMBOURG_DATA_AS_OF = "2025 (publication mars 2026)";
-export const ANNOUNCED_TO_REAL_DISCOUNT = 0.9125; // -8.75%
+// Abattement historique -8,75 % : defini dans lib/data/announced-discount.ts
+// (source unique), reexporte ici pour compatibilite.
+export { LEGACY_ANNOUNCED_TO_REAL_FACTOR as ANNOUNCED_TO_REAL_DISCOUNT } from "./announced-discount";
 
 // Oct. 2026 : doublons orthographiques fusionnes sous la graphie officielle
 // du Registre national des localites et des rues (lib/geo/luxembourg-

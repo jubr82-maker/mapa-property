@@ -382,6 +382,12 @@ function unrealisticResponse(reason: string, commune: string | undefined, mid: n
     commune,
     mid,
   });
+  // Valeur nulle = la commune n'a pas de prix de reference pour ce type de
+  // bien (ex. appartement a Preizerdaul) : donnee manquante, pas une valeur
+  // aberrante. Message distinct cote formulaire.
+  if (reason === "non_positive") {
+    return NextResponse.json({ error: "NO_MARKET_DATA" }, { status: 422 });
+  }
   return NextResponse.json({ error: "UNREALISTIC_ESTIMATE" }, { status: 422 });
 }
 

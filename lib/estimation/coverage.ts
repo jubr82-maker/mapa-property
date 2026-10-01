@@ -65,6 +65,8 @@ export interface LuxembourgPlace {
   quartier?: string;
   /** true si le lieu n'est pas la commune elle-meme (rattachement). */
   attached: boolean;
+  /** Graphies acceptees, normalisees (nom, alias luxembourgeois, allemands). */
+  keys: string[];
 }
 
 interface PlaceIndex {
@@ -95,10 +97,20 @@ function buildIndex(): PlaceIndex {
 
   const byKey = new Map<string, LuxembourgPlace[]>();
   const places: LuxembourgPlace[] = [];
-  const add = (keys: string[], place: LuxembourgPlace) => {
-    for (const key of keys) {
+  // Un meme lieu (meme nom affiche) n'existe qu'une fois : ses graphies sont
+  // fusionnees (ex. commune Petange + localite Petange, alias Petingen).
+  const byName = new Map<string, LuxembourgPlace>();
+  const add = (rawKeys: string[], candidate: Omit<LuxembourgPlace, "keys">) => {
+    let place = byName.get(candidate.name);
+    if (!place) {
+      place = { ...candidate, keys: [] };
+      byName.set(candidate.name, place);
+      places.push(place);
+    }
+    for (const key of rawKeys) {
       const k = normalizeCommune(key);
       if (!k) continue;
+      if (!place.keys.includes(k)) place.keys.push(k);
       const list = byKey.get(k) ?? [];
       // Un meme lieu (meme commune, meme quartier) n'est indexe qu'une fois.
       if (!list.some((p) => p.commune === place.commune && p.quartier === place.quartier)) {
@@ -106,7 +118,6 @@ function buildIndex(): PlaceIndex {
         byKey.set(k, list);
       }
     }
-    places.push(place);
   };
 
   // 1. Communes officielles.
@@ -142,20 +153,13 @@ function buildIndex(): PlaceIndex {
       homonym && !isCommuneItself && !l.name.includes("(")
         ? `${l.name} (${l.commune})`
         : l.name;
-    const place: LuxembourgPlace = isCommuneItself
+    const place: Omit<LuxembourgPlace, "keys"> = isCommuneItself
       ? { name: l.commune, commune: l.commune, attached: false }
       : { name: display, commune: l.commune, attached: true };
     add([l.name, display, ...l.aliases], place);
   }
 
-  // Liste affichee : un lieu par nom.
-  const seen = new Set<string>();
-  const unique = places.filter((p) => {
-    if (seen.has(p.name)) return false;
-    seen.add(p.name);
-    return true;
-  });
-  return { byKey, communes, places: unique, communesWithoutPrices };
+  return { byKey, communes, places, communesWithoutPrices };
 }
 
 function getIndex(): PlaceIndex {

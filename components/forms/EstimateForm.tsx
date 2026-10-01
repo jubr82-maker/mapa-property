@@ -4,9 +4,9 @@ import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { formatEuro } from "@/lib/finance";
 import type { EstimateResult } from "@/lib/estimate";
-import { VDL_QUARTIERS_PRICES } from "@/lib/data/luxembourg-prices";
 import { track } from "@/lib/tracking/track";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
+import { PlaceCombobox, type ComboboxPlace } from "@/components/forms/PlaceCombobox";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
@@ -121,7 +121,6 @@ interface FormState {
   locality: string;
   commune: string;
   quartier: string; // si commune = Luxembourg (25 quartiers VDL)
-  postal: string;
   type: string;
   state: (typeof STATES)[number];
   energy: string;
@@ -172,7 +171,6 @@ const initial: FormState = {
   locality: "",
   commune: "",
   quartier: "",
-  postal: "",
   type: "appartement",
   state: "good",
   energy: "C",
@@ -214,14 +212,7 @@ const initial: FormState = {
 // que validators ne retournent pas valid=true sur les 3 champs.
 
 /** Lieu propose au formulaire (cf. lib/estimation/coverage.ts). */
-export interface EstimatePlace {
-  name: string;
-  commune: string;
-  quartier?: string;
-  attached: boolean;
-}
-
-const PLACES_DATALIST_ID = "estimate-places";
+export type EstimatePlace = ComboboxPlace;
 
 /** Suggestion a confirmer (cf. lib/estimation/coverage.ts). */
 interface PlaceSuggestion {
@@ -235,18 +226,6 @@ interface EstimateBasis {
   commune: string;
   quartier: string | null;
   attached: boolean;
-}
-
-/** Meme normalisation que le serveur (casse, accents, tirets). */
-function normalizePlace(s: string): string {
-  return s
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .replace(/[-_'’.]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
@@ -267,7 +246,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
   // renvoi vers l'agence (hors Luxembourg ou valeur hors seuil).
   const [blocked, setBlocked] = useState<
     | { kind: "country" | "commune"; suggestions: PlaceSuggestion[] }
-    | { kind: "unrealistic" }
+    | { kind: "unrealistic" | "no_data" }
     | null
   >(null);
   // Sprint C8 — touched flags pour affichage erreurs onBlur uniquement.
@@ -284,20 +263,15 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
     setData((d) => ({ ...d, [key]: value }));
   };
 
-  const placesByKey = useMemo(
-    () => new Map(places.map((p) => [normalizePlace(p.name), p])),
+  const placesByName = useMemo(
+    () => new Map(places.map((p) => [p.name, p])),
     [places],
   );
-  const selectedPlace = placesByKey.get(normalizePlace(data.locality));
-  // Communes officielles du registre (100), pour la liste deroulante.
-  const communeOptions = useMemo(
-    () =>
-      places
-        .filter((p) => !p.attached && !p.quartier && p.name === p.commune)
-        .map((p) => ({ value: p.commune, label: p.commune }))
-        .sort((a, b) => a.label.localeCompare(b.label, "fr")),
-    [places],
-  );
+  // Lieu choisi dans le champ unique (null tant qu'aucune entree n'est
+  // selectionnee : l'etape suivante reste bloquee).
+  const selectedPlace = placesByName.get(data.locality) ?? null;
+  const [placeFieldKey, setPlaceFieldKey] = useState(0);
+
 
   // Sprint C2 LIVRABLE 4 : validation par-categorie. Une cat cochee DOIT
   // avoir year ET amount remplis et valides. Si une seule cat est invalide,
@@ -336,9 +310,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
   // officielle) ; elle remplace la saisie avant le nouvel envoi.
   const submit = async (override?: PlaceSuggestion) => {
     const locality = override?.name ?? data.locality;
-    const overridePlace = override
-      ? placesByKey.get(normalizePlace(override.name))
-      : undefined;
+    const overridePlace = override ? placesByName.get(override.name) : undefined;
     const commune = override?.commune ?? data.commune;
     const quartier = override ? (overridePlace?.quartier ?? "") : data.quartier;
     // Sprint C9 — double protection : meme si le bouton fuit (DevTools,
@@ -474,6 +446,10 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
         };
         if (j.error === "UNREALISTIC_ESTIMATE") {
           setBlocked({ kind: "unrealistic" });
+          return;
+        }
+        if (j.error === "NO_MARKET_DATA") {
+          setBlocked({ kind: "no_data" });
           return;
         }
         if (j.error === "OUT_OF_COVERAGE" || j.error === "COUNTRY_NOT_COVERED") {
@@ -761,82 +737,53 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
 
       {step === 2 && (
         <StepWrap title={t("step2_title")} subtitle={t("step2_subtitle")}>
-          {/* Oct. 2026 : estimation limitee au Luxembourg, plus de choix
-              du pays. Le lieu (commune, quartier ou localite) propose la
-              commune de rattachement, modifiable par le visiteur. */}
+          {/* Oct. 2026 : estimation limitee au Luxembourg (pays implicite)
+              et CHAMP UNIQUE de localisation : localites, communes et
+              quartiers du registre officiel. Plus de liste de communes ni
+              de code postal (jamais transmis a l'API). */}
           <p className="mb-4 text-sm text-ink-mid">{t("country_implicit")}</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FieldText
-              label={t("locality")}
-              value={data.locality}
-              onChange={(v) => {
-                set("locality", v);
-                const place = placesByKey.get(normalizePlace(v));
-                if (place) {
-                  set("commune", place.commune);
-                  set("quartier", place.quartier ?? "");
-                }
-              }}
-              placeholder={t("locality_placeholder")}
-              list={PLACES_DATALIST_ID}
-              autoComplete="off"
-            />
-            <datalist id={PLACES_DATALIST_ID}>
-              {places.map((p) => (
-                <option key={p.name} value={p.name} />
-              ))}
-            </datalist>
-            <FieldSelect
-              label={t("commune_attached")}
-              value={data.commune}
-              // Lieu reconnu : commune officielle du registre, non modifiable.
-              disabled={Boolean(selectedPlace)}
-              onChange={(v) => {
-                set("commune", v);
-                // reset quartier si on quitte Luxembourg
-                if (v !== "Luxembourg") set("quartier", "");
-              }}
-              options={[
-                { value: "", label: t("commune_choose") },
-                ...communeOptions,
-              ]}
-            />
-            {data.commune === "Luxembourg" && (
-              <FieldSelect
-                label={t("quartier")}
-                value={data.quartier}
-                onChange={(v) => set("quartier", v)}
-                options={[
-                  { value: "", label: tSearch("any") },
-                  ...VDL_QUARTIERS_PRICES.filter(
-                    (q) => q.quartier !== "Moyenne nationale",
-                  ).map((q) => ({
-                    value: q.quartier,
-                    label: q.quartier,
-                  })),
-                ]}
-              />
-            )}
-            <FieldText
-              label={t("postal")}
-              value={data.postal}
-              onChange={(v) => set("postal", v)}
-            />
-          </div>
-          {data.commune && (
-            <p className="mt-3 text-xs italic text-ink-soft">
-              {selectedPlace?.attached
-                ? t("commune_attached_hint_auto", {
-                    locality: selectedPlace.name,
-                    commune: data.commune,
-                  })
-                : t("commune_attached_hint")}
+          <PlaceCombobox
+            // "Modifier" remonte le champ vide, ouvert et focalise.
+            key={placeFieldKey}
+            autoFocus={placeFieldKey > 0}
+            places={places}
+            value={selectedPlace}
+            onSelect={(place) => {
+              setData((d) => ({
+                ...d,
+                locality: place?.name ?? "",
+                commune: place?.commune ?? "",
+                quartier: place?.quartier ?? "",
+              }));
+            }}
+            label={t("locality")}
+            placeholder={t("locality_placeholder")}
+            noResultText={t("place_no_result")}
+            listLabel={t("place_list_label")}
+          />
+          {selectedPlace && (
+            <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-mid">
+              <span>
+                {selectedPlace.quartier
+                  ? t("place_selected_quartier", { quartier: selectedPlace.quartier })
+                  : t("place_selected", { commune: selectedPlace.commune })}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setData((d) => ({ ...d, locality: "", commune: "", quartier: "" }));
+                  setPlaceFieldKey((k) => k + 1);
+                }}
+                className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink underline underline-offset-4 hover:no-underline"
+              >
+                {t("place_change")}
+              </button>
             </p>
           )}
           <BackNextBtn
             onBack={() => setStep(1)}
             onNext={() => setStep(3)}
-            disabled={!data.commune}
+            disabled={!selectedPlace}
             t={t}
           />
         </StepWrap>
@@ -959,11 +906,15 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
           {blocked && (
             <CoverageNotice
               kind={blocked.kind}
-              suggestions={blocked.kind === "unrealistic" ? [] : blocked.suggestions}
+              suggestions={
+                blocked.kind === "country" || blocked.kind === "commune"
+                  ? blocked.suggestions
+                  : []
+              }
               onPickSuggestion={(s) => {
                 set("locality", s.name);
                 set("commune", s.commune);
-                set("quartier", placesByKey.get(normalizePlace(s.name))?.quartier ?? "");
+                set("quartier", placesByName.get(s.name)?.quartier ?? "");
                 void submit(s);
               }}
               t={t}
@@ -1590,29 +1541,28 @@ function CoverageNotice({
   onPickSuggestion,
   t,
 }: {
-  kind: "country" | "commune" | "unrealistic";
+  kind: "country" | "commune" | "unrealistic" | "no_data";
   suggestions?: PlaceSuggestion[];
   onPickSuggestion?: (place: PlaceSuggestion) => void;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const unrealistic = kind === "unrealistic";
+  // Textes par cas. Titre et suggestions en text-ink : l'or de la charte
+  // n'offre que 1,6:1 sur fond creme (WCAG 4,5:1 requis).
+  const keys = {
+    country: ["coverage_title", "coverage_country", "coverage_cta"],
+    commune: ["coverage_title", "coverage_commune", "coverage_cta"],
+    unrealistic: ["unrealistic_title", "unrealistic_body", "unrealistic_cta"],
+    no_data: ["no_data_title", "no_data_body", "no_data_cta"],
+  }[kind];
   return (
     <div
       role="status"
       className="mt-5 rounded-xl border border-gold/50 bg-gold/5 p-5"
     >
-      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold-deep">
-        {t(unrealistic ? "unrealistic_title" : "coverage_title")}
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink">
+        {t(keys[0])}
       </p>
-      <p className="mt-2 text-sm leading-relaxed text-ink-mid">
-        {t(
-          unrealistic
-            ? "unrealistic_body"
-            : kind === "commune"
-              ? "coverage_commune"
-              : "coverage_country",
-        )}
-      </p>
+      <p className="mt-2 text-sm leading-relaxed text-ink-mid">{t(keys[1])}</p>
       {suggestions.length > 0 && onPickSuggestion && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-sm text-ink-mid">{t("coverage_suggestions")}</span>
@@ -1621,7 +1571,7 @@ function CoverageNotice({
               key={`${s.name}|${s.commune}`}
               type="button"
               onClick={() => onPickSuggestion(s)}
-              className="rounded-full border border-gold px-4 py-1.5 font-mono text-[11px] text-gold-deep hover:bg-gold/10"
+              className="rounded-full border border-line-strong px-4 py-1.5 font-mono text-[11px] text-ink hover:bg-bg-deep"
             >
               {s.name}
             </button>
@@ -1632,7 +1582,7 @@ function CoverageNotice({
         href="/contact"
         className="gold-shine-bg mt-4 inline-block rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20"
       >
-        {t(unrealistic ? "unrealistic_cta" : "coverage_cta")} →
+        {t(keys[2])} →
       </Link>
     </div>
   );
