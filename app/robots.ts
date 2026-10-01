@@ -5,12 +5,16 @@ const SITE_URL =
 
 const isBeta = SITE_URL.includes("beta.");
 
+// Pas de directive "Host" (oct. 2026) : propre a Yandex, abandonnee par
+// lui-meme et inconnue de Google, elle etait signalee comme erreur dans le
+// rapport robots.txt (valeur avec schema https:// de surcroit). Seules les
+// directives reconnues par Google sont emises : User-agent, Allow,
+// Disallow, Sitemap.
 export default function robots(): MetadataRoute.Robots {
   // Beta / staging : tout bloquer aux moteurs de recherche.
   if (isBeta) {
     return {
       rules: [{ userAgent: "*", disallow: "/" }],
-      host: SITE_URL,
     };
   }
 
@@ -60,6 +64,5 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
   };
 }

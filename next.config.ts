@@ -43,6 +43,31 @@ const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
 ];
 
+// Perf oct. 2026 (PageSpeed : ressources mal mises en cache). Next sert
+// public/ en "max-age=0" : chaque visite revalidait logos, avatars,
+// favicons. Noms non hashes -> 30 jours (pas immutable) + revalidation
+// en arriere-plan, pour qu'un fichier remplace se propage en douceur.
+const STATIC_ASSET_CACHE = "public, max-age=2592000, stale-while-revalidate=86400";
+const ROOT_STATIC_FILES = [
+  "logo_mapa_jour.png",
+  "logo_mapa_nuit.png",
+  "logo-mapa-property.svg",
+  "logo-mapa-property.png",
+  "logo-mapa-property-mono.png",
+  "elena-avatar.jpg",
+  "offmarket_hero.png",
+  "apple-touch-icon.png",
+  "favicon-16.png",
+  "favicon-32.png",
+  "favicon-48.png",
+  "pwa-192.png",
+  "pwa-384.png",
+  "pwa-512.png",
+  "pwa-512-maskable.png",
+]
+  .map((f) => f.replace(/\./g, "\\."))
+  .join("|");
+
 const nextConfig: NextConfig = {
   // Défaut Next.js = 1 MB pour le body des Server Actions ; trop bas pour
   // l'upload de photos brutes (2-10 Mo) avant compression côté client.
@@ -52,9 +77,26 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "25mb",
     },
+    // Perf oct. 2026 (PageSpeed : 680 ms de blocage du rendu). Les feuilles
+    // CSS (Tailwind, atomique et compact) sont injectees en <style> dans le
+    // HTML au lieu de <link> bloquants : plus d'aller-retour avant le 1er
+    // rendu. Experimental Next 16 ; retour arriere = supprimer cette ligne.
+    inlineCss: true,
   },
   images: {
+    // Perf oct. 2026 : AVIF (~20-30 % plus leger que WebP) en priorite.
+    formats: ["image/avif", "image/webp"],
+    // Defaut Next 16 = 4 h ; les images optimisees (/_next/image) etaient
+    // signalees "mal mises en cache". 30 jours : les photos de biens ont
+    // des URL uniques, les logos changent rarement.
+    minimumCacheTTL: 2592000,
     remotePatterns: [
+      {
+        // Poster de la video hero (Cloudflare R2, cf. components/home/Hero.tsx).
+        protocol: "https",
+        hostname: "pub-c9fa8716c00f4a0c965197a93086bdce.r2.dev",
+        pathname: "/**",
+      },
       {
         protocol: "https",
         hostname: "dutfkblygfvhhwpzxmfz.supabase.co",
@@ -87,6 +129,14 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: securityHeaders,
+      },
+      {
+        source: "/:dir(fonts|images|logos)/:path*",
+        headers: [{ key: "Cache-Control", value: STATIC_ASSET_CACHE }],
+      },
+      {
+        source: `/:file(${ROOT_STATIC_FILES})`,
+        headers: [{ key: "Cache-Control", value: STATIC_ASSET_CACHE }],
       },
     ];
   },

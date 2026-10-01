@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -64,13 +65,18 @@ export function BookletReader({
               {title}
             </h1>
             {coverImage && (
-              // eslint-disable-next-line @next/next/no-img-element -- cover dans l'article, pas LCP above-the-fold
-              <img
-                src={coverImage}
-                alt={title}
-                className="aspect-[16/9] w-full rounded-xl object-cover"
-                loading="eager"
-              />
+              // Perf oct. 2026 : next/image (AVIF/WebP redimensionne) au lieu
+              // du fichier source plein format. Memes hotes que BlogTeaser.
+              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
+                <Image
+                  src={coverImage}
+                  alt={title}
+                  fill
+                  priority
+                  sizes="(min-width: 768px) 768px, 100vw"
+                  className="object-cover"
+                />
+              </div>
             )}
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft sm:text-[11px]">
               {[author, formattedDate].filter(Boolean).join(" · ")}

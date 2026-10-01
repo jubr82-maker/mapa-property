@@ -50,7 +50,30 @@ type VideoR2Props = {
   preload?: "none" | "metadata" | "auto";
   /** alt pour le fallback <img> si la video echoue. */
   alt?: string;
+  /**
+   * Chargement differe (perf oct. 2026, hero accueil) : aucune requete
+   * video avant l'evenement load + un temps idle, pour ne plus concurrencer
+   * l'affichage principal. Le poster est alors rendu par le parent (image
+   * optimisee prioritaire) : pas d'attribut poster ici, la video apparait
+   * en fondu des la premiere frame jouee. Ignore si Save-Data, reseau 2G
+   * ou prefers-reduced-motion : seul le poster reste affiche.
+   */
+  deferLoad?: boolean;
 };
+
+const DEFER_FALLBACK_MS = 2500;
+
+function canLoadDeferredVideo(): boolean {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+  const conn = (
+    navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }
+  ).connection;
+  if (conn?.saveData) return false;
+  if (conn?.effectiveType && /(^|-)2g$/.test(conn.effectiveType)) return false;
+  return true;
+}
 
 export function VideoR2({
   filename,
@@ -64,9 +87,35 @@ export function VideoR2({
   ariaHidden,
   preload = "metadata",
   alt,
+  deferLoad = false,
 }: VideoR2Props) {
   const [hasError, setHasError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  // deferLoad : false tant que la page n'a pas fini de charger.
+  const [loadAllowed, setLoadAllowed] = useState(!deferLoad);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    if (!deferLoad) return;
+    if (!canLoadDeferredVideo()) return;
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const allow = () => setLoadAllowed(true);
+    const schedule = () => {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(allow, { timeout: DEFER_FALLBACK_MS });
+      } else {
+        timeoutId = setTimeout(allow, 200);
+      }
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      window.removeEventListener("load", schedule);
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
+  }, [deferLoad]);
 
   const resolvedSources: Source[] = sources
     ? sources.map((s) => ({ ...s, filename: resolve(s.filename) }))
@@ -141,7 +190,7 @@ export function VideoR2({
   // Source effective rendue dans <video src=...> :
   //   1. activeSrc si defini (post-mount apres matchMedia)
   //   2. sinon fallbackSrc (SSR + premier paint client)
-  const effectiveSrc = activeSrc ?? fallbackSrc;
+  const effectiveSrc = loadAllowed ? (activeSrc ?? fallbackSrc) : "";
 
   // ──────────────────────────────────────────────────────────────────
   // Sprint HERO-VIDEO-V2 : fix autoplay iOS Safari. Les props React
@@ -157,7 +206,7 @@ export function VideoR2({
   // ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     const el = videoRef.current;
-    if (!el) return;
+    if (!el || !effectiveSrc) return;
     if (muted) {
       el.muted = true;
       el.defaultMuted = true;
@@ -184,6 +233,9 @@ export function VideoR2({
     }
   }, [autoPlay, muted, effectiveSrc]);
 
+  // deferLoad : le poster vit sous la video (rendu par le parent).
+  if (hasError && deferLoad) return null;
+
   if (hasError && posterUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -202,16 +254,24 @@ export function VideoR2({
       // Une seule source via attribut src (vs <source> enfants). Resout
       // le bug Safari iOS qui ignorait media= des <source>.
       src={effectiveSrc || undefined}
-      poster={posterUrl}
+      poster={deferLoad ? undefined : posterUrl}
       autoPlay={autoPlay}
       loop={loop}
       muted={muted}
       controls={controls}
       playsInline
-      preload={preload}
-      className={className}
+      preload={deferLoad && !loadAllowed ? "none" : preload}
+      className={
+        deferLoad
+          ? `${className ?? ""} transition-opacity duration-700 ${playing ? "opacity-100" : "opacity-0"}`
+          : className
+      }
       aria-hidden={ariaHidden}
-      onError={() => setHasError(true)}
+      onPlaying={deferLoad ? () => setPlaying(true) : undefined}
+      onError={() => {
+        // Sans src (chargement differe pas encore autorise), pas d'erreur reelle.
+        if (effectiveSrc) setHasError(true);
+      }}
     />
   );
 }

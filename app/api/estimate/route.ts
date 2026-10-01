@@ -21,6 +21,10 @@ import {
   validateEmail,
   validatePhone,
 } from "@/lib/validators/contact";
+import {
+  resolveLuxembourgCommune,
+  checkEstimateSanity,
+} from "@/lib/estimation/coverage";
 
 const WORK_CATEGORIES: ReadonlySet<string> = new Set([
   "toiture",
@@ -366,6 +370,20 @@ async function persistEstimationRequest(args: {
   }
 }
 
+/**
+ * Valeur hors seuil de vraisemblance : aucun chiffre renvoye, le formulaire
+ * oriente vers un contact. Rien n'est persiste ni envoye par email (la
+ * fourchette serait fausse) ; un log serveur garde la trace pour diagnostic.
+ */
+function unrealisticResponse(reason: string, commune: string | undefined, mid: number) {
+  console.warn("[api/estimate] estimation bloquee (seuil de vraisemblance)", {
+    reason,
+    commune,
+    mid,
+  });
+  return NextResponse.json({ error: "UNREALISTIC_ESTIMATE" }, { status: 422 });
+}
+
 function hashIp(ip: string): string {
   const salt = process.env.TRACKING_IP_SALT ?? "mapa_default_salt_change_me_2026";
   return createHash("sha256").update(ip + salt).digest("hex").slice(0, 32);
@@ -512,6 +530,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
+  // Garde couverture (oct. 2026) : estimation publique LUXEMBOURG UNIQUEMENT.
+  // Pays != LU ou commune absente du referentiel officiel -> aucun chiffre,
+  // le formulaire affiche le renvoi vers l'agence. Une orthographe approchee
+  // renvoie des suggestions a confirmer, jamais une correction silencieuse
+  // (cf. lib/estimation/coverage.ts).
+  if (String(body.country).trim().toUpperCase() !== "LU") {
+    return NextResponse.json(
+      { error: "OUT_OF_COVERAGE", reason: "country" },
+      { status: 422 },
+    );
+  }
+  const communeRes = resolveLuxembourgCommune(body.commune);
+  if (communeRes.status !== "exact") {
+    return NextResponse.json(
+      {
+        error: "OUT_OF_COVERAGE",
+        reason: "commune",
+        suggestions:
+          communeRes.status === "suggest" ? communeRes.suggestions : [],
+      },
+      { status: 422 },
+    );
+  }
+  body.country = "LU";
+  body.commune = communeRes.canonical;
+
   // Sprint C9 + C10 — validation contact server-side avant toute persistance.
   // Doublonne le gating client (Step 3 disabled) pour bloquer les leads
   // forges (DevTools, scripts) qui contourneraient le bouton disabled.
@@ -623,6 +667,13 @@ export async function POST(req: Request) {
         helps: [],
       };
 
+      const sanity = checkEstimateSanity({
+        mid: result.range.mid,
+        surface: evsInputs.surfaceLiving,
+        isLand: false,
+      });
+      if (!sanity.ok) return unrealisticResponse(sanity.reason, body.commune, result.range.mid);
+
       // Persistance audit trail. Bug C5-bis (juin 2026) : AWAIT obligatoire en
       // serverless Vercel — un `void` fire-and-forget laisse le runtime tuer le
       // process apres response avant que les INSERTs Supabase n'aient le temps
@@ -711,6 +762,13 @@ export async function POST(req: Request) {
     3.6;
 
   const result = estimateProperty(body as EstimateInput, Number(rate));
+
+  const sanity = checkEstimateSanity({
+    mid: result.range.mid,
+    surface: usefulSurface,
+    isLand,
+  });
+  if (!sanity.ok) return unrealisticResponse(sanity.reason, body.commune, result.range.mid);
 
   // Bug C5-bis : AWAIT obligatoire (cf. branche EVS plus haut). Same reason.
   await persistEstimationRequest({

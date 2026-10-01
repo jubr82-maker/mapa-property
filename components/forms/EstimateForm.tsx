@@ -119,6 +119,16 @@ const WORKS_GROUPS: ReadonlyArray<{
 
 const CURRENT_YEAR = new Date().getFullYear();
 
+// Communes LU proposees : referentiel prix Observatoire, sans la ligne
+// agregee "Moyenne nationale" (pas un lieu) ni les doublons orthographiques.
+const LU_COMMUNE_OPTIONS = Array.from(
+  new Map(
+    LUXEMBOURG_COMMUNES_PRICES.filter((r) => r.commune !== "Moyenne nationale").map(
+      (r) => [r.commune, { value: r.commune, label: r.commune }],
+    ),
+  ).values(),
+);
+
 interface FormState {
   country: string;
   commune: string;
@@ -227,6 +237,13 @@ export function EstimateForm() {
   const [usedComparables, setUsedComparables] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Garde couverture (oct. 2026) : reponse 422 du serveur -> aucun chiffre,
+  // renvoi vers l'agence (hors Luxembourg ou valeur hors seuil).
+  const [blocked, setBlocked] = useState<
+    | { kind: "country" | "commune"; suggestions: string[] }
+    | { kind: "unrealistic" }
+    | null
+  >(null);
   // Sprint C8 — touched flags pour affichage erreurs onBlur uniquement.
   // Sprint C10 — touchedName remplace par touchedFirstName + touchedLastName.
   const [touchedFirstName, setTouchedFirstName] = useState(false);
@@ -274,7 +291,8 @@ export function EstimateForm() {
   }
   const hasWorksErrors = worksErrors.length > 0;
 
-  const submit = async () => {
+  const submit = async (communeOverride?: string) => {
+    const commune = communeOverride ?? data.commune;
     // Sprint C9 — double protection : meme si le bouton fuit (DevTools,
     // race), on refuse cote handler si un validator KO. Force le retour
     // visuel onBlur en marquant tous les champs comme touches.
@@ -293,6 +311,7 @@ export function EstimateForm() {
     }
     setPending(true);
     setError(null);
+    setBlocked(null);
     try {
       // Sprint C2 : construit works: WorkItem[] AVEC annee + montant
       // INDIVIDUELS par categorie (data.worksByCat). Fini la repartition
@@ -332,7 +351,7 @@ export function EstimateForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           country: data.country,
-          commune: data.commune || undefined,
+          commune: commune || undefined,
           quartier: data.quartier || undefined,
           type: data.type,
           state: data.state,
@@ -398,6 +417,24 @@ export function EstimateForm() {
           rgpdConsent: data.rgpdConsent,
         }),
       });
+      if (res.status === 422) {
+        const j = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          reason?: string;
+          suggestions?: string[];
+        };
+        if (j.error === "UNREALISTIC_ESTIMATE") {
+          setBlocked({ kind: "unrealistic" });
+          return;
+        }
+        if (j.error === "OUT_OF_COVERAGE" || j.error === "COUNTRY_NOT_COVERED") {
+          setBlocked({
+            kind: j.reason === "commune" ? "commune" : "country",
+            suggestions: Array.isArray(j.suggestions) ? j.suggestions : [],
+          });
+          return;
+        }
+      }
       if (!res.ok) throw new Error();
       const json = (await res.json()) as {
         result: EstimateResult;
@@ -430,6 +467,7 @@ export function EstimateForm() {
     setData(initial);
     setResult(null);
     setUsedComparables(false);
+    setBlocked(null);
     setStep(1);
   };
 
@@ -684,11 +722,8 @@ export function EstimateForm() {
                     if (v !== "Luxembourg") set("quartier", "");
                   }}
                   options={[
-                    { value: "", label: tSearch("any") },
-                    ...LUXEMBOURG_COMMUNES_PRICES.map((r) => ({
-                      value: r.commune,
-                      label: r.commune,
-                    })),
+                    { value: "", label: t("commune_choose") },
+                    ...LU_COMMUNE_OPTIONS,
                   ]}
                 />
                 {data.commune === "Luxembourg" && (
@@ -706,23 +741,22 @@ export function EstimateForm() {
                   />
                 )}
               </>
-            ) : (
+            ) : null}
+            {data.country === "LU" && (
               <FieldText
-                label={tSearch("city")}
-                value={data.commune}
-                onChange={(v) => set("commune", v)}
-                placeholder={tSearch("city_ph")}
+                label={t("postal")}
+                value={data.postal}
+                onChange={(v) => set("postal", v)}
               />
             )}
-            <FieldText
-              label={t("postal")}
-              value={data.postal}
-              onChange={(v) => set("postal", v)}
-            />
           </div>
+          {/* Garde couverture : hors Luxembourg, aucune estimation chiffree,
+              renvoi immediat vers une estimation internationale. */}
+          {data.country !== "LU" && <CoverageNotice kind="country" t={t} />}
           <BackNextBtn
             onBack={() => setStep(1)}
             onNext={() => setStep(3)}
+            disabled={data.country !== "LU" || !data.commune}
             t={t}
           />
         </StepWrap>
@@ -842,9 +876,20 @@ export function EstimateForm() {
               {error}
             </p>
           )}
+          {blocked && (
+            <CoverageNotice
+              kind={blocked.kind}
+              suggestions={blocked.kind === "unrealistic" ? [] : blocked.suggestions}
+              onPickSuggestion={(s) => {
+                set("commune", s);
+                void submit(s);
+              }}
+              t={t}
+            />
+          )}
           <BackSubmitBtn
             onBack={() => setStep(2)}
-            onSubmit={submit}
+            onSubmit={() => void submit()}
             pending={pending}
             t={t}
             disabled={step3Disabled}
@@ -1450,13 +1495,69 @@ function NextBtn({
   );
 }
 
+function CoverageNotice({
+  kind,
+  suggestions = [],
+  onPickSuggestion,
+  t,
+}: {
+  kind: "country" | "commune" | "unrealistic";
+  suggestions?: string[];
+  onPickSuggestion?: (commune: string) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const unrealistic = kind === "unrealistic";
+  return (
+    <div
+      role="status"
+      className="mt-5 rounded-xl border border-gold/50 bg-gold/5 p-5"
+    >
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold-deep">
+        {t(unrealistic ? "unrealistic_title" : "coverage_title")}
+      </p>
+      <p className="mt-2 text-sm leading-relaxed text-ink-mid">
+        {t(
+          unrealistic
+            ? "unrealistic_body"
+            : kind === "commune"
+              ? "coverage_commune"
+              : "coverage_country",
+        )}
+      </p>
+      {suggestions.length > 0 && onPickSuggestion && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-ink-mid">{t("coverage_suggestions")}</span>
+          {suggestions.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => onPickSuggestion(s)}
+              className="rounded-full border border-gold px-4 py-1.5 font-mono text-[11px] text-gold-deep hover:bg-gold/10"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+      <Link
+        href="/contact"
+        className="gold-shine-bg mt-4 inline-block rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20"
+      >
+        {t(unrealistic ? "unrealistic_cta" : "coverage_cta")} →
+      </Link>
+    </div>
+  );
+}
+
 function BackNextBtn({
   onBack,
   onNext,
+  disabled = false,
   t,
 }: {
   onBack: () => void;
   onNext: () => void;
+  disabled?: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
   return (
@@ -1471,7 +1572,8 @@ function BackNextBtn({
       <button
         type="button"
         onClick={onNext}
-        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02]"
+        disabled={disabled}
+        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
       >
         {t("next")} →
       </button>

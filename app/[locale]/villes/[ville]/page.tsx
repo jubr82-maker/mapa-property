@@ -4,7 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { pageAlternates } from "@/lib/seo";
-import { cities, getCityBySlug, getCitySlugs, getNearbyCities, type City } from "@/lib/cities";
+import { getCityBySlug, getCitySlugs, getNearbyCities, type City } from "@/lib/cities";
 import { routing } from "@/i18n/routing";
 
 type Locale = "fr" | "en" | "de";
@@ -243,4 +243,3 @@ export default async function VillePage({
 }
 
 export const dynamicParams = false;
-export { cities };
