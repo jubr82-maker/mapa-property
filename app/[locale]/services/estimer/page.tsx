@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { EstimateForm } from "@/components/forms/EstimateForm";
 import { pageAlternates } from "@/lib/seo";
+import { getLuxembourgPlaces } from "@/lib/estimation/coverage";
 
 export async function generateMetadata({
   params,
@@ -41,7 +42,10 @@ export default async function EstimatePage({
           </p>
         </header>
 
-        <EstimateForm />
+        {/* Lieux reconnus (communes, quartiers VDL, localites) et commune
+            proposee, calcules cote serveur : le JSON GeoNames reste hors du
+            bundle client. */}
+        <EstimateForm places={getLuxembourgPlaces()} />
       </div>
     </div>
   );

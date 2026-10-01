@@ -9,7 +9,6 @@ import {
   VDL_QUARTIERS_PRICES,
 } from "@/lib/data/luxembourg-prices";
 import { track } from "@/lib/tracking/track";
-import { CountrySelect } from "@/components/ui/CountrySelect";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
@@ -130,7 +129,9 @@ const LU_COMMUNE_OPTIONS = Array.from(
 );
 
 interface FormState {
-  country: string;
+  // Oct. 2026 : lieu saisi (commune, quartier VDL ou localite). `commune`
+  // = commune de rattachement utilisee pour le calcul.
+  locality: string;
   commune: string;
   quartier: string; // si commune = Luxembourg (25 quartiers VDL)
   postal: string;
@@ -181,7 +182,7 @@ interface FormState {
 }
 
 const initial: FormState = {
-  country: DEFAULT_COUNTRY,
+  locality: "",
   commune: "",
   quartier: "",
   postal: "",
@@ -225,7 +226,37 @@ const initial: FormState = {
 // des leads pourris ("j@j.lu", "+352 691"). Bouton vraiment disabled tant
 // que validators ne retournent pas valid=true sur les 3 champs.
 
-export function EstimateForm() {
+/** Lieu propose au formulaire (cf. lib/estimation/coverage.ts). */
+export interface EstimatePlace {
+  name: string;
+  commune: string;
+  quartier?: string;
+  attached: boolean;
+}
+
+const PLACES_DATALIST_ID = "estimate-places";
+
+/** Base de calcul annoncee au visiteur (cf. app/api/estimate/route.ts). */
+interface EstimateBasis {
+  locality: string;
+  commune: string;
+  quartier: string | null;
+  attached: boolean;
+}
+
+/** Meme normalisation que le serveur (casse, accents, tirets). */
+function normalizePlace(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[-_'’.]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
   const t = useTranslations("estimate_form");
   const tSearch = useTranslations("search");
   const tRgpd = useTranslations("rgpd");
@@ -235,6 +266,8 @@ export function EstimateForm() {
   // Booleen methodo : des ventes reelles ont-elles servi au calcul ? (jamais
   // le nombre ni le detail cote client). Selectionne la variante de phrase.
   const [usedComparables, setUsedComparables] = useState(false);
+  // Base de calcul renvoyee par le serveur (commune, quartier, rattachement).
+  const [basis, setBasis] = useState<EstimateBasis | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Garde couverture (oct. 2026) : reponse 422 du serveur -> aucun chiffre,
@@ -257,6 +290,12 @@ export function EstimateForm() {
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setData((d) => ({ ...d, [key]: value }));
   };
+
+  const placesByKey = useMemo(
+    () => new Map(places.map((p) => [normalizePlace(p.name), p])),
+    [places],
+  );
+  const selectedPlace = placesByKey.get(normalizePlace(data.locality));
 
   // Sprint C2 LIVRABLE 4 : validation par-categorie. Une cat cochee DOIT
   // avoir year ET amount remplis et valides. Si une seule cat est invalide,
@@ -291,8 +330,15 @@ export function EstimateForm() {
   }
   const hasWorksErrors = worksErrors.length > 0;
 
-  const submit = async (communeOverride?: string) => {
-    const commune = communeOverride ?? data.commune;
+  // `localityOverride` : suggestion choisie apres une reponse 422 ; la
+  // commune proposee pour ce lieu remplace alors la commune selectionnee.
+  const submit = async (localityOverride?: string) => {
+    const locality = localityOverride ?? data.locality;
+    const overridePlace = localityOverride
+      ? placesByKey.get(normalizePlace(localityOverride))
+      : undefined;
+    const commune = overridePlace?.commune ?? data.commune;
+    const quartier = overridePlace ? (overridePlace.quartier ?? "") : data.quartier;
     // Sprint C9 — double protection : meme si le bouton fuit (DevTools,
     // race), on refuse cote handler si un validator KO. Force le retour
     // visuel onBlur en marquant tous les champs comme touches.
@@ -350,9 +396,10 @@ export function EstimateForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          country: data.country,
+          country: "LU",
+          locality: locality.trim() || undefined,
           commune: commune || undefined,
-          quartier: data.quartier || undefined,
+          quartier: quartier || undefined,
           type: data.type,
           state: data.state,
           energy: data.energy,
@@ -441,14 +488,16 @@ export function EstimateForm() {
         engine?: string;
         confidence?: string;
         usedComparables?: boolean;
+        basis?: EstimateBasis;
       };
       setResult(json.result);
+      setBasis(json.basis ?? null);
       setUsedComparables(json.usedComparables === true);
       setStep(4);
       track("estimation_compute", {
-        country: data.country,
+        country: "LU",
         type: data.type,
-        commune: data.commune || undefined,
+        commune: commune || undefined,
         quartier: data.quartier || undefined,
         living_surface: Number(data.livingSurface) || undefined,
         engine: json.engine,
@@ -467,12 +516,20 @@ export function EstimateForm() {
     setData(initial);
     setResult(null);
     setUsedComparables(false);
+    setBasis(null);
     setBlocked(null);
     setStep(1);
   };
 
   if (result) {
-    return <ResultView result={result} usedComparables={usedComparables} onReset={reset} />;
+    return (
+      <ResultView
+        result={result}
+        usedComparables={usedComparables}
+        basis={basis}
+        onReset={reset}
+      />
+    );
   }
 
   return (
@@ -702,61 +759,80 @@ export function EstimateForm() {
 
       {step === 2 && (
         <StepWrap title={t("step2_title")} subtitle={t("step2_subtitle")}>
+          {/* Oct. 2026 : estimation limitee au Luxembourg, plus de choix
+              du pays. Le lieu (commune, quartier ou localite) propose la
+              commune de rattachement, modifiable par le visiteur. */}
+          <p className="mb-4 text-sm text-ink-mid">{t("country_implicit")}</p>
           <div className="grid gap-4 sm:grid-cols-2">
-            <CountrySelect
-              label={tSearch("country")}
-              value={data.country}
+            <FieldText
+              label={t("locality")}
+              value={data.locality}
               onChange={(v) => {
-                set("country", v);
-                if (v !== "LU") set("quartier", "");
+                set("locality", v);
+                const place = placesByKey.get(normalizePlace(v));
+                if (place) {
+                  set("commune", place.commune);
+                  set("quartier", place.quartier ?? "");
+                }
               }}
+              placeholder={t("locality_placeholder")}
+              list={PLACES_DATALIST_ID}
+              autoComplete="off"
             />
-            {data.country === "LU" ? (
-              <>
-                <FieldSelect
-                  label={t("commune")}
-                  value={data.commune}
-                  onChange={(v) => {
-                    set("commune", v);
-                    // reset quartier si on quitte Luxembourg
-                    if (v !== "Luxembourg") set("quartier", "");
-                  }}
-                  options={[
-                    { value: "", label: t("commune_choose") },
-                    ...LU_COMMUNE_OPTIONS,
-                  ]}
-                />
-                {data.commune === "Luxembourg" && (
-                  <FieldSelect
-                    label={t("quartier") || "Quartier (Luxembourg-Ville)"}
-                    value={data.quartier}
-                    onChange={(v) => set("quartier", v)}
-                    options={[
-                      { value: "", label: tSearch("any") },
-                      ...VDL_QUARTIERS_PRICES.map((q) => ({
-                        value: q.quartier,
-                        label: q.quartier,
-                      })),
-                    ]}
-                  />
-                )}
-              </>
-            ) : null}
-            {data.country === "LU" && (
-              <FieldText
-                label={t("postal")}
-                value={data.postal}
-                onChange={(v) => set("postal", v)}
+            <datalist id={PLACES_DATALIST_ID}>
+              {places.map((p) => (
+                <option key={p.name} value={p.name} />
+              ))}
+            </datalist>
+            <FieldSelect
+              label={t("commune_attached")}
+              value={data.commune}
+              onChange={(v) => {
+                set("commune", v);
+                // reset quartier si on quitte Luxembourg
+                if (v !== "Luxembourg") set("quartier", "");
+              }}
+              options={[
+                { value: "", label: t("commune_choose") },
+                ...LU_COMMUNE_OPTIONS,
+              ]}
+            />
+            {data.commune === "Luxembourg" && (
+              <FieldSelect
+                label={t("quartier")}
+                value={data.quartier}
+                onChange={(v) => set("quartier", v)}
+                options={[
+                  { value: "", label: tSearch("any") },
+                  ...VDL_QUARTIERS_PRICES.filter(
+                    (q) => q.quartier !== "Moyenne nationale",
+                  ).map((q) => ({
+                    value: q.quartier,
+                    label: q.quartier,
+                  })),
+                ]}
               />
             )}
+            <FieldText
+              label={t("postal")}
+              value={data.postal}
+              onChange={(v) => set("postal", v)}
+            />
           </div>
-          {/* Garde couverture : hors Luxembourg, aucune estimation chiffree,
-              renvoi immediat vers une estimation internationale. */}
-          {data.country !== "LU" && <CoverageNotice kind="country" t={t} />}
+          {data.commune && (
+            <p className="mt-3 text-xs italic text-ink-soft">
+              {selectedPlace?.attached && selectedPlace.commune === data.commune
+                ? t("commune_attached_hint_auto", {
+                    locality: selectedPlace.name,
+                    commune: data.commune,
+                  })
+                : t("commune_attached_hint")}
+            </p>
+          )}
           <BackNextBtn
             onBack={() => setStep(1)}
             onNext={() => setStep(3)}
-            disabled={data.country !== "LU" || !data.commune}
+            disabled={!data.commune}
             t={t}
           />
         </StepWrap>
@@ -881,7 +957,12 @@ export function EstimateForm() {
               kind={blocked.kind}
               suggestions={blocked.kind === "unrealistic" ? [] : blocked.suggestions}
               onPickSuggestion={(s) => {
-                set("commune", s);
+                set("locality", s);
+                const place = placesByKey.get(normalizePlace(s));
+                if (place) {
+                  set("commune", place.commune);
+                  set("quartier", place.quartier ?? "");
+                }
                 void submit(s);
               }}
               t={t}
@@ -974,6 +1055,7 @@ function FieldText({
   placeholder,
   type = "text",
   autoComplete,
+  list,
 }: {
   label: string;
   value: string;
@@ -983,6 +1065,8 @@ function FieldText({
   placeholder?: string;
   type?: "text" | "email" | "tel";
   autoComplete?: string;
+  /** id d'un <datalist> de suggestions. */
+  list?: string;
 }) {
   const borderClass = error
     ? "border-red-500 focus:border-red-500"
@@ -999,6 +1083,7 @@ function FieldText({
         onBlur={onBlur}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        list={list}
         aria-invalid={error ? true : undefined}
         className={`rounded-md border ${borderClass} bg-bg px-4 py-2.5 text-sm focus:outline-none`}
       />
@@ -1621,10 +1706,12 @@ function BackSubmitBtn({
 function ResultView({
   result,
   usedComparables,
+  basis,
   onReset,
 }: {
   result: EstimateResult;
   usedComparables: boolean;
+  basis: EstimateBasis | null;
   onReset: () => void;
 }) {
   const t = useTranslations("estimate_form");
@@ -1671,6 +1758,18 @@ function ResultView({
         <p className="mt-3 border-t border-gold/20 pt-3 text-xs leading-relaxed text-ink-mid">
           {usedComparables ? t("methodology_with_sales") : t("methodology_without_sales")}
         </p>
+        {/* Oct. 2026 : base geographique du calcul. Les prix officiels sont
+            publies par commune (et par quartier a Luxembourg-Ville) : on ne
+            laisse jamais croire a une donnee au village pres. */}
+        {basis && (
+          <p className="mt-3 text-xs leading-relaxed text-ink-mid">
+            {basis.quartier
+              ? t("basis_quartier", { quartier: basis.quartier })
+              : t("basis_commune", { commune: basis.commune })}
+            {basis.attached &&
+              ` ${t("basis_attached", { locality: basis.locality, commune: basis.commune })}`}
+          </p>
+        )}
       </section>
 
       {/* Financing */}

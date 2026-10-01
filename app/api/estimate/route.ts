@@ -22,7 +22,8 @@ import {
   validatePhone,
 } from "@/lib/validators/contact";
 import {
-  resolveLuxembourgCommune,
+  resolveLuxembourgLocation,
+  normalizeCommune,
   checkEstimateSanity,
 } from "@/lib/estimation/coverage";
 
@@ -472,6 +473,9 @@ function c7Cast(body: Record<string, unknown>, key: string): string | undefined 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as Partial<EstimateInput> & {
     quartier?: string;
+    // Oct. 2026 : lieu saisi (commune, quartier VDL ou localite) ; `commune`
+    // porte alors la commune de rattachement choisie dans le formulaire.
+    locality?: string;
     contactEmail?: string;
     contactPhone?: string;
     // Sprint C9 : ISO pays du PhoneInput pour validation libphonenumber.
@@ -521,7 +525,6 @@ export async function POST(req: Request) {
     ? Number(body.landSurface)
     : Number(body.livingSurface);
   if (
-    !body.country ||
     !body.type ||
     !body.state ||
     !usefulSurface ||
@@ -531,30 +534,56 @@ export async function POST(req: Request) {
   }
 
   // Garde couverture (oct. 2026) : estimation publique LUXEMBOURG UNIQUEMENT.
-  // Pays != LU ou commune absente du referentiel officiel -> aucun chiffre,
-  // le formulaire affiche le renvoi vers l'agence. Une orthographe approchee
-  // renvoie des suggestions a confirmer, jamais une correction silencieuse
-  // (cf. lib/estimation/coverage.ts).
-  if (String(body.country).trim().toUpperCase() !== "LU") {
+  // Le formulaire ne propose plus de pays (Luxembourg implicite), mais la
+  // route peut etre appelee directement : un pays explicite != LU est
+  // refuse, et le lieu doit etre une commune, un quartier VDL ou une
+  // localite luxembourgeoise reconnue. Une orthographe approchee renvoie
+  // des suggestions a confirmer, jamais une correction silencieuse. Une
+  // localite sans donnees propres est rattachee a une commune ; la commune
+  // choisie par le visiteur prime (cf. lib/estimation/coverage.ts).
+  if (body.country && String(body.country).trim().toUpperCase() !== "LU") {
     return NextResponse.json(
       { error: "OUT_OF_COVERAGE", reason: "country" },
       { status: 422 },
     );
   }
-  const communeRes = resolveLuxembourgCommune(body.commune);
-  if (communeRes.status !== "exact") {
+  const placeRes = resolveLuxembourgLocation(
+    body.locality || body.commune,
+    body.locality ? body.commune : undefined,
+  );
+  if (placeRes.status !== "exact") {
     return NextResponse.json(
       {
         error: "OUT_OF_COVERAGE",
         reason: "commune",
         suggestions:
-          communeRes.status === "suggest" ? communeRes.suggestions : [],
+          placeRes.status === "suggest" ? placeRes.suggestions : [],
       },
       { status: 422 },
     );
   }
+  const place = placeRes.place;
   body.country = "LU";
-  body.commune = communeRes.canonical;
+  body.locality = place.name;
+  body.commune = place.commune;
+  // Quartier VDL : celui du lieu saisi prime ; sinon celui choisi dans le
+  // formulaire, uniquement si la commune est Luxembourg-Ville.
+  body.quartier =
+    place.quartier ??
+    (normalizeCommune(place.commune).startsWith("luxembourg")
+      ? body.quartier
+      : undefined);
+  // Emails : lieu saisi + commune de calcul si rattachement (noms seuls).
+  const emailPlace = place.attached
+    ? `${place.name} / ${place.commune}`
+    : place.commune;
+  // Base de calcul annoncee au visiteur (jamais une donnee au village pres).
+  const basis = {
+    locality: place.name,
+    commune: place.commune,
+    quartier: body.quartier || null,
+    attached: place.attached,
+  };
 
   // Sprint C9 + C10 — validation contact server-side avant toute persistance.
   // Doublonne le gating client (Step 3 disabled) pour bloquer les leads
@@ -728,7 +757,7 @@ export async function POST(req: Request) {
         contactName: fullName || body.contactName,
         contactPhone: body.contactPhone,
         message: body.message,
-        commune: body.commune,
+        commune: emailPlace,
         type: body.type,
         surfaceLiving:
           typeof body.livingSurface === "number" ? body.livingSurface : undefined,
@@ -744,6 +773,7 @@ export async function POST(req: Request) {
         confidence: evs.client_output.confidence,
         // Booleen methodo UNIQUEMENT (jamais le nombre ni le detail des
         // ventes) : selectionne la variante de phrase methodo cote client.
+        basis,
         usedComparables:
           evs.internal_output.methods.sales_comparison.applicable === true,
       });
@@ -799,7 +829,7 @@ export async function POST(req: Request) {
     contactName: fullName || body.contactName,
     contactPhone: body.contactPhone,
     message: body.message,
-    commune: body.commune,
+    commune: emailPlace,
     type: body.type,
     surfaceLiving:
       typeof body.livingSurface === "number" ? body.livingSurface : undefined,
@@ -808,7 +838,7 @@ export async function POST(req: Request) {
     locale: body.locale,
   });
 
-  return NextResponse.json({ result, rate, engine: "hedonic_legacy" });
+  return NextResponse.json({ result, rate, engine: "hedonic_legacy", basis });
 }
 
 export const dynamic = "force-dynamic";
