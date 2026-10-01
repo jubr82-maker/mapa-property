@@ -1,45 +1,40 @@
-// ABATTEMENT PRIX ANNONCE -> PRIX DE VENTE : SOURCE UNIQUE DU DEPOT.
-// Tout abattement entre prix affiche par les vendeurs et prix de vente reel
-// doit etre defini ICI et nulle part ailleurs (mission oct. 2026).
+// DECOTE PRIX ANNONCE -> PRIX DE VENTE : SOURCE UNIQUE DU DEPOT.
+// Toute decote entre prix affiche par les vendeurs et prix de vente reel est
+// definie ICI et nulle part ailleurs.
 
 /**
- * Maisons : abattement de 7 % sur le prix annonce au m2.
+ * Taux unique de decote : 7 % sur le prix annonce au m2.
  *
- * Auteur : Julien Brebion, MAPA Property (regle professionnelle, oct. 2026).
- * Justification : l'Observatoire de l'Habitat ne publie pas de prix de vente
- * au m2 des maisons par commune (les actes notaries ne portent pas la
- * surface). Le prix de vente se deduit donc des prix annonces par commune,
- * diminues de 7 %.
+ * Auteur : Julien Brebion, MAPA Property (regle professionnelle, decision
+ * definitive d'octobre 2026). Remplace l'ancien facteur 0,9125 (8,75 %).
  *
- * Ne s'applique QU'AUX MAISONS. Les appartements disposent de prix notaries
- * reels par commune : aucun abattement.
+ * S'applique partout ou l'on part d'un prix annonce :
+ *  - maisons : toujours (l'Observatoire de l'Habitat ne publie aucun prix de
+ *    vente au m2 des maisons par commune, les actes notaries ne portant pas
+ *    la surface) ;
+ *  - appartements : seulement dans les communes sans prix notarie. La ou un
+ *    prix notarie existe, il est utilise tel quel, sans decote.
  *
- * Ajustement : modifier cette seule valeur (0.07 = 7 %).
+ * Ajustement : modifier cette seule valeur (0.07 = 7 %). Les prix estimes du
+ * referentiel (lib/data/luxembourg-prices.ts) en sont derives au chargement.
  */
-export const HOUSE_ANNOUNCED_TO_SALE_DISCOUNT = 0.07;
+export const ANNOUNCED_TO_SALE_DISCOUNT = 0.07;
 
 /**
- * Prix de vente au m2 d'une maison a partir du prix ANNONCE BRUT au m2
- * (champ `announced_maison_avg_m2` du referentiel).
- *
- * NE JAMAIS passer `estimated_maison_m2_from_ann` : cette valeur contient
- * deja l'abattement historique de 8,75 % (cf. ci-dessous), l'abattement
- * serait applique deux fois.
+ * Prix de vente au m2 a partir d'un prix ANNONCE BRUT au m2 (champs
+ * `announced_*_avg_m2` du referentiel). Seul point d'application de la
+ * decote : ne jamais lui passer une valeur `estimated_*`, deja decotee.
  */
-export function houseSalePricePerM2FromAnnounced(announcedPerM2: number): number {
-  return announcedPerM2 * (1 - HOUSE_ANNOUNCED_TO_SALE_DISCOUNT);
+export function salePricePerM2FromAnnounced(announcedPerM2: number): number {
+  return announcedPerM2 * (1 - ANNOUNCED_TO_SALE_DISCOUNT);
 }
 
-/**
- * HERITAGE, NON MODIFIE (constat oct. 2026) : facteur 0.9125 (abattement de
- * 8,75 %, "regle MAPA : ecart moyen 7,5-10 % entre prix annonce et prix de
- * vente"). Il est PRECALCULE dans les 143 valeurs `estimated_*_m2_from_ann`
- * de lib/data/luxembourg-prices.ts, pour les appartements ET les maisons
- * (communes et quartiers VDL), et sert au moteur quand une commune n'a pas
- * de prix notarie.
- *
- * Il contredit la regle d'octobre 2026 (7 %, maisons seulement) : decision
- * de Julien attendue avant toute harmonisation. Tant qu'elle n'est pas
- * prise, aucun calcul existant n'est modifie.
- */
-export const LEGACY_ANNOUNCED_TO_REAL_FACTOR = 0.9125;
+/** Libelle du taux pour les traces internes du moteur ("-7%"). */
+export const ANNOUNCED_DISCOUNT_LABEL = `-${Math.round(ANNOUNCED_TO_SALE_DISCOUNT * 1000) / 10}%`;
+
+// EXCEPTION CONNUE, SANS EFFET SUR LES ESTIMATIONS (constat oct. 2026) :
+// APARTMENT_BASELINES (lib/data/luxembourg-prices.ts) integre une decote de
+// 6,5 % ecrite en dur, sans les prix affiches bruts correspondants. Cette
+// table n'est lue que par estimateApartment (lib/estimation/engine.ts), code
+// mort : le moteur passe par estimateObservatoire. Non modifiee, faute de
+// prix bruts ; a supprimer ou a recalculer si elle est un jour reactivee.

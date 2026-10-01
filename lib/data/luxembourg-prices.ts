@@ -14,8 +14,10 @@
  *     null si <10 transactions sur la période (règle officielle Observatoire pour confidentialité).
  *   - real_vefa_avg_m2 : prix RÉEL moyen €/m² VEFA (Vente en État Futur d'Achèvement = neuf).
  *   - announced_*_avg_m2 : prix moyen annoncé €/m² par les vendeurs (avant négociation).
- *   - estimated_*_m2_from_ann : prix annoncé × 0.9125 (décote -8.75%, règle MAPA : écart
- *     moyen 7.5-10% entre prix annoncé et prix de vente effectif).
+ *   - estimated_*_m2_from_ann : prix annoncé × (1 - 7 %), taux unique défini dans
+ *     lib/data/announced-discount.ts (décision Julien, oct. 2026 ; remplace 8,75 %).
+ *     Valeurs écrites ci-dessous à titre lisible, RECALCULÉES au chargement du
+ *     module depuis announced_*_avg_m2 (cf. fin de fichier) : le taux fait foi.
  *
  * Logique de sélection à appliquer dans le moteur d'estimation :
  *   1. Priorité 1 : real_existing_avg_m2 si disponible (>=10 ventes notariées).
@@ -27,6 +29,8 @@
  *
  * Renouvellement officiel : trimestriel (Observatoire publie chaque mars/juin/sept/déc).
  */
+
+import { salePricePerM2FromAnnounced } from "./announced-discount";
 
 export interface CommunePrices {
   commune: string;
@@ -55,9 +59,8 @@ export interface VdlQuartierPrices {
 }
 
 export const LUXEMBOURG_DATA_AS_OF = "2025 (publication mars 2026)";
-// Abattement historique -8,75 % : defini dans lib/data/announced-discount.ts
-// (source unique), reexporte ici pour compatibilite.
-export { LEGACY_ANNOUNCED_TO_REAL_FACTOR as ANNOUNCED_TO_REAL_DISCOUNT } from "./announced-discount";
+// Decote prix annonce -> prix de vente : taux unique (7 %) defini dans
+// lib/data/announced-discount.ts, applique a la fin de ce fichier.
 
 // Oct. 2026 : doublons orthographiques fusionnes sous la graphie officielle
 // du Registre national des localites et des rues (lib/geo/luxembourg-
@@ -77,10 +80,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 32.0,
     "announced_appart_avg_m2": 7284.52,
-    "estimated_appart_m2_from_ann": 6647,
+    "estimated_appart_m2_from_ann": 6775,
     "announced_maison_count": 35.0,
     "announced_maison_avg_m2": 5351.984,
-    "estimated_maison_m2_from_ann": 4884
+    "estimated_maison_m2_from_ann": 4977
   },
   {
     "commune": "Bech",
@@ -107,10 +110,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 30.0,
     "announced_appart_avg_m2": 6614.201,
-    "estimated_appart_m2_from_ann": 6035,
+    "estimated_appart_m2_from_ann": 6151,
     "announced_maison_count": 95.0,
     "announced_maison_avg_m2": 4983.419,
-    "estimated_maison_m2_from_ann": 4547
+    "estimated_maison_m2_from_ann": 4635
   },
   {
     "commune": "Berdorf",
@@ -137,10 +140,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "10302 € - 14948 €",
     "announced_appart_count": 406.0,
     "announced_appart_avg_m2": 11331.49,
-    "estimated_appart_m2_from_ann": 10340,
+    "estimated_appart_m2_from_ann": 10538,
     "announced_maison_count": 384.0,
     "announced_maison_avg_m2": 8350.165,
-    "estimated_maison_m2_from_ann": 7620
+    "estimated_maison_m2_from_ann": 7766
   },
   {
     "commune": "Bettembourg",
@@ -152,10 +155,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 218.0,
     "announced_appart_avg_m2": 7522.348,
-    "estimated_appart_m2_from_ann": 6864,
+    "estimated_appart_m2_from_ann": 6996,
     "announced_maison_count": 128.0,
     "announced_maison_avg_m2": 6296.808,
-    "estimated_maison_m2_from_ann": 5746
+    "estimated_maison_m2_from_ann": 5856
   },
   {
     "commune": "Bettendorf",
@@ -170,7 +173,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 175.0,
     "announced_maison_avg_m2": 5566.074,
-    "estimated_maison_m2_from_ann": 5079
+    "estimated_maison_m2_from_ann": 5176
   },
   {
     "commune": "Betzdorf",
@@ -185,7 +188,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 90.0,
     "announced_maison_avg_m2": 6014.865,
-    "estimated_maison_m2_from_ann": 5489
+    "estimated_maison_m2_from_ann": 5594
   },
   {
     "commune": "Bissen",
@@ -197,10 +200,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 46.0,
     "announced_appart_avg_m2": 7664.87,
-    "estimated_appart_m2_from_ann": 6994,
+    "estimated_appart_m2_from_ann": 7128,
     "announced_maison_count": 52.0,
     "announced_maison_avg_m2": 5969.118,
-    "estimated_maison_m2_from_ann": 5447
+    "estimated_maison_m2_from_ann": 5551
   },
   {
     "commune": "Biwer",
@@ -257,10 +260,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 35.0,
     "announced_appart_avg_m2": 8037.701,
-    "estimated_appart_m2_from_ann": 7334,
+    "estimated_appart_m2_from_ann": 7475,
     "announced_maison_count": 54.0,
     "announced_maison_avg_m2": 5916.055,
-    "estimated_maison_m2_from_ann": 5398
+    "estimated_maison_m2_from_ann": 5502
   },
   {
     "commune": "Clervaux",
@@ -272,10 +275,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 122.0,
     "announced_appart_avg_m2": 5898.5,
-    "estimated_appart_m2_from_ann": 5382,
+    "estimated_appart_m2_from_ann": 5486,
     "announced_maison_count": 224.0,
     "announced_maison_avg_m2": 5123.036,
-    "estimated_maison_m2_from_ann": 4675
+    "estimated_maison_m2_from_ann": 4764
   },
   {
     "commune": "Colmar-Berg",
@@ -287,10 +290,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 50.0,
     "announced_appart_avg_m2": 6927.78,
-    "estimated_appart_m2_from_ann": 6322,
+    "estimated_appart_m2_from_ann": 6443,
     "announced_maison_count": 44.0,
     "announced_maison_avg_m2": 5424.762,
-    "estimated_maison_m2_from_ann": 4950
+    "estimated_maison_m2_from_ann": 5045
   },
   {
     "commune": "Consdorf",
@@ -305,7 +308,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 44.0,
     "announced_maison_avg_m2": 5485.946,
-    "estimated_maison_m2_from_ann": 5006
+    "estimated_maison_m2_from_ann": 5102
   },
   {
     "commune": "Contern",
@@ -317,10 +320,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 246.0,
     "announced_appart_avg_m2": 9496.161,
-    "estimated_appart_m2_from_ann": 8665,
+    "estimated_appart_m2_from_ann": 8831,
     "announced_maison_count": 67.0,
     "announced_maison_avg_m2": 6328.366,
-    "estimated_maison_m2_from_ann": 5775
+    "estimated_maison_m2_from_ann": 5885
   },
   {
     "commune": "Dalheim",
@@ -332,10 +335,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 65.0,
     "announced_appart_avg_m2": 7051.553,
-    "estimated_appart_m2_from_ann": 6435,
+    "estimated_appart_m2_from_ann": 6558,
     "announced_maison_count": 459.0,
     "announced_maison_avg_m2": 6901.406,
-    "estimated_maison_m2_from_ann": 6298
+    "estimated_maison_m2_from_ann": 6418
   },
   {
     "commune": "Diekirch",
@@ -347,10 +350,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 126.0,
     "announced_appart_avg_m2": 7489.602,
-    "estimated_appart_m2_from_ann": 6834,
+    "estimated_appart_m2_from_ann": 6965,
     "announced_maison_count": 51.0,
     "announced_maison_avg_m2": 5232.472,
-    "estimated_maison_m2_from_ann": 4775
+    "estimated_maison_m2_from_ann": 4866
   },
   {
     "commune": "Differdange",
@@ -362,10 +365,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "6323 € - 8051 €",
     "announced_appart_count": 1035.0,
     "announced_appart_avg_m2": 7220.824,
-    "estimated_appart_m2_from_ann": 6589,
+    "estimated_appart_m2_from_ann": 6715,
     "announced_maison_count": 370.0,
     "announced_maison_avg_m2": 5026.02,
-    "estimated_maison_m2_from_ann": 4586
+    "estimated_maison_m2_from_ann": 4674
   },
   {
     "commune": "Dippach",
@@ -377,10 +380,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 98.0,
     "announced_appart_avg_m2": 8480.572,
-    "estimated_appart_m2_from_ann": 7739,
+    "estimated_appart_m2_from_ann": 7887,
     "announced_maison_count": 241.0,
     "announced_maison_avg_m2": 5995.771,
-    "estimated_maison_m2_from_ann": 5471
+    "estimated_maison_m2_from_ann": 5576
   },
   {
     "commune": "Dudelange",
@@ -392,10 +395,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "7009 € - 10420 €",
     "announced_appart_count": 710.0,
     "announced_appart_avg_m2": 7139.192,
-    "estimated_appart_m2_from_ann": 6515,
+    "estimated_appart_m2_from_ann": 6639,
     "announced_maison_count": 358.0,
     "announced_maison_avg_m2": 5489.796,
-    "estimated_maison_m2_from_ann": 5009
+    "estimated_maison_m2_from_ann": 5106
   },
   {
     "commune": "Echternach",
@@ -407,10 +410,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 74.0,
     "announced_appart_avg_m2": 6555.484,
-    "estimated_appart_m2_from_ann": 5982,
+    "estimated_appart_m2_from_ann": 6097,
     "announced_maison_count": 77.0,
     "announced_maison_avg_m2": 5257.337,
-    "estimated_maison_m2_from_ann": 4797
+    "estimated_maison_m2_from_ann": 4889
   },
   {
     "commune": "Ell",
@@ -425,7 +428,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 64.0,
     "announced_maison_avg_m2": 5380.54,
-    "estimated_maison_m2_from_ann": 4910
+    "estimated_maison_m2_from_ann": 5004
   },
   {
     "commune": "Erpeldange-sur-Sûre",
@@ -452,10 +455,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "7929 € - 10573 €",
     "announced_appart_count": 1752.0,
     "announced_appart_avg_m2": 7391.681,
-    "estimated_appart_m2_from_ann": 6745,
+    "estimated_appart_m2_from_ann": 6874,
     "announced_maison_count": 436.0,
     "announced_maison_avg_m2": 5135.175,
-    "estimated_maison_m2_from_ann": 4686
+    "estimated_maison_m2_from_ann": 4776
   },
   {
     "commune": "Esch-sur-Sûre",
@@ -467,10 +470,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 35.0,
     "announced_appart_avg_m2": 5683.518,
-    "estimated_appart_m2_from_ann": 5186,
+    "estimated_appart_m2_from_ann": 5286,
     "announced_maison_count": 52.0,
     "announced_maison_avg_m2": 4310.81,
-    "estimated_maison_m2_from_ann": 3934
+    "estimated_maison_m2_from_ann": 4009
   },
   {
     "commune": "Ettelbruck",
@@ -482,10 +485,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 157.0,
     "announced_appart_avg_m2": 6854.177,
-    "estimated_appart_m2_from_ann": 6254,
+    "estimated_appart_m2_from_ann": 6374,
     "announced_maison_count": 170.0,
     "announced_maison_avg_m2": 4865.235,
-    "estimated_maison_m2_from_ann": 4440
+    "estimated_maison_m2_from_ann": 4525
   },
   {
     "commune": "Feulen",
@@ -500,7 +503,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 46.0,
     "announced_maison_avg_m2": 4901.569,
-    "estimated_maison_m2_from_ann": 4473
+    "estimated_maison_m2_from_ann": 4558
   },
   {
     "commune": "Fischbach",
@@ -530,7 +533,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 50.0,
     "announced_maison_avg_m2": 5495.506,
-    "estimated_maison_m2_from_ann": 5015
+    "estimated_maison_m2_from_ann": 5111
   },
   {
     "commune": "Frisange",
@@ -542,10 +545,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 142.0,
     "announced_appart_avg_m2": 7661.378,
-    "estimated_appart_m2_from_ann": 6991,
+    "estimated_appart_m2_from_ann": 7125,
     "announced_maison_count": 193.0,
     "announced_maison_avg_m2": 6242.726,
-    "estimated_maison_m2_from_ann": 5696
+    "estimated_maison_m2_from_ann": 5806
   },
   {
     "commune": "Garnich",
@@ -560,7 +563,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 75.0,
     "announced_maison_avg_m2": 6873.719,
-    "estimated_maison_m2_from_ann": 6272
+    "estimated_maison_m2_from_ann": 6393
   },
   {
     "commune": "Goesdorf",
@@ -572,10 +575,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 30.0,
     "announced_appart_avg_m2": 6151.176,
-    "estimated_appart_m2_from_ann": 5613,
+    "estimated_appart_m2_from_ann": 5721,
     "announced_maison_count": 35.0,
     "announced_maison_avg_m2": 4545.672,
-    "estimated_maison_m2_from_ann": 4148
+    "estimated_maison_m2_from_ann": 4227
   },
   {
     "commune": "Grevenmacher",
@@ -587,10 +590,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 367.0,
     "announced_appart_avg_m2": 8554.264,
-    "estimated_appart_m2_from_ann": 7806,
+    "estimated_appart_m2_from_ann": 7955,
     "announced_maison_count": 38.0,
     "announced_maison_avg_m2": 5646.952,
-    "estimated_maison_m2_from_ann": 5153
+    "estimated_maison_m2_from_ann": 5252
   },
   {
     "commune": "Groussbus-Wal",
@@ -605,7 +608,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 245.0,
     "announced_maison_avg_m2": 4212.025,
-    "estimated_maison_m2_from_ann": 3843
+    "estimated_maison_m2_from_ann": 3917
   },
   {
     "commune": "Habscht",
@@ -617,10 +620,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 153.0,
     "announced_appart_avg_m2": 7313.451,
-    "estimated_appart_m2_from_ann": 6674,
+    "estimated_appart_m2_from_ann": 6802,
     "announced_maison_count": 135.0,
     "announced_maison_avg_m2": 5358.353,
-    "estimated_maison_m2_from_ann": 4889
+    "estimated_maison_m2_from_ann": 4983
   },
   {
     "commune": "Heffingen",
@@ -632,10 +635,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 60.0,
     "announced_appart_avg_m2": 8311.34,
-    "estimated_appart_m2_from_ann": 7584,
+    "estimated_appart_m2_from_ann": 7730,
     "announced_maison_count": 35.0,
     "announced_maison_avg_m2": 5370.1,
-    "estimated_maison_m2_from_ann": 4900
+    "estimated_maison_m2_from_ann": 4994
   },
   {
     "commune": "Helperknapp",
@@ -647,10 +650,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 65.0,
     "announced_appart_avg_m2": 7366.098,
-    "estimated_appart_m2_from_ann": 6722,
+    "estimated_appart_m2_from_ann": 6850,
     "announced_maison_count": 70.0,
     "announced_maison_avg_m2": 5268.189,
-    "estimated_maison_m2_from_ann": 4807
+    "estimated_maison_m2_from_ann": 4899
   },
   {
     "commune": "Hesperange",
@@ -662,10 +665,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "11651 € - 13933 €",
     "announced_appart_count": 866.0,
     "announced_appart_avg_m2": 10039.64,
-    "estimated_appart_m2_from_ann": 9161,
+    "estimated_appart_m2_from_ann": 9337,
     "announced_maison_count": 279.0,
     "announced_maison_avg_m2": 7863.955,
-    "estimated_maison_m2_from_ann": 7176
+    "estimated_maison_m2_from_ann": 7313
   },
   {
     "commune": "Junglinster",
@@ -677,10 +680,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "8051 € - 11230 €",
     "announced_appart_count": 103.0,
     "announced_appart_avg_m2": 8801.918,
-    "estimated_appart_m2_from_ann": 8032,
+    "estimated_appart_m2_from_ann": 8186,
     "announced_maison_count": 244.0,
     "announced_maison_avg_m2": 7553.857,
-    "estimated_maison_m2_from_ann": 6893
+    "estimated_maison_m2_from_ann": 7025
   },
   {
     "commune": "Kayl",
@@ -692,10 +695,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 277.0,
     "announced_appart_avg_m2": 6963.505,
-    "estimated_appart_m2_from_ann": 6354,
+    "estimated_appart_m2_from_ann": 6476,
     "announced_maison_count": 131.0,
     "announced_maison_avg_m2": 5138.584,
-    "estimated_maison_m2_from_ann": 4689
+    "estimated_maison_m2_from_ann": 4779
   },
   {
     "commune": "Kehlen",
@@ -707,10 +710,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "6405 € - 10857 €",
     "announced_appart_count": 215.0,
     "announced_appart_avg_m2": 8256.026,
-    "estimated_appart_m2_from_ann": 7534,
+    "estimated_appart_m2_from_ann": 7678,
     "announced_maison_count": 330.0,
     "announced_maison_avg_m2": 5952.723,
-    "estimated_maison_m2_from_ann": 5432
+    "estimated_maison_m2_from_ann": 5536
   },
   {
     "commune": "Kiischpelt",
@@ -737,10 +740,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 197.0,
     "announced_appart_avg_m2": 6924.573,
-    "estimated_appart_m2_from_ann": 6319,
+    "estimated_appart_m2_from_ann": 6440,
     "announced_maison_count": 35.0,
     "announced_maison_avg_m2": 6403.819,
-    "estimated_maison_m2_from_ann": 5843
+    "estimated_maison_m2_from_ann": 5956
   },
   {
     "commune": "Kopstal",
@@ -752,10 +755,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 77.0,
     "announced_appart_avg_m2": 8935.269,
-    "estimated_appart_m2_from_ann": 8153,
+    "estimated_appart_m2_from_ann": 8310,
     "announced_maison_count": 92.0,
     "announced_maison_avg_m2": 8558.628,
-    "estimated_maison_m2_from_ann": 7810
+    "estimated_maison_m2_from_ann": 7960
   },
   {
     "commune": "Käerjeng",
@@ -767,10 +770,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 1358.0,
     "announced_appart_avg_m2": 8728.515,
-    "estimated_appart_m2_from_ann": 7965,
+    "estimated_appart_m2_from_ann": 8118,
     "announced_maison_count": 776.0,
     "announced_maison_avg_m2": 6051.063,
-    "estimated_maison_m2_from_ann": 5522
+    "estimated_maison_m2_from_ann": 5627
   },
   {
     "commune": "Lac de la Haute-Sûre",
@@ -797,7 +800,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 34.0,
     "announced_appart_avg_m2": 6792.424,
-    "estimated_appart_m2_from_ann": 6198,
+    "estimated_appart_m2_from_ann": 6317,
     "announced_maison_count": 24.0,
     "announced_maison_avg_m2": null,
     "estimated_maison_m2_from_ann": null
@@ -815,7 +818,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 35.0,
     "announced_maison_avg_m2": 5496.232,
-    "estimated_maison_m2_from_ann": 5015
+    "estimated_maison_m2_from_ann": 5111
   },
   {
     "commune": "Leudelange",
@@ -827,10 +830,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "7836 € - 11932 €",
     "announced_appart_count": 161.0,
     "announced_appart_avg_m2": 8759.538,
-    "estimated_appart_m2_from_ann": 7993,
+    "estimated_appart_m2_from_ann": 8146,
     "announced_maison_count": 48.0,
     "announced_maison_avg_m2": 7696.914,
-    "estimated_maison_m2_from_ann": 7023
+    "estimated_maison_m2_from_ann": 7158
   },
   {
     "commune": "Lintgen",
@@ -842,10 +845,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 70.0,
     "announced_appart_avg_m2": 9228.819,
-    "estimated_appart_m2_from_ann": 8421,
+    "estimated_appart_m2_from_ann": 8583,
     "announced_maison_count": 44.0,
     "announced_maison_avg_m2": 6124.392,
-    "estimated_maison_m2_from_ann": 5589
+    "estimated_maison_m2_from_ann": 5696
   },
   {
     "commune": "Lorentzweiler",
@@ -857,10 +860,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 168.0,
     "announced_appart_avg_m2": 9542.926,
-    "estimated_appart_m2_from_ann": 8708,
+    "estimated_appart_m2_from_ann": 8875,
     "announced_maison_count": 185.0,
     "announced_maison_avg_m2": 5432.159,
-    "estimated_maison_m2_from_ann": 4957
+    "estimated_maison_m2_from_ann": 5052
   },
   {
     "commune": "Luxembourg",
@@ -872,10 +875,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": null,
     "announced_appart_count": 6863.0,
     "announced_appart_avg_m2": 12362.33,
-    "estimated_appart_m2_from_ann": 11281,
+    "estimated_appart_m2_from_ann": 11497,
     "announced_maison_count": 818.0,
     "announced_maison_avg_m2": 8668.662,
-    "estimated_maison_m2_from_ann": 7910
+    "estimated_maison_m2_from_ann": 8062
   },
   {
     "commune": "Luxembourg-Ville",
@@ -902,10 +905,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "8687 € - 12547 €",
     "announced_appart_count": 721.0,
     "announced_appart_avg_m2": 9766.282,
-    "estimated_appart_m2_from_ann": 8912,
+    "estimated_appart_m2_from_ann": 9083,
     "announced_maison_count": 291.0,
     "announced_maison_avg_m2": 7702.215,
-    "estimated_maison_m2_from_ann": 7028
+    "estimated_maison_m2_from_ann": 7163
   },
   {
     "commune": "Manternach",
@@ -932,10 +935,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "7687 € - 12983 €",
     "announced_appart_count": 927.0,
     "announced_appart_avg_m2": 9557.733,
-    "estimated_appart_m2_from_ann": 8721,
+    "estimated_appart_m2_from_ann": 8889,
     "announced_maison_count": 397.0,
     "announced_maison_avg_m2": 6265.377,
-    "estimated_maison_m2_from_ann": 5717
+    "estimated_maison_m2_from_ann": 5827
   },
   {
     "commune": "Mertert",
@@ -947,10 +950,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "6887 € - 10095 €",
     "announced_appart_count": 159.0,
     "announced_appart_avg_m2": 7141.64,
-    "estimated_appart_m2_from_ann": 6517,
+    "estimated_appart_m2_from_ann": 6642,
     "announced_maison_count": 57.0,
     "announced_maison_avg_m2": 5618.957,
-    "estimated_maison_m2_from_ann": 5127
+    "estimated_maison_m2_from_ann": 5226
   },
   {
     "commune": "Mertzig",
@@ -965,7 +968,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 60.0,
     "announced_maison_avg_m2": 5770.799,
-    "estimated_maison_m2_from_ann": 5266
+    "estimated_maison_m2_from_ann": 5367
   },
   {
     "commune": "Mondercange",
@@ -977,10 +980,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 181.0,
     "announced_appart_avg_m2": 7225.58,
-    "estimated_appart_m2_from_ann": 6593,
+    "estimated_appart_m2_from_ann": 6720,
     "announced_maison_count": 327.0,
     "announced_maison_avg_m2": 6556.665,
-    "estimated_maison_m2_from_ann": 5983
+    "estimated_maison_m2_from_ann": 6098
   },
   {
     "commune": "Mondorf-les-Bains",
@@ -992,10 +995,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 145.0,
     "announced_appart_avg_m2": 7830.405,
-    "estimated_appart_m2_from_ann": 7145,
+    "estimated_appart_m2_from_ann": 7282,
     "announced_maison_count": 79.0,
     "announced_maison_avg_m2": 6170.447,
-    "estimated_maison_m2_from_ann": 5631
+    "estimated_maison_m2_from_ann": 5739
   },
   {
     "commune": "Moyenne nationale",
@@ -1007,10 +1010,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "6941 € - 14106 €",
     "announced_appart_count": null,
     "announced_appart_avg_m2": 9463.98,
-    "estimated_appart_m2_from_ann": 8636,
+    "estimated_appart_m2_from_ann": 8802,
     "announced_maison_count": null,
     "announced_maison_avg_m2": 6058.961,
-    "estimated_maison_m2_from_ann": 5529
+    "estimated_maison_m2_from_ann": 5635
   },
   {
     "commune": "Niederanven",
@@ -1022,10 +1025,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 75.0,
     "announced_appart_avg_m2": 10326.85,
-    "estimated_appart_m2_from_ann": 9423,
+    "estimated_appart_m2_from_ann": 9604,
     "announced_maison_count": 150.0,
     "announced_maison_avg_m2": 7564.372,
-    "estimated_maison_m2_from_ann": 6902
+    "estimated_maison_m2_from_ann": 7035
   },
   {
     "commune": "Nommern",
@@ -1052,10 +1055,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 31.0,
     "announced_appart_avg_m2": 5916.751,
-    "estimated_appart_m2_from_ann": 5399,
+    "estimated_appart_m2_from_ann": 5503,
     "announced_maison_count": 41.0,
     "announced_maison_avg_m2": 4763.413,
-    "estimated_maison_m2_from_ann": 4347
+    "estimated_maison_m2_from_ann": 4430
   },
   {
     "commune": "Pétange",
@@ -1067,10 +1070,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 654.0,
     "announced_appart_avg_m2": 7040.645,
-    "estimated_appart_m2_from_ann": 6425,
+    "estimated_appart_m2_from_ann": 6548,
     "announced_maison_count": 461.0,
     "announced_maison_avg_m2": 5037.115,
-    "estimated_maison_m2_from_ann": 4596
+    "estimated_maison_m2_from_ann": 4685
   },
   {
     "commune": "Préizerdaul",
@@ -1115,7 +1118,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 215.0,
     "announced_maison_avg_m2": 4608.852,
-    "estimated_maison_m2_from_ann": 4206
+    "estimated_maison_m2_from_ann": 4286
   },
   {
     "commune": "Reckange-sur-Mess",
@@ -1127,10 +1130,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "7838 € - 9625 €",
     "announced_appart_count": 51.0,
     "announced_appart_avg_m2": 8787.806,
-    "estimated_appart_m2_from_ann": 8019,
+    "estimated_appart_m2_from_ann": 8173,
     "announced_maison_count": 80.0,
     "announced_maison_avg_m2": 5739.013,
-    "estimated_maison_m2_from_ann": 5237
+    "estimated_maison_m2_from_ann": 5337
   },
   {
     "commune": "Redange/Attert",
@@ -1142,10 +1145,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 55.0,
     "announced_appart_avg_m2": 6746.648,
-    "estimated_appart_m2_from_ann": 6156,
+    "estimated_appart_m2_from_ann": 6274,
     "announced_maison_count": 47.0,
     "announced_maison_avg_m2": 4629.79,
-    "estimated_maison_m2_from_ann": 4225
+    "estimated_maison_m2_from_ann": 4306
   },
   {
     "commune": "Reisdorf",
@@ -1160,7 +1163,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 53.0,
     "announced_maison_avg_m2": 6050.24,
-    "estimated_maison_m2_from_ann": 5521
+    "estimated_maison_m2_from_ann": 5627
   },
   {
     "commune": "Remich",
@@ -1172,10 +1175,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 126.0,
     "announced_appart_avg_m2": 8017.674,
-    "estimated_appart_m2_from_ann": 7316,
+    "estimated_appart_m2_from_ann": 7456,
     "announced_maison_count": 82.0,
     "announced_maison_avg_m2": 6499.894,
-    "estimated_maison_m2_from_ann": 5931
+    "estimated_maison_m2_from_ann": 6045
   },
   {
     "commune": "Roeser",
@@ -1187,10 +1190,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 153.0,
     "announced_appart_avg_m2": 8233.881,
-    "estimated_appart_m2_from_ann": 7513,
+    "estimated_appart_m2_from_ann": 7658,
     "announced_maison_count": 118.0,
     "announced_maison_avg_m2": 7174.908,
-    "estimated_maison_m2_from_ann": 6547
+    "estimated_maison_m2_from_ann": 6673
   },
   {
     "commune": "Rosport-Mompach",
@@ -1205,7 +1208,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 81.0,
     "announced_maison_avg_m2": 4806.72,
-    "estimated_maison_m2_from_ann": 4386
+    "estimated_maison_m2_from_ann": 4470
   },
   {
     "commune": "Rumelange",
@@ -1217,10 +1220,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 66.0,
     "announced_appart_avg_m2": 6475.025,
-    "estimated_appart_m2_from_ann": 5908,
+    "estimated_appart_m2_from_ann": 6022,
     "announced_maison_count": 86.0,
     "announced_maison_avg_m2": 4918.761,
-    "estimated_maison_m2_from_ann": 4488
+    "estimated_maison_m2_from_ann": 4574
   },
   {
     "commune": "Saeul",
@@ -1250,7 +1253,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 31.0,
     "announced_maison_avg_m2": 7454.713,
-    "estimated_maison_m2_from_ann": 6802
+    "estimated_maison_m2_from_ann": 6933
   },
   {
     "commune": "Sanem",
@@ -1262,10 +1265,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "7623 € - 10210 €",
     "announced_appart_count": 471.0,
     "announced_appart_avg_m2": 7459.496,
-    "estimated_appart_m2_from_ann": 6807,
+    "estimated_appart_m2_from_ann": 6937,
     "announced_maison_count": 491.0,
     "announced_maison_avg_m2": 5496.629,
-    "estimated_maison_m2_from_ann": 5016
+    "estimated_maison_m2_from_ann": 5112
   },
   {
     "commune": "Schengen",
@@ -1277,10 +1280,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 30.0,
     "announced_appart_avg_m2": 6969.232,
-    "estimated_appart_m2_from_ann": 6359,
+    "estimated_appart_m2_from_ann": 6481,
     "announced_maison_count": 114.0,
     "announced_maison_avg_m2": 5396.319,
-    "estimated_maison_m2_from_ann": 4924
+    "estimated_maison_m2_from_ann": 5019
   },
   {
     "commune": "Schieren",
@@ -1307,10 +1310,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 303.0,
     "announced_appart_avg_m2": 7298.821,
-    "estimated_appart_m2_from_ann": 6660,
+    "estimated_appart_m2_from_ann": 6788,
     "announced_maison_count": 107.0,
     "announced_maison_avg_m2": 5691.998,
-    "estimated_maison_m2_from_ann": 5194
+    "estimated_maison_m2_from_ann": 5294
   },
   {
     "commune": "Schuttrange",
@@ -1322,10 +1325,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 84.0,
     "announced_appart_avg_m2": 9432.296,
-    "estimated_appart_m2_from_ann": 8607,
+    "estimated_appart_m2_from_ann": 8772,
     "announced_maison_count": 81.0,
     "announced_maison_avg_m2": 7406.017,
-    "estimated_maison_m2_from_ann": 6758
+    "estimated_maison_m2_from_ann": 6888
   },
   {
     "commune": "Stadtbredimus",
@@ -1340,7 +1343,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 98.0,
     "announced_maison_avg_m2": 5837.951,
-    "estimated_maison_m2_from_ann": 5327
+    "estimated_maison_m2_from_ann": 5429
   },
   {
     "commune": "Steinfort",
@@ -1352,10 +1355,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 202.0,
     "announced_appart_avg_m2": 8734.896,
-    "estimated_appart_m2_from_ann": 7971,
+    "estimated_appart_m2_from_ann": 8123,
     "announced_maison_count": 197.0,
     "announced_maison_avg_m2": 6178.631,
-    "estimated_maison_m2_from_ann": 5638
+    "estimated_maison_m2_from_ann": 5746
   },
   {
     "commune": "Steinsel",
@@ -1367,10 +1370,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "6537 € - 10813 €",
     "announced_appart_count": 196.0,
     "announced_appart_avg_m2": 9569.236,
-    "estimated_appart_m2_from_ann": 8732,
+    "estimated_appart_m2_from_ann": 8899,
     "announced_maison_count": 102.0,
     "announced_maison_avg_m2": 6931.09,
-    "estimated_maison_m2_from_ann": 6325
+    "estimated_maison_m2_from_ann": 6446
   },
   {
     "commune": "Strassen",
@@ -1382,10 +1385,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "9686 € - 14914 €",
     "announced_appart_count": 263.0,
     "announced_appart_avg_m2": 10779.85,
-    "estimated_appart_m2_from_ann": 9837,
+    "estimated_appart_m2_from_ann": 10025,
     "announced_maison_count": 61.0,
     "announced_maison_avg_m2": 8733.636,
-    "estimated_maison_m2_from_ann": 7969
+    "estimated_maison_m2_from_ann": 8122
   },
   {
     "commune": "Tandel",
@@ -1415,7 +1418,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 56.0,
     "announced_maison_avg_m2": 4077.889,
-    "estimated_maison_m2_from_ann": 3721
+    "estimated_maison_m2_from_ann": 3792
   },
   {
     "commune": "Useldange",
@@ -1430,7 +1433,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 69.0,
     "announced_maison_avg_m2": 5277.081,
-    "estimated_maison_m2_from_ann": 4815
+    "estimated_maison_m2_from_ann": 4908
   },
   {
     "commune": "Vallée de l'Ernz",
@@ -1445,7 +1448,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 179.0,
     "announced_maison_avg_m2": 4824.492,
-    "estimated_maison_m2_from_ann": 4402
+    "estimated_maison_m2_from_ann": 4487
   },
   {
     "commune": "Vianden",
@@ -1460,7 +1463,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 42.0,
     "announced_maison_avg_m2": 4223.038,
-    "estimated_maison_m2_from_ann": 3854
+    "estimated_maison_m2_from_ann": 3927
   },
   {
     "commune": "Vichten",
@@ -1490,7 +1493,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 39.0,
     "announced_maison_avg_m2": 5277.722,
-    "estimated_maison_m2_from_ann": 4816
+    "estimated_maison_m2_from_ann": 4908
   },
   {
     "commune": "Walferdange",
@@ -1502,10 +1505,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 227.0,
     "announced_appart_avg_m2": 9583.645,
-    "estimated_appart_m2_from_ann": 8745,
+    "estimated_appart_m2_from_ann": 8913,
     "announced_maison_count": 95.0,
     "announced_maison_avg_m2": 7529.224,
-    "estimated_maison_m2_from_ann": 6870
+    "estimated_maison_m2_from_ann": 7002
   },
   {
     "commune": "Weiler-la-Tour",
@@ -1517,10 +1520,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 38.0,
     "announced_appart_avg_m2": 8386.918,
-    "estimated_appart_m2_from_ann": 7653,
+    "estimated_appart_m2_from_ann": 7800,
     "announced_maison_count": 94.0,
     "announced_maison_avg_m2": 6475.206,
-    "estimated_maison_m2_from_ann": 5909
+    "estimated_maison_m2_from_ann": 6022
   },
   {
     "commune": "Weiswampach",
@@ -1532,7 +1535,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 63.0,
     "announced_appart_avg_m2": 6679.935,
-    "estimated_appart_m2_from_ann": 6095,
+    "estimated_appart_m2_from_ann": 6212,
     "announced_maison_count": 21.0,
     "announced_maison_avg_m2": null,
     "estimated_maison_m2_from_ann": null
@@ -1547,10 +1550,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 196.0,
     "announced_appart_avg_m2": 5627.966,
-    "estimated_appart_m2_from_ann": 5136,
+    "estimated_appart_m2_from_ann": 5234,
     "announced_maison_count": 462.0,
     "announced_maison_avg_m2": 4213.139,
-    "estimated_maison_m2_from_ann": 3844
+    "estimated_maison_m2_from_ann": 3918
   },
   {
     "commune": "Wincrange",
@@ -1565,7 +1568,7 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_appart_m2_from_ann": null,
     "announced_maison_count": 69.0,
     "announced_maison_avg_m2": 4291.768,
-    "estimated_maison_m2_from_ann": 3916
+    "estimated_maison_m2_from_ann": 3991
   },
   {
     "commune": "Winseler",
@@ -1592,10 +1595,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_range": "*",
     "announced_appart_count": 179.0,
     "announced_appart_avg_m2": 8527.334,
-    "estimated_appart_m2_from_ann": 7781,
+    "estimated_appart_m2_from_ann": 7930,
     "announced_maison_count": 53.0,
     "announced_maison_avg_m2": 5181.871,
-    "estimated_maison_m2_from_ann": 4728
+    "estimated_maison_m2_from_ann": 4819
   }
 ];
 
@@ -1604,52 +1607,52 @@ export const VDL_QUARTIERS_PRICES: VdlQuartierPrices[] = [
     "quartier": "Beggen",
     "announced_appart_count": 72.0,
     "announced_appart_avg_m2": 10124.0,
-    "estimated_appart_m2_from_ann": 9238,
+    "estimated_appart_m2_from_ann": 9415,
     "announced_maison_count": 16.0,
     "announced_maison_avg_m2": 7149.152,
-    "estimated_maison_m2_from_ann": 6524
+    "estimated_maison_m2_from_ann": 6649
   },
   {
     "quartier": "Belair",
     "announced_appart_count": 1314.0,
     "announced_appart_avg_m2": 14272.85,
-    "estimated_appart_m2_from_ann": 13024,
+    "estimated_appart_m2_from_ann": 13274,
     "announced_maison_count": 67.0,
     "announced_maison_avg_m2": 10966.7,
-    "estimated_maison_m2_from_ann": 10007
+    "estimated_maison_m2_from_ann": 10199
   },
   {
     "quartier": "Bonnevoie",
     "announced_appart_count": 530.0,
     "announced_appart_avg_m2": 10560.37,
-    "estimated_appart_m2_from_ann": 9636,
+    "estimated_appart_m2_from_ann": 9821,
     "announced_maison_count": 64.0,
     "announced_maison_avg_m2": 7593.921,
-    "estimated_maison_m2_from_ann": 6929
+    "estimated_maison_m2_from_ann": 7062
   },
   {
     "quartier": "Cents",
     "announced_appart_count": 94.0,
     "announced_appart_avg_m2": 8892.141,
-    "estimated_appart_m2_from_ann": 8114,
+    "estimated_appart_m2_from_ann": 8270,
     "announced_maison_count": 121.0,
     "announced_maison_avg_m2": 8181.7,
-    "estimated_maison_m2_from_ann": 7466
+    "estimated_maison_m2_from_ann": 7609
   },
   {
     "quartier": "Cessange",
     "announced_appart_count": 141.0,
     "announced_appart_avg_m2": 10900.47,
-    "estimated_appart_m2_from_ann": 9947,
+    "estimated_appart_m2_from_ann": 10137,
     "announced_maison_count": 23.0,
     "announced_maison_avg_m2": 8749.626,
-    "estimated_maison_m2_from_ann": 7984
+    "estimated_maison_m2_from_ann": 8137
   },
   {
     "quartier": "Clausen",
     "announced_appart_count": 14.0,
     "announced_appart_avg_m2": 9959.866,
-    "estimated_appart_m2_from_ann": 9088,
+    "estimated_appart_m2_from_ann": 9263,
     "announced_maison_count": 5.0,
     "announced_maison_avg_m2": null
   },
@@ -1657,37 +1660,37 @@ export const VDL_QUARTIERS_PRICES: VdlQuartierPrices[] = [
     "quartier": "Dommeldange",
     "announced_appart_count": 36.0,
     "announced_appart_avg_m2": 9990.104,
-    "estimated_appart_m2_from_ann": 9116,
+    "estimated_appart_m2_from_ann": 9291,
     "announced_maison_count": 12.0,
     "announced_maison_avg_m2": 7256.224,
-    "estimated_maison_m2_from_ann": 6621
+    "estimated_maison_m2_from_ann": 6748
   },
   {
     "quartier": "Eich",
     "announced_appart_count": 136.0,
     "announced_appart_avg_m2": 11182.46,
-    "estimated_appart_m2_from_ann": 10204,
+    "estimated_appart_m2_from_ann": 10400,
     "announced_maison_count": 10.0,
     "announced_maison_avg_m2": 7110.758,
-    "estimated_maison_m2_from_ann": 6489
+    "estimated_maison_m2_from_ann": 6613
   },
   {
     "quartier": "Gare",
     "announced_appart_count": 212.0,
     "announced_appart_avg_m2": 10828.69,
-    "estimated_appart_m2_from_ann": 9881,
+    "estimated_appart_m2_from_ann": 10071,
     "announced_maison_count": 117.0,
     "announced_maison_avg_m2": 8092.067,
-    "estimated_maison_m2_from_ann": 7384
+    "estimated_maison_m2_from_ann": 7526
   },
   {
     "quartier": "Gasperich",
     "announced_appart_count": 303.0,
     "announced_appart_avg_m2": 12289.33,
-    "estimated_appart_m2_from_ann": 11214,
+    "estimated_appart_m2_from_ann": 11429,
     "announced_maison_count": 28.0,
     "announced_maison_avg_m2": 9586.629,
-    "estimated_maison_m2_from_ann": 8748
+    "estimated_maison_m2_from_ann": 8916
   },
   {
     "quartier": "Grund",
@@ -1700,88 +1703,88 @@ export const VDL_QUARTIERS_PRICES: VdlQuartierPrices[] = [
     "quartier": "Hamm",
     "announced_appart_count": 52.0,
     "announced_appart_avg_m2": 10558.65,
-    "estimated_appart_m2_from_ann": 9635,
+    "estimated_appart_m2_from_ann": 9820,
     "announced_maison_count": 10.0,
     "announced_maison_avg_m2": 7674.495,
-    "estimated_maison_m2_from_ann": 7003
+    "estimated_maison_m2_from_ann": 7137
   },
   {
     "quartier": "Hollerich",
     "announced_appart_count": 221.0,
     "announced_appart_avg_m2": 11406.47,
-    "estimated_appart_m2_from_ann": 10408,
+    "estimated_appart_m2_from_ann": 10608,
     "announced_maison_count": 19.0,
     "announced_maison_avg_m2": 9006.511,
-    "estimated_maison_m2_from_ann": 8218
+    "estimated_maison_m2_from_ann": 8376
   },
   {
     "quartier": "Kirchberg",
     "announced_appart_count": 357.0,
     "announced_appart_avg_m2": 11407.35,
-    "estimated_appart_m2_from_ann": 10409,
+    "estimated_appart_m2_from_ann": 10609,
     "announced_maison_count": 15.0,
     "announced_maison_avg_m2": 7713.11,
-    "estimated_maison_m2_from_ann": 7038
+    "estimated_maison_m2_from_ann": 7173
   },
   {
     "quartier": "Limpertsberg",
     "announced_appart_count": 362.0,
     "announced_appart_avg_m2": 11977.03,
-    "estimated_appart_m2_from_ann": 10929,
+    "estimated_appart_m2_from_ann": 11139,
     "announced_maison_count": 49.0,
     "announced_maison_avg_m2": 10880.44,
-    "estimated_maison_m2_from_ann": 9928
+    "estimated_maison_m2_from_ann": 10119
   },
   {
     "quartier": "Luxembourg-Ville",
     "announced_appart_count": 6863.0,
     "announced_appart_avg_m2": 12362.33,
-    "estimated_appart_m2_from_ann": 11281,
+    "estimated_appart_m2_from_ann": 11497,
     "announced_maison_count": 818.0,
     "announced_maison_avg_m2": 8668.662,
-    "estimated_maison_m2_from_ann": 7910
+    "estimated_maison_m2_from_ann": 8062
   },
   {
     "quartier": "Merl",
     "announced_appart_count": 325.0,
     "announced_appart_avg_m2": 11767.51,
-    "estimated_appart_m2_from_ann": 10738,
+    "estimated_appart_m2_from_ann": 10944,
     "announced_maison_count": 46.0,
     "announced_maison_avg_m2": 8989.389,
-    "estimated_maison_m2_from_ann": 8203
+    "estimated_maison_m2_from_ann": 8360
   },
   {
     "quartier": "Moyenne nationale",
     "announced_appart_count": 22548.0,
     "announced_appart_avg_m2": 9463.98,
-    "estimated_appart_m2_from_ann": 8636,
+    "estimated_appart_m2_from_ann": 8802,
     "announced_maison_count": 13059.0,
     "announced_maison_avg_m2": 6058.961,
-    "estimated_maison_m2_from_ann": 5529
+    "estimated_maison_m2_from_ann": 5635
   },
   {
     "quartier": "Mühlenbach",
     "announced_appart_count": 71.0,
     "announced_appart_avg_m2": 11694.98,
-    "estimated_appart_m2_from_ann": 10672,
+    "estimated_appart_m2_from_ann": 10876,
     "announced_maison_count": 32.0,
     "announced_maison_avg_m2": 8133.353,
-    "estimated_maison_m2_from_ann": 7422
+    "estimated_maison_m2_from_ann": 7564
   },
   {
     "quartier": "Neudorf",
     "announced_appart_count": 1596.0,
     "announced_appart_avg_m2": 13600.66,
-    "estimated_appart_m2_from_ann": 12411,
+    "estimated_appart_m2_from_ann": 12649,
     "announced_maison_count": 23.0,
     "announced_maison_avg_m2": 8726.785,
-    "estimated_maison_m2_from_ann": 7963
+    "estimated_maison_m2_from_ann": 8116
   },
   {
     "quartier": "Pfaffenthal",
     "announced_appart_count": 22.0,
     "announced_appart_avg_m2": 9665.391,
-    "estimated_appart_m2_from_ann": 8820,
+    "estimated_appart_m2_from_ann": 8989,
     "announced_maison_count": 8.0,
     "announced_maison_avg_m2": null
   },
@@ -1789,7 +1792,7 @@ export const VDL_QUARTIERS_PRICES: VdlQuartierPrices[] = [
     "quartier": "Pulvermühle",
     "announced_appart_count": 12.0,
     "announced_appart_avg_m2": 10295.61,
-    "estimated_appart_m2_from_ann": 9395,
+    "estimated_appart_m2_from_ann": 9575,
     "announced_maison_count": 1.0,
     "announced_maison_avg_m2": null
   },
@@ -1797,28 +1800,28 @@ export const VDL_QUARTIERS_PRICES: VdlQuartierPrices[] = [
     "quartier": "Rollingergrund",
     "announced_appart_count": 170.0,
     "announced_appart_avg_m2": 11014.29,
-    "estimated_appart_m2_from_ann": 10051,
+    "estimated_appart_m2_from_ann": 10243,
     "announced_maison_count": 32.0,
     "announced_maison_avg_m2": 8524.263,
-    "estimated_maison_m2_from_ann": 7778
+    "estimated_maison_m2_from_ann": 7928
   },
   {
     "quartier": "Ville-Haute",
     "announced_appart_count": 189.0,
     "announced_appart_avg_m2": 11742.9,
-    "estimated_appart_m2_from_ann": 10715,
+    "estimated_appart_m2_from_ann": 10921,
     "announced_maison_count": 47.0,
     "announced_maison_avg_m2": 9054.428,
-    "estimated_maison_m2_from_ann": 8262
+    "estimated_maison_m2_from_ann": 8421
   },
   {
     "quartier": "Weimerskirch",
     "announced_appart_count": 65.0,
     "announced_appart_avg_m2": 10062.35,
-    "estimated_appart_m2_from_ann": 9182,
+    "estimated_appart_m2_from_ann": 9358,
     "announced_maison_count": 27.0,
     "announced_maison_avg_m2": 7367.799,
-    "estimated_maison_m2_from_ann": 6723
+    "estimated_maison_m2_from_ann": 6852
   }
 ];
 
@@ -2002,4 +2005,18 @@ export function getApartmentBaseline(
   }
   if (!commune) return null;
   return APARTMENT_BASELINES[normBaselineKey(commune)] ?? null;
+}
+
+// Derivation des prix estimes depuis les prix annonces BRUTS, au taux unique
+// (lib/data/announced-discount.ts). Seul endroit ou la decote est appliquee
+// aux valeurs `estimated_*` : elles ne sont jamais redecotees ailleurs.
+for (const row of [...LUXEMBOURG_COMMUNES_PRICES, ...VDL_QUARTIERS_PRICES]) {
+  row.estimated_appart_m2_from_ann =
+    row.announced_appart_avg_m2 != null
+      ? Math.round(salePricePerM2FromAnnounced(row.announced_appart_avg_m2))
+      : null;
+  row.estimated_maison_m2_from_ann =
+    row.announced_maison_avg_m2 != null
+      ? Math.round(salePricePerM2FromAnnounced(row.announced_maison_avg_m2))
+      : null;
 }

@@ -23,12 +23,19 @@
 import {
   LUXEMBOURG_COMMUNES_PRICES,
   VDL_QUARTIERS_PRICES,
-  ANNOUNCED_TO_REAL_DISCOUNT,
   type CommunePrices,
   type VdlQuartierPrices,
 } from "@/lib/data/luxembourg-prices";
 import { calcParkingValue, computeParkingAdjustment } from "@/lib/estimation/parking-coeff";
-import { calcLandValue, getLandZone } from "@/lib/estimation/land-zones";
+import {
+  ANNOUNCED_DISCOUNT_LABEL,
+  salePricePerM2FromAnnounced,
+} from "@/lib/data/announced-discount";
+import {
+  calcLandValue,
+  getLandZone,
+  COMMUNE_TO_LAND_ZONE,
+} from "@/lib/estimation/land-zones";
 import { getApartmentBaseline } from "@/lib/data/luxembourg-prices";
 
 // ============================================================================
@@ -663,7 +670,7 @@ export function getBaseline(
           pricePerM2: q.estimated_appart_m2_from_ann,
           source: "announced_discounted",
           confidence: "MEDIUM",
-          reference: `VDL quartier ${q.quartier} (annonces -8.75%)`,
+          reference: `VDL quartier ${q.quartier} (annonces ${ANNOUNCED_DISCOUNT_LABEL})`,
         };
       }
       if (type === "maison" && q.estimated_maison_m2_from_ann) {
@@ -671,7 +678,7 @@ export function getBaseline(
           pricePerM2: q.estimated_maison_m2_from_ann,
           source: "announced_discounted",
           confidence: "MEDIUM",
-          reference: `VDL quartier ${q.quartier} (annonces maisons -8.75%)`,
+          reference: `VDL quartier ${q.quartier} (annonces maisons ${ANNOUNCED_DISCOUNT_LABEL})`,
         };
       }
     }
@@ -695,7 +702,7 @@ export function getBaseline(
         pricePerM2: c.estimated_appart_m2_from_ann,
         source: "announced_discounted",
         confidence: "MEDIUM",
-        reference: `${c.commune} (annonces -8.75%, ${c.announced_appart_count} offres)`,
+        reference: `${c.commune} (annonces ${ANNOUNCED_DISCOUNT_LABEL}, ${c.announced_appart_count} offres)`,
       };
     }
   } else if (type === "maison") {
@@ -704,7 +711,7 @@ export function getBaseline(
         pricePerM2: c.estimated_maison_m2_from_ann,
         source: "announced_discounted",
         confidence: "MEDIUM",
-        reference: `${c.commune} (annonces maisons -8.75%, ${c.announced_maison_count} offres)`,
+        reference: `${c.commune} (annonces maisons ${ANNOUNCED_DISCOUNT_LABEL}, ${c.announced_maison_count} offres)`,
       };
     }
   }
@@ -813,7 +820,7 @@ function rangePosition(state: PropertyState, year: number | undefined): number {
  * chers au m² que les maisons individuelles dans ces communes — cf.
  * écart `estimated_maison_m2_from_ann` ≈ 0,7 × appartement). La segmenter
  * sur-évaluerait les maisons. Les maisons restent donc sur leur baseline
- * `estimated_maison_m2_from_ann` (annonces maisons décotées −8,75 %,
+ * `estimated_maison_m2_from_ann` (annonces maisons décotées au taux unique de lib/data/announced-discount.ts,
  * Observatoire) via getBaseline — recalibration appartement-only.
  */
 function peripheralRecalibratedBaseline(
@@ -1093,7 +1100,7 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
       works_added_value_eur: worksValue,
     },
     warnings: baseline.source === "announced_discounted"
-      ? [`Baseline issue d'annonces (décote -8.75% appliquée).`]
+      ? [`Baseline issue d'annonces (décote ${ANNOUNCED_DISCOUNT_LABEL} appliquée).`]
       : [],
   };
 }
@@ -1311,7 +1318,7 @@ export function methodStatecReference(
       adjusted_per_m2: Math.round(adjusted),
     },
     warnings: baseline.source === "announced_discounted"
-      ? ["Baseline issue d'annonces (décote -8.75% appliquée)."]
+      ? [`Baseline issue d'annonces (décote ${ANNOUNCED_DISCOUNT_LABEL} appliquée).`]
       : [],
   };
 }
@@ -1446,14 +1453,100 @@ const COMMUNE_MARKET_COEF_HOUSE: Record<string, number> = {
   vianden: 0.85,
 };
 
-function getCommuneMarketCoefHouse(commune: string): number {
-  if (!commune) return 1.05;
-  const key = commune
+function normHouseKey(commune: string): string {
+  return commune
     .toLowerCase()
     .trim()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "");
-  return COMMUNE_MARKET_COEF_HOUSE[key] || 1.05;
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+// Calibration par prix annonce (oct. 2026, decision Julien) des communes SANS
+// zone fonciere NI coefficient propre. Le coefficient de marche est fixe pour
+// que la MAISON DE REFERENCE ci-dessous (avant parkings et travaux) vaille
+// surface x prix de vente au m2 de la commune, ce prix etant le prix ANNONCE
+// BRUT diminue du taux unique (lib/data/announced-discount.ts). Les autres
+// caracteristiques du bien (etat, CPE, terrain, annexes) gardent la
+// sensibilite du moteur. Profil de reference = maison familiale type (choix
+// de modelisation, cf. rapport de mission).
+const HOUSE_CALIBRATION_REFERENCE: Pick<
+  EstimationInputs,
+  "surfaceLiving" | "surfaceLand" | "state" | "energy"
+> = { surfaceLiving: 160, surfaceLand: 600, state: "good", energy: "C" };
+
+let referenceSubtotalCache: number | null = null;
+function referenceHouseSubtotal(): number {
+  if (referenceSubtotalCache === null) {
+    // Commune vide -> zone fonciere par defaut (getLandZone) : meme base que
+    // les communes non calibrees avant octobre 2026.
+    referenceSubtotalCache = houseSubtotalBeforeMarketCoef({
+      country: "LU",
+      type: "maison",
+      commune: "",
+      ...HOUSE_CALIBRATION_REFERENCE,
+    }).subtotal;
+  }
+  return referenceSubtotalCache;
+}
+
+type HouseMarketCoef =
+  | { coef: number; source: "commune_table" | "zone_default" | "announced_price" }
+  | null;
+
+/**
+ * Coefficient de marche maison d'une commune :
+ *  1. coefficient propre (table COMMUNE_MARKET_COEF_HOUSE), inchange ;
+ *  2. zone fonciere propre sans coefficient : 1.05 historique, inchange ;
+ *  3. ni l'un ni l'autre : derive du prix annonce maison diminue de 7 % ;
+ *  4. aucune donnee : null (le simulateur renvoie "donnees indisponibles").
+ */
+function getCommuneMarketCoefHouse(commune: string): HouseMarketCoef {
+  if (!commune) return { coef: 1.05, source: "zone_default" };
+  const key = normHouseKey(commune);
+  const own = COMMUNE_MARKET_COEF_HOUSE[key];
+  if (own) return { coef: own, source: "commune_table" };
+  if (COMMUNE_TO_LAND_ZONE[key] !== undefined) {
+    return { coef: 1.05, source: "zone_default" };
+  }
+  const announced = findCommune(commune)?.announced_maison_avg_m2;
+  if (announced) {
+    const target =
+      HOUSE_CALIBRATION_REFERENCE.surfaceLiving *
+      salePricePerM2FromAnnounced(announced);
+    return { coef: target / referenceHouseSubtotal(), source: "announced_price" };
+  }
+  return null;
+}
+
+/** Etapes 1 a 5 de estimateHouse : sous-total avant coefficient de marche. */
+function houseSubtotalBeforeMarketCoef(inputs: EstimationInputs) {
+  // 1. Bâti
+  const stateBati = BATI_COST_PER_SQM[inputs.state] || BATI_COST_PER_SQM.good;
+  const surfCoef = surfaceCoef(inputs.surfaceLiving);
+  let bati = inputs.surfaceLiving * stateBati * surfCoef;
+  bati *= inputs.energy ? ENERGY_COEF[inputs.energy] ?? 1.0 : 1.0;
+  bati *= yearCoef(inputs.yearBuilt);
+  bati *= MARKET_2026_CORRECTION;
+
+  // 2. Terrain
+  const landZone = getLandZone(inputs.commune, inputs.quartier);
+  const land = calcLandValue(inputs.surfaceLand || 0, landZone);
+
+  // 3. Annexes (sous-sol fini > 30 m² seulement)
+  let annexes = 0;
+  if (inputs.basementFinishedSqm && inputs.basementFinishedSqm > 30) {
+    annexes = (inputs.basementFinishedSqm - 30) * ANNEXE_COST_PER_SQM;
+  }
+
+  // 4. Sous-total avant ajustements
+  let subtotal = bati + land + annexes;
+
+  // 5. rangePosition ajuste la fourchette (-10 % à +10 %)
+  const pos = rangePosition(inputs.state, inputs.yearBuilt);
+  const adj = (pos - 0.5) * 0.2;
+  subtotal *= 1 + adj;
+
+  return { bati, land, annexes, landZone, pos, subtotal };
 }
 
 // FIX 2 (POL3-6, validé Julien) — prime type ; penthouse modulé par la
@@ -1594,36 +1687,27 @@ function estimateApartment(inputs: EstimationInputs): EstimationResult {
 
 /** Branche MAISON/VILLA : bâti + terrain + annexes (Étape 2.C). */
 function estimateHouse(inputs: EstimationInputs): EstimationResult {
-  // 1. Bâti
-  const stateBati = BATI_COST_PER_SQM[inputs.state] || BATI_COST_PER_SQM.good;
-  const surfCoef = surfaceCoef(inputs.surfaceLiving);
-  let bati = inputs.surfaceLiving * stateBati * surfCoef;
-  bati *= inputs.energy ? ENERGY_COEF[inputs.energy] ?? 1.0 : 1.0;
-  bati *= yearCoef(inputs.yearBuilt);
-  bati *= MARKET_2026_CORRECTION;
-
-  // 2. Terrain
-  const landZone = getLandZone(inputs.commune, inputs.quartier);
-  const land = calcLandValue(inputs.surfaceLand || 0, landZone);
-
-  // 3. Annexes (sous-sol fini > 30 m² seulement)
-  let annexes = 0;
-  if (inputs.basementFinishedSqm && inputs.basementFinishedSqm > 30) {
-    annexes = (inputs.basementFinishedSqm - 30) * ANNEXE_COST_PER_SQM;
-  }
-
-  // 4. Sous-total avant ajustements
-  let subtotal = bati + land + annexes;
-
-  // 5. rangePosition ajuste la fourchette (-10 % à +10 %)
-  const pos = rangePosition(inputs.state, inputs.yearBuilt);
-  const adj = (pos - 0.5) * 0.2;
-  subtotal *= 1 + adj;
+  // 1 a 5 : bati, terrain, annexes, position dans la fourchette.
+  const { bati, land, annexes, landZone, pos, subtotal: base } =
+    houseSubtotalBeforeMarketCoef(inputs);
+  let subtotal = base;
 
   // ACTION 3 — multiplicateur marché commune (maisons), APRÈS
   // rangePosition et AVANT parking/travaux.
-  const marketCoef = getCommuneMarketCoefHouse(inputs.commune);
-  subtotal *= marketCoef;
+  const market = getCommuneMarketCoefHouse(inputs.commune);
+  if (!market) {
+    // Aucune donnee de prix maison pour cette commune : valeur nulle, que
+    // la route traduit en "donnees de marche indisponibles" (jamais une
+    // valeur par defaut presentee comme une estimation).
+    const empty = buildEvsResult(inputs, 0, {
+      method: "hedonic_terrain_bati",
+      reason: "no_house_price_data",
+    });
+    empty.client_output = { price_low: 0, price_mid: 0, price_high: 0, confidence: "LOW" };
+    empty.internal_output.weighted_price = 0;
+    return empty;
+  }
+  subtotal *= market.coef;
 
   // FIX 2 — prime type (villa, etc.) ; maison/villa non modulés par baseline.
   subtotal *= getTypePremium(inputs.type, 0);
@@ -1641,6 +1725,8 @@ function estimateHouse(inputs: EstimationInputs): EstimationResult {
     annexes_value: Math.round(annexes),
     land_zone: landZone,
     range_position: pos,
+    market_coef: Math.round(market.coef * 1000) / 1000,
+    market_coef_source: market.source,
   });
 }
 
