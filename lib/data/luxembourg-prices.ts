@@ -62,6 +62,10 @@ export const LUXEMBOURG_DATA_AS_OF = "2025 (publication mars 2026)";
 // Decote prix annonce -> prix de vente : taux unique (7 %) defini dans
 // lib/data/announced-discount.ts, applique a la fin de ce fichier.
 
+// Oct. 2026 : la ligne "Luxembourg-Ville" (prix notaries de la capitale) est
+// fusionnee dans "Luxembourg", nom officiel de la commune : le prix notarie
+// prime (decision Julien). Champs disjoints, aucune valeur modifiee. Les
+// quartiers gardent leurs prix annonces (VDL_QUARTIERS_PRICES, inchange).
 // Oct. 2026 : doublons orthographiques fusionnes sous la graphie officielle
 // du Registre national des localites et des rues (lib/geo/luxembourg-
 // localities-official.ts) : Erpeldange + Erpeldange-sur-Sure, Redange +
@@ -867,33 +871,18 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
   },
   {
     "commune": "Luxembourg",
-    "real_existing_count": null,
-    "real_existing_avg_m2": null,
-    "real_existing_range": null,
-    "real_vefa_count": null,
-    "real_vefa_avg_m2": null,
-    "real_vefa_range": null,
-    "announced_appart_count": 6863.0,
-    "announced_appart_avg_m2": 12362.33,
-    "estimated_appart_m2_from_ann": 11497,
-    "announced_maison_count": 818.0,
-    "announced_maison_avg_m2": 8668.662,
-    "estimated_maison_m2_from_ann": 8062
-  },
-  {
-    "commune": "Luxembourg-Ville",
     "real_existing_count": 672.0,
     "real_existing_avg_m2": 10269.64,
     "real_existing_range": "6958 € - 14075 €",
     "real_vefa_count": 182.0,
     "real_vefa_avg_m2": 11990.01,
     "real_vefa_range": "8960 € - 15137 €",
-    "announced_appart_count": null,
-    "announced_appart_avg_m2": null,
-    "estimated_appart_m2_from_ann": null,
-    "announced_maison_count": null,
-    "announced_maison_avg_m2": null,
-    "estimated_maison_m2_from_ann": null
+    "announced_appart_count": 6863.0,
+    "announced_appart_avg_m2": 12362.33,
+    "estimated_appart_m2_from_ann": 11497,
+    "announced_maison_count": 818.0,
+    "announced_maison_avg_m2": 8668.662,
+    "estimated_maison_m2_from_ann": 8062
   },
   {
     "commune": "Mamer",
