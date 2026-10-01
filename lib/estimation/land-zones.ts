@@ -148,6 +148,9 @@ export const COMMUNE_TO_LAND_ZONE: Record<string, LandZone> = {
   consdorf: 6,
   beckerich: 6,
   redange: 6,
+  // Graphie officielle du registre (oct. 2026) : meme zone, pas une
+  // nouvelle calibration.
+  "redange/attert": 6,
   weiswampach: 6,
   pissange: 6,
   grosbous: 6,

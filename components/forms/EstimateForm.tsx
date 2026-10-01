@@ -4,10 +4,7 @@ import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { formatEuro } from "@/lib/finance";
 import type { EstimateResult } from "@/lib/estimate";
-import {
-  LUXEMBOURG_COMMUNES_PRICES,
-  VDL_QUARTIERS_PRICES,
-} from "@/lib/data/luxembourg-prices";
+import { VDL_QUARTIERS_PRICES } from "@/lib/data/luxembourg-prices";
 import { track } from "@/lib/tracking/track";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 import { PhoneInput } from "@/components/ui/PhoneInput";
@@ -118,16 +115,6 @@ const WORKS_GROUPS: ReadonlyArray<{
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-// Communes LU proposees : referentiel prix Observatoire, sans la ligne
-// agregee "Moyenne nationale" (pas un lieu) ni les doublons orthographiques.
-const LU_COMMUNE_OPTIONS = Array.from(
-  new Map(
-    LUXEMBOURG_COMMUNES_PRICES.filter((r) => r.commune !== "Moyenne nationale").map(
-      (r) => [r.commune, { value: r.commune, label: r.commune }],
-    ),
-  ).values(),
-);
-
 interface FormState {
   // Oct. 2026 : lieu saisi (commune, quartier VDL ou localite). `commune`
   // = commune de rattachement utilisee pour le calcul.
@@ -236,6 +223,12 @@ export interface EstimatePlace {
 
 const PLACES_DATALIST_ID = "estimate-places";
 
+/** Suggestion a confirmer (cf. lib/estimation/coverage.ts). */
+interface PlaceSuggestion {
+  name: string;
+  commune: string;
+}
+
 /** Base de calcul annoncee au visiteur (cf. app/api/estimate/route.ts). */
 interface EstimateBasis {
   locality: string;
@@ -273,7 +266,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
   // Garde couverture (oct. 2026) : reponse 422 du serveur -> aucun chiffre,
   // renvoi vers l'agence (hors Luxembourg ou valeur hors seuil).
   const [blocked, setBlocked] = useState<
-    | { kind: "country" | "commune"; suggestions: string[] }
+    | { kind: "country" | "commune"; suggestions: PlaceSuggestion[] }
     | { kind: "unrealistic" }
     | null
   >(null);
@@ -296,6 +289,15 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
     [places],
   );
   const selectedPlace = placesByKey.get(normalizePlace(data.locality));
+  // Communes officielles du registre (100), pour la liste deroulante.
+  const communeOptions = useMemo(
+    () =>
+      places
+        .filter((p) => !p.attached && !p.quartier && p.name === p.commune)
+        .map((p) => ({ value: p.commune, label: p.commune }))
+        .sort((a, b) => a.label.localeCompare(b.label, "fr")),
+    [places],
+  );
 
   // Sprint C2 LIVRABLE 4 : validation par-categorie. Une cat cochee DOIT
   // avoir year ET amount remplis et valides. Si une seule cat est invalide,
@@ -330,15 +332,15 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
   }
   const hasWorksErrors = worksErrors.length > 0;
 
-  // `localityOverride` : suggestion choisie apres une reponse 422 ; la
-  // commune proposee pour ce lieu remplace alors la commune selectionnee.
-  const submit = async (localityOverride?: string) => {
-    const locality = localityOverride ?? data.locality;
-    const overridePlace = localityOverride
-      ? placesByKey.get(normalizePlace(localityOverride))
+  // `override` : suggestion choisie apres une reponse 422 (lieu + commune
+  // officielle) ; elle remplace la saisie avant le nouvel envoi.
+  const submit = async (override?: PlaceSuggestion) => {
+    const locality = override?.name ?? data.locality;
+    const overridePlace = override
+      ? placesByKey.get(normalizePlace(override.name))
       : undefined;
-    const commune = overridePlace?.commune ?? data.commune;
-    const quartier = overridePlace ? (overridePlace.quartier ?? "") : data.quartier;
+    const commune = override?.commune ?? data.commune;
+    const quartier = override ? (overridePlace?.quartier ?? "") : data.quartier;
     // Sprint C9 — double protection : meme si le bouton fuit (DevTools,
     // race), on refuse cote handler si un validator KO. Force le retour
     // visuel onBlur en marquant tous les champs comme touches.
@@ -468,7 +470,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
         const j = (await res.json().catch(() => ({}))) as {
           error?: string;
           reason?: string;
-          suggestions?: string[];
+          suggestions?: PlaceSuggestion[];
         };
         if (j.error === "UNREALISTIC_ESTIMATE") {
           setBlocked({ kind: "unrealistic" });
@@ -787,6 +789,8 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
             <FieldSelect
               label={t("commune_attached")}
               value={data.commune}
+              // Lieu reconnu : commune officielle du registre, non modifiable.
+              disabled={Boolean(selectedPlace)}
               onChange={(v) => {
                 set("commune", v);
                 // reset quartier si on quitte Luxembourg
@@ -794,7 +798,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
               }}
               options={[
                 { value: "", label: t("commune_choose") },
-                ...LU_COMMUNE_OPTIONS,
+                ...communeOptions,
               ]}
             />
             {data.commune === "Luxembourg" && (
@@ -821,7 +825,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
           </div>
           {data.commune && (
             <p className="mt-3 text-xs italic text-ink-soft">
-              {selectedPlace?.attached && selectedPlace.commune === data.commune
+              {selectedPlace?.attached
                 ? t("commune_attached_hint_auto", {
                     locality: selectedPlace.name,
                     commune: data.commune,
@@ -957,12 +961,9 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
               kind={blocked.kind}
               suggestions={blocked.kind === "unrealistic" ? [] : blocked.suggestions}
               onPickSuggestion={(s) => {
-                set("locality", s);
-                const place = placesByKey.get(normalizePlace(s));
-                if (place) {
-                  set("commune", place.commune);
-                  set("quartier", place.quartier ?? "");
-                }
+                set("locality", s.name);
+                set("commune", s.commune);
+                set("quartier", placesByKey.get(normalizePlace(s.name))?.quartier ?? "");
                 void submit(s);
               }}
               t={t}
@@ -1509,11 +1510,13 @@ function FieldSelect({
   value,
   onChange,
   options,
+  disabled = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
+  disabled?: boolean;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
@@ -1523,7 +1526,8 @@ function FieldSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
+        disabled={disabled}
+        className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -1587,8 +1591,8 @@ function CoverageNotice({
   t,
 }: {
   kind: "country" | "commune" | "unrealistic";
-  suggestions?: string[];
-  onPickSuggestion?: (commune: string) => void;
+  suggestions?: PlaceSuggestion[];
+  onPickSuggestion?: (place: PlaceSuggestion) => void;
   t: ReturnType<typeof useTranslations>;
 }) {
   const unrealistic = kind === "unrealistic";
@@ -1614,12 +1618,12 @@ function CoverageNotice({
           <span className="text-sm text-ink-mid">{t("coverage_suggestions")}</span>
           {suggestions.map((s) => (
             <button
-              key={s}
+              key={`${s.name}|${s.commune}`}
               type="button"
               onClick={() => onPickSuggestion(s)}
               className="rounded-full border border-gold px-4 py-1.5 font-mono text-[11px] text-gold-deep hover:bg-gold/10"
             >
-              {s}
+              {s.name}
             </button>
           ))}
         </div>

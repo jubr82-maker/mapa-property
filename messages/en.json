@@ -840,7 +840,7 @@
     "locality_placeholder": "E.g. Hagen, Belair, Esch-sur-Alzette",
     "commune_attached": "Municipality used for the valuation",
     "commune_attached_hint": "Official reference prices are published per municipality. Check your property's municipality.",
-    "commune_attached_hint_auto": "Suggested municipality for {locality}: {commune}. Official reference prices are published per municipality; change it if your property belongs to another municipality.",
+    "commune_attached_hint_auto": "{locality} officially belongs to the municipality of {commune} (National register of localities and streets). Reference prices are published per municipality.",
     "basis_commune": "Valuation based on market data for the municipality of {commune}.",
     "basis_quartier": "Valuation based on market data for the {quartier} district (Luxembourg City).",
     "basis_attached": "{locality} is attached to the municipality of {commune}: reference prices are not published at village level.",

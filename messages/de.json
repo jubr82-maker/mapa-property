@@ -840,7 +840,7 @@
     "locality_placeholder": "Z. B. Hagen, Belair, Esch-sur-Alzette",
     "commune_attached": "Zugeordnete Gemeinde",
     "commune_attached_hint": "Offizielle Referenzpreise werden pro Gemeinde veröffentlicht. Prüfen Sie die Gemeinde Ihrer Immobilie.",
-    "commune_attached_hint_auto": "Vorgeschlagene Gemeinde für {locality}: {commune}. Offizielle Referenzpreise werden pro Gemeinde veröffentlicht; ändern Sie sie, falls Ihre Immobilie zu einer anderen Gemeinde gehört.",
+    "commune_attached_hint_auto": "{locality} gehört offiziell zur Gemeinde {commune} (Nationales Register der Ortschaften und Straßen). Referenzpreise werden pro Gemeinde veröffentlicht.",
     "basis_commune": "Bewertung auf Grundlage der Marktdaten der Gemeinde {commune}.",
     "basis_quartier": "Bewertung auf Grundlage der Marktdaten des Stadtviertels {quartier} (Stadt Luxemburg).",
     "basis_attached": "{locality} ist der Gemeinde {commune} zugeordnet: Referenzpreise werden nicht auf Ortsebene veröffentlicht.",

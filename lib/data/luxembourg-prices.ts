@@ -57,6 +57,13 @@ export interface VdlQuartierPrices {
 export const LUXEMBOURG_DATA_AS_OF = "2025 (publication mars 2026)";
 export const ANNOUNCED_TO_REAL_DISCOUNT = 0.9125; // -8.75%
 
+// Oct. 2026 : doublons orthographiques fusionnes sous la graphie officielle
+// du Registre national des localites et des rues (lib/geo/luxembourg-
+// localities-official.ts) : Erpeldange + Erpeldange-sur-Sure, Redange +
+// Redange-sur-Attert (officiel : Redange/Attert), Petange + Pétange,
+// Preizerdaul + Préizerdaul. Les deux lignes portaient des champs
+// disjoints (notarial d'un cote, annonces de l'autre) : aucune valeur
+// n'a ete modifiee, seulement regroupee.
 export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
   {
     "commune": "Beaufort",
@@ -419,21 +426,6 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_maison_m2_from_ann": 4910
   },
   {
-    "commune": "Erpeldange",
-    "real_existing_count": null,
-    "real_existing_avg_m2": null,
-    "real_existing_range": null,
-    "real_vefa_count": null,
-    "real_vefa_avg_m2": null,
-    "real_vefa_range": null,
-    "announced_appart_count": 10.0,
-    "announced_appart_avg_m2": null,
-    "estimated_appart_m2_from_ann": null,
-    "announced_maison_count": 12.0,
-    "announced_maison_avg_m2": null,
-    "estimated_maison_m2_from_ann": null
-  },
-  {
     "commune": "Erpeldange-sur-Sûre",
     "real_existing_count": 10.0,
     "real_existing_avg_m2": 6934.209,
@@ -441,10 +433,10 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "real_vefa_count": 11.0,
     "real_vefa_avg_m2": 9039.224,
     "real_vefa_range": "7034 € - 10326 €",
-    "announced_appart_count": null,
+    "announced_appart_count": 10.0,
     "announced_appart_avg_m2": null,
     "estimated_appart_m2_from_ann": null,
-    "announced_maison_count": null,
+    "announced_maison_count": 12.0,
     "announced_maison_avg_m2": null,
     "estimated_maison_m2_from_ann": null
   },
@@ -1064,43 +1056,28 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_maison_m2_from_ann": 4347
   },
   {
-    "commune": "Petange",
+    "commune": "Pétange",
     "real_existing_count": 153.0,
     "real_existing_avg_m2": 6531.358,
     "real_existing_range": "4465 € - 8423 €",
     "real_vefa_count": 0.0,
     "real_vefa_avg_m2": null,
     "real_vefa_range": "*",
-    "announced_appart_count": null,
-    "announced_appart_avg_m2": null,
-    "estimated_appart_m2_from_ann": null,
-    "announced_maison_count": null,
-    "announced_maison_avg_m2": null,
-    "estimated_maison_m2_from_ann": null
+    "announced_appart_count": 654.0,
+    "announced_appart_avg_m2": 7040.645,
+    "estimated_appart_m2_from_ann": 6425,
+    "announced_maison_count": 461.0,
+    "announced_maison_avg_m2": 5037.115,
+    "estimated_maison_m2_from_ann": 4596
   },
   {
-    "commune": "Preizerdaul",
+    "commune": "Préizerdaul",
     "real_existing_count": 5.0,
     "real_existing_avg_m2": null,
     "real_existing_range": "*",
     "real_vefa_count": 0.0,
     "real_vefa_avg_m2": null,
     "real_vefa_range": "*",
-    "announced_appart_count": null,
-    "announced_appart_avg_m2": null,
-    "estimated_appart_m2_from_ann": null,
-    "announced_maison_count": null,
-    "announced_maison_avg_m2": null,
-    "estimated_maison_m2_from_ann": null
-  },
-  {
-    "commune": "Préizerdaul",
-    "real_existing_count": null,
-    "real_existing_avg_m2": null,
-    "real_existing_range": null,
-    "real_vefa_count": null,
-    "real_vefa_avg_m2": null,
-    "real_vefa_range": null,
     "announced_appart_count": 15.0,
     "announced_appart_avg_m2": null,
     "estimated_appart_m2_from_ann": null,
@@ -1122,21 +1099,6 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "announced_maison_count": 26.0,
     "announced_maison_avg_m2": null,
     "estimated_maison_m2_from_ann": null
-  },
-  {
-    "commune": "Pétange",
-    "real_existing_count": null,
-    "real_existing_avg_m2": null,
-    "real_existing_range": null,
-    "real_vefa_count": null,
-    "real_vefa_avg_m2": null,
-    "real_vefa_range": null,
-    "announced_appart_count": 654.0,
-    "announced_appart_avg_m2": 7040.645,
-    "estimated_appart_m2_from_ann": 6425,
-    "announced_maison_count": 461.0,
-    "announced_maison_avg_m2": 5037.115,
-    "estimated_maison_m2_from_ann": 4596
   },
   {
     "commune": "Rambrouch",
@@ -1169,28 +1131,13 @@ export const LUXEMBOURG_COMMUNES_PRICES: CommunePrices[] = [
     "estimated_maison_m2_from_ann": 5237
   },
   {
-    "commune": "Redange",
+    "commune": "Redange/Attert",
     "real_existing_count": 11.0,
     "real_existing_avg_m2": 6482.286,
     "real_existing_range": "4719 € - 8113 €",
     "real_vefa_count": 8.0,
     "real_vefa_avg_m2": null,
     "real_vefa_range": "*",
-    "announced_appart_count": null,
-    "announced_appart_avg_m2": null,
-    "estimated_appart_m2_from_ann": null,
-    "announced_maison_count": null,
-    "announced_maison_avg_m2": null,
-    "estimated_maison_m2_from_ann": null
-  },
-  {
-    "commune": "Redange-sur-Attert",
-    "real_existing_count": null,
-    "real_existing_avg_m2": null,
-    "real_existing_range": null,
-    "real_vefa_count": null,
-    "real_vefa_avg_m2": null,
-    "real_vefa_range": null,
     "announced_appart_count": 55.0,
     "announced_appart_avg_m2": 6746.648,
     "estimated_appart_m2_from_ann": 6156,

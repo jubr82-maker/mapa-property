@@ -537,19 +537,21 @@ export async function POST(req: Request) {
   // Le formulaire ne propose plus de pays (Luxembourg implicite), mais la
   // route peut etre appelee directement : un pays explicite != LU est
   // refuse, et le lieu doit etre une commune, un quartier VDL ou une
-  // localite luxembourgeoise reconnue. Une orthographe approchee renvoie
-  // des suggestions a confirmer, jamais une correction silencieuse. Une
-  // localite sans donnees propres est rattachee a une commune ; la commune
-  // choisie par le visiteur prime (cf. lib/estimation/coverage.ts).
+  // localite luxembourgeoise du registre officiel. Une orthographe
+  // approchee renvoie des suggestions a confirmer, jamais une correction
+  // silencieuse. Une localite est rattachee a sa commune officielle pour le
+  // calcul (cf. lib/estimation/coverage.ts).
   if (body.country && String(body.country).trim().toUpperCase() !== "LU") {
     return NextResponse.json(
       { error: "OUT_OF_COVERAGE", reason: "country" },
       { status: 422 },
     );
   }
+  // La commune officielle du registre fait foi ; la commune envoyee ne sert
+  // qu'a departager deux localites homonymes.
   const placeRes = resolveLuxembourgLocation(
     body.locality || body.commune,
-    body.locality ? body.commune : undefined,
+    body.commune,
   );
   if (placeRes.status !== "exact") {
     return NextResponse.json(

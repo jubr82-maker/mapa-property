@@ -840,7 +840,7 @@
     "locality_placeholder": "Ex. Hagen, Belair, Esch-sur-Alzette",
     "commune_attached": "Commune de rattachement",
     "commune_attached_hint": "Les prix de référence officiels sont publiés par commune. Vérifiez la commune de votre bien.",
-    "commune_attached_hint_auto": "Commune proposée pour {locality} : {commune}. Les prix de référence officiels sont publiés par commune ; corrigez-la si votre bien dépend d'une autre commune.",
+    "commune_attached_hint_auto": "{locality} dépend officiellement de la commune de {commune} (Registre national des localités et des rues). Les prix de référence sont publiés par commune.",
     "basis_commune": "Estimation fondée sur les données de marché de la commune de {commune}.",
     "basis_quartier": "Estimation fondée sur les données de marché du quartier {quartier} (Luxembourg-Ville).",
     "basis_attached": "{locality} est rattachée à la commune de {commune} : les prix de référence ne sont pas publiés au niveau du village.",

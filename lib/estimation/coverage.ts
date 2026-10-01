@@ -1,189 +1,161 @@
 // Garde de couverture du simulateur d'estimation public (missions
-// "estimation limitee au Luxembourg" et "couverture des localites",
-// octobre 2026).
+// "estimation limitee au Luxembourg", "couverture des localites" et
+// "registre officiel", octobre 2026).
 //
 // Constat production : une commune francaise (Havange) a produit une
 // fourchette de 14 a 19 M EUR, le moteur appliquant des references sans
 // aucune donnee pour ce lieu. Deux gardes serveur, jamais contournables
 // par le formulaire :
 //
-//  1. resolveLuxembourgLocation : le lieu saisi doit etre une commune du
-//     referentiel prix Observatoire, un quartier de Luxembourg-Ville, ou une
-//     localite de la liste GeoNames du depot
-//     (lib/geo/luxembourg-localities.json). Correspondance EXACTE apres
-//     normalisation uniquement. Une orthographe approchee n'est JAMAIS
-//     corrigee automatiquement : "Havange" (FR) est a une lettre de
-//     "Hivange" (LU), "Perl" (DE) de "Merl" (LU). On renvoie des
-//     suggestions que le visiteur confirme lui-meme.
+//  1. resolveLuxembourgLocation : le lieu saisi doit etre une commune, une
+//     localite ou un quartier de Luxembourg-Ville du Registre national des
+//     localites et des rues (lib/geo/luxembourg-localities-official.ts,
+//     genere par scripts/import-caclr.py), ou un quartier du referentiel
+//     prix. Correspondance EXACTE apres normalisation uniquement. Une
+//     orthographe approchee n'est JAMAIS corrigee automatiquement :
+//     "Havange" (FR) est a une lettre de "Hivange" (LU), "Perl" (DE) de
+//     "Merl" (LU). On renvoie des suggestions que le visiteur confirme.
 //
-//     Les prix de reference sont publies PAR COMMUNE : une localite sans
-//     donnees propres (Hagen) est rattachee a une commune pour le calcul.
-//     La liste GeoNames ne porte pas la commune de chaque localite ; le
-//     rattachement automatique prend le siege communal le plus proche dans
-//     le meme canton. Il est APPROXIMATIF (118/142 sur le jeu de controle de
-//     la mission d'octobre 2026) : le formulaire l'affiche comme commune
-//     proposee, modifiable, et la commune choisie par le visiteur prime.
+//     Les prix de reference sont publies PAR COMMUNE : une localite est
+//     rattachee a SA commune officielle (donnee du registre, plus aucune
+//     estimation par distance). Un meme nom de localite peut exister dans
+//     deux communes (Erpeldange, Hostert...) : la commune choisie par le
+//     visiteur departage, sinon on propose les deux.
 //
 //  2. checkEstimateSanity : au-dela d'un prix au m2 manifestement
 //     irrealiste, aucune estimation n'est affichee (renvoi vers contact).
 //
-// Module serveur uniquement (le JSON des localites pese ~160 Ko).
+// Module serveur uniquement (la table officielle pese ~70 Ko).
 
-import localities from "@/lib/geo/luxembourg-localities.json";
-import { haversineKm } from "@/lib/geo/luxembourg-communes";
+import {
+  OFFICIAL_COMMUNES,
+  OFFICIAL_LOCALITIES,
+  OFFICIAL_VDL_QUARTIERS,
+} from "@/lib/geo/luxembourg-localities-official";
 import {
   LUXEMBOURG_COMMUNES_PRICES,
   VDL_QUARTIERS_PRICES,
 } from "@/lib/data/luxembourg-prices";
 
-interface RawLocality {
-  name: string;
-  asciiname: string;
-  alternateNames: string[];
-  lat: number;
-  lng: number;
-  featureCode: string;
-  canton?: string;
-}
-
-/** Normalisation : casse, accents, tirets, apostrophes, espaces multiples. */
+/** Normalisation : casse, accents, tirets, apostrophes, barres, espaces. */
 export function normalizeCommune(s: string): string {
   return s
     .trim()
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
-    .replace(/[-_'’.]/g, " ")
+    .replace(/[-_'’./]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-// Les alternateNames GeoNames contiennent des graphies cyrilliques, arabes,
-// etc. : seules les graphies latines sont utiles a une saisie FR/EN/DE.
-const LATIN_ONLY = /^[\p{Script=Latin}\s\-'’.()]+$/u;
-
 // Lignes du referentiel prix qui ne sont pas des lieux.
-const NON_PLACE_ROWS = new Set(["moyenne nationale"]);
+const NON_PLACE_ROWS = new Set(["moyenne nationale", "luxembourg ville"]);
 
-// Commune portant les quartiers VDL dans le referentiel prix.
+// Commune officielle portant les quartiers de Luxembourg-Ville.
 const VDL_COMMUNE = "Luxembourg";
-
-// Sieges GeoNames (anciennes communes) dont la commune actuelle, issue d'une
-// fusion, porte un autre nom dans le referentiel prix. Fusions communales
-// officielles, a verifier contre le Registre national des localites et des
-// rues (cf. rapport de mission) : SUPPOSE, pas derive des donnees du depot.
-const SEAT_TO_MERGED_COMMUNE: Record<string, string> = {
-  bascharage: "Käerjeng",
-  capellen: "Mamer",
-  medernach: "Vallée de l'Ernz",
-  hosingen: "Parc Hosingen",
-  rosport: "Rosport-Mompach",
-  mompach: "Rosport-Mompach",
-  grosbous: "Groussbus-Wal",
-  wahl: "Groussbus-Wal",
-  tuntange: "Helperknapp",
-  "boevange sur attert": "Helperknapp",
-  bous: "Bous-Waldbredimus",
-  waldbredimus: "Bous-Waldbredimus",
-  septfontaines: "Habscht",
-  wilwerwiltz: "Kiischpelt",
-  bettborn: "Préizerdaul",
-  bavigne: "Lac de la Haute-Sûre",
-};
-
-const SEAT_CODES = new Set(["PPLA", "PPLA2", "PPLA3", "PPLC"]);
 
 /** Un lieu reconnu et la commune (et le quartier VDL) qui portent ses prix. */
 export interface LuxembourgPlace {
-  /** Nom affiche (graphie canonique). */
+  /** Nom affiche, unique (precise la commune en cas d'homonymie). */
   name: string;
-  /** Commune du referentiel prix utilisee pour le calcul. */
+  /** Commune officielle utilisee pour le calcul. */
   commune: string;
-  /** Quartier VDL si le lieu en est un. */
+  /** Quartier VDL du referentiel prix si le lieu en est un. */
   quartier?: string;
-  /** true si le lieu n'a pas de donnees propres (rattachement). */
+  /** true si le lieu n'est pas la commune elle-meme (rattachement). */
   attached: boolean;
 }
 
 interface PlaceIndex {
-  byKey: Map<string, LuxembourgPlace>;
+  byKey: Map<string, LuxembourgPlace[]>;
   communes: Map<string, string>;
   places: LuxembourgPlace[];
+  /** Communes officielles absentes du referentiel prix. */
+  communesWithoutPrices: string[];
 }
 
 let cache: PlaceIndex | null = null;
 
 function buildIndex(): PlaceIndex {
+  // Communes officielles (graphie du registre), cle normalisee.
   const communes = new Map<string, string>();
-  for (const r of LUXEMBOURG_COMMUNES_PRICES) {
-    const k = normalizeCommune(r.commune);
-    if (!NON_PLACE_ROWS.has(k) && !communes.has(k)) communes.set(k, r.commune);
+  for (const c of OFFICIAL_COMMUNES) communes.set(normalizeCommune(c), c);
+  const priceKeys = new Set(
+    LUXEMBOURG_COMMUNES_PRICES.map((r) => normalizeCommune(r.commune)),
+  );
+  const communesWithoutPrices = OFFICIAL_COMMUNES.filter(
+    (c) => !priceKeys.has(normalizeCommune(c)),
+  );
+  const priceQuartiers = new Map<string, string>();
+  for (const q of VDL_QUARTIERS_PRICES) {
+    const k = normalizeCommune(q.quartier);
+    if (!NON_PLACE_ROWS.has(k)) priceQuartiers.set(k, q.quartier);
   }
-  const all = localities as RawLocality[];
-  const latinNames = (l: RawLocality) =>
-    [l.name, l.asciiname, ...l.alternateNames].filter(
-      (x) => x && LATIN_ONLY.test(x),
-    );
-  const ownCommune = (l: RawLocality) =>
-    latinNames(l)
-      .map((x) => communes.get(normalizeCommune(x)))
-      .find(Boolean);
 
-  const seats = all
-    .filter((l) => SEAT_CODES.has(l.featureCode))
-    .map((l) => ({
-      l,
-      commune: ownCommune(l) ?? SEAT_TO_MERGED_COMMUNE[normalizeCommune(l.name)],
-    }))
-    .filter((x): x is { l: RawLocality; commune: string } => Boolean(x.commune));
-
-  const attach = (l: RawLocality): string | undefined => {
-    let best: { commune: string; km: number } | null = null;
-    for (const s of seats) {
-      if (s.l.canton !== l.canton) continue;
-      const km = haversineKm(l.lat, l.lng, s.l.lat, s.l.lng);
-      if (!best || km < best.km) best = { commune: s.commune, km };
-    }
-    return best?.commune;
-  };
-
-  const byKey = new Map<string, LuxembourgPlace>();
+  const byKey = new Map<string, LuxembourgPlace[]>();
   const places: LuxembourgPlace[] = [];
   const add = (keys: string[], place: LuxembourgPlace) => {
-    let added = false;
     for (const key of keys) {
       const k = normalizeCommune(key);
-      if (k && !byKey.has(k)) {
-        byKey.set(k, place);
-        added = true;
+      if (!k) continue;
+      const list = byKey.get(k) ?? [];
+      // Un meme lieu (meme commune, meme quartier) n'est indexe qu'une fois.
+      if (!list.some((p) => p.commune === place.commune && p.quartier === place.quartier)) {
+        list.push(place);
+        byKey.set(k, list);
       }
     }
-    if (added) places.push(place);
+    places.push(place);
   };
 
-  // Priorite 1 : communes du referentiel prix (donnees propres).
-  for (const [k, commune] of communes) {
-    add([k], { name: commune, commune, attached: false });
+  // 1. Communes officielles.
+  for (const c of OFFICIAL_COMMUNES) add([c], { name: c, commune: c, attached: false });
+
+  // 2. Quartiers de Luxembourg-Ville : referentiel prix (donnees propres),
+  //    puis quartiers officiels du registre (commune Luxembourg).
+  for (const q of priceQuartiers.values()) {
+    add([q], { name: q, commune: VDL_COMMUNE, quartier: q, attached: false });
   }
-  // Priorite 2 : quartiers de Luxembourg-Ville (donnees propres).
-  for (const q of VDL_QUARTIERS_PRICES) {
-    if (NON_PLACE_ROWS.has(normalizeCommune(q.quartier))) continue;
-    add([q.quartier], {
-      name: q.quartier,
-      commune: VDL_COMMUNE,
-      quartier: q.quartier,
-      attached: false,
-    });
+  for (const q of OFFICIAL_VDL_QUARTIERS) {
+    const k = normalizeCommune(q);
+    if (priceQuartiers.has(k)) continue;
+    add([q], { name: q, commune: VDL_COMMUNE, attached: true });
   }
-  // Priorite 3 : localites GeoNames et leurs graphies latines
-  // (Petingen -> Petange, Hoen -> Hagen), rattachees a leur commune.
-  for (const l of all) {
-    const own = ownCommune(l);
-    const commune = own ?? attach(l);
-    if (!commune) continue;
-    add(latinNames(l), { name: l.name, commune, attached: !own });
+
+  // 3. Localites officielles. Nom affiche precise la commune si le nom
+  //    existe dans plusieurs communes ("Erpeldange (Wiltz)").
+  const communesByName = new Map<string, Set<string>>();
+  for (const l of OFFICIAL_LOCALITIES) {
+    const k = normalizeCommune(l.name);
+    const set = communesByName.get(k) ?? new Set<string>();
+    set.add(l.commune);
+    const asCommune = communes.get(k);
+    if (asCommune) set.add(asCommune);
+    communesByName.set(k, set);
   }
-  return { byKey, communes, places };
+  for (const l of OFFICIAL_LOCALITIES) {
+    const k = normalizeCommune(l.name);
+    const isCommuneItself = communes.get(k) === l.commune;
+    const homonym = (communesByName.get(k)?.size ?? 1) > 1;
+    const display =
+      homonym && !isCommuneItself && !l.name.includes("(")
+        ? `${l.name} (${l.commune})`
+        : l.name;
+    const place: LuxembourgPlace = isCommuneItself
+      ? { name: l.commune, commune: l.commune, attached: false }
+      : { name: display, commune: l.commune, attached: true };
+    add([l.name, display, ...l.aliases], place);
+  }
+
+  // Liste affichee : un lieu par nom.
+  const seen = new Set<string>();
+  const unique = places.filter((p) => {
+    if (seen.has(p.name)) return false;
+    seen.add(p.name);
+    return true;
+  });
+  return { byKey, communes, places: unique, communesWithoutPrices };
 }
 
 function getIndex(): PlaceIndex {
@@ -191,20 +163,18 @@ function getIndex(): PlaceIndex {
   return cache;
 }
 
-/** Liste des lieux proposes au formulaire (nom + commune proposee). */
+/** Liste des lieux proposes au formulaire (nom + commune officielle). */
 export function getLuxembourgPlaces(): LuxembourgPlace[] {
-  // Homonymes (deux "Reckange"...) : une seule entree par nom, la premiere
-  // (communes d'abord, puis localites par population decroissante).
-  const seen = new Set<string>();
-  return getIndex().places.filter((p) => {
-    if (seen.has(p.name)) return false;
-    seen.add(p.name);
-    return true;
-  });
+  return getIndex().places;
 }
 
-/** Nom canonique d'une commune du referentiel prix, ou null. */
-export function findPriceCommune(input: string | null | undefined): string | null {
+/** Communes officielles sans ligne dans le referentiel prix. */
+export function getCommunesWithoutPrices(): string[] {
+  return getIndex().communesWithoutPrices;
+}
+
+/** Nom officiel d'une commune, ou null. */
+export function findOfficialCommune(input: string | null | undefined): string | null {
   if (!input) return null;
   return getIndex().communes.get(normalizeCommune(input)) ?? null;
 }
@@ -230,17 +200,28 @@ function levenshtein(a: string, b: string, max: number): number {
   return prev[b.length];
 }
 
+/** Suggestion a confirmer : nom affiche + commune officielle. */
+export interface PlaceSuggestion {
+  name: string;
+  commune: string;
+}
+
 export type LocationResolution =
   | { status: "exact"; place: LuxembourgPlace }
-  | { status: "suggest"; suggestions: string[] }
+  | { status: "suggest"; suggestions: PlaceSuggestion[] }
   | { status: "unknown" };
 
 const MAX_SUGGESTIONS = 3;
 
+const toSuggestion = (p: LuxembourgPlace): PlaceSuggestion => ({
+  name: p.name,
+  commune: p.commune,
+});
+
 /**
- * Resout le lieu saisi. `communeChoice` = commune choisie par le visiteur
- * dans le formulaire : si c'est une commune valide du referentiel prix, elle
- * prime sur le rattachement automatique (le visiteur connait sa commune).
+ * Resout le lieu saisi. La commune officielle du registre fait foi ;
+ * `communeChoice` (commune selectionnee dans le formulaire) ne sert qu'a
+ * departager deux lieux homonymes.
  */
 export function resolveLuxembourgLocation(
   input: string | null | undefined,
@@ -251,19 +232,14 @@ export function resolveLuxembourgLocation(
   if (!q) return { status: "unknown" };
   const { byKey } = getIndex();
   const found = byKey.get(q);
-  if (found) {
-    const chosen = findPriceCommune(communeChoice);
-    if (!chosen || chosen === found.commune) return { status: "exact", place: found };
-    // Commune choisie differente : elle prime ; un quartier VDL n'a plus
-    // de sens hors Luxembourg-Ville.
+  if (found && found.length > 0) {
+    if (found.length === 1) return { status: "exact", place: found[0] };
+    const chosen = findOfficialCommune(communeChoice);
+    const match = chosen ? found.filter((p) => p.commune === chosen) : [];
+    if (match.length >= 1) return { status: "exact", place: match[0] };
     return {
-      status: "exact",
-      place: {
-        name: found.name,
-        commune: chosen,
-        quartier: chosen === VDL_COMMUNE ? found.quartier : undefined,
-        attached: normalizeCommune(found.name) !== normalizeCommune(chosen),
-      },
+      status: "suggest",
+      suggestions: found.slice(0, MAX_SUGGESTIONS * 2).map(toSuggestion),
     };
   }
 
@@ -271,19 +247,20 @@ export function resolveLuxembourgLocation(
   // Jamais d'acceptation automatique, seulement des suggestions.
   if (q.length < 4) return { status: "unknown" };
   const tol = q.length < 8 ? 1 : 2;
-  const scored = new Map<string, number>();
-  for (const [k, place] of byKey) {
+  const scored = new Map<string, { place: LuxembourgPlace; d: number }>();
+  for (const [k, list] of byKey) {
     const d = levenshtein(q, k, tol);
-    if (d <= tol) {
+    if (d > tol) continue;
+    for (const place of list) {
       const prev = scored.get(place.name);
-      if (prev === undefined || d < prev) scored.set(place.name, d);
+      if (!prev || d < prev.d) scored.set(place.name, { place, d });
     }
   }
   if (scored.size === 0) return { status: "unknown" };
-  const suggestions = [...scored.entries()]
-    .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0], "fr"))
+  const suggestions = [...scored.values()]
+    .sort((a, b) => a.d - b.d || a.place.name.localeCompare(b.place.name, "fr"))
     .slice(0, MAX_SUGGESTIONS)
-    .map(([name]) => name);
+    .map((x) => toSuggestion(x.place));
   return { status: "suggest", suggestions };
 }
 
