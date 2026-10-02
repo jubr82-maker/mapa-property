@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { offmarketFicheMetadata } from "@/lib/offmarket-seo";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchOffmarketById, fetchOffmarketList } from "@/lib/data";
@@ -71,7 +72,14 @@ export async function generateMetadata({
   params: Promise<{ locale: string; id: string }>;
 }): Promise<Metadata> {
   const { locale, id } = await params;
-  return { alternates: pageAlternates(locale, `/off-market/${id}`) };
+  // SEO oct. 2026 : title et description generiques (type de bien et zone
+  // uniquement), uniques par fiche. Aucune adresse, prix ni detail.
+  const [property, all] = await Promise.all([
+    fetchOffmarketById(id, locale),
+    fetchOffmarketList(locale),
+  ]);
+  if (!property) return { alternates: pageAlternates(locale, `/off-market/${id}`) };
+  return offmarketFicheMetadata(locale, property, all);
 }
 
 export default async function OffMarketDetailPage({

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchOffmarketList } from "@/lib/data";
 import type { PropertyOffmarket } from "@/lib/types";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 import { PropertyPrice } from "@/components/property/PropertyPrice";
-import { pageAlternates } from "@/lib/seo";
 
 // Sprint OPTIM-1B : ISR sur la page liste off-market — fetch
 // fetchOffmarketList(locale) via VIEW Supabase. Sans revalidate explicite,
@@ -23,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/off-market") };
+  return seoPageMetadata(locale, "offmarket", "/off-market");
 }
 
 export default async function OffMarketListPage({

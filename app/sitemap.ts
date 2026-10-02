@@ -35,8 +35,12 @@ const STATIC_PATHS = [
   "/legal/intelligence-artificielle",
 ];
 
-const buildAlternates = (path: string) =>
-  Object.fromEntries(LOCALES.map((l) => [l, `${SITE_URL}/${l}${path}`]));
+// Memes codes que les hreflang des pages (lib/seo.ts) : fr, en, de et
+// x-default vers la version francaise.
+const buildAlternates = (path: string) => ({
+  ...Object.fromEntries(LOCALES.map((l) => [l, `${SITE_URL}/${l}${path}`])),
+  "x-default": `${SITE_URL}/fr${path}`,
+});
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Beta / staging : sitemap vide (pas d'indexation souhaitée).

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { ContactReveal } from "@/components/contact-reveal";
-import { pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/contact") };
+  return seoPageMetadata(locale, "contact", "/contact");
 }
 
 export default async function ContactPage({

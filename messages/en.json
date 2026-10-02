@@ -1369,5 +1369,79 @@
   "ai_transparency": {
     "note_gallery": "Some photographs may have been enhanced through digital processing.",
     "note_journal": "Writing assisted by artificial intelligence, content reviewed and validated by MAPA Property."
+  },
+  "seo_pages": {
+    "contact": {
+      "title": "Contact our real estate agency, MAPA Property",
+      "description": "Sales mandate, property search, off-market access or wealth advice in Luxembourg: write to us and receive a personal reply within 48 business hours."
+    },
+    "simulators": {
+      "title": "Mortgage and rental yield calculators, MAPA Property",
+      "description": "Calculate monthly payments, rental yield and borrowing capacity with the latest Luxembourg market rates. Indicative, non-binding tools for your project."
+    },
+    "estimate": {
+      "title": "Property valuation in Luxembourg, MAPA Property",
+      "description": "Value your property in Luxembourg: an indicative price range based on Observatoire de l'Habitat data, continuously refined by our agency to market trends."
+    },
+    "markets": {
+      "title": "Active markets, Luxembourg and worldwide, MAPA Property",
+      "description": "Nationwide coverage in the Grand Duchy and international search under a mandate signed in Luxembourg: trophy assets, prestige homes and off-market."
+    },
+    "blog": {
+      "title": "Real estate blog, insights and taxation, MAPA Property",
+      "description": "Insights on the Luxembourg property market, taxation, off-market deals and mandates: our analyses to help you make precise real estate decisions."
+    },
+    "journal": {
+      "title": "Journal, our real estate editorial, MAPA Property",
+      "description": "The MAPA Property editorial journal: columns on real estate in Luxembourg and abroad, covering the market, taxation and off-market opportunities."
+    },
+    "offmarket": {
+      "title": "Confidential off-market properties, MAPA Property",
+      "description": "A confidential selection of prestige properties never published on listing portals: access under mandate and NDA, after verification of your profile."
+    },
+    "arcova": {
+      "title": "ARCOVA, the private off-market space, MAPA Property",
+      "description": "ARCOVA, the confidential space for qualified clients under mandate: complete off-market files and secure exchanges, available by invitation only."
+    },
+    "fees": {
+      "title": "Agency and broker fees, MAPA Property",
+      "description": "Our published fees, stated excluding VAT: exclusive, semi-exclusive, simple and autonomous sales mandates, search mandates and rental services."
+    },
+    "terms_use": {
+      "title": "Terms of use, MAPA Property",
+      "description": "Terms of use of the mapaproperty.lu website: purpose of the site, access conditions, intellectual property, cookies and limitation of liability."
+    },
+    "terms_sale": {
+      "title": "Terms and conditions of sale, MAPA Property",
+      "description": "Terms and conditions of sale: the contractual framework for our real estate agency services in Luxembourg and our international broking services."
+    },
+    "privacy": {
+      "title": "Personal data protection, MAPA Property",
+      "description": "Our GDPR policy: data collected through the website, purposes, legal bases, retention periods, recipients and how to exercise your rights."
+    },
+    "legal_notice": {
+      "title": "Legal notice, MAPA Property",
+      "description": "Legal notice of the mapaproperty.lu website: publisher, Luxembourg registration, publication director, hosting provider and intellectual property."
+    },
+    "ai": {
+      "title": "Our use of artificial intelligence, MAPA Property",
+      "description": "How we use artificial intelligence: the virtual assistant Eléna, portrait retouching and property photo processing, explained with full transparency."
+    },
+    "offmarket_fiche": {
+      "title": "Off-market {type}, {zone}",
+      "description": "Off-market in {zone}: {type}, a confidential selection by MAPA Property. Full file under mandate and NDA, after profile verification.",
+      "extra": " Request access online.",
+      "rank": "{base} ({rank})",
+      "types": {
+        "appartement": "apartment",
+        "maison": "house",
+        "penthouse": "penthouse",
+        "duplex": "duplex",
+        "villa": "villa",
+        "immeuble": "building",
+        "terrain": "plot of land",
+        "property": "exceptional property"
+      }
+    }
   }
 }

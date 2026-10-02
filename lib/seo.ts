@@ -121,10 +121,12 @@ export const personJulien = () => ({
 // équivalente construite à la main) pour que son canonical pointe vers
 // SA PROPRE URL et que ses hreflang listent les 3 langues de LA MÊME page.
 const LOCALES = ["fr", "en", "de"] as const;
+// Codes de langue SANS region (oct. 2026) : le site sert une version par
+// langue, pas par pays. x-default -> version francaise.
 const HREFLANG_BY_LOCALE: Record<(typeof LOCALES)[number], string> = {
-  fr: "fr-LU",
-  en: "en-US",
-  de: "de-DE",
+  fr: "fr",
+  en: "en",
+  de: "de",
 };
 
 /**

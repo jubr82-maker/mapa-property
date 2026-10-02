@@ -90,6 +90,11 @@ const nextConfig: NextConfig = {
     // signalees "mal mises en cache". 30 jours : les photos de biens ont
     // des URL uniques, les logos changent rarement.
     minimumCacheTTL: 2592000,
+    // SEO oct. 2026 : les variantes 3840 px des photos Apimo repondaient 404
+    // et aucun affichage du site ne depasse 1920 px de large. Plafond a 1920 ;
+    // imageSizes (vignettes, < plus petite deviceSize) = defaut Next 16.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         // Poster de la video hero (Cloudflare R2, cf. components/home/Hero.tsx).

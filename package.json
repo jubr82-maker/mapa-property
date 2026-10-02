@@ -10,6 +10,7 @@
     "test:engine": "tsx scripts/test-engine.mjs",
     "test:types": "node scripts/test-property-types.mjs",
     "test:geo": "node scripts/test-luxembourg-communes.mjs",
+    "test:seo": "playwright test -c tests/seo/playwright.config.ts",
     "purge:offmarket": "tsx scripts/purge-offmarket-isr.mjs",
     "backup": "tsx scripts/backup-supabase-to-r2.mjs"
   },

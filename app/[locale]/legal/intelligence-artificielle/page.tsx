@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale } from "next-intl/server";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 import { intelligenceArtificielle } from "@/lib/legal/intelligence-artificielle";
-import { pageAlternates } from "@/lib/seo";
 
 type Locale = keyof typeof intelligenceArtificielle;
 
@@ -12,7 +12,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/legal/intelligence-artificielle") };
+  return seoPageMetadata(locale, "ai", "/legal/intelligence-artificielle");
 }
 
 export default async function Page({

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale } from "next-intl/server";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 import { honoraires } from "@/lib/legal/honoraires";
-import { pageAlternates } from "@/lib/seo";
 
 type Locale = keyof typeof honoraires;
 
@@ -12,7 +12,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/legal/honoraires") };
+  return seoPageMetadata(locale, "fees", "/legal/honoraires");
 }
 
 export default async function Page({

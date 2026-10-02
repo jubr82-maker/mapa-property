@@ -2,10 +2,10 @@
 // ARCOVA n'apparaît plus dans le header principal : il devient une
 // page de sous-section accessible depuis /off-market.
 import type { Metadata } from "next";
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale } from "next-intl/server";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -13,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/off-market/arcova") };
+  return seoPageMetadata(locale, "arcova", "/off-market/arcova");
 }
 
 export default async function OffmarketArcovaPage({

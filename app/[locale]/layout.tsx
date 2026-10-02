@@ -64,9 +64,9 @@ export async function generateMetadata({
     alternates: {
       canonical: `/${locale}`,
       languages: {
-        "fr-LU": "/fr",
-        "en-US": "/en",
-        "de-DE": "/de",
+        fr: "/fr",
+        en: "/en",
+        de: "/de",
         "x-default": "/fr",
       },
     },

@@ -1369,5 +1369,79 @@
   "ai_transparency": {
     "note_gallery": "Certaines photographies peuvent avoir été améliorées par traitement numérique.",
     "note_journal": "Rédaction assistée par intelligence artificielle, contenu vérifié et validé par MAPA Property."
+  },
+  "seo_pages": {
+    "contact": {
+      "title": "Contacter l'agence immobilière, MAPA Property",
+      "description": "Mandat de vente, recherche, accès off-market ou conseil patrimonial au Luxembourg : écrivez-nous, réponse personnalisée sous 48 heures ouvrées."
+    },
+    "simulators": {
+      "title": "Simulateurs de crédit et de rendement, MAPA Property",
+      "description": "Calculez mensualité, rendement locatif et capacité d'emprunt avec les derniers taux du marché luxembourgeois. Outils indicatifs et non contractuels."
+    },
+    "estimate": {
+      "title": "Estimation immobilière au Luxembourg, MAPA Property",
+      "description": "Estimez votre bien au Luxembourg : fourchette indicative fondée sur les données de l'Observatoire de l'Habitat, affinée en continu par notre agence."
+    },
+    "markets": {
+      "title": "Marchés actifs, Luxembourg et international, MAPA Property",
+      "description": "Couverture nationale au Grand-Duché et recherche internationale sous mandat signé au Luxembourg : trophy assets, résidences de prestige et off-market."
+    },
+    "blog": {
+      "title": "Blog immobilier, analyses et fiscalité, MAPA Property",
+      "description": "Décryptages du marché immobilier luxembourgeois, fiscalité, off-market et mandats : nos analyses pour prendre des décisions immobilières précises."
+    },
+    "journal": {
+      "title": "Journal, l'édito immobilier, MAPA Property",
+      "description": "Le journal éditorial de MAPA Property : chroniques sur l'immobilier au Luxembourg et à l'international, le marché, la fiscalité et l'off-market."
+    },
+    "offmarket": {
+      "title": "Biens off-market confidentiels, MAPA Property",
+      "description": "Une sélection confidentielle de biens de prestige, jamais publiée sur les portails : accès sous mandat et NDA, après vérification de votre profil."
+    },
+    "arcova": {
+      "title": "ARCOVA, l'espace off-market privé, MAPA Property",
+      "description": "ARCOVA, l'espace confidentiel réservé aux clients qualifiés sous mandat : dossiers off-market complets et échanges sécurisés, sur invitation uniquement."
+    },
+    "fees": {
+      "title": "Honoraires d'agence et de broker, MAPA Property",
+      "description": "Nos honoraires publics, indiqués hors taxes : mandats de vente exclusif, semi-exclusif, simple ou autonome, mandats de recherche et location."
+    },
+    "terms_use": {
+      "title": "Conditions générales d'utilisation, MAPA Property",
+      "description": "Conditions générales d'utilisation du site mapaproperty.lu : objet du site, accès, propriété intellectuelle, cookies et limitation de responsabilité."
+    },
+    "terms_sale": {
+      "title": "Conditions générales de vente, MAPA Property",
+      "description": "Conditions générales de vente : cadre contractuel de nos prestations d'agence immobilière au Luxembourg et de broker international pour nos clients."
+    },
+    "privacy": {
+      "title": "Protection des données personnelles, MAPA Property",
+      "description": "Notre politique RGPD : données collectées via le site, finalités, bases légales, durées de conservation, destinataires et exercice de vos droits."
+    },
+    "legal_notice": {
+      "title": "Mentions légales, MAPA Property",
+      "description": "Mentions légales du site mapaproperty.lu : éditeur, immatriculation au Luxembourg, directeur de la publication, hébergement et propriété intellectuelle."
+    },
+    "ai": {
+      "title": "Usage de l'intelligence artificielle, MAPA Property",
+      "description": "Comment nous utilisons l'intelligence artificielle : assistante virtuelle Eléna, retouche de portraits et traitement des photos de biens, en transparence."
+    },
+    "offmarket_fiche": {
+      "title": "{type} off-market, {zone}",
+      "description": "Off-market à {zone} : {type}, sélection confidentielle de MAPA Property. Dossier complet sous mandat et NDA, après vérification du profil.",
+      "extra": " Demande d'accès en ligne.",
+      "rank": "{base} ({rank})",
+      "types": {
+        "appartement": "Appartement",
+        "maison": "Maison",
+        "penthouse": "Penthouse",
+        "duplex": "Duplex",
+        "villa": "Villa",
+        "immeuble": "Immeuble",
+        "terrain": "Terrain",
+        "property": "Bien d'exception"
+      }
+    }
   }
 }

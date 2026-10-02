@@ -71,7 +71,8 @@ function MinimalDisclaimer({ locale }: { locale: string }) {
     <p className="mt-4 text-xs italic leading-relaxed text-ink-soft">
       {t("disclaimer")}{" "}
       <Link
-        href={`/${locale}/mentions-acquisition`}
+        // Link next-intl : il prefixe lui-meme la langue (jamais `/${locale}`).
+        href="/mentions-acquisition"
         className="underline-offset-2 hover:underline"
       >
         {t("legal_notice")}
@@ -87,7 +88,7 @@ function ContactButtonsRow({ locale }: { locale: string }) {
     <div className="mt-5 flex flex-wrap items-center gap-2">
       <ContactReveal variant="compact" align="center" />
       <Link
-        href={`/${locale}/contact`}
+        href="/contact"
         className="inline-flex items-center gap-2 rounded-full border border-line bg-bg px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold/40 hover:text-ink"
       >
         {t("contact")}

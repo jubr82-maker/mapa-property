@@ -190,8 +190,10 @@ export async function Hero({ locale }: { locale: string }) {
           className="mapa-hero-fade-up font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]"
           style={{ animationDelay: "150ms" }}
         >
-          <span className="block text-white/90">{titleLine1}</span>
-          <span className="block text-white">{titleLine2}</span>
+          {/* Espaces explicites entre segments block : invisibles a
+              l'ecran, mais le texte du H1 se lit avec des espaces. */}
+          <span className="block text-white/90">{titleLine1}</span>{" "}
+          <span className="block text-white">{titleLine2}</span>{" "}
           {titleLine3 && (
             <span
               className="mt-1 block font-normal italic text-[clamp(1.4rem,5.5vw,4.8rem)] md:mt-2"

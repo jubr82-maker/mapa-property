@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { brandedTitle, htmlToPlainText, metaDescription } from "@/lib/meta-text";
 import { notFound, redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import {
@@ -107,18 +108,23 @@ export async function generateMetadata({
   if (!property) return {};
 
   const title = pickLang(property, "title", locale as Locale);
-  const description = pickLang(property, "description", locale as Locale);
+  // SEO oct. 2026 : la description est du HTML (editeur TipTap) ; la meta
+  // et og:description recoivent un texte sans balise ni entite, coupe
+  // proprement a 155 caracteres.
+  const description = metaDescription(
+    pickLang(property, "description", locale as Locale),
+  );
   const images = await fetchPropertyImages(property.id);
   const cover = images[0]?.url;
   const path = `/biens/${property.slug}`;
 
   return {
-    title: `${title}, MAPA Property`,
-    description: description.slice(0, 160) || undefined,
+    title: brandedTitle(title),
+    description: description || undefined,
     alternates: pageAlternates(locale, path),
     openGraph: {
-      title,
-      description: description.slice(0, 200) || undefined,
+      title: htmlToPlainText(title),
+      description: description || undefined,
       url: `/${locale}${path}`,
       siteName: "MAPA Property",
       type: "website",

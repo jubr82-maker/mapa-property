@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 import Image from "next/image";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchAllBlogPosts } from "@/lib/data";
 import { pickLang, type Locale } from "@/lib/types";
-import { pageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -12,7 +12,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/blog") };
+  return seoPageMetadata(locale, "blog", "/blog");
 }
 
 export default async function BlogIndexPage({

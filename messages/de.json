@@ -1369,5 +1369,79 @@
   "ai_transparency": {
     "note_gallery": "Einige Fotografien können digital nachbearbeitet worden sein.",
     "note_journal": "Mit Unterstützung künstlicher Intelligenz verfasst, Inhalt von MAPA Property geprüft und freigegeben."
+  },
+  "seo_pages": {
+    "contact": {
+      "title": "Kontakt zur Immobilienagentur, MAPA Property",
+      "description": "Verkaufsmandat, Suche, Off-Market-Zugang oder Vermögensberatung in Luxemburg: Schreiben Sie uns, persönliche Antwort innerhalb von 48 Werktagsstunden."
+    },
+    "simulators": {
+      "title": "Kredit- und Renditerechner, MAPA Property",
+      "description": "Berechnen Sie Monatsrate, Mietrendite und Kreditrahmen mit den aktuellen Zinsen des luxemburgischen Marktes. Unverbindliche Orientierungswerkzeuge."
+    },
+    "estimate": {
+      "title": "Immobilienbewertung in Luxemburg, MAPA Property",
+      "description": "Bewerten Sie Ihre Immobilie in Luxemburg: eine Preisspanne auf Basis der Daten des Observatoire de l'Habitat, laufend von unserer Agentur angepasst."
+    },
+    "markets": {
+      "title": "Aktive Märkte, Luxemburg und weltweit, MAPA Property",
+      "description": "Landesweite Abdeckung im Großherzogtum und internationale Suche mit in Luxemburg unterzeichnetem Mandat: Trophy Assets, Prestigeobjekte und Off-Market."
+    },
+    "blog": {
+      "title": "Immobilienblog, Analysen und Steuern, MAPA Property",
+      "description": "Analysen zum luxemburgischen Immobilienmarkt, zu Steuern, Off-Market und Mandaten: unsere Einblicke für präzise Immobilienentscheidungen."
+    },
+    "journal": {
+      "title": "Journal, das Immobilien-Editorial, MAPA Property",
+      "description": "Das redaktionelle Journal von MAPA Property: Beiträge zu Immobilien in Luxemburg und international, zu Markt, Steuern und Off-Market-Chancen."
+    },
+    "offmarket": {
+      "title": "Vertrauliche Off-Market-Immobilien, MAPA Property",
+      "description": "Eine vertrauliche Auswahl an Prestigeimmobilien, nie auf Portalen veröffentlicht: Zugang mit Mandat und NDA, nach Prüfung Ihres Profils."
+    },
+    "arcova": {
+      "title": "ARCOVA, der private Off-Market-Bereich, MAPA Property",
+      "description": "ARCOVA, der vertrauliche Bereich für qualifizierte Kunden mit Mandat: vollständige Off-Market-Dossiers und sicherer Austausch, nur auf Einladung."
+    },
+    "fees": {
+      "title": "Makler- und Brokerhonorare, MAPA Property",
+      "description": "Unsere veröffentlichten Honorare, ohne Mehrwertsteuer: exklusive, halbexklusive, einfache und autonome Verkaufsmandate, Suchmandate und Vermietung."
+    },
+    "terms_use": {
+      "title": "Nutzungsbedingungen, MAPA Property",
+      "description": "Nutzungsbedingungen der Website mapaproperty.lu: Zweck der Website, Zugang, geistiges Eigentum, Cookies und Haftungsbeschränkung im Überblick."
+    },
+    "terms_sale": {
+      "title": "Allgemeine Verkaufsbedingungen, MAPA Property",
+      "description": "Allgemeine Verkaufsbedingungen: der vertragliche Rahmen unserer Immobilienagentur-Leistungen in Luxemburg und unserer internationalen Brokertätigkeit."
+    },
+    "privacy": {
+      "title": "Schutz personenbezogener Daten, MAPA Property",
+      "description": "Unsere DSGVO-Richtlinie: über die Website erhobene Daten, Zwecke, Rechtsgrundlagen, Speicherfristen, Empfänger und Ausübung Ihrer Rechte."
+    },
+    "legal_notice": {
+      "title": "Impressum, MAPA Property",
+      "description": "Impressum der Website mapaproperty.lu: Herausgeber, Eintragung in Luxemburg, verantwortliche Person für die Veröffentlichung, Hosting und Urheberrecht."
+    },
+    "ai": {
+      "title": "Einsatz künstlicher Intelligenz, MAPA Property",
+      "description": "Wie wir künstliche Intelligenz einsetzen: die virtuelle Assistentin Eléna, Porträtretusche und Bearbeitung von Immobilienfotos, in voller Transparenz."
+    },
+    "offmarket_fiche": {
+      "title": "Off-Market {type}, {zone}",
+      "description": "Off-Market in {zone}: {type}, vertrauliche Auswahl von MAPA Property. Vollständiges Dossier mit Mandat und NDA, nach Profilprüfung.",
+      "extra": " Zugang online anfragen.",
+      "rank": "{base} ({rank})",
+      "types": {
+        "appartement": "Wohnung",
+        "maison": "Haus",
+        "penthouse": "Penthouse",
+        "duplex": "Duplex",
+        "villa": "Villa",
+        "immeuble": "Gebäude",
+        "terrain": "Grundstück",
+        "property": "Ausnahmeobjekt"
+      }
+    }
   }
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { EstimateForm } from "@/components/forms/EstimateForm";
-import { pageAlternates } from "@/lib/seo";
 import { getLuxembourgPlaces } from "@/lib/estimation/coverage";
 
 export async function generateMetadata({
@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/services/estimer") };
+  return seoPageMetadata(locale, "estimate", "/services/estimer");
 }
 
 export default async function EstimatePage({

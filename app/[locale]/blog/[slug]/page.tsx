@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { brandedTitle, metaDescription } from "@/lib/meta-text";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchBlogPostBySlug } from "@/lib/data";
@@ -19,11 +20,15 @@ export async function generateMetadata({
   const post = await fetchBlogPostBySlug(slug);
   if (!post) return {};
   const title = post.meta_title ?? pickLang(post, "title", locale as Locale);
-  const description =
-    post.meta_description ?? pickLang(post, "excerpt", locale as Locale);
+  const description = metaDescription(
+    post.meta_description ?? pickLang(post, "excerpt", locale as Locale),
+  );
   return {
-    title: `${title}, MAPA Property`,
-    description,
+    // SEO oct. 2026 : certains meta_title en base finissent deja par
+    // "| Mapa Property" ; brandedTitle retire tout suffixe de marque avant
+    // d'ajouter l'unique ", MAPA Property". La base n'est pas modifiee.
+    title: brandedTitle(title),
+    description: description || undefined,
     alternates: pageAlternates(locale, `/blog/${post.slug}`),
     openGraph: post.cover_image
       ? { images: [{ url: post.cover_image }] }
