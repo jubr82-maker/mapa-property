@@ -8,7 +8,7 @@ import { CountrySelect } from "@/components/ui/CountrySelect";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
-import { track } from "@/lib/tracking/track";
+import { leadFormTypeOf, track, trackLead } from "@/lib/tracking/track";
 
 interface Props {
   type: string;
@@ -102,6 +102,7 @@ export function ContactForm({
       if (res.ok) {
         setStatus("success");
         form.reset();
+        trackLead(leadFormTypeOf(type));
         track("form_submit", {
           form: type,
           source,

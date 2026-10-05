@@ -5,7 +5,7 @@ import { useState, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { formatEuro } from "@/lib/finance";
 import type { EstimateResult } from "@/lib/estimate";
-import { track } from "@/lib/tracking/track";
+import { track, trackLead } from "@/lib/tracking/track";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 import { Turnstile, type TurnstileHandle } from "@/components/ui/Turnstile";
 import { PlaceCombobox, type ComboboxPlace } from "@/components/forms/PlaceCombobox";
@@ -489,6 +489,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
       setBasis(json.basis ?? null);
       setUsedComparables(json.usedComparables === true);
       setStep(4);
+      trackLead("estimation");
       track("estimation_compute", {
         country: "LU",
         type: data.type,

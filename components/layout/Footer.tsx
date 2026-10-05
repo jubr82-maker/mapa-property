@@ -7,7 +7,7 @@ import { ExploreLinks } from "@/components/seo/ExploreLinks";
 
 const colServices = [
   { href: "/services/vendre", key: "sell" },
-  { href: "/biens", key: "buy" },
+  { href: "/services/acheter", key: "buy" },
   { href: "/biens?transaction=rent", key: "rent" },
   { href: "/off-market", key: "off_market" },
   { href: "/services/estimer", key: "estimate" },
@@ -17,6 +17,8 @@ const colServices = [
 
 const colAgency = [
   { href: "/qui-sommes-nous", key: "about" },
+  { href: "/agence-immobiliere-luxembourg", key: "agency_luxembourg" },
+  { href: "/services/broker-international", key: "broker_international" },
   { href: "/services/marches-actifs", key: "markets" },
   { href: "/mandats/exclusif", key: "mandates" },
   { href: "/legal/honoraires", key: "fees" },

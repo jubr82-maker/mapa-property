@@ -4,6 +4,7 @@
 // /mandats, /villes) ne sont pas listes, pour ne jamais citer une adresse
 // en erreur.
 export const BREADCRUMB_KEYS: Record<string, string> = {
+  "/agence-immobiliere-luxembourg": "agency",
   "/biens": "properties",
   "/blog": "blog",
   "/contact": "contact",
@@ -13,6 +14,8 @@ export const BREADCRUMB_KEYS: Record<string, string> = {
   "/off-market/arcova": "arcova",
   "/qui-sommes-nous": "about",
   "/services": "services",
+  "/services/acheter": "buy",
+  "/services/broker-international": "broker",
   "/services/capacite-emprunt": "borrowing",
   "/services/estimer": "estimate",
   "/services/louer": "rent",

@@ -42,7 +42,9 @@
     "simulators": "Simulators",
     "markets": "Active markets",
     "fees": "Fees",
-    "mandates": "Mandates"
+    "mandates": "Mandates",
+    "agency_luxembourg": "Real estate agency in Luxembourg",
+    "broker_international": "International broker"
   },
   "footer": {
     "col_services": "Services",
@@ -820,6 +822,11 @@
         "eyebrow": "Off-Market",
         "title": "Off-Market catalogue",
         "body": "Confidential properties never published online, accessible after signing an NDA and proof of capacity."
+      },
+      "broker": {
+        "eyebrow": "International",
+        "title": "International real estate broker",
+        "body": "European Professional Card for France, Germany and Italy; elsewhere, a licensed local agency and a single point of contact."
       }
     }
   },
@@ -1146,7 +1153,7 @@
     "eyebrow": "Active markets",
     "title": "From the Grand Duchy to global cities.",
     "found_p1": "MAPA Property is a Luxembourg real estate agency and an international broker.",
-    "found_p2": "To secure legal compliance in each jurisdiction, we operate internationally exclusively as a broker, under search mandate signed in Luxembourg, with selected and licensed local partners.",
+    "found_p2": "In Luxembourg, we conduct the transaction as a real estate agency. The European Professional Card also allows us to operate on properties located in France, Germany and Italy. Elsewhere, we act as a broker under a mandate signed in Luxembourg: regulated acts are carried out by a licensed local agency that we select, and we remain the client's single point of contact.",
     "found_p3": "This approach allows us to support our clients on Trophy Assets, prestige secondary residences, wealth investments or off-market assets in the most sought-after markets in Europe, the UAE and the Americas.",
     "found_p4": "Each international search is handled with the same rigour as in the Grand Duchy: local due diligence, coordinated notarial expertise, contractual confidentiality.",
     "found_source": "Source: MAPA Property (https://www.mapaproperty.lu). © 2026. All rights reserved. Reproduction prohibited.",
@@ -3563,7 +3570,10 @@
     "fees": "Fees",
     "ai": "Artificial intelligence",
     "legal_notice": "Legal notice",
-    "privacy": "Privacy policy"
+    "privacy": "Privacy policy",
+    "agency": "Real estate agency in Luxembourg",
+    "buy": "Buy",
+    "broker": "International broker"
   },
   "not_found": {
     "eyebrow": "Error 404",
@@ -3596,5 +3606,119 @@
     "section_title": "Explore the markets and simulate your project",
     "city_market": "The {city} market",
     "fiche_title": "Go further"
+  },
+  "intent_pages": {
+    "faq_title": "Frequently asked questions",
+    "links_title": "Next steps",
+    "services_title": "What the agency does",
+    "link_properties_sale": "Properties for sale",
+    "link_properties_rent": "Properties for rent",
+    "link_all_properties": "All properties",
+    "link_waitlist": "Waiting list",
+    "link_search": "Search mandate",
+    "link_offmarket": "Off-Market",
+    "link_estimate": "Value a property",
+    "link_sell": "Sell",
+    "link_buy": "Buy",
+    "link_rent": "Rent",
+    "link_broker": "International broker",
+    "link_agency": "The agency in Luxembourg",
+    "link_fees": "Fees",
+    "link_markets": "Active markets",
+    "link_contact": "Contact",
+    "link_list_rental": "Let your property",
+    "link_about": "About us",
+    "agency": {
+      "eyebrow": "MAPA Property",
+      "title": "Real estate agency in Luxembourg",
+      "meta_title": "Real estate agency in Luxembourg",
+      "meta_description": "MAPA Property, a real estate agency in Luxembourg founded in 2024: sales, purchases, lettings and search mandates across the Grand Duchy, under signed mandate.",
+      "service_name": "Real estate agency in Luxembourg",
+      "answer": "MAPA Property is a Luxembourg real estate agency founded in 2024. It handles the sale, purchase and letting of properties across the whole Grand Duchy, with a strong presence in the centre, south and west of the country. The agency only works under a signed mandate, for a single interest at a time, and extends its work abroad as an international broker.",
+      "faq_q1": "Where does MAPA Property operate in Luxembourg?",
+      "faq_a1": "Across the whole Grand Duchy, with a strong presence in the centre, south and west. The city pages describe the markets the agency follows.",
+      "faq_q2": "What are the agency's fees?",
+      "faq_a2": "They are public and quoted excluding VAT (17%). For a sale: 3% of the net seller price with an exclusive mandate, 4% semi-exclusive, 5% simple and 1% autonomous. The full scale, including lettings and search, is on the Fees page.",
+      "faq_q3": "Can the agency act without a mandate?",
+      "faq_a3": "No. MAPA Property only acts under a signed mandate and defends a single interest at a time: that of the seller or of the buyer who appointed it.",
+      "faq_q4": "Can I have my property valued?",
+      "faq_a4": "Yes. The indicative online valuation is free. A valuation with a visit and a written report is free as part of a potential sale mandate, and quoted otherwise.",
+      "faq_q5": "In which languages is the website available?",
+      "faq_a5": "In French, English and German."
+    },
+    "buy": {
+      "eyebrow": "Buy with MAPA Property",
+      "title": "Buying property in Luxembourg",
+      "meta_title": "Buying property in Luxembourg",
+      "meta_description": "Buying in Luxembourg: listed properties, waiting list, search mandate and Off-Market. Purchase costs, Bëllegen Akt and financing simulators.",
+      "service_name": "Property purchase support in Luxembourg",
+      "answer": "To buy a property in Luxembourg with MAPA Property, you can browse the properties listed for sale, join the waiting list to receive new properties 24 hours before they are published, or sign a search mandate. With a search mandate, the agency searches for you, including off-market, and defends only your interests as a buyer through to the notarial deed.",
+      "faq_q1": "What costs should I plan on top of the price?",
+      "faq_a1": "In Luxembourg, allow about 6% registration duties, 1% transcription duty and about 1% notary fees, an indicative total close to 8% of the price.",
+      "faq_q2": "What is the Bëllegen Akt?",
+      "faq_a2": "A tax credit on registration duties of up to 40,000 euros per buyer for the purchase of a main residence, with no age or first-time buyer condition (law of 3 July 2025).",
+      "faq_q3": "How can I access properties that are not listed?",
+      "faq_a3": "The Off-Market selection is available on a reasoned request, after signing a non-disclosure agreement. A search mandate also activates the agency's confidential network.",
+      "faq_q4": "How much can I borrow?",
+      "faq_a4": "The borrowing capacity and financing simulators give a first indication using Luxembourg market rates. The final decision rests with the bank."
+    },
+    "sell": {
+      "meta_title": "Selling property in Luxembourg",
+      "meta_description": "Selling in Luxembourg with MAPA Property: valuation, four sale mandates from 1% to 5% excluding VAT, marketing, negotiation and follow-up to the deed.",
+      "service_name": "Property sales in Luxembourg",
+      "answer": "To sell your property in Luxembourg with MAPA Property, you start with a valuation, then choose one of four sale mandates: exclusive (3% excluding VAT of the net seller price), semi-exclusive (4%), simple (5%) or autonomous (1%). The agency then handles marketing, buyer selection, negotiation and follow-up through to the notarial deed.",
+      "faq_q1": "Which sale mandate should I choose?",
+      "faq_a1": "The exclusive mandate entrusts the sale to MAPA Property alone, at the lowest rate of the three full mandates. The semi-exclusive mandate lets you introduce buyers from your own circle. The simple mandate lets you list with several agencies. The autonomous mandate lets you handle viewings and negotiation yourself, with legal and notarial support.",
+      "faq_q2": "How long does a mandate last?",
+      "faq_a2": "From two months, the duration recommended by MAPA Property. It renews tacitly and can be terminated with 15 days' notice.",
+      "faq_q3": "When are the fees due?",
+      "faq_a3": "On signature of the notarial deed, unless otherwise agreed in writing. Rates are excluding VAT (17%), on the net seller price.",
+      "faq_q4": "Is the valuation charged?",
+      "faq_a4": "The indicative online valuation is free. A valuation with a visit and a written report is free as part of a potential sale mandate, and quoted otherwise."
+    },
+    "rent": {
+      "meta_title": "Renting property in Luxembourg",
+      "meta_description": "Renting in Luxembourg with MAPA Property: find a rental, let your property or entrust its management, within the 5% legal rent cap.",
+      "service_name": "Lettings and property management in Luxembourg",
+      "answer": "MAPA Property helps you rent in Luxembourg both ways: find a rental among the listed properties, or let your property with tenant selection and a compliant lease, with optional property management. The rent always respects the Luxembourg legal cap of 5% of the invested capital per year.",
+      "faq_q1": "What are the letting fees?",
+      "faq_a1": "One month's rent excluding VAT, shared according to custom (50% landlord, 50% tenant) or paid entirely by the landlord, depending on the mandate.",
+      "faq_q2": "How much does property management cost?",
+      "faq_a2": "From 6% to 8% excluding VAT of the rents collected, depending on the services included: collection, service charges, claims and end of lease.",
+      "faq_q3": "What is the maximum rent allowed in Luxembourg?",
+      "faq_a3": "The annual rent may not exceed 5% of the capital invested in the dwelling (law of 21 September 2006 on residential leases).",
+      "faq_q4": "How are tenants selected?",
+      "faq_a4": "Through a careful review of a complete file, with identity and anti-money laundering checks (KYC), before a compliant lease is signed."
+    },
+    "search": {
+      "meta_title": "Property search mandate in Luxembourg",
+      "meta_description": "MAPA Property search mandate: the agency finds your property in Luxembourg or abroad and defends only your interests. Fees from 3% to 5% excluding VAT.",
+      "service_name": "Property search mandate",
+      "answer": "A search mandate entrusts MAPA Property with finding the property you are looking for and managing its purchase, in Luxembourg or abroad. The agency defends only your interests as a buyer. In Luxembourg, its fees are 3% to 5% excluding VAT of the purchase price, with an advance of 250 euros excluding VAT, deducted from the fees if the purchase completes.",
+      "faq_q1": "How much does a search mandate cost?",
+      "faq_a1": "In Luxembourg, 3% to 5% excluding VAT of the purchase price. In Europe, including France, 3% to 8% excluding VAT depending on complexity and country. Elsewhere, quoted in the mandate.",
+      "faq_q2": "What is the fee advance for?",
+      "faq_a2": "It formalises the mutual commitment: the agency works exclusively on your project. It is 250 euros excluding VAT in Luxembourg, from 500 euros excluding VAT in neighbouring regions up to 100 km, quoted elsewhere, and fully deducted from the fees if the transaction completes with MAPA Property.",
+      "faq_q3": "Does the search include off-market properties?",
+      "faq_a3": "Yes. The mandate activates the agency's confidential network: partner agencies, direct owners and off-market sources.",
+      "faq_q4": "Can I search outside Luxembourg?",
+      "faq_a4": "Yes. MAPA Property operates directly on properties in France, Germany and Italy under the European Professional Card. Elsewhere, it acts as a broker with a licensed local agency and remains your single point of contact."
+    },
+    "broker": {
+      "eyebrow": "International",
+      "title": "International real estate broker",
+      "meta_title": "International real estate broker based in Luxembourg",
+      "meta_description": "MAPA Property, international real estate broker: European Professional Card for France, Germany and Italy, licensed local agencies elsewhere.",
+      "service_name": "International real estate broker",
+      "answer": "MAPA Property acts as an international real estate broker for clients buying or selling outside Luxembourg. The agency holds the European Professional Card for real estate agents, which allows it to operate on properties located in France, Germany and Italy. Elsewhere, regulated acts are carried out by a licensed local agency that it selects, and MAPA Property remains your single point of contact through to signing.",
+      "faq_q1": "What does an international real estate broker do?",
+      "faq_a1": "It defines the requirement precisely, identifies the properties, chooses the right local partner, oversees the file and remains the client's single point of contact through to signing.",
+      "faq_q2": "In which countries does MAPA Property operate?",
+      "faq_a2": "Directly in Luxembourg, and in France, Germany and Italy under the European Professional Card. Elsewhere, on request, with licensed local agencies; the Active markets page shows the regular coverage.",
+      "faq_q3": "Who carries out the transaction abroad?",
+      "faq_a3": "In France, Germany and Italy, MAPA Property can conduct it itself. In other countries, negotiation and the transaction are carried out by a licensed local agency that represents the client on the ground.",
+      "faq_q4": "What are the fees abroad?",
+      "faq_a4": "For a search in Europe, including France, 3% to 8% excluding VAT of the purchase price depending on complexity and country. Outside Europe, quoted in the mandate."
+    }
   }
 }

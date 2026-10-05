@@ -8,7 +8,7 @@ import { CountrySelect } from "@/components/ui/CountrySelect";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
-import { track } from "@/lib/tracking/track";
+import { track, trackLead } from "@/lib/tracking/track";
 
 interface Props {
   propertyRef: string;
@@ -97,6 +97,7 @@ export function NDAForm({ propertyRef, propertyTitle }: Props) {
       });
       if (!res.ok) throw new Error();
       setStatus("success");
+      trackLead("offmarket");
       track("form_submit", {
         form: "nda_request",
         property_id: propertyRef,

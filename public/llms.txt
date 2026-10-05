@@ -1,61 +1,86 @@
 # MAPA Property
 
-> Agence immobilière luxembourgeoise et broker international. Sous mandat, dans l'intérêt exclusif du client. Site en français, anglais et allemand.
+> MAPA Property est une agence immobilière au Luxembourg et un broker immobilier international. Elle accompagne la vente, l'achat et la location sur tout le Grand-Duché, uniquement sous mandat signé et dans l'intérêt exclusif de son client. Site en français, anglais et allemand.
 
 ## Identité
 
-- Nom commercial : MAPA Property
+- Nom : MAPA Property
+- Catégorie : agence immobilière
 - Raison sociale : MAPA Synergy Sàrl (détails légaux : https://mapaproperty.lu/fr/legal/mentions-legales)
-- Pays : Luxembourg
-- Site : https://mapaproperty.lu
-- Langues : https://mapaproperty.lu/fr, https://mapaproperty.lu/en, https://mapaproperty.lu/de
+- Pays : Luxembourg (adresse de l'établissement dans les mentions légales)
+- Fondation : 2024
 - Directeur immobilier : Julien Brebion
+- Site : https://mapaproperty.lu (versions https://mapaproperty.lu/fr, https://mapaproperty.lu/en, https://mapaproperty.lu/de)
+- Profils officiels : LinkedIn https://www.linkedin.com/showcase/mapa-property/, Instagram https://www.instagram.com/mapa_property, Facebook https://www.facebook.com/people/MAPA-Property/61559121213209/
 
-## Métiers
+## Positionnement
 
-1. Vente et acquisition au Luxembourg, sous mandat exclusif, semi-exclusif, simple ou autonome.
-2. Mandat de recherche pour acquéreurs (Luxembourg et international).
-3. Broker international, sous mandat signé au Luxembourg, avec des partenaires locaux habilités.
-4. Négociation, due diligence et coordination notariale.
-5. Mise en location et gestion locative au Luxembourg.
-6. Estimation : fourchette indicative fondée sur les données de l'Observatoire de l'Habitat et les ventes réelles enregistrées par l'agence, affinée par une visite.
+- Au Luxembourg : agence immobilière, qui conduit elle-même la transaction, sur tout le territoire (présence forte sur le centre, le sud et l'ouest).
+- En France, en Allemagne et en Italie : MAPA Property détient la carte professionnelle européenne d'agent immobilier, qui lui permet d'intervenir sur des biens situés dans ces pays.
+- Ailleurs : MAPA Property agit comme broker. Les actes réglementés (négociation, transaction) sont réalisés par une agence locale habilitée qu'elle sélectionne ; MAPA Property reste l'interlocuteur unique du client jusqu'à la signature.
+- Un seul intérêt à la fois : celui du vendeur ou celui de l'acquéreur qui l'a mandatée.
 
-## Méthode
+## Services
 
-1. Mandater : l'agence n'agit que sous mandat signé.
-2. Sourcer : réseau d'agences partenaires, de propriétaires directs et de sources confidentielles.
-3. Conclure : dossier KYC et lutte anti-blanchiment, compromis, suivi notarial jusqu'à l'acte.
+1. Vente au Luxembourg, sous mandat exclusif (3 % HT du prix net vendeur), semi-exclusif (4 %), simple (5 %) ou autonome (1 %). TVA 17 % en sus.
+2. Achat : biens publiés, liste d'attente (nouveaux biens 24 heures avant leur diffusion publique), Off-Market sous accord de confidentialité.
+3. Mandat de recherche pour acquéreurs : 3 % à 5 % HT du prix d'acquisition au Luxembourg, 3 % à 8 % HT en Europe, sur devis ailleurs ; avance sur frais déduite des honoraires.
+4. Location : mise en location (un mois de loyer HT) et gestion locative (6 % à 8 % HT des loyers encaissés), dans le respect du plafond légal de 5 % du capital investi par an.
+5. Estimation : fourchette indicative en ligne gratuite, affinée par une visite.
+6. Broker immobilier international, selon le positionnement ci-dessus.
 
-## Honoraires
+## Pages clés
 
-Barème publié, hors TVA : https://mapaproperty.lu/fr/legal/honoraires
+Agence immobilière au Luxembourg :
+- https://mapaproperty.lu/fr/agence-immobiliere-luxembourg
+- https://mapaproperty.lu/en/agence-immobiliere-luxembourg
+- https://mapaproperty.lu/de/agence-immobiliere-luxembourg
 
-## Off-Market et ARCOVA
+Acheter :
+- https://mapaproperty.lu/fr/services/acheter
+- https://mapaproperty.lu/en/services/acheter
+- https://mapaproperty.lu/de/services/acheter
 
-- Off-Market : sélection confidentielle accessible sous accord de confidentialité, jamais publiée en ligne. https://mapaproperty.lu/fr/off-market
-- ARCOVA : espace privé réservé aux clients sous mandat, sur invitation. https://mapaproperty.lu/fr/off-market/arcova
+Vendre :
+- https://mapaproperty.lu/fr/services/vendre
+- https://mapaproperty.lu/en/services/vendre
+- https://mapaproperty.lu/de/services/vendre
 
-## Pages principales
+Louer :
+- https://mapaproperty.lu/fr/services/louer
+- https://mapaproperty.lu/en/services/louer
+- https://mapaproperty.lu/de/services/louer
 
-- Biens à vendre et à louer : https://mapaproperty.lu/fr/biens
-- Vendre : https://mapaproperty.lu/fr/services/vendre
-- Mettre en location : https://mapaproperty.lu/fr/services/louer
+Mandat de recherche :
+- https://mapaproperty.lu/fr/mandats/recherche
+- https://mapaproperty.lu/en/mandats/recherche
+- https://mapaproperty.lu/de/mandats/recherche
+
+Broker immobilier international :
+- https://mapaproperty.lu/fr/services/broker-international
+- https://mapaproperty.lu/en/services/broker-international
+- https://mapaproperty.lu/de/services/broker-international
+
+Biens à vendre et à louer :
+- https://mapaproperty.lu/fr/biens
+- https://mapaproperty.lu/en/biens
+- https://mapaproperty.lu/de/biens
+
+Autres pages :
 - Estimer un bien : https://mapaproperty.lu/fr/services/estimer
-- Mandat de recherche : https://mapaproperty.lu/fr/mandats/recherche
-- Mandat exclusif : https://mapaproperty.lu/fr/mandats/exclusif
-- Services : https://mapaproperty.lu/fr/services
 - Marchés actifs et pages par ville : https://mapaproperty.lu/fr/services/marches-actifs
-- Simulateurs : https://mapaproperty.lu/fr/services/simulateurs
 - Simulateur de financement : https://mapaproperty.lu/fr/services/simulateurs/financement
 - Capacité d'emprunt : https://mapaproperty.lu/fr/services/capacite-emprunt
-- Rendement locatif : https://mapaproperty.lu/fr/services/rendement-locatif
-- Liste d'attente (biens en avant-première) : https://mapaproperty.lu/fr/liste-attente
-- Blog : https://mapaproperty.lu/fr/blog
+- Liste d'attente : https://mapaproperty.lu/fr/liste-attente
+- Off-Market : https://mapaproperty.lu/fr/off-market
+- Honoraires : https://mapaproperty.lu/fr/legal/honoraires
 - Qui sommes-nous : https://mapaproperty.lu/fr/qui-sommes-nous
+- Blog : https://mapaproperty.lu/fr/blog
 - Contact (formulaire) : https://mapaproperty.lu/fr/contact
 
 ## Cadre légal luxembourgeois (sources officielles)
 
+- Frais d'acquisition : environ 6 % de droits d'enregistrement, 1 % de droit de transcription et environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 %.
 - Bëllegen Akt : crédit d'impôt sur les droits d'enregistrement, jusqu'à 40 000 euros par acquéreur pour une résidence principale (loi du 3 juillet 2025). Source : https://logement.public.lu/fr/aides-logement/bellegen-akt.html
 - Plafond légal du loyer : 5 % du capital investi par an (loi du 21 septembre 2006 sur le bail à usage d'habitation).
 

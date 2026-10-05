@@ -23,6 +23,20 @@ export const ORGANIZATION_ADDRESS = {
   addressCountry: "LU",
 } as const;
 
+/** Pays servis : Luxembourg (agence), puis international (broker). */
+export const AREA_SERVED = [
+  { "@type": "Country", name: "Luxembourg" },
+  { "@type": "Country", name: "France" },
+  { "@type": "Country", name: "Belgium" },
+  { "@type": "Country", name: "Switzerland" },
+  { "@type": "Country", name: "Germany" },
+  { "@type": "Country", name: "Italy" },
+  { "@type": "Country", name: "Spain" },
+  { "@type": "Country", name: "Portugal" },
+  { "@type": "Country", name: "Monaco" },
+  { "@type": "Country", name: "United Arab Emirates" },
+];
+
 export const realEstateAgent = (locale: string) => ({
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
@@ -41,18 +55,7 @@ export const realEstateAgent = (locale: string) => ({
   foundingDate: "2024",
   address: ORGANIZATION_ADDRESS,
   knowsLanguage: ["fr", "en", "de"],
-  areaServed: [
-    { "@type": "Country", name: "Luxembourg" },
-    { "@type": "Country", name: "France" },
-    { "@type": "Country", name: "Belgium" },
-    { "@type": "Country", name: "Switzerland" },
-    { "@type": "Country", name: "Germany" },
-    { "@type": "Country", name: "Italy" },
-    { "@type": "Country", name: "Spain" },
-    { "@type": "Country", name: "Portugal" },
-    { "@type": "Country", name: "Monaco" },
-    { "@type": "Country", name: "United Arab Emirates" },
-  ],
+  areaServed: AREA_SERVED,
   sameAs: [
     "https://www.linkedin.com/showcase/mapa-property/",
     "https://www.instagram.com/mapa_property",
@@ -305,4 +308,28 @@ export const faqPage = (faq: { question: string; answer: string }[]) => ({
       text: f.answer,
     },
   })),
+});
+
+/**
+ * Service d'une page de recherche immobiliere (lib/intent-pages.ts),
+ * rattache a l'etablissement unique (#organization) : meme nom, meme
+ * adresse, meme categorie partout.
+ */
+export const intentService = (p: {
+  locale: string;
+  path: string;
+  name: string;
+  description: string;
+  area: "luxembourg" | "international";
+}) => ({
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": `${SITE_URL}/${p.locale}${p.path}#service`,
+  name: p.name,
+  serviceType: p.name,
+  description: p.description,
+  url: `${SITE_URL}/${p.locale}${p.path}`,
+  inLanguage: p.locale,
+  provider: { "@id": `${SITE_URL}#organization` },
+  areaServed: p.area === "luxembourg" ? AREA_SERVED[0] : AREA_SERVED,
 });

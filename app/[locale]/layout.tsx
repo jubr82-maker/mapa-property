@@ -103,13 +103,19 @@ export async function generateMetadata({
       "max-snippet": -1,
       "max-video-preview": -1,
     },
+    // Icones (oct. 2026, scripts/generate-icons.mjs) : adresses stables
+    // public/icons/, carres en multiples de 48 px. /favicon.ico (16, 32 et
+    // 48 px) est declare par la convention app/favicon.ico.
     icons: {
       icon: [
-        { url: "/logo-mapa-property.svg", type: "image/svg+xml" },
-        { url: "/favicon.ico", sizes: "any" },
+        { url: "/icons/icon-48.png", sizes: "48x48", type: "image/png" },
+        { url: "/icons/icon-96.png", sizes: "96x96", type: "image/png" },
+        { url: "/icons/icon-144.png", sizes: "144x144", type: "image/png" },
+        { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
       ],
-      apple: "/apple-touch-icon.png",
+      apple: { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
     },
+    manifest: "/site.webmanifest",
     other: {
       // Balises geo.* et ICBM retirees (oct. 2026) : coordonnees du canton
       // du siege presentees comme "Luxembourg", region LU-LU inexacte ;

@@ -37,7 +37,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
       {
-        heading: "Mandats de Recherche – Sourcing Exclusif",
+        heading: "Mandats de recherche, sourcing exclusif",
         paragraphs: [
           "Luxembourg : 3 % à 5 % HT du prix d'acquisition.",
           "Europe (y compris France) : 3 % à 8 % HT selon complexité et pays.",
@@ -118,7 +118,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
       {
-        heading: "Search Mandates – Exclusive Sourcing",
+        heading: "Search mandates, exclusive sourcing",
         paragraphs: [
           "Luxembourg: 3% to 5% (excl. VAT) of acquisition price.",
           "Europe (including France): 3% to 8% (excl. VAT) depending on complexity and country.",
@@ -199,7 +199,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         ],
       },
       {
-        heading: "Suchmandate – Exklusives Sourcing",
+        heading: "Suchmandate, exklusives Sourcing",
         paragraphs: [
           "Luxemburg: 3 % bis 5 % zzgl. MwSt. des Kaufpreises.",
           "Europa (einschließlich Frankreich): 3 % bis 8 % zzgl. MwSt. je nach Komplexität und Land.",
@@ -241,7 +241,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
         heading: "Abrechnung",
         paragraphs: [
           "Honorar fällig bei Unterzeichnung der notariellen Urkunde.",
-          "Honorar geschuldet, wenn MAPAs Eingriff direkt oder indirekt zum Geschäft beigetragen hat — inklusive Verkauf an einen von MAPA vermittelten Käufer innerhalb von 24 Monaten nach Mandatsende.",
+          "Honorar geschuldet, wenn MAPAs Eingriff direkt oder indirekt zum Geschäft beigetragen hat, einschließlich bei Verkauf an einen von MAPA vermittelten Käufer innerhalb von 24 Monaten nach Mandatsende.",
         ],
       },
       {

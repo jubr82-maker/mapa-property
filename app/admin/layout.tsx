@@ -55,7 +55,14 @@ export async function generateMetadata(): Promise<Metadata> {
     // donc rien n'est mis en cache hors ligne.
     manifest: "/admin/manifest.webmanifest",
     appleWebApp: { capable: true, title: t("app_name"), statusBarStyle: "default" },
-    icons: { apple: "/apple-touch-icon.png" },
+    // Memes icones que le site public (scripts/generate-icons.mjs).
+    icons: {
+      icon: [
+        { url: "/icons/icon-48.png", sizes: "48x48", type: "image/png" },
+        { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      ],
+      apple: { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
+    },
   };
 }
 

@@ -7,6 +7,7 @@ import { ALL_MANDATE_SLUGS, MANDATES, type MandateType } from "@/lib/mandates";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
 import { pageAlternates } from "@/lib/seo";
+import { IntentAnswer, IntentSections, intentMetadata } from "@/components/seo/IntentSections";
 
 export function generateStaticParams() {
   return ALL_MANDATE_SLUGS.flatMap((type) =>
@@ -21,6 +22,8 @@ export async function generateMetadata({
 }) {
   const { locale, type } = await params;
   if (!ALL_MANDATE_SLUGS.includes(type as MandateType)) return {};
+  // Mandat de recherche : page d'intention (lib/intent-pages.ts).
+  if (type === "recherche") return intentMetadata(locale, "search");
   const t = await getTranslations({
     locale,
     namespace: `mandate_${type.replace("-", "_")}`,
@@ -46,12 +49,12 @@ export default async function MandatePage({
   return (
     <>
       <PageBreadcrumb locale={locale} path={`/mandats/${config.slug}`} current={tTitle("title")} />
-      <MandateContent config={config} />
+      <MandateContent config={config} locale={locale} />
     </>
   );
 }
 
-function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) {
+function MandateContent({ config, locale }: { config: (typeof MANDATES)[MandateType]; locale: string }) {
   const ns = `mandate_${config.slug.replace("-", "_")}`;
   const t = useTranslations(ns);
   const tCommon = useTranslations("mandate_common");
@@ -84,6 +87,13 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
             <h1 className="mt-2 t-h1">
               {t("title")}
             </h1>
+            {config.slug === "recherche" && (
+              <IntentAnswer
+                locale={locale}
+                intent="search"
+                className="mt-4 max-w-xl text-base leading-relaxed text-ink sm:text-lg"
+              />
+            )}
             <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-mid sm:text-lg">
               {t("intro")}
             </p>
@@ -241,6 +251,11 @@ function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) 
             defaultMessage={config.defaultMessage}
           />
         </section>
+        {config.slug === "recherche" && (
+          <div className="mb-20">
+            <IntentSections locale={locale} intent="search" />
+          </div>
+        )}
       </div>
     </article>
   );

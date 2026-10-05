@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { pageAlternates } from "@/lib/seo";
+import { IntentAnswer, IntentSections, intentMetadata } from "@/components/seo/IntentSections";
 
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
@@ -9,12 +9,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "page_rent" });
-  return {
-    title: `${t("title")}, MAPA Property`,
-    description: t("intro"),
-    alternates: pageAlternates(locale, "/services/louer"),
-  };
+  return intentMetadata(locale, "rent");
 }
 
 export default async function RentPage({
@@ -44,6 +39,7 @@ export default async function RentPage({
           <h1 className="mt-2 t-h1">
             {t("title")}
           </h1>
+          <IntentAnswer locale={locale} intent="rent" />
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink-mid sm:text-lg">
             {t("intro")}
           </p>
@@ -75,6 +71,8 @@ export default async function RentPage({
         <p className="mt-12 max-w-3xl rounded-xl border border-line bg-bg-soft p-6 text-sm leading-relaxed text-ink-mid">
           {t("legal_notice")}
         </p>
+
+        <IntentSections locale={locale} intent="rent" />
       </div>
     </div>
     </>

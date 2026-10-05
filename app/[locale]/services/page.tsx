@@ -26,13 +26,14 @@ type ServiceCard = {
 // Ordre semantique : pyramide vendeur → acheteur → outils.
 const SERVICE_CARDS: readonly ServiceCard[] = [
   { href: "/services/vendre", key: "sell" },
-  { href: "/biens", key: "buy" },
+  { href: "/services/acheter", key: "buy" },
   { href: "/services/louer", key: "rent" },
   { href: "/services/estimer", key: "estimate" },
   { href: "/services/simulateurs", key: "simulators" },
   { href: "/services/marches-actifs", key: "markets" },
   { href: "/mandats/recherche", key: "search_mandate" },
   { href: "/off-market", key: "offmarket" },
+  { href: "/services/broker-international", key: "broker" },
 ];
 
 export default async function ServicesIndexPage({

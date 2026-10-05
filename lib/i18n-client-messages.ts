@@ -31,6 +31,7 @@ export const SERVER_ONLY_NAMESPACES: ReadonlySet<string> = new Set([
   "property_gone",
   "breadcrumb",
   "not_found",
+  "intent_pages",
 ]);
 
 export function clientMessages(all: Record<string, unknown>): Record<string, unknown> {

@@ -11,10 +11,11 @@
  *   n'a pas explicitement accepté la catégorie "Statistiques" via la
  *   bannière cookies (cf. lib/consent/store.ts). Pas de décision ⇒ pas de
  *   tracking, jamais d'opt-out implicite.
- * - Les événements "lead" (cf. GA4_LEAD_EVENTS) sont AUSSI forwardés à GA4
- *   (gtag) en plus de /api/track — même garde hasStatsConsent(), pas de
- *   logique de consentement dupliquée. Silencieux si GA4 n'est pas monté
- *   (pas de NEXT_PUBLIC_GA4_MEASUREMENT_ID, cf. ConsentGatedAnalytics.tsx).
+ * - GA4 : generate_lead part de trackLead(), appele par chaque formulaire
+ *   apres un envoi reussi (contact, demande sur un bien, estimation,
+ *   mandat, off-market, liste d'attente), avec le seul type de formulaire.
+ *   Meme garde hasStatsConsent(). Silencieux si GA4 n'est pas monte (pas de
+ *   NEXT_PUBLIC_GA4_MEASUREMENT_ID, cf. ConsentGatedAnalytics.tsx).
  */
 
 "use client";
@@ -22,19 +23,42 @@
 import { hasStatsConsent } from "@/lib/consent/store";
 import { SESSION_COOKIE_NAME, type TrackEventPayload, type TrackingEventType } from "./types";
 
-// Correspondance events internes -> conversions GA4. Seuls les types listés
-// ici partent vers GA4 (les événements d'engagement pur — page_view,
-// property_view, scroll_depth_75, sibling_carousel_*, etc. — n'y figurent
-// pas volontairement, pour ne pas polluer les conversions). generate_lead
-// = nom d'événement GA4 recommandé pour toute action avec collecte de
-// coordonnées. simulator_submit = nom distinct pour la capacité d'emprunt,
-// qui ne collecte aucune coordonnée (pas un vrai lead au sens GA4).
-const GA4_LEAD_EVENTS: Partial<Record<TrackingEventType, string>> = {
-  form_submit: "generate_lead",
-  estimation_compute: "generate_lead",
-  contact_reveal: "generate_lead",
+// Evenements GA4 hors demandes : seul simulator_submit (capacite
+// d'emprunt, aucune coordonnee collectee). Les evenements d'engagement pur
+// (page_view, property_view, scroll_depth_75...) ne partent jamais vers GA4.
+const GA4_EVENTS: Partial<Record<TrackingEventType, string>> = {
   emprunt_simulate: "simulator_submit",
 };
+
+/**
+ * Type de formulaire envoye a GA4 avec generate_lead (oct. 2026). Liste
+ * fermee : aucune donnee personnelle, aucun titre de bien, aucun montant.
+ */
+export type LeadFormType =
+  | "contact"
+  | "property_request"
+  | "estimation"
+  | "mandate"
+  | "offmarket"
+  | "waitlist";
+
+/** Type GA4 d'un formulaire ContactForm a partir de son type interne. */
+export function leadFormTypeOf(type: string): LeadFormType {
+  if (type.startsWith("mandate_") || type === "search_mandate") return "mandate";
+  if (type === "property_request") return "property_request";
+  return "contact";
+}
+
+/**
+ * generate_lead GA4 (evenement recommande par Google pour une demande
+ * envoyee) : a appeler UNIQUEMENT apres une reponse positive du serveur.
+ * Consentement "Statistiques" obligatoire ; sans GA4 monte, rien.
+ */
+export function trackLead(formType: LeadFormType): void {
+  if (typeof window === "undefined") return;
+  if (!hasStatsConsent()) return;
+  sendToGA4("generate_lead", { form_type: formType });
+}
 
 function sendToGA4(gaEventName: string, eventData?: Record<string, unknown>): void {
   if (typeof window.gtag !== "function") return;
@@ -64,7 +88,7 @@ export function track(
   if (typeof window === "undefined") return;
   if (!hasStatsConsent()) return;
 
-  const ga4EventName = GA4_LEAD_EVENTS[eventType];
+  const ga4EventName = GA4_EVENTS[eventType];
   if (ga4EventName) sendToGA4(ga4EventName, eventData);
 
   const sessionId = getOrCreateSessionId();

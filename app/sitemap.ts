@@ -13,8 +13,10 @@ const LOCALES = ["fr", "en", "de"] as const;
 const isBeta = SITE_URL.includes("beta.");
 
 // Oct. 2026 : exactement les pages publiees et indexables. Retirees : les
-// adresses qui ne font que rediriger (/services/acheter,
-// /services/mandat-exclusif, /services/mandat-recherche, /journal).
+// adresses qui ne font que rediriger (/services/mandat-exclusif,
+// /services/mandat-recherche, /journal). Oct. 2026 : pages de recherche
+// immobiliere (lib/intent-pages.ts), dont /services/acheter, devenue une
+// vraie page.
 // Ajoutees : pages existantes absentes (services, simulateurs, ARCOVA,
 // liste d'attente, mentions du simulateur d'acquisition).
 // Pages a contenu fixe : AUCUNE date de modification (pas de date
@@ -25,7 +27,10 @@ const STATIC_PATHS = [
   "/off-market",
   "/off-market/arcova",
   "/liste-attente",
+  "/agence-immobiliere-luxembourg",
   "/services",
+  "/services/acheter",
+  "/services/broker-international",
   "/services/vendre",
   "/services/louer",
   "/services/estimer",

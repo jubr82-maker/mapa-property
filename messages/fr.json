@@ -42,7 +42,9 @@
     "simulators": "Simulateurs",
     "markets": "Marchés actifs",
     "fees": "Honoraires",
-    "mandates": "Mandats"
+    "mandates": "Mandats",
+    "agency_luxembourg": "Agence immobilière au Luxembourg",
+    "broker_international": "Broker international"
   },
   "footer": {
     "col_services": "Services",
@@ -820,6 +822,11 @@
         "eyebrow": "Off-Market",
         "title": "Catalogue Off-Market",
         "body": "Biens confidentiels jamais publiés en ligne, accessibles après signature d'un NDA et vérification de capacité."
+      },
+      "broker": {
+        "eyebrow": "International",
+        "title": "Broker immobilier international",
+        "body": "Carte professionnelle européenne pour la France, l'Allemagne et l'Italie ; ailleurs, une agence locale habilitée et un interlocuteur unique."
       }
     }
   },
@@ -1146,7 +1153,7 @@
     "eyebrow": "Marchés actifs",
     "title": "Du Grand-Duché aux marchés mondiaux.",
     "found_p1": "MAPA Property est une agence immobilière luxembourgeoise et un broker (courtier) international.",
-    "found_p2": "Pour sécuriser la conformité juridique dans chaque juridiction, nous opérons à l'international exclusivement en qualité de broker, sous mandat de recherche signé au Luxembourg, avec des partenaires locaux sélectionnés et habilités.",
+    "found_p2": "Au Luxembourg, nous conduisons la transaction en qualité d'agence immobilière. La carte professionnelle européenne nous permet aussi d'intervenir sur des biens situés en France, en Allemagne et en Italie. Ailleurs, nous opérons comme broker, sous mandat signé au Luxembourg : les actes réglementés sont réalisés par une agence locale habilitée que nous sélectionnons, et nous restons l'interlocuteur unique du client.",
     "found_p3": "Cette approche nous permet d'accompagner nos clients sur des Trophy Assets, des résidences secondaires de prestige, des investissements patrimoniaux ou des actifs off-market dans les marchés les plus recherchés d'Europe, des Émirats et d'Amérique.",
     "found_p4": "Chaque recherche à l'international est traitée avec la même rigueur qu'au Grand-Duché : due diligence locale, expertise notariale coordonnée, confidentialité contractuelle.",
     "found_source": "Source : MAPA Property (https://www.mapaproperty.lu). © 2026. Tous droits réservés. Toute reproduction interdite.",
@@ -3563,7 +3570,10 @@
     "fees": "Honoraires",
     "ai": "Intelligence artificielle",
     "legal_notice": "Mentions légales",
-    "privacy": "Politique RGPD"
+    "privacy": "Politique RGPD",
+    "agency": "Agence immobilière au Luxembourg",
+    "buy": "Acheter",
+    "broker": "Broker international"
   },
   "not_found": {
     "eyebrow": "Erreur 404",
@@ -3596,5 +3606,119 @@
     "section_title": "Explorer les marchés et simuler votre projet",
     "city_market": "Le marché à {city}",
     "fiche_title": "Pour aller plus loin"
+  },
+  "intent_pages": {
+    "faq_title": "Questions fréquentes",
+    "links_title": "Pour avancer",
+    "services_title": "Ce que fait l'agence",
+    "link_properties_sale": "Biens à vendre",
+    "link_properties_rent": "Biens à louer",
+    "link_all_properties": "Tous les biens",
+    "link_waitlist": "Liste d'attente",
+    "link_search": "Mandat de recherche",
+    "link_offmarket": "Off-Market",
+    "link_estimate": "Estimer un bien",
+    "link_sell": "Vendre",
+    "link_buy": "Acheter",
+    "link_rent": "Louer",
+    "link_broker": "Broker international",
+    "link_agency": "L'agence au Luxembourg",
+    "link_fees": "Honoraires",
+    "link_markets": "Marchés actifs",
+    "link_contact": "Contact",
+    "link_list_rental": "Confier un bien en location",
+    "link_about": "Qui sommes-nous",
+    "agency": {
+      "eyebrow": "MAPA Property",
+      "title": "Agence immobilière au Luxembourg",
+      "meta_title": "Agence immobilière au Luxembourg",
+      "meta_description": "MAPA Property, agence immobilière au Luxembourg fondée en 2024 : vente, achat, location et mandat de recherche sur tout le Grand-Duché, sous mandat signé.",
+      "service_name": "Agence immobilière au Luxembourg",
+      "answer": "MAPA Property est une agence immobilière luxembourgeoise fondée en 2024. Elle accompagne la vente, l'achat et la location de biens sur l'ensemble du Grand-Duché, avec une présence forte sur le centre, le sud et l'ouest du pays. L'agence travaille uniquement sous mandat signé, pour un seul intérêt à la fois, et prolonge son action à l'étranger comme broker international.",
+      "faq_q1": "Où intervient MAPA Property au Luxembourg ?",
+      "faq_a1": "Sur l'ensemble du territoire du Grand-Duché, avec une présence forte sur le centre, le sud et l'ouest. Les pages par ville présentent les marchés suivis par l'agence.",
+      "faq_q2": "Quels sont les honoraires de l'agence ?",
+      "faq_a2": "Ils sont publics et exprimés hors TVA (17 %). Pour une vente : 3 % du prix net vendeur en mandat exclusif, 4 % en semi-exclusif, 5 % en mandat simple et 1 % en mandat autonome. Le barème complet, location et recherche comprises, figure sur la page Honoraires.",
+      "faq_q3": "L'agence peut-elle intervenir sans mandat ?",
+      "faq_a3": "Non. MAPA Property n'agit que sous mandat signé et ne défend qu'un seul intérêt à la fois : celui du vendeur ou celui de l'acquéreur qui l'a mandatée.",
+      "faq_q4": "Peut-on faire estimer son bien ?",
+      "faq_a4": "Oui. L'estimation indicative en ligne est gratuite. L'estimation avec visite et rapport écrit est gratuite dans le cadre d'un mandat de vente potentiel, et sur devis en dehors.",
+      "faq_q5": "Dans quelles langues le site est-il disponible ?",
+      "faq_a5": "En français, en anglais et en allemand."
+    },
+    "buy": {
+      "eyebrow": "Acheter avec MAPA Property",
+      "title": "Acheter un bien immobilier au Luxembourg",
+      "meta_title": "Acheter un bien immobilier au Luxembourg",
+      "meta_description": "Acheter au Luxembourg : biens publiés, liste d'attente, mandat de recherche et Off-Market. Frais d'acquisition, Bëllegen Akt et simulateurs de financement.",
+      "service_name": "Accompagnement à l'achat immobilier au Luxembourg",
+      "answer": "Pour acheter un bien au Luxembourg avec MAPA Property, vous pouvez consulter les biens publiés à la vente, rejoindre la liste d'attente pour recevoir les nouveaux biens 24 heures avant leur diffusion publique, ou confier un mandat de recherche. Dans ce dernier cas, l'agence cherche pour vous, y compris hors marché, et ne défend que vos intérêts d'acquéreur jusqu'à l'acte authentique.",
+      "faq_q1": "Quels frais prévoir en plus du prix d'achat ?",
+      "faq_a1": "Au Luxembourg, comptez environ 6 % de droits d'enregistrement, 1 % de droit de transcription et environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % du prix.",
+      "faq_q2": "Qu'est-ce que le Bëllegen Akt ?",
+      "faq_a2": "Un crédit d'impôt sur les droits d'enregistrement, jusqu'à 40 000 euros par acquéreur, pour l'achat d'une résidence principale, sans condition d'âge ni de première acquisition (loi du 3 juillet 2025).",
+      "faq_q3": "Comment accéder aux biens qui ne sont pas publiés ?",
+      "faq_a3": "La sélection Off-Market est accessible sur demande motivée, après signature d'un accord de confidentialité. Le mandat de recherche active aussi le réseau confidentiel de l'agence.",
+      "faq_q4": "Combien puis-je emprunter ?",
+      "faq_a4": "Le simulateur de capacité d'emprunt et le simulateur de financement donnent une première indication, avec les taux du marché luxembourgeois. L'accord final reste celui de la banque."
+    },
+    "sell": {
+      "meta_title": "Vendre un bien immobilier au Luxembourg",
+      "meta_description": "Vendre au Luxembourg avec MAPA Property : estimation, quatre mandats de vente de 1 % à 5 % hors TVA, commercialisation, négociation et suivi jusqu'à l'acte.",
+      "service_name": "Vente de biens immobiliers au Luxembourg",
+      "answer": "Pour vendre votre bien au Luxembourg avec MAPA Property, vous commencez par une estimation, puis vous choisissez l'un des quatre mandats de vente : exclusif (3 % hors TVA du prix net vendeur), semi-exclusif (4 %), simple (5 %) ou autonome (1 %). L'agence assure ensuite la commercialisation, la sélection des acquéreurs, la négociation et le suivi jusqu'à l'acte notarié.",
+      "faq_q1": "Quel mandat de vente choisir ?",
+      "faq_a1": "Le mandat exclusif confie la vente à MAPA Property seule, au taux le plus bas des trois mandats complets. Le semi-exclusif vous laisse présenter vous-même des acquéreurs de votre cercle. Le mandat simple permet de confier la vente à plusieurs agences. Le mandat autonome vous laisse gérer visites et négociation, avec un appui juridique et notarial.",
+      "faq_q2": "Combien de temps dure un mandat ?",
+      "faq_a2": "À partir de deux mois, durée recommandée par MAPA Property. Il est reconductible tacitement et résiliable avec un préavis de 15 jours.",
+      "faq_q3": "Quand les honoraires sont-ils dus ?",
+      "faq_a3": "À la signature de l'acte authentique, sauf disposition contraire écrite. Les taux s'entendent hors TVA (17 %), sur le prix net vendeur.",
+      "faq_q4": "L'estimation est-elle payante ?",
+      "faq_a4": "L'estimation indicative en ligne est gratuite. L'estimation avec visite et rapport écrit est gratuite dans le cadre d'un mandat de vente potentiel, et sur devis en dehors."
+    },
+    "rent": {
+      "meta_title": "Louer un bien immobilier au Luxembourg",
+      "meta_description": "Louer au Luxembourg avec MAPA Property : trouver une location, mettre votre bien en location ou confier sa gestion, dans le respect du plafond légal de 5 %.",
+      "service_name": "Location et gestion locative au Luxembourg",
+      "answer": "MAPA Property vous accompagne pour louer au Luxembourg dans les deux sens : trouver une location parmi les biens publiés, ou mettre votre bien en location avec sélection des locataires et bail conforme, et une gestion locative en option. Le loyer respecte toujours le plafond légal luxembourgeois de 5 % du capital investi par an.",
+      "faq_q1": "Quels sont les honoraires de mise en location ?",
+      "faq_a1": "Un mois de loyer hors TVA, partagé selon l'usage (50 % bailleur, 50 % locataire) ou entièrement à la charge du bailleur selon le mandat.",
+      "faq_q2": "Combien coûte la gestion locative ?",
+      "faq_a2": "De 6 % à 8 % hors TVA des loyers encaissés, selon les services inclus : encaissement, charges, sinistres et fin de bail.",
+      "faq_q3": "Quel est le loyer maximum autorisé au Luxembourg ?",
+      "faq_a3": "Le loyer annuel ne peut pas dépasser 5 % du capital investi dans le logement (loi du 21 septembre 2006 sur le bail à usage d'habitation).",
+      "faq_q4": "Comment sont choisis les locataires ?",
+      "faq_a4": "Par une sélection rigoureuse sur dossier complet, avec les vérifications d'identité et de lutte contre le blanchiment (KYC), avant la signature d'un contrat de bail conforme."
+    },
+    "search": {
+      "meta_title": "Mandat de recherche immobilière au Luxembourg",
+      "meta_description": "Mandat de recherche MAPA Property : l'agence trouve votre bien au Luxembourg ou à l'étranger et défend vos seuls intérêts. Honoraires de 3 % à 5 % hors TVA.",
+      "service_name": "Mandat de recherche immobilière",
+      "answer": "Le mandat de recherche confie à MAPA Property la mission de trouver le bien que vous cherchez et de piloter son acquisition, au Luxembourg ou à l'étranger. L'agence ne défend que vos intérêts d'acquéreur. Au Luxembourg, ses honoraires sont de 3 % à 5 % hors TVA du prix d'acquisition, avec une avance sur frais de 250 euros hors TVA, déduite des honoraires si l'achat se conclut.",
+      "faq_q1": "Combien coûte un mandat de recherche ?",
+      "faq_a1": "Au Luxembourg, 3 % à 5 % hors TVA du prix d'acquisition. En Europe, France comprise, 3 % à 8 % hors TVA selon la complexité et le pays. Ailleurs, sur devis défini au mandat.",
+      "faq_q2": "À quoi sert l'avance sur frais ?",
+      "faq_a2": "Elle formalise l'engagement réciproque : l'agence travaille exclusivement sur votre projet. Elle est de 250 euros hors TVA au Luxembourg, à partir de 500 euros hors TVA dans les régions limitrophes jusqu'à 100 km, sur devis ailleurs, et entièrement déduite des honoraires si la transaction se conclut avec MAPA Property.",
+      "faq_q3": "La recherche inclut-elle les biens hors marché ?",
+      "faq_a3": "Oui. Le mandat active le réseau confidentiel de l'agence : agences partenaires, propriétaires directs et sources off-market.",
+      "faq_q4": "Peut-on chercher hors du Luxembourg ?",
+      "faq_a4": "Oui. MAPA Property intervient directement sur des biens situés en France, en Allemagne et en Italie grâce à la carte professionnelle européenne. Ailleurs, elle agit comme broker avec une agence locale habilitée et reste votre interlocuteur unique."
+    },
+    "broker": {
+      "eyebrow": "International",
+      "title": "Broker immobilier international",
+      "meta_title": "Broker immobilier international depuis le Luxembourg",
+      "meta_description": "MAPA Property, broker immobilier international : carte professionnelle européenne pour la France, l'Allemagne et l'Italie, agences locales habilitées ailleurs.",
+      "service_name": "Broker immobilier international",
+      "answer": "MAPA Property agit comme broker immobilier international pour les clients qui achètent ou vendent hors du Luxembourg. L'agence détient la carte professionnelle européenne d'agent immobilier, qui lui permet d'intervenir sur des biens situés en France, en Allemagne et en Italie. Ailleurs, les actes réglementés sont réalisés par une agence locale habilitée qu'elle sélectionne, et MAPA Property reste votre interlocuteur unique jusqu'à la signature.",
+      "faq_q1": "Que fait un broker immobilier international ?",
+      "faq_a1": "Il définit précisément le besoin, identifie les biens, choisit le bon partenaire local, pilote le dossier et reste l'interlocuteur unique du client jusqu'à la signature.",
+      "faq_q2": "Dans quels pays MAPA Property intervient-elle ?",
+      "faq_a2": "Directement au Luxembourg, ainsi qu'en France, en Allemagne et en Italie grâce à la carte professionnelle européenne. Ailleurs, sur demande, avec des agences locales habilitées ; la page Marchés actifs présente la couverture régulière.",
+      "faq_q3": "Qui réalise la transaction à l'étranger ?",
+      "faq_a3": "En France, en Allemagne et en Italie, MAPA Property peut la conduire elle-même. Dans les autres pays, la négociation et la transaction sont réalisées par une agence locale habilitée, qui représente le client sur place.",
+      "faq_q4": "Quels sont les honoraires à l'international ?",
+      "faq_a4": "Pour une recherche en Europe, France comprise, 3 % à 8 % hors TVA du prix d'acquisition selon la complexité et le pays. Hors d'Europe, sur devis défini au mandat."
+    }
   }
 }

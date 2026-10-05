@@ -2,7 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ALL_MANDATE_SLUGS, MANDATES } from "@/lib/mandates";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
-import { pageAlternates } from "@/lib/seo";
+import { IntentAnswer, IntentSections, intentMetadata } from "@/components/seo/IntentSections";
 
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
@@ -11,12 +11,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "page_sell" });
-  return {
-    title: `${t("title")}, MAPA Property`,
-    description: t("intro"),
-    alternates: pageAlternates(locale, "/services/vendre"),
-  };
+  return intentMetadata(locale, "sell");
 }
 
 export default async function SellPage({
@@ -42,6 +37,7 @@ export default async function SellPage({
           <h1 className="mt-2 t-h1">
             {t("title")}
           </h1>
+          <IntentAnswer locale={locale} intent="sell" />
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink-mid sm:text-lg">
             {t("intro")}
           </p>
@@ -127,6 +123,8 @@ export default async function SellPage({
           </div>
         </section>
         </FadeInOnScroll>
+
+        <IntentSections locale={locale} intent="sell" />
       </div>
     </div>
     </>

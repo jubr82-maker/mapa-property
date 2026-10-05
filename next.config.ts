@@ -144,7 +144,6 @@ const nextConfig: NextConfig = {
       { source: "/403.html", destination: "/fr", permanent: true },
       { source: "/admin/index.html", destination: "/admin", permanent: true },
       { source: "/content/article-:n(\\d+)-:lang(fr|en|de).html", destination: "/:lang/blog", permanent: true },
-      { source: "/:locale(fr|en|de)/services/acheter", destination: "/:locale/biens", permanent: true },
       { source: "/:locale(fr|en|de)/services/mandat-recherche", destination: "/:locale/mandats/recherche", permanent: true },
       { source: "/:locale(fr|en|de)/services/mandat-exclusif", destination: "/:locale/mandats/exclusif", permanent: true },
       { source: "/:locale(fr|en|de)/journal", destination: "/:locale/blog", permanent: true },
@@ -162,7 +161,7 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
-        source: "/:dir(fonts|images|logos)/:path*",
+        source: "/:dir(fonts|images|logos|icons)/:path*",
         headers: [{ key: "Cache-Control", value: STATIC_ASSET_CACHE }],
       },
       {

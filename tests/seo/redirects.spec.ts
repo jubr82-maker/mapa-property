@@ -23,6 +23,7 @@ import {
 } from "../../lib/legacy-redirects";
 import { indexNowPayload, INDEXNOW_KEY_PATTERN } from "../../lib/indexnow";
 import { breadcrumbTrail } from "../../lib/breadcrumbs";
+import { INTENT_PAGES } from "../../lib/intent-pages";
 
 const ROOT = path.resolve(__dirname, "../..");
 // Hors ligne (SEO_OFFLINE=1), une page rendue a la demande qui lit
@@ -105,7 +106,8 @@ test("redirections 308 : un controle par format d'adresse", async () => {
     // C. Doublons et renvois internes.
     for (const l of ["fr", "en", "de"]) {
       await expect308(`/${l}/journal`, `/${l}/blog`);
-      await expect308(`/${l}/services/acheter`, `/${l}/biens`);
+      // /services/acheter : page d'intention "acheter" depuis oct. 2026,
+      // plus une redirection (verifiee par seo-onpage).
       await expect308(`/${l}/services/mandat-recherche`, `/${l}/mandats/recherche`);
       await expect308(`/${l}/services/mandat-exclusif`, `/${l}/mandats/exclusif`);
     }
@@ -212,6 +214,12 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
           failures.push(`${p} : etablissement inexact (${o.name} / ${o.legalName} / ${JSON.stringify(a)} / ${o.foundingDate})`);
         }
         if (!p.includes("/legal/mentions-legales") && (o.vatID || o.identifier)) failures.push(`${p} : TVA ou RCS hors des mentions legales`);
+        if (o["@type"] === "RealEstateAgent" && !p.includes("/legal/mentions-legales")) {
+          const hosts = (o.sameAs ?? []).map((u: string) => new URL(u).hostname.replace(/^www\./, "")).sort();
+          if (JSON.stringify(hosts) !== JSON.stringify(["facebook.com", "instagram.com", "linkedin.com"])) {
+            failures.push(`${p} : sameAs different de LinkedIn, Instagram et Facebook (${hosts.join(", ")})`);
+          }
+        }
       }
       // Aucune coordonnee de contact ni position dans les donnees structurees.
       if (/"(telephone|email|faxNumber|contactPoint|geo|latitude|longitude)"\s*:|mailto:|tel:|\+352|@mapagroup/i.test(all)) {
@@ -238,7 +246,7 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
     // Sitemap : aucune adresse qui redirige.
     const sm = await server.request("/sitemap.xml");
     const locs = [...(sm.body ?? "").matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
-    for (const bad of ["/services/acheter", "/services/mandat-exclusif", "/services/mandat-recherche", "/journal"]) {
+    for (const bad of ["/services/mandat-exclusif", "/services/mandat-recherche", "/journal"]) {
       if (locs.some((l) => l.endsWith(bad))) failures.push(`sitemap : ${bad} redirige`);
     }
     if (/<lastmod>/.test(sm.body ?? "") && locs.some((l) => /\/legal\//.test(l)) && /<loc>[^<]*\/legal\/[^<]*<\/loc>\s*<lastmod>/.test(sm.body ?? "")) {
@@ -254,5 +262,90 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
   // llms.txt : pages actuelles, aucune coordonnee.
   const llms = read("public/llms.txt");
   if (/@|\+352|tel:|mailto:/i.test(llms) || !/\/fr\/blog/.test(llms)) failures.push("llms.txt : coordonnee ou page manquante");
+  expect(failures, failures.join("\n")).toEqual([]);
+});
+
+// Pages de recherche immobiliere (oct. 2026, lib/intent-pages.ts) : dans
+// les trois langues, reponse dans le premier paragraphe, FAQ visible et
+// FAQPage identiques, Service rattache a l'etablissement unique, liens vers
+// les biens, les villes et les simulateurs, aucun tiret long ou moyen.
+test("pages de recherche immobiliere (build)", async () => {
+  const server = await startServerProcess();
+  const failures: string[] = [];
+  const ldBlocks = (html: string) =>
+    [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => {
+      try { return JSON.parse(m[1]); } catch { return null; }
+    });
+  const text = (h: string) => h.replace(/<[^>]+>/g, "").replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, "&").replace(/&quot;/g, '"').trim();
+  try {
+    for (const [intent, cfg] of Object.entries(INTENT_PAGES)) {
+      for (const l of ["fr", "en", "de"]) {
+        const p = `/${l}${cfg.path}`;
+        const r = await server.request(p);
+        if (r.status >= 590) {
+          if (OFFLINE) unverified.push(p);
+          else failures.push(`${p} : non rendue (${r.status})`);
+          continue;
+        }
+        if (r.status !== 200) { failures.push(`${p} : statut ${r.status}`); continue; }
+        const html = r.body ?? "";
+        const main = html.replace(/<script[\s\S]*?<\/script>/g, "");
+        const afterH1 = main.slice(main.indexOf("</h1>"));
+        const firstP = afterH1.match(/<p\b[^>]*>/)?.[0] ?? "";
+        if (!firstP.includes(`data-intent-answer="${intent}"`)) failures.push(`${p} : la reponse n'est pas le premier paragraphe apres le H1`);
+        const lds = ldBlocks(html).filter(Boolean);
+        const service = lds.find((j) => j["@type"] === "Service");
+        if (!service || !String(service.provider?.["@id"] ?? "").endsWith("#organization") || new URL(String(service.url)).pathname !== p) {
+          failures.push(`${p} : Service absent ou inexact`);
+        }
+        const faq = lds.find((j) => j["@type"] === "FAQPage");
+        const visibleQ = [...main.matchAll(/<summary[^>]*>[\s\S]*?<h3[^>]*>([\s\S]*?)<\/h3>/g)].map((m) => text(m[1]));
+        const ldQ = (faq?.mainEntity ?? []).map((q: { name: string }) => q.name);
+        if (ldQ.length !== cfg.faqCount || JSON.stringify(ldQ) !== JSON.stringify(visibleQ)) {
+          failures.push(`${p} : FAQ visible et FAQPage differentes (${visibleQ.length} / ${ldQ.length})`);
+        }
+        if (!new RegExp(`href="/${l}/biens`).test(main)) failures.push(`${p} : aucun lien vers les biens`);
+        if (!new RegExp(`href="/${l}/villes/`).test(main)) failures.push(`${p} : aucun lien vers une ville`);
+        if (!new RegExp(`href="/${l}/services/(simulateurs/financement|capacite-emprunt)`).test(main)) failures.push(`${p} : aucun lien vers un simulateur`);
+      }
+    }
+  } finally {
+    await server.close();
+  }
+  for (const l of ["fr", "en", "de"]) {
+    const ns = JSON.parse(read(`messages/${l}.json`)).intent_pages;
+    if (/[\u2013\u2014]/.test(JSON.stringify(ns))) failures.push(`messages/${l}.json : tiret long ou moyen dans intent_pages`);
+  }
+  expect(failures, failures.join("\n")).toEqual([]);
+});
+
+// Icones (oct. 2026, scripts/generate-icons.mjs) : toutes les declarations
+// (site, admin, manifestes) visent public/icons/ ; fichiers presents,
+// carres, multiples de 48 px (Apple : 180 px) ; aucune ancienne icone
+// declaree ; favicon.ico multi-tailles identique dans app/ et public/.
+test("icones du site et de l'admin", async () => {
+  const sharp = (await import("sharp")).default;
+  const failures: string[] = [];
+  const sources = ["app/[locale]/layout.tsx", "app/admin/layout.tsx", "app/admin/manifest.webmanifest/route.ts", "public/site.webmanifest"];
+  const declared = new Set<string>();
+  for (const f of sources) {
+    const s = read(f);
+    if (/favicon-(16|32|48)\.png|pwa-\d+|"\/apple-touch-icon\.png"|logo-mapa-property\.svg/.test(s)) failures.push(`${f} : ancienne icone declaree`);
+    for (const m of s.matchAll(/["'](\/icons\/[^"']+)["']/g)) declared.add(m[1]);
+  }
+  if (declared.size === 0) failures.push("aucune icone declaree dans public/icons/");
+  for (const u of declared) {
+    const file = path.join(ROOT, "public", u);
+    if (!fs.existsSync(file)) { failures.push(`${u} absent`); continue; }
+    const { width, height } = await sharp(file).metadata();
+    // Exceptions : Apple (180 px) et 512 px, taille attendue par les
+    // manifestes d'application, declaree uniquement dans les manifestes.
+    const apple = /apple-touch-icon/.test(u);
+    const manifestOnly = width === 512 && !/-512/.test(read("app/[locale]/layout.tsx") + read("app/admin/layout.tsx"));
+    if (width !== height || (apple ? width !== 180 : (width ?? 0) % 48 !== 0 && !manifestOnly)) failures.push(`${u} : ${width}x${height}`);
+  }
+  const ico = fs.readFileSync(path.join(ROOT, "public/favicon.ico"));
+  if (ico.readUInt16LE(2) !== 1 || ico.readUInt16LE(4) < 3) failures.push("public/favicon.ico : moins de trois tailles");
+  if (!ico.equals(fs.readFileSync(path.join(ROOT, "app/favicon.ico")))) failures.push("app/favicon.ico different de public/favicon.ico");
   expect(failures, failures.join("\n")).toEqual([]);
 });

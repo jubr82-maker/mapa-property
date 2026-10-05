@@ -42,7 +42,9 @@
     "simulators": "Rechner",
     "markets": "Aktive Märkte",
     "fees": "Honorare",
-    "mandates": "Mandate"
+    "mandates": "Mandate",
+    "agency_luxembourg": "Immobilienagentur in Luxemburg",
+    "broker_international": "Internationaler Broker"
   },
   "footer": {
     "col_services": "Leistungen",
@@ -820,6 +822,11 @@
         "eyebrow": "Off-Market",
         "title": "Off-Market-Katalog",
         "body": "Vertrauliche Objekte, die nie online veröffentlicht werden, zugänglich nach Unterzeichnung einer NDA und Kapazitätsnachweis."
+      },
+      "broker": {
+        "eyebrow": "International",
+        "title": "Internationaler Immobilienbroker",
+        "body": "Europäischer Berufsausweis für Frankreich, Deutschland und Italien; andernorts eine zugelassene lokale Agentur und ein einziger Ansprechpartner."
       }
     }
   },
@@ -1146,7 +1153,7 @@
     "eyebrow": "Aktive Märkte",
     "title": "Vom Großherzogtum zu globalen Städten.",
     "found_p1": "MAPA Property ist eine Luxemburger Immobilienagentur und ein internationaler Broker.",
-    "found_p2": "Um die rechtliche Konformität in jeder Jurisdiktion zu gewährleisten, agieren wir international ausschließlich als Broker, unter in Luxemburg unterzeichnetem Suchmandat, mit ausgewählten und zugelassenen lokalen Partnern.",
+    "found_p2": "In Luxemburg führen wir die Transaktion als Immobilienagentur durch. Der Europäische Berufsausweis erlaubt es uns zudem, bei Immobilien in Frankreich, Deutschland und Italien tätig zu werden. Andernorts handeln wir als Broker mit einem in Luxemburg unterzeichneten Mandat: Die reglementierten Tätigkeiten führt eine von uns ausgewählte, zugelassene lokale Agentur aus, und wir bleiben der einzige Ansprechpartner des Kunden.",
     "found_p3": "Dieser Ansatz ermöglicht es uns, unsere Kunden bei Trophy Assets, prestigeträchtigen Zweitwohnsitzen, Vermögensinvestitionen oder Off-Market-Werten in den begehrtesten Märkten Europas, der VAE und Amerikas zu begleiten.",
     "found_p4": "Jede internationale Suche wird mit derselben Sorgfalt behandelt wie im Großherzogtum: lokale Due Diligence, koordinierte notarielle Expertise, vertragliche Vertraulichkeit.",
     "found_source": "Quelle: MAPA Property (https://www.mapaproperty.lu). © 2026. Alle Rechte vorbehalten. Vervielfältigung untersagt.",
@@ -3563,7 +3570,10 @@
     "fees": "Honorare",
     "ai": "Künstliche Intelligenz",
     "legal_notice": "Impressum",
-    "privacy": "Datenschutz"
+    "privacy": "Datenschutz",
+    "agency": "Immobilienagentur in Luxemburg",
+    "buy": "Kaufen",
+    "broker": "Internationaler Broker"
   },
   "not_found": {
     "eyebrow": "Fehler 404",
@@ -3596,5 +3606,119 @@
     "section_title": "Märkte entdecken und Ihr Projekt berechnen",
     "city_market": "Der Markt in {city}",
     "fiche_title": "Weiterführend"
+  },
+  "intent_pages": {
+    "faq_title": "Häufige Fragen",
+    "links_title": "Nächste Schritte",
+    "services_title": "Was die Agentur macht",
+    "link_properties_sale": "Immobilien zum Kauf",
+    "link_properties_rent": "Immobilien zur Miete",
+    "link_all_properties": "Alle Immobilien",
+    "link_waitlist": "Warteliste",
+    "link_search": "Suchauftrag",
+    "link_offmarket": "Off-Market",
+    "link_estimate": "Immobilie bewerten",
+    "link_sell": "Verkaufen",
+    "link_buy": "Kaufen",
+    "link_rent": "Mieten",
+    "link_broker": "Internationaler Broker",
+    "link_agency": "Die Agentur in Luxemburg",
+    "link_fees": "Honorare",
+    "link_markets": "Aktive Märkte",
+    "link_contact": "Kontakt",
+    "link_list_rental": "Immobilie vermieten",
+    "link_about": "Über uns",
+    "agency": {
+      "eyebrow": "MAPA Property",
+      "title": "Immobilienagentur in Luxemburg",
+      "meta_title": "Immobilienagentur in Luxemburg",
+      "meta_description": "MAPA Property, Immobilienagentur in Luxemburg, gegründet 2024: Verkauf, Kauf, Vermietung und Suchauftrag im ganzen Großherzogtum, mit unterzeichnetem Mandat.",
+      "service_name": "Immobilienagentur in Luxemburg",
+      "answer": "MAPA Property ist eine 2024 gegründete Luxemburger Immobilienagentur. Sie begleitet Verkauf, Kauf und Vermietung von Immobilien im ganzen Großherzogtum, mit starker Präsenz im Zentrum, im Süden und im Westen des Landes. Die Agentur arbeitet ausschließlich mit unterzeichnetem Mandat, für jeweils nur ein Interesse, und ist im Ausland als internationaler Broker tätig.",
+      "faq_q1": "Wo ist MAPA Property in Luxemburg tätig?",
+      "faq_a1": "Im gesamten Großherzogtum, mit starker Präsenz im Zentrum, im Süden und im Westen. Die Städteseiten stellen die von der Agentur beobachteten Märkte vor.",
+      "faq_q2": "Wie hoch sind die Honorare der Agentur?",
+      "faq_a2": "Sie sind öffentlich und verstehen sich zuzüglich MwSt. (17 %). Für einen Verkauf: 3 % des Nettoverkaufspreises beim Alleinauftrag, 4 % beim halbexklusiven, 5 % beim einfachen und 1 % beim autonomen Mandat. Die vollständige Übersicht, einschließlich Vermietung und Suche, steht auf der Seite Honorare.",
+      "faq_q3": "Kann die Agentur ohne Mandat tätig werden?",
+      "faq_a3": "Nein. MAPA Property handelt nur mit unterzeichnetem Mandat und vertritt jeweils nur ein Interesse: das des Verkäufers oder das des Käufers, der sie beauftragt hat.",
+      "faq_q4": "Kann ich meine Immobilie bewerten lassen?",
+      "faq_a4": "Ja. Die unverbindliche Online-Bewertung ist kostenlos. Eine Bewertung mit Besichtigung und schriftlichem Bericht ist im Rahmen eines möglichen Verkaufsmandats kostenlos, sonst nach Angebot.",
+      "faq_q5": "In welchen Sprachen ist die Website verfügbar?",
+      "faq_a5": "Auf Französisch, Englisch und Deutsch."
+    },
+    "buy": {
+      "eyebrow": "Kaufen mit MAPA Property",
+      "title": "Immobilie in Luxemburg kaufen",
+      "meta_title": "Immobilie in Luxemburg kaufen",
+      "meta_description": "Kaufen in Luxemburg: veröffentlichte Immobilien, Warteliste, Suchauftrag und Off-Market. Erwerbsnebenkosten, Bëllegen Akt und Finanzierungsrechner.",
+      "service_name": "Begleitung beim Immobilienkauf in Luxemburg",
+      "answer": "Um mit MAPA Property eine Immobilie in Luxemburg zu kaufen, können Sie die zum Verkauf veröffentlichten Immobilien ansehen, sich in die Warteliste eintragen und neue Objekte 24 Stunden vor ihrer Veröffentlichung erhalten oder einen Suchauftrag erteilen. Dann sucht die Agentur für Sie, auch außerhalb des Marktes, und vertritt bis zur notariellen Urkunde ausschließlich Ihre Interessen als Käufer.",
+      "faq_q1": "Welche Kosten kommen zum Kaufpreis hinzu?",
+      "faq_a1": "In Luxemburg rund 6 % Registrierungsgebühren, 1 % Umschreibungsgebühr und rund 1 % Notarhonorar, insgesamt also etwa 8 % des Preises (Richtwert).",
+      "faq_q2": "Was ist der Bëllegen Akt?",
+      "faq_a2": "Eine Steuergutschrift auf die Registrierungsgebühren von bis zu 40 000 Euro pro Käufer beim Kauf eines Hauptwohnsitzes, ohne Alters- oder Ersterwerbsbedingung (Gesetz vom 3. Juli 2025).",
+      "faq_q3": "Wie erhalte ich Zugang zu nicht veröffentlichten Immobilien?",
+      "faq_a3": "Die Off-Market-Auswahl ist auf begründete Anfrage nach Unterzeichnung einer Vertraulichkeitsvereinbarung zugänglich. Ein Suchauftrag aktiviert zudem das vertrauliche Netzwerk der Agentur.",
+      "faq_q4": "Wie viel kann ich leihen?",
+      "faq_a4": "Der Rechner für die Kreditkapazität und der Finanzierungsrechner geben eine erste Orientierung mit den Zinssätzen des Luxemburger Marktes. Die endgültige Entscheidung trifft die Bank."
+    },
+    "sell": {
+      "meta_title": "Immobilie in Luxemburg verkaufen",
+      "meta_description": "Verkaufen in Luxemburg mit MAPA Property: Bewertung, vier Verkaufsmandate von 1 % bis 5 % zzgl. MwSt., Vermarktung, Verhandlung und Begleitung bis zur Urkunde.",
+      "service_name": "Immobilienverkauf in Luxemburg",
+      "answer": "Um Ihre Immobilie in Luxemburg mit MAPA Property zu verkaufen, beginnen Sie mit einer Bewertung und wählen dann eines der vier Verkaufsmandate: Alleinauftrag (3 % zzgl. MwSt. des Nettoverkaufspreises), halbexklusiv (4 %), einfach (5 %) oder autonom (1 %). Die Agentur übernimmt anschließend Vermarktung, Käuferauswahl, Verhandlung und Begleitung bis zur notariellen Urkunde.",
+      "faq_q1": "Welches Verkaufsmandat soll ich wählen?",
+      "faq_a1": "Beim Alleinauftrag verkauft nur MAPA Property, zum niedrigsten Satz der drei vollständigen Mandate. Beim halbexklusiven Mandat können Sie selbst Käufer aus Ihrem Umfeld vorstellen. Beim einfachen Mandat können Sie mehrere Agenturen beauftragen. Beim autonomen Mandat führen Sie Besichtigungen und Verhandlung selbst, mit rechtlicher und notarieller Unterstützung.",
+      "faq_q2": "Wie lange läuft ein Mandat?",
+      "faq_a2": "Ab zwei Monaten, der von MAPA Property empfohlenen Dauer. Es verlängert sich stillschweigend und kann mit einer Frist von 15 Tagen gekündigt werden.",
+      "faq_q3": "Wann sind die Honorare fällig?",
+      "faq_a3": "Bei Unterzeichnung der notariellen Urkunde, sofern nicht schriftlich anders vereinbart. Die Sätze verstehen sich zuzüglich MwSt. (17 %) auf den Nettoverkaufspreis.",
+      "faq_q4": "Ist die Bewertung kostenpflichtig?",
+      "faq_a4": "Die unverbindliche Online-Bewertung ist kostenlos. Eine Bewertung mit Besichtigung und schriftlichem Bericht ist im Rahmen eines möglichen Verkaufsmandats kostenlos, sonst nach Angebot."
+    },
+    "rent": {
+      "meta_title": "Immobilie in Luxemburg mieten oder vermieten",
+      "meta_description": "Mieten in Luxemburg mit MAPA Property: Mietobjekt finden, Ihre Immobilie vermieten oder verwalten lassen, unter Einhaltung der gesetzlichen 5 %-Grenze.",
+      "service_name": "Vermietung und Mietverwaltung in Luxemburg",
+      "answer": "MAPA Property begleitet Sie beim Mieten in Luxemburg in beide Richtungen: ein Mietobjekt unter den veröffentlichten Immobilien finden oder Ihre Immobilie vermieten, mit Mieterauswahl und rechtskonformem Mietvertrag sowie optionaler Mietverwaltung. Die Miete hält stets die gesetzliche Luxemburger Obergrenze von 5 % des investierten Kapitals pro Jahr ein.",
+      "faq_q1": "Wie hoch ist das Honorar für die Vermietung?",
+      "faq_a1": "Eine Monatsmiete zzgl. MwSt., je nach Gepflogenheit geteilt (50 % Vermieter, 50 % Mieter) oder je nach Mandat vollständig vom Vermieter getragen.",
+      "faq_q2": "Was kostet die Mietverwaltung?",
+      "faq_a2": "6 % bis 8 % zzgl. MwSt. der eingenommenen Mieten, je nach enthaltenen Leistungen: Inkasso, Nebenkosten, Schadensfälle und Mietende.",
+      "faq_q3": "Wie hoch darf die Miete in Luxemburg höchstens sein?",
+      "faq_a3": "Die Jahresmiete darf 5 % des in die Wohnung investierten Kapitals nicht übersteigen (Gesetz vom 21. September 2006 über den Wohnungsmietvertrag).",
+      "faq_q4": "Wie werden die Mieter ausgewählt?",
+      "faq_a4": "Durch eine sorgfältige Prüfung eines vollständigen Dossiers, mit Identitäts- und Geldwäscheprüfung (KYC), vor Unterzeichnung eines rechtskonformen Mietvertrags."
+    },
+    "search": {
+      "meta_title": "Suchauftrag für Immobilien in Luxemburg",
+      "meta_description": "Suchauftrag MAPA Property: Die Agentur findet Ihre Immobilie in Luxemburg oder im Ausland und vertritt nur Ihre Interessen. Honorar 3 % bis 5 % zzgl. MwSt.",
+      "service_name": "Immobilien-Suchauftrag",
+      "answer": "Mit einem Suchauftrag beauftragen Sie MAPA Property, die gesuchte Immobilie zu finden und ihren Kauf zu steuern, in Luxemburg oder im Ausland. Die Agentur vertritt ausschließlich Ihre Interessen als Käufer. In Luxemburg beträgt das Honorar 3 % bis 5 % zzgl. MwSt. des Kaufpreises, mit einem Kostenvorschuss von 250 Euro zzgl. MwSt., der bei Kaufabschluss vom Honorar abgezogen wird.",
+      "faq_q1": "Was kostet ein Suchauftrag?",
+      "faq_a1": "In Luxemburg 3 % bis 5 % zzgl. MwSt. des Kaufpreises. In Europa, einschließlich Frankreich, 3 % bis 8 % zzgl. MwSt. je nach Komplexität und Land. Andernorts nach Angebot im Mandat.",
+      "faq_q2": "Wozu dient der Kostenvorschuss?",
+      "faq_a2": "Er formalisiert die gegenseitige Verpflichtung: Die Agentur arbeitet ausschließlich an Ihrem Projekt. Er beträgt 250 Euro zzgl. MwSt. in Luxemburg, ab 500 Euro zzgl. MwSt. in den angrenzenden Regionen bis 100 km, andernorts nach Angebot, und wird bei Abschluss mit MAPA Property vollständig vom Honorar abgezogen.",
+      "faq_q3": "Umfasst die Suche auch Off-Market-Immobilien?",
+      "faq_a3": "Ja. Der Auftrag aktiviert das vertrauliche Netzwerk der Agentur: Partneragenturen, direkte Eigentümer und Off-Market-Quellen.",
+      "faq_q4": "Kann ich auch außerhalb Luxemburgs suchen?",
+      "faq_a4": "Ja. Mit dem Europäischen Berufsausweis ist MAPA Property bei Immobilien in Frankreich, Deutschland und Italien direkt tätig. Andernorts handelt sie als Broker mit einer zugelassenen lokalen Agentur und bleibt Ihr einziger Ansprechpartner."
+    },
+    "broker": {
+      "eyebrow": "International",
+      "title": "Internationaler Immobilienbroker",
+      "meta_title": "Internationaler Immobilienbroker mit Sitz in Luxemburg",
+      "meta_description": "MAPA Property, internationaler Immobilienbroker: Europäischer Berufsausweis für Frankreich, Deutschland und Italien, zugelassene lokale Agenturen andernorts.",
+      "service_name": "Internationaler Immobilienbroker",
+      "answer": "MAPA Property ist als internationaler Immobilienbroker für Kunden tätig, die außerhalb Luxemburgs kaufen oder verkaufen. Die Agentur besitzt den Europäischen Berufsausweis für Immobilienmakler, der es ihr erlaubt, bei Immobilien in Frankreich, Deutschland und Italien tätig zu werden. Andernorts werden die reglementierten Tätigkeiten von einer zugelassenen lokalen Agentur ausgeführt, die sie auswählt, und MAPA Property bleibt bis zur Unterzeichnung Ihr einziger Ansprechpartner.",
+      "faq_q1": "Was macht ein internationaler Immobilienbroker?",
+      "faq_a1": "Er definiert den Bedarf präzise, identifiziert die Objekte, wählt den richtigen lokalen Partner, steuert den Vorgang und bleibt bis zur Unterzeichnung der einzige Ansprechpartner des Kunden.",
+      "faq_q2": "In welchen Ländern ist MAPA Property tätig?",
+      "faq_a2": "Direkt in Luxemburg sowie mit dem Europäischen Berufsausweis in Frankreich, Deutschland und Italien. Andernorts auf Anfrage mit zugelassenen lokalen Agenturen; die Seite Aktive Märkte zeigt die regelmäßige Abdeckung.",
+      "faq_q3": "Wer führt die Transaktion im Ausland durch?",
+      "faq_a3": "In Frankreich, Deutschland und Italien kann MAPA Property sie selbst durchführen. In anderen Ländern werden Verhandlung und Transaktion von einer zugelassenen lokalen Agentur durchgeführt, die den Kunden vor Ort vertritt.",
+      "faq_q4": "Wie hoch sind die Honorare im Ausland?",
+      "faq_a4": "Für eine Suche in Europa, einschließlich Frankreich, 3 % bis 8 % zzgl. MwSt. des Kaufpreises je nach Komplexität und Land. Außerhalb Europas nach Angebot im Mandat."
+    }
   }
 }
