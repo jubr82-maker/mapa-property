@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AdminDateCell } from "@/components/admin/AdminDateCell";
+import { lastModifiedAt } from "@/lib/datetime";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { supabaseService } from "@/lib/supabase-service";
@@ -54,19 +56,6 @@ const FULL_SELECT =
 const FALLBACK_SELECT =
   "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,subject,status,property_ref,notes";
 
-function formatDateTime(iso: string) {
-  try {
-    return new Date(iso).toLocaleString("fr-FR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-}
 
 export default async function AdminLeadDetailPage({
   params,
@@ -133,9 +122,13 @@ export default async function AdminLeadDetailPage({
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
             {fullName}
           </h1>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-            Créé le {formatDateTime(lead.created_at)}
-          </p>
+          <div className="mt-1 font-mono text-[11px] tracking-[0.1em] text-[#3D4F63]/60">
+            <AdminDateCell
+              createdAt={lead.created_at}
+              updatedAt={lastModifiedAt(lead)}
+              variant="long"
+            />
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <PdfExportButton href={`/api/admin/exports/leads/${lead.id}`} />

@@ -1443,5 +1443,15 @@
         "property": "Bien d'exception"
       }
     }
+  },
+  "admin_datetime": {
+    "created": "Créé le {date}",
+    "updated": "Modifié le {date}",
+    "created_col": "Création",
+    "updated_col": "Dernière modification",
+    "sort_label": "Tri par date",
+    "sort_desc": "Plus récents d'abord",
+    "sort_asc": "Plus anciens d'abord",
+    "email_received": "Reçu le {date} (heure de Luxembourg)"
   }
 }

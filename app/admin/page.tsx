@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateTimeShort } from "@/lib/datetime";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
@@ -142,10 +143,7 @@ export default async function AdminDashboardPage() {
                       </p>
                     </div>
                     <time className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/50">
-                      {new Date(l.created_at).toLocaleDateString("fr-FR", {
-                        day: "2-digit",
-                        month: "short",
-                      })}
+                      {formatDateTimeShort(l.created_at)}
                     </time>
                   </li>
                 ),
@@ -190,10 +188,7 @@ export default async function AdminDashboardPage() {
                       </p>
                     </div>
                     <time className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/50">
-                      {new Date(r.created_at).toLocaleDateString("fr-FR", {
-                        day: "2-digit",
-                        month: "short",
-                      })}
+                      {formatDateTimeShort(r.created_at)}
                     </time>
                   </li>
                 ),

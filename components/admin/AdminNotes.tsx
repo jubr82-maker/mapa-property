@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { formatDateTime } from "@/lib/datetime";
 import {
   addAdminNote as addLeadAdminNote,
   setNextFollowUp as setLeadNextFollowUp,
@@ -17,19 +18,6 @@ type HistoryEntry = {
   note?: string;
 };
 
-function formatDateTime(iso: string) {
-  try {
-    return new Date(iso).toLocaleString("fr-FR", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-}
 
 export function AdminNotes({
   leadId,

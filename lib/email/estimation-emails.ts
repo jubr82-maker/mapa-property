@@ -10,6 +10,7 @@
 // Best effort : ne throw jamais, ne bloque jamais la réponse au visiteur.
 
 import { sendMail, INTERNAL_NOTIFICATION_RECIPIENTS } from "./smtp";
+import { receivedAtLine } from "@/lib/email/received-at";
 import { formatNumber, formatSurface } from "@/lib/format/numbers";
 
 type Locale = "fr" | "en" | "de";
@@ -142,9 +143,10 @@ function internalSubject(args: { commune?: string; type?: string }): string {
   return `Nouveau lead estimation, ${c}, ${t}`;
 }
 
-function internalBody(args: SendEstimationEmailsArgs): string {
+function internalBody(args: SendEstimationEmailsArgs, receivedLine: string): string {
   const lines: string[] = [
     `Nouveau lead estimation via le simulateur public.`,
+    receivedLine,
     ``,
     `= PROSPECT =`,
     `Nom         : ${args.contactName ?? "—"}`,
@@ -211,7 +213,7 @@ export async function sendEstimationEmails(
     sendMail({
       to: INTERNAL_NOTIFICATION_RECIPIENTS,
       subject: internalSubject({ commune, type: args.type }),
-      text: internalBody(args),
+      text: internalBody(args, await receivedAtLine()),
     }),
   );
 

@@ -5,7 +5,7 @@ import { requireAdminRoute } from "@/lib/admin/require-admin";
 import { supabaseService } from "@/lib/supabase-service";
 import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel";
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
-import { toDateOrNull, orDash } from "@/lib/admin/exports/format";
+import { toLuxembourgDateTimeCell, orDash } from "@/lib/admin/exports/format";
 import { propertyTypeLabel, engineLabel, estimationStatusLabel, confidenceLabel } from "@/lib/admin/exports/labels";
 
 interface EstimationExportRow {
@@ -25,7 +25,7 @@ interface EstimationExportRow {
 }
 
 const COLUMNS: ExcelColumn<EstimationExportRow>[] = [
-  { header: "Date", key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
+  { header: "Date", key: "date", type: "datetime", value: (r) => toLuxembourgDateTimeCell(r.created_at) },
   {
     header: "Type de bien",
     key: "type",

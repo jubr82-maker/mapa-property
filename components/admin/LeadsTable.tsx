@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { formatDateTimeShort } from "@/lib/datetime";
 import { useState, useTransition } from "react";
 import { updateWorkflowStatus, updateLeadNotes } from "@/app/admin/leads/actions";
 import {
@@ -13,6 +14,9 @@ import {
 type Lead = {
   id: string;
   created_at: string;
+  /** Date et heure formatees cote serveur (lib/datetime.ts). */
+  created_label?: string;
+  updated_label?: string | null;
   first_name: string | null;
   last_name: string | null;
   email: string;
@@ -61,7 +65,13 @@ const LEAD_TYPES = [
   "offmarket_request",
 ] as const;
 
-export function LeadsTable({ leads }: { leads: Lead[] }) {
+export function LeadsTable({
+  leads,
+  createdColumnLabel,
+}: {
+  leads: Lead[];
+  createdColumnLabel: string;
+}) {
   const router = useRouter();
   const sp = useSearchParams();
   const [openId, setOpenId] = useState<string | null>(null);
@@ -104,7 +114,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
         <table className="w-full text-sm">
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
-              <th className="px-4 py-3">Date · Heure</th>
+              <th className="px-4 py-3">{createdColumnLabel}</th>
               <th className="px-4 py-3">Objet</th>
               <th className="px-4 py-3">Type</th>
               <th className="px-4 py-3">Contact</th>
@@ -169,13 +179,14 @@ function LeadRow({
     <>
       <tr className="cursor-pointer hover:bg-[#3D4F63]/5" onClick={onToggle}>
         <td className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]/70">
-          {new Date(lead.created_at).toLocaleString("fr-FR", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          <span className="block whitespace-nowrap">
+            {lead.created_label ?? formatDateTimeShort(lead.created_at)}
+          </span>
+          {lead.updated_label && (
+            <span className="block whitespace-nowrap normal-case tracking-normal opacity-60">
+              {lead.updated_label}
+            </span>
+          )}
         </td>
         <td className="px-4 py-3 text-xs">
           {lead.subject ? (

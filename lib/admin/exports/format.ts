@@ -1,3 +1,5 @@
+import { luxembourgWallClockDate } from "@/lib/datetime";
+
 // lib/admin/exports/format.ts — formatteurs partagés par les exports
 // admin (Excel + PDF). Aucune dépendance à exceljs/pdfkit ici.
 //
@@ -24,18 +26,24 @@ function pad2(n: number): string {
   return n < 10 ? `0${n}` : `${n}`;
 }
 
-/** "2026-09-20T17:51:00Z" -> "20/09/2026" */
+/** "2026-09-20T17:51:00Z" -> "20/09/2026" (date, heure de Luxembourg). */
 export function fmtDateShort(iso: string | null | undefined): string {
-  const d = toDateOrNull(iso);
+  const d = luxembourgWallClockDate(iso);
   if (!d) return "—";
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`;
+  return `${pad2(d.getUTCDate())}/${pad2(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`;
 }
 
-/** "2026-09-20T17:51:00Z" -> "20/09/2026 17:51" */
+/** "2026-09-20T17:51:00Z" -> "20/09/2026 19:51" (heure de Luxembourg, ete
+ *  comme hiver ; cf. lib/datetime.ts, utilitaire unique). */
 export function fmtDateTimeShort(iso: string | null | undefined): string {
-  const d = toDateOrNull(iso);
+  const d = luxembourgWallClockDate(iso);
   if (!d) return "—";
-  return `${fmtDateShort(iso)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  return `${fmtDateShort(iso)} ${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}`;
+}
+
+/** Cellule Excel date et heure, a l'heure murale de Luxembourg. */
+export function toLuxembourgDateTimeCell(iso: string | null | undefined): Date | null {
+  return luxembourgWallClockDate(iso);
 }
 
 /** Regroupe les milliers avec une espace ASCII normale (jamais U+202F). */

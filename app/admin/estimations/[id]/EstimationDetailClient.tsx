@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { formatDateTime } from "@/lib/datetime";
 import { useRouter } from "next/navigation";
 import { sendRefinement } from "@/app/admin/estimations/actions";
 import { MethodDetails } from "@/components/admin/MethodDetails";
@@ -243,7 +244,7 @@ export function EstimationDetailClient({
                 }
               >
                 {rgpdConsentAt
-                  ? `✓ obtenu le ${new Date(rgpdConsentAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })}`
+                  ? `✓ obtenu le ${formatDateTime(rgpdConsentAt)}`
                   : consent
                     ? "✓ obtenu"
                     : "✗ non obtenu"}
@@ -318,7 +319,7 @@ export function EstimationDetailClient({
           } else if (noConsent) {
             helper = "Pas de consentement recontact enregistré.";
           } else if (alreadySent) {
-            helper = `Affinage proposé le ${new Date(refinementSentAt as string).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}.`;
+            helper = `Affinage proposé le ${formatDateTime(refinementSentAt as string)}.`;
           }
           return (
             <>
@@ -351,7 +352,7 @@ export function EstimationDetailClient({
                           : res.reason === "no_consent"
                             ? "Pas de consentement recontact enregistré."
                             : res.reason === "already_sent"
-                              ? `Déjà proposé le ${new Date(res.sentAt).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}.`
+                              ? `Déjà proposé le ${formatDateTime(res.sentAt)}.`
                               : res.reason === "unauthorized"
                                 ? "Session expirée. Reconnecte-toi."
                                 : res.reason === "not_found"
@@ -376,7 +377,7 @@ export function EstimationDetailClient({
               </div>
               {refinementFeedback?.kind === "sent" && (
                 <p className="mt-3 rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
-                  Mail envoyé · {new Date(refinementFeedback.sentAt).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  Mail envoyé · {formatDateTime(refinementFeedback.sentAt)}
                 </p>
               )}
               {refinementFeedback?.kind === "error" && (

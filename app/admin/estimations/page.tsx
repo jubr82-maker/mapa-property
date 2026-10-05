@@ -2,6 +2,9 @@ import Link from "next/link";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
+import { AdminDateCell } from "@/components/admin/AdminDateCell";
+import { DateSortToggle, parseDateSort } from "@/components/admin/DateSortToggle";
+import { getAdminDateTimeT } from "@/lib/admin/datetime-labels";
 
 interface EstimationRow {
   id: string;
@@ -12,6 +15,7 @@ interface EstimationRow {
   engine: string;
   status: string;
   created_at: string;
+  updated_at: string | null;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -35,27 +39,24 @@ function fmtPrice(n?: number) {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleString("fr-FR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
-export default async function AdminEstimationsPage() {
+export default async function AdminEstimationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string }>;
+}) {
   await requireAdminPage();
   const supabase = supabaseService();
+  const sort = parseDateSort((await searchParams).sort);
+  const tDate = await getAdminDateTimeT();
 
   const { data: rows, error } = await supabase
     .from("estimation_requests")
     .select(
-      "id, inputs, client_output, contact_email, contact_phone, engine, status, created_at",
+      "id, inputs, client_output, contact_email, contact_phone, engine, status, created_at, updated_at",
     )
     .neq("status", "deleted") // BUG 6 : masque les estimations soft-deleted
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: sort === "asc" })
     .limit(100);
 
   return (
@@ -92,6 +93,8 @@ export default async function AdminEstimationsPage() {
         </div>
       </header>
 
+      <DateSortToggle basePath="/admin/estimations" sort={sort} />
+
       {error && (
         <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-700">
           Erreur chargement : {error.message}
@@ -102,7 +105,7 @@ export default async function AdminEstimationsPage() {
         <table className="w-full text-sm">
           <thead className="bg-[#F5EFE1] text-left font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/70">
             <tr>
-              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">{tDate("created_col")}</th>
               <th className="px-4 py-3">Bien</th>
               <th className="px-4 py-3 text-right">Fourchette</th>
               <th className="px-4 py-3 text-center">Confidence</th>
@@ -132,7 +135,7 @@ export default async function AdminEstimationsPage() {
                       href={`/admin/estimations/${r.id}`}
                       className="hover:text-[#9E7B2A] hover:underline"
                     >
-                      {fmtDate(r.created_at)}
+                      <AdminDateCell createdAt={r.created_at} updatedAt={r.updated_at} />
                     </Link>
                   </td>
                   <td className="px-4 py-3">

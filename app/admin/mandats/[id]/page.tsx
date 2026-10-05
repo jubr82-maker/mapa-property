@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { AdminDateCell } from "@/components/admin/AdminDateCell";
+import { formatDateOnly, lastModifiedAt } from "@/lib/datetime";
+
+const formatDateOrDash = (iso: string | null) => formatDateOnly(iso) || "-";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { supabaseService } from "@/lib/supabase-service";
@@ -97,32 +101,7 @@ const STATUS_LABEL: Record<string, string> = {
   resilie: "Résilié",
 };
 
-function formatDateTime(iso: string) {
-  try {
-    return new Date(iso).toLocaleString("fr-FR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-}
 
-function formatDate(iso: string | null): string {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
 
 function formatPrice(value: number | null): string {
   if (value == null) return "—";
@@ -218,7 +197,12 @@ export default async function AdminMandatDetailPage({
             {mandat.client_name?.trim() || mandat.client_email || "—"}
           </h1>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-            Créé le {formatDateTime(mandat.created_at)} · Statut {statusLabel}
+            <AdminDateCell
+              createdAt={mandat.created_at}
+              updatedAt={lastModifiedAt(mandat)}
+              variant="long"
+            />
+            Statut {statusLabel}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -303,11 +287,11 @@ export default async function AdminMandatDetailPage({
               Cycle commercial
             </p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Field label="Date début" value={formatDate(mandat.date_debut)} />
-              <Field label="Date fin" value={formatDate(mandat.date_fin)} />
+              <Field label="Date début" value={formatDateOrDash(mandat.date_debut)} />
+              <Field label="Date fin" value={formatDateOrDash(mandat.date_fin)} />
               <Field
                 label="Date de signature"
-                value={formatDate(mandat.signed_at)}
+                value={formatDateOrDash(mandat.signed_at)}
               />
               <Field label="Statut" value={statusLabel} />
             </dl>

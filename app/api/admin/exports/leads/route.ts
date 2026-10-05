@@ -5,7 +5,7 @@ import { requireAdminRoute } from "@/lib/admin/require-admin";
 import { supabaseService } from "@/lib/supabase-service";
 import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel";
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
-import { toDateOrNull, fullName, orDash } from "@/lib/admin/exports/format";
+import { toDateOrNull, toLuxembourgDateTimeCell, fullName, orDash } from "@/lib/admin/exports/format";
 import { rawTypeLabel, subjectLabel, sourceLabel, workflowStatusLabel } from "@/lib/admin/exports/labels";
 
 interface LeadExportRow {
@@ -28,7 +28,7 @@ interface LeadExportRow {
 }
 
 const COLUMNS: ExcelColumn<LeadExportRow>[] = [
-  { header: "Date", key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
+  { header: "Date", key: "date", type: "datetime", value: (r) => toLuxembourgDateTimeCell(r.created_at) },
   { header: "Nom", key: "nom", type: "text", value: (r) => fullName(r.first_name, r.last_name) },
   { header: "Email", key: "email", type: "text", width: 28, value: (r) => r.email },
   { header: "Téléphone", key: "tel", type: "text", value: (r) => orDash(r.phone) },

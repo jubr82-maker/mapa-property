@@ -1443,5 +1443,15 @@
         "property": "exceptional property"
       }
     }
+  },
+  "admin_datetime": {
+    "created": "Created on {date}",
+    "updated": "Modified on {date}",
+    "created_col": "Created",
+    "updated_col": "Last modified",
+    "sort_label": "Sort by date",
+    "sort_desc": "Newest first",
+    "sort_asc": "Oldest first",
+    "email_received": "Received on {date} (Luxembourg time)"
   }
 }

@@ -16,6 +16,7 @@
 // journaux (compteurs et codes de statut uniquement, cf. lib/email/smtp.ts).
 
 import { sendMail, INTERNAL_NOTIFICATION_RECIPIENTS } from "./smtp";
+import { receivedAtLine } from "@/lib/email/received-at";
 
 type Locale = "fr" | "en" | "de";
 
@@ -163,11 +164,12 @@ function internalSubject(args: { subjectStr: string; name: string }): string {
 }
 
 function internalBody(
-  args: SendLeadEmailsArgs & { locale: Locale; subjectStr: string },
+  args: SendLeadEmailsArgs & { locale: Locale; subjectStr: string; receivedLine: string },
 ): string {
   const fullName = [args.firstName, args.lastName].filter(Boolean).join(" ") || "—";
   const lines: string[] = [
     `Nouveau lead reçu via le site (formulaire ${args.source ?? "website"}).`,
+    args.receivedLine,
     ``,
     `= PROSPECT =`,
     `Nom         : ${fullName}`,
@@ -235,7 +237,7 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
     sendMail({
       to: internalTo,
       subject: internalSubject({ subjectStr, name: fullName }),
-      text: internalBody({ ...args, locale, subjectStr }),
+      text: internalBody({ ...args, locale, subjectStr, receivedLine: await receivedAtLine() }),
     }),
   );
 

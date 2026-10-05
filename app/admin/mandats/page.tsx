@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AdminDateCell } from "@/components/admin/AdminDateCell";
+import { lastModifiedAt } from "@/lib/datetime";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import {
@@ -139,7 +141,7 @@ export default async function AdminMandatsPage({
   const fullSelect =
     "id,created_at,client_name,client_email,client_phone,client_country,client_city," +
     "property_type,type_transaction,type_mandat,bien_adresse,prix_mise_en_vente," +
-    "budget_min,budget_max,zones,status,notes,workflow_status,next_follow_up";
+    "budget_min,budget_max,zones,status,notes,workflow_status,next_follow_up,workflow_history";
 
   const fallbackSelect =
     "id,created_at,client_name,client_email,client_phone,client_country,client_city," +
@@ -379,11 +381,10 @@ export default async function AdminMandatsPage({
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                    {new Date(m.created_at).toLocaleDateString("fr-FR", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    <AdminDateCell
+                      createdAt={m.created_at}
+                      updatedAt={lastModifiedAt(m as { workflow_history?: unknown })}
+                    />
                   </span>
                   {m.next_follow_up && (
                     <span

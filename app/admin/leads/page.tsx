@@ -2,6 +2,10 @@ import Link from "next/link";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { LeadsTable } from "@/components/admin/LeadsTable";
+import { AdminDateCell } from "@/components/admin/AdminDateCell";
+import { DateSortToggle, parseDateSort } from "@/components/admin/DateSortToggle";
+import { getAdminDateTimeT } from "@/lib/admin/datetime-labels";
+import { formatDateTime, formatDateTimeShort, lastModifiedAt } from "@/lib/datetime";
 import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 import {
   WorkflowBadge,
@@ -16,6 +20,7 @@ type SearchParams = {
   status?: string;
   q?: string;
   tab?: string;
+  sort?: string;
 };
 
 type LeadRow = {
@@ -37,6 +42,7 @@ type LeadRow = {
   rgpd_consent_at?: string | null;
   /** Sprint C3 : sujet pre-cadre depuis /contact (NULLABLE). */
   subject?: string | null;
+  workflow_history?: unknown;
 };
 
 // Consentement RGPD (BUG 7). Source structurée = colonne
@@ -72,6 +78,8 @@ export default async function AdminLeadsPage({
 }) {
   const sp = await searchParams;
   const tab = sp.tab && TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
+  const sort = parseDateSort(sp.sort);
+  const tDate = await getAdminDateTimeT();
   await requireAdminPage();
   // Lecture leads via service_role : table sans policy SELECT confirmée
   // pour le rôle authenticated (cf. lib/lead-insert.ts, leads est
@@ -87,9 +95,9 @@ export default async function AdminLeadsPage({
   const tryC3 = await supabase
     .from("leads")
     .select(
-      "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref,workflow_status,next_follow_up,subject",
+      "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref,workflow_status,next_follow_up,subject,workflow_history",
     )
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: sort === "asc" })
     .limit(500);
 
   if (!tryC3.error) {
@@ -98,9 +106,9 @@ export default async function AdminLeadsPage({
     const tryNew = await supabase
       .from("leads")
       .select(
-        "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref,workflow_status,next_follow_up",
+        "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref,workflow_status,next_follow_up,workflow_history",
       )
-      .order("created_at", { ascending: false })
+      .order("created_at", { ascending: sort === "asc" })
       .limit(500);
 
     if (tryNew.error) {
@@ -111,7 +119,7 @@ export default async function AdminLeadsPage({
         .select(
           "id,created_at,first_name,last_name,email,phone,type,source,country,city,message,status,property_ref",
         )
-        .order("created_at", { ascending: false })
+        .order("created_at", { ascending: sort === "asc" })
         .limit(500);
       leads = (fallback.data ?? []) as LeadRow[];
     } else {
@@ -154,6 +162,7 @@ export default async function AdminLeadsPage({
     params.set("tab", key);
     if (sp.q) params.set("q", sp.q);
     if (sp.type) params.set("type", sp.type);
+    params.set("sort", sort);
     return `/admin/leads?${params.toString()}`;
   };
 
@@ -199,6 +208,12 @@ export default async function AdminLeadsPage({
         </div>
       )}
 
+      <DateSortToggle
+        basePath="/admin/leads"
+        sort={sort}
+        params={{ tab: sp.tab, q: sp.q, type: sp.type }}
+      />
+
       {/* Sous-onglets workflow */}
       <nav className="flex flex-wrap items-center gap-2">
         {TABS.map((t) => {
@@ -233,7 +248,24 @@ export default async function AdminLeadsPage({
         })}
       </nav>
 
-      <LeadsTable leads={filtered as never} />
+      {/* Date et heure formatees cote serveur (fuseau Europe/Luxembourg,
+          libelles next-intl) puis transmises au tableau client. */}
+      <LeadsTable
+        leads={
+          filtered.map((l) => {
+            const updated = lastModifiedAt(l);
+            return {
+              ...l,
+              created_label: formatDateTimeShort(l.created_at),
+              updated_label:
+                updated && updated !== l.created_at
+                  ? tDate("updated", { date: formatDateTimeShort(updated) })
+                  : null,
+            };
+          }) as never
+        }
+        createdColumnLabel={tDate("created_col")}
+      />
 
       {/* Vue compacte alternative : liste avec lien Voir */}
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white">
@@ -273,15 +305,11 @@ export default async function AdminLeadsPage({
                     const c = rgpdConsentAt(l);
                     return c ? (
                       <span
-                        title={`Consentement RGPD obtenu le ${new Date(c).toLocaleString("fr-FR")}`}
+                        title={`Consentement RGPD obtenu le ${formatDateTime(c)}`}
                         className="rounded-full bg-emerald-600/15 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-emerald-700"
                       >
                         RGPD ✓{" "}
-                        {new Date(c).toLocaleDateString("fr-FR", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })}
+                        {formatDateTimeShort(c)}
                       </span>
                     ) : (
                       <span className="rounded-full bg-[#3D4F63]/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]/50">
@@ -290,11 +318,7 @@ export default async function AdminLeadsPage({
                     );
                   })()}
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                    {new Date(l.created_at).toLocaleDateString("fr-FR", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    <AdminDateCell createdAt={l.created_at} updatedAt={lastModifiedAt(l)} />
                   </span>
                   {l.next_follow_up && (
                     <span className="rounded-full bg-[#e0af6e]/15 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#e0af6e]">

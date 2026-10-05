@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DateSortToggle, parseDateSort } from "@/components/admin/DateSortToggle";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import {
@@ -41,6 +42,7 @@ export default async function AdminWaitlistPage({
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
+  const sort = parseDateSort((sp as { sort?: string }).sort);
   const tab = sp.tab && TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
   await requireAdminPage();
   // Lecture leads via service_role : cf. app/admin/leads/page.tsx.
@@ -55,7 +57,7 @@ export default async function AdminWaitlistPage({
       "id,created_at,first_name,last_name,email,message,source,status,workflow_status,next_follow_up",
     )
     .eq("type", "waitlist")
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: sort === "asc" })
     .limit(500);
 
   if (tryNew.error) {
@@ -64,7 +66,7 @@ export default async function AdminWaitlistPage({
       .from("leads")
       .select("id,created_at,first_name,last_name,email,message,source,status")
       .eq("type", "waitlist")
-      .order("created_at", { ascending: false })
+      .order("created_at", { ascending: sort === "asc" })
       .limit(500);
     rows = (fallback.data ?? []) as WaitlistRow[];
   } else {
@@ -172,6 +174,7 @@ export default async function AdminWaitlistPage({
             Inscriptions ({filtered.length})
           </p>
         </header>
+        <DateSortToggle basePath="/admin/liste-attente" sort={sort} params={sp as Record<string, string | undefined>} />
         <WaitlistTable items={filtered} />
       </section>
     </div>

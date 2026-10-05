@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { formatDateTimeShort } from "@/lib/datetime";
 import { useState, useTransition } from "react";
 import { updateWorkflowStatus } from "@/app/admin/liste-attente/actions";
 import {
@@ -103,7 +104,7 @@ function WaitlistRow({
               {item.email}
             </p>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/50">
-              {new Date(item.created_at).toLocaleString("fr-LU")}
+              {formatDateTimeShort(item.created_at)}
             </p>
           </div>
         </button>

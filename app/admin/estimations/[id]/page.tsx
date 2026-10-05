@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AdminDateCell } from "@/components/admin/AdminDateCell";
 import Link from "next/link";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
@@ -74,15 +75,6 @@ function fmtPrice(n?: number | null) {
   }).format(n);
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleString("fr-FR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export default async function EstimationDetailPage({
   params,
@@ -122,8 +114,15 @@ export default async function EstimationDetailPage({
           <h1 className="mt-2 font-display text-3xl font-bold text-[#1A1F2A]">
             Estimation #{r.id.slice(0, 8)}
           </h1>
+          <div className="mt-1 font-mono text-xs text-[#1A1F2A]/60">
+            <AdminDateCell
+              createdAt={r.created_at}
+              updatedAt={(row as { updated_at?: string | null }).updated_at}
+              variant="long"
+            />
+          </div>
           <p className="mt-1 font-mono text-xs text-[#1A1F2A]/60">
-            {fmtDate(r.created_at)} · moteur{" "}
+            moteur{" "}
             <span className="font-semibold">
               {r.engine === "evs_5_methods" ? "EVS 5 méthodes" : "Hédoniste legacy"}
             </span>

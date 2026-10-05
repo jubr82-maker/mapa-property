@@ -1443,5 +1443,15 @@
         "property": "Ausnahmeobjekt"
       }
     }
+  },
+  "admin_datetime": {
+    "created": "Erstellt am {date}",
+    "updated": "Geändert am {date}",
+    "created_col": "Erstellt",
+    "updated_col": "Zuletzt geändert",
+    "sort_label": "Nach Datum sortieren",
+    "sort_desc": "Neueste zuerst",
+    "sort_asc": "Älteste zuerst",
+    "email_received": "Eingegangen am {date} (Luxemburger Zeit)"
   }
 }

@@ -5,7 +5,7 @@ import { requireAdminRoute } from "@/lib/admin/require-admin";
 import { supabaseService } from "@/lib/supabase-service";
 import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel";
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
-import { toDateOrNull, orDash } from "@/lib/admin/exports/format";
+import { toDateOrNull, toLuxembourgDateTimeCell, orDash } from "@/lib/admin/exports/format";
 import {
   propertyTypeLabel,
   typeTransactionLabel,
@@ -37,7 +37,7 @@ interface MandatExportRow {
 }
 
 const COLUMNS: ExcelColumn<MandatExportRow>[] = [
-  { header: "Date", key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
+  { header: "Date", key: "date", type: "datetime", value: (r) => toLuxembourgDateTimeCell(r.created_at) },
   { header: "Client", key: "client", type: "text", value: (r) => orDash(r.client_name) },
   { header: "Email", key: "email", type: "text", width: 28, value: (r) => orDash(r.client_email) },
   { header: "Téléphone", key: "tel", type: "text", value: (r) => orDash(r.client_phone) },
