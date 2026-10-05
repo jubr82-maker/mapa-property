@@ -78,6 +78,20 @@ export function formatSurface(
   return options?.withUnit === false ? formatted : `${formatted} m²`;
 }
 
+/**
+ * Taux stocke en FRACTION (0.06) -> "6 %" (fr) / "6%" (en) / "6 %" (de),
+ * jusqu'a 3 decimales sans zero superflu (0.00715 -> "0,715 %").
+ * Bug corrige (oct. 2026) : le plan de financement affichait la fraction
+ * suivie de "%" ("0.06 %" pour 6 %). Les moteurs lib/acquisition/countries
+ * stockent tous leurs taux en fraction.
+ */
+export function formatRateFraction(fraction: number, locale: string): string {
+  return new Intl.NumberFormat(NUMBER_LOCALE[normalizeLocale(locale)], {
+    style: "percent",
+    maximumFractionDigits: 3,
+  }).format(fraction);
+}
+
 /** Nombre simple (compteurs, etc.), sans unité, même convention de séparateur. */
 export function formatNumber(value: number, locale: string): string {
   return new Intl.NumberFormat(NUMBER_LOCALE[normalizeLocale(locale)], {

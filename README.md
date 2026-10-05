@@ -106,7 +106,7 @@ DNS Cloudflare devant Vercel pour :
 
 ## Sécurité
 
-- Headers : X-Frame, HSTS 2 ans, Permissions-Policy, X-Robots-Tag noai
+- Headers : X-Frame, HSTS 2 ans, Permissions-Policy (plus de X-Robots-Tag noai depuis oct. 2026)
 - Rate limit IP-based : `/api/lead` 5/min, `/api/chatbot` 30/min
 - Turnstile sur tous formulaires
 - Validation côté client + serveur

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { sanitizeArticleHtml } from "@/lib/security/sanitize";
-import { brandedTitle, metaDescription } from "@/lib/meta-text";
+import { brandedTitle, htmlToPlainText, metaDescription } from "@/lib/meta-text";
+import { siteShareImage } from "@/lib/og";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchBlogPostBySlug } from "@/lib/data";
@@ -24,6 +25,7 @@ export async function generateMetadata({
   const description = metaDescription(
     post.meta_description ?? pickLang(post, "excerpt", locale as Locale),
   );
+  const shareImage = post.cover_image || siteShareImage();
   return {
     // SEO oct. 2026 : certains meta_title en base finissent deja par
     // "| Mapa Property" ; brandedTitle retire tout suffixe de marque avant
@@ -31,9 +33,21 @@ export async function generateMetadata({
     title: brandedTitle(title),
     description: description || undefined,
     alternates: pageAlternates(locale, `/blog/${post.slug}`),
-    openGraph: post.cover_image
-      ? { images: [{ url: post.cover_image }] }
-      : undefined,
+    // Open Graph et carte X identiques (titre, description, image).
+    openGraph: {
+      title: htmlToPlainText(title),
+      description: description || undefined,
+      url: `/${locale}/blog/${post.slug}`,
+      siteName: "MAPA Property",
+      type: "article",
+      images: [{ url: shareImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: htmlToPlainText(title),
+      description: description || undefined,
+      images: [shareImage],
+    },
   };
 }
 

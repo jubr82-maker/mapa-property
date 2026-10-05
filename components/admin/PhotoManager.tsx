@@ -18,6 +18,13 @@
  * seul commit global en fin de boucle), progression visible, limite de
  * taille vérifiée avant l'envoi, échecs par fichier collectés et affichés
  * sans jamais casser l'affichage de la liste ni du compteur.
+ *
+ * Oct. 2026 (decision de Julien : la fiche publique affiche exactement les
+ * photos de l'admin) : chaque changement est ENREGISTRE AUTOMATIQUEMENT
+ * (fin d'un envoi, ordre, photo principale, retrait). Auparavant, les
+ * photos envoyees n'existaient que dans l'etat local de cette page tant
+ * que "Enregistrer l'ordre" n'etait pas clique : la table property_images,
+ * lue par la fiche publique, restait inchangee.
  */
 
 import { useState, useTransition, useRef } from "react";
@@ -70,6 +77,40 @@ export function PhotoManager({
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dragSrcIdx = useRef<number | null>(null);
+  // Copie synchrone de la liste courante, pour enregistrer l'etat exact
+  // juste apres une mutation (setPhotos est asynchrone).
+  const photosRef = useRef<PhotoData[]>(photos);
+
+  function commit(list: PhotoData[]) {
+    photosRef.current = list;
+    setPhotos(list);
+  }
+
+  // Enregistrements en file, jamais en parallele : savePropertyPhotos
+  // remplace toutes les lignes du bien (suppression puis ajout), deux
+  // appels simultanes pourraient dupliquer des lignes. Chaque passage
+  // enregistre la liste la plus recente.
+  const saveChain = useRef<Promise<void>>(Promise.resolve());
+
+  async function saveLatest(): Promise<void> {
+    try {
+      const result = await onSave(photosRef.current);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setFeedback(t("photos_autosaved"));
+    } catch {
+      setError(t("err_photo_save"));
+    }
+  }
+
+  function persist(list: PhotoData[]) {
+    photosRef.current = list;
+    const run = saveChain.current.then(saveLatest);
+    saveChain.current = run;
+    startTransition(() => run);
+  }
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   function renormalize(list: PhotoData[]): PhotoData[] {
@@ -91,6 +132,7 @@ export function PhotoManager({
     setFeedback(null);
     const list = Array.from(files);
     const failures: string[] = [];
+    let added = 0;
     setUploadErrors([]);
     setUploadProgress({ done: 0, total: list.length });
 
@@ -116,7 +158,9 @@ export function PhotoManager({
           failures.push(t("photo_failure", { name: label, message: result.error }));
         } else {
           // Commit immédiat, un par un, jamais de batch en fin de boucle.
-          setPhotos((prev) => renormalize([...prev, { url: result.url, path: result.path, isCover: false, order: prev.length }]));
+          const prev = photosRef.current;
+          commit(renormalize([...prev, { url: result.url, path: result.path, isCover: false, order: prev.length }]));
+          added++;
         }
       } catch {
         // Filet ultime (ex. coupure réseau pendant l'appel) : jamais
@@ -129,6 +173,7 @@ export function PhotoManager({
     setUploadProgress(null);
     setUploadErrors(failures);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (added > 0) persist(photosRef.current);
   }
 
   function onDragStart(idx: number) {
@@ -149,19 +194,23 @@ export function PhotoManager({
       const src = dragSrcIdx.current;
       dragSrcIdx.current = null;
       if (src == null || src === targetIdx) return;
-      const next = [...photos];
+      const next = [...photosRef.current];
       const [moved] = next.splice(src, 1);
       next.splice(targetIdx, 0, moved);
-      setPhotos(renormalize(next));
+      const list = renormalize(next);
+      commit(list);
+      persist(list);
     };
   }
 
   function setCover(idx: number) {
     if (idx === 0) return;
-    const next = [...photos];
+    const next = [...photosRef.current];
     const [chosen] = next.splice(idx, 1);
     next.unshift(chosen);
-    setPhotos(renormalize(next));
+    const list = renormalize(next);
+    commit(list);
+    persist(list);
   }
 
   function removeAt(idx: number) {
@@ -176,8 +225,11 @@ export function PhotoManager({
           setError(result.error);
           return;
         }
-        const next = photos.filter((_, i) => i !== idx);
-        setPhotos(renormalize(next));
+        const list = renormalize(photosRef.current.filter((x) => x.path !== p.path || x.url !== p.url));
+        commit(list);
+        // Enregistre aussi une liste vide : la fiche publique ne doit plus
+        // pointer vers un fichier retire.
+        persist(list);
       } catch {
         setError(t("err_photo_delete"));
       }
@@ -187,19 +239,9 @@ export function PhotoManager({
   function save() {
     setError(null);
     setFeedback(null);
-    startTransition(async () => {
-      try {
-        const result = await onSave(photos);
-        if (!result.ok) {
-          setError(result.error);
-          return;
-        }
-        setFeedback(t("photos_saved"));
-      } catch {
-        setError(t("err_photo_save"));
-      }
-    });
+    persist(photosRef.current);
   }
+
 
   return (
     <div className="space-y-4">

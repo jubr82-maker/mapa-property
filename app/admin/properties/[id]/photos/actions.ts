@@ -27,9 +27,9 @@
  * ce dépôt.
  */
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
-import { PROPERTIES_LIST_TAG } from "@/lib/data";
+import { revalidatePublicPropertyPages } from "@/lib/revalidate-property";
 import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 import { assertAdminAction } from "@/lib/admin/require-admin";
@@ -136,20 +136,6 @@ export async function savePropertyPhotos(
   await assertAdminAction();
   try {
     const supabase = await createSupabaseServerClient();
-    // Sprint OPTIM-1A : fetch slug pour invalidation ciblee fiche SSG (C2).
-    const { data: slugRow, error: slugErr } = await supabase
-      .from("properties")
-      .select("slug")
-      .eq("id", propertyId)
-      .maybeSingle();
-    if (slugErr) {
-      console.warn("[admin/properties/photos] fetchSlug error", {
-        code: errorCode(slugErr),
-      });
-    }
-    const slug = (slugRow as { slug: string | null } | null)?.slug;
-    const slugClean =
-      typeof slug === "string" && slug.length > 0 ? slug : null;
     // Wipe existing rows pour ce property_id
     const { error: delErr } = await supabase
       .from("property_images")
@@ -193,11 +179,10 @@ export async function savePropertyPhotos(
     // sur la page actuellement affichée. PhotoManager reflète déjà l'état
     // des photos localement (state client), inutile de forcer un refresh
     // serveur de cette page pour ça.
-    revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
+    // Toutes les fiches publiques (3 langues, slug ou identifiant Apimo),
+    // la liste, les villes et l'accueil : cf. lib/revalidate-property.ts.
+    revalidatePublicPropertyPages();
     revalidatePath("/admin/properties");
-    revalidatePath("/fr/biens");
-    // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
-    if (slugClean) revalidatePath(`/fr/biens/${slugClean}`);
     return { ok: true };
   } catch (e) {
     console.error("[admin/properties/photos] save exception", {

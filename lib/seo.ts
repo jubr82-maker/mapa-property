@@ -1,17 +1,16 @@
 import { CHILD_TO_PARENT, PROPERTY_TYPE_FAMILIES } from "./taxonomy/property-types";
+import { siteLogo, siteShareImage } from "./og";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
 
 // Contact public dans le JSON-LD (règle projet : jamais Frédéric Mannis,
-// jamais IBAN/BIC/matricule). Décision : email générique conservé comme
-// contact machine-readable (moteurs de recherche / IA) ; le portable
-// personnel de Julien est volontairement EXCLU du JSON-LD (anti-scraping —
-// contrairement au texte visible d'une page, le JSON-LD est trivialement
-// moissonnable en masse). Le portable reste disponible côté UI via
-// <ContactReveal /> (révélé au clic, protection anti-scraping) et, à
-// terme, sur la fiche Google Business.
-const PUBLIC_CONTACT_EMAIL = "admin@mapagroup.org";
+// jamais IBAN/BIC/matricule). Oct. 2026 (décision de Julien) : AUCUNE
+// adresse e-mail ni téléphone dans le JSON-LD, trivialement moissonnable en
+// masse ; l'adresse admin@ était celle d'un compte administrateur. Le
+// contact machine-readable est la page Contact ; téléphone et e-mail
+// restent révélés au clic côté UI (<ContactReveal />).
+const PUBLIC_CONTACT_PATH = "/contact";
 
 export const realEstateAgent = (locale: string) => ({
   "@context": "https://schema.org",
@@ -20,8 +19,8 @@ export const realEstateAgent = (locale: string) => ({
   name: "MAPA Property",
   alternateName: "MAPA Synergy Sàrl",
   url: SITE_URL,
-  logo: `${SITE_URL}/og/logo.png`,
-  image: `${SITE_URL}/og/og-${locale}.png`,
+  logo: siteLogo(),
+  image: siteShareImage(),
   description:
     locale === "en"
       ? "Luxembourg real estate agency and international broker."
@@ -29,12 +28,11 @@ export const realEstateAgent = (locale: string) => ({
         ? "Luxemburger Immobilienagentur und internationaler Broker."
         : "Agence immobilière luxembourgeoise et broker international.",
   knowsLanguage: ["fr", "en", "de"],
-  // Contact machine-readable via l'email générique uniquement (cf.
-  // commentaire PUBLIC_CONTACT_EMAIL) — forme standard schema.org
-  // ContactPoint plutôt qu'un champ email/telephone nu sur l'Organization.
+  // Contact machine-readable : page Contact uniquement (cf. commentaire
+  // PUBLIC_CONTACT_PATH), forme standard schema.org ContactPoint.
   contactPoint: {
     "@type": "ContactPoint",
-    email: PUBLIC_CONTACT_EMAIL,
+    url: `${SITE_URL}/${locale}${PUBLIC_CONTACT_PATH}`,
     contactType: "customer service",
     areaServed: "LU",
     availableLanguage: ["fr", "en", "de"],
@@ -98,7 +96,7 @@ export const personJulien = () => ({
   jobTitle: "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
   worksFor: { "@id": `${SITE_URL}#organization` },
   // Portable personnel volontairement exclu du JSON-LD (anti-scraping,
-  // cf. commentaire PUBLIC_CONTACT_EMAIL) — contact machine-readable au
+  // cf. commentaire PUBLIC_CONTACT_PATH), contact machine-readable au
   // niveau organisation via realEstateAgent().contactPoint uniquement.
   sameAs: [
     "https://www.linkedin.com/in/julien-brebion/",

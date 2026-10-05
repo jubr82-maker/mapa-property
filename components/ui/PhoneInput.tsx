@@ -13,7 +13,7 @@ import {
 // externe (pas de libphonenumber-js). Deux champs côte à côte :
 //   - gauche : <select> compact drapeau + indicatif (source COUNTRIES)
 //   - droite : <input type="tel"> numéro national
-// Valeur combinée émise au format "+352 691 620 127".
+// Valeur combinée émise au format "+352 621 000 000".
 //
 // Modes :
 //   - non controlé : passer `name` → un <input type="hidden" name>
@@ -91,7 +91,7 @@ export function PhoneInput({
           autoComplete="tel-national"
           required={required}
           value={national}
-          placeholder="691 620 127"
+          placeholder={tc("phone_placeholder")}
           onChange={(e) => {
             setNational(e.target.value);
             emit(code, e.target.value);

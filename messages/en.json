@@ -10,7 +10,8 @@
     "theme_dark": "Dark mode",
     "loading": "Loading...",
     "back": "Back",
-    "phone_too_short": "Number too short"
+    "phone_too_short": "Number too short",
+    "phone_placeholder": "621 000 000"
   },
   "nav": {
     "home": "Home",
@@ -419,7 +420,10 @@
     "email_button": "Email",
     "contact_button": "Contact us",
     "loading": "Loading...",
-    "error": "Try again shortly"
+    "error": "Try again shortly",
+    "aria_call_julien": "Call Julien Brebion",
+    "aria_email_julien": "Email Julien Brebion",
+    "aria_call_secondary": "Call the MAPA Property secondary number"
   },
   "home": {
     "placeholder": "MAPA Property, homepage under construction."
@@ -477,7 +481,22 @@
     "form_subtitle": "MAPA Property will personally get back to you within 24 working hours.",
     "similar": "Similar properties",
     "download_pdf": "Download / Print",
-    "request_info": "Request information"
+    "request_info": "Request information",
+    "gallery_empty": "Photos coming soon",
+    "gallery_open": "Enlarge photo",
+    "gallery_close": "Close",
+    "gallery_prev": "Previous photo",
+    "gallery_next": "Next photo",
+    "gallery_thumb": "Show photo {n}",
+    "gallery_counter": "{current} / {total}",
+    "video_play": "Play video",
+    "video_close": "Close video",
+    "print_advisor_title": "Your advisor, MAPA Property",
+    "print_contact_hint": "Phone and email: “Contact us” button on the online listing.",
+    "print_phone": "Phone: {value}",
+    "print_email": "Email: {value}",
+    "print_listing": "Full listing:",
+    "print_footer_brand": "MAPA PROPERTY, a brand of MAPA Synergy Sàrl"
   },
   "property_financing": {
     "eyebrow": "Indicative financing plan",
@@ -536,7 +555,7 @@
     "label_budget_validated_yes": "Yes",
     "label_budget_validated_no": "No",
     "label_search": "My search",
-    "label_rgpd": "I agree that MAPA Property may use my data (first name, last name, email, budget, project) to contact me in advance when properties matching my criteria come to market. Membership is free and may be cancelled at any time on simple request to admin@mapagroup.org.",
+    "label_rgpd": "I agree that MAPA Property may use my data (first name, last name, email, budget, project) to contact me in advance when properties matching my criteria come to market. Membership is free and may be cancelled at any time on simple request via the contact form on this site.",
     "rgpd_policy_link": "Privacy policy",
     "rgpd_notice": "No spam. Unsubscribe at any time.",
     "submit": "Join the list",
@@ -1571,7 +1590,7 @@
     "video_hint": "Paste the address of a publicly accessible video file, for example the direct link to a file hosted on Vimeo.",
     "photos_kicker": "Photos",
     "photos_title": "Gallery ({count})",
-    "photos_hint": "Drag and drop the photos to reorder them. The first one is the main photo on the public website. Click “Save order” to keep the changes.",
+    "photos_hint": "Drag and drop photos to reorder them. The first one is the main photo on the public site. Every upload, reorder or main photo change is saved automatically and published on the listing.",
     "public_preview": "Public preview",
     "view_listing": "View listing ↗",
     "unsaved_banner": "Unsaved changes: click “Save” to keep them.",
@@ -1689,7 +1708,8 @@
     "refresh_label": "Refresh public listing",
     "refresh_running": "Refreshing…",
     "refresh_ok": "Public listing refreshed ✓",
-    "refresh_failed": "Refresh failed (code {status})."
+    "refresh_failed": "Refresh failed (code {status}).",
+    "photos_autosaved": "Photos saved and published on the listing."
   },
   "property_gone": {
     "title": "This property is no longer available",

@@ -10,7 +10,8 @@
     "theme_dark": "Mode nuit",
     "loading": "Chargement...",
     "back": "Retour",
-    "phone_too_short": "Numéro trop court"
+    "phone_too_short": "Numéro trop court",
+    "phone_placeholder": "621 000 000"
   },
   "nav": {
     "home": "Accueil",
@@ -419,7 +420,10 @@
     "email_button": "Écrire",
     "contact_button": "Nous contacter",
     "loading": "Chargement...",
-    "error": "Réessayez dans un instant"
+    "error": "Réessayez dans un instant",
+    "aria_call_julien": "Appeler Julien Brebion",
+    "aria_email_julien": "Écrire un e-mail à Julien Brebion",
+    "aria_call_secondary": "Appeler le numéro secondaire MAPA Property"
   },
   "home": {
     "placeholder": "MAPA Property, page d'accueil en construction."
@@ -477,7 +481,22 @@
     "form_subtitle": "MAPA Property vous recontacte personnellement sous 48 heures ouvrées.",
     "similar": "Biens similaires",
     "download_pdf": "Télécharger / Imprimer",
-    "request_info": "Demander des informations"
+    "request_info": "Demander des informations",
+    "gallery_empty": "Photos bientôt disponibles",
+    "gallery_open": "Agrandir la photo",
+    "gallery_close": "Fermer",
+    "gallery_prev": "Photo précédente",
+    "gallery_next": "Photo suivante",
+    "gallery_thumb": "Afficher la photo {n}",
+    "gallery_counter": "{current} / {total}",
+    "video_play": "Lire la vidéo",
+    "video_close": "Fermer la vidéo",
+    "print_advisor_title": "Votre conseiller, MAPA Property",
+    "print_contact_hint": "Téléphone et e-mail : bouton « Nous contacter » de l'annonce en ligne.",
+    "print_phone": "Téléphone : {value}",
+    "print_email": "E-mail : {value}",
+    "print_listing": "Annonce complète :",
+    "print_footer_brand": "MAPA PROPERTY, une marque de MAPA Synergy Sàrl"
   },
   "property_financing": {
     "eyebrow": "Plan de financement indicatif",
@@ -536,7 +555,7 @@
     "label_budget_validated_yes": "Oui",
     "label_budget_validated_no": "Non",
     "label_search": "Ma recherche",
-    "label_rgpd": "J'accepte que mes données (prénom, nom, email, budget, projet) soient utilisées par MAPA Property pour me contacter en avant-première lorsqu'un bien correspondant à mes critères est mis sur le marché. Inscription gratuite, annulable à tout moment par simple demande à admin@mapagroup.org.",
+    "label_rgpd": "J'accepte que mes données (prénom, nom, email, budget, projet) soient utilisées par MAPA Property pour me contacter en avant-première lorsqu'un bien correspondant à mes critères est mis sur le marché. Inscription gratuite, annulable à tout moment par simple demande via le formulaire de contact du site.",
     "rgpd_policy_link": "Politique de confidentialité",
     "rgpd_notice": "Aucun spam. Annulation possible à tout moment.",
     "submit": "Rejoindre la liste",
@@ -1571,7 +1590,7 @@
     "video_hint": "Collez l'adresse d'un fichier vidéo accessible publiquement, par exemple le lien direct d'un fichier hébergé sur Vimeo.",
     "photos_kicker": "Photos",
     "photos_title": "Galerie ({count})",
-    "photos_hint": "Glissez-déposez les photos pour les réordonner. La première sert de photo principale sur le site public. Cliquez sur « Enregistrer l'ordre » pour conserver les changements.",
+    "photos_hint": "Glissez-déposez les photos pour les réordonner. La première sert de photo principale sur le site public. Chaque envoi, changement d'ordre ou de photo principale est enregistré automatiquement et publié sur la fiche.",
     "public_preview": "Aperçu public",
     "view_listing": "Voir la fiche ↗",
     "unsaved_banner": "Modifications non enregistrées : cliquez sur « Enregistrer » pour les conserver.",
@@ -1689,7 +1708,8 @@
     "refresh_label": "Mettre à jour la fiche publique",
     "refresh_running": "Mise à jour en cours…",
     "refresh_ok": "Fiche publique mise à jour ✓",
-    "refresh_failed": "Échec de la mise à jour (code {status})."
+    "refresh_failed": "Échec de la mise à jour (code {status}).",
+    "photos_autosaved": "Photos enregistrées et publiées sur la fiche."
   },
   "property_gone": {
     "title": "Ce bien n'est plus disponible",

@@ -9,6 +9,7 @@ import type {
   AcquisitionResult,
 } from "@/lib/acquisition/types";
 import { computeMortgage, computeDebtRatio, fmtEur } from "@/lib/finance-sim";
+import { formatRateFraction } from "@/lib/format/numbers";
 import { ContactReveal } from "@/components/contact-reveal";
 
 interface Props {
@@ -390,7 +391,7 @@ function SimulatorActive({
                 <span className="flex items-baseline gap-2">
                   {typeof li.rate === "number" && (
                     <span className="font-mono text-[10px] text-ink-soft">
-                      {li.rate.toFixed(2).replace(/\.?0+$/, "")} %
+                      {formatRateFraction(li.rate, locale)}
                     </span>
                   )}
                   {li.amount !== 0 && (

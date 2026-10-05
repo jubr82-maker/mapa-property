@@ -7,6 +7,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { pageAlternates } from "@/lib/seo";
+import { siteShareImage, SITE_SHARE_IMAGE_SIZE } from "@/lib/og";
 
 export type SeoPageKey =
   | "contact"
@@ -24,11 +25,6 @@ export type SeoPageKey =
   | "legal_notice"
   | "ai";
 
-/** Meme image de partage que le layout (non heritee si openGraph redefini). */
-function ogImage(locale: string): string {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
-  return `${siteUrl}/og/og-${locale}.png`;
-}
 
 export function buildPageMetadata(
   locale: string,
@@ -36,7 +32,8 @@ export function buildPageMetadata(
   title: string,
   description: string,
 ): Metadata {
-  const image = ogImage(locale);
+  // Meme image de partage que le layout (non heritee si openGraph redefini).
+  const image = siteShareImage();
   return {
     title,
     description,
@@ -47,7 +44,7 @@ export function buildPageMetadata(
       url: `/${locale}${path}`,
       siteName: "MAPA Property",
       type: "website",
-      images: [{ url: image, width: 1200, height: 630 }],
+      images: [{ url: image, ...SITE_SHARE_IMAGE_SIZE }],
     },
     twitter: {
       card: "summary_large_image",

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePublicPropertyPages } from "@/lib/revalidate-property";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
@@ -22,12 +23,8 @@ import { sendAdminAlert } from "@/lib/pilotage/alerts";
 const tProps = () => getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
 
 /**
- * Sprint OPTIM-1A : helper de lecture du slug d'un bien par id. Utilise
- * pour cibler revalidatePath sur la fiche SSG generee par C2
- * generateStaticParams. Si fetch echoue OU slug null : retourne null,
- * le caller console.warn + skip l'invalidation de la fiche (la liste
- * /fr/biens reste invalidee, et la fiche se rafraichit au revalidate
- * 30min ou via le bouton refresh admin C5).
+ * Lecture du slug d'un bien par id, pour le journal admin. L'invalidation
+ * des pages publiques ne depend plus du slug (lib/revalidate-property.ts).
  */
 async function fetchPropertySlug(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
@@ -65,16 +62,13 @@ export async function setPropertyPublished(id: string, isPublished: boolean) {
   });
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePath("/fr/biens");
-  // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
-  if (slug) revalidatePath(`/fr/biens/${slug}`);
+  revalidatePublicPropertyPages();
 }
 
 export async function setPropertyFeatured(id: string, isFeatured: boolean) {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
   await assertAdminAction();
   const supabase = await createSupabaseServerClient();
-  const slug = await fetchPropertySlug(supabase, id);
   const { error } = await supabase
     .from("properties")
     .update({ is_featured: isFeatured })
@@ -82,10 +76,7 @@ export async function setPropertyFeatured(id: string, isFeatured: boolean) {
   if (error) throw new Error(error.message);
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePath("/fr");
-  // Sprint OPTIM-1A : la fiche elle-meme peut afficher un badge featured
-  // dans certains rendus -> on l'invalide aussi par securite (cout marginal).
-  if (slug) revalidatePath(`/fr/biens/${slug}`);
+  revalidatePublicPropertyPages();
 }
 
 /**
@@ -342,9 +333,7 @@ export async function updateProperty(
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePath(`/admin/properties/${id}`);
-  revalidatePath("/fr/biens");
-  // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
-  if (slug) revalidatePath(`/fr/biens/${slug}`);
+  revalidatePublicPropertyPages();
   return { ok: true };
 }
 
@@ -363,7 +352,6 @@ export async function updatePropertyVideoUrl(
     typeof videoUrl === "string" && videoUrl.trim().length > 0
       ? videoUrl.trim()
       : null;
-  const slug = await fetchPropertySlug(supabase, propertyId);
   const { error } = await supabase
     .from("properties")
     .update({ video_url: normalized })
@@ -376,9 +364,7 @@ export async function updatePropertyVideoUrl(
   // PropertyVideoForm reflète déjà l'URL sauvée localement.
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePath("/fr/biens");
-  // Sprint OPTIM-1A : invalide la fiche SSG (C2) pour fraicheur immediate.
-  if (slug) revalidatePath(`/fr/biens/${slug}`);
+  revalidatePublicPropertyPages();
 }
 
 // ============================================================================
@@ -562,14 +548,10 @@ export type PropertyLifecycleResult =
 
 const PHOTO_BUCKET = "property-images";
 
-function revalidatePropertyPaths(slug: string | null) {
+function revalidatePropertyPaths() {
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  for (const l of ["fr", "en", "de"]) {
-    revalidatePath(`/${l}`);
-    revalidatePath(`/${l}/biens`);
-    if (slug) revalidatePath(`/${l}/biens/${slug}`);
-  }
+  revalidatePublicPropertyPages();
   invalidateArchivedPropertyKeys();
 }
 
@@ -601,7 +583,7 @@ export async function archiveProperty(id: string): Promise<PropertyLifecycleResu
     .eq("id", id);
   if (upErr) return { ok: false, error: upErr.message };
   await logAdminAction({ actorEmail: user.email, action: "property_archived", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
-  revalidatePropertyPaths(row.slug);
+  revalidatePropertyPaths();
   return { ok: true };
 }
 
@@ -617,7 +599,7 @@ export async function restoreProperty(id: string): Promise<PropertyLifecycleResu
     .eq("id", id);
   if (upErr) return { ok: false, error: upErr.message };
   await logAdminAction({ actorEmail: user.email, action: "property_restored", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
-  revalidatePropertyPaths(row.slug);
+  revalidatePropertyPaths();
   return { ok: true };
 }
 
@@ -655,7 +637,7 @@ export async function deleteProperty(
   console.info("[admin/properties] bien supprime, fichiers conserves", { id, files: media.length });
   await logAdminAction({ actorEmail: user.email, action: "property_deleted", targetTable: "properties", targetId: id, diff: { slug: row.slug, files: media.length } });
   await sendAdminAlert("property_deleted", { reference: row.slug || row.id, actor: user.email });
-  revalidatePropertyPaths(row.slug);
+  revalidatePropertyPaths();
   return { ok: true, media };
 }
 

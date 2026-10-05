@@ -58,7 +58,7 @@ Espace privé contractuel réservé aux clients sous mandat MAPA. Accès stricte
 
 ## RGPD
 
-- **Référent données** : Julien Brebion — admin@mapagroup.org
+- **Référent données** : Julien Brebion, via le formulaire de contact : https://mapaproperty.lu/fr/contact
 - **Conservation** : prospection 3 ans · contractuel KYC AED 7 ans · cookies/logs 13 mois.
 - **Recours** : Commission nationale pour la protection des données (CNPD) — www.cnpd.lu
 
@@ -77,8 +77,8 @@ Espace privé contractuel réservé aux clients sous mandat MAPA. Accès stricte
 
 ## Contact direct
 
-- Email : j.brebion@mapagroup.org
-- Téléphone : +352 691 620 127
+- Formulaire : https://mapaproperty.lu/fr/contact
+- Téléphone et e-mail : affichés au clic sur le bouton « Nous contacter » du site (protection contre la collecte automatique).
 - Rendez-vous : Luxembourg-Ville, sur site (dans le bien visité), à votre domicile, ou en visioconférence.
 
 ## Indexation IA

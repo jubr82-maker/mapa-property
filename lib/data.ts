@@ -2,6 +2,7 @@ import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { supabaseServer } from "./supabase-server";
 import { getLocalizedField } from "./i18n-field";
+import { publicCoverUrl, selectPublicImages } from "./property-images";
 import type {
   BlogPost,
   InterestRates,
@@ -47,15 +48,10 @@ export async function fetchFeaturedPropertiesWithCover(
     return [];
   }
   type Row = Property & { property_images: { url: string; sort: number | null }[] | null };
-  return ((data as Row[] | null) ?? []).map((row) => {
-    const sorted = (row.property_images ?? [])
-      .slice()
-      .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
-    return {
-      ...row,
-      cover_url: sorted[0]?.url ?? null,
-    };
-  });
+  return ((data as Row[] | null) ?? []).map((row) => ({
+    ...row,
+    cover_url: publicCoverUrl(row.property_images),
+  }));
 }
 
 // Coups de cœur unifiés (CHANTIER 5 V3) : Apimo is_featured + Off-Market
@@ -163,7 +159,6 @@ export async function fetchHomeFeatured(
   };
 
   const apimo: HomeFeatured[] = ((apimoRes.data as ApimoRow[] | null) ?? []).map((row) => {
-    const sorted = (row.property_images ?? []).slice().sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
     return {
       id: row.id,
       kind: "apimo",
@@ -175,7 +170,7 @@ export async function fetchHomeFeatured(
       price_label: row.price
         ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(row.price) + " €"
         : null,
-      cover_url: sorted[0]?.url ?? null,
+      cover_url: publicCoverUrl(row.property_images),
       surface: row.surface,
       bedrooms: row.bedrooms,
       created_at: row.created_at,
@@ -241,9 +236,9 @@ const PROPERTY_CARD_COLUMNS =
  * Sprint OPTIM-BIENS-1 — mise en cache (tag-only invalidation, comme
  * lib/site-content.ts) : sans ça, chaque changement de filtre sur /biens
  * refaisait un aller-retour Supabase complet. `select` allégé aux seules
- * colonnes de PROPERTY_CARD_COLUMNS + 1 seule photo (cover) par bien via
- * order+limit sur la relation `property_images`, au lieu de select("*")
- * + toutes les photos triées en JS.
+ * colonnes de PROPERTY_CARD_COLUMNS + url et ordre des photos (pas de
+ * limite a 1 : la photo principale publique est la premiere photo de
+ * l'admin, images Apimo ecartees, cf. lib/property-images.ts).
  */
 const fetchPropertiesWithCoverCached = unstable_cache(
   async (): Promise<PropertyWithCover[]> => {
@@ -251,9 +246,7 @@ const fetchPropertiesWithCoverCached = unstable_cache(
     const { data, error } = await sb
       .from("properties")
       .select(`${PROPERTY_CARD_COLUMNS}, property_images(url, sort)`)
-      .eq("is_published", true)
-      .order("sort", { referencedTable: "property_images" })
-      .limit(1, { referencedTable: "property_images" });
+      .eq("is_published", true);
     if (error) {
       console.error("[data] fetchAllPropertiesWithCover", error.message);
       return [];
@@ -281,12 +274,12 @@ const fetchPropertiesWithCoverCached = unstable_cache(
       | "badge"
       | "badge_size"
       | "badge_position"
-    > & { property_images: { url: string }[] | null };
+    > & { property_images: { url: string; sort: number | null }[] | null };
     return ((data as Row[] | null) ?? []).map(
       (row) =>
         ({
           ...row,
-          cover_url: row.property_images?.[0]?.url ?? null,
+          cover_url: publicCoverUrl(row.property_images),
         }) as unknown as PropertyWithCover,
     );
   },
@@ -442,7 +435,7 @@ export const fetchPropertyImages = cache(
       console.error("[data] fetchPropertyImages", error.message);
       return [];
     }
-    return safeArray<PropertyImage>(data as PropertyImage[] | null);
+    return selectPublicImages(safeArray<PropertyImage>(data as PropertyImage[] | null));
   },
 );
 

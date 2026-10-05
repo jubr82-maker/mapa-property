@@ -10,7 +10,8 @@
     "theme_dark": "Nachtmodus",
     "loading": "Lädt...",
     "back": "Zurück",
-    "phone_too_short": "Nummer zu kurz"
+    "phone_too_short": "Nummer zu kurz",
+    "phone_placeholder": "621 000 000"
   },
   "nav": {
     "home": "Startseite",
@@ -419,7 +420,10 @@
     "email_button": "Schreiben",
     "contact_button": "Kontakt",
     "loading": "Lädt...",
-    "error": "Erneut versuchen"
+    "error": "Erneut versuchen",
+    "aria_call_julien": "Julien Brebion anrufen",
+    "aria_email_julien": "Julien Brebion eine E-Mail schreiben",
+    "aria_call_secondary": "Die Zweitnummer von MAPA Property anrufen"
   },
   "home": {
     "placeholder": "MAPA Property, Startseite im Aufbau."
@@ -477,7 +481,22 @@
     "form_subtitle": "MAPA Property meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen.",
     "similar": "Ähnliche Objekte",
     "download_pdf": "Herunterladen / Drucken",
-    "request_info": "Informationen anfragen"
+    "request_info": "Informationen anfragen",
+    "gallery_empty": "Fotos folgen in Kürze",
+    "gallery_open": "Foto vergrößern",
+    "gallery_close": "Schließen",
+    "gallery_prev": "Vorheriges Foto",
+    "gallery_next": "Nächstes Foto",
+    "gallery_thumb": "Foto {n} anzeigen",
+    "gallery_counter": "{current} / {total}",
+    "video_play": "Video abspielen",
+    "video_close": "Video schließen",
+    "print_advisor_title": "Ihr Berater, MAPA Property",
+    "print_contact_hint": "Telefon und E-Mail: Schaltfläche „Kontakt“ in der Online-Anzeige.",
+    "print_phone": "Telefon: {value}",
+    "print_email": "E-Mail: {value}",
+    "print_listing": "Vollständige Anzeige:",
+    "print_footer_brand": "MAPA PROPERTY, eine Marke der MAPA Synergy Sàrl"
   },
   "property_financing": {
     "eyebrow": "Indikativer Finanzierungsplan",
@@ -536,7 +555,7 @@
     "label_budget_validated_yes": "Ja",
     "label_budget_validated_no": "Nein",
     "label_search": "Meine Suche",
-    "label_rgpd": "Ich stimme zu, dass MAPA Property meine Daten (Vorname, Nachname, E-Mail, Budget, Projekt) verwenden darf, um mich vorab zu kontaktieren, sobald passende Objekte auf den Markt kommen. Die Mitgliedschaft ist kostenlos und jederzeit auf einfache Anfrage an admin@mapagroup.org kündbar.",
+    "label_rgpd": "Ich stimme zu, dass MAPA Property meine Daten (Vorname, Nachname, E-Mail, Budget, Projekt) verwenden darf, um mich vorab zu kontaktieren, sobald passende Objekte auf den Markt kommen. Die Mitgliedschaft ist kostenlos und jederzeit auf einfache Anfrage über das Kontaktformular der Website kündbar.",
     "rgpd_policy_link": "Datenschutz",
     "rgpd_notice": "Kein Spam. Abmeldung jederzeit möglich.",
     "submit": "Auf die Liste setzen",
@@ -1571,7 +1590,7 @@
     "video_hint": "Fügen Sie die Adresse einer öffentlich zugänglichen Videodatei ein, zum Beispiel den direkten Link zu einer auf Vimeo gehosteten Datei.",
     "photos_kicker": "Fotos",
     "photos_title": "Galerie ({count})",
-    "photos_hint": "Ziehen Sie die Fotos, um sie neu anzuordnen. Das erste ist das Hauptfoto auf der öffentlichen Website. Klicken Sie auf „Reihenfolge speichern“, um die Änderungen zu übernehmen.",
+    "photos_hint": "Fotos per Drag-and-drop neu anordnen. Das erste Foto ist das Hauptfoto der öffentlichen Website. Jeder Upload, jede Änderung der Reihenfolge oder des Hauptfotos wird automatisch gespeichert und in der Anzeige veröffentlicht.",
     "public_preview": "Öffentliche Vorschau",
     "view_listing": "Exposé ansehen ↗",
     "unsaved_banner": "Nicht gespeicherte Änderungen: Klicken Sie auf „Speichern“, um sie zu übernehmen.",
@@ -1689,7 +1708,8 @@
     "refresh_label": "Öffentliches Exposé aktualisieren",
     "refresh_running": "Wird aktualisiert…",
     "refresh_ok": "Öffentliches Exposé aktualisiert ✓",
-    "refresh_failed": "Aktualisierung fehlgeschlagen (Code {status})."
+    "refresh_failed": "Aktualisierung fehlgeschlagen (Code {status}).",
+    "photos_autosaved": "Fotos gespeichert und in der Anzeige veröffentlicht."
   },
   "property_gone": {
     "title": "Diese Immobilie ist nicht mehr verfügbar",

@@ -23,6 +23,8 @@
 //   K. pilotage
 //   L. regles d'acces (SQL 02, 05, 09), ecritures par le serveur seul,
 //      fichiers inutilises supprimes, purge automatique
+//   M. fiche de bien : photos de l'admin, coordonnees protegees, taux,
+//      metadonnees de partage
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -40,6 +42,8 @@ import { classifyChannel, sanitizeAttribution } from "../../lib/pilotage/attribu
 import { isTargetQuery } from "../../lib/pilotage/seo-targets";
 import { RETENTION_RULES } from "../../lib/pilotage/config";
 import { retentionCutoff } from "../../lib/pilotage/retention";
+import { selectPublicImages, isApimoImageUrl } from "../../lib/property-images";
+import { formatRateFraction } from "../../lib/format/numbers";
 
 const ROOT = path.resolve(__dirname, "../..");
 const read = (p: string) => fs.readFileSync(path.join(ROOT, p), "utf8");
@@ -609,6 +613,83 @@ section = "L. Regles d'acces et purge";
 }
 
 // ===========================================================================
+// M. Fiche de bien publique et coordonnees protegees
+// ===========================================================================
+// Coordonnees interdites dans le HTML servi par le serveur (decision de
+// Julien, oct. 2026) : adresse du compte admin, liens mailto: et tel:,
+// numero de Julien en clair (toutes graphies courantes).
+const FORBIDDEN_IN_HTML: [string, RegExp][] = [
+  ["admin@mapagroup.org", /admin@mapagroup\.org/i],
+  ["lien mailto:", /(?<![a-z])mailto:/i],
+  ["lien tel:", /(?<![a-z])tel:/i],
+  ["numero de Julien", /691[\s.-]*620[\s.-]*127/],
+];
+function forbiddenHits(text: string): string[] {
+  return FORBIDDEN_IN_HTML.filter(([, re]) => re.test(text)).map(([label]) => label);
+}
+section = "M. Fiche de bien et coordonnees";
+{
+  // Photos : decision A (photos de l'admin, ordre de l'admin, Apimo masque).
+  const A = "https://dutfkblygfvhhwpzxmfz.supabase.co/storage/v1/object/public/property-images/p/a.webp";
+  const B = "https://dutfkblygfvhhwpzxmfz.supabase.co/storage/v1/object/public/property-images/p/b.webp";
+  const X = "https://media.apimo.pro/cache/x.jpg";
+  check("photos : image Apimo reconnue", isApimoImageUrl(X) && !isApimoImageUrl(A));
+  check("photos : ordre de l'admin, Apimo masque des qu'une photo admin existe", selectPublicImages([{ url: X, sort: 0 }, { url: B, sort: 2 }, { url: A, sort: 1 }]).map((r) => r.url).join(",") === `${A},${B}`);
+  check("photos : sans photo admin, les images Apimo restent affichees", selectPublicImages([{ url: X, sort: 0 }]).length === 1);
+  const data = read("lib/data.ts");
+  check("photos : fiche, cartes et accueil filtres par selectPublicImages", /return selectPublicImages\(/.test(data) && (data.match(/publicCoverUrl\(row\.property_images\)/g) ?? []).length === 3 && !/limit\(1, \{ referencedTable: "property_images" \}\)/.test(data));
+  // Cache : toutes les fiches (3 langues, slug ou identifiant Apimo).
+  check("cache : invalidation de toutes les fiches publiques", /revalidatePath\("\/\[locale\]\/biens\/\[slug\]", "page"\)/.test(read("lib/revalidate-property.ts")));
+  for (const f of ["app/admin/properties/[id]/photos/actions.ts", "app/admin/properties/actions.ts"]) {
+    const src = read(f);
+    check(`cache : ${f} invalide toutes les fiches`, /revalidatePublicPropertyPages\(\)/.test(src) && !/revalidatePath\(`\/fr\/biens\/\$\{/.test(src));
+  }
+  // Admin : chaque changement de photos est enregistre (table lue par la fiche).
+  const pm = read("components/admin/PhotoManager.tsx");
+  check("admin : photos envoyees enregistrees automatiquement", /if \(added > 0\) persist\(photosRef\.current\)/.test(pm) && (pm.match(/persist\(list\)/g) ?? []).length >= 3);
+  check("admin : enregistrements en file, jamais en parallele", /saveChain\.current\.then\(saveLatest\)/.test(pm));
+  // SQL 10 : lecture seule, un seul tableau.
+  const sql10 = read("supabase/manual/execution/10_images_apimo_restantes.sql").replace(/^--.*$/gm, "");
+  check("SQL 10 : lecture seule, un seul tableau", !/\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|GRANT|REVOKE)\b/i.test(sql10) && (sql10.match(/^SELECT /gm) ?? []).length === 1 && /media\.apimo|apimo\\\.pro/.test(sql10));
+  // Galerie : photo principale visible sans animation, repli sans optimiseur.
+  const gal = read("components/property/PropertyGallery.tsx");
+  check("galerie : aucune opacite initiale ni animation sur la photo principale", !/opacity-0|motion\.|initial=\{\{|animate-/.test(gal));
+  check("galerie : repli direct si l'optimiseur echoue", /unoptimized=\{direct\.has\(current\.url\)\}/.test(gal) && /naturalWidth === 0/.test(gal));
+  check("galerie : priority deprecie non utilise", !/\bpriority\b/.test(gal));
+  // Taux : fractions affichees en pourcentage.
+  check("taux : 0.06 -> 6 % (fr)", formatRateFraction(0.06, "fr").replace(/\s/g, " ") === "6 %", formatRateFraction(0.06, "fr"));
+  check("taux : 0.01 -> 1% (en)", formatRateFraction(0.01, "en") === "1%", formatRateFraction(0.01, "en"));
+  check("taux : 0.00715 -> 0,715 % (fr)", formatRateFraction(0.00715, "fr").replace(/\s/g, " ") === "0,715 %", formatRateFraction(0.00715, "fr"));
+  check("taux : plan de financement par formatRateFraction", /formatRateFraction\(li\.rate, locale\)/.test(read("components/property/AcquisitionSimulator.tsx")));
+  // Metadonnees.
+  const layout = read("app/[locale]/layout.tsx");
+  check("metadonnees : plus de noai ni noimageai", !/noai|noimageai/.test(layout + read("next.config.ts")));
+  const ogRefs = [...walk("app", (x) => /\.(ts|tsx)$/.test(x)), ...walk("lib", (x) => /\.(ts|tsx)$/.test(x)), ...walk("components", (x) => /\.(ts|tsx)$/.test(x))]
+    .filter((f) => /["'`][^"'`]*\/og\/[^"'`]*["'`]/.test(read(f).replace(/^\s*\/\/.*$/gm, "")));
+  check("metadonnees : aucune reference a /og/ (dossier absent)", ogRefs.length === 0, ogRefs.join(", "));
+  check("metadonnees : image de partage presente dans public/", fs.existsSync(path.join(ROOT, "public/og-image.png")) && fs.existsSync(path.join(ROOT, "public/logo-mapa-property.png")));
+  const fiche = read("app/[locale]/biens/[slug]/page.tsx");
+  const meta = fiche.slice(fiche.indexOf("export async function generateMetadata"), fiche.indexOf("export default"));
+  check("metadonnees : carte X de la fiche = Open Graph (image et description)", /openGraph: \{[\s\S]*?images: \[\{ url: shareImage \}\]/.test(meta) && /twitter: \{[\s\S]*?description: description \|\| undefined,[\s\S]*?images: \[shareImage\]/.test(meta));
+  // Coordonnees dans le code des pages publiques.
+  const publicSources = [...walk("app/[locale]", (x) => /\.(ts|tsx)$/.test(x)), ...walk("components", (x) => /\.(ts|tsx)$/.test(x) && !x.startsWith("components/admin/")), "lib/seo.ts", ...walk("lib/legal", (x) => x.endsWith(".ts")), "messages/fr.json", "messages/en.json", "messages/de.json", "public/llms.txt"];
+  const leaks = publicSources.filter((f) => /admin@mapagroup\.org|j\.brebion@mapagroup\.org|691[\s.]?620[\s.]?127|href=["'](tel|mailto):/i.test(read(f)));
+  check("coordonnees : aucune en clair dans les sources publiques", leaks.length === 0, leaks.join(", "));
+  const reveal = read("components/contact-reveal.tsx");
+  check("coordonnees : adresse admin retiree de ContactReveal", !/EMAIL_ADMIN|\["admin"\]/.test(reveal));
+  check("version imprimee : coordonnees seulement apres clic", /<PrintAdvisorContact/.test(fiche) && /useContactRevealed\(\)/.test(read("components/property/fiche/PrintAdvisorContact.tsx")));
+  check("version imprimee : numeros RCS, TVA, AE retires", !/RCS Luxembourg|TVA : LU|AE N/.test(fiche));
+  // HTML prerendu par le build.
+  if (hasBuild) {
+    const htmlFiles = walk(".next/server/app", (x) => /\.(html|rsc)$/.test(x) && !/[\\/]admin[\\/]|[\\/]admin\.(html|rsc)$/.test(x));
+    const hits = htmlFiles.flatMap((f) => forbiddenHits(fs.readFileSync(path.join(ROOT, f), "utf8")).map((l) => `${f} : ${l}`));
+    check(`HTML prerendu : aucune coordonnee en clair (${htmlFiles.length} fichiers)`, htmlFiles.length > 0 && hits.length === 0, hits.slice(0, 10).join(" ; "));
+  }
+  // Le controle lui-meme detecte bien chaque cas.
+  check("controle HTML : detecte admin@, mailto:, tel:, numero", forbiddenHits('<a href="mailto:x">admin@mapagroup.org</a><a href="tel:+352691620127">+352 691 620 127</a>').length === 4 && forbiddenHits('<input type="tel" autocomplete="tel-national"> Stadtviertel: x').length === 0);
+}
+
+// ===========================================================================
 // I. Requetes reelles en memoire (build de production)
 // ===========================================================================
 async function runtime() {
@@ -659,6 +740,23 @@ async function runtime() {
       check(`${p} anonyme : redirection vers la connexion`, r.status >= 300 && r.status < 400 && /\/admin\/login/.test(loc), `statut ${r.status} location ${loc}`);
       check(`${p} : jamais en cache, jamais indexe`, /no-store/.test(r.headers["cache-control"] ?? "") && /noindex/.test(r.headers["x-robots-tag"] ?? ""));
     }
+    // Pages publiques servies : aucune coordonnee en clair dans le HTML.
+    let verified = 0;
+    const unverified: string[] = [];
+    for (const p of ["/fr", "/en", "/de", "/fr/contact", "/fr/qui-sommes-nous", "/fr/biens", "/fr/off-market", "/fr/legal/mentions-legales", "/fr/legal/cgv", "/fr/legal/rgpd", "/fr/services/vendre", "/fr/services/estimer", "/fr/services/simulateurs/financement", "/fr/liste-attente", "/fr/biens/86388715"]) {
+      const r = await server.request(p);
+      // 598/599 : page non rendue (delai depasse sans acces a la base,
+      // ex. bac a sable hors reseau) : non verifiee, jamais comptee OK.
+      if (r.status >= 590) {
+        unverified.push(`${p} (${r.status})`);
+        continue;
+      }
+      const hits = forbiddenHits(r.body ?? "");
+      check(`${p} : aucune coordonnee en clair dans le HTML (statut ${r.status})`, hits.length === 0, hits.join(", "));
+      verified++;
+    }
+    check(`pages publiques verifiees : ${verified}`, verified >= 10, `non rendues : ${unverified.join(", ")}`);
+    if (unverified.length) console.log(`  (non rendues, donc non verifiees ici : ${unverified.join(", ")})`);
     const h = await server.request("/api/health");
     for (const name of REQUIRED_HEADERS) {
       check(`en-tete servi : ${name}`, Boolean(h.headers[name.toLowerCase()]), `absent de /api/health (statut ${h.status})`);

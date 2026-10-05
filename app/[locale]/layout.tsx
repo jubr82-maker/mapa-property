@@ -1,3 +1,4 @@
+import { siteShareImage, SITE_SHARE_IMAGE_SIZE } from "@/lib/og";
 import type { Metadata } from "next";
 import { sanitizeCssColorOverrides } from "@/lib/security/sanitize";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
@@ -58,7 +59,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "meta" });
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
-  const ogImage = `${siteUrl}/og/og-${locale}.png`;
+  const ogImage = siteShareImage();
   return {
     title: t("default_title"),
     description: t("default_description"),
@@ -80,7 +81,7 @@ export async function generateMetadata({
       locale:
         locale === "fr" ? "fr_LU" : locale === "de" ? "de_DE" : "en_US",
       type: "website",
-      images: [{ url: ogImage, width: 1200, height: 630 }],
+      images: [{ url: ogImage, ...SITE_SHARE_IMAGE_SIZE }],
     },
     twitter: {
       card: "summary_large_image",
@@ -108,9 +109,6 @@ export async function generateMetadata({
       ICBM: "49.4811, 6.0878",
       "geo.placename": "Luxembourg",
       copyright: "© 2026 MAPA Synergy Sàrl",
-      // Note: "noai" / "noimageai" sont des indicateurs informels que certains
-      // crawlers IA respectent. Aucune garantie technique.
-      "robots-noai": "noai, noimageai",
     },
   };
 }

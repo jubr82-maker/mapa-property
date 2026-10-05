@@ -156,7 +156,7 @@ const sectionsFr: LegalSection[] = [
     heading: "17. Droit de rétractation",
     paragraphs: [
       "Pour les contrats conclus à distance ou hors lieux commerciaux avec un consommateur, le Mandant dispose d'un délai de quatorze (14) jours calendaires pour se rétracter, sans avoir à justifier de motif.",
-      "La rétractation s'exerce par notification écrite à l'adresse du siège ou par email à j.brebion@mapagroup.org.",
+      "La rétractation s'exerce par notification écrite à l'adresse du siège, ou par le formulaire de contact du site, ou par l'adresse e-mail affichée au clic sur le bouton « Nous contacter ».",
       "Si le Mandant a expressément demandé l'exécution immédiate de la prestation et que celle-ci a été entièrement réalisée avant la fin du délai, le droit de rétractation s'éteint.",
     ],
   },
@@ -337,7 +337,7 @@ const sectionsEn: LegalSection[] = [
     heading: "17. Right of withdrawal",
     paragraphs: [
       "For contracts concluded at a distance or off business premises with a consumer, the Client has a period of fourteen (14) calendar days to withdraw, without having to state a reason.",
-      "Withdrawal is exercised by written notice to the registered office address or by email to j.brebion@mapagroup.org.",
+      "Withdrawal is exercised by written notice to the registered office address, through the contact form on this site, or by the email address shown when clicking the “Contact us” button.",
       "If the Client has expressly requested immediate performance of the service and it has been fully carried out before the end of the period, the right of withdrawal lapses.",
     ],
   },
@@ -518,7 +518,7 @@ const sectionsDe: LegalSection[] = [
     heading: "17. Widerrufsrecht",
     paragraphs: [
       "Bei Fernabsatzverträgen oder außerhalb von Geschäftsräumen geschlossenen Verträgen mit einem Verbraucher hat der Mandant ein Widerrufsrecht von vierzehn (14) Kalendertagen, ohne einen Grund angeben zu müssen.",
-      "Der Widerruf erfolgt durch schriftliche Mitteilung an die Anschrift des Sitzes oder per E-Mail an j.brebion@mapagroup.org.",
+      "Der Widerruf erfolgt durch schriftliche Mitteilung an die Anschrift des Sitzes, über das Kontaktformular der Website oder an die E-Mail-Adresse, die nach Klick auf die Schaltfläche „Kontakt“ angezeigt wird.",
       "Hat der Mandant ausdrücklich die sofortige Ausführung der Leistung verlangt und wurde diese vor Ablauf der Frist vollständig erbracht, erlischt das Widerrufsrecht.",
     ],
   },

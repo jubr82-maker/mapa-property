@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { track } from "@/lib/tracking/track";
 
@@ -26,8 +26,9 @@ interface ContactRevealProps {
 const PHONE_JULIEN_PARTS = ["+352", "691", "620", "127"];
 const PHONE_SECONDARY_PARTS = ["+352", "691", "113", "018"];
 const EMAIL_JULIEN_USER = ["j", "brebion"];
-const EMAIL_ADMIN_USER = ["admin"];
 const EMAIL_DOMAIN = ["mapagroup", "org"];
+// Oct. 2026 (decision de Julien) : l'adresse du compte administrateur
+// n'apparait plus nulle part sur le site public, meme apres clic.
 
 // Delai minimum entre mount et premier clic (anti-bot naif).
 // Sprint UI-MAI : baisse de 300ms a 150ms pour limiter les faux positifs
@@ -46,6 +47,33 @@ function buildPhoneTel(parts: string[]) {
 // domaine. Aucune chaine complete "...@..." dans le SSR ni le source.
 function buildEmail(userParts: string[]) {
   return `${userParts.join(".")}${String.fromCharCode(64)}${EMAIL_DOMAIN.join(".")}`;
+}
+
+// Revelation partagee (oct. 2026) : la carte conseiller de la version
+// imprimee n'affiche telephone et e-mail que si le visiteur les a reveles
+// d'un clic sur cette page. Rien n'est ecrit dans le HTML servi.
+const REVEAL_EVENT = "mapa-contact-revealed";
+let revealedOnPage = false;
+
+function announceReveal() {
+  if (revealedOnPage) return;
+  revealedOnPage = true;
+  window.dispatchEvent(new Event(REVEAL_EVENT));
+}
+
+function subscribeReveal(onChange: () => void) {
+  window.addEventListener(REVEAL_EVENT, onChange);
+  return () => window.removeEventListener(REVEAL_EVENT, onChange);
+}
+
+/** Vrai des que le visiteur a clique sur "Nous contacter" dans cette page. */
+export function useContactRevealed(): boolean {
+  return useSyncExternalStore(subscribeReveal, () => revealedOnPage, () => false);
+}
+
+/** Coordonnees de Julien, assemblees cote client uniquement. */
+export function advisorContact(): { phone: string; email: string } {
+  return { phone: buildPhoneDisplay(PHONE_JULIEN_PARTS), email: buildEmail(EMAIL_JULIEN_USER) };
 }
 
 export function ContactReveal({
@@ -98,6 +126,7 @@ export function ContactReveal({
   function handleReveal() {
     if (!guard()) return;
     setRevealed(true);
+    announceReveal();
     trackReveal("reveal");
   }
 
@@ -181,7 +210,7 @@ export function ContactReveal({
           <ContactLine
             display={buildPhoneDisplay(PHONE_JULIEN_PARTS)}
             href={`tel:${buildPhoneTel(PHONE_JULIEN_PARTS)}`}
-            ariaLabel="Appeler Julien Brebion"
+            ariaLabel={t("aria_call_julien")}
             icon={<PhoneIcon />}
             onClick={() => trackReveal("call_julien")}
             linkBase={linkBase}
@@ -192,7 +221,7 @@ export function ContactReveal({
           <ContactLine
             display={buildEmail(EMAIL_JULIEN_USER)}
             href={`mailto:${buildEmail(EMAIL_JULIEN_USER)}`}
-            ariaLabel="Ecrire un email"
+            ariaLabel={t("aria_email_julien")}
             icon={<MailIcon />}
             onClick={() => trackReveal("email")}
             linkBase={linkBase}
@@ -204,20 +233,9 @@ export function ContactReveal({
           <ContactLine
             display={buildPhoneDisplay(PHONE_SECONDARY_PARTS)}
             href={`tel:${buildPhoneTel(PHONE_SECONDARY_PARTS)}`}
-            ariaLabel="Appeler le numero secondaire MAPA Property"
+            ariaLabel={t("aria_call_secondary")}
             icon={<PhoneIcon />}
             onClick={() => trackReveal("call_secondary")}
-            linkBase={linkBase}
-            iconColor={iconColor}
-            variant={variant}
-          />
-          {/* 4. Email admin */}
-          <ContactLine
-            display={buildEmail(EMAIL_ADMIN_USER)}
-            href={`mailto:${buildEmail(EMAIL_ADMIN_USER)}`}
-            ariaLabel="Ecrire un email a l'administration MAPA Property"
-            icon={<MailIcon />}
-            onClick={() => trackReveal("email_admin")}
             linkBase={linkBase}
             iconColor={iconColor}
             variant={variant}

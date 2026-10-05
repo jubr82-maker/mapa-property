@@ -12,11 +12,12 @@
 // - videoUrl null/absent ⇒ ne rend RIEN (aucun placeholder cassé).
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   videoUrl: string | null | undefined;
   poster?: string | null;
-  /** Libellés localisés (next-intl côté appelant). Fallbacks FR de secours. */
+  /** Libellés localisés (next-intl côté appelant) ; sinon namespace "property". */
   labels?: {
     eyebrow?: string;
     play?: string;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function PropertyVideo({ videoUrl, poster, labels }: Props) {
+  const t = useTranslations("property");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(false);
   const [open, setOpen] = useState(false);
@@ -70,9 +72,9 @@ export function PropertyVideo({ videoUrl, poster, labels }: Props) {
   // Garde-fou : pas de vidéo ⇒ rien (aucun placeholder cassé).
   if (!videoUrl || !videoUrl.trim()) return null;
 
-  const eyebrow = labels?.eyebrow ?? "Vidéo de présentation";
-  const playLabel = labels?.play ?? "Lire la vidéo";
-  const closeLabel = labels?.close ?? "Fermer";
+  const eyebrow = labels?.eyebrow ?? t("video");
+  const playLabel = labels?.play ?? t("video_play");
+  const closeLabel = labels?.close ?? t("video_close");
 
   return (
     <section data-property-video className="mt-12">

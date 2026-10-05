@@ -28,6 +28,7 @@ import { FicheAccordion } from "@/components/property/fiche/FicheAccordion";
 import { FicheConditions } from "@/components/property/fiche/FicheConditions";
 import { FicheLocation } from "@/components/property/fiche/FicheLocation";
 import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
+import { PrintAdvisorContact } from "@/components/property/fiche/PrintAdvisorContact";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import {
   parseApimoDescription,
@@ -35,6 +36,7 @@ import {
 } from "@/lib/property-description-parser";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumb, realEstateListing, pageAlternates } from "@/lib/seo";
+import { siteShareImage } from "@/lib/og";
 import { transactionDetailLabel } from "@/lib/taxonomy/property-types";
 
 // Sprint OPTIM-1A : ISR 30 min (vs 60s avant). Les fiches biens changent
@@ -115,20 +117,30 @@ export async function generateMetadata({
     pickLang(property, "description", locale as Locale),
   );
   const images = await fetchPropertyImages(property.id);
-  const cover = images[0]?.url;
+  // Carte de partage : photo principale de l'admin, sinon image du site.
+  const shareImage = images[0]?.url ?? siteShareImage();
   const path = `/biens/${property.slug}`;
+  const shareTitle = htmlToPlainText(title);
 
+  // Open Graph et carte X identiques (meme titre, description et image) :
+  // sans champ twitter, la fiche heritait de la carte generique du layout.
   return {
     title: brandedTitle(title),
     description: description || undefined,
     alternates: pageAlternates(locale, path),
     openGraph: {
-      title: htmlToPlainText(title),
+      title: shareTitle,
       description: description || undefined,
       url: `/${locale}${path}`,
       siteName: "MAPA Property",
       type: "website",
-      ...(cover ? { images: [{ url: cover }] } : {}),
+      images: [{ url: shareImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: shareTitle,
+      description: description || undefined,
+      images: [shareImage],
     },
   };
 }
@@ -420,33 +432,29 @@ export default async function PropertyPage({
           />
         </div>
 
-        {/* Print-only : carte conseiller en clair (telephone + emails),
-            remplace la colonne droite cachee en print. */}
+        {/* Print-only : carte conseiller. Nom et fonction en clair ;
+            telephone et e-mail seulement s'ils ont ete reveles d'un clic
+            (decision de Julien, oct. 2026 : rien dans le HTML servi). */}
         <section
           data-fiche-print-advisor
           className="hidden print:block"
         >
           <h3 className="font-display text-base font-bold">
-            Votre conseiller, MAPA Property
+            {t("print_advisor_title")}
           </h3>
           <p className="mt-2 font-display text-sm">Julien Brebion</p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em]">
-            Real Estate Director · Exclusive Sourcing Specialist
+          <p className="whitespace-pre-line font-mono text-[10px] uppercase tracking-[0.25em]">
+            {t("advisor_block_roles")}
           </p>
-          <p className="mt-3 text-sm">
-            Téléphone :{" "}
-            <a href="tel:+352691620127">+352 691 620 127</a>
-          </p>
-          <p className="text-sm">
-            Email :{" "}
-            <a href="mailto:j.brebion@mapagroup.org">j.brebion@mapagroup.org</a>
-          </p>
-          <p className="text-sm">
-            Email :{" "}
-            <a href="mailto:admin@mapagroup.org">admin@mapagroup.org</a>
-          </p>
+          <PrintAdvisorContact
+            labels={{
+              hint: t("print_contact_hint"),
+              phone: t.raw("print_phone") as string,
+              email: t.raw("print_email") as string,
+            }}
+          />
           <p className="mt-3 text-xs">
-            Annonce complète :{" "}
+            {t("print_listing")}{" "}
             <a href={canonicalUrl}>{canonicalUrl}</a>
           </p>
         </section>
@@ -490,16 +498,15 @@ export default async function PropertyPage({
           </section>
         )}
 
-        {/* Print-only : pied de page legal sobre. Pas d'IBAN/BIC. */}
+        {/* Print-only : pied de page sobre. Pas d'IBAN/BIC. */}
         <footer
           data-fiche-print-footer
           className="hidden print:block"
         >
-          <p>MAPA PROPERTY, une marque de MAPA Synergy Sàrl</p>
-          <p>
-            RCS Luxembourg B241974 · TVA : LU 31988923 · AE N°10108681/0-1-2-3 ·
-            www.mapaproperty.lu
-          </p>
+          {/* Numeros RCS, TVA et AE : uniquement dans les mentions legales
+              (regle du projet). */}
+          <p>{t("print_footer_brand")}</p>
+          <p>www.mapaproperty.lu</p>
         </footer>
       </div>
     </article>
