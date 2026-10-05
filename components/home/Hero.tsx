@@ -4,11 +4,7 @@ import { SignatureLine } from "@/components/ui/SignatureLine";
 import { ParallaxImage } from "@/components/ui/ParallaxImage";
 import { HeroScrollContainer } from "@/components/home/HeroScrollContainer";
 import { VideoR2 } from "@/components/media/VideoR2";
-import Image from "next/image";
-
-// Hote autorise dans next.config.ts (images.remotePatterns).
-const HERO_POSTER_URL =
-  "https://pub-c9fa8716c00f4a0c965197a93086bdce.r2.dev/mapa-showcase-poster.jpg";
+import { HeroPoster, HERO_POSTER_FALLBACK } from "@/components/home/HeroPoster";
 
 export async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: "hero" });
@@ -73,15 +69,9 @@ export async function Hero({ locale }: { locale: string }) {
               principal immediat. La video, chargee apres l'evenement load
               (deferLoad), apparait en fondu par-dessus des sa 1re frame. */}
           <div className="absolute left-0 top-[-4%] h-[108%] w-full">
-            <Image
-              src={HERO_POSTER_URL}
-              alt=""
-              aria-hidden
-              fill
-              priority
-              sizes="100vw"
-              className="object-contain lg:object-cover"
-            />
+            {/* Oct. 2026 : image servie par le site (HeroPoster), plus par
+                r2.dev ; les videos restent sur R2 (decision de Julien). */}
+            <HeroPoster className="absolute inset-0 size-full object-contain lg:object-cover" />
           </div>
           {/* Sprint HERO-VIDEO-V2 : nouveau montage 1080p (10 clips
               remappes + segments choisis manuellement, two-pass 3800k
@@ -101,7 +91,7 @@ export async function Hero({ locale }: { locale: string }) {
             ariaHidden
             preload="metadata"
             deferLoad
-            posterUrl={HERO_POSTER_URL}
+            posterUrl={HERO_POSTER_FALLBACK}
             sources={[
               { filename: "mapa-showcase-desktop-v2.mp4", media: "(min-width: 1024px)", type: "video/mp4" },
               // v5 : carre 1080x1080 (vs v3 portrait 1080x1350). Profil

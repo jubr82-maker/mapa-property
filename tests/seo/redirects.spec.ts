@@ -132,6 +132,50 @@ test("redirections 308 : un controle par format d'adresse", async () => {
   expect(failures, failures.join("\n")).toEqual([]);
 });
 
+test("premier ecran : aucune image servie par r2.dev (build)", async () => {
+  // Decision de Julien (oct. 2026) : images du premier ecran servies par le
+  // site ; seules les videos de l'accueil restent sur R2 (chargees apres
+  // l'image, hors trafic Vercel). Controle : toute image (img, source,
+  // preload, optimiseur /_next/image) des pages publiques de premier rang.
+  const server = await startServerProcess();
+  const failures: string[] = [];
+  try {
+    for (const p of ["/fr", "/en", "/de", "/fr/biens", "/fr/services/estimer", "/fr/off-market", "/fr/contact", "/fr/qui-sommes-nous"]) {
+      const r = await server.request(p);
+      if (r.status >= 590) {
+        if (OFFLINE) unverified.push(p);
+        else failures.push(`${p} : non rendue (${r.status})`);
+        continue;
+      }
+      const html = (r.body ?? "").replace(/&amp;/g, "&");
+      const tags = html.match(/<(img|source|link)\b[^>]*>/gi) ?? [];
+      for (const tag of tags) {
+        if (/^<link/i.test(tag) && !/as="image"/i.test(tag)) continue;
+        let decoded = tag;
+        try {
+          decoded = decodeURIComponent(tag);
+        } catch {
+          // Sequence % invalide : on teste la balise telle quelle.
+        }
+        if (/r2\.dev/i.test(decoded)) failures.push(`${p} : image servie par r2.dev : ${tag.slice(0, 140)}`);
+      }
+    }
+    const home = await server.request("/fr");
+    if (!/rel="preload" as="image"[^>]*mapa-showcase-poster-\d+\.avif/.test(home.body ?? "")) {
+      failures.push("/fr : image d'accueil locale non prechargee");
+    }
+  } finally {
+    await server.close();
+  }
+  for (const w of [640, 828, 1080, 1280, 1920]) {
+    for (const ext of ["avif", "webp"]) {
+      const f = `public/images/hero/mapa-showcase-poster-${w}.${ext}`;
+      if (!fs.existsSync(path.join(ROOT, f))) failures.push(`${f} absent`);
+    }
+  }
+  expect(failures, failures.join("\n")).toEqual([]);
+});
+
 test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () => {
   const server = await startServerProcess();
   const failures: string[] = [];

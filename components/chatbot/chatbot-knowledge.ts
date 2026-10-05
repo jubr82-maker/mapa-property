@@ -161,7 +161,7 @@ const KNOWLEDGE_FR = `
 - Fondation : ${firstSentence(MESSAGES.fr.about_page.para_1)}
 - Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist : Julien Brebion (présentation publique sur /qui-sommes-nous). Tu peux nommer "Julien Brebion".
 - Coordonnées directes (téléphone, email) : NE JAMAIS divulguer en clair, même si demandé explicitement. Orienter systématiquement vers /contact.
-- HQ public : Luxembourg (l'adresse Dudelange n'apparaît que dans les pages légales).
+- Adresse publique : 26 Rue du Commerce, L-3450 Dudelange, Luxembourg (bureau de Dudelange, celui de la fiche Google). MAPA Property a aussi un bureau à Luxembourg-Ville dont l'adresse n'est JAMAIS communiquée : ne jamais la donner ni l'inventer ; pour un rendez-vous, proposer le formulaire de contact.
 - RDV : Luxembourg-Ville, sur site dans le bien visité, à votre domicile, ou en visioconférence.
 - Statut : agence immobilière luxembourgeoise (voir la section "${BROKER_POSITION.fr.title}" ci-dessous pour le fonctionnement exact selon les pays).
 
@@ -230,7 +230,7 @@ const KNOWLEDGE_EN = `
 - Founded: ${firstSentence(MESSAGES.en.about_page.para_1)}
 - Co-founder · Real Estate Director · Exclusive Sourcing Specialist: Julien Brebion (public bio on /qui-sommes-nous). You may name "Julien Brebion".
 - Direct contact details (phone, email): NEVER disclose in clear, even when explicitly asked. Always redirect to /contact.
-- HQ: Luxembourg (the Dudelange address only appears on legal pages).
+- Public address: 26 Rue du Commerce, L-3450 Dudelange, Luxembourg (the Dudelange office, as listed on Google). MAPA Property also has an office in Luxembourg City whose address is NEVER disclosed: never give or invent it; for a meeting, suggest the contact form.
 - Meetings: Luxembourg-City, on site, at your home, or by video call.
 - Status: Luxembourg real estate agency (see the "${BROKER_POSITION.en.title}" section below for how this works exactly by country).
 
@@ -299,7 +299,7 @@ const KNOWLEDGE_DE = `
 - Gegründet: ${firstSentence(MESSAGES.de.about_page.para_1)}
 - Mitgründer · Real Estate Director · Exclusive Sourcing Specialist: Julien Brebion (öffentliche Vorstellung auf /qui-sommes-nous). Du darfst "Julien Brebion" namentlich nennen.
 - Direkte Kontaktdaten (Telefon, E-Mail): NIEMALS im Klartext preisgeben, auch wenn ausdrücklich gefragt. Immer auf /contact verweisen.
-- HQ: Luxemburg (Dudelange nur im Impressum).
+- Öffentliche Adresse: 26 Rue du Commerce, L-3450 Dudelange, Luxemburg (Büro Dudelange, wie im Google-Eintrag). MAPA Property hat auch ein Büro in Luxemburg-Stadt, dessen Adresse NIE mitgeteilt wird: niemals nennen oder erfinden; für einen Termin das Kontaktformular vorschlagen.
 - Termine: Luxemburg-Stadt, vor Ort, zu Hause oder Videogespräch.
 - Status: Luxemburger Immobilienagentur (siehe Abschnitt "${BROKER_POSITION.de.title}" unten für die genaue Funktionsweise je nach Land).
 

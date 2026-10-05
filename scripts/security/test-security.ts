@@ -895,6 +895,11 @@ section = "Q. Performance mobile et diffusion";
   check("IndexNow : envoi apres la reponse et journalise", /after\(async \(\) =>/.test(inx) && /recordCronRun\("indexnow"/.test(inx) && !/user-agent/i.test(inx));
   check("IndexNow : active seulement par INDEXNOW_KEY et hors beta", /process\.env\.INDEXNOW_KEY/.test(inx) && /SITE_URL\.includes\("beta\."\)/.test(inx));
   check("IndexNow : fichier de cle a la racine", /source: "\/:key\(\[a-f0-9\]\{8,128\}\)\.txt"/.test(read("next.config.ts")));
+  // Chatbot : adresse publique de Dudelange, jamais celle de Luxembourg-Ville.
+  const kb = read("components/chatbot/chatbot-knowledge.ts");
+  check("chatbot : adresse publique de Dudelange dans les trois langues", (kb.match(/26 Rue du Commerce, L-3450 Dudelange/g) ?? []).length === 3);
+  check("chatbot : adresse de Luxembourg-Ville jamais communiquee", /dont l'adresse n'est JAMAIS communiquée/.test(kb) && /NEVER disclosed/.test(kb) && /NIE mitgeteilt/.test(kb) && !/n'apparaît que dans les pages légales|only appears on legal pages|nur im Impressum/.test(kb));
+  check("accueil : image principale servie par le site, pas par r2.dev", !/r2\.dev/.test(read("components/home/Hero.tsx").replace(/\/\*[\s\S]*?\*\/|^\s*\/\/.*$/gm, "")) && /HeroPoster/.test(read("components/home/Hero.tsx")) && /\/images\/hero\/mapa-showcase-poster/.test(read("components/home/HeroPoster.tsx")));
   check("IndexNow : biens et articles signales", /revalidatePublicBlogPages\(id\)/.test(read("app/admin/blog/actions.ts")) && /scheduleIndexNow/.test(read("lib/revalidate-property.ts")));
 }
 
