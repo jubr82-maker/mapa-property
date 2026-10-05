@@ -4,28 +4,25 @@ import { siteLogo, siteShareImage } from "./og";
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
 
-// Contact public dans le JSON-LD (règle projet : jamais Frédéric Mannis,
-// jamais IBAN/BIC/matricule). Oct. 2026 (décision de Julien) : AUCUNE
-// adresse e-mail ni téléphone dans le JSON-LD, trivialement moissonnable en
-// masse ; l'adresse admin@ était celle d'un compte administrateur. Le
-// contact machine-readable est la page Contact ; téléphone et e-mail
-// restent révélés au clic côté UI (<ContactReveal />).
-const PUBLIC_CONTACT_PATH = "/contact";
+// Etablissement unique des donnees structurees (oct. 2026, regle de
+// Julien). MAPA Property a deux bureaux reels : celui de Luxembourg-Ville
+// n'est JAMAIS publie ; seul celui de Dudelange est public (fiche Google
+// Business Profile verifiee). Sur toutes les pages et dans les trois
+// langues : nom "MAPA Property" (regle de marque), nom legal "MAPA Synergy
+// Sarl", categorie agence immobiliere (RealEstateAgent), adresse de
+// Dudelange identique a la fiche Google, creation en 2024 (lancement de la
+// marque, indique sur la page Qui sommes-nous), profils publics officiels.
+// JAMAIS : telephone, e-mail, coordonnees geographiques, adresse de
+// Luxembourg-Ville, note ou avis ; RCS, TVA et autorisation
+// d'etablissement restent sur les mentions legales (page dediee).
+export const ORGANIZATION_ADDRESS = {
+  "@type": "PostalAddress",
+  streetAddress: "26 Rue du Commerce",
+  postalCode: "L-3450",
+  addressLocality: "Dudelange",
+  addressCountry: "LU",
+} as const;
 
-// Etablissement reel unique (oct. 2026). Champs tires des mentions legales
-// du site (lib/legal/mentions.ts) : nom commercial MAPA Property, nom legal
-// MAPA Synergy Sarl, pays Luxembourg. Retires car non verifiables ou
-// contraires aux regles de Google :
-//   - aggregateRating fabrique (Google n'accepte pas les avis
-//     "autoproclames" d'un etablissement sur son propre site, et la note
-//     n'etait adossee a aucun avis reel) ;
-//   - foundingDate "2020" (absente des mentions legales, et le site indique
-//     ailleurs une agence fondee en 2024) ;
-//   - coordonnees geographiques et localite (l'adresse exacte du siege
-//     n'est publiee, par regle du projet, que sur la page des mentions
-//     legales : legalNoticeOrganization ci-dessous).
-// Images : fichiers reels de public/ (lib/og.ts), verifies au build par
-// pnpm test:seo.
 export const realEstateAgent = (locale: string) => ({
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
@@ -41,20 +38,9 @@ export const realEstateAgent = (locale: string) => ({
       : locale === "de"
         ? "Luxemburger Immobilienagentur und internationaler Broker."
         : "Agence immobilière luxembourgeoise et broker international.",
+  foundingDate: "2024",
+  address: ORGANIZATION_ADDRESS,
   knowsLanguage: ["fr", "en", "de"],
-  // Contact machine-readable : page Contact uniquement (cf. commentaire
-  // PUBLIC_CONTACT_PATH), forme standard schema.org ContactPoint.
-  contactPoint: {
-    "@type": "ContactPoint",
-    url: `${SITE_URL}/${locale}${PUBLIC_CONTACT_PATH}`,
-    contactType: "customer service",
-    areaServed: "LU",
-    availableLanguage: ["fr", "en", "de"],
-  },
-  address: {
-    "@type": "PostalAddress",
-    addressCountry: "LU",
-  },
   areaServed: [
     { "@type": "Country", name: "Luxembourg" },
     { "@type": "Country", name: "France" },
@@ -96,8 +82,8 @@ export const personJulien = () => ({
   jobTitle: "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
   worksFor: { "@id": `${SITE_URL}#organization` },
   // Portable personnel volontairement exclu du JSON-LD (anti-scraping,
-  // cf. commentaire PUBLIC_CONTACT_PATH), contact machine-readable au
-  // niveau organisation via realEstateAgent().contactPoint uniquement.
+  // aucun telephone ni e-mail dans les donnees structurees (cf.
+  // commentaire ORGANIZATION_ADDRESS).
   sameAs: [
     "https://www.linkedin.com/in/julien-brebion/",
   ],

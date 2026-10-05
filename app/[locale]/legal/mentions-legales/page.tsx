@@ -7,15 +7,16 @@ import { mentions } from "@/lib/legal/mentions";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { siteLogo } from "@/lib/og";
+import { ORGANIZATION_ADDRESS } from "@/lib/seo";
 type Locale = keyof typeof mentions;
 
 const LEGAL_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
 
 /**
- * Etablissement de lib/seo.ts (#organization), complete de son adresse
- * legale, publie UNIQUEMENT ici (seule page autorisee a citer la localite du
- * siege et les numeros d'immatriculation, regle du projet). Valeurs
- * recopiees de lib/legal/mentions.ts, jamais inventees.
+ * Complement de l'etablissement unique (#organization, lib/seo.ts) publie
+ * UNIQUEMENT ici : TVA, RCS et autorisation d'etablissement (regle du
+ * projet). Meme nom, nom legal et adresse que sur toutes les pages
+ * (ORGANIZATION_ADDRESS). Valeurs recopiees de lib/legal/mentions.ts.
  */
 const legalNoticeOrganization = () => ({
   "@context": "https://schema.org",
@@ -25,13 +26,8 @@ const legalNoticeOrganization = () => ({
   legalName: "MAPA Synergy Sàrl",
   url: LEGAL_SITE_URL,
   logo: siteLogo(),
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "26, rue du Commerce",
-    postalCode: "L-3450",
-    addressLocality: "Dudelange",
-    addressCountry: "LU",
-  },
+  foundingDate: "2024",
+  address: ORGANIZATION_ADDRESS,
   vatID: "LU31988923",
   identifier: [
     { "@type": "PropertyValue", propertyID: "RCS Luxembourg", value: "B241974" },

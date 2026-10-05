@@ -140,7 +140,7 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
     [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
   try {
     const pages = [
-      "/fr", "/en/contact", "/de/qui-sommes-nous", "/fr/services/estimer", "/fr/services/simulateurs",
+      "/fr", "/en", "/de", "/en/contact", "/de/qui-sommes-nous", "/fr/services/estimer", "/fr/services/simulateurs",
       "/fr/services/simulateurs/financement", "/fr/services/capacite-emprunt", "/fr/services/rendement-locatif",
       "/fr/services/marches-actifs", "/fr/legal/mentions-legales", "/fr/legal/rgpd", "/fr/villes/belair",
       "/en/villes/paris", "/fr/mandats/exclusif", "/fr/off-market/arcova", "/fr/liste-attente",
@@ -155,8 +155,28 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
       const html = r.body ?? "";
       const blocks = ldBlocks(html);
       const all = blocks.join("\n");
-      if (/aggregateRating|"LocalBusiness"|foundingDate/.test(all)) failures.push(`${p} : note, faux etablissement ou date de creation`);
-      if (p !== "/fr" && !/"BreadcrumbList"/.test(all)) failures.push(`${p} : fil d'Ariane absent`);
+      if (/aggregateRating|"LocalBusiness"/.test(all)) failures.push(`${p} : note ou faux etablissement`);
+      // Etablissement unique, identique sur toutes les pages (regle de Julien).
+      const orgs = blocks.map((b) => { try { return JSON.parse(b); } catch { return null; } })
+        .flatMap((j) => (j && Array.isArray(j["@graph"]) ? j["@graph"] : [j]))
+        .filter((j) => j && j["@type"] === "RealEstateAgent");
+      if (orgs.length === 0) failures.push(`${p} : etablissement absent`);
+      for (const o of orgs) {
+        const a = o.address ?? {};
+        const okAddress = a.streetAddress === "26 Rue du Commerce" && a.postalCode === "L-3450" && a.addressLocality === "Dudelange" && a.addressCountry === "LU";
+        if (o.name !== "MAPA Property" || o.legalName !== "MAPA Synergy Sàrl" || !okAddress || o.foundingDate !== "2024") {
+          failures.push(`${p} : etablissement inexact (${o.name} / ${o.legalName} / ${JSON.stringify(a)} / ${o.foundingDate})`);
+        }
+        if (!p.includes("/legal/mentions-legales") && (o.vatID || o.identifier)) failures.push(`${p} : TVA ou RCS hors des mentions legales`);
+      }
+      // Aucune coordonnee de contact ni position dans les donnees structurees.
+      if (/"(telephone|email|faxNumber|contactPoint|geo|latitude|longitude)"\s*:|mailto:|tel:|\+352|@mapagroup/i.test(all)) {
+        failures.push(`${p} : coordonnee de contact dans les donnees structurees`);
+      }
+      if (/Luxembourg-Ville|Luxembourg City|Luxemburg-Stadt/i.test(JSON.stringify(orgs))) {
+        failures.push(`${p} : adresse de Luxembourg-Ville dans l'etablissement`);
+      }
+      if (!/^\/(fr|en|de)$/.test(p) && !/"BreadcrumbList"/.test(all)) failures.push(`${p} : fil d'Ariane absent`);
       // Images locales citees : fichier present dans public/.
       for (const m of all.matchAll(/"(https?:\/\/[^"]+\.(?:png|jpe?g|webp|avif|svg))"/g)) {
         const u = new URL(m[1]);
@@ -168,11 +188,9 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
         failures.push(`${p} : prix sans source`);
       }
     }
-    // Adresse legale : uniquement sur les mentions legales.
+    // Numeros legaux : uniquement sur les mentions legales.
     const legal = await server.request("/fr/legal/mentions-legales");
-    if (!/"streetAddress"/.test(ldBlocks(legal.body ?? "").join(""))) failures.push("mentions legales : adresse legale absente des donnees structurees");
-    const home = await server.request("/fr");
-    if (/"streetAddress"/.test(ldBlocks(home.body ?? "").join(""))) failures.push("accueil : adresse du siege hors des mentions legales");
+    if (!/"vatID"/.test(ldBlocks(legal.body ?? "").join(""))) failures.push("mentions legales : TVA absente des donnees structurees");
     // Sitemap : aucune adresse qui redirige.
     const sm = await server.request("/sitemap.xml");
     const locs = [...(sm.body ?? "").matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);

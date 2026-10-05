@@ -19,7 +19,8 @@ Lire `node_modules/next/dist/docs/` pour les détails. Respecter les deprecation
 ## Conventions inviolables
 
 - Domaine : `mapaproperty.lu` — JAMAIS `.com`
-- "Dudelange" et numéros AE/RCS/TVA : UNIQUEMENT dans `app/[locale]/legal/mentions-legales/page.tsx`. Partout ailleurs, écrire "Luxembourg".
+- Adresses : MAPA Property a deux bureaux. L'adresse du bureau de Luxembourg-Ville n'est JAMAIS publiée. L'adresse publique est celle de Dudelange (26 Rue du Commerce, L-3450 Dudelange, identique à la fiche Google Business Profile) : établissement unique des données structurées (`lib/seo.ts`, ORGANIZATION_ADDRESS) et mentions légales. Dans les textes du site, écrire "Luxembourg" pour situer l'agence.
+- Numéros AE/RCS/TVA : UNIQUEMENT dans `app/[locale]/legal/mentions-legales/page.tsx` (et `lib/legal/`).
 - Toutes les chaînes UI passent par `next-intl` — jamais en dur dans les composants.
 - Tailwind v4 : couleurs via variables CSS (`bg-bg`, `text-ink`, `text-gold`, etc.) — jamais d'hexa en dur.
 - Server Components par défaut. `'use client'` uniquement si hooks/state/events.
