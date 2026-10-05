@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { pageAlternates } from "@/lib/seo";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
 }: {
@@ -25,12 +26,12 @@ type ServiceCard = {
 // Ordre semantique : pyramide vendeur → acheteur → outils.
 const SERVICE_CARDS: readonly ServiceCard[] = [
   { href: "/services/vendre", key: "sell" },
-  { href: "/services/acheter", key: "buy" },
+  { href: "/biens", key: "buy" },
   { href: "/services/louer", key: "rent" },
   { href: "/services/estimer", key: "estimate" },
   { href: "/services/simulateurs", key: "simulators" },
   { href: "/services/marches-actifs", key: "markets" },
-  { href: "/services/mandat-recherche", key: "search_mandate" },
+  { href: "/mandats/recherche", key: "search_mandate" },
   { href: "/off-market", key: "offmarket" },
 ];
 
@@ -44,6 +45,8 @@ export default async function ServicesIndexPage({
   const t = await getTranslations({ locale, namespace: "services_page" });
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/services" />
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-6xl">
         <header className="mb-12 max-w-3xl">
@@ -81,5 +84,6 @@ export default async function ServicesIndexPage({
         </ul>
       </div>
     </div>
+    </>
   );
 }

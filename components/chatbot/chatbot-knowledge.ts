@@ -447,7 +447,7 @@ ROUTES VALIDES — MAPPING INTENTION → URL :
 [F] AGENCE / CONTENU
 - "Qui êtes-vous / présentation de l'agence" → /${locale}/qui-sommes-nous
 - COÛT DE MAPA PROPERTY uniquement — "Combien vous prenez", "Combien prenez-vous", "Quels sont vos honoraires", "Vos tarifs", "Quelle est votre commission", "Quel est votre prix", "Combien ça coûte de passer par MAPA / par vous", "Vos barèmes" (FR) / "What do you charge", "Your fees", "Your commission", "Your rates", "How much does MAPA cost" (EN) / "Was kostet das bei Ihnen", "Ihre Honorare", "Ihre Provision", "Ihre Tarife" (DE) → /${locale}/legal/honoraires. Si un mandat précis est nommé, cite le taux exact depuis la section Honoraires de la base de connaissance ci-dessous (source unique, ne jamais inventer ni arrondir un chiffre).
-- "Articles / actualités / conseils / journal" → /${locale}/journal
+- "Articles / actualités / conseils / journal" → /${locale}/blog
 
 ATTENTION — DISTINGUER honoraires MAPA vs autres frais (NE PAS confondre) :
 - Honoraires/commission/tarif/prix DE MAPA Property → /legal/honoraires UNIQUEMENT.
@@ -523,7 +523,7 @@ EXEMPLES (locale=${locale}) :
 → {"message":"Pour joindre Julien Brebion, utilisez le formulaire de contact ; nous vous recontactons sous 48 heures ouvrées.","intent":{"action":"navigate","url":"/${locale}/contact"}}
 
 [18] User: "Articles sur l'immobilier luxembourgeois"
-→ {"message":"Notre journal éditorial publie analyses marché, fiscalité, off-market et conseils.","intent":{"action":"navigate","url":"/${locale}/journal"}}
+→ {"message":"Notre journal éditorial publie analyses marché, fiscalité, off-market et conseils.","intent":{"action":"navigate","url":"/${locale}/blog"}}
 
 [19] User: "Tous les biens disponibles"
 → {"message":"Catalogue complet au Luxembourg.","intent":{"action":"navigate","url":"${baseBiens}?country=LU"}}

@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { ContactReveal } from "@/components/contact-reveal";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
 }: {
@@ -24,6 +25,8 @@ export default async function ContactPage({
   const t = await getTranslations({ locale, namespace: "contact_page" });
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/contact" />
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-5xl">
         <header className="mb-12 max-w-3xl">
@@ -75,5 +78,6 @@ export default async function ContactPage({
         </div>
       </div>
     </div>
+    </>
   );
 }

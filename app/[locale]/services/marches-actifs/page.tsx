@@ -6,6 +6,9 @@ import { internationalRegions, luxembourgCommunes } from "@/lib/markets";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+import { ExploreLinks } from "@/components/seo/ExploreLinks";
+import { cities } from "@/lib/cities";
 export async function generateMetadata({
   params,
 }: {
@@ -26,6 +29,8 @@ export default async function ActiveMarketsPage({
   const t = await getTranslations({ locale, namespace: "markets_page" });
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/services/marches-actifs" />
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-[1400px]">
         <header className="mb-14 max-w-3xl">
@@ -109,7 +114,12 @@ export default async function ActiveMarketsPage({
         {/* Sprint juridique : disclaimer unifie sous les tableaux de
             donnees STATEC/Observatoire (remplace l'ancienne mention custom). */}
         <DisclaimerLegal className="mt-12" />
+        {/* Maillage (oct. 2026) : les 52 pages villes. */}
+        <section className="mt-16 border-t border-line pt-10">
+          <ExploreLinks cities={cities} showAllCities={false} />
+        </section>
       </div>
     </div>
+    </>
   );
 }

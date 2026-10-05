@@ -1463,6 +1463,13 @@
         "terrain": "Terrain",
         "property": "Bien d'exception"
       }
+    },
+    "city": {
+      "title": "{city}, immobilier de prestige"
+    },
+    "yield": {
+      "title": "Simulateur de rendement locatif",
+      "description": "Calculez le rendement brut et net d'un investissement locatif au Luxembourg : prix, loyer, charges et frais d'acquisition, dans le respect du plafond légal des loyers."
     }
   },
   "admin_datetime": {
@@ -3529,6 +3536,65 @@
     "reason_aal2": "double authentification",
     "reason_invalid_credentials": "identifiants incorrects",
     "reason_wrong_current": "ancien mot de passe incorrect",
-    "event_auth_passkey_step": "Étape de connexion par Passkey"
+    "event_auth_passkey_step": "Étape de connexion par Passkey",
+    "task_indexnow": "Signalement IndexNow"
+  },
+  "breadcrumb": {
+    "home": "Accueil",
+    "properties": "Biens",
+    "blog": "Blog",
+    "contact": "Contact",
+    "waitlist": "Liste d'attente",
+    "acquisition_notice": "Mentions du simulateur d'acquisition",
+    "offmarket": "Off-Market",
+    "arcova": "ARCOVA",
+    "about": "Qui sommes-nous",
+    "services": "Services",
+    "borrowing": "Capacité d'emprunt",
+    "estimate": "Estimation",
+    "rent": "Louer",
+    "markets": "Marchés actifs",
+    "yield": "Rendement locatif",
+    "simulators": "Simulateurs",
+    "financing": "Simulateur de financement",
+    "sell": "Vendre",
+    "terms_use": "Conditions générales d'utilisation",
+    "terms_sale": "Conditions générales de vente",
+    "fees": "Honoraires",
+    "ai": "Intelligence artificielle",
+    "legal_notice": "Mentions légales",
+    "privacy": "Politique RGPD"
+  },
+  "not_found": {
+    "eyebrow": "Erreur 404",
+    "title": "Cette page n'existe pas ou plus",
+    "text": "L'adresse a peut-être changé. Cherchez un bien ci-dessous ou choisissez une rubrique.",
+    "search_label": "Rechercher un bien",
+    "search_placeholder": "Commune ou ville",
+    "transaction_label": "Type de transaction",
+    "transaction_all": "Vente et location",
+    "transaction_sale": "Vente",
+    "transaction_rent": "Location",
+    "search_submit": "Rechercher",
+    "links_title": "Pages principales",
+    "link_home": "Accueil",
+    "link_properties": "Tous nos biens",
+    "link_estimate": "Estimer un bien",
+    "link_simulators": "Simulateurs",
+    "link_markets": "Marchés actifs",
+    "link_offmarket": "Off-Market",
+    "link_blog": "Blog",
+    "link_contact": "Contact"
+  },
+  "explore": {
+    "title_cities": "Marchés par ville",
+    "title_simulators": "Simulateurs",
+    "all_cities": "Toutes les villes",
+    "sim_financing": "Simulateur de financement",
+    "sim_borrowing": "Capacité d'emprunt",
+    "sim_yield": "Rendement locatif",
+    "section_title": "Explorer les marchés et simuler votre projet",
+    "city_market": "Le marché à {city}",
+    "fiche_title": "Pour aller plus loin"
   }
 }

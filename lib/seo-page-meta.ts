@@ -23,7 +23,8 @@ export type SeoPageKey =
   | "terms_sale"
   | "privacy"
   | "legal_notice"
-  | "ai";
+  | "ai"
+  | "yield";
 
 
 export function buildPageMetadata(

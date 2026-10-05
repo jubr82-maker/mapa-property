@@ -62,7 +62,7 @@ export async function setPropertyPublished(id: string, isPublished: boolean) {
   });
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePublicPropertyPages();
+  revalidatePublicPropertyPages(id);
 }
 
 export async function setPropertyFeatured(id: string, isFeatured: boolean) {
@@ -76,7 +76,7 @@ export async function setPropertyFeatured(id: string, isFeatured: boolean) {
   if (error) throw new Error(error.message);
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePublicPropertyPages();
+  revalidatePublicPropertyPages(id);
 }
 
 /**
@@ -333,7 +333,7 @@ export async function updateProperty(
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePath(`/admin/properties/${id}`);
-  revalidatePublicPropertyPages();
+  revalidatePublicPropertyPages(id);
   return { ok: true };
 }
 
@@ -364,7 +364,7 @@ export async function updatePropertyVideoUrl(
   // PropertyVideoForm reflète déjà l'URL sauvée localement.
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePublicPropertyPages();
+  revalidatePublicPropertyPages(propertyId);
 }
 
 // ============================================================================
@@ -548,10 +548,10 @@ export type PropertyLifecycleResult =
 
 const PHOTO_BUCKET = "property-images";
 
-function revalidatePropertyPaths() {
+function revalidatePropertyPaths(id: string) {
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePublicPropertyPages();
+  revalidatePublicPropertyPages(id);
   invalidateArchivedPropertyKeys();
 }
 
@@ -583,7 +583,7 @@ export async function archiveProperty(id: string): Promise<PropertyLifecycleResu
     .eq("id", id);
   if (upErr) return { ok: false, error: upErr.message };
   await logAdminAction({ actorEmail: user.email, action: "property_archived", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
-  revalidatePropertyPaths();
+  revalidatePropertyPaths(id);
   return { ok: true };
 }
 
@@ -599,7 +599,7 @@ export async function restoreProperty(id: string): Promise<PropertyLifecycleResu
     .eq("id", id);
   if (upErr) return { ok: false, error: upErr.message };
   await logAdminAction({ actorEmail: user.email, action: "property_restored", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
-  revalidatePropertyPaths();
+  revalidatePropertyPaths(id);
   return { ok: true };
 }
 
@@ -637,7 +637,7 @@ export async function deleteProperty(
   console.info("[admin/properties] bien supprime, fichiers conserves", { id, files: media.length });
   await logAdminAction({ actorEmail: user.email, action: "property_deleted", targetTable: "properties", targetId: id, diff: { slug: row.slug, files: media.length } });
   await sendAdminAlert("property_deleted", { reference: row.slug || row.id, actor: user.email });
-  revalidatePropertyPaths();
+  revalidatePropertyPaths(id);
   return { ok: true, media };
 }
 

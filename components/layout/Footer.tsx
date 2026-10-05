@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ContactReveal } from "@/components/contact-reveal";
 import { ManageCookiesLink } from "@/components/consent/ManageCookiesLink";
+import { ExploreLinks } from "@/components/seo/ExploreLinks";
 
 const colServices = [
   { href: "/services/vendre", key: "sell" },
@@ -104,6 +105,11 @@ export function Footer() {
               <ManageCookiesLink label={t("manage_cookies")} />
             </li>
           </FooterCol>
+        </div>
+
+        {/* Maillage (oct. 2026) : pages villes et simulateurs. */}
+        <div className="mt-12 border-t border-line pt-10">
+          <ExploreLinks variant="footer" />
         </div>
 
         <div className="mt-14 h-[2px] w-full bg-gold" />

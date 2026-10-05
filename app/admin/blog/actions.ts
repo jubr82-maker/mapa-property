@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidatePublicBlogPages } from "@/lib/revalidate-property";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { assertAdminAction } from "@/lib/admin/require-admin";
@@ -49,6 +50,7 @@ export async function createBlogPost(formData: FormData) {
     .single();
   if (error) throw new Error(error.message);
   revalidatePath("/admin/blog");
+  revalidatePublicBlogPages(data.id);
   redirect(`/admin/blog/${data.id}/edit`);
 }
 
@@ -62,7 +64,8 @@ export async function updateBlogPost(id: string, formData: FormData) {
     .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/blog");
-  revalidatePath("/fr/blog");
+  // Toutes les langues, l'article et l'accueil ; IndexNow (oct. 2026).
+  revalidatePublicBlogPages(id);
 }
 
 export async function deleteBlogPost(id: string) {
@@ -72,5 +75,6 @@ export async function deleteBlogPost(id: string) {
   const { error } = await supabase.from("blog_posts").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/blog");
+  revalidatePublicBlogPages();
   redirect("/admin/blog");
 }

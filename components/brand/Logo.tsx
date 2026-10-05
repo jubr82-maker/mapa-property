@@ -34,6 +34,8 @@ type LogoProps = {
   tone?: "auto" | "light" | "dark";
   className?: string;
   priority?: boolean;
+  /** "eager" : charge sans attendre, SANS preload ni priorite reseau. */
+  loading?: "eager" | "lazy";
 };
 
 export function Logo({
@@ -41,6 +43,7 @@ export function Logo({
   tone = "auto",
   className = "",
   priority = false,
+  loading,
 }: LogoProps) {
   // SSR + pré-mount : true (nuit défaut). Observe ensuite la classe
   // `.dark` sur <html> via MutationObserver — synchro garantie quelle
@@ -67,6 +70,11 @@ export function Logo({
       width={width}
       height={height}
       priority={priority}
+      loading={priority ? undefined : loading}
+      // Sans priorite : React prechargerait sinon toute image non differee
+      // du haut de page (logos mobile et ordinateur) en concurrence avec
+      // l'image principale.
+      fetchPriority={priority ? undefined : "low"}
       className={className}
     />
   );

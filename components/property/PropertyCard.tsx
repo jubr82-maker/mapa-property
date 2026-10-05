@@ -9,6 +9,8 @@ interface PropertyCardProps {
   property: PropertyWithCover;
   locale: Locale;
   priority?: boolean;
+  /** Chargement immediat sans preload (cartes visibles a l'ouverture). */
+  eager?: boolean;
   /**
    * Mini-fiche pour les carrousels (ex. SiblingCarousel) : padding et
    * texte réduits, specs limitées à l'essentiel (chambres). N'affecte pas
@@ -38,6 +40,7 @@ export function PropertyCard({
   property,
   locale,
   priority = false,
+  eager = false,
   compact = false,
   onClick,
 }: PropertyCardProps) {
@@ -65,6 +68,7 @@ export function PropertyCard({
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 90vw"
             priority={priority}
+            loading={priority ? undefined : eager ? "eager" : undefined}
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

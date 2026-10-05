@@ -1463,6 +1463,13 @@
         "terrain": "Grundstück",
         "property": "Ausnahmeobjekt"
       }
+    },
+    "city": {
+      "title": "{city}, Prestige-Immobilien"
+    },
+    "yield": {
+      "title": "Mietrendite-Rechner",
+      "description": "Berechnen Sie die Brutto- und Nettorendite einer Mietinvestition in Luxemburg: Preis, Miete, Nebenkosten und Erwerbskosten, unter Beachtung der gesetzlichen Mietobergrenze."
     }
   },
   "admin_datetime": {
@@ -3529,6 +3536,65 @@
     "reason_aal2": "Zwei-Faktor",
     "reason_invalid_credentials": "falsche Zugangsdaten",
     "reason_wrong_current": "falsches aktuelles Passwort",
-    "event_auth_passkey_step": "Schritt der Passkey-Anmeldung"
+    "event_auth_passkey_step": "Schritt der Passkey-Anmeldung",
+    "task_indexnow": "IndexNow-Meldung"
+  },
+  "breadcrumb": {
+    "home": "Startseite",
+    "properties": "Immobilien",
+    "blog": "Blog",
+    "contact": "Kontakt",
+    "waitlist": "Warteliste",
+    "acquisition_notice": "Hinweise zum Erwerbskostenrechner",
+    "offmarket": "Off-Market",
+    "arcova": "ARCOVA",
+    "about": "Über uns",
+    "services": "Leistungen",
+    "borrowing": "Kreditrahmen",
+    "estimate": "Bewertung",
+    "rent": "Vermieten",
+    "markets": "Aktive Märkte",
+    "yield": "Mietrendite",
+    "simulators": "Rechner",
+    "financing": "Finanzierungsrechner",
+    "sell": "Verkaufen",
+    "terms_use": "Nutzungsbedingungen",
+    "terms_sale": "Allgemeine Geschäftsbedingungen",
+    "fees": "Honorare",
+    "ai": "Künstliche Intelligenz",
+    "legal_notice": "Impressum",
+    "privacy": "Datenschutz"
+  },
+  "not_found": {
+    "eyebrow": "Fehler 404",
+    "title": "Diese Seite existiert nicht oder nicht mehr",
+    "text": "Die Adresse hat sich möglicherweise geändert. Suchen Sie unten eine Immobilie oder wählen Sie eine Rubrik.",
+    "search_label": "Immobilie suchen",
+    "search_placeholder": "Gemeinde oder Stadt",
+    "transaction_label": "Art der Transaktion",
+    "transaction_all": "Kauf und Miete",
+    "transaction_sale": "Kauf",
+    "transaction_rent": "Miete",
+    "search_submit": "Suchen",
+    "links_title": "Hauptseiten",
+    "link_home": "Startseite",
+    "link_properties": "Alle Immobilien",
+    "link_estimate": "Immobilie bewerten",
+    "link_simulators": "Rechner",
+    "link_markets": "Aktive Märkte",
+    "link_offmarket": "Off-Market",
+    "link_blog": "Blog",
+    "link_contact": "Kontakt"
+  },
+  "explore": {
+    "title_cities": "Märkte nach Stadt",
+    "title_simulators": "Rechner",
+    "all_cities": "Alle Städte",
+    "sim_financing": "Finanzierungsrechner",
+    "sim_borrowing": "Kreditrahmen",
+    "sim_yield": "Mietrendite",
+    "section_title": "Märkte entdecken und Ihr Projekt berechnen",
+    "city_market": "Der Markt in {city}",
+    "fiche_title": "Weiterführend"
   }
 }

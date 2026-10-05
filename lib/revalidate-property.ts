@@ -11,11 +11,48 @@
 // regeneree qu'a sa prochaine visite.
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PROPERTIES_LIST_TAG } from "@/lib/data";
+import { localizedUrls, scheduleIndexNow } from "@/lib/indexnow";
+import { supabaseService } from "@/lib/supabase-service";
 
-export function revalidatePublicPropertyPages(): void {
+/**
+ * `propertyId` (facultatif) : bien publie ou modifie, signale a IndexNow
+ * (fiche dans les trois langues et liste des biens) apres la reponse.
+ */
+export function revalidatePublicPropertyPages(propertyId?: string | null): void {
+  if (propertyId) {
+    scheduleIndexNow(async () => {
+      const { data } = await supabaseService()
+        .from("properties")
+        .select("slug,is_published")
+        .eq("id", propertyId)
+        .maybeSingle();
+      const row = data as { slug: string | null; is_published: boolean | null } | null;
+      const urls = localizedUrls("/biens");
+      if (row?.slug) urls.push(...localizedUrls(`/biens/${row.slug}`));
+      return urls;
+    });
+  }
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/[locale]/biens/[slug]", "page");
   revalidatePath("/[locale]/biens", "page");
   revalidatePath("/[locale]/villes/[ville]", "page");
   revalidatePath("/[locale]", "page");
+}
+
+/** Articles du blog : liste, articles, accueil (apercu) ; IndexNow si `postId`. */
+export function revalidatePublicBlogPages(postId?: string | null): void {
+  revalidatePath("/[locale]/blog", "page");
+  revalidatePath("/[locale]/blog/[slug]", "page");
+  revalidatePath("/[locale]", "page");
+  if (postId) {
+    scheduleIndexNow(async () => {
+      const { data } = await supabaseService()
+        .from("blog_posts")
+        .select("slug")
+        .eq("id", postId)
+        .maybeSingle();
+      const slug = (data as { slug: string | null } | null)?.slug;
+      return [...localizedUrls("/blog"), ...(slug ? localizedUrls(`/blog/${slug}`) : [])];
+    });
+  }
 }

@@ -4,6 +4,7 @@ import { ALL_MANDATE_SLUGS, MANDATES } from "@/lib/mandates";
 import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 import { pageAlternates } from "@/lib/seo";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
 }: {
@@ -30,6 +31,8 @@ export default async function SellPage({
   const sellableMandates = ALL_MANDATE_SLUGS.filter((m) => m !== "recherche");
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/services/vendre" />
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-[1400px]">
         <header className="mb-14 max-w-3xl">
@@ -126,5 +129,6 @@ export default async function SellPage({
         </FadeInOnScroll>
       </div>
     </div>
+    </>
   );
 }

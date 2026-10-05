@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { brandedTitle, htmlToPlainText, metaDescription } from "@/lib/meta-text";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import {
   fetchAllPropertiesWithCover,
@@ -35,7 +35,10 @@ import {
   ALL_SECTION_TITLE_KEYS,
 } from "@/lib/property-description-parser";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { breadcrumb, realEstateListing, pageAlternates } from "@/lib/seo";
+import { realEstateListing, pageAlternates } from "@/lib/seo";
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+import { ExploreLinks } from "@/components/seo/ExploreLinks";
+import { cityForPlace, featuredCities } from "@/lib/internal-links";
 import { siteShareImage } from "@/lib/og";
 import { transactionDetailLabel } from "@/lib/taxonomy/property-types";
 
@@ -164,7 +167,7 @@ export default async function PropertyPage({
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (UUID_RE.test(slug)) {
       const off = await fetchOffmarketById(slug);
-      if (off) redirect(`/${locale}/off-market/${off.id}`);
+      if (off) permanentRedirect(`/${locale}/off-market/${off.id}`);
     }
     notFound();
   }
@@ -176,6 +179,7 @@ export default async function PropertyPage({
 
   const t = await getTranslations({ locale, namespace: "property" });
   const tf = await getTranslations({ locale, namespace: "fiche" });
+  const tEx = await getTranslations({ locale, namespace: "explore" });
   const title = pickLang(property, "title", locale as Locale);
   const description = pickLang(property, "description", locale as Locale);
   // Sprint UI-I18N : on construit le dict { titleKey -> label localise }
@@ -230,9 +234,12 @@ export default async function PropertyPage({
 
   const propertyJsonLd = realEstateListing({
     name: title,
-    description: description.slice(0, 300),
+    description: htmlToPlainText(description).slice(0, 500),
     url: `${SITE_URL}/${locale}/biens/${property.slug}`,
-    image: galleryItems[0]?.url,
+    images: galleryItems.map((g) => g.url).slice(0, 12),
+    datePosted: (property as { created_at?: string | null }).created_at ?? null,
+    dateModified: (property as { updated_at?: string | null }).updated_at ?? null,
+    identifier: property.slug ?? property.id,
     locale,
     price: property.price,
     city: property.city,
@@ -242,11 +249,6 @@ export default async function PropertyPage({
     bathrooms: property.bathrooms,
     propertyType,
   });
-  const breadcrumbJsonLd = breadcrumb([
-    { name: "MAPA Property", url: `${SITE_URL}/${locale}` },
-    { name: "Biens", url: `${SITE_URL}/${locale}/biens` },
-    { name: title, url: `${SITE_URL}/${locale}/biens/${property.slug}` },
-  ]);
 
 
   const formattedPrice = formatPrice(
@@ -370,7 +372,8 @@ export default async function PropertyPage({
         price={property.price}
         offmarket={false}
       />
-      <JsonLd data={[propertyJsonLd, breadcrumbJsonLd]} />
+      <JsonLd data={propertyJsonLd} />
+      <PageBreadcrumb locale={locale} path={`/biens/${property.slug}`} current={htmlToPlainText(title)} />
       {/* Print-only : entete logo sombre + URL canonique. Invisible a l'ecran. */}
       <div data-fiche-print-header className="hidden print:block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -481,6 +484,20 @@ export default async function PropertyPage({
             propertyTitle={title}
             defaultMessage={`Bonjour, je souhaite plus d'informations sur le bien : ${title}.`}
           />
+        </section>
+
+        {/* Maillage (oct. 2026) : page de la ville du bien, si elle existe,
+            et simulateurs. */}
+        <section className="mt-16 border-t border-line pt-10 print:hidden">
+          <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">{tEx("fiche_title")}</h2>
+          <div className="mt-6">
+            <ExploreLinks
+              cities={(() => {
+                const c = cityForPlace(property.city);
+                return c ? [c] : featuredCities().slice(0, 4);
+              })()}
+            />
+          </div>
         </section>
 
         {/* Biens similaires */}

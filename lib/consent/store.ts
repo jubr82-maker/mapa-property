@@ -1,5 +1,7 @@
 "use client";
 
+import { CONSENT_STORAGE_KEY, CONSENT_VERSION } from "@/lib/consent/decided-script";
+
 /**
  * Store de consentement cookies — opt-in strict (RGPD).
  * Pattern calqué sur lib/use-favorites.ts (localStorage + CustomEvent pour
@@ -20,10 +22,10 @@ export interface ConsentState {
   version: number;
 }
 
-const KEY = "mp_cookie_consent";
+const KEY = CONSENT_STORAGE_KEY;
 const CHANGE_EVENT = "mapa-consent-change";
 const REOPEN_EVENT = "mapa-consent-reopen";
-const VERSION = 1;
+const VERSION = CONSENT_VERSION;
 
 function read(): ConsentState | null {
   if (typeof window === "undefined") return null;

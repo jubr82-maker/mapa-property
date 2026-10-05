@@ -5,6 +5,7 @@ import { ContactReveal } from "@/components/contact-reveal";
 import { pageAlternates } from "@/lib/seo";
 import { BROKER_POSITION } from "@/lib/legal/broker-position";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 // Sprint IA-TRANSPARENCE : portrait local optimise (webp, cadrage buste),
 // remplace l'ancienne photo distante sbUrl("photos","IMG_2461.jpg").
 const JULIEN_PORTRAIT_SRC = "/images/julien-brebion-2026-portrait.webp";
@@ -35,6 +36,8 @@ export default async function AboutPage({
     BROKER_POSITION[locale as keyof typeof BROKER_POSITION] ?? BROKER_POSITION.fr;
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/qui-sommes-nous" />
     <article className="pt-24 lg:pt-32">
       <div className="mx-auto max-w-[1100px] px-6 lg:px-10">
         <header className="mb-14">
@@ -131,5 +134,6 @@ export default async function AboutPage({
         </p>
       </div>
     </article>
+    </>
   );
 }

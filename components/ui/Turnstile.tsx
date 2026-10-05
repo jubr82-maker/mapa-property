@@ -113,7 +113,32 @@ export const Turnstile = forwardRef<TurnstileHandle, Props>(function Turnstile(
 
   // Ne rendre le widget qu'APRÈS le mount client (évite le mismatch
   // SSR/hydration et le flicker au premier paint).
-  useEffect(() => setMounted(true), []);
+  // Perf mobile (oct. 2026) : le script Cloudflare (plus de 100 Ko de
+  // JavaScript tiers) n'est plus charge a l'ouverture de la page, mais
+  // quand le formulaire approche de l'ecran (300 px avant) ou au premier
+  // geste du visiteur. La protection est identique : aucun envoi sans
+  // jeton, le delai de secours (FALLBACK_MS) part de l'activation.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setMounted(true);
+      return;
+    }
+    const activate = () => setMounted(true);
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) activate();
+      },
+      { rootMargin: "300px" },
+    );
+    io.observe(el);
+    const events = ["pointerdown", "keydown", "focusin"] as const;
+    events.forEach((ev) => window.addEventListener(ev, activate, { once: true, passive: true }));
+    return () => {
+      io.disconnect();
+      events.forEach((ev) => window.removeEventListener(ev, activate));
+    };
+  }, []);
 
   useEffect(() => {
     if (!sitekey || !mounted || !ref.current) return;

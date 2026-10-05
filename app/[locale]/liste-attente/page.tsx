@@ -4,6 +4,7 @@ import { WaitlistForm } from "@/components/forms/WaitlistForm";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { pageAlternates } from "@/lib/seo";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
 }: {
@@ -28,6 +29,8 @@ export default async function WaitlistPage({
   const t = await getTranslations({ locale, namespace: "waitlist_page" });
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/liste-attente" />
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-3xl">
         <header className="mb-10 max-w-2xl">
@@ -43,5 +46,6 @@ export default async function WaitlistPage({
         <WaitlistForm />
       </div>
     </div>
+    </>
   );
 }

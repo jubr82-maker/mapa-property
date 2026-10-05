@@ -1,0 +1,196 @@
+// Suite redirections, donnees structurees et diffusion (oct. 2026). Echoue
+// si, sur le build de production local servi en memoire :
+//  - un format d'adresse de l'ancien site ne redirige pas en 308 vers son
+//    equivalent exact (un controle par format) ;
+//  - une redirection publique repond 307 (hors accueil "/", qui choisit la
+//    langue du visiteur et reste volontairement temporaire) ;
+//  - la page 404 n'est pas utile (recherche, liens) ou ne repond pas 404 ;
+//  - une donnee structuree cite une image locale absente, une note, un faux
+//    etablissement ou une date de creation non sourcee ;
+//  - une page publique n'a pas de fil d'Ariane ;
+//  - le sitemap cite une adresse qui redirige ;
+//  - une page de ville etrangere affiche un prix sans source.
+import { test, expect } from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
+import { startServerProcess } from "./server-client";
+import {
+  OLD_SITE_PAGES,
+  V28_PAGES,
+  legacyPropertyDestination,
+  legacyPropertyId,
+  resolveLegacyPath,
+} from "../../lib/legacy-redirects";
+import { indexNowPayload, INDEXNOW_KEY_PATTERN } from "../../lib/indexnow";
+import { breadcrumbTrail } from "../../lib/breadcrumbs";
+
+const ROOT = path.resolve(__dirname, "../..");
+// Hors ligne (SEO_OFFLINE=1), une page rendue a la demande qui lit
+// Supabase ne repond pas (598) : listee comme NON VERIFIEE, jamais OK.
+const OFFLINE = process.env.SEO_OFFLINE === "1";
+const unverified: string[] = [];
+test.afterAll(() => {
+  if (unverified.length) console.log(`NON VERIFIE (hors ligne) : ${unverified.join(", ")}`);
+});
+const read = (p: string) => fs.readFileSync(path.join(ROOT, p), "utf8");
+
+function pathOf(location: string | undefined): string {
+  if (!location) return "";
+  const u = new URL(location, "http://localhost");
+  return `${u.pathname}${u.search}`;
+}
+
+test("logique des anciennes adresses (sans serveur)", () => {
+  // Identifiant en fin d'adresse (format observe dans Google Analytics).
+  expect(legacyPropertyId("vente+maison+hagen+87109262")).toBe("87109262");
+  expect(legacyPropertyId("vente+commerce+fentange+86747780")).toBe("86747780");
+  expect(legacyPropertyId("vente+appartement+steinfort+superbe-appartement-duplex-2-chambres-a")).toBeNull();
+  // Bien publie : fiche canonique (slug) dans la meme langue.
+  const map = new Map([["87109262", "maison-hagen-87109262"]]);
+  expect(legacyPropertyDestination({ locale: "de", id: "87109262" }, map)).toBe("/de/biens/maison-hagen-87109262");
+  // Bien absent : liste des biens de la langue, jamais une erreur.
+  expect(legacyPropertyDestination({ locale: "en", id: "11111111" }, map)).toBe("/en/biens");
+  expect(legacyPropertyDestination({ locale: "fr", id: null }, map)).toBe("/fr/biens");
+  // Adresses actuelles jamais detournees.
+  for (const p of ["/fr", "/fr/biens", "/fr/biens/86388715", "/en/off-market/abc", "/de/blog/x", "/fr/villes/belair"]) {
+    expect(resolveLegacyPath(p), p).toBeNull();
+  }
+  // Fil d'Ariane : niveaux sans page jamais cites.
+  expect(breadcrumbTrail("/legal/cgu").map((c) => c.path)).toEqual(["/legal/cgu"]);
+  expect(breadcrumbTrail("/villes/belair", "Belair").map((c) => c.path)).toEqual(["/services", "/services/marches-actifs", "/villes/belair"]);
+  // IndexNow : cle hexadecimale, URL du site uniquement, aucun nom.
+  expect(INDEXNOW_KEY_PATTERN.test("0123456789abcdef0123456789abcdef")).toBe(true);
+  expect(INDEXNOW_KEY_PATTERN.test("MAPA-key")).toBe(false);
+  const payload = indexNowPayload("0123456789abcdef", ["https://mapaproperty.lu/fr/biens"]);
+  expect(payload.keyLocation.endsWith("/0123456789abcdef.txt")).toBe(true);
+  expect(JSON.stringify(payload)).not.toMatch(/julien|brebion|@/i);
+});
+
+test("redirections 308 : un controle par format d'adresse", async () => {
+  const server = await startServerProcess();
+  const failures: string[] = [];
+  const expect308 = async (from: string, to: RegExp | string) => {
+    const r = await server.request(from);
+    const loc = pathOf(r.headers["location"]);
+    const ok = r.status === 308 && (typeof to === "string" ? loc === to : to.test(loc));
+    if (!ok) failures.push(`${from} -> ${r.status} ${loc} (attendu 308 ${to})`);
+  };
+  try {
+    // B. Fiches de l'ancien site (identifiant final), meme langue. Hors
+    // ligne, aucun bien n'est lu : la liste des biens de la langue.
+    await expect308("/fr/propriete/vente+maison+hagen+87109262", /^\/fr\/biens(\/[^/?]+)?$/);
+    await expect308("/fr/propriete/vente+immeuble+luxembourg+85866347", /^\/fr\/biens(\/[^/?]+)?$/);
+    await expect308("/fr/propriete/vente+appartement+steinfort+superbe-appartement-duplex-2-chambres-a", "/fr/biens");
+    await expect308("/en/property/sale+house+hagen+87109262", /^\/en\/biens(\/[^/?]+)?$/);
+    await expect308("/de/immobilie/verkauf+haus+hagen+87109262", /^\/de\/biens(\/[^/?]+)?$/);
+    await expect308("/de/immobilien/verkauf+haus+hagen+87109262", /^\/de\/biens(\/[^/?]+)?$/);
+    // B. Pages de l'ancien site.
+    for (const [seg, to] of Object.entries(OLD_SITE_PAGES)) {
+      for (const l of ["fr", "en", "de"]) await expect308(`/${l}/${seg}`, `/${l}${to}`);
+    }
+    // Barres finales -> sans barre.
+    await expect308("/en/", "/en");
+    await expect308("/fr/", "/fr");
+    await expect308("/fr/biens/", "/fr/biens");
+    // A. Site v28 (sans langue).
+    for (const [from, to] of Object.entries(V28_PAGES)) await expect308(from, `/fr${to}`);
+    await expect308("/blog/vendre-luxembourg-2026-prix-estimation", "/fr/blog/vendre-luxembourg-2026-prix-estimation");
+    await expect308("/content/article-1-fr.html", "/fr/blog");
+    await expect308("/content/article-2-en.html", "/en/blog");
+    await expect308("/content/article-3-de.html", "/de/blog");
+    await expect308("/index.html", "/fr");
+    await expect308("/403.html", "/fr");
+    // Adresse sans langue inconnue du v28 -> version francaise.
+    await expect308("/biens", "/fr/biens");
+    // C. Doublons et renvois internes.
+    for (const l of ["fr", "en", "de"]) {
+      await expect308(`/${l}/journal`, `/${l}/blog`);
+      await expect308(`/${l}/services/acheter`, `/${l}/biens`);
+      await expect308(`/${l}/services/mandat-recherche`, `/${l}/mandats/recherche`);
+      await expect308(`/${l}/services/mandat-exclusif`, `/${l}/mandats/exclusif`);
+    }
+    // Accueil "/" : seule redirection temporaire publique (choix de langue).
+    const home = await server.request("/");
+    if (home.status !== 307 || !/^\/(fr|en|de)$/.test(pathOf(home.headers["location"]))) {
+      failures.push(`/ -> ${home.status} ${home.headers["location"]} (attendu 307 vers une langue)`);
+    }
+    // Page 404 utile, dans chaque langue.
+    for (const l of ["fr", "en", "de"]) {
+      const r = await server.request(`/${l}/cette-page-n-existe-pas`);
+      if (OFFLINE && r.status >= 590) {
+        unverified.push(`/${l}/cette-page-n-existe-pas`);
+        continue;
+      }
+      const body = r.body ?? "";
+      if (r.status !== 404 || !body.includes(`action="/${l}/biens"`) || !body.includes(`href="/${l}/contact"`)) {
+        failures.push(`/${l}/cette-page-n-existe-pas -> ${r.status} (attendu 404 avec recherche et liens)`);
+      }
+    }
+  } finally {
+    await server.close();
+  }
+  expect(failures, failures.join("\n")).toEqual([]);
+});
+
+test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () => {
+  const server = await startServerProcess();
+  const failures: string[] = [];
+  const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu").replace(/\/$/, "");
+  const ldBlocks = (html: string) =>
+    [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  try {
+    const pages = [
+      "/fr", "/en/contact", "/de/qui-sommes-nous", "/fr/services/estimer", "/fr/services/simulateurs",
+      "/fr/services/simulateurs/financement", "/fr/services/capacite-emprunt", "/fr/services/rendement-locatif",
+      "/fr/services/marches-actifs", "/fr/legal/mentions-legales", "/fr/legal/rgpd", "/fr/villes/belair",
+      "/en/villes/paris", "/fr/mandats/exclusif", "/fr/off-market/arcova", "/fr/liste-attente",
+    ];
+    for (const p of pages) {
+      const r = await server.request(p);
+      if (r.status >= 590) {
+        if (OFFLINE) unverified.push(p);
+        else failures.push(`${p} : non rendue (${r.status})`);
+        continue;
+      }
+      const html = r.body ?? "";
+      const blocks = ldBlocks(html);
+      const all = blocks.join("\n");
+      if (/aggregateRating|"LocalBusiness"|foundingDate/.test(all)) failures.push(`${p} : note, faux etablissement ou date de creation`);
+      if (p !== "/fr" && !/"BreadcrumbList"/.test(all)) failures.push(`${p} : fil d'Ariane absent`);
+      // Images locales citees : fichier present dans public/.
+      for (const m of all.matchAll(/"(https?:\/\/[^"]+\.(?:png|jpe?g|webp|avif|svg))"/g)) {
+        const u = new URL(m[1]);
+        if (`${u.protocol}//${u.host}` === site && !fs.existsSync(path.join(ROOT, "public", decodeURIComponent(u.pathname)))) {
+          failures.push(`${p} : image absente ${u.pathname}`);
+        }
+      }
+      if (p.startsWith("/en/villes/paris") && /€\s?\d|\d\s?€|\/sqm|\/m²/.test(html.replace(/<script[\s\S]*?<\/script>/g, ""))) {
+        failures.push(`${p} : prix sans source`);
+      }
+    }
+    // Adresse legale : uniquement sur les mentions legales.
+    const legal = await server.request("/fr/legal/mentions-legales");
+    if (!/"streetAddress"/.test(ldBlocks(legal.body ?? "").join(""))) failures.push("mentions legales : adresse legale absente des donnees structurees");
+    const home = await server.request("/fr");
+    if (/"streetAddress"/.test(ldBlocks(home.body ?? "").join(""))) failures.push("accueil : adresse du siege hors des mentions legales");
+    // Sitemap : aucune adresse qui redirige.
+    const sm = await server.request("/sitemap.xml");
+    const locs = [...(sm.body ?? "").matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+    for (const bad of ["/services/acheter", "/services/mandat-exclusif", "/services/mandat-recherche", "/journal"]) {
+      if (locs.some((l) => l.endsWith(bad))) failures.push(`sitemap : ${bad} redirige`);
+    }
+    if (/<lastmod>/.test(sm.body ?? "") && locs.some((l) => /\/legal\//.test(l)) && /<loc>[^<]*\/legal\/[^<]*<\/loc>\s*<lastmod>/.test(sm.body ?? "")) {
+      failures.push("sitemap : date de modification inventee sur une page fixe");
+    }
+  } finally {
+    await server.close();
+  }
+  // Fichiers d'images du site cites en dur par les donnees structurees.
+  for (const f of ["public/og-image.png", "public/logo-mapa-property.png"]) {
+    if (!fs.existsSync(path.join(ROOT, f))) failures.push(`${f} absent`);
+  }
+  // llms.txt : pages actuelles, aucune coordonnee.
+  const llms = read("public/llms.txt");
+  if (/@|\+352|tel:|mailto:/i.test(llms) || !/\/fr\/blog/.test(llms)) failures.push("llms.txt : coordonnee ou page manquante");
+  expect(failures, failures.join("\n")).toEqual([]);
+});

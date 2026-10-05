@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { BorrowingCapacitySimulator } from "@/components/simulators/BorrowingCapacitySimulator";
 import { pageAlternates } from "@/lib/seo";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
 }: {
@@ -26,6 +27,8 @@ export default async function CapaciteEmpruntPage({
   const t = await getTranslations({ locale, namespace: "borrowing_capacity" });
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/services/capacite-emprunt" />
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-5xl">
         <header className="mb-10 text-center">
@@ -43,6 +46,7 @@ export default async function CapaciteEmpruntPage({
         <BorrowingCapacitySimulator />
       </div>
     </div>
+    </>
   );
 }
 

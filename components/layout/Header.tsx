@@ -107,10 +107,13 @@ export function Header() {
             className="inline-flex shrink-0 pt-2 transition-opacity hover:opacity-80"
           >
             <span className="lg:hidden">
-              <Logo height={44} tone="auto" priority />
+              {/* Perf mobile (oct. 2026) : plus de preload. Les deux logos
+                  (mobile et ordinateur) etaient precharges sur chaque page,
+                  en concurrence avec l'image principale (LCP). */}
+              <Logo height={44} tone="auto" loading="eager" />
             </span>
             <span className="hidden lg:inline-block">
-              <Logo height={76} tone="auto" priority />
+              <Logo height={76} tone="auto" loading="eager" />
             </span>
           </Link>
         </div>

@@ -12,21 +12,32 @@ const SITE_URL =
 const LOCALES = ["fr", "en", "de"] as const;
 const isBeta = SITE_URL.includes("beta.");
 
+// Oct. 2026 : exactement les pages publiees et indexables. Retirees : les
+// adresses qui ne font que rediriger (/services/acheter,
+// /services/mandat-exclusif, /services/mandat-recherche, /journal).
+// Ajoutees : pages existantes absentes (services, simulateurs, ARCOVA,
+// liste d'attente, mentions du simulateur d'acquisition).
+// Pages a contenu fixe : AUCUNE date de modification (pas de date
+// inventee) ; biens et articles : leur date reelle en base.
 const STATIC_PATHS = [
   "",
   "/biens",
   "/off-market",
+  "/off-market/arcova",
+  "/liste-attente",
+  "/services",
   "/services/vendre",
-  "/services/acheter",
   "/services/louer",
   "/services/estimer",
   "/services/simulateurs",
+  "/services/simulateurs/financement",
+  "/services/capacite-emprunt",
+  "/services/rendement-locatif",
   "/services/marches-actifs",
-  "/services/mandat-exclusif",
-  "/services/mandat-recherche",
   "/qui-sommes-nous",
   "/blog",
   "/contact",
+  "/mentions-acquisition",
   "/legal/mentions-legales",
   "/legal/cgu",
   "/legal/cgv",
@@ -52,12 +63,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     fetchAllBlogPosts().catch(() => []),
   ]);
 
-  const now = new Date();
+  const validDate = (v: unknown): Date | undefined => {
+    if (typeof v !== "string" || !v) return undefined;
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? undefined : d;
+  };
 
   const staticEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
     STATIC_PATHS.map((path) => ({
       url: `${SITE_URL}/${locale}${path}`,
-      lastModified: now,
       changeFrequency: "weekly" as const,
       priority: path === "" ? 1.0 : 0.7,
       alternates: { languages: buildAlternates(path) },
@@ -67,7 +81,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const mandateEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
     ALL_MANDATE_SLUGS.map((slug) => ({
       url: `${SITE_URL}/${locale}/mandats/${slug}`,
-      lastModified: now,
       changeFrequency: "monthly" as const,
       priority: 0.8,
       alternates: { languages: buildAlternates(`/mandats/${slug}`) },
@@ -79,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((p) => Boolean(p.slug))
       .map((p) => ({
         url: `${SITE_URL}/${locale}/biens/${p.slug}`,
-        lastModified: now,
+        lastModified: validDate((p as { updated_at?: string | null }).updated_at),
         changeFrequency: "weekly" as const,
         priority: 0.8,
         alternates: { languages: buildAlternates(`/biens/${p.slug}`) },
@@ -89,7 +102,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const offmarketEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
     offmarket.map((o) => ({
       url: `${SITE_URL}/${locale}/off-market/${o.id}`,
-      lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.7,
       alternates: { languages: buildAlternates(`/off-market/${o.id}`) },
@@ -99,7 +111,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
     blogPosts.map((post) => ({
       url: `${SITE_URL}/${locale}/blog/${post.slug}`,
-      lastModified: post.published_at ? new Date(post.published_at) : now,
+      lastModified:
+        validDate((post as { updated_at?: string | null }).updated_at) ?? validDate(post.published_at),
       changeFrequency: "monthly" as const,
       priority: 0.6,
       alternates: { languages: buildAlternates(`/blog/${post.slug}`) },
@@ -109,14 +122,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const cityEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
     cities.map((city) => ({
       url: `${SITE_URL}/${locale}/villes/${city.slug}`,
-      lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.6,
-      alternates: {
-        languages: Object.fromEntries(
-          LOCALES.map((l) => [l, `${SITE_URL}/${l}/villes/${city.slug}`]),
-        ),
-      },
+      alternates: { languages: buildAlternates(`/villes/${city.slug}`) },
     })),
   );
 

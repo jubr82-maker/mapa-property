@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 // Route alias SEO-friendly /services/mandat-exclusif → /mandats/exclusif
 // Le contenu canonique vit dans app/[locale]/mandats/[type]/page.tsx (slug "exclusif").
@@ -10,5 +10,6 @@ export default async function MandatExclusifAliasPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}/mandats/exclusif`);
+  // 308 aussi assure par next.config.ts (redirects).
+  permanentRedirect(`/${locale}/mandats/exclusif`);
 }

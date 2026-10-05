@@ -22,7 +22,7 @@ export function PropertyGrid({
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {properties.map((p, i) => (
-        <PropertyCard key={p.id} property={p} locale={locale} priority={i < 3} />
+        <PropertyCard key={p.id} property={p} locale={locale} priority={i === 0} />
       ))}
     </div>
   );

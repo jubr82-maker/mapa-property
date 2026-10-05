@@ -1,4 +1,4 @@
-import { redirect } from "@/i18n/navigation";
+import { permanentRedirect } from "next/navigation";
 
 export default async function BuyRedirectPage({
   params,
@@ -6,5 +6,6 @@ export default async function BuyRedirectPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect({ href: "/biens", locale });
+  // 308 aussi assure par next.config.ts (redirects).
+  permanentRedirect(`/${locale}/biens`);
 }

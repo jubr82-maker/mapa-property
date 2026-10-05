@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { FinancingSimulator } from "@/components/simulators/FinancingSimulator";
 import { pageAlternates } from "@/lib/seo";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -27,12 +28,15 @@ export default async function FinancingPage({
 
   const initial = {
     price: Number(sp.price) || 500000,
-    country: (sp.country as "LU" | "FR" | "BE" | "DE" | "PT" | "AE") || "LU",
+    // Luxembourg seul (donnees etrangeres retirees, cf. lib/legal-fees.ts).
+    country: "LU" as const,
     down: Number(sp.down) || 100000,
     duration: Number(sp.duration) || 25,
   };
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/services/simulateurs/financement" />
     <article className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-[1100px]">
         <header className="mb-12 max-w-3xl">
@@ -52,5 +56,6 @@ export default async function FinancingPage({
         <FinancingSimulator initial={initial} />
       </div>
     </article>
+    </>
   );
 }

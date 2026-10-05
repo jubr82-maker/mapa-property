@@ -1,8 +1,11 @@
+import { getTranslations } from "next-intl/server";
+import { brandedTitle } from "@/lib/meta-text";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { pageAlternates } from "@/lib/seo";
 import { getCityBySlug, getCitySlugs, getNearbyCities, type City } from "@/lib/cities";
 import { routing } from "@/i18n/routing";
@@ -29,11 +32,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, ville } = await params;
   const city = getCityBySlug(ville);
-  if (!city) return { title: "Ville inconnue · MAPA Property" };
+  if (!city) return {};
   const loc = locale as Locale;
   const cityName = city.name[loc];
+  // Titre traduit (oct. 2026) : l'ancien suffixe francais fige donnait le
+  // meme titre aux trois langues.
+  const tc = await getTranslations({ locale, namespace: "seo_pages" });
   return {
-    title: `${cityName}, Immobilier prestige · MAPA Property`,
+    title: brandedTitle(tc("city.title", { city: cityName })),
     description: city.metaDescription[loc],
     alternates: pageAlternates(locale, `/villes/${city.slug}`),
   };
@@ -84,28 +90,26 @@ function formatEuro(n: number): string {
   return new Intl.NumberFormat("fr-FR").format(n);
 }
 
+// Oct. 2026 : une page de ville n'est PAS un etablissement. L'ancien
+// LocalBusiness par ville luxembourgeoise declarait autant de faux
+// etablissements (adresse fictive dans chaque commune). Desormais : une
+// page web qui parle d'un lieu, publiee par l'unique etablissement reel
+// (#organization, cf. lib/seo.ts).
 function buildJsonLd(city: City, locale: Locale) {
   const url = `${SITE_URL}/${locale}/villes/${city.slug}`;
-  if (city.country === "LU") {
-    return {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "@id": `${url}#mapa-${city.slug}`,
-      name: `MAPA Property : ${city.name[locale]}`,
-      url,
-      areaServed: { "@type": "Place", name: city.name[locale] },
-      address: { "@type": "PostalAddress", addressLocality: city.name[locale], addressCountry: "LU" },
-      parentOrganization: { "@id": `${SITE_URL}#organization` },
-      description: city.metaDescription[locale],
-    };
-  }
   return {
     "@context": "https://schema.org",
-    "@type": "Place",
-    name: city.name[locale],
+    "@type": "WebPage",
     url,
-    address: { "@type": "PostalAddress", addressLocality: city.name[locale], addressCountry: city.country },
+    name: city.name[locale],
     description: city.metaDescription[locale],
+    inLanguage: locale,
+    about: {
+      "@type": "Place",
+      name: city.name[locale],
+      address: { "@type": "PostalAddress", addressLocality: city.name[locale], addressCountry: city.country },
+    },
+    publisher: { "@id": `${SITE_URL}#organization` },
   };
 }
 
@@ -125,6 +129,7 @@ export default async function VillePage({
   return (
     <>
       <JsonLd data={buildJsonLd(city, loc)} />
+      <PageBreadcrumb locale={locale} path={`/villes/${city.slug}`} current={city.name[loc]} />
       <main className="mx-auto max-w-3xl px-6 pt-32 pb-20 lg:px-10 lg:pt-40">
         <Link
           href="/services/marches-actifs"

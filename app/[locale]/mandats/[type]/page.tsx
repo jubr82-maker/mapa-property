@@ -1,3 +1,4 @@
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { useTranslations } from "next-intl";
@@ -41,7 +42,13 @@ export default async function MandatePage({
   setRequestLocale(locale);
 
   const config = MANDATES[type as MandateType];
-  return <MandateContent config={config} />;
+  const tTitle = await getTranslations({ locale, namespace: `mandate_${config.slug.replace("-", "_")}` });
+  return (
+    <>
+      <PageBreadcrumb locale={locale} path={`/mandats/${config.slug}`} current={tTitle("title")} />
+      <MandateContent config={config} />
+    </>
+  );
 }
 
 function MandateContent({ config }: { config: (typeof MANDATES)[MandateType] }) {

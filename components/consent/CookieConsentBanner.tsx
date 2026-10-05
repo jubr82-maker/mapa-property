@@ -21,21 +21,27 @@ import {
  *   mapa-consent-reopen) : préremplit les choix existants, fermable
  *   (Échap/clic extérieur) puisqu'une décision existe déjà.
  */
+// Perf mobile (oct. 2026) : la banniere est rendue dans le HTML servi
+// (visible par defaut, comme pour une premiere visite) au lieu d'apparaitre
+// apres le chargement du JavaScript. Elle s'affiche donc des le premier
+// rendu, au lieu de devenir l'element le plus tardif de la page sur
+// telephone. Un visiteur ayant deja choisi ne la voit pas : un script
+// avant l'affichage pose la classe "consent-decided" sur <html>
+// (lib/consent/decided-script.ts, app/[locale]/layout.tsx), qui la masque en CSS,
+// puis le composant la retire a l'hydratation.
 export function CookieConsentBanner() {
   const t = useTranslations("cookies");
-  const [mounted, setMounted] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [dismissable, setDismissable] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [stats, setStats] = useState(false);
   const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    if (!hasConsentDecision()) {
-      setVisible(true);
-      setDismissable(false);
-    }
+    if (hasConsentDecision()) setVisible(false);
+    // La classe d'avant affichage n'est plus utile une fois hydrate ; la
+    // retirer permet de rouvrir la banniere ("Gerer les cookies").
+    document.documentElement.classList.remove("consent-decided");
 
     const reopen = () => {
       const current = getConsent();
@@ -58,7 +64,7 @@ export function CookieConsentBanner() {
     return () => document.removeEventListener("keydown", onKey);
   }, [visible, dismissable]);
 
-  if (!mounted || !visible) return null;
+  if (!visible) return null;
 
   const close = () => setVisible(false);
   const onAcceptAll = () => {
@@ -75,7 +81,7 @@ export function CookieConsentBanner() {
   };
 
   return (
-    <div className="fixed inset-0 z-[9997] flex items-end justify-center">
+    <div data-consent-banner className="fixed inset-0 z-[9997] flex items-end justify-center">
       <div
         className="absolute inset-0 bg-bg-contrast/25 backdrop-blur-[1px]"
         aria-hidden="true"
@@ -223,3 +229,4 @@ function Toggle({
     </button>
   );
 }
+

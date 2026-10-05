@@ -4,6 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { EstimateForm } from "@/components/forms/EstimateForm";
 import { getLuxembourgPlaces } from "@/lib/estimation/coverage";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
 }: {
@@ -23,6 +24,8 @@ export default async function EstimatePage({
   const t = await getTranslations({ locale, namespace: "estimate_page" });
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/services/estimer" />
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-4xl">
         {/* Sprint A : le sous-titre 'Notre simulateur...' s'empilait
@@ -48,5 +51,6 @@ export default async function EstimatePage({
         <EstimateForm places={getLuxembourgPlaces()} />
       </div>
     </div>
+    </>
   );
 }

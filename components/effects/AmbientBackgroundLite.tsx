@@ -31,7 +31,13 @@ export function AmbientBackgroundLite() {
   useEffect(() => {
     if (!containerRef.current) return;
     if (typeof window === "undefined") return;
-    if (window.matchMedia("(max-width: 768px)").matches) return;
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      // Perf mobile (oct. 2026) : les courbes SMIL animees en continu
+      // redessinaient tout l'ecran a chaque image. Sur telephone, elles
+      // restent affichees, immobiles.
+      containerRef.current.querySelector("svg")?.pauseAnimations();
+      return;
+    }
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;

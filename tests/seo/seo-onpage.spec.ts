@@ -30,7 +30,9 @@ const SKIP_PATH = /^\/(api|admin|_next|og)(\/|$)/;
 // Routes dont le contenu vient de Supabase (biens, articles, fiches
 // off-market). Hors ligne (SEO_OFFLINE=1) elles ne peuvent pas repondre :
 // listees comme NON VERIFIEES dans le rapport, jamais comptees comme OK.
-const DATA_ROUTE = /^\/(fr|en|de)\/(biens(\/|$|\?)|biens$|blog\/[^/?]+|journal\/[^/?]+|off-market\/(?!arcova)[^/?]+)/;
+// Oct. 2026 : simulateurs de financement et de capacite d'emprunt rendus a
+// la demande avec les taux lus en base.
+const DATA_ROUTE = /^\/(fr|en|de)\/(biens(\/|$|\?)|biens$|blog\/[^/?]+|journal\/[^/?]+|off-market\/(?!arcova)[^/?]+|services\/simulateurs\/financement|services\/capacite-emprunt)/;
 
 interface PageFacts {
   url: string;

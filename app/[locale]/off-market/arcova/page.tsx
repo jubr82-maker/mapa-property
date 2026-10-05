@@ -7,6 +7,7 @@ import { setRequestLocale } from "next-intl/server";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
 }: {
@@ -23,7 +24,12 @@ export default async function OffmarketArcovaPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <ArcovaContent />;
+  return (
+    <>
+      <PageBreadcrumb locale={locale} path="/off-market/arcova" />
+      <ArcovaContent />
+    </>
+  );
 }
 
 function ArcovaContent() {

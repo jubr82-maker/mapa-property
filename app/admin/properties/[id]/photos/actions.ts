@@ -181,7 +181,7 @@ export async function savePropertyPhotos(
     // serveur de cette page pour ça.
     // Toutes les fiches publiques (3 langues, slug ou identifiant Apimo),
     // la liste, les villes et l'accueil : cf. lib/revalidate-property.ts.
-    revalidatePublicPropertyPages();
+    revalidatePublicPropertyPages(propertyId);
     revalidatePath("/admin/properties");
     return { ok: true };
   } catch (e) {

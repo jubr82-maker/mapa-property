@@ -4,6 +4,8 @@ import { createServerClient } from "@supabase/ssr";
 import { routing } from "./i18n/routing";
 import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { getArchivedPropertyKeys } from "@/lib/archived-properties";
+import { getPublishedPropertySlugByKey } from "@/lib/published-property-keys";
+import { legacyPropertyDestination, resolveLegacyPath } from "@/lib/legacy-redirects";
 import {
   ADMIN_ACTIVITY_COOKIE,
   ADMIN_ACTIVITY_COOKIE_MAX_AGE_SECONDS,
@@ -137,6 +139,31 @@ export default async function middleware(request: NextRequest) {
     if (target) return redirectTo(target.path, target.params);
 
     return noStore(response);
+  }
+
+  // Anciennes adresses (site v28 et site precedent) : 308 vers l'equivalent
+  // exact (lib/legacy-redirects.ts). Les pages sans equivalent connu
+  // suivent le flux normal (page 404 utile).
+  const legacy = resolveLegacyPath(pathname);
+  if (legacy) {
+    const dest =
+      legacy.kind === "path"
+        ? legacy.to
+        : legacyPropertyDestination(legacy, await getPublishedPropertySlugByKey());
+    const url = new URL(dest, request.url);
+    if (legacy.kind === "path" && !dest.includes("?")) url.search = request.nextUrl.search;
+    return NextResponse.redirect(url, 308);
+  }
+
+  // Adresse sans langue (hors accueil) : 308 vers la version francaise,
+  // langue par defaut et langue du site v28. L'accueil "/" garde la
+  // redirection temporaire de next-intl, qui choisit la langue du
+  // visiteur (cf. rapport : une redirection selon la langue doit rester
+  // temporaire).
+  if (pathname !== "/" && !/^\/(fr|en|de)(\/|$)/.test(pathname)) {
+    const url = new URL(`/fr${pathname}`, request.url);
+    url.search = request.nextUrl.search;
+    return NextResponse.redirect(url, 308);
   }
 
   // Fiche d'un bien ARCHIVE (oct. 2026) : 410 + page "plus disponible"

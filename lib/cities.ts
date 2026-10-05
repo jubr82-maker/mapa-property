@@ -467,9 +467,9 @@ function buildIntlCity(args: {
     highlights: args.highlights,
     intro: args.description,
     metaDescription: {
-      fr: `${args.name.fr} — broker international ${M}${args.priceRange ? `, ${args.priceRange.floor}-${args.priceRange.ceiling} €/m²` : ""}.`,
-      en: `${args.name.en} — international broker ${M}${args.priceRange ? `, €${args.priceRange.floor}-${args.priceRange.ceiling}/sqm` : ""}.`,
-      de: `${args.name.de} — internationaler Broker ${M}${args.priceRange ? `, ${args.priceRange.floor}-${args.priceRange.ceiling} €/m²` : ""}.`,
+      fr: `${args.name.fr}, broker international ${M}${args.priceRange ? `, ${args.priceRange.floor}-${args.priceRange.ceiling} €/m²` : ""}.`,
+      en: `${args.name.en}, international broker ${M}${args.priceRange ? `, €${args.priceRange.floor}-${args.priceRange.ceiling}/sqm` : ""}.`,
+      de: `${args.name.de}, internationaler Broker ${M}${args.priceRange ? `, ${args.priceRange.floor}-${args.priceRange.ceiling} €/m²` : ""}.`,
     },
   };
 }
@@ -478,12 +478,11 @@ const paris = buildIntlCity({
   slug: "paris",
   name: { fr: "Paris", en: "Paris", de: "Paris" },
   country: "FR",
-  priceRange: { floor: 10000, ceiling: 35000 },
   highlights: ["Capitale française et marché de référence européen", "20 arrondissements aux profils contrastés", "Concentration de Trophy Assets (Triangle d'Or, 6ᵉ, 16ᵉ)", "Hôtels particuliers du XVIIᵉ-XIXᵉ"],
   description: {
-    fr: "Paris reste le marché de référence pour les Trophy Assets en Europe continentale. Les arrondissements premium (Triangle d'Or 8ᵉ, 6ᵉ Saint-Germain-des-Prés, 7ᵉ Invalides, 16ᵉ Passy-Auteuil, 17ᵉ Plaine Monceau) concentrent l'essentiel de la valeur, avec des prix s'étalant de 10 000 à 35 000 €/m² selon le micro-quartier, l'étage et la qualité du bien. Les hôtels particuliers du XVIIᵉ-XIXᵉ siècles, les pieds-à-terre familiaux et les penthouses contemporains constituent les trois segments principaux du marché de prestige. MAPA Property opère à Paris en qualité de broker international, sous mandat de recherche signé au Luxembourg et avec des partenaires locaux habilités. Notre intervention typique : sourcing off-market des biens d'exception (jamais publiés en agence), négociation, due diligence et coordination notariale jusqu'à l'acte authentique.",
-    en: "Paris remains the reference market for Trophy Assets in continental Europe. Premium arrondissements (Triangle d'Or 8th, 6th Saint-Germain-des-Prés, 7th Invalides, 16th Passy-Auteuil, 17th Plaine Monceau) concentrate most of the value, with prices ranging from €10,000 to €35,000/sqm depending on micro-district, floor and quality. 17th–19th-century townhouses (hôtels particuliers), family pieds-à-terre and contemporary penthouses form the three main prestige segments. MAPA Property operates in Paris as international broker, under a search mandate signed in Luxembourg with vetted local partners. Typical engagement: off-market sourcing of exceptional properties (never publicly listed), negotiation, due diligence and notarial coordination through to the deed.",
-    de: "Paris bleibt der Referenzmarkt für Trophy Assets in Kontinentaleuropa. Die Premium-Arrondissements (Triangle d'Or 8., 6. Saint-Germain-des-Prés, 7. Invalides, 16. Passy-Auteuil, 17. Plaine Monceau) konzentrieren den Großteil des Werts; Preise von 10.000 bis 35.000 €/m² je nach Mikrolage, Etage und Qualität. Stadthäuser (hôtels particuliers) des 17.–19. Jahrhunderts, Familien-Pieds-à-terre und zeitgenössische Penthouses bilden die drei zentralen Prestige-Segmente. MAPA Property tritt in Paris als internationaler Broker auf, unter einem in Luxemburg unterzeichneten Suchmandat mit geprüften lokalen Partnern. Typischer Auftrag: Off-Market-Sourcing außergewöhnlicher Objekte (niemals öffentlich gelistet), Verhandlung, Due Diligence und notarielle Koordination bis zur Beurkundung.",
+    fr: "Paris reste le marché de référence pour les Trophy Assets en Europe continentale. Les hôtels particuliers du XVIIᵉ-XIXᵉ siècles, les pieds-à-terre familiaux et les penthouses contemporains constituent les trois segments principaux du marché de prestige. MAPA Property opère à Paris en qualité de broker international, sous mandat de recherche signé au Luxembourg et avec des partenaires locaux habilités. Notre intervention typique : sourcing off-market des biens d'exception (jamais publiés en agence), négociation, due diligence et coordination notariale jusqu'à l'acte authentique.",
+    en: "Paris remains the reference market for Trophy Assets in continental Europe. 17th to 19th-century townhouses (hôtels particuliers), family pieds-à-terre and contemporary penthouses form the three main prestige segments. MAPA Property operates in Paris as international broker, under a search mandate signed in Luxembourg with vetted local partners. Typical engagement: off-market sourcing of exceptional properties (never publicly listed), negotiation, due diligence and notarial coordination through to the deed.",
+    de: "Paris bleibt der Referenzmarkt für Trophy Assets in Kontinentaleuropa. Stadthäuser (hôtels particuliers) des 17. bis 19. Jahrhunderts, Familien-Pieds-à-terre und zeitgenössische Penthouses bilden die drei zentralen Prestige-Segmente. MAPA Property tritt in Paris als internationaler Broker auf, unter einem in Luxemburg unterzeichneten Suchmandat mit geprüften lokalen Partnern. Typischer Auftrag: Off-Market-Sourcing außergewöhnlicher Objekte (niemals öffentlich gelistet), Verhandlung, Due Diligence und notarielle Koordination bis zur Beurkundung.",
   },
 });
 
@@ -492,12 +491,11 @@ const cannes = buildIntlCity({
   name: { fr: "Cannes", en: "Cannes", de: "Cannes" },
   country: "FR",
   region: "Côte d'Azur",
-  priceRange: { floor: 8000, ceiling: 30000 },
   highlights: ["Croisette, Festival du Cinéma, MIPIM", "Villas Californie, Super Cannes", "Penthouses front de mer", "Marché ultra-international"],
   description: {
-    fr: "Cannes reste l'une des destinations clés de la Côte d'Azur, structurée autour de la Croisette, des collines (Californie, Super Cannes, La Colle, Pointe Croisette) et du Suquet. Le marché s'étend de 8 000 à 30 000 €/m² avec des records ponctuels au-delà sur les penthouses de la Croisette ou les villas Belle Époque restaurées. La saisonnalité (Festival du Cinéma en mai, MIPIM en mars, festivals d'été) et la clientèle internationale (Russes, Britanniques, Américains, Moyen-Orient) en font un marché très liquide. MAPA Property y opère en broker international, sous mandat de recherche signé au Luxembourg, avec un réseau local habilité.",
-    en: "Cannes remains one of the French Riviera's key destinations, structured around the Croisette, the hills (Californie, Super Cannes, La Colle, Pointe Croisette) and Le Suquet. The market ranges from €8,000 to €30,000/sqm with occasional records above on Croisette penthouses or restored Belle Époque villas. Seasonality (Film Festival in May, MIPIM in March, summer festivals) and international clientele (Russian, British, American, Middle Eastern) make it a very liquid market. MAPA Property acts as international broker under a search mandate signed in Luxembourg, with a vetted local network.",
-    de: "Cannes bleibt eines der Schlüsselziele der Côte d'Azur, strukturiert um die Croisette, die Hügel (Californie, Super Cannes, La Colle, Pointe Croisette) und Le Suquet. Markt: 8.000 bis 30.000 €/m² mit gelegentlichen Rekorden darüber bei Penthouses an der Croisette oder restaurierten Belle-Époque-Villen. Saisonalität (Filmfestspiele Mai, MIPIM März, Sommerfestivals) und internationale Klientel (russisch, britisch, amerikanisch, Naher Osten) machen den Markt sehr liquide. MAPA Property tritt hier als internationaler Broker auf, unter einem in Luxemburg unterzeichneten Suchmandat mit geprüftem lokalen Netzwerk.",
+    fr: "Cannes reste l'une des destinations clés de la Côte d'Azur, structurée autour de la Croisette, des collines (Californie, Super Cannes, La Colle, Pointe Croisette) et du Suquet. La saisonnalité (Festival du Cinéma en mai, MIPIM en mars, festivals d'été) et la clientèle internationale (Russes, Britanniques, Américains, Moyen-Orient) en font un marché très liquide. MAPA Property y opère en broker international, sous mandat de recherche signé au Luxembourg, avec un réseau local habilité.",
+    en: "Cannes remains one of the French Riviera's key destinations, structured around the Croisette, the hills (Californie, Super Cannes, La Colle, Pointe Croisette) and Le Suquet. Seasonality (Film Festival in May, MIPIM in March, summer festivals) and international clientele (Russian, British, American, Middle Eastern) make it a very liquid market. MAPA Property acts as international broker under a search mandate signed in Luxembourg, with a vetted local network.",
+    de: "Cannes bleibt eines der Schlüsselziele der Côte d'Azur, strukturiert um die Croisette, die Hügel (Californie, Super Cannes, La Colle, Pointe Croisette) und Le Suquet. Saisonalität (Filmfestspiele Mai, MIPIM März, Sommerfestivals) und internationale Klientel (russisch, britisch, amerikanisch, Naher Osten) machen den Markt sehr liquide. MAPA Property tritt hier als internationaler Broker auf, unter einem in Luxemburg unterzeichneten Suchmandat mit geprüftem lokalen Netzwerk.",
   },
 });
 
@@ -506,12 +504,11 @@ const nice = buildIntlCity({
   name: { fr: "Nice", en: "Nice", de: "Nizza" },
   country: "FR",
   region: "Côte d'Azur",
-  priceRange: { floor: 5500, ceiling: 18000 },
   highlights: ["Cinquième ville française, capitale de la Côte d'Azur", "Vieux Nice, Promenade des Anglais, Mont Boron", "Aéroport Côte d'Azur (3ᵉ français)", "Marché plus large que Cannes"],
   description: {
-    fr: "Nice est la cinquième ville française et la capitale économique de la Côte d'Azur. Son marché immobilier, plus large et liquide que Cannes, se segmente entre le Vieux Nice (patrimoine), la Promenade des Anglais (front de mer), le Mont Boron et le Cap de Nice (villas avec vue mer), Cimiez et le Nice Nord (familial). Les prix s'étalent de 5 500 à 18 000 €/m². L'aéroport international (Côte d'Azur, 3ᵉ français) et la connexion TGV en font une métropole accessible. MAPA Property y intervient en broker international.",
-    en: "Nice is France's fifth city and the economic capital of the French Riviera. Its real estate market, broader and more liquid than Cannes, is segmented between Old Nice (heritage), the Promenade des Anglais (seafront), Mont Boron and Cap de Nice (villas with sea views), Cimiez and Nice Nord (family). Prices: €5,500 to €18,000/sqm. The international airport (Côte d'Azur, France's 3rd) and TGV connection make it an accessible metropolis. MAPA Property acts as international broker.",
-    de: "Nizza ist Frankreichs fünftgrößte Stadt und wirtschaftliche Hauptstadt der Côte d'Azur. Sein Immobilienmarkt, breiter und liquider als Cannes, gliedert sich in Altstadt (Erbe), Promenade des Anglais (Meerfront), Mont Boron und Cap de Nice (Villen mit Meerblick), Cimiez und Nizza-Nord (familiär). Preise: 5.500 bis 18.000 €/m². Internationaler Flughafen (Côte d'Azur, 3. Frankreichs) und TGV-Anbindung machen die Metropole erreichbar. MAPA Property agiert als internationaler Broker.",
+    fr: "Nice est la cinquième ville française et la capitale économique de la Côte d'Azur. Son marché immobilier, plus large et liquide que Cannes, se segmente entre le Vieux Nice (patrimoine), la Promenade des Anglais (front de mer), le Mont Boron et le Cap de Nice (villas avec vue mer), Cimiez et le Nice Nord (familial). L'aéroport international (Côte d'Azur, 3ᵉ français) et la connexion TGV en font une métropole accessible. MAPA Property y intervient en broker international.",
+    en: "Nice is France's fifth city and the economic capital of the French Riviera. Its real estate market, broader and more liquid than Cannes, is segmented between Old Nice (heritage), the Promenade des Anglais (seafront), Mont Boron and Cap de Nice (villas with sea views), Cimiez and Nice Nord (family). The international airport (Côte d'Azur, France's 3rd) and TGV connection make it an accessible metropolis. MAPA Property acts as international broker.",
+    de: "Nizza ist Frankreichs fünftgrößte Stadt und wirtschaftliche Hauptstadt der Côte d'Azur. Sein Immobilienmarkt, breiter und liquider als Cannes, gliedert sich in Altstadt (Erbe), Promenade des Anglais (Meerfront), Mont Boron und Cap de Nice (Villen mit Meerblick), Cimiez und Nizza-Nord (familiär). Internationaler Flughafen (Côte d'Azur, 3. Frankreichs) und TGV-Anbindung machen die Metropole erreichbar. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -520,12 +517,11 @@ const saintTropez = buildIntlCity({
   name: { fr: "Saint-Tropez", en: "Saint-Tropez", de: "Saint-Tropez" },
   country: "FR",
   region: "Côte d'Azur",
-  priceRange: { floor: 12000, ceiling: 60000 },
   highlights: ["Mythe Côte d'Azur, marché ultra-saisonnier", "Villas Capon, Pampelonne, Ramatuelle", "Sud-est St-Tropez = ceinture premium", "Trophy Assets quasi-systématiques"],
   description: {
-    fr: "Saint-Tropez est l'une des destinations les plus emblématiques du Var, structurée autour du village historique, de la presqu'île (Pampelonne, Ramatuelle) et des hameaux résidentiels (Capon, Salins, Citadelle). Le marché est ultra-saisonnier et international, dominé par les Trophy Assets : villas avec piscine et accès mer, propriétés de prestige sur 1-3 hectares de terrain. Les prix s'étalent de 12 000 à 60 000 €/m² selon l'exposition, le terrain et la rareté du bien. Les transactions s'opèrent essentiellement en off-market, sous NDA contractuel. MAPA Property y intervient comme broker international, en partenariat avec des spécialistes du marché local.",
-    en: "Saint-Tropez is one of the Var department's most iconic destinations, structured around the historic village, the peninsula (Pampelonne, Ramatuelle) and residential hamlets (Capon, Salins, Citadelle). The market is ultra-seasonal and international, dominated by Trophy Assets: villas with pool and sea access, prestige properties on 1–3 hectares of land. Prices: €12,000 to €60,000/sqm depending on exposure, land and rarity. Transactions are mostly off-market under contractual NDA. MAPA Property acts as international broker, in partnership with local market specialists.",
-    de: "Saint-Tropez ist eines der ikonischsten Reiseziele des Departements Var, strukturiert um das historische Dorf, die Halbinsel (Pampelonne, Ramatuelle) und Wohngemeinden (Capon, Salins, Citadelle). Der Markt ist ultra-saisonal und international, dominiert von Trophy Assets: Villen mit Pool und Meerzugang, Prestige-Immobilien auf 1–3 Hektar Grundstück. Preise: 12.000 bis 60.000 €/m² je nach Lage, Grundstück und Seltenheit. Transaktionen erfolgen überwiegend off-market unter vertraglicher NDA. MAPA Property agiert als internationaler Broker in Partnerschaft mit lokalen Marktspezialisten.",
+    fr: "Saint-Tropez est l'une des destinations les plus emblématiques du Var, structurée autour du village historique, de la presqu'île (Pampelonne, Ramatuelle) et des hameaux résidentiels (Capon, Salins, Citadelle). Le marché est ultra-saisonnier et international, dominé par les Trophy Assets : villas avec piscine et accès mer, propriétés de prestige sur 1-3 hectares de terrain. Les transactions s'opèrent essentiellement en off-market, sous NDA contractuel. MAPA Property y intervient comme broker international, en partenariat avec des spécialistes du marché local.",
+    en: "Saint-Tropez is one of the Var department's most iconic destinations, structured around the historic village, the peninsula (Pampelonne, Ramatuelle) and residential hamlets (Capon, Salins, Citadelle). The market is ultra-seasonal and international, dominated by Trophy Assets: villas with pool and sea access, prestige properties on 1 to 3 hectares of land. Transactions are mostly off-market under contractual NDA. MAPA Property acts as international broker, in partnership with local market specialists.",
+    de: "Saint-Tropez ist eines der ikonischsten Reiseziele des Departements Var, strukturiert um das historische Dorf, die Halbinsel (Pampelonne, Ramatuelle) und Wohngemeinden (Capon, Salins, Citadelle). Der Markt ist ultra-saisonal und international, dominiert von Trophy Assets: Villen mit Pool und Meerzugang, Prestige-Immobilien auf 1 bis 3 Hektar Grundstück. Transaktionen erfolgen überwiegend off-market unter vertraglicher NDA. MAPA Property agiert als internationaler Broker in Partnerschaft mit lokalen Marktspezialisten.",
   },
 });
 
@@ -534,12 +530,11 @@ const monaco = buildIntlCity({
   name: { fr: "Monaco", en: "Monaco", de: "Monaco" },
   country: "FR",
   region: "Principauté",
-  priceRange: { floor: 40000, ceiling: 120000 },
   highlights: ["Marché immobilier le plus cher du monde au m²", "Carré d'Or, Larvotto, Monte-Carlo", "Stabilité fiscale (résidence)", "Penthouses, vues mer, sécurité"],
   description: {
-    fr: "Monaco affiche les prix immobiliers les plus élevés du monde au mètre carré, conséquence directe de la rareté du foncier (2 km² seulement) et du statut fiscal de la Principauté pour les résidents non-français. Les prix s'étalent de 40 000 à 120 000 €/m² selon le micro-quartier (Carré d'Or, Larvotto, Monte-Carlo, Fontvieille, La Condamine, Saint-Roman) et la qualité du bien. Les penthouses avec vue mer panoramique sur le Larvotto ou la Tour Odéon dépassent fréquemment 100 000 €/m². L'achat à Monaco est conditionné à des prérequis (résidence, justificatifs financiers stricts). MAPA Property opère en broker international avec des partenaires monégasques habilités.",
-    en: "Monaco shows the world's highest real estate prices per square metre, a direct consequence of land scarcity (only 2 km²) and the Principality's tax status for non-French residents. Prices: €40,000 to €120,000/sqm depending on micro-district (Carré d'Or, Larvotto, Monte-Carlo, Fontvieille, La Condamine, Saint-Roman) and quality. Penthouses with panoramic sea views over Larvotto or Tour Odéon frequently exceed €100,000/sqm. Buying in Monaco is subject to prerequisites (residency, strict financial documentation). MAPA Property operates as international broker with vetted Monégasque partners.",
-    de: "Monaco weist die höchsten Immobilienpreise der Welt pro Quadratmeter auf — direkte Folge knappen Baulandes (nur 2 km²) und des Steuerstatus des Fürstentums für Nicht-Franzosen. Preise: 40.000 bis 120.000 €/m² je nach Mikroviertel (Carré d'Or, Larvotto, Monte-Carlo, Fontvieille, La Condamine, Saint-Roman) und Qualität. Penthouses mit Panoramablick auf Larvotto oder Tour Odéon übersteigen häufig 100.000 €/m². Der Kauf in Monaco unterliegt Voraussetzungen (Wohnsitz, strenge Finanznachweise). MAPA Property agiert als internationaler Broker mit geprüften monegassischen Partnern.",
+    fr: "Monaco affiche les prix immobiliers les plus élevés du monde au mètre carré, conséquence directe de la rareté du foncier (2 km² seulement) et du statut fiscal de la Principauté pour les résidents non-français. L'achat à Monaco est conditionné à des prérequis (résidence, justificatifs financiers stricts). MAPA Property opère en broker international avec des partenaires monégasques habilités.",
+    en: "Monaco shows the world's highest real estate prices per square metre, a direct consequence of land scarcity (only 2 km²) and the Principality's tax status for non-French residents. Buying in Monaco is subject to prerequisites (residency, strict financial documentation). MAPA Property operates as international broker with vetted Monégasque partners.",
+    de: "Monaco weist die höchsten Immobilienpreise der Welt pro Quadratmeter auf, direkte Folge knappen Baulandes (nur 2 km²) und des Steuerstatus des Fürstentums für Nicht-Franzosen. Der Kauf in Monaco unterliegt Voraussetzungen (Wohnsitz, strenge Finanznachweise). MAPA Property agiert als internationaler Broker mit geprüften monegassischen Partnern.",
   },
 });
 
@@ -547,12 +542,11 @@ const geneve = buildIntlCity({
   slug: "geneve",
   name: { fr: "Genève", en: "Geneva", de: "Genf" },
   country: "CH",
-  priceRange: { floor: 14000, ceiling: 35000 },
   highlights: ["Capitale onusienne, banking privé", "Cologny, Vandœuvres, Versoix premium", "Lex Koller régule l'accès non-résident", "Marché étroit, prix élevés"],
   description: {
-    fr: "Genève abrite les institutions onusiennes (ONU, OMC, OMS) et un secteur bancaire privé de premier plan. Le marché immobilier y est étroit et cher, avec des prix de 14 000 à 35 000 €/m² selon le quartier (Eaux-Vives, Champel, Cologny, Vandœuvres, Versoix). La Lex Koller (loi fédérale sur l'acquisition d'immeubles par des personnes à l'étranger) restreint l'accès des non-résidents, ce qui rend l'opération plus complexe juridiquement. Les villas avec vue lac à Cologny ou Vandœuvres figurent parmi les biens les plus convoités. MAPA Property opère en broker international avec des partenaires genevois habilités, sous mandat de recherche signé au Luxembourg.",
-    en: "Geneva hosts UN institutions (UN, WTO, WHO) and a leading private banking sector. The real estate market is narrow and expensive, prices €14,000 to €35,000/sqm depending on district (Eaux-Vives, Champel, Cologny, Vandœuvres, Versoix). The Lex Koller (federal law on real estate acquisition by foreigners) restricts non-resident access, making the transaction legally more complex. Villas with lake views in Cologny or Vandœuvres are among the most coveted. MAPA Property operates as international broker with vetted Geneva partners, under a search mandate signed in Luxembourg.",
-    de: "Genf beherbergt UN-Institutionen (UNO, WTO, WHO) und einen führenden Private-Banking-Sektor. Der Immobilienmarkt ist eng und teuer; Preise von 14.000 bis 35.000 €/m² je nach Viertel (Eaux-Vives, Champel, Cologny, Vandœuvres, Versoix). Die Lex Koller (Bundesgesetz über den Erwerb von Grundstücken durch Personen im Ausland) schränkt den Zugang Nichtansässiger ein und macht die Transaktion rechtlich komplexer. Villen mit Seeblick in Cologny oder Vandœuvres zählen zu den begehrtesten. MAPA Property agiert als internationaler Broker mit geprüften Genfer Partnern, unter einem in Luxemburg unterzeichneten Suchmandat.",
+    fr: "Genève abrite les institutions onusiennes (ONU, OMC, OMS) et un secteur bancaire privé de premier plan. La Lex Koller (loi fédérale sur l'acquisition d'immeubles par des personnes à l'étranger) restreint l'accès des non-résidents, ce qui rend l'opération plus complexe juridiquement. Les villas avec vue lac à Cologny ou Vandœuvres figurent parmi les biens les plus convoités. MAPA Property opère en broker international avec des partenaires genevois habilités, sous mandat de recherche signé au Luxembourg.",
+    en: "Geneva hosts UN institutions (UN, WTO, WHO) and a leading private banking sector. The Lex Koller (federal law on real estate acquisition by foreigners) restricts non-resident access, making the transaction legally more complex. Villas with lake views in Cologny or Vandœuvres are among the most coveted. MAPA Property operates as international broker with vetted Geneva partners, under a search mandate signed in Luxembourg.",
+    de: "Genf beherbergt UN-Institutionen (UNO, WTO, WHO) und einen führenden Private-Banking-Sektor. Die Lex Koller (Bundesgesetz über den Erwerb von Grundstücken durch Personen im Ausland) schränkt den Zugang Nichtansässiger ein und macht die Transaktion rechtlich komplexer. Villen mit Seeblick in Cologny oder Vandœuvres zählen zu den begehrtesten. MAPA Property agiert als internationaler Broker mit geprüften Genfer Partnern, unter einem in Luxemburg unterzeichneten Suchmandat.",
   },
 });
 
@@ -560,12 +554,11 @@ const lausanne = buildIntlCity({
   slug: "lausanne",
   name: { fr: "Lausanne", en: "Lausanne", de: "Lausanne" },
   country: "CH",
-  priceRange: { floor: 9500, ceiling: 22000 },
   highlights: ["CIO, EPFL, université", "Lavaux UNESCO mitoyen", "Pully, Lutry, Saint-Sulpice premium", "Marché plus large que Genève"],
   description: {
-    fr: "Lausanne, sur les rives du Léman, abrite le siège du Comité International Olympique, l'EPFL et l'université. Le marché immobilier y est plus large et liquide qu'à Genève, avec des prix de 9 500 à 22 000 €/m². Les communes périphériques premium — Pully, Lutry, Saint-Sulpice, Cully — abritent des villas et propriétés vue lac très recherchées. La Lex Koller s'applique également (restrictions non-résidents). MAPA Property y intervient en broker international.",
-    en: "Lausanne, on the shores of Lake Geneva, hosts the International Olympic Committee, EPFL and the university. The real estate market is broader and more liquid than Geneva, prices €9,500 to €22,000/sqm. Premium peripheral communes — Pully, Lutry, Saint-Sulpice, Cully — host highly sought-after villas and lake-view properties. Lex Koller also applies (non-resident restrictions). MAPA Property acts as international broker.",
-    de: "Lausanne am Genfersee beherbergt den Sitz des Internationalen Olympischen Komitees, die EPFL und die Universität. Der Immobilienmarkt ist breiter und liquider als in Genf, Preise von 9.500 bis 22.000 €/m². Premium-Randgemeinden — Pully, Lutry, Saint-Sulpice, Cully — beherbergen sehr gefragte Villen und Seeblick-Immobilien. Die Lex Koller gilt ebenfalls (Beschränkungen für Nichtansässige). MAPA Property agiert als internationaler Broker.",
+    fr: "Lausanne, sur les rives du Léman, abrite le siège du Comité International Olympique, l'EPFL et l'université. Les communes périphériques premium (Pully, Lutry, Saint-Sulpice, Cully) abritent des villas et propriétés vue lac très recherchées. La Lex Koller s'applique également (restrictions non-résidents). MAPA Property y intervient en broker international.",
+    en: "Lausanne, on the shores of Lake Geneva, hosts the International Olympic Committee, EPFL and the university. Premium peripheral communes (Pully, Lutry, Saint-Sulpice, Cully) host highly sought-after villas and lake-view properties. Lex Koller also applies (non-resident restrictions). MAPA Property acts as international broker.",
+    de: "Lausanne am Genfersee beherbergt den Sitz des Internationalen Olympischen Komitees, die EPFL und die Universität. Premium-Randgemeinden (Pully, Lutry, Saint-Sulpice, Cully) beherbergen sehr gefragte Villen und Seeblick-Immobilien. Die Lex Koller gilt ebenfalls (Beschränkungen für Nichtansässige). MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -573,12 +566,11 @@ const zurich = buildIntlCity({
   slug: "zurich",
   name: { fr: "Zurich", en: "Zurich", de: "Zürich" },
   country: "CH",
-  priceRange: { floor: 13000, ceiling: 30000 },
   highlights: ["Capitale économique de la Suisse", "Banking privé, hub Big Tech (Google EMEA)", "Goldküste (rive nord) premium", "Lex Koller et restrictions cantonales"],
   description: {
-    fr: "Zurich est la capitale économique de la Suisse, premier centre bancaire privé du pays et hub Big Tech (Google EMEA, IBM Research). Le marché immobilier y est ultra-tendu, avec des prix de 13 000 à 30 000 €/m². La Goldküste (rive nord du lac : Küsnacht, Erlenbach, Herrliberg) est la zone la plus prisée pour les villas vue lac. La Lex Koller et les restrictions cantonales rendent l'achat par non-résidents complexe et souvent conditionné à un statut professionnel local. MAPA Property opère en broker international.",
-    en: "Zurich is Switzerland's economic capital, the country's leading private banking hub and a Big Tech base (Google EMEA, IBM Research). The real estate market is ultra-tight, prices €13,000 to €30,000/sqm. The Goldküste (north shore of the lake: Küsnacht, Erlenbach, Herrliberg) is the most coveted area for lake-view villas. Lex Koller and cantonal restrictions make non-resident purchase complex, often subject to a local professional status. MAPA Property acts as international broker.",
-    de: "Zürich ist die Wirtschaftshauptstadt der Schweiz, führender Private-Banking-Standort und Big-Tech-Drehkreuz (Google EMEA, IBM Research). Der Immobilienmarkt ist äußerst angespannt, Preise 13.000 bis 30.000 €/m². Die Goldküste (Nordufer des Sees: Küsnacht, Erlenbach, Herrliberg) ist die begehrteste Zone für Villen mit Seeblick. Lex Koller und kantonale Beschränkungen machen den Kauf durch Nichtansässige komplex und oft an einen lokalen Berufstitel gebunden. MAPA Property agiert als internationaler Broker.",
+    fr: "Zurich est la capitale économique de la Suisse, premier centre bancaire privé du pays et hub Big Tech (Google EMEA, IBM Research). La Goldküste (rive nord du lac : Küsnacht, Erlenbach, Herrliberg) est la zone la plus prisée pour les villas vue lac. La Lex Koller et les restrictions cantonales rendent l'achat par non-résidents complexe et souvent conditionné à un statut professionnel local. MAPA Property opère en broker international.",
+    en: "Zurich is Switzerland's economic capital, the country's leading private banking hub and a Big Tech base (Google EMEA, IBM Research). The Goldküste (north shore of the lake: Küsnacht, Erlenbach, Herrliberg) is the most coveted area for lake-view villas. Lex Koller and cantonal restrictions make non-resident purchase complex, often subject to a local professional status. MAPA Property acts as international broker.",
+    de: "Zürich ist die Wirtschaftshauptstadt der Schweiz, führender Private-Banking-Standort und Big-Tech-Drehkreuz (Google EMEA, IBM Research). Die Goldküste (Nordufer des Sees: Küsnacht, Erlenbach, Herrliberg) ist die begehrteste Zone für Villen mit Seeblick. Lex Koller und kantonale Beschränkungen machen den Kauf durch Nichtansässige komplex und oft an einen lokalen Berufstitel gebunden. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -586,12 +578,11 @@ const bruxelles = buildIntlCity({
   slug: "bruxelles",
   name: { fr: "Bruxelles", en: "Brussels", de: "Brüssel" },
   country: "BE",
-  priceRange: { floor: 3500, ceiling: 12000 },
   highlights: ["Capitale belge et de l'UE", "Uccle, Ixelles, Châtelain premium", "Marché européen actif", "Maisons de maître XIXᵉ"],
   description: {
-    fr: "Bruxelles, capitale belge et siège des institutions européennes, présente un marché immobilier moins tendu et plus accessible que Luxembourg-Ville ou Paris. Les communes premium — Uccle, Ixelles (Châtelain, Flagey), Saint-Gilles — affichent des prix de 6 000 à 12 000 €/m² ; le reste de la ville s'étale de 3 500 à 6 000 €/m². Les maisons de maître du XIXᵉ siècle constituent un segment particulièrement attractif. MAPA Property opère en broker international avec des partenaires bruxellois.",
-    en: "Brussels, the Belgian capital and seat of EU institutions, has a less strained and more accessible real estate market than Luxembourg City or Paris. Premium communes — Uccle, Ixelles (Châtelain, Flagey), Saint-Gilles — show prices of €6,000 to €12,000/sqm; the rest of the city ranges from €3,500 to €6,000/sqm. 19th-century townhouses (maisons de maître) are a particularly attractive segment. MAPA Property acts as international broker with Brussels-based partners.",
-    de: "Brüssel, belgische Hauptstadt und Sitz der EU-Institutionen, hat einen weniger angespannten und zugänglicheren Immobilienmarkt als Luxemburg-Stadt oder Paris. Premium-Gemeinden — Uccle, Ixelles (Châtelain, Flagey), Saint-Gilles — zeigen Preise von 6.000 bis 12.000 €/m²; der Rest der Stadt reicht von 3.500 bis 6.000 €/m². Stadthäuser des 19. Jahrhunderts (maisons de maître) bilden ein besonders attraktives Segment. MAPA Property agiert als internationaler Broker mit Brüsseler Partnern.",
+    fr: "Bruxelles, capitale belge et siège des institutions européennes, présente un marché immobilier moins tendu et plus accessible que Luxembourg-Ville ou Paris. Les maisons de maître du XIXᵉ siècle constituent un segment particulièrement attractif. MAPA Property opère en broker international avec des partenaires bruxellois.",
+    en: "Brussels, the Belgian capital and seat of EU institutions, has a less strained and more accessible real estate market than Luxembourg City or Paris. 19th-century townhouses (maisons de maître) are a particularly attractive segment. MAPA Property acts as international broker with Brussels-based partners.",
+    de: "Brüssel, belgische Hauptstadt und Sitz der EU-Institutionen, hat einen weniger angespannten und zugänglicheren Immobilienmarkt als Luxemburg-Stadt oder Paris. Stadthäuser des 19. Jahrhunderts (maisons de maître) bilden ein besonders attraktives Segment. MAPA Property agiert als internationaler Broker mit Brüsseler Partnern.",
   },
 });
 
@@ -599,12 +590,11 @@ const anvers = buildIntlCity({
   slug: "anvers",
   name: { fr: "Anvers", en: "Antwerp", de: "Antwerpen" },
   country: "BE",
-  priceRange: { floor: 2800, ceiling: 8500 },
   highlights: ["Deuxième ville belge, port majeur", "Diamantaires, mode (Dries Van Noten)", "Quartier sud (Het Zuid) gentrifié", "Patrimoine flamand riche"],
   description: {
-    fr: "Anvers, deuxième ville de Belgique, abrite le port le plus important de la mer du Nord, le quartier des diamantaires et une scène mode internationale. Le marché immobilier s'étale de 2 800 à 8 500 €/m². Les quartiers Het Zuid (gentrifié), 't Eilandje (reconversion portuaire) et la vieille ville sont les plus recherchés. MAPA Property y opère en broker international.",
-    en: "Antwerp, Belgium's second city, hosts the most important North Sea port, the diamond district and an international fashion scene. The real estate market ranges from €2,800 to €8,500/sqm. The most sought-after districts are Het Zuid (gentrified), 't Eilandje (port reconversion) and the old town. MAPA Property acts as international broker.",
-    de: "Antwerpen, zweitgrößte Stadt Belgiens, beherbergt den wichtigsten Hafen der Nordsee, das Diamantenviertel und eine internationale Modeszene. Der Immobilienmarkt reicht von 2.800 bis 8.500 €/m². Begehrteste Viertel: Het Zuid (gentrifiziert), 't Eilandje (Hafenumnutzung) und Altstadt. MAPA Property agiert als internationaler Broker.",
+    fr: "Anvers, deuxième ville de Belgique, abrite le port le plus important de la mer du Nord, le quartier des diamantaires et une scène mode internationale. Les quartiers Het Zuid (gentrifié), 't Eilandje (reconversion portuaire) et la vieille ville sont les plus recherchés. MAPA Property y opère en broker international.",
+    en: "Antwerp, Belgium's second city, hosts the most important North Sea port, the diamond district and an international fashion scene. The most sought-after districts are Het Zuid (gentrified), 't Eilandje (port reconversion) and the old town. MAPA Property acts as international broker.",
+    de: "Antwerpen, zweitgrößte Stadt Belgiens, beherbergt den wichtigsten Hafen der Nordsee, das Diamantenviertel und eine internationale Modeszene. Begehrteste Viertel: Het Zuid (gentrifiziert), 't Eilandje (Hafenumnutzung) und Altstadt. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -612,12 +602,11 @@ const amsterdam = buildIntlCity({
   slug: "amsterdam",
   name: { fr: "Amsterdam", en: "Amsterdam", de: "Amsterdam" },
   country: "NL",
-  priceRange: { floor: 7500, ceiling: 18000 },
   highlights: ["Capitale néerlandaise, hub financier post-Brexit", "Canaux UNESCO", "Oud-Zuid, Jordaan, Vondelpark", "Pénurie chronique de logement"],
   description: {
-    fr: "Amsterdam est la capitale économique néerlandaise et un hub financier renforcé par le post-Brexit (relocations EMA, banques, fonds). Le marché immobilier souffre d'une pénurie chronique, avec des prix de 7 500 à 18 000 €/m² selon le canal et l'arrondissement. Les zones premium incluent Oud-Zuid, Centrum (canaux UNESCO), Jordaan, Zuidas (quartier d'affaires moderne). MAPA Property y intervient en broker international.",
-    en: "Amsterdam is the Dutch economic capital and a financial hub reinforced post-Brexit (EMA relocation, banks, funds). The real estate market suffers from chronic supply shortages, prices €7,500 to €18,000/sqm depending on canal and district. Premium areas include Oud-Zuid, Centrum (UNESCO canals), Jordaan, Zuidas (modern business district). MAPA Property acts as international broker.",
-    de: "Amsterdam ist die niederländische Wirtschaftshauptstadt und ein durch den Post-Brexit gestärkter Finanzhub (EMA-Verlegung, Banken, Fonds). Der Immobilienmarkt leidet unter chronischer Knappheit, Preise 7.500 bis 18.000 €/m² je nach Gracht und Viertel. Premium-Lagen: Oud-Zuid, Centrum (UNESCO-Grachten), Jordaan, Zuidas (modernes Geschäftsviertel). MAPA Property agiert als internationaler Broker.",
+    fr: "Amsterdam est la capitale économique néerlandaise et un hub financier renforcé par le post-Brexit (relocations EMA, banques, fonds). Les zones premium incluent Oud-Zuid, Centrum (canaux UNESCO), Jordaan, Zuidas (quartier d'affaires moderne). MAPA Property y intervient en broker international.",
+    en: "Amsterdam is the Dutch economic capital and a financial hub reinforced post-Brexit (EMA relocation, banks, funds). Premium areas include Oud-Zuid, Centrum (UNESCO canals), Jordaan, Zuidas (modern business district). MAPA Property acts as international broker.",
+    de: "Amsterdam ist die niederländische Wirtschaftshauptstadt und ein durch den Post-Brexit gestärkter Finanzhub (EMA-Verlegung, Banken, Fonds). Premium-Lagen: Oud-Zuid, Centrum (UNESCO-Grachten), Jordaan, Zuidas (modernes Geschäftsviertel). MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -625,12 +614,11 @@ const londres = buildIntlCity({
   slug: "londres",
   name: { fr: "Londres", en: "London", de: "London" },
   country: "GB",
-  priceRange: { floor: 8000, ceiling: 50000 },
-  highlights: ["Mayfair, Belgravia, Knightsbridge, Kensington premium", "Marché global le plus liquide", "Brexit a recentré les flux", "Prime Central London 16k-50k €/m²"],
+  highlights: ["Mayfair, Belgravia, Knightsbridge, Kensington premium", "Marché global le plus liquide", "Brexit a recentré les flux"],
   description: {
-    fr: "Londres demeure le marché global le plus liquide pour les Trophy Assets résidentiels. Le Prime Central London (Mayfair, Belgravia, Knightsbridge, Kensington, Chelsea, Notting Hill) affiche des prix de 16 000 à 50 000 €/m², avec des records sur les superprimes (One Hyde Park, certains squares géorgiens). Le reste de la ville (zones 2 et 3) s'étend de 8 000 à 16 000 €/m². Le Brexit a marginalement recentré les flux mais Londres reste un actif refuge pour les investisseurs internationaux. MAPA Property opère en broker international avec des partenaires londoniens.",
-    en: "London remains the most liquid global market for residential Trophy Assets. Prime Central London (Mayfair, Belgravia, Knightsbridge, Kensington, Chelsea, Notting Hill) shows prices of €16,000 to €50,000/sqm, with records on superprime assets (One Hyde Park, certain Georgian squares). The rest of the city (zones 2 and 3) ranges from €8,000 to €16,000/sqm. Brexit marginally redirected flows but London remains a safe haven for international investors. MAPA Property operates as international broker with London partners.",
-    de: "London bleibt der liquideste globale Markt für residenzielle Trophy Assets. Prime Central London (Mayfair, Belgravia, Knightsbridge, Kensington, Chelsea, Notting Hill) zeigt Preise von 16.000 bis 50.000 €/m², mit Rekorden bei Superprime-Werten (One Hyde Park, einige georgianische Squares). Der Rest der Stadt (Zonen 2 und 3) reicht von 8.000 bis 16.000 €/m². Der Brexit hat die Flüsse marginal umgelenkt, doch London bleibt ein sicherer Hafen für internationale Investoren. MAPA Property agiert als internationaler Broker mit Londoner Partnern.",
+    fr: "Londres demeure le marché global le plus liquide pour les Trophy Assets résidentiels. Le Brexit a marginalement recentré les flux mais Londres reste un actif refuge pour les investisseurs internationaux. MAPA Property opère en broker international avec des partenaires londoniens.",
+    en: "London remains the most liquid global market for residential Trophy Assets. Brexit marginally redirected flows but London remains a safe haven for international investors. MAPA Property operates as international broker with London partners.",
+    de: "London bleibt der liquideste globale Markt für residenzielle Trophy Assets. Der Brexit hat die Flüsse marginal umgelenkt, doch London bleibt ein sicherer Hafen für internationale Investoren. MAPA Property agiert als internationaler Broker mit Londoner Partnern.",
   },
 });
 
@@ -638,12 +626,11 @@ const madrid = buildIntlCity({
   slug: "madrid",
   name: { fr: "Madrid", en: "Madrid", de: "Madrid" },
   country: "ES",
-  priceRange: { floor: 4000, ceiling: 14000 },
   highlights: ["Capitale espagnole, locomotion économique", "Salamanca, Chamberí, Centro premium", "Marché en hausse, retour des capitaux internationaux"],
   description: {
-    fr: "Madrid concentre l'essentiel de l'activité économique espagnole et présente un marché immobilier en croissance soutenue depuis 2015. Les quartiers premium — Salamanca (rue Serrano), Chamberí, Centro, Recoletos, Justicia — affichent des prix de 7 000 à 14 000 €/m². Le reste de la ville s'étale de 4 000 à 7 000 €/m². L'attrait fiscal pour les non-résidents (régime Beckham, retraités) renforce les flux entrants. MAPA Property opère en broker international.",
-    en: "Madrid concentrates most of Spain's economic activity and shows a real estate market in sustained growth since 2015. Premium districts — Salamanca (Serrano street), Chamberí, Centro, Recoletos, Justicia — show prices of €7,000 to €14,000/sqm. The rest of the city ranges from €4,000 to €7,000/sqm. The tax appeal for non-residents (Beckham regime, retirees) reinforces inbound flows. MAPA Property acts as international broker.",
-    de: "Madrid vereint den Großteil der spanischen Wirtschaftsaktivität und zeigt seit 2015 einen anhaltend wachsenden Immobilienmarkt. Premium-Viertel — Salamanca (Calle Serrano), Chamberí, Centro, Recoletos, Justicia — zeigen Preise von 7.000 bis 14.000 €/m². Der Rest der Stadt reicht von 4.000 bis 7.000 €/m². Der steuerliche Reiz für Nichtansässige (Beckham-Regime, Rentner) verstärkt die Zuflüsse. MAPA Property agiert als internationaler Broker.",
+    fr: "Madrid concentre l'essentiel de l'activité économique espagnole et présente un marché immobilier en croissance soutenue depuis 2015. L'attrait fiscal pour les non-résidents (régime Beckham, retraités) renforce les flux entrants. MAPA Property opère en broker international.",
+    en: "Madrid concentrates most of Spain's economic activity and shows a real estate market in sustained growth since 2015. The tax appeal for non-residents (Beckham regime, retirees) reinforces inbound flows. MAPA Property acts as international broker.",
+    de: "Madrid vereint den Großteil der spanischen Wirtschaftsaktivität und zeigt seit 2015 einen anhaltend wachsenden Immobilienmarkt. Der steuerliche Reiz für Nichtansässige (Beckham-Regime, Rentner) verstärkt die Zuflüsse. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -651,12 +638,11 @@ const barcelone = buildIntlCity({
   slug: "barcelone",
   name: { fr: "Barcelone", en: "Barcelona", de: "Barcelona" },
   country: "ES",
-  priceRange: { floor: 4500, ceiling: 15000 },
   highlights: ["Eixample, Pedralbes, Sarrià premium", "Marché méditerranéen ultra-international", "Modernisme catalan", "Réglementation locative durcie"],
   description: {
-    fr: "Barcelone offre un marché immobilier méditerranéen ultra-international, dominé par les Trophy Assets de l'Eixample (Pedrera, Sagrada Família), Pedralbes, Sarrià-Sant Gervasi et Diagonal Mar. Les prix s'étalent de 4 500 à 15 000 €/m². L'architecture moderniste catalane (Gaudí, Domènech i Montaner) constitue un segment patrimonial à part. La réglementation locative s'est durcie sur les Airbnb (limitations strictes), ce qui réoriente les flux vers le résidentiel propre. MAPA Property opère en broker international.",
-    en: "Barcelona offers an ultra-international Mediterranean market, dominated by Trophy Assets in the Eixample (Pedrera, Sagrada Família), Pedralbes, Sarrià-Sant Gervasi and Diagonal Mar. Prices: €4,500 to €15,000/sqm. Catalan Modernist architecture (Gaudí, Domènech i Montaner) constitutes a heritage segment of its own. Rental regulation has tightened on Airbnb (strict limits), redirecting flows to clean residential. MAPA Property acts as international broker.",
-    de: "Barcelona bietet einen ultra-internationalen Mittelmeermarkt, dominiert von Trophy Assets im Eixample (Pedrera, Sagrada Família), Pedralbes, Sarrià-Sant Gervasi und Diagonal Mar. Preise: 4.500 bis 15.000 €/m². Die katalanische Modernisme-Architektur (Gaudí, Domènech i Montaner) bildet ein eigenes Erbesegment. Die Mietregulierung wurde bei Airbnb verschärft (strenge Begrenzungen), was die Flüsse auf das reine Wohnen umlenkt. MAPA Property agiert als internationaler Broker.",
+    fr: "Barcelone offre un marché immobilier méditerranéen ultra-international, dominé par les Trophy Assets de l'Eixample (Pedrera, Sagrada Família), Pedralbes, Sarrià-Sant Gervasi et Diagonal Mar. L'architecture moderniste catalane (Gaudí, Domènech i Montaner) constitue un segment patrimonial à part. La réglementation locative s'est durcie sur les Airbnb (limitations strictes), ce qui réoriente les flux vers le résidentiel propre. MAPA Property opère en broker international.",
+    en: "Barcelona offers an ultra-international Mediterranean market, dominated by Trophy Assets in the Eixample (Pedrera, Sagrada Família), Pedralbes, Sarrià-Sant Gervasi and Diagonal Mar. Catalan Modernist architecture (Gaudí, Domènech i Montaner) constitutes a heritage segment of its own. Rental regulation has tightened on Airbnb (strict limits), redirecting flows to clean residential. MAPA Property acts as international broker.",
+    de: "Barcelona bietet einen ultra-internationalen Mittelmeermarkt, dominiert von Trophy Assets im Eixample (Pedrera, Sagrada Família), Pedralbes, Sarrià-Sant Gervasi und Diagonal Mar. Die katalanische Modernisme-Architektur (Gaudí, Domènech i Montaner) bildet ein eigenes Erbesegment. Die Mietregulierung wurde bei Airbnb verschärft (strenge Begrenzungen), was die Flüsse auf das reine Wohnen umlenkt. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -664,12 +650,11 @@ const lisbonne = buildIntlCity({
   slug: "lisbonne",
   name: { fr: "Lisbonne", en: "Lisbon", de: "Lissabon" },
   country: "PT",
-  priceRange: { floor: 3500, ceiling: 11000 },
   highlights: ["Chiado, Príncipe Real, Lapa premium", "Climat, qualité de vie, fiscalité", "Visa Doré (Golden Visa) recadré", "Marché en pleine restructuration"],
   description: {
-    fr: "Lisbonne a connu entre 2015 et 2023 une explosion de la demande internationale, portée par le climat, la fiscalité (Régime Résident Non Habituel, Golden Visa) et la qualité de vie. Depuis le recadrage du Golden Visa et la fin partielle du RNH, le marché s'est restructuré. Les quartiers premium — Chiado, Príncipe Real, Lapa, Estrela, Avenida da Liberdade — affichent des prix de 6 000 à 11 000 €/m². Les autres zones de la ville s'étendent de 3 500 à 6 000 €/m². MAPA Property opère en broker international.",
-    en: "Lisbon experienced between 2015 and 2023 an explosion of international demand, driven by climate, taxation (Non-Habitual Resident regime, Golden Visa) and quality of life. Since the Golden Visa rework and partial NHR end, the market has restructured. Premium districts — Chiado, Príncipe Real, Lapa, Estrela, Avenida da Liberdade — show prices of €6,000 to €11,000/sqm. Other areas of the city range from €3,500 to €6,000/sqm. MAPA Property acts as international broker.",
-    de: "Lissabon erlebte zwischen 2015 und 2023 eine Explosion internationaler Nachfrage, getragen von Klima, Besteuerung (Nicht-Habitueller-Resident-Regime, Goldenes Visum) und Lebensqualität. Seit der Überarbeitung des Goldenen Visums und dem teilweisen Ende des NHR hat sich der Markt umstrukturiert. Premium-Viertel — Chiado, Príncipe Real, Lapa, Estrela, Avenida da Liberdade — zeigen Preise von 6.000 bis 11.000 €/m². Andere Gebiete der Stadt reichen von 3.500 bis 6.000 €/m². MAPA Property agiert als internationaler Broker.",
+    fr: "Lisbonne a connu entre 2015 et 2023 une explosion de la demande internationale, portée par le climat, la fiscalité (Régime Résident Non Habituel, Golden Visa) et la qualité de vie. Depuis le recadrage du Golden Visa et la fin partielle du RNH, le marché s'est restructuré. MAPA Property opère en broker international.",
+    en: "Lisbon experienced between 2015 and 2023 an explosion of international demand, driven by climate, taxation (Non-Habitual Resident regime, Golden Visa) and quality of life. Since the Golden Visa rework and partial NHR end, the market has restructured. MAPA Property acts as international broker.",
+    de: "Lissabon erlebte zwischen 2015 und 2023 eine Explosion internationaler Nachfrage, getragen von Klima, Besteuerung (Nicht-Habitueller-Resident-Regime, Goldenes Visum) und Lebensqualität. Seit der Überarbeitung des Goldenen Visums und dem teilweisen Ende des NHR hat sich der Markt umstrukturiert. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -677,12 +662,11 @@ const porto = buildIntlCity({
   slug: "porto",
   name: { fr: "Porto", en: "Porto", de: "Porto" },
   country: "PT",
-  priceRange: { floor: 2800, ceiling: 8500 },
   highlights: ["Deuxième ville portugaise", "Foz do Douro, Boavista, Centro UNESCO", "Marché plus accessible que Lisbonne", "Patrimoine et caves de Porto"],
   description: {
-    fr: "Porto, deuxième ville du Portugal, présente un marché plus accessible que Lisbonne, avec des prix de 2 800 à 8 500 €/m². Les quartiers premium — Foz do Douro (front de mer), Boavista, Centro Histórico (UNESCO) — concentrent la valeur. La ville bénéficie d'un patrimoine UNESCO, des caves de Porto sur la rive de Vila Nova de Gaia, et d'un dynamisme culturel marqué (Casa da Música, Serralves). MAPA Property opère en broker international.",
-    en: "Porto, Portugal's second city, presents a more accessible market than Lisbon, prices €2,800 to €8,500/sqm. Premium districts — Foz do Douro (seafront), Boavista, Centro Histórico (UNESCO) — concentrate value. The city benefits from UNESCO heritage, the port wine cellars across Vila Nova de Gaia and a strong cultural dynamism (Casa da Música, Serralves). MAPA Property acts as international broker.",
-    de: "Porto, Portugals zweitgrößte Stadt, bietet einen zugänglicheren Markt als Lissabon, Preise 2.800 bis 8.500 €/m². Premium-Viertel — Foz do Douro (Meerfront), Boavista, Centro Histórico (UNESCO) — konzentrieren den Wert. Die Stadt profitiert von UNESCO-Erbe, den Portweinkellern auf der Seite Vila Nova de Gaia und ausgeprägter kultureller Dynamik (Casa da Música, Serralves). MAPA Property agiert als internationaler Broker.",
+    fr: "Les quartiers premium, Foz do Douro (front de mer), Boavista, Centro Histórico (UNESCO), concentrent la valeur. La ville bénéficie d'un patrimoine UNESCO, des caves de Porto sur la rive de Vila Nova de Gaia, et d'un dynamisme culturel marqué (Casa da Música, Serralves). MAPA Property opère en broker international.",
+    en: "Premium districts, Foz do Douro (seafront), Boavista, Centro Histórico (UNESCO), concentrate value. The city benefits from UNESCO heritage, the port wine cellars across Vila Nova de Gaia and a strong cultural dynamism (Casa da Música, Serralves). MAPA Property acts as international broker.",
+    de: "Premium-Viertel, Foz do Douro (Meerfront), Boavista, Centro Histórico (UNESCO), konzentrieren den Wert. Die Stadt profitiert von UNESCO-Erbe, den Portweinkellern auf der Seite Vila Nova de Gaia und ausgeprägter kultureller Dynamik (Casa da Música, Serralves). MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -690,12 +674,11 @@ const rome = buildIntlCity({
   slug: "rome",
   name: { fr: "Rome", en: "Rome", de: "Rom" },
   country: "IT",
-  priceRange: { floor: 4500, ceiling: 18000 },
   highlights: ["Capitale italienne, patrimoine UNESCO", "Centro storico, Parioli, Aventino premium", "Marché conservateur, biens rares"],
   description: {
-    fr: "Rome, capitale italienne, présente un marché immobilier conservateur, dominé par les biens patrimoniaux. Les quartiers premium — Centro storico, Parioli, Aventino, Trastevere, Prati — affichent des prix de 8 000 à 18 000 €/m². Le reste de la ville s'étale de 4 500 à 8 000 €/m². Les contraintes patrimoniales (zones UNESCO, monuments protégés) limitent les rénovations possibles. MAPA Property opère en broker international.",
-    en: "Rome, the Italian capital, presents a conservative real estate market dominated by heritage properties. Premium districts — Centro storico, Parioli, Aventino, Trastevere, Prati — show prices of €8,000 to €18,000/sqm. The rest of the city ranges from €4,500 to €8,000/sqm. Heritage constraints (UNESCO zones, protected monuments) limit renovation possibilities. MAPA Property acts as international broker.",
-    de: "Rom, italienische Hauptstadt, bietet einen konservativen Immobilienmarkt, dominiert von Erbeobjekten. Premium-Viertel — Centro storico, Parioli, Aventino, Trastevere, Prati — zeigen Preise von 8.000 bis 18.000 €/m². Der Rest der Stadt reicht von 4.500 bis 8.000 €/m². Erbeauflagen (UNESCO-Zonen, geschützte Denkmäler) begrenzen Sanierungsmöglichkeiten. MAPA Property agiert als internationaler Broker.",
+    fr: "Rome, capitale italienne, présente un marché immobilier conservateur, dominé par les biens patrimoniaux. Les contraintes patrimoniales (zones UNESCO, monuments protégés) limitent les rénovations possibles. MAPA Property opère en broker international.",
+    en: "Rome, the Italian capital, presents a conservative real estate market dominated by heritage properties. Heritage constraints (UNESCO zones, protected monuments) limit renovation possibilities. MAPA Property acts as international broker.",
+    de: "Rom, italienische Hauptstadt, bietet einen konservativen Immobilienmarkt, dominiert von Erbeobjekten. Erbeauflagen (UNESCO-Zonen, geschützte Denkmäler) begrenzen Sanierungsmöglichkeiten. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -703,12 +686,11 @@ const milan = buildIntlCity({
   slug: "milan",
   name: { fr: "Milan", en: "Milan", de: "Mailand" },
   country: "IT",
-  priceRange: { floor: 5500, ceiling: 22000 },
   highlights: ["Capitale économique italienne", "Quadrilatero della Moda, Brera, CityLife", "Marché en croissance forte", "Mode, finance, design"],
   description: {
-    fr: "Milan est la capitale économique italienne, premier centre financier et siège de l'industrie de la mode et du design. Le marché immobilier y est en croissance forte, avec des prix de 5 500 à 22 000 €/m². Les quartiers premium — Quadrilatero della Moda, Brera, Porta Nuova, CityLife (gratte-ciel récents), Magenta-San Vittore — concentrent les Trophy Assets. MAPA Property opère en broker international.",
-    en: "Milan is Italy's economic capital, the leading financial centre and seat of the fashion and design industry. The real estate market is in strong growth, prices €5,500 to €22,000/sqm. Premium districts — Quadrilatero della Moda, Brera, Porta Nuova, CityLife (recent skyscrapers), Magenta-San Vittore — concentrate Trophy Assets. MAPA Property acts as international broker.",
-    de: "Mailand ist Italiens Wirtschaftshauptstadt, führender Finanzplatz und Sitz der Mode- und Designindustrie. Der Immobilienmarkt wächst stark, Preise 5.500 bis 22.000 €/m². Premium-Viertel — Quadrilatero della Moda, Brera, Porta Nuova, CityLife (jüngere Hochhäuser), Magenta-San Vittore — konzentrieren Trophy Assets. MAPA Property agiert als internationaler Broker.",
+    fr: "Milan est la capitale économique italienne, premier centre financier et siège de l'industrie de la mode et du design. Les quartiers premium, Quadrilatero della Moda, Brera, Porta Nuova, CityLife (gratte-ciel récents), Magenta-San Vittore, concentrent les Trophy Assets. MAPA Property opère en broker international.",
+    en: "Milan is Italy's economic capital, the leading financial centre and seat of the fashion and design industry. Premium districts, Quadrilatero della Moda, Brera, Porta Nuova, CityLife (recent skyscrapers), Magenta-San Vittore, concentrate Trophy Assets. MAPA Property acts as international broker.",
+    de: "Mailand ist Italiens Wirtschaftshauptstadt, führender Finanzplatz und Sitz der Mode- und Designindustrie. Premium-Viertel, Quadrilatero della Moda, Brera, Porta Nuova, CityLife (jüngere Hochhäuser), Magenta-San Vittore, konzentrieren Trophy Assets. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -717,12 +699,11 @@ const florence = buildIntlCity({
   name: { fr: "Florence", en: "Florence", de: "Florenz" },
   country: "IT",
   region: "Toscane",
-  priceRange: { floor: 4500, ceiling: 14000 },
   highlights: ["Patrimoine Renaissance UNESCO", "Centro storico, Oltrarno premium", "Toscane résidentielle (villas, fattorie)", "Marché conservateur"],
   description: {
-    fr: "Florence concentre l'un des patrimoines artistiques les plus denses du monde (Renaissance, UNESCO). Le marché immobilier y est étroit et conservateur, avec des prix de 4 500 à 14 000 €/m² selon le quartier (Centro storico, Oltrarno, Campo di Marte, San Frediano). La Toscane résidentielle — villas, fattorie, propriétés viticoles dans le Chianti — constitue un segment international à part. MAPA Property opère en broker international.",
-    en: "Florence concentrates one of the world's densest artistic heritages (Renaissance, UNESCO). The real estate market is narrow and conservative, prices €4,500 to €14,000/sqm depending on district (Centro storico, Oltrarno, Campo di Marte, San Frediano). Residential Tuscany — villas, fattorie, wine properties in Chianti — constitutes an international segment of its own. MAPA Property acts as international broker.",
-    de: "Florenz vereint eines der dichtesten Kulturerben der Welt (Renaissance, UNESCO). Der Immobilienmarkt ist eng und konservativ, Preise 4.500 bis 14.000 €/m² je nach Viertel (Centro storico, Oltrarno, Campo di Marte, San Frediano). Das residenzielle Toskana — Villen, fattorie, Weingüter im Chianti — bildet ein eigenes internationales Segment. MAPA Property agiert als internationaler Broker.",
+    fr: "Florence concentre l'un des patrimoines artistiques les plus denses du monde (Renaissance, UNESCO). La Toscane résidentielle (villas, fattorie, propriétés viticoles dans le Chianti) constitue un segment international à part. MAPA Property opère en broker international.",
+    en: "Florence concentrates one of the world's densest artistic heritages (Renaissance, UNESCO). Residential Tuscany (villas, fattorie, wine properties in Chianti) constitutes an international segment of its own. MAPA Property acts as international broker.",
+    de: "Florenz vereint eines der dichtesten Kulturerben der Welt (Renaissance, UNESCO). Das residenzielle Toskana (Villen, fattorie, Weingüter im Chianti) bildet ein eigenes internationales Segment. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -730,12 +711,11 @@ const vienne = buildIntlCity({
   slug: "vienne",
   name: { fr: "Vienne", en: "Vienna", de: "Wien" },
   country: "AT",
-  priceRange: { floor: 5000, ceiling: 16000 },
   highlights: ["Capitale autrichienne, qualité de vie n°1 mondiale", "1ᵉʳ arrondissement (InnereStadt), 19ᵉ Döbling", "Marché stable, fiscalité claire"],
   description: {
-    fr: "Vienne, capitale autrichienne, est régulièrement classée première ville du monde en qualité de vie (Mercer, Economist). Le marché immobilier y est stable, avec des prix de 5 000 à 16 000 €/m². Le 1ᵉʳ arrondissement (InnereStadt, UNESCO) et le 19ᵉ (Döbling, vignobles) concentrent la valeur. MAPA Property opère en broker international avec des partenaires viennois.",
-    en: "Vienna, the Austrian capital, regularly ranks as the world's top city for quality of life (Mercer, Economist). The real estate market is stable, prices €5,000 to €16,000/sqm. The 1st district (InnereStadt, UNESCO) and the 19th (Döbling, vineyards) concentrate value. MAPA Property acts as international broker with Vienna partners.",
-    de: "Wien, österreichische Hauptstadt, wird regelmäßig als beste Stadt der Welt für Lebensqualität eingestuft (Mercer, Economist). Der Immobilienmarkt ist stabil, Preise 5.000 bis 16.000 €/m². Der 1. Bezirk (Innere Stadt, UNESCO) und der 19. (Döbling, Weinberge) konzentrieren den Wert. MAPA Property agiert als internationaler Broker mit Wiener Partnern.",
+    fr: "Vienne, capitale autrichienne, est régulièrement classée première ville du monde en qualité de vie (Mercer, Economist). Le 1ᵉʳ arrondissement (InnereStadt, UNESCO) et le 19ᵉ (Döbling, vignobles) concentrent la valeur. MAPA Property opère en broker international avec des partenaires viennois.",
+    en: "Vienna, the Austrian capital, regularly ranks as the world's top city for quality of life (Mercer, Economist). The 1st district (InnereStadt, UNESCO) and the 19th (Döbling, vineyards) concentrate value. MAPA Property acts as international broker with Vienna partners.",
+    de: "Wien, österreichische Hauptstadt, wird regelmäßig als beste Stadt der Welt für Lebensqualität eingestuft (Mercer, Economist). Der 1. Bezirk (Innere Stadt, UNESCO) und der 19. (Döbling, Weinberge) konzentrieren den Wert. MAPA Property agiert als internationaler Broker mit Wiener Partnern.",
   },
 });
 
@@ -743,12 +723,11 @@ const berlin = buildIntlCity({
   slug: "berlin",
   name: { fr: "Berlin", en: "Berlin", de: "Berlin" },
   country: "DE",
-  priceRange: { floor: 4500, ceiling: 14000 },
   highlights: ["Capitale allemande, scène culturelle", "Mitte, Charlottenburg, Prenzlauer Berg", "Mietendeckel et régulations strictes", "Marché en mutation"],
   description: {
-    fr: "Berlin, capitale allemande, présente un marché immobilier en mutation depuis 2015. Les quartiers premium — Mitte, Charlottenburg-Wilmersdorf, Prenzlauer Berg, Kreuzberg — affichent des prix de 7 000 à 14 000 €/m². Le reste de la ville s'étale de 4 500 à 7 000 €/m². La régulation locative (Mietendeckel partiellement annulé, encadrement des loyers) reste un point de vigilance pour l'investisseur. MAPA Property opère en broker international.",
-    en: "Berlin, the German capital, presents a market in transition since 2015. Premium districts — Mitte, Charlottenburg-Wilmersdorf, Prenzlauer Berg, Kreuzberg — show prices of €7,000 to €14,000/sqm. The rest of the city ranges from €4,500 to €7,000/sqm. Rental regulation (Mietendeckel partly overturned, rent caps) remains a point of vigilance for investors. MAPA Property acts as international broker.",
-    de: "Berlin, deutsche Hauptstadt, zeigt seit 2015 einen Markt im Wandel. Premium-Viertel — Mitte, Charlottenburg-Wilmersdorf, Prenzlauer Berg, Kreuzberg — zeigen Preise von 7.000 bis 14.000 €/m². Der Rest der Stadt reicht von 4.500 bis 7.000 €/m². Mietregulierung (Mietendeckel teilweise gekippt, Mietpreisbremse) bleibt ein Wachsamkeitspunkt für Investoren. MAPA Property agiert als internationaler Broker.",
+    fr: "Berlin, capitale allemande, présente un marché immobilier en mutation depuis 2015. La régulation locative (Mietendeckel partiellement annulé, encadrement des loyers) reste un point de vigilance pour l'investisseur. MAPA Property opère en broker international.",
+    en: "Berlin, the German capital, presents a market in transition since 2015. Rental regulation (Mietendeckel partly overturned, rent caps) remains a point of vigilance for investors. MAPA Property acts as international broker.",
+    de: "Berlin, deutsche Hauptstadt, zeigt seit 2015 einen Markt im Wandel. Mietregulierung (Mietendeckel teilweise gekippt, Mietpreisbremse) bleibt ein Wachsamkeitspunkt für Investoren. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -756,12 +735,11 @@ const munich = buildIntlCity({
   slug: "munich",
   name: { fr: "Munich", en: "Munich", de: "München" },
   country: "DE",
-  priceRange: { floor: 9000, ceiling: 22000 },
   highlights: ["Première ville allemande en prix", "Schwabing, Bogenhausen, Lehel premium", "BMW, Allianz, Siemens", "Marché ultra-tendu"],
   description: {
-    fr: "Munich est la première ville allemande en prix immobiliers, conséquence de son tissu économique dense (BMW, Allianz, Siemens, MunichRe). Le marché s'étale de 9 000 à 22 000 €/m². Les quartiers premium — Schwabing, Bogenhausen, Lehel, Altstadt, Maxvorstadt — concentrent la valeur. La pénurie de logements y est chronique. MAPA Property opère en broker international.",
-    en: "Munich has Germany's highest real estate prices, a consequence of its dense economic fabric (BMW, Allianz, Siemens, MunichRe). Market: €9,000 to €22,000/sqm. Premium districts — Schwabing, Bogenhausen, Lehel, Altstadt, Maxvorstadt — concentrate value. Housing shortage is chronic. MAPA Property acts as international broker.",
-    de: "München hat die höchsten Immobilienpreise Deutschlands — Folge des dichten Wirtschaftsgefüges (BMW, Allianz, Siemens, MunichRe). Markt: 9.000 bis 22.000 €/m². Premium-Viertel — Schwabing, Bogenhausen, Lehel, Altstadt, Maxvorstadt — konzentrieren den Wert. Wohnungsknappheit ist chronisch. MAPA Property agiert als internationaler Broker.",
+    fr: "Munich est la première ville allemande en prix immobiliers, conséquence de son tissu économique dense (BMW, Allianz, Siemens, MunichRe). Les quartiers premium (Schwabing, Bogenhausen, Lehel, Altstadt, Maxvorstadt) concentrent la valeur. La pénurie de logements y est chronique. MAPA Property opère en broker international.",
+    en: "Munich has Germany's highest real estate prices, a consequence of its dense economic fabric (BMW, Allianz, Siemens, MunichRe). Premium districts (Schwabing, Bogenhausen, Lehel, Altstadt, Maxvorstadt) concentrate value. Housing shortage is chronic. MAPA Property acts as international broker.",
+    de: "München hat die höchsten Immobilienpreise Deutschlands, Folge des dichten Wirtschaftsgefüges (BMW, Allianz, Siemens, MunichRe). Premium-Viertel, Schwabing, Bogenhausen, Lehel, Altstadt, Maxvorstadt, konzentrieren den Wert. Wohnungsknappheit ist chronisch. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -769,12 +747,11 @@ const francfort = buildIntlCity({
   slug: "francfort",
   name: { fr: "Francfort", en: "Frankfurt", de: "Frankfurt am Main" },
   country: "DE",
-  priceRange: { floor: 5500, ceiling: 14000 },
   highlights: ["Capitale financière allemande", "BCE, Bundesbank, banques", "Westend, Sachsenhausen, Bornheim", "Hub aérien européen majeur"],
   description: {
-    fr: "Francfort est la capitale financière allemande, siège de la Banque Centrale Européenne et de la Bundesbank. Le marché immobilier y est dynamique, avec des prix de 5 500 à 14 000 €/m². Les quartiers premium — Westend, Sachsenhausen, Bornheim, Nordend — concentrent la demande. Le hub aérien (Frankfurt Airport, premier d'Allemagne) renforce l'attractivité internationale. MAPA Property opère en broker international.",
-    en: "Frankfurt is the German financial capital, seat of the European Central Bank and Bundesbank. The market is dynamic, prices €5,500 to €14,000/sqm. Premium districts — Westend, Sachsenhausen, Bornheim, Nordend — concentrate demand. The airline hub (Frankfurt Airport, Germany's largest) reinforces international appeal. MAPA Property acts as international broker.",
-    de: "Frankfurt ist Deutschlands Finanzhauptstadt, Sitz der Europäischen Zentralbank und der Bundesbank. Der Markt ist dynamisch, Preise 5.500 bis 14.000 €/m². Premium-Viertel — Westend, Sachsenhausen, Bornheim, Nordend — konzentrieren die Nachfrage. Das Luftfahrtdrehkreuz (Frankfurt Airport, größter Deutschlands) stärkt die internationale Anziehungskraft. MAPA Property agiert als internationaler Broker.",
+    fr: "Francfort est la capitale financière allemande, siège de la Banque Centrale Européenne et de la Bundesbank. Les quartiers premium (Westend, Sachsenhausen, Bornheim, Nordend) concentrent la demande. Le hub aérien (Frankfurt Airport, premier d'Allemagne) renforce l'attractivité internationale. MAPA Property opère en broker international.",
+    en: "Frankfurt is the German financial capital, seat of the European Central Bank and Bundesbank. Premium districts (Westend, Sachsenhausen, Bornheim, Nordend) concentrate demand. The airline hub (Frankfurt Airport, Germany's largest) reinforces international appeal. MAPA Property acts as international broker.",
+    de: "Frankfurt ist Deutschlands Finanzhauptstadt, Sitz der Europäischen Zentralbank und der Bundesbank. Premium-Viertel (Westend, Sachsenhausen, Bornheim, Nordend) konzentrieren die Nachfrage. Das Luftfahrtdrehkreuz (Frankfurt Airport, größter Deutschlands) stärkt die internationale Anziehungskraft. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -782,12 +759,11 @@ const hambourg = buildIntlCity({
   slug: "hambourg",
   name: { fr: "Hambourg", en: "Hamburg", de: "Hamburg" },
   country: "DE",
-  priceRange: { floor: 4500, ceiling: 13000 },
   highlights: ["Deuxième ville allemande, port majeur", "HafenCity, Eppendorf, Blankenese premium", "Médias, commerce, logistique"],
   description: {
-    fr: "Hambourg, deuxième ville allemande, abrite le plus grand port d'Allemagne et un tissu économique fort (médias, commerce, logistique, aéronautique). Le marché immobilier s'étale de 4 500 à 13 000 €/m². Les quartiers premium — HafenCity (reconversion portuaire), Eppendorf, Blankenese (villas vue Elbe) — concentrent la valeur. MAPA Property opère en broker international.",
-    en: "Hamburg, Germany's second city, hosts the country's largest port and a strong economic fabric (media, trade, logistics, aerospace). The real estate market ranges from €4,500 to €13,000/sqm. Premium districts — HafenCity (port reconversion), Eppendorf, Blankenese (villas with Elbe views) — concentrate value. MAPA Property acts as international broker.",
-    de: "Hamburg, zweitgrößte Stadt Deutschlands, beherbergt den größten Hafen Deutschlands und ein starkes Wirtschaftsgefüge (Medien, Handel, Logistik, Luftfahrt). Der Immobilienmarkt reicht von 4.500 bis 13.000 €/m². Premium-Viertel — HafenCity (Hafenumnutzung), Eppendorf, Blankenese (Villen mit Elbblick) — konzentrieren den Wert. MAPA Property agiert als internationaler Broker.",
+    fr: "Hambourg, deuxième ville allemande, abrite le plus grand port d'Allemagne et un tissu économique fort (médias, commerce, logistique, aéronautique). Les quartiers premium, HafenCity (reconversion portuaire), Eppendorf, Blankenese (villas vue Elbe), concentrent la valeur. MAPA Property opère en broker international.",
+    en: "Hamburg, Germany's second city, hosts the country's largest port and a strong economic fabric (media, trade, logistics, aerospace). Premium districts, HafenCity (port reconversion), Eppendorf, Blankenese (villas with Elbe views), concentrate value. MAPA Property acts as international broker.",
+    de: "Hamburg, zweitgrößte Stadt Deutschlands, beherbergt den größten Hafen Deutschlands und ein starkes Wirtschaftsgefüge (Medien, Handel, Logistik, Luftfahrt). Premium-Viertel, HafenCity (Hafenumnutzung), Eppendorf, Blankenese (Villen mit Elbblick), konzentrieren den Wert. MAPA Property agiert als internationaler Broker.",
   },
 });
 
@@ -795,12 +771,11 @@ const dubai = buildIntlCity({
   slug: "dubai",
   name: { fr: "Dubaï", en: "Dubai", de: "Dubai" },
   country: "AE",
-  priceRange: { floor: 4500, ceiling: 30000 },
   highlights: ["Émirats Arabes Unis, hub global", "Palm Jumeirah, Downtown, DIFC, Emirates Hills", "Pas d'IR, fiscalité avantageuse résidence", "Marché ultra-international"],
   description: {
-    fr: "Dubaï est l'un des marchés immobiliers les plus internationaux et liquides du monde, structuré autour de zones distinctes : Palm Jumeirah (villas et penthouses sur l'archipel artificiel), Downtown Dubai (Burj Khalifa, Dubai Mall), DIFC (financier), Emirates Hills (villas haut de gamme), Arabian Ranches, Dubai Marina, Bluewaters. Les prix s'étalent de 4 500 à 30 000 €/m² selon l'emplacement, avec des records pour les villas Palm Jumeirah Frond. L'absence d'impôt sur le revenu et un cadre réglementaire pro-investisseur en font un marché refuge. MAPA Property opère en broker international avec des partenaires habilités RERA.",
-    en: "Dubai is one of the world's most international and liquid real estate markets, structured around distinct zones: Palm Jumeirah (villas and penthouses on the artificial archipelago), Downtown Dubai (Burj Khalifa, Dubai Mall), DIFC (financial), Emirates Hills (high-end villas), Arabian Ranches, Dubai Marina, Bluewaters. Prices: €4,500 to €30,000/sqm depending on location, with records for Palm Jumeirah Frond villas. Absence of income tax and a pro-investor regulatory framework make it a safe haven. MAPA Property acts as international broker with RERA-licensed partners.",
-    de: "Dubai ist einer der internationalsten und liquidesten Immobilienmärkte der Welt, strukturiert um eigenständige Zonen: Palm Jumeirah (Villen und Penthouses auf dem künstlichen Archipel), Downtown Dubai (Burj Khalifa, Dubai Mall), DIFC (Finanzplatz), Emirates Hills (gehobene Villen), Arabian Ranches, Dubai Marina, Bluewaters. Preise: 4.500 bis 30.000 €/m² je nach Lage, Rekorde bei Palm-Jumeirah-Frond-Villen. Fehlende Einkommensteuer und ein investorenfreundlicher Rechtsrahmen machen Dubai zu einem sicheren Hafen. MAPA Property agiert als internationaler Broker mit RERA-lizenzierten Partnern.",
+    fr: "Dubaï est l'un des marchés immobiliers les plus internationaux et liquides du monde, structuré autour de zones distinctes : Palm Jumeirah (villas et penthouses sur l'archipel artificiel), Downtown Dubai (Burj Khalifa, Dubai Mall), DIFC (financier), Emirates Hills (villas haut de gamme), Arabian Ranches, Dubai Marina, Bluewaters. L'absence d'impôt sur le revenu et un cadre réglementaire pro-investisseur en font un marché refuge. MAPA Property opère en broker international avec des partenaires habilités RERA.",
+    en: "Dubai is one of the world's most international and liquid real estate markets, structured around distinct zones: Palm Jumeirah (villas and penthouses on the artificial archipelago), Downtown Dubai (Burj Khalifa, Dubai Mall), DIFC (financial), Emirates Hills (high-end villas), Arabian Ranches, Dubai Marina, Bluewaters. Absence of income tax and a pro-investor regulatory framework make it a safe haven. MAPA Property acts as international broker with RERA-licensed partners.",
+    de: "Dubai ist einer der internationalsten und liquidesten Immobilienmärkte der Welt, strukturiert um eigenständige Zonen: Palm Jumeirah (Villen und Penthouses auf dem künstlichen Archipel), Downtown Dubai (Burj Khalifa, Dubai Mall), DIFC (Finanzplatz), Emirates Hills (gehobene Villen), Arabian Ranches, Dubai Marina, Bluewaters. Fehlende Einkommensteuer und ein investorenfreundlicher Rechtsrahmen machen Dubai zu einem sicheren Hafen. MAPA Property agiert als internationaler Broker mit RERA-lizenzierten Partnern.",
   },
 });
 
@@ -808,12 +783,11 @@ const newYork = buildIntlCity({
   slug: "new-york",
   name: { fr: "New York", en: "New York", de: "New York" },
   country: "US",
-  priceRange: { floor: 12000, ceiling: 60000 },
   highlights: ["Manhattan : Tribeca, SoHo, Upper East/West Side", "Brooklyn : Williamsburg, DUMBO", "Marché global premium", "Coopératives, condominiums, brownstones"],
   description: {
-    fr: "New York demeure l'un des marchés immobiliers les plus iconiques au monde, structuré autour de Manhattan (Tribeca, SoHo, Upper East Side, Upper West Side, Greenwich Village, West Village), Brooklyn (Williamsburg, DUMBO, Brooklyn Heights, Park Slope) et de quelques zones du Queens (Long Island City). Les prix à Manhattan s'étalent de 12 000 à 60 000 €/m² (en USD/sqft équivalent), avec des superprimes (One57, 432 Park, 220 Central Park South) bien au-delà. Le marché distingue trois segments structurels : coopératives (avec board approval), condominiums (plus souples pour étrangers), brownstones (maisons de ville historiques). MAPA Property opère en broker international avec des partenaires NY licenciés.",
-    en: "New York remains one of the world's most iconic real estate markets, structured around Manhattan (Tribeca, SoHo, Upper East Side, Upper West Side, Greenwich Village, West Village), Brooklyn (Williamsburg, DUMBO, Brooklyn Heights, Park Slope) and parts of Queens (Long Island City). Manhattan prices range from €12,000 to €60,000/sqm equivalent, with superprime assets (One57, 432 Park, 220 Central Park South) well above. The market distinguishes three structural segments: cooperatives (with board approval), condominiums (more foreigner-friendly), brownstones (historic townhouses). MAPA Property acts as international broker with NY-licensed partners.",
-    de: "New York bleibt einer der ikonischsten Immobilienmärkte der Welt, strukturiert um Manhattan (Tribeca, SoHo, Upper East Side, Upper West Side, Greenwich Village, West Village), Brooklyn (Williamsburg, DUMBO, Brooklyn Heights, Park Slope) und Teile von Queens (Long Island City). Manhattan-Preise: 12.000 bis 60.000 €/m²-Äquivalent, Superprime-Werte (One57, 432 Park, 220 Central Park South) deutlich darüber. Der Markt unterscheidet drei strukturelle Segmente: Cooperatives (mit Board Approval), Condominiums (ausländerfreundlicher), Brownstones (historische Stadthäuser). MAPA Property agiert als internationaler Broker mit NY-lizenzierten Partnern.",
+    fr: "New York demeure l'un des marchés immobiliers les plus iconiques au monde, structuré autour de Manhattan (Tribeca, SoHo, Upper East Side, Upper West Side, Greenwich Village, West Village), Brooklyn (Williamsburg, DUMBO, Brooklyn Heights, Park Slope) et de quelques zones du Queens (Long Island City). Le marché distingue trois segments structurels : coopératives (avec board approval), condominiums (plus souples pour étrangers), brownstones (maisons de ville historiques). MAPA Property opère en broker international avec des partenaires NY licenciés.",
+    en: "New York remains one of the world's most iconic real estate markets, structured around Manhattan (Tribeca, SoHo, Upper East Side, Upper West Side, Greenwich Village, West Village), Brooklyn (Williamsburg, DUMBO, Brooklyn Heights, Park Slope) and parts of Queens (Long Island City). The market distinguishes three structural segments: cooperatives (with board approval), condominiums (more foreigner-friendly), brownstones (historic townhouses). MAPA Property acts as international broker with NY-licensed partners.",
+    de: "New York bleibt einer der ikonischsten Immobilienmärkte der Welt, strukturiert um Manhattan (Tribeca, SoHo, Upper East Side, Upper West Side, Greenwich Village, West Village), Brooklyn (Williamsburg, DUMBO, Brooklyn Heights, Park Slope) und Teile von Queens (Long Island City). Der Markt unterscheidet drei strukturelle Segmente: Cooperatives (mit Board Approval), Condominiums (ausländerfreundlicher), Brownstones (historische Stadthäuser). MAPA Property agiert als internationaler Broker mit NY-lizenzierten Partnern.",
   },
 });
 
@@ -821,12 +795,11 @@ const miami = buildIntlCity({
   slug: "miami",
   name: { fr: "Miami", en: "Miami", de: "Miami" },
   country: "US",
-  priceRange: { floor: 4500, ceiling: 25000 },
   highlights: ["South Beach, Miami Beach, Brickell premium", "Hub Latin America", "Tax appeal Florida (no state income tax)", "Marché ultra-international"],
   description: {
-    fr: "Miami est devenue depuis 2020 l'un des marchés immobiliers les plus dynamiques d'Amérique du Nord, porté par les flux entrants depuis New York, San Francisco et l'Amérique latine. Les zones premium — South Beach, Miami Beach (Star Island, Indian Creek), Brickell, Coconut Grove, Coral Gables, Bal Harbour, Sunny Isles — affichent des prix de 8 000 à 25 000 €/m². Le reste s'étend de 4 500 à 8 000 €/m². L'absence d'impôt d'État (Florida) renforce l'attractivité. MAPA Property opère en broker international avec des partenaires Miami licenciés.",
-    en: "Miami has become since 2020 one of North America's most dynamic real estate markets, driven by inflows from New York, San Francisco and Latin America. Premium areas — South Beach, Miami Beach (Star Island, Indian Creek), Brickell, Coconut Grove, Coral Gables, Bal Harbour, Sunny Isles — show prices of €8,000 to €25,000/sqm. The rest ranges from €4,500 to €8,000/sqm. The absence of state income tax (Florida) reinforces appeal. MAPA Property acts as international broker with Miami-licensed partners.",
-    de: "Miami ist seit 2020 einer der dynamischsten Immobilienmärkte Nordamerikas geworden — getragen von Zuflüssen aus New York, San Francisco und Lateinamerika. Premium-Zonen — South Beach, Miami Beach (Star Island, Indian Creek), Brickell, Coconut Grove, Coral Gables, Bal Harbour, Sunny Isles — zeigen Preise von 8.000 bis 25.000 €/m². Der Rest reicht von 4.500 bis 8.000 €/m². Das Fehlen einer staatlichen Einkommensteuer (Florida) verstärkt die Attraktivität. MAPA Property agiert als internationaler Broker mit Miami-lizenzierten Partnern.",
+    fr: "Miami est devenue depuis 2020 l'un des marchés immobiliers les plus dynamiques d'Amérique du Nord, porté par les flux entrants depuis New York, San Francisco et l'Amérique latine. L'absence d'impôt d'État (Florida) renforce l'attractivité. MAPA Property opère en broker international avec des partenaires Miami licenciés.",
+    en: "Miami has become since 2020 one of North America's most dynamic real estate markets, driven by inflows from New York, San Francisco and Latin America. The absence of state income tax (Florida) reinforces appeal. MAPA Property acts as international broker with Miami-licensed partners.",
+    de: "Miami ist seit 2020 einer der dynamischsten Immobilienmärkte Nordamerikas geworden, getragen von Zuflüssen aus New York, San Francisco und Lateinamerika. Das Fehlen einer staatlichen Einkommensteuer (Florida) verstärkt die Attraktivität. MAPA Property agiert als internationaler Broker mit Miami-lizenzierten Partnern.",
   },
 });
 
@@ -835,12 +808,11 @@ const saintBarthelemy = buildIntlCity({
   name: { fr: "Saint-Barthélemy", en: "Saint-Barthélemy", de: "Saint-Barthélemy" },
   country: "FR",
   region: "Antilles",
-  priceRange: { floor: 18000, ceiling: 80000 },
   highlights: ["Antilles françaises, marché ultra-confidentiel", "Villas Gustavia, Saint-Jean, Lurin", "Trophy Assets quasi-systématiques", "Off-market dominant"],
   description: {
-    fr: "Saint-Barthélemy (Saint-Barth) est l'une des destinations résidentielles les plus exclusives des Caraïbes, dominée par les Trophy Assets : villas avec accès mer, propriétés sur les hauteurs (Lurin, Gouverneur, Saint-Jean) et front de mer rare (Gustavia). Le marché est ultra-confidentiel, dominé par les transactions off-market sous NDA contractuel. Les prix s'étalent de 18 000 à 80 000 €/m² selon l'exposition, le terrain et la rareté. MAPA Property opère en broker international avec des partenaires antillais habilités, sous mandat de recherche signé au Luxembourg.",
-    en: "Saint-Barthélemy (Saint-Barth) is one of the Caribbean's most exclusive residential destinations, dominated by Trophy Assets: villas with sea access, properties on the heights (Lurin, Gouverneur, Saint-Jean) and rare seafront (Gustavia). The market is ultra-confidential, dominated by off-market transactions under contractual NDA. Prices: €18,000 to €80,000/sqm depending on exposure, land and rarity. MAPA Property acts as international broker with vetted Caribbean partners, under a search mandate signed in Luxembourg.",
-    de: "Saint-Barthélemy (Saint-Barth) ist eines der exklusivsten Wohnziele der Karibik, dominiert von Trophy Assets: Villen mit Meerzugang, Immobilien auf den Höhen (Lurin, Gouverneur, Saint-Jean) und seltene Meerfront (Gustavia). Der Markt ist ultra-vertraulich, dominiert von Off-Market-Transaktionen unter vertraglicher NDA. Preise: 18.000 bis 80.000 €/m² je nach Lage, Grundstück und Seltenheit. MAPA Property agiert als internationaler Broker mit geprüften karibischen Partnern, unter einem in Luxemburg unterzeichneten Suchmandat.",
+    fr: "Saint-Barthélemy (Saint-Barth) est l'une des destinations résidentielles les plus exclusives des Caraïbes, dominée par les Trophy Assets : villas avec accès mer, propriétés sur les hauteurs (Lurin, Gouverneur, Saint-Jean) et front de mer rare (Gustavia). Le marché est ultra-confidentiel, dominé par les transactions off-market sous NDA contractuel. MAPA Property opère en broker international avec des partenaires antillais habilités, sous mandat de recherche signé au Luxembourg.",
+    en: "Saint-Barthélemy (Saint-Barth) is one of the Caribbean's most exclusive residential destinations, dominated by Trophy Assets: villas with sea access, properties on the heights (Lurin, Gouverneur, Saint-Jean) and rare seafront (Gustavia). The market is ultra-confidential, dominated by off-market transactions under contractual NDA. MAPA Property acts as international broker with vetted Caribbean partners, under a search mandate signed in Luxembourg.",
+    de: "Saint-Barthélemy (Saint-Barth) ist eines der exklusivsten Wohnziele der Karibik, dominiert von Trophy Assets: Villen mit Meerzugang, Immobilien auf den Höhen (Lurin, Gouverneur, Saint-Jean) und seltene Meerfront (Gustavia). Der Markt ist ultra-vertraulich, dominiert von Off-Market-Transaktionen unter vertraglicher NDA. MAPA Property agiert als internationaler Broker mit geprüften karibischen Partnern, unter einem in Luxemburg unterzeichneten Suchmandat.",
   },
 });
 

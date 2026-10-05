@@ -230,7 +230,7 @@ export const PROPERTIES_LIST_TAG = "properties";
 // composant listé ci-dessus a besoin d'un champ absent d'ici, l'ajouter
 // explicitement — ne pas revenir à select("*").
 const PROPERTY_CARD_COLUMNS =
-  "id, slug, transaction, property_type, country, city, title_fr, title_en, title_de, price, surface, bedrooms, bathrooms, energy, badge, badge_size, badge_position";
+  "id, slug, transaction, property_type, country, city, title_fr, title_en, title_de, price, surface, bedrooms, bathrooms, energy, badge, badge_size, badge_position, updated_at";
 
 /**
  * Sprint OPTIM-BIENS-1 — mise en cache (tag-only invalidation, comme

@@ -45,6 +45,7 @@ import { retentionCutoff } from "../../lib/pilotage/retention";
 import { selectPublicImages, isApimoImageUrl } from "../../lib/property-images";
 import { formatRateFraction } from "../../lib/format/numbers";
 import { evaluateAdminIdle, sessionStartFromClaims, parseActivityCookie } from "../../lib/admin/idle";
+import { SERVER_ONLY_NAMESPACES, clientMessages } from "../../lib/i18n-client-messages";
 
 const ROOT = path.resolve(__dirname, "../..");
 const read = (p: string) => fs.readFileSync(path.join(ROOT, p), "utf8");
@@ -644,7 +645,7 @@ section = "M. Fiche de bien et coordonnees";
   check("cache : invalidation de toutes les fiches publiques", /revalidatePath\("\/\[locale\]\/biens\/\[slug\]", "page"\)/.test(read("lib/revalidate-property.ts")));
   for (const f of ["app/admin/properties/[id]/photos/actions.ts", "app/admin/properties/actions.ts"]) {
     const src = read(f);
-    check(`cache : ${f} invalide toutes les fiches`, /revalidatePublicPropertyPages\(\)/.test(src) && !/revalidatePath\(`\/fr\/biens\/\$\{/.test(src));
+    check(`cache : ${f} invalide toutes les fiches`, /revalidatePublicPropertyPages\(/.test(src) && !/revalidatePath\(`\/fr\/biens\/\$\{/.test(src));
   }
   // Admin : chaque changement de photos est enregistre (table lue par la fiche).
   const pm = read("components/admin/PhotoManager.tsx");
@@ -862,6 +863,39 @@ section = "P. Admin sur telephone";
     check(`site public : feuille mobile de l'admin absente de ${publicHtml.length} pages`, adminCss.length > 0 && publicHtml.length > 0 && leaks.length === 0, leaks.slice(0, 5).join(", "));
   }
   check("ecran d'accueil : manifeste hors du proxy, sans donnee", /\.\*\\\\\.\.\*/.test(read("proxy.ts")) && !/supabase|from\(/.test(mf));
+}
+
+// ===========================================================================
+// Q. Performance mobile et diffusion (garde-fous)
+// ===========================================================================
+section = "Q. Performance mobile et diffusion";
+{
+  const src = [...walk("app", (x) => /\.(ts|tsx)$/.test(x)), ...walk("components", (x) => /\.(ts|tsx)$/.test(x)), ...walk("lib", (x) => /\.(ts|tsx)$/.test(x))];
+  const misuse = src.filter((f) => [...read(f).matchAll(/useTranslations\(\s*["']([\w]+)/g)].some((m) => SERVER_ONLY_NAMESPACES.has(m[1])));
+  check("messages : aucun namespace serveur lu par useTranslations", misuse.length === 0, misuse.join(", "));
+  const sample = clientMessages({ admin_leads: {}, hero: {}, nav: {} });
+  check("messages : admin et namespaces serveur jamais envoyes au navigateur", Object.keys(sample).join(",") === "nav");
+  const layout = read("app/[locale]/layout.tsx");
+  check("layout public : messages filtres", /clientMessages\(\(await getMessages\(\)\)/.test(layout));
+  check("layout public : aucun preconnect vers Apimo, Supabase ou Cloudflare", !/rel="preconnect"/.test(layout));
+  check("layout public : police des etiquettes non prechargee", /preload: false/.test(layout));
+  const banner = read("components/consent/CookieConsentBanner.tsx");
+  check("banniere cookies : rendue dans le HTML, masquee avant affichage si choix", !/setMounted/.test(banner) && /useState\(true\)/.test(banner) && /CONSENT_DECIDED_SCRIPT/.test(layout) && /html\.consent-decided \[data-consent-banner\]/.test(read("app/globals.css")));
+  check("Turnstile : charge a l'approche du formulaire ou au premier geste", /new IntersectionObserver/.test(read("components/ui/Turnstile.tsx")) && /"pointerdown", "keydown", "focusin"/.test(read("components/ui/Turnstile.tsx")));
+  check("logos et pastille du chatbot : jamais precharges", !/<Logo[^>]*priority/.test(read("components/layout/Header.tsx")) && /fetchPriority="low"/.test(read("components/chatbot/ChatbotBubble.tsx")) && /fetchPriority=\{priority \? undefined : "low"\}/.test(read("components/brand/Logo.tsx")));
+  if (hasBuild && fs.existsSync(path.join(ROOT, ".next/server/app/fr.html"))) {
+    const home = read(".next/server/app/fr.html");
+    const preloads = (home.match(/<link rel="preload" as="image"/g) ?? []).length;
+    check("accueil : une seule image prechargee (image principale)", preloads === 1 && /mapa-showcase-poster/.test(home.match(/<link rel="preload" as="image"[^>]*>/)?.[0] ?? ""), `${preloads} images prechargees`);
+    check("accueil : aucun message de l'admin dans le HTML", !/"admin_[a-z]+":/.test(home));
+    check("accueil : banniere cookies presente dans le HTML servi", /data-consent-banner/.test(home));
+  }
+  // IndexNow : envoi apres la reponse, jamais bloquant ; cle publique servie seulement si definie.
+  const inx = read("lib/indexnow.ts");
+  check("IndexNow : envoi apres la reponse et journalise", /after\(async \(\) =>/.test(inx) && /recordCronRun\("indexnow"/.test(inx) && !/user-agent/i.test(inx));
+  check("IndexNow : active seulement par INDEXNOW_KEY et hors beta", /process\.env\.INDEXNOW_KEY/.test(inx) && /SITE_URL\.includes\("beta\."\)/.test(inx));
+  check("IndexNow : fichier de cle a la racine", /source: "\/:key\(\[a-f0-9\]\{8,128\}\)\.txt"/.test(read("next.config.ts")));
+  check("IndexNow : biens et articles signales", /revalidatePublicBlogPages\(id\)/.test(read("app/admin/blog/actions.ts")) && /scheduleIndexNow/.test(read("lib/revalidate-property.ts")));
 }
 
 // ===========================================================================

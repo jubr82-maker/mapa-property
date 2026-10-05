@@ -4,6 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 import { cgu } from "@/lib/legal/cgu";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 type Locale = keyof typeof cgu;
 
 export async function generateMetadata({
@@ -24,6 +25,8 @@ export default async function Page({
   setRequestLocale(locale);
   const data = cgu[locale as Locale] ?? cgu.fr;
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/legal/cgu" />
     <LegalLayout
       eyebrow={data.eyebrow}
       title={data.title}
@@ -34,5 +37,6 @@ export default async function Page({
       sections={data.sections}
       copyright={data.copyright}
     />
+    </>
   );
 }

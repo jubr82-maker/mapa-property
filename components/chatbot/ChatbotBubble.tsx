@@ -144,7 +144,10 @@ export function ChatbotBubble() {
             fill
             sizes="(min-width: 640px) 64px, 56px"
             className="object-cover"
-            priority
+            // Perf mobile (oct. 2026) : pastille du chatbot sans preload
+            // (elle concurrencait l'image principale de chaque page).
+            loading="eager"
+            fetchPriority="low"
           />
         </span>
         <span aria-hidden className="absolute -right-0.5 -top-0.5 size-3 rounded-full bg-bg ring-2 ring-gold animate-pulse" />

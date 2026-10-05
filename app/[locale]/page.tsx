@@ -14,6 +14,7 @@ import { FadeInOnScroll } from "@/components/ui/FadeInOnScroll";
 import { FadeInOutSection } from "@/components/effects/FadeInOutSection";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { Link } from "@/i18n/navigation";
+import { ExploreLinks } from "@/components/seo/ExploreLinks";
 import {
   fetchHomeFeatured,
   fetchLatestBlogPosts,
@@ -29,12 +30,13 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [featured, reviews, blogPosts, tMC, tWL] = await Promise.all([
+  const [featured, reviews, blogPosts, tMC, tWL, tEx] = await Promise.all([
     fetchHomeFeatured(6, locale),
     fetchPublishedReviews(8),
     fetchLatestBlogPosts(3),
     getTranslations({ locale, namespace: "method_coverage" }),
     getTranslations({ locale, namespace: "home_waitlist" }),
+    getTranslations({ locale, namespace: "explore" }),
   ]);
 
   return (
@@ -134,6 +136,16 @@ export default async function HomePage({
         </FadeInOutSection>
       </FadeInOnScroll>
       <BlogTeaser posts={blogPosts} locale={locale as Locale} />
+      {/* Maillage (oct. 2026) : pages villes et simulateurs. */}
+      <section className="px-6 py-12 md:py-16 lg:px-10">
+        <div className="mx-auto max-w-[1400px]">
+          <h2 className="t-h2">{tEx("section_title")}</h2>
+          <SignatureLine />
+          <div className="mt-6">
+            <ExploreLinks />
+          </div>
+        </div>
+      </section>
       {/* NAV8 : ContactCTA « Une conversation peut tout changer »
           retiré (doublon du CTA footer « Passer à l'action »). */}
     </>

@@ -4,6 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 import { rgpd } from "@/lib/legal/rgpd";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 type Locale = keyof typeof rgpd;
 
 export async function generateMetadata({
@@ -24,6 +25,8 @@ export default async function Page({
   setRequestLocale(locale);
   const data = rgpd[locale as Locale] ?? rgpd.fr;
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/legal/rgpd" />
     <LegalLayout
       eyebrow={data.eyebrow}
       title={data.title}
@@ -34,5 +37,6 @@ export default async function Page({
       sections={data.sections}
       copyright={data.copyright}
     />
+    </>
   );
 }

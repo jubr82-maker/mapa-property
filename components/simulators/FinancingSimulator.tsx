@@ -33,7 +33,7 @@ export function FinancingSimulator({ initial }: Props) {
   const [income, setIncome] = useState(8000);
   const [persons, setPersons] = useState(1);
 
-  const fees = LEGAL_FEES[country];
+  const fees = LEGAL_FEES[country] ?? LEGAL_FEES.LU;
   const rate = DEFAULT_RATES_BY_COUNTRY[country] ?? 3.85;
 
   const mortgage = useMemo(
@@ -59,7 +59,7 @@ export function FinancingSimulator({ initial }: Props) {
             >
               {(Object.keys(LEGAL_FEES) as CountryCode[]).map((c) => (
                 <option key={c} value={c}>
-                  {LEGAL_FEES[c].name}
+                  {LEGAL_FEES[c]?.name ?? c}
                 </option>
               ))}
             </select>

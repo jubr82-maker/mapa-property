@@ -1,3 +1,4 @@
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import type { Metadata } from "next";
 import { offmarketFicheMetadata } from "@/lib/offmarket-seo";
 import { notFound } from "next/navigation";
@@ -210,6 +211,7 @@ export default async function OffMarketDetailPage({
 
   return (
     <article className="pt-24 lg:pt-32">
+      <PageBreadcrumb locale={locale} path={`/off-market/${property.id}`} current={title} />
       <PropertyViewTracker
         propertyId={property.id}
         commune={property.city_label ?? undefined}

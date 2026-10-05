@@ -17,11 +17,13 @@ import { ConsentGatedAnalytics } from "@/components/consent/ConsentGatedAnalytic
 import { AttributionCapture } from "@/components/tracking/AttributionCapture";
 import { ConsentGatedMarketing } from "@/components/consent/ConsentGatedMarketing";
 import { CookieConsentBanner } from "@/components/consent/CookieConsentBanner";
+import { CONSENT_DECIDED_SCRIPT } from "@/lib/consent/decided-script";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 import { AmbientBackgroundLite } from "@/components/effects/AmbientBackgroundLite";
 import { ScrollProgressBar } from "@/components/effects/ScrollProgressBar";
 import { homepageGraph } from "@/lib/seo";
+import { clientMessages } from "@/lib/i18n-client-messages";
 import { siteDesignTokens } from "@/lib/site-content";
 import "../globals.css";
 
@@ -39,11 +41,16 @@ const sans = Archivo({
   display: "swap",
 });
 
+// Perf mobile (oct. 2026) : police des petites etiquettes, non prechargee
+// (affichee d'abord dans la police monospace du systeme, puis remplacee).
+// Seules les polices du titre et du texte, visibles au premier affichage,
+// restent prechargees.
 const mono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["400", "500"],
   display: "swap",
+  preload: false,
 });
 
 export function generateStaticParams() {
@@ -104,10 +111,10 @@ export async function generateMetadata({
       apple: "/apple-touch-icon.png",
     },
     other: {
-      "geo.region": "LU-LU",
-      "geo.position": "49.4811;6.0878",
-      ICBM: "49.4811, 6.0878",
-      "geo.placename": "Luxembourg",
+      // Balises geo.* et ICBM retirees (oct. 2026) : coordonnees du canton
+      // du siege presentees comme "Luxembourg", region LU-LU inexacte ;
+      // Google ne les utilise pas. L'adresse reelle est dans les donnees
+      // structurees de la page des mentions legales.
       copyright: "© 2026 MAPA Synergy Sàrl",
     },
   };
@@ -124,7 +131,8 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) notFound();
 
   setRequestLocale(locale);
-  const messages = await getMessages();
+  // Seulement les messages utiles au navigateur (lib/i18n-client-messages.ts).
+  const messages = clientMessages((await getMessages()) as Record<string, unknown>);
 
   // CMS design tokens — override les couleurs racine via :root inline.
   // Les fonts restent gérées par next/font/google (Big Shoulders / Archivo /
@@ -179,32 +187,20 @@ export default async function LocaleLayout({
             __html: `(function(){try{var s=localStorage.getItem('mapa_theme');if(s==='light'){document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}}catch(e){}})();`,
           }}
         />
+        {/* Banniere cookies rendue dans le HTML : masquee avant l'affichage
+            si un choix existe deja (components/consent/CookieConsentBanner). */}
+        <script dangerouslySetInnerHTML={{ __html: CONSENT_DECIDED_SCRIPT }} />
         {cssOverride ? (
           <style dangerouslySetInnerHTML={{ __html: `:root{${cssOverride}}` }} />
         ) : null}
-        {/* Connexions critiques pré-établies — LCP : images Apimo (cover fiches)
-            et Supabase (vidéo hero + images storage). Le preconnect avec
-            crossOrigin couvre le fetch des images cross-origin. */}
-        <link rel="dns-prefetch" href="https://media.apimo.pro" />
-        <link rel="dns-prefetch" href="https://dutfkblygfvhhwpzxmfz.supabase.co" />
-        <link
-          rel="preconnect"
-          href="https://media.apimo.pro"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
-          href="https://dutfkblygfvhhwpzxmfz.supabase.co"
-          crossOrigin="anonymous"
-        />
-        {/* POL1 : preconnect Turnstile — stabilise/accélère le 1er
-            rendu du widget (moins de flicker au mount). */}
+        {/* Perf mobile (oct. 2026) : plus de preconnect vers Apimo, Supabase
+            ni Cloudflare. Les photos passent par l'optimiseur du site
+            (/_next/image, meme origine), les pages publiques ne parlent pas
+            a Supabase depuis le navigateur, et Turnstile n'est charge
+            qu'a l'approche d'un formulaire : ces connexions anticipees
+            occupaient le reseau du telephone pendant l'affichage. Simple
+            resolution DNS conservee pour Turnstile. */}
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
-        <link
-          rel="preconnect"
-          href="https://challenges.cloudflare.com"
-          crossOrigin="anonymous"
-        />
       </head>
       <body
         className="min-h-dvh bg-bg text-ink antialiased"

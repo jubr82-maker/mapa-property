@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { pageAlternates } from "@/lib/seo";
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/services/rendement-locatif") };
+  // Title et description propres (oct. 2026) : la page heritait de ceux de
+  // l'accueil (contenu en double signale par pnpm test:seo).
+  return seoPageMetadata(locale, "yield", "/services/rendement-locatif");
 }
 
 export default async function RendementLocatifPage({
@@ -22,6 +25,8 @@ export default async function RendementLocatifPage({
   const t = await getTranslations({ locale, namespace: "rendement_locatif" });
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/services/rendement-locatif" />
     <article className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-3xl text-center">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">
@@ -60,5 +65,6 @@ export default async function RendementLocatifPage({
         </p>
       </div>
     </article>
+    </>
   );
 }

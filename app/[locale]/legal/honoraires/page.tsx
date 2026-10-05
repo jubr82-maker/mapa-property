@@ -4,6 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 import { honoraires } from "@/lib/legal/honoraires";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 type Locale = keyof typeof honoraires;
 
 export async function generateMetadata({
@@ -24,6 +25,8 @@ export default async function Page({
   setRequestLocale(locale);
   const data = honoraires[locale as Locale] ?? honoraires.fr;
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/legal/honoraires" />
     <LegalLayout
       eyebrow={data.eyebrow}
       title={data.title}
@@ -34,5 +37,6 @@ export default async function Page({
       sections={data.sections}
       copyright={data.copyright}
     />
+    </>
   );
 }

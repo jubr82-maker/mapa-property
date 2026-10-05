@@ -4,6 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 import { intelligenceArtificielle } from "@/lib/legal/intelligence-artificielle";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 type Locale = keyof typeof intelligenceArtificielle;
 
 export async function generateMetadata({
@@ -24,6 +25,8 @@ export default async function Page({
   setRequestLocale(locale);
   const data = intelligenceArtificielle[locale as Locale] ?? intelligenceArtificielle.fr;
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/legal/intelligence-artificielle" />
     <LegalLayout
       eyebrow={data.eyebrow}
       title={data.title}
@@ -32,5 +35,6 @@ export default async function Page({
       sections={data.sections}
       copyright={data.copyright}
     />
+    </>
   );
 }

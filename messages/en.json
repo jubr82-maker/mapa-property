@@ -1463,6 +1463,13 @@
         "terrain": "plot of land",
         "property": "exceptional property"
       }
+    },
+    "city": {
+      "title": "{city}, prestige real estate"
+    },
+    "yield": {
+      "title": "Rental yield simulator",
+      "description": "Calculate the gross and net yield of a rental investment in Luxembourg: price, rent, charges and acquisition costs, within the legal rent cap."
     }
   },
   "admin_datetime": {
@@ -3529,6 +3536,65 @@
     "reason_aal2": "two-factor",
     "reason_invalid_credentials": "wrong credentials",
     "reason_wrong_current": "wrong current password",
-    "event_auth_passkey_step": "Passkey sign-in step"
+    "event_auth_passkey_step": "Passkey sign-in step",
+    "task_indexnow": "IndexNow notification"
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "properties": "Properties",
+    "blog": "Blog",
+    "contact": "Contact",
+    "waitlist": "Waiting list",
+    "acquisition_notice": "Acquisition simulator notice",
+    "offmarket": "Off-Market",
+    "arcova": "ARCOVA",
+    "about": "About us",
+    "services": "Services",
+    "borrowing": "Borrowing capacity",
+    "estimate": "Valuation",
+    "rent": "Letting",
+    "markets": "Active markets",
+    "yield": "Rental yield",
+    "simulators": "Simulators",
+    "financing": "Financing simulator",
+    "sell": "Selling",
+    "terms_use": "Terms of use",
+    "terms_sale": "Terms of sale",
+    "fees": "Fees",
+    "ai": "Artificial intelligence",
+    "legal_notice": "Legal notice",
+    "privacy": "Privacy policy"
+  },
+  "not_found": {
+    "eyebrow": "Error 404",
+    "title": "This page does not exist or has moved",
+    "text": "The address may have changed. Search for a property below or pick a section.",
+    "search_label": "Search for a property",
+    "search_placeholder": "Municipality or town",
+    "transaction_label": "Transaction type",
+    "transaction_all": "Sale and rent",
+    "transaction_sale": "Sale",
+    "transaction_rent": "Rent",
+    "search_submit": "Search",
+    "links_title": "Main pages",
+    "link_home": "Home",
+    "link_properties": "All properties",
+    "link_estimate": "Value a property",
+    "link_simulators": "Simulators",
+    "link_markets": "Active markets",
+    "link_offmarket": "Off-Market",
+    "link_blog": "Blog",
+    "link_contact": "Contact"
+  },
+  "explore": {
+    "title_cities": "Markets by city",
+    "title_simulators": "Simulators",
+    "all_cities": "All cities",
+    "sim_financing": "Financing simulator",
+    "sim_borrowing": "Borrowing capacity",
+    "sim_yield": "Rental yield",
+    "section_title": "Explore the markets and simulate your project",
+    "city_market": "The {city} market",
+    "fiche_title": "Go further"
   }
 }

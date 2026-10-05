@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 // Route alias SEO-friendly /services/mandat-recherche → /mandats/recherche
 // Le contenu canonique vit dans app/[locale]/mandats/[type]/page.tsx (slug "recherche").
@@ -9,5 +9,6 @@ export default async function MandatRechercheAliasPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}/mandats/recherche`);
+  // 308 aussi assure par next.config.ts (redirects).
+  permanentRedirect(`/${locale}/mandats/recherche`);
 }

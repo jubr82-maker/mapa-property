@@ -29,7 +29,7 @@ export const RENT_ITEMS: readonly { href: string; key: string }[] = [
 ];
 
 export const AGENCY_ITEMS: readonly { href: string; key: string }[] = [
-  { href: "/journal", key: "blog" },
+  { href: "/blog", key: "blog" },
   { href: "/qui-sommes-nous", key: "about" },
   // Page contact existante : /[locale]/contact (pas /nous-contacter).
   // Audit Sprint A : ancien href '/nous-contacter' renvoyait 404 alors que

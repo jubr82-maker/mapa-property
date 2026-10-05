@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactReveal } from "@/components/contact-reveal";
 import { pageAlternates } from "@/lib/seo";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
 }: {
@@ -48,6 +49,8 @@ export default async function MentionsAcquisitionPage({
   ] as const;
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/mentions-acquisition" />
     <article className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-[800px]">
         <header className="mb-12">
@@ -124,5 +127,6 @@ export default async function MentionsAcquisitionPage({
         </p>
       </div>
     </article>
+    </>
   );
 }

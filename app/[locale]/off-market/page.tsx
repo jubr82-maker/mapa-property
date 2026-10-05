@@ -7,6 +7,7 @@ import type { PropertyOffmarket } from "@/lib/types";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 import { PropertyPrice } from "@/components/property/PropertyPrice";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 // Sprint OPTIM-1B : ISR sur la page liste off-market — fetch
 // fetchOffmarketList(locale) via VIEW Supabase. Sans revalidate explicite,
 // Next.js 16 considere la page Dynamic (Supabase fetch non-cache) ->
@@ -38,6 +39,8 @@ export default async function OffMarketListPage({
   const t = await getTranslations({ locale, namespace: "offmarket" });
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/off-market" />
     <>
       <section className="relative isolate overflow-hidden bg-bg-contrast">
         {/* Bordure interne or subtile (effet plaque) */}
@@ -150,6 +153,7 @@ export default async function OffMarketListPage({
         )}
       </div>
     </div>
+    </>
     </>
   );
 }

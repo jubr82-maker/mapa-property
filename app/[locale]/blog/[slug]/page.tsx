@@ -8,7 +8,8 @@ import { fetchBlogPostBySlug } from "@/lib/data";
 import { pickLang, type Locale } from "@/lib/types";
 import { BookletReader } from "@/components/blog/BookletReader";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { blogPosting, breadcrumb, pageAlternates } from "@/lib/seo";
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+import { blogPosting, pageAlternates } from "@/lib/seo";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -77,15 +78,10 @@ export default async function BlogPostPage({
     publishedAt: post.published_at,
     author: post.author,
   });
-  const breadcrumbJsonLd = breadcrumb([
-    { name: "MAPA Property", url: `${SITE_URL}/${locale}` },
-    { name: "Blog", url: `${SITE_URL}/${locale}/blog` },
-    { name: title, url: `${SITE_URL}/${locale}/blog/${post.slug}` },
-  ]);
-
   return (
     <div className="px-6 pt-24 pb-16 lg:px-10 lg:pt-32">
-      <JsonLd data={[articleJsonLd, breadcrumbJsonLd]} />
+      <JsonLd data={articleJsonLd} />
+      <PageBreadcrumb locale={locale} path={`/blog/${post.slug}`} current={title} />
       {/* NAV6 : sur Mac le conteneur respire (90% viewport) ; le texte
           reste lisible (prose-mapa cappe à 65ch en interne). */}
       <div className="mx-auto max-w-4xl lg:max-w-[90vw] xl:max-w-[1400px]">

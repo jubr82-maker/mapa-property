@@ -12,12 +12,26 @@ const SITE_URL =
 // restent révélés au clic côté UI (<ContactReveal />).
 const PUBLIC_CONTACT_PATH = "/contact";
 
+// Etablissement reel unique (oct. 2026). Champs tires des mentions legales
+// du site (lib/legal/mentions.ts) : nom commercial MAPA Property, nom legal
+// MAPA Synergy Sarl, pays Luxembourg. Retires car non verifiables ou
+// contraires aux regles de Google :
+//   - aggregateRating fabrique (Google n'accepte pas les avis
+//     "autoproclames" d'un etablissement sur son propre site, et la note
+//     n'etait adossee a aucun avis reel) ;
+//   - foundingDate "2020" (absente des mentions legales, et le site indique
+//     ailleurs une agence fondee en 2024) ;
+//   - coordonnees geographiques et localite (l'adresse exacte du siege
+//     n'est publiee, par regle du projet, que sur la page des mentions
+//     legales : legalNoticeOrganization ci-dessous).
+// Images : fichiers reels de public/ (lib/og.ts), verifies au build par
+// pnpm test:seo.
 export const realEstateAgent = (locale: string) => ({
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
   "@id": `${SITE_URL}#organization`,
   name: "MAPA Property",
-  alternateName: "MAPA Synergy Sàrl",
+  legalName: "MAPA Synergy Sàrl",
   url: SITE_URL,
   logo: siteLogo(),
   image: siteShareImage(),
@@ -39,13 +53,7 @@ export const realEstateAgent = (locale: string) => ({
   },
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Luxembourg",
     addressCountry: "LU",
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: 49.4811,
-    longitude: 6.0878,
   },
   areaServed: [
     { "@type": "Country", name: "Luxembourg" },
@@ -68,14 +76,6 @@ export const realEstateAgent = (locale: string) => ({
     "@type": "Person",
     name: "Julien Brebion",
     jobTitle: "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
-  },
-  foundingDate: "2020",
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "5",
-    reviewCount: "8",
-    bestRating: "5",
-    worstRating: "1",
   },
 });
 
@@ -207,7 +207,13 @@ interface RealEstateListingInput {
   name: string;
   description: string;
   url: string;
-  image?: string;
+  /** Photos publiques du bien (ordre de l'admin), adresses absolues. */
+  images?: string[];
+  /** Dates reelles de la fiche (colonnes created_at, updated_at). */
+  datePosted?: string | null;
+  dateModified?: string | null;
+  /** Reference publique (slug) du bien. */
+  identifier?: string | null;
   /** Locale de la page courante (fr/en/de) -> inLanguage. */
   locale: string;
   /** null/absent = prix sur demande, omis du JSON-LD (jamais inventé). */
@@ -240,7 +246,11 @@ export const realEstateListing = (p: RealEstateListingInput) => {
     description: p.description,
     url: p.url,
     inLanguage: p.locale,
-    ...(p.image ? { image: p.image } : {}),
+    ...(p.images && p.images.length ? { image: p.images } : {}),
+    ...(p.datePosted ? { datePosted: p.datePosted } : {}),
+    ...(p.dateModified ? { dateModified: p.dateModified } : {}),
+    ...(p.identifier ? { identifier: p.identifier } : {}),
+    provider: { "@id": `${SITE_URL}#organization` },
     offers: {
       "@type": "Offer",
       ...(p.price ? { price: p.price, priceCurrency: "EUR" } : {}),

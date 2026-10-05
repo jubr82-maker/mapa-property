@@ -19,6 +19,7 @@ import {
   haversineKm,
 } from "@/lib/geo/luxembourg-communes";
 
+import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 // Sprint OPTIM-BIENS-3 — chargé en lazy (chunk séparé, embla-carousel-react
 // inclus) : ne pèse sur le bundle client que sur les recherches où le
 // carrousel s'affiche réellement (peu de résultats + type précis). SSR
@@ -307,6 +308,8 @@ export default async function PropertiesPage({
   const showAllHref = `/biens?${showAllParams.toString()}`;
 
   return (
+    <>
+      <PageBreadcrumb locale={locale} path="/biens" />
     <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
       <div className="mx-auto max-w-[1400px]">
         <header className="mb-10 max-w-3xl">
@@ -348,5 +351,6 @@ export default async function PropertiesPage({
         )}
       </div>
     </div>
+    </>
   );
 }

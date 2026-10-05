@@ -134,6 +134,27 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Redirections permanentes (308, oct. 2026). Les anciennes adresses sans
+  // extension sont traitees par proxy.ts (lib/legacy-redirects.ts) ; ici,
+  // celles que le proxy ne voit pas (fichiers .html du site v28) et les
+  // pages internes devenues de simples renvois.
+  async redirects() {
+    return [
+      { source: "/index.html", destination: "/fr", permanent: true },
+      { source: "/403.html", destination: "/fr", permanent: true },
+      { source: "/admin/index.html", destination: "/admin", permanent: true },
+      { source: "/content/article-:n(\\d+)-:lang(fr|en|de).html", destination: "/:lang/blog", permanent: true },
+      { source: "/:locale(fr|en|de)/services/acheter", destination: "/:locale/biens", permanent: true },
+      { source: "/:locale(fr|en|de)/services/mandat-recherche", destination: "/:locale/mandats/recherche", permanent: true },
+      { source: "/:locale(fr|en|de)/services/mandat-exclusif", destination: "/:locale/mandats/exclusif", permanent: true },
+      { source: "/:locale(fr|en|de)/journal", destination: "/:locale/blog", permanent: true },
+    ];
+  },
+  // Fichier de cle IndexNow servi a la racine (/<cle>.txt), cf.
+  // app/api/indexnow-key/[key]/route.ts.
+  async rewrites() {
+    return [{ source: "/:key([a-f0-9]{8,128}).txt", destination: "/api/indexnow-key/:key" }];
+  },
   async headers() {
     return [
       {

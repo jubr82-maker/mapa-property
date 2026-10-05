@@ -893,3 +893,9 @@ body {
   }
 }
 
+
+/* Banniere cookies rendue dans le HTML (oct. 2026) : masquee avant
+   l'affichage si un choix est deja enregistre (CONSENT_DECIDED_SCRIPT). */
+html.consent-decided [data-consent-banner] {
+  display: none;
+}

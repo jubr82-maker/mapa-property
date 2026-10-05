@@ -63,7 +63,11 @@ function mapCountry(raw: string): string {
   return aliases[c] ?? c;
 }
 
-const SUPPORTED_CODES = ["LU", "FR", "BE", "DE", "MC", "CH", "IT", "ES", "PT"];
+// Oct. 2026 : Luxembourg seul. Les regles des autres pays
+// (lib/acquisition/countries) ne citent que des portails generaux, pas une
+// source par chiffre, et le taux de credit (source BCL) ne vaut que pour le
+// Luxembourg : un bien a l'etranger affiche le message "pays non couvert".
+const SUPPORTED_CODES = ["LU"];
 
 /** Disclaimer minimaliste affiché sous le résultat. */
 function MinimalDisclaimer({ locale }: { locale: string }) {
