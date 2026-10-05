@@ -55,8 +55,9 @@ export async function PATCH(
       .eq("id", id)
       .single();
     if (readErr || !current) {
+      if (readErr) console.error("[admin/estimations] read error", readErr.code);
       return NextResponse.json(
-        { error: "not_found", detail: readErr?.message },
+        { error: "not_found" },
         { status: 404 },
       );
     }
@@ -94,7 +95,8 @@ export async function PATCH(
     .select("id");
 
   if (updErr) {
-    return NextResponse.json({ error: updErr.message }, { status: 500 });
+    console.error("[api/admin/estimations/id] update", { code: updErr.code });
+    return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
   if (!updated || updated.length === 0) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -121,6 +123,7 @@ export async function DELETE(
     .select("id");
 
   if (error) {
+    console.error("[admin/estimations] delete error", error.code);
     // CHECK status non encore élargi (migration 20260518_estimation_
     // status_deleted.sql pas appliquée) → message actionnable.
     const isCheck =
@@ -129,7 +132,7 @@ export async function DELETE(
       {
         error: isCheck
           ? "Migration requise : appliquer supabase/migrations/20260518_estimation_status_deleted.sql (CHECK status n'autorise pas encore 'deleted')."
-          : error.message,
+          : "db_error",
       },
       { status: isCheck ? 409 : 500 },
     );

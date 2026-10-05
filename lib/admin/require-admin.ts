@@ -17,6 +17,7 @@ import { NextResponse } from "next/server";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { isAdminEmail } from "@/lib/admin/admin-emails";
+import { evaluateAdminAccess } from "@/lib/admin/admin-access";
 import { ADMIN_MFA_PATH } from "@/lib/admin/security-config";
 
 // Oct. 2026 : double authentification OBLIGATOIRE. Un compte de la liste
@@ -49,7 +50,8 @@ async function getAdminUser(): Promise<{
   user: User | null;
 }> {
   const { supabase, user, aal2 } = await getAdminState();
-  return { supabase, user: user && aal2 ? user : null };
+  const access = evaluateAdminAccess(user, aal2 ? "aal2" : "aal1");
+  return { supabase, user: access === "admin" ? user : null };
 }
 
 /**

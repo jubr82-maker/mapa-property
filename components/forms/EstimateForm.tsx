@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { formatEuro } from "@/lib/finance";
 import type { EstimateResult } from "@/lib/estimate";
 import { track } from "@/lib/tracking/track";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
+import { Turnstile, type TurnstileHandle } from "@/components/ui/Turnstile";
 import { PlaceCombobox, type ComboboxPlace } from "@/components/forms/PlaceCombobox";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
@@ -263,6 +264,14 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
     setData((d) => ({ ...d, [key]: value }));
   };
 
+  // Anti-robots (oct. 2026) : jeton Turnstile exige par /api/estimate si
+  // configure. Script indisponible : soumission autorisee, le serveur tranche.
+  const turnstileRef = useRef<TurnstileHandle>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaFailed, setCaptchaFailed] = useState(false);
+  const turnstileEnabled = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
+  const captchaReady = !turnstileEnabled || Boolean(captchaToken) || captchaFailed;
+
   const placesByName = useMemo(
     () => new Map(places.map((p) => [p.name, p])),
     [places],
@@ -436,8 +445,14 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
           // Sprint C9 — ISO pays requis pour validatePhone server-side.
           contactPhoneCountry: phoneCountry || undefined,
           rgpdConsent: data.rgpdConsent,
+          captchaToken: captchaToken ?? undefined,
         }),
       });
+      if (!res.ok) {
+        // Jeton deja consomme par le serveur : un nouveau pour l'essai suivant.
+        turnstileRef.current?.reset();
+        setCaptchaToken(null);
+      }
       if (res.status === 422) {
         const j = (await res.json().catch(() => ({}))) as {
           error?: string;
@@ -920,12 +935,18 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
               t={t}
             />
           )}
+          <Turnstile
+            ref={turnstileRef}
+            onToken={setCaptchaToken}
+            onUnavailable={() => setCaptchaFailed(true)}
+            className="mt-4"
+          />
           <BackSubmitBtn
             onBack={() => setStep(2)}
             onSubmit={() => void submit()}
             pending={pending}
             t={t}
-            disabled={step3Disabled}
+            disabled={step3Disabled || !captchaReady}
             disabledTooltip={t("validation.submit_disabled_tooltip")}
           />
         </StepWrap>

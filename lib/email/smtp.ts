@@ -113,6 +113,10 @@ function withinRateLimit(): boolean {
   return true;
 }
 
+function stripHeaderBreaks(value: string | undefined): string | undefined {
+  return value?.replace(/[\r\n]+/g, " ").trim();
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -148,8 +152,10 @@ async function attemptSend(
     await transporter.sendMail({
       from: `"${FROM_NAME}" <${FROM_ADDRESS}>`,
       to: args.to,
-      replyTo: args.replyTo ?? SMTP_REPLY_TO,
-      subject: args.subject,
+      replyTo: stripHeaderBreaks(args.replyTo ?? SMTP_REPLY_TO),
+      // En-tetes sans retour a la ligne (injection d'en-tetes, OWASP ASVS
+      // 5.2.3) : le sujet contient des donnees saisies par les visiteurs.
+      subject: stripHeaderBreaks(args.subject),
       text: args.text,
     });
     return { ok: true };
@@ -165,6 +171,19 @@ async function attemptSend(
  * jamais d'adresse ni de contenu).
  */
 export async function sendMail(args: SendMailArgs): Promise<SendMailResult> {
+  // Preversion Vercel : jamais d'e-mail a un visiteur, seulement aux
+  // destinataires internes configures (audit de securite, oct. 2026).
+  if (process.env.VERCEL_ENV === "preview") {
+    const internal = new Set(INTERNAL_NOTIFICATION_RECIPIENTS.map((r) => r.toLowerCase()));
+    const kept = (Array.isArray(args.to) ? args.to : [args.to]).filter((r) =>
+      internal.has(String(r).trim().toLowerCase()),
+    );
+    if (kept.length === 0) {
+      console.info("[email] preversion : envoi a un destinataire externe ignore");
+      return { ok: true };
+    }
+    args = { ...args, to: kept };
+  }
   const recipients = Array.isArray(args.to) ? args.to.length : 1;
   const transporter = getTransporter();
   if (!transporter) {

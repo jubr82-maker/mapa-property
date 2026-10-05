@@ -18,11 +18,14 @@ const csp = [
   // ressource <video> hors origine, ce qui causait le hero noir.
   "media-src 'self' https://*.supabase.co https: blob: data:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://sdw-wsrest.ecb.europa.eu https://cloudflareinsights.com https://api.qrserver.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com",
+  "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://sdw-wsrest.ecb.europa.eu https://cloudflareinsights.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com",
   "frame-src https://challenges.cloudflare.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
+  // Audit oct. 2026 : equivalent CSP de X-Frame-Options SAMEORIGIN
+  // (anti-clickjacking, OWASP ASVS 14.4.7).
+  "frame-ancestors 'self'",
   "upgrade-insecure-requests",
 ].join("; ");
 

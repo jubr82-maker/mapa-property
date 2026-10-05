@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
-import { isAdminEmail } from "@/lib/admin/admin-emails";
+import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -9,18 +8,12 @@ const CONFIG_URL = "https://vercel.com/account/tokens";
 const INSTRUCTIONS =
   "Créer un token Vercel (Account Settings → Tokens), scope 'Full Account'. Récupérer aussi l'ID du projet depuis vercel.com/[team]/[project]/settings (champ 'Project ID'). Définir VERCEL_API_TOKEN, VERCEL_PROJECT_ID et optionnellement VERCEL_TEAM_ID dans Vercel env vars.";
 
-async function requireAdmin() {
+// Audit oct. 2026 : garde commune (liste admin + session aal2). L'ancienne
+// garde locale acceptait une session sans second facteur, /api etant hors
+// du perimetre de proxy.ts.
+async function requireAdmin(): Promise<boolean> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return false;
-    if (!isAdminEmail(user.email)) {
-      console.warn("admin access denied");
-      return false;
-    }
-    return true;
+    return (await requireAdminRoute()).ok;
   } catch {
     return false;
   }

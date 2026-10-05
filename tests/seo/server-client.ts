@@ -2,7 +2,7 @@
 // processus Node enfant (IPC, aucun port) et lui transmet les requetes.
 import { fork, type ChildProcess } from "node:child_process";
 import path from "node:path";
-import type { InProcessResponse } from "./in-process-server";
+import type { InProcessResponse, RequestOptions } from "./in-process-server";
 
 const REQUEST_TIMEOUT_MS = Number(process.env.SEO_REQUEST_TIMEOUT_MS ?? 30000);
 
@@ -35,7 +35,7 @@ export async function startServerProcess() {
     });
   });
   return {
-    request(url: string): Promise<InProcessResponse> {
+    request(url: string, opts?: RequestOptions): Promise<InProcessResponse> {
       const id = ++seq;
       return new Promise((resolve) => {
         // Delai maximal : une reponse qui ne se termine pas est un echec
@@ -48,7 +48,7 @@ export async function startServerProcess() {
           clearTimeout(timer);
           resolve(r);
         });
-        child.send({ id, url });
+        child.send({ id, url, opts });
       });
     },
     async close() {

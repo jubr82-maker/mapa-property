@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
-import { isAdminEmail } from "@/lib/admin/admin-emails";
+import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -11,20 +10,13 @@ const INSTRUCTIONS =
 
 type AuthResult = { ok: true } | { ok: false; status: number; body: { ok: false; reason: string } };
 
+// Audit oct. 2026 : garde commune (liste admin + session aal2). L'ancienne
+// garde locale acceptait une session sans second facteur, /api etant hors
+// du perimetre de proxy.ts.
 async function requireAdmin(): Promise<AuthResult> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return { ok: false, status: 401, body: { ok: false, reason: "unauthorized" } };
-    }
-    if (!isAdminEmail(user.email)) {
-      console.warn("admin access denied");
-      return { ok: false, status: 403, body: { ok: false, reason: "forbidden" } };
-    }
-    return { ok: true };
+    if ((await requireAdminRoute()).ok) return { ok: true };
+    return { ok: false, status: 403, body: { ok: false, reason: "forbidden" } };
   } catch {
     return { ok: false, status: 401, body: { ok: false, reason: "unauthorized" } };
   }

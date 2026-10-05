@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { sanitizeArticleHtml } from "@/lib/security/sanitize";
 import { brandedTitle, metaDescription } from "@/lib/meta-text";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -80,7 +81,8 @@ export default async function BlogPostPage({
           author={post.author}
           publishedAt={post.published_at}
           primaryTag={post.primary_tag}
-          contentHtml={content}
+          // Assaini cote serveur (OWASP ASVS 5.2.1) avant injection.
+          contentHtml={sanitizeArticleHtml(content)}
         />
         <p className="mx-auto mt-8 max-w-[65ch] font-mono text-[10px] leading-snug text-ink-soft">
           <Link href="/legal/intelligence-artificielle" className="hover:underline">

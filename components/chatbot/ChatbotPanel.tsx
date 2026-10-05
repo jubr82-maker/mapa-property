@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { safeInternalPath } from "@/lib/security/sanitize";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -119,10 +120,11 @@ export function ChatbotPanel({
       if (
         json?.intent &&
         json.intent.action === "navigate" &&
-        typeof json.intent.url === "string" &&
-        json.intent.url.startsWith("/")
+        safeInternalPath(json.intent.url)
       ) {
-        const target = json.intent.url;
+        // Chemin interne uniquement : "//site-externe" ou "/\site" refuses
+        // (redirection ouverte par injection de consigne, OWASP ASVS 5.1.5).
+        const target = safeInternalPath(json.intent.url) as string;
         setTimeout(() => router.push(target), 900);
       }
     } catch {

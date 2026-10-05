@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 const SYSTEM_PROMPT = `Tu es un assistant qui transforme une demande immobilière en filtres structurés.
 Renvoie uniquement un JSON :
@@ -14,8 +15,11 @@ Renvoie uniquement un JSON :
 }`;
 
 export async function POST(req: Request) {
+  // Audit oct. 2026 : limite par IP et longueur bornee (ASVS 11.1.4, 5.1.3).
+  const limit = rateLimit(req, { windowMs: 60_000, max: 30, namespace: "search-ia" });
+  if (!limit.ok) return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   const { query } = (await req.json().catch(() => ({}))) as { query?: string };
-  if (!query || typeof query !== "string") {
+  if (!query || typeof query !== "string" || query.length > 500) {
     return NextResponse.json({ error: "missing_query" }, { status: 400 });
   }
 

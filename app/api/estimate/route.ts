@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/turnstile";
+import { verifyCaptchaIfConfigured } from "@/lib/security/captcha";
 import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { estimateProperty, type EstimateInput, type EstimateResult } from "@/lib/estimate";
@@ -477,7 +480,15 @@ function c7Cast(body: Record<string, unknown>, key: string): string | undefined 
 }
 
 export async function POST(req: Request) {
+  // Audit de securite (oct. 2026) : cette route ecrit en base et envoie un
+  // e-mail a l'adresse saisie. Limite de debit (OWASP ASVS 11.1.4) et
+  // anti-robots (Turnstile, exige si configure) contre l'abus et les couts.
+  const limit = rateLimit(req, { windowMs: 10 * 60_000, max: 10, namespace: "estimate" });
+  if (!limit.ok) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
   const body = (await req.json().catch(() => ({}))) as Partial<EstimateInput> & {
+    captchaToken?: string;
     quartier?: string;
     // Oct. 2026 : lieu saisi (commune, quartier VDL ou localite) ; `commune`
     // porte alors la commune de rattachement choisie dans le formulaire.
@@ -520,6 +531,11 @@ export async function POST(req: Request) {
     balconyArea?: number;
     gardenArea?: number;
   };
+
+  const captcha = await verifyCaptchaIfConfigured(body.captchaToken, clientIp(req));
+  if (!captcha.ok) {
+    return NextResponse.json({ error: "captcha_failed" }, { status: 403 });
+  }
 
   const rgpdConsentAt =
     body.rgpdConsent === true ? new Date().toISOString() : undefined;

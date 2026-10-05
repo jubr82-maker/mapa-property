@@ -7,9 +7,8 @@ import { getArchivedPropertyKeys } from "@/lib/archived-properties";
 import {
   ADMIN_ACTIVITY_COOKIE,
   ADMIN_IDLE_TIMEOUT_MINUTES,
-  ADMIN_MFA_PATH,
-  ADMIN_PUBLIC_PATHS,
 } from "@/lib/admin/security-config";
+import { adminPageRedirect, evaluateAdminAccess } from "@/lib/admin/admin-access";
 import { logAdminAuthEvent } from "@/lib/admin/auth-log";
 
 const intlMiddleware = createMiddleware(routing);
@@ -53,9 +52,6 @@ export default async function middleware(request: NextRequest) {
     if (user && !isAllowedAdmin) {
       console.warn("admin access denied");
     }
-
-    const isPublicAdminPath = ADMIN_PUBLIC_PATHS.has(pathname);
-    const isMfaPath = pathname === ADMIN_MFA_PATH;
 
     // Anti-cache : aucune réponse admin (200, 307, redirect) ne doit
     // être cachée par le CDN Vercel — sinon une 307 émise pour un user
@@ -109,23 +105,10 @@ export default async function middleware(request: NextRequest) {
       });
     }
 
-    if (!isAllowedAdmin && !isPublicAdminPath) {
-      return redirectTo("/admin/login", { from: pathname });
-    }
-
-    // Admin connecte par mot de passe seulement (aal1) : uniquement la page
-    // d'inscription / verification du second facteur, et les pages publiques
-    // de reinitialisation du mot de passe.
-    if (isAllowedAdmin && !aal2 && !isMfaPath && !isPublicAdminPath) {
-      return redirectTo(ADMIN_MFA_PATH, { from: pathname });
-    }
-    if (isAllowedAdmin && !aal2 && pathname === "/admin/login") {
-      return redirectTo(ADMIN_MFA_PATH);
-    }
-
-    if (isAllowedAdmin && aal2 && (pathname === "/admin/login" || isMfaPath)) {
-      return redirectTo("/admin");
-    }
+    // Decision partagee et testee (lib/admin/admin-access.ts).
+    const access = evaluateAdminAccess(user, aal2 ? "aal2" : "aal1");
+    const target = adminPageRedirect(pathname, access);
+    if (target) return redirectTo(target.path, target.params);
 
     return noStore(response);
   }

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
-import { isAdminEmail } from "@/lib/admin/admin-emails";
+import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -9,18 +8,12 @@ const CONFIG_URL = "https://dash.cloudflare.com/profile/api-tokens";
 const INSTRUCTIONS =
   "Cloudflare → Profile → API Tokens → Create Token (template 'Read analytics'). Récupérer l'Account ID et le Zone ID dans le dashboard du domaine. Définir CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID et CLOUDFLARE_ZONE_ID dans Vercel env vars.";
 
-async function requireAdmin() {
+// Audit oct. 2026 : garde commune (liste admin + session aal2). L'ancienne
+// garde locale acceptait une session sans second facteur, /api etant hors
+// du perimetre de proxy.ts.
+async function requireAdmin(): Promise<boolean> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return false;
-    if (!isAdminEmail(user.email)) {
-      console.warn("admin access denied");
-      return false;
-    }
-    return true;
+    return (await requireAdminRoute()).ok;
   } catch {
     return false;
   }

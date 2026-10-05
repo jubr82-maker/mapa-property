@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAuthorizedCron } from "@/lib/security/cron-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -26,8 +27,7 @@ function extractRate(data: SDWPayload): number | null {
 }
 
 export async function GET(req: Request) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorizedCron(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -65,7 +65,8 @@ export async function GET(req: Request) {
     } as never);
     if (error) {
       console.error("[cron/bce-rates] insert", error.message);
-      return NextResponse.json({ ok: false, rate, error: error.message }, { status: 500 });
+      console.error("[cron/bce-rates] upsert", { code: error.code });
+      return NextResponse.json({ ok: false, rate, error: "db_error" }, { status: 500 });
     }
   } catch (e) {
     console.error("[cron/bce-rates] insert caught", e);

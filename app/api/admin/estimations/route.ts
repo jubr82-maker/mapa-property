@@ -67,7 +67,8 @@ export async function POST(req: Request) {
   } as never);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[api/admin/estimations] insert", { code: error.code });
+    return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }

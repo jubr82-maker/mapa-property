@@ -29,11 +29,10 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    console.error("[admin/ventes-realisees] insert error", error.message);
-    // Cas tres probable : migration 20260524_mapa_historical_sales.sql pas
-    // encore appliquee → renvoie un message explicite cote admin.
+    // Detail technique dans les journaux serveur uniquement (ASVS 7.4.1).
+    console.error("[admin/ventes-realisees] insert error", error.code, error.message);
     return NextResponse.json(
-      { error: "db_error", message: error.message },
+      { error: "db_error" },
       { status: 500 },
     );
   }

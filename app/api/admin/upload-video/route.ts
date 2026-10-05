@@ -20,6 +20,7 @@
 //   (presigned URLs) — pas requis pour le 1er use case.
 
 import { NextResponse } from "next/server";
+import { detectFileType } from "@/lib/security/file-type";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { uploadToR2, isR2Configured } from "@/lib/r2";
 import { requireAdminRoute } from "@/lib/admin/require-admin";
@@ -64,10 +65,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_file" }, { status: 400 });
   }
   if (!ALLOWED_CONTENT_TYPES.has(file.type)) {
-    return NextResponse.json(
-      { error: "invalid_content_type", got: file.type },
-      { status: 415 },
-    );
+    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
+  }
+  // Signature du contenu coherente avec le type declare (OWASP ASVS
+  // 12.2.1) : conteneur ISO "ftyp" pour mp4 / mov, EBML pour webm.
+  const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  const detected = detectFileType(head);
+  const signatureOk =
+    file.type === "video/webm" ? detected?.kind === "webm" : detected?.kind === "mp4";
+  if (!signatureOk) {
+    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
   }
   if (file.size > MAX_SIZE_BYTES) {
     return NextResponse.json(

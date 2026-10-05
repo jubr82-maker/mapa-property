@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/security/sanitize";
 interface Props {
   data: Record<string, unknown> | Record<string, unknown>[];
 }
@@ -10,7 +11,7 @@ export function JsonLd({ data }: Props) {
         <script
           key={i}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(item) }}
         />
       ))}
     </>

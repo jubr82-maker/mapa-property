@@ -12,7 +12,7 @@ import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { assertAdminAction } from "@/lib/admin/require-admin";
 import { logAdminAuthEvent } from "@/lib/admin/auth-log";
 import { ADMIN_PASSWORD_MIN_LENGTH } from "@/lib/admin/security-config";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { verifyCaptchaIfConfigured } from "@/lib/security/captcha";
 
 export type AuthResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -31,16 +31,8 @@ async function requestOrigin(): Promise<string> {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
 }
 
-/**
- * Turnstile exige seulement si les DEUX cles sont configurees : sans cela,
- * verifyTurnstile refuse tout en production et l'admin serait inaccessible.
- */
-async function captchaOk(token: string): Promise<{ ok: boolean; reason?: string }> {
-  const configured = Boolean(
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() && process.env.TURNSTILE_SECRET_KEY?.trim(),
-  );
-  if (!configured) return { ok: true, reason: "captcha_not_configured" };
-  return { ok: await verifyTurnstile(token, await requestIp()), reason: "captcha" };
+async function captchaOk(token: string) {
+  return verifyCaptchaIfConfigured(token, await requestIp());
 }
 
 async function verifiedTotpFactors(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>) {

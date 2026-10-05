@@ -90,7 +90,8 @@ async function handle(req: Request) {
 
   if (error) {
     console.error("[admin/cms/tokens] upsert error", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[api/admin/cms/tokens]", { code: error.code });
+    return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
   revalidateTag(SITE_DESIGN_TOKENS_TAG, { expire: 0 });

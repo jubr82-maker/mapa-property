@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { safeInternalPath } from "@/lib/security/sanitize";
 import { createHash } from "crypto";
 import { getTranslations } from "next-intl/server";
 import { buildSystemPrompt } from "@/components/chatbot/chatbot-knowledge";
@@ -8,6 +9,9 @@ import { sendLeadEmails } from "@/lib/email/lead-emails";
 import { insertLeadWithConsent } from "@/lib/lead-insert";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { getLockedTopicsReply } from "@/lib/chatbot/locked-topics";
+
+const CHATBOT_MAX_MESSAGES = 20;
+const CHATBOT_MAX_MESSAGE_CHARS = 2000;
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -66,13 +70,13 @@ function parseAssistantReply(
     obj.intent &&
     typeof obj.intent === "object" &&
     (obj.intent as { action?: unknown }).action === "navigate" &&
-    typeof (obj.intent as { url?: unknown }).url === "string" &&
-    ((obj.intent as { url: string }).url.startsWith("/") ||
-      (obj.intent as { url: string }).url.startsWith("./"))
+    safeInternalPath((obj.intent as { url?: unknown }).url)
   ) {
+    // Chemin interne uniquement (OWASP ASVS 5.1.5) : "//site", "/\site",
+    // schemas et caracteres de controle refuses.
     intent = {
       action: "navigate",
-      url: (obj.intent as { url: string }).url,
+      url: safeInternalPath((obj.intent as { url?: unknown }).url) as string,
     };
   }
   return { message: obj.message, intent };
@@ -372,7 +376,18 @@ export async function POST(req: Request) {
     return handleConsent(req, body);
   }
 
-  const { messages = [], locale = "fr", pageContext = "" } = body;
+  // Audit oct. 2026 (OWASP ASVS 5.1.3, 11.1.4) : seuls les roles user et
+  // assistant (jamais system, reserve au serveur), les 20 derniers
+  // messages, 2000 caracteres chacun : cout Mistral par appel borne.
+  const messages: Message[] = (Array.isArray(body.messages) ? body.messages : [])
+    .filter(
+      (m): m is Message =>
+        Boolean(m) && (m.role === "user" || m.role === "assistant") && typeof m.content === "string",
+    )
+    .slice(-CHATBOT_MAX_MESSAGES)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, CHATBOT_MAX_MESSAGE_CHARS) }));
+  const locale = typeof body.locale === "string" && ["fr", "en", "de"].includes(body.locale) ? body.locale : "fr";
+  const pageContext = typeof body.pageContext === "string" ? body.pageContext.slice(0, 200) : "";
 
   if (messages.length === 0) {
     return NextResponse.json({ error: "missing_messages" }, { status: 400 });

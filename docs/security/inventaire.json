@@ -1,0 +1,1804 @@
+{
+  "genere": "2026-10-05T09:26:01.131Z",
+  "regles": {
+    "1": "fichiers app/**/page.tsx et app/**/layout.tsx (find app -name page.tsx -o -name layout.tsx)",
+    "2": "app/**/route.ts + app/robots.ts + app/sitemap.ts + proxy.ts (find app -name route.ts)",
+    "3": "fonctions `export async function` des fichiers commencant par \"use server\" (grep -rl '^\"use server\"')",
+    "4": "CREATE TABLE/VIEW/FUNCTION/TRIGGER des fichiers supabase/**/*.sql + tables lues par le code (grep from(\"...\"))",
+    "5": "storage.from(\"x\"), sbUrl(\"x\"), BUCKET = \"x\", bucket_id = 'x' (code et SQL) + clients R2 de lib/r2.ts",
+    "6": "composants et modules hors admin contenant fetch(\"/api/...\") (grep -rl 'fetch(\"/api/')",
+    "7": "formData.get(\"file\") / instanceof File dans app (grep -rn 'instanceof File\\|formData.get(\"file\")')",
+    "8": "process.env.NOM dans app, lib, components, proxy.ts, next.config.ts, sentry.*.config.ts",
+    "9": "hotes des appels fetch serveur, SDK (Supabase, R2, SMTP) et directives CSP script/connect/img/frame",
+    "10": "securityHeaders et csp de next.config.ts + en-tetes poses par proxy.ts",
+    "11": "cookies.set / document.cookie / COOKIE dans le code + cookies poses par les bibliotheques et services",
+    "12": "appels sendMail( dans lib/email + e-mails d'authentification Supabase"
+  },
+  "categories": {
+    "1. Pages et gabarits": 76,
+    "2. Routes API et intercepteur": 45,
+    "3. Actions serveur": 60,
+    "4. Base de donnees": 52,
+    "5. Stockage": 8,
+    "6. Saisies des visiteurs": 8,
+    "7. Envois de fichiers": 3,
+    "8. Variables d'environnement": 51,
+    "9. Services tiers": 14,
+    "10. En-tetes et CSP": 24,
+    "11. Cookies": 7,
+    "12. Envois d'e-mails": 6
+  },
+  "total": 354,
+  "elements": [
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/biens/[slug]/page.tsx",
+      "file": "app/[locale]/biens/[slug]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/biens/page.tsx",
+      "file": "app/[locale]/biens/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/blog/[slug]/page.tsx",
+      "file": "app/[locale]/blog/[slug]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/blog/page.tsx",
+      "file": "app/[locale]/blog/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/contact/page.tsx",
+      "file": "app/[locale]/contact/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/journal/page.tsx",
+      "file": "app/[locale]/journal/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/layout.tsx",
+      "file": "app/[locale]/layout.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/legal/cgu/page.tsx",
+      "file": "app/[locale]/legal/cgu/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/legal/cgv/page.tsx",
+      "file": "app/[locale]/legal/cgv/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/legal/honoraires/page.tsx",
+      "file": "app/[locale]/legal/honoraires/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/legal/intelligence-artificielle/page.tsx",
+      "file": "app/[locale]/legal/intelligence-artificielle/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/legal/mentions-legales/page.tsx",
+      "file": "app/[locale]/legal/mentions-legales/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/legal/rgpd/page.tsx",
+      "file": "app/[locale]/legal/rgpd/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/liste-attente/page.tsx",
+      "file": "app/[locale]/liste-attente/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/mandats/[type]/page.tsx",
+      "file": "app/[locale]/mandats/[type]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/mentions-acquisition/page.tsx",
+      "file": "app/[locale]/mentions-acquisition/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/off-market/[id]/page.tsx",
+      "file": "app/[locale]/off-market/[id]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/off-market/arcova/page.tsx",
+      "file": "app/[locale]/off-market/arcova/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/off-market/page.tsx",
+      "file": "app/[locale]/off-market/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/page.tsx",
+      "file": "app/[locale]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/qui-sommes-nous/page.tsx",
+      "file": "app/[locale]/qui-sommes-nous/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/acheter/page.tsx",
+      "file": "app/[locale]/services/acheter/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/capacite-emprunt/page.tsx",
+      "file": "app/[locale]/services/capacite-emprunt/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/estimer/page.tsx",
+      "file": "app/[locale]/services/estimer/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/louer/page.tsx",
+      "file": "app/[locale]/services/louer/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/mandat-exclusif/page.tsx",
+      "file": "app/[locale]/services/mandat-exclusif/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/mandat-recherche/page.tsx",
+      "file": "app/[locale]/services/mandat-recherche/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/marches-actifs/page.tsx",
+      "file": "app/[locale]/services/marches-actifs/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/page.tsx",
+      "file": "app/[locale]/services/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/rendement-locatif/page.tsx",
+      "file": "app/[locale]/services/rendement-locatif/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/simulateurs/financement/page.tsx",
+      "file": "app/[locale]/services/simulateurs/financement/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/simulateurs/page.tsx",
+      "file": "app/[locale]/services/simulateurs/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/services/vendre/page.tsx",
+      "file": "app/[locale]/services/vendre/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/test-scroll/page.tsx",
+      "file": "app/[locale]/test-scroll/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/[locale]/villes/[ville]/page.tsx",
+      "file": "app/[locale]/villes/[ville]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/analytics/page.tsx",
+      "file": "app/admin/analytics/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/arcova/[id]/page.tsx",
+      "file": "app/admin/arcova/[id]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/arcova/page.tsx",
+      "file": "app/admin/arcova/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/blog/[id]/edit/page.tsx",
+      "file": "app/admin/blog/[id]/edit/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/blog/new/page.tsx",
+      "file": "app/admin/blog/new/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/blog/page.tsx",
+      "file": "app/admin/blog/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/contenu/page.tsx",
+      "file": "app/admin/contenu/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/documents/page.tsx",
+      "file": "app/admin/documents/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/estimations/[id]/page.tsx",
+      "file": "app/admin/estimations/[id]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/estimations/new/page.tsx",
+      "file": "app/admin/estimations/new/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/estimations/page.tsx",
+      "file": "app/admin/estimations/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/forgot-password/page.tsx",
+      "file": "app/admin/forgot-password/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/layout.tsx",
+      "file": "app/admin/layout.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/leads/[id]/page.tsx",
+      "file": "app/admin/leads/[id]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/leads/page.tsx",
+      "file": "app/admin/leads/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/liste-attente/[id]/page.tsx",
+      "file": "app/admin/liste-attente/[id]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/liste-attente/page.tsx",
+      "file": "app/admin/liste-attente/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/login/page.tsx",
+      "file": "app/admin/login/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/mandats/[id]/page.tsx",
+      "file": "app/admin/mandats/[id]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/mandats/page.tsx",
+      "file": "app/admin/mandats/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/mfa/page.tsx",
+      "file": "app/admin/mfa/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/offmarket/[id]/edit/page.tsx",
+      "file": "app/admin/offmarket/[id]/edit/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/offmarket/[id]/requests/page.tsx",
+      "file": "app/admin/offmarket/[id]/requests/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/offmarket/new/page.tsx",
+      "file": "app/admin/offmarket/new/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/offmarket/page.tsx",
+      "file": "app/admin/offmarket/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/offmarket/requests/[id]/page.tsx",
+      "file": "app/admin/offmarket/requests/[id]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/offmarket/requests/page.tsx",
+      "file": "app/admin/offmarket/requests/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/page.tsx",
+      "file": "app/admin/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/performance/page.tsx",
+      "file": "app/admin/performance/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/properties/[id]/page.tsx",
+      "file": "app/admin/properties/[id]/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/properties/new/page.tsx",
+      "file": "app/admin/properties/new/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/properties/page.tsx",
+      "file": "app/admin/properties/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/reset-password/page.tsx",
+      "file": "app/admin/reset-password/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/reviews/[id]/edit/page.tsx",
+      "file": "app/admin/reviews/[id]/edit/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/reviews/new/page.tsx",
+      "file": "app/admin/reviews/new/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/reviews/page.tsx",
+      "file": "app/admin/reviews/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/securite/page.tsx",
+      "file": "app/admin/securite/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/settings/page.tsx",
+      "file": "app/admin/settings/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/ventes-realisees/[id]/edit/page.tsx",
+      "file": "app/admin/ventes-realisees/[id]/edit/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/ventes-realisees/page.tsx",
+      "file": "app/admin/ventes-realisees/page.tsx"
+    },
+    {
+      "cat": "1. Pages et gabarits",
+      "name": "/admin/visiteurs/page.tsx",
+      "file": "app/admin/visiteurs/page.tsx"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/admin/auth/callback [GET]",
+      "file": "app/admin/auth/callback/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/analytics/cloudflare [GET]",
+      "file": "app/api/admin/analytics/cloudflare/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/analytics/ga4 [GET]",
+      "file": "app/api/admin/analytics/ga4/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/analytics/supabase [GET]",
+      "file": "app/api/admin/analytics/supabase/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/analytics/vercel [GET]",
+      "file": "app/api/admin/analytics/vercel/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/cms/content [PATCH,POST]",
+      "file": "app/api/admin/cms/content/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/cms/revalidate [POST]",
+      "file": "app/api/admin/cms/revalidate/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/cms/tokens [PATCH,POST]",
+      "file": "app/api/admin/cms/tokens/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/estimations/[id] [PATCH,DELETE]",
+      "file": "app/api/admin/estimations/[id]/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/estimations [POST]",
+      "file": "app/api/admin/estimations/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/exports/estimations/[id] [GET]",
+      "file": "app/api/admin/exports/estimations/[id]/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/exports/estimations [GET]",
+      "file": "app/api/admin/exports/estimations/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/exports/leads/[id] [GET]",
+      "file": "app/api/admin/exports/leads/[id]/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/exports/leads [GET]",
+      "file": "app/api/admin/exports/leads/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/exports/liste-attente [GET]",
+      "file": "app/api/admin/exports/liste-attente/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/exports/mandats/[id] [GET]",
+      "file": "app/api/admin/exports/mandats/[id]/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/exports/mandats [GET]",
+      "file": "app/api/admin/exports/mandats/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/exports/offmarket-requests/[id] [GET]",
+      "file": "app/api/admin/exports/offmarket-requests/[id]/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/exports/offmarket-requests [GET]",
+      "file": "app/api/admin/exports/offmarket-requests/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/performance/psi [GET]",
+      "file": "app/api/admin/performance/psi/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/performance/sentry [GET]",
+      "file": "app/api/admin/performance/sentry/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/revalidate [POST]",
+      "file": "app/api/admin/revalidate/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/upload-video [POST]",
+      "file": "app/api/admin/upload-video/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/ventes-realisees/[id] [PATCH,DELETE]",
+      "file": "app/api/admin/ventes-realisees/[id]/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/admin/ventes-realisees [POST]",
+      "file": "app/api/admin/ventes-realisees/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/arcova-waitlist [POST]",
+      "file": "app/api/arcova-waitlist/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/chatbot [POST]",
+      "file": "app/api/chatbot/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/contact-reveal [POST]",
+      "file": "app/api/contact-reveal/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/contact [POST]",
+      "file": "app/api/contact/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/cron/apimo-sync [GET]",
+      "file": "app/api/cron/apimo-sync/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/cron/bce-rates [GET]",
+      "file": "app/api/cron/bce-rates/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/estimate [POST]",
+      "file": "app/api/estimate/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/health [GET]",
+      "file": "app/api/health/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/lead [POST]",
+      "file": "app/api/lead/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/liste-attente [POST]",
+      "file": "app/api/liste-attente/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/nda-offmarket [POST]",
+      "file": "app/api/nda-offmarket/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/nda-request [POST]",
+      "file": "app/api/nda-request/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/offmarket-request [POST]",
+      "file": "app/api/offmarket-request/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/property-gone [GET]",
+      "file": "app/api/property-gone/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/search-ia [POST]",
+      "file": "app/api/search-ia/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/track-view [POST]",
+      "file": "app/api/track-view/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/api/track [POST]",
+      "file": "app/api/track/route.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/robots.ts [metadata]",
+      "file": "app/robots.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "/sitemap.ts [metadata]",
+      "file": "app/sitemap.ts"
+    },
+    {
+      "cat": "2. Routes API et intercepteur",
+      "name": "proxy.ts [metadata]",
+      "file": "proxy.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateWorkflowStatus (app/admin/arcova/actions.ts)",
+      "file": "app/admin/arcova/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "addAdminNote (app/admin/arcova/actions.ts)",
+      "file": "app/admin/arcova/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "setNextFollowUp (app/admin/arcova/actions.ts)",
+      "file": "app/admin/arcova/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "loginAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "logoutAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "mfaStatusAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "mfaVerifyAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "enrollStartAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "enrollConfirmAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "unenrollAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "changePasswordAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "forgotPasswordAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "resetPasswordAction (app/admin/auth-actions.ts)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "createBlogPost (app/admin/blog/actions.ts)",
+      "file": "app/admin/blog/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateBlogPost (app/admin/blog/actions.ts)",
+      "file": "app/admin/blog/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "deleteBlogPost (app/admin/blog/actions.ts)",
+      "file": "app/admin/blog/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "uploadDocument (app/admin/documents/actions.ts)",
+      "file": "app/admin/documents/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "toggleDocumentPublic (app/admin/documents/actions.ts)",
+      "file": "app/admin/documents/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "deleteDocument (app/admin/documents/actions.ts)",
+      "file": "app/admin/documents/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "sendRefinement (app/admin/estimations/actions.ts)",
+      "file": "app/admin/estimations/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateLeadNotes (app/admin/leads/actions.ts)",
+      "file": "app/admin/leads/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateWorkflowStatus (app/admin/leads/actions.ts)",
+      "file": "app/admin/leads/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "addAdminNote (app/admin/leads/actions.ts)",
+      "file": "app/admin/leads/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "setNextFollowUp (app/admin/leads/actions.ts)",
+      "file": "app/admin/leads/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "deleteLead (app/admin/leads/actions.ts)",
+      "file": "app/admin/leads/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "convertLeadToMandat (app/admin/leads/actions.ts)",
+      "file": "app/admin/leads/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "exportLead (app/admin/leads/actions.ts)",
+      "file": "app/admin/leads/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateWorkflowStatus (app/admin/liste-attente/actions.ts)",
+      "file": "app/admin/liste-attente/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "addAdminNote (app/admin/liste-attente/actions.ts)",
+      "file": "app/admin/liste-attente/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "setNextFollowUp (app/admin/liste-attente/actions.ts)",
+      "file": "app/admin/liste-attente/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateWorkflowStatus (app/admin/mandats/actions.ts)",
+      "file": "app/admin/mandats/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "addAdminNote (app/admin/mandats/actions.ts)",
+      "file": "app/admin/mandats/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "setNextFollowUp (app/admin/mandats/actions.ts)",
+      "file": "app/admin/mandats/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateMandat (app/admin/mandats/actions.ts)",
+      "file": "app/admin/mandats/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "deleteMandat (app/admin/mandats/actions.ts)",
+      "file": "app/admin/mandats/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "exportMandat (app/admin/mandats/actions.ts)",
+      "file": "app/admin/mandats/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "createOffmarket (app/admin/offmarket/actions.ts)",
+      "file": "app/admin/offmarket/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateOffmarket (app/admin/offmarket/actions.ts)",
+      "file": "app/admin/offmarket/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "deleteOffmarket (app/admin/offmarket/actions.ts)",
+      "file": "app/admin/offmarket/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "duplicateOffmarket (app/admin/offmarket/actions.ts)",
+      "file": "app/admin/offmarket/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateRequestStatus (app/admin/offmarket/actions.ts)",
+      "file": "app/admin/offmarket/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateRequestNotes (app/admin/offmarket/actions.ts)",
+      "file": "app/admin/offmarket/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateRequestWorkflowStatus (app/admin/offmarket/actions.ts)",
+      "file": "app/admin/offmarket/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "addRequestAdminNote (app/admin/offmarket/actions.ts)",
+      "file": "app/admin/offmarket/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "setRequestNextFollowUp (app/admin/offmarket/actions.ts)",
+      "file": "app/admin/offmarket/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "uploadPropertyPhoto (app/admin/properties/[id]/photos/actions.ts)",
+      "file": "app/admin/properties/[id]/photos/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "savePropertyPhotos (app/admin/properties/[id]/photos/actions.ts)",
+      "file": "app/admin/properties/[id]/photos/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "deletePropertyPhoto (app/admin/properties/[id]/photos/actions.ts)",
+      "file": "app/admin/properties/[id]/photos/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "setPropertyPublished (app/admin/properties/actions.ts)",
+      "file": "app/admin/properties/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "setPropertyFeatured (app/admin/properties/actions.ts)",
+      "file": "app/admin/properties/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateProperty (app/admin/properties/actions.ts)",
+      "file": "app/admin/properties/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updatePropertyVideoUrl (app/admin/properties/actions.ts)",
+      "file": "app/admin/properties/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "createProperty (app/admin/properties/actions.ts)",
+      "file": "app/admin/properties/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "archiveProperty (app/admin/properties/actions.ts)",
+      "file": "app/admin/properties/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "restoreProperty (app/admin/properties/actions.ts)",
+      "file": "app/admin/properties/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "deleteProperty (app/admin/properties/actions.ts)",
+      "file": "app/admin/properties/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "purgePropertyMedia (app/admin/properties/actions.ts)",
+      "file": "app/admin/properties/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "createReview (app/admin/reviews/actions.ts)",
+      "file": "app/admin/reviews/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "updateReview (app/admin/reviews/actions.ts)",
+      "file": "app/admin/reviews/actions.ts"
+    },
+    {
+      "cat": "3. Actions serveur",
+      "name": "deleteReview (app/admin/reviews/actions.ts)",
+      "file": "app/admin/reviews/actions.ts"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table admin_auth_log",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table arcova_waitlist",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table blog_posts",
+      "file": "code (table hors depot)"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table bo_audit_log",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table chatbot_logs",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table commune_baseline",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table coups_de_coeur",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table documents",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table estimation_requests",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table estimation_requests_backup_",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table estimations",
+      "file": "code (table hors depot)"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table interest_rates",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table leads",
+      "file": "code (table hors depot)"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table leads_backup_",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table leads_notifications",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table leads_notifications_backup_",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table lu_market_prices_by_commune",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table mandate_requests",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table mandates_requests",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table mandats",
+      "file": "code (table hors depot)"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table mandats_backup_",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table mapa_historical_sales",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table nda_requests",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table offmarket_audit_log",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table offmarket_requests",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table offmarket_requests_backup_",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table properties",
+      "file": "code (table hors depot)"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table properties_offmarket",
+      "file": "code (table hors depot)"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table property_images",
+      "file": "code (table hors depot)"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table property_views",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table reviews",
+      "file": "code (table hors depot)"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table site_content",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table site_design_tokens",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table tracking_events",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "table vdl_quartier_baseline",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "vue properties_offmarket_public",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "fonction bump_offmarket_requests_count",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "fonction estimation_requests_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "fonction is_mapa_admin",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "fonction lu_market_prices_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "fonction mapa_historical_sales_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "fonction set_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "fonction site_content_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "fonction site_design_tokens_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "declencheur estimation_requests_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "declencheur lu_market_prices_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "declencheur mapa_historical_sales_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "declencheur site_content_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "declencheur site_design_tokens_touch_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "declencheur trg_offmarket_requests_bump",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "declencheur trg_offmarket_requests_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "4. Base de donnees",
+      "name": "declencheur trg_properties_offmarket_updated_at",
+      "file": "supabase/migrations"
+    },
+    {
+      "cat": "5. Stockage",
+      "name": "bucket Supabase Documents",
+      "file": "components/legal/LegalLayout.tsx"
+    },
+    {
+      "cat": "5. Stockage",
+      "name": "bucket Supabase Videos",
+      "file": "components/media/VideoR2.tsx"
+    },
+    {
+      "cat": "5. Stockage",
+      "name": "bucket Supabase documents",
+      "file": "app/admin/documents/actions.ts"
+    },
+    {
+      "cat": "5. Stockage",
+      "name": "bucket Supabase offmarket-photos",
+      "file": "supabase/manual/20261005_correction_regles_acces.sql"
+    },
+    {
+      "cat": "5. Stockage",
+      "name": "bucket Supabase photos",
+      "file": "app/[locale]/qui-sommes-nous/page.tsx"
+    },
+    {
+      "cat": "5. Stockage",
+      "name": "bucket Supabase property-images",
+      "file": "app/admin/properties/[id]/photos/actions.ts"
+    },
+    {
+      "cat": "5. Stockage",
+      "name": "Cloudflare R2 videos (public)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "5. Stockage",
+      "name": "Cloudflare R2 sauvegardes (prive)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "6. Saisies des visiteurs",
+      "name": "components/chatbot/ChatbotPanel.tsx",
+      "file": "components/chatbot/ChatbotPanel.tsx"
+    },
+    {
+      "cat": "6. Saisies des visiteurs",
+      "name": "components/forms/ContactForm.tsx",
+      "file": "components/forms/ContactForm.tsx"
+    },
+    {
+      "cat": "6. Saisies des visiteurs",
+      "name": "components/forms/EstimateForm.tsx",
+      "file": "components/forms/EstimateForm.tsx"
+    },
+    {
+      "cat": "6. Saisies des visiteurs",
+      "name": "components/forms/NDAForm.tsx",
+      "file": "components/forms/NDAForm.tsx"
+    },
+    {
+      "cat": "6. Saisies des visiteurs",
+      "name": "components/forms/WaitlistForm.tsx",
+      "file": "components/forms/WaitlistForm.tsx"
+    },
+    {
+      "cat": "6. Saisies des visiteurs",
+      "name": "components/home/SearchBar.tsx",
+      "file": "components/home/SearchBar.tsx"
+    },
+    {
+      "cat": "6. Saisies des visiteurs",
+      "name": "components/property/PropertyViewTracker.tsx",
+      "file": "components/property/PropertyViewTracker.tsx"
+    },
+    {
+      "cat": "6. Saisies des visiteurs",
+      "name": "lib/tracking/track.ts",
+      "file": "lib/tracking/track.ts"
+    },
+    {
+      "cat": "7. Envois de fichiers",
+      "name": "app/admin/documents/actions.ts",
+      "file": "app/admin/documents/actions.ts"
+    },
+    {
+      "cat": "7. Envois de fichiers",
+      "name": "app/admin/properties/[id]/photos/actions.ts",
+      "file": "app/admin/properties/[id]/photos/actions.ts"
+    },
+    {
+      "cat": "7. Envois de fichiers",
+      "name": "app/api/admin/upload-video/route.ts",
+      "file": "app/api/admin/upload-video/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "APIMO_AGENCY_ID (serveur)",
+      "file": "lib/apimo/client.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "APIMO_API_BASE (serveur)",
+      "file": "lib/apimo/client.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "APIMO_PROVIDER_ID (serveur)",
+      "file": "lib/apimo/client.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "APIMO_TOKEN (serveur)",
+      "file": "lib/apimo/client.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "CLOUDFLARE_ACCOUNT_ID (serveur)",
+      "file": "app/api/admin/analytics/cloudflare/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "CLOUDFLARE_API_TOKEN (serveur)",
+      "file": "app/api/admin/analytics/cloudflare/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "CLOUDFLARE_ZONE_ID (serveur)",
+      "file": "app/api/admin/analytics/cloudflare/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "CRON_SECRET (serveur)",
+      "file": "lib/security/cron-auth.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "EMAIL_RATE_LIMIT_PER_HOUR (serveur)",
+      "file": "lib/email/smtp.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "GA4_PROPERTY_ID (serveur)",
+      "file": "app/api/admin/analytics/ga4/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "GA4_SERVICE_ACCOUNT_KEY (serveur)",
+      "file": "app/api/admin/analytics/ga4/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "MAPA_EMAIL (serveur)",
+      "file": "app/api/contact-reveal/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "MAPA_NOTIFICATION_EMAILS (serveur)",
+      "file": "lib/email/smtp.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "MAPA_PHONE (serveur)",
+      "file": "app/api/contact-reveal/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "MAPA_PHONE_FREDERIC (serveur)",
+      "file": "app/api/contact-reveal/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "MISTRAL_API_KEY (serveur)",
+      "file": "app/api/chatbot/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "NEXT_PUBLIC_CF_ANALYTICS_TOKEN (navigateur)",
+      "file": "app/[locale]/layout.tsx"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "NEXT_PUBLIC_GA4_MEASUREMENT_ID (navigateur)",
+      "file": "components/consent/ConsentGatedAnalytics.tsx"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "NEXT_PUBLIC_R2_PUBLIC_URL (navigateur)",
+      "file": "components/media/VideoR2.tsx"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "NEXT_PUBLIC_SENTRY_DSN (navigateur)",
+      "file": "sentry.client.config.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "NEXT_PUBLIC_SITE_URL (navigateur)",
+      "file": "app/[locale]/biens/[slug]/page.tsx"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY (navigateur)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "NEXT_PUBLIC_SUPABASE_URL (navigateur)",
+      "file": "app/admin/auth-actions.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "NEXT_PUBLIC_TURNSTILE_SITE_KEY (navigateur)",
+      "file": "components/chatbot/ChatbotPanel.tsx"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "NODE_ENV (serveur)",
+      "file": "app/[locale]/layout.tsx"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "PSI_API_KEY (serveur)",
+      "file": "app/api/admin/performance/psi/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "R2_ACCESS_KEY_ID (serveur)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "R2_ACCOUNT_ID (serveur)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "R2_BACKUP_ACCESS_KEY_ID (serveur)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "R2_BACKUP_BUCKET (serveur)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "R2_BACKUP_SECRET_ACCESS_KEY (serveur)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "R2_BUCKET_NAME (serveur)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "R2_PUBLIC_URL (serveur)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "R2_SECRET_ACCESS_KEY (serveur)",
+      "file": "lib/r2.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "REVALIDATE_SECRET (serveur)",
+      "file": "app/api/admin/revalidate/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "SENTRY_AUTH_TOKEN (serveur)",
+      "file": "app/api/admin/performance/sentry/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "SENTRY_DSN (serveur)",
+      "file": "sentry.edge.config.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "SENTRY_ORG (serveur)",
+      "file": "app/api/admin/performance/sentry/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "SENTRY_PROJECT (serveur)",
+      "file": "app/api/admin/performance/sentry/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "SMTP_HOST (serveur)",
+      "file": "lib/email/smtp.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "SMTP_PASSWORD (serveur)",
+      "file": "lib/email/smtp.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "SMTP_PORT (serveur)",
+      "file": "lib/email/smtp.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "SMTP_USER (serveur)",
+      "file": "lib/email/smtp.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "SUPABASE_SERVICE_ROLE_KEY (serveur)",
+      "file": "app/api/cron/apimo-sync/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "TRACKING_IP_SALT (serveur)",
+      "file": "app/api/chatbot/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "TURNSTILE_SECRET_KEY (serveur)",
+      "file": "app/api/contact-reveal/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "VERCEL_API_TOKEN (serveur)",
+      "file": "app/api/admin/analytics/vercel/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "VERCEL_ENV (serveur)",
+      "file": "lib/email/smtp.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "VERCEL_GIT_COMMIT_SHA (serveur)",
+      "file": "app/api/health/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "VERCEL_PROJECT_ID (serveur)",
+      "file": "app/api/admin/analytics/vercel/route.ts"
+    },
+    {
+      "cat": "8. Variables d'environnement",
+      "name": "VERCEL_TEAM_ID (serveur)",
+      "file": "app/api/admin/analytics/vercel/route.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Supabase (base, auth, stockage) [serveur + navigateur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Mistral AI (chatbot, traduction) [serveur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Apimo (biens) [serveur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Cloudflare Turnstile (siteverify et widget) [serveur + navigateur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Cloudflare R2 (S3) [serveur + navigateur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Cloudflare Web Analytics [navigateur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "IONOS SMTP [serveur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "BCE (sdw-wsrest.ecb.europa.eu) [serveur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Google Analytics 4 et Tag Manager [navigateur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Google APIs (PageSpeed, GA4 Data) [serveur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Vercel API (analytics) [serveur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "Sentry [serveur + navigateur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "OpenStreetMap (tuiles carte) [navigateur]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "9. Services tiers",
+      "name": "media.apimo.pro et images.unsplash.com (images) [navigateur via /_next/image]",
+      "file": "lib, next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete X-DNS-Prefetch-Control",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete X-Frame-Options",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete X-Content-Type-Options",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete Referrer-Policy",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete Permissions-Policy",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete X-Robots-Tag",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete Strict-Transport-Security",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete Content-Security-Policy",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete Cache-Control",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP default-src",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP script-src",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP style-src",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP img-src",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP media-src",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP font-src",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP connect-src",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP frame-src",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP object-src",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP base-uri",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP form-action",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP frame-ancestors",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "CSP upgrade-insecure-requests",
+      "file": "next.config.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete x-robots-tag (admin)",
+      "file": "proxy.ts"
+    },
+    {
+      "cat": "10. En-tetes et CSP",
+      "name": "en-tete cache-control no-store (admin)",
+      "file": "proxy.ts"
+    },
+    {
+      "cat": "11. Cookies",
+      "name": "sb-<projet>-auth-token (Supabase, session)",
+      "file": "@supabase/ssr"
+    },
+    {
+      "cat": "11. Cookies",
+      "name": "sb-<projet>-auth-token-code-verifier (Supabase, PKCE)",
+      "file": "@supabase/ssr"
+    },
+    {
+      "cat": "11. Cookies",
+      "name": "mapa_admin_activity (inactivite admin)",
+      "file": "proxy.ts"
+    },
+    {
+      "cat": "11. Cookies",
+      "name": "mp_sess (session statistiques, 90 jours)",
+      "file": "lib/tracking/track.ts"
+    },
+    {
+      "cat": "11. Cookies",
+      "name": "NEXT_LOCALE (langue)",
+      "file": "next-intl"
+    },
+    {
+      "cat": "11. Cookies",
+      "name": "_ga, _ga_* (Google Analytics)",
+      "file": "gtag.js"
+    },
+    {
+      "cat": "11. Cookies",
+      "name": "__cf_bm, cf_clearance (Cloudflare)",
+      "file": "Cloudflare"
+    },
+    {
+      "cat": "12. Envois d'e-mails",
+      "name": "accuse de reception lead (visiteur)",
+      "file": "lib/email/lead-emails.ts"
+    },
+    {
+      "cat": "12. Envois d'e-mails",
+      "name": "notification interne lead",
+      "file": "lib/email/lead-emails.ts"
+    },
+    {
+      "cat": "12. Envois d'e-mails",
+      "name": "fourchette d'estimation (visiteur)",
+      "file": "lib/email/estimation-emails.ts"
+    },
+    {
+      "cat": "12. Envois d'e-mails",
+      "name": "notification interne estimation",
+      "file": "lib/email/estimation-emails.ts"
+    },
+    {
+      "cat": "12. Envois d'e-mails",
+      "name": "proposition d'affinage d'estimation (admin vers prospect)",
+      "file": "lib/email/estimation-emails.ts"
+    },
+    {
+      "cat": "12. Envois d'e-mails",
+      "name": "reinitialisation du mot de passe admin (Supabase)",
+      "file": "Supabase Auth"
+    }
+  ]
+}

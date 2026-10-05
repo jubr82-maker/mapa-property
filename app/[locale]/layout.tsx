@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { sanitizeCssColorOverrides } from "@/lib/security/sanitize";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { Big_Shoulders, Archivo, JetBrains_Mono } from "next/font/google";
@@ -158,9 +159,9 @@ export default async function LocaleLayout({
       colorOverrides[`--${k}`] = v;
     }
   }
-  const cssOverride = Object.entries(colorOverrides)
-    .map(([k, v]) => `${k}:${v};`)
-    .join("");
+  // Valeurs du CMS filtrees (noms et couleurs CSS valides uniquement) :
+  // aucune donnee ne peut sortir de la regle :root ni fermer <style>.
+  const cssOverride = sanitizeCssColorOverrides(colorOverrides);
 
   return (
     <html

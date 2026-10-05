@@ -90,7 +90,8 @@ async function handle(req: Request) {
 
   if (error) {
     console.error("[admin/cms/content] upsert error", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[api/admin/cms/content]", { code: error.code });
+    return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
   // Invalide le cache pour que le nouveau contenu soit visible immédiatement.

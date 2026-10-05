@@ -15,6 +15,13 @@ export interface InProcessResponse {
   body: string;
 }
 
+/** Options d'une requete (suite de securite : POST, en-tetes, corps JSON). */
+export interface RequestOptions {
+  method?: string;
+  headers?: Record<string, string>;
+  body?: string;
+}
+
 class CaptureSocket extends Duplex {
   chunks: Buffer[] = [];
   remoteAddress = "127.0.0.1";
@@ -59,17 +66,22 @@ export async function createInProcessServer(dir = process.cwd()) {
   await app.prepare();
   const handle = app.getRequestHandler();
 
-  async function request(url: string, method = "GET"): Promise<InProcessResponse> {
+  async function request(url: string, opts: RequestOptions = {}): Promise<InProcessResponse> {
     const socket = new CaptureSocket();
     const req = new http.IncomingMessage(socket as never);
-    req.method = method;
+    req.method = opts.method ?? "GET";
     req.url = url;
     req.headers = {
       host: "mapaproperty.lu",
       "accept-language": "fr",
       "user-agent": "seo-onpage-test",
       "x-forwarded-proto": "https",
+      ...(opts.body !== undefined
+        ? { "content-type": "application/json", "content-length": String(Buffer.byteLength(opts.body)) }
+        : {}),
+      ...opts.headers,
     };
+    if (opts.body !== undefined) req.push(opts.body);
     req.push(null);
     const res = new http.ServerResponse(req);
     res.assignSocket(socket as never);

@@ -20,6 +20,7 @@
 //   4. Retourne compteurs detailles + erreurs par bien.
 
 import { NextResponse } from "next/server";
+import { isAuthorizedCron } from "@/lib/security/cron-auth";
 import { isApimoConfigured, apimoFetch, getApimoAgencyId } from "@/lib/apimo/client";
 import type { ApimoProperty } from "@/lib/apimo/client";
 import {
@@ -59,8 +60,7 @@ function extractBiens(payload: ApimoListResponse | null): ApimoProperty[] {
 
 export async function GET(req: Request) {
   // --- AUTH cron ---
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorizedCron(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
