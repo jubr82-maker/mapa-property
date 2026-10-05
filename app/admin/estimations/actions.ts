@@ -30,7 +30,7 @@ type RefinementResult =
  *  - consent != true -> no_consent
  *  - refinement_sent_at deja rempli -> already_sent + date
  *
- * No-op silencieux cote Resend si RESEND_API_KEY absent (cf.
+ * No-op silencieux si le SMTP n'est pas configure (cf.
  * sendEstimationRefinementEmail). Le UPDATE refinement_sent_at est posee
  * APRES l'envoi best-effort, ce qui veut dire qu'en cas de stub local
  * (clef absente), on marque quand meme comme "envoye" pour eviter de

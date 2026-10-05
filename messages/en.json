@@ -3364,6 +3364,7 @@
     "task_seo_positions": "Google position snapshot",
     "task_weekly_summary": "Weekly summary",
     "task_bce_rate": "ECB rate",
+    "task_retention": "Log and statistics purge",
     "forms_title": "Forms",
     "forms_intro": "Per form and per day, over 14 days. A recording error appears the same day on the dashboard.",
     "forms_not_ready": "Form counting is not enabled yet.",

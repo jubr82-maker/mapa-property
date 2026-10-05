@@ -3364,6 +3364,7 @@
     "task_seo_positions": "Relevé des positions Google",
     "task_weekly_summary": "Résumé hebdomadaire",
     "task_bce_rate": "Taux BCE",
+    "task_retention": "Purge des journaux et statistiques",
     "forms_title": "Formulaires",
     "forms_intro": "Par formulaire et par jour, sur 14 jours. Une erreur d'enregistrement apparaît le jour même dans le tableau de bord.",
     "forms_not_ready": "Le comptage des formulaires n'est pas encore activé.",

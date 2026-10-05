@@ -6,7 +6,10 @@
 //                      (idempotent : une fois par semaine de reference)
 //   le lundi         : resume hebdomadaire (une seule fois par semaine)
 //   le 1er du mois   : taux BCE (ancienne tache bce-rates)
+//   tous les jours   : purge des journaux et statistiques au-dela des
+//                      durees de conservation (RETENTION_RULES)
 import { runPsiMeasurements } from "@/lib/pilotage/psi";
+import { purgeExpiredRows } from "@/lib/pilotage/retention";
 import { snapshotWeeklyPositions } from "@/lib/pilotage/seo";
 import { sendWeeklySummary } from "@/lib/pilotage/weekly-summary";
 import { refreshBceRate } from "@/lib/pilotage/bce";
@@ -46,6 +49,7 @@ export async function runDailyTask(now = new Date()): Promise<StepResult[]> {
     if (!alreadySent) results.push(await step("weekly_summary", () => sendWeeklySummary()));
   }
   if (now.getUTCDate() === 1) results.push(await step("bce_rate", () => refreshBceRate()));
+  results.push(await step("retention", () => purgeExpiredRows(now)));
 
   const failed = results.filter((r) => !r.ok).map((r) => r.task);
   await recordCronRun("daily", failed.length === 0, failed.length ? `echecs: ${failed.join(",")}` : "ok");

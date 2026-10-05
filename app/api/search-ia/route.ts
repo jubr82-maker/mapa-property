@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_query" }, { status: 400 });
   }
 
-  // TODO: brancher Mistral (MISTRAL_API_KEY) puis fallback Groq (GROQ_API_KEY)
+  // TODO: brancher Mistral (MISTRAL_API_KEY).
   // Pour l'instant on renvoie un parse heuristique léger basé sur mots-clés.
   const lower = query.toLowerCase();
 

@@ -19,6 +19,10 @@
 //   G. aucun secret dans les fichiers suivis par git
 //   H. aucune cle serveur dans le build client
 //   I. requetes reelles en memoire : refus anonyme, en-tetes servis
+//   J. Passkeys
+//   K. pilotage
+//   L. regles d'acces (SQL 02, 05, 09), ecritures par le serveur seul,
+//      fichiers inutilises supprimes, purge automatique
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -34,6 +38,8 @@ import { detectFileType } from "../../lib/security/file-type";
 import { maskEmail } from "../../lib/email/smtp";
 import { classifyChannel, sanitizeAttribution } from "../../lib/pilotage/attribution";
 import { isTargetQuery } from "../../lib/pilotage/seo-targets";
+import { RETENTION_RULES } from "../../lib/pilotage/config";
+import { retentionCutoff } from "../../lib/pilotage/retention";
 
 const ROOT = path.resolve(__dirname, "../..");
 const read = (p: string) => fs.readFileSync(path.join(ROOT, p), "utf8");
@@ -501,6 +507,105 @@ section = "K. Pilotage";
   const sql07 = read("supabase/manual/execution/07_effacement_statistiques_test.sql").replace(/^--.*$/gm, "");
   check("SQL 07 : seulement vues de biens, evenements de suivi et chatbot", /VALUES \(1, 'property_views'\), \(2, 'tracking_events'\), \(3, 'chatbot_logs'\)/.test(sql07) && !/DELETE FROM public\.(?!%I)/.test(sql07));
   check("SQL 07 : sauvegarde avant effacement dans la meme transaction", sql07.indexOf("INSERT INTO public.%I SELECT * FROM public.%I") < sql07.indexOf("DELETE FROM public.%I") && /BEGIN;[\s\S]*COMMIT;/.test(sql07));
+}
+
+// ===========================================================================
+// L. Fermeture des regles d'acces, nettoyage, purge automatique
+// ===========================================================================
+section = "L. Regles d'acces et purge";
+{
+  const strip = (s: string) => s.replace(/^\s*--.*$/gm, "");
+  const codeFiles = [...walk("app", (p) => /\.(ts|tsx)$/.test(p)), ...walk("lib", (p) => /\.(ts|tsx)$/.test(p)), ...walk("components", (p) => /\.(ts|tsx)$/.test(p))];
+  // Ecritures directes : chaque ecriture sur ces tables passe par le serveur
+  // avec la cle service_role, jamais par le navigateur ni par la cle anon.
+  const DIRECT = ["leads", "estimation_requests", "estimations", "offmarket_requests", "arcova_waitlist", "property_views", "tracking_events"];
+  const usesService = (src: string) => /supabaseService\(\)|SUPABASE_SERVICE_ROLE_KEY/.test(src);
+  const isClient = (src: string) => /^\s*["']use client["']/.test(src);
+  for (const t of DIRECT) {
+    const writers = codeFiles.filter((f) => new RegExp(`from\\(["']${t}["']\\)\\s*\\.(insert|upsert|update|delete)\\(`).test(read(f)));
+    for (const f of writers) {
+      const src = read(f);
+      check(`${t} : ${f} ecrit par la cle service_role, cote serveur`, usesService(src) && !isClient(src));
+    }
+  }
+  for (const f of codeFiles.filter((f) => /insertLeadWithConsent\(\s*\w/.test(read(f)) && f !== "lib/lead-insert.ts")) {
+    check(`leads : ${f} insere par la cle service_role`, /insertLeadWithConsent\(\s*(sb|sbWrite)\b/.test(read(f)) && /const (sb|sbWrite) = supabaseService\(\)/.test(read(f)));
+  }
+  const browserWriters = codeFiles.filter((f) => isClient(read(f)) && /\.from\(["'][\w-]+["']\)\s*\.(insert|upsert|update|delete|upload|remove)\(/.test(read(f)));
+  check("aucune ecriture en base ni dans le stockage depuis le navigateur", browserWriters.length === 0, browserWriters.join(", "));
+  const browserClientUsers = codeFiles.filter((f) => f !== "lib/supabase-ssr.ts" && /createSupabaseBrowserClient/.test(read(f)));
+  check("client navigateur reserve a la connexion (Passkey)", browserClientUsers.join(",") === "components/admin/PasskeyClient.tsx", browserClientUsers.join(", "));
+  // Stockage : le code n'ecrit que dans property-images et documents, en session admin.
+  const storageWriters = codeFiles.filter((f) => /storage\s*\.from\([^)]*\)\s*\.(upload|remove|update|move|copy)\(/.test(read(f)));
+  check("stockage : ecritures seulement dans l'admin", storageWriters.length > 0 && storageWriters.every((f) => f.startsWith("app/admin/")), storageWriters.join(", "));
+  check("offmarket-photos : aucune ecriture dans le code", !codeFiles.some((f) => /storage\s*\.from\(["']offmarket-photos["']\)/.test(read(f))));
+
+  // Variables revoquees : plus aucune lecture.
+  const REVOKED = ["SUPABASE_ACCESS_TOKEN", "GROQ_API_KEY", "RESEND_API_KEY"];
+  const envReaders = [...codeFiles, ...walk("scripts", (p) => /\.(ts|mjs|js)$/.test(p) && !p.endsWith("test-security.ts")), "proxy.ts", "next.config.ts", ".env.example"]
+    .filter((f) => REVOKED.some((k) => new RegExp(`process\\.env\\.${k}\\b|process\\.env\\[["']${k}["']\\]|^${k}=`, "m").test(read(f))));
+  check("aucune lecture de SUPABASE_ACCESS_TOKEN, GROQ_API_KEY, RESEND_API_KEY", envReaders.length === 0, envReaders.join(", "));
+
+  // SQL 02 bloc A.
+  const a = strip(read("supabase/manual/execution/02_bloc_A.sql"));
+  check("SQL 02 : une seule transaction", (a.match(/^BEGIN;$/gm) ?? []).length === 1 && (a.match(/^COMMIT;$/gm) ?? []).length === 1);
+  for (const [tbl, pol] of [["leads", "anon insert leads"], ["estimation_requests", "estimation_requests_insert_anon"], ["estimations", "anon insert estimations"], ["offmarket_requests", "offmarket_requests_public_insert"], ["arcova_waitlist", "anon insert arcova"], ["arcova_waitlist", "arcova_public_insert"], ["property_views", "pv_public_insert"], ["tracking_events", "tracking_events_insert_anon"]]) {
+    check(`SQL 02 : regle ouverte supprimee ${tbl} / ${pol}`, a.includes(`('${tbl}', '${pol}')`));
+  }
+  for (const [tbl, pol] of [["arcova_waitlist", "arcova_admin_full"], ["properties_offmarket", "offmarket_authenticated_write"], ["offmarket_audit_log", "audit_admin_read"]]) {
+    check(`SQL 02 : agency_admins remplacee ${tbl} / ${pol}`, a.includes(`pg_temp.bloc_a_admin_only('public', '${tbl}', '${pol}', NULL)`));
+  }
+  check("SQL 02 : condition admin = public.is_mapa_admin()", /'public\.is_mapa_admin\(\)'/.test(a) && /format\('bucket_id = %L AND public\.is_mapa_admin\(\)', p_bucket\)/.test(a));
+  check("SQL 02 : liste d'e-mails de mapa_historical_sales remplacee", /partners_read/.test(a) && /partners_write/.test(a) && /@mapagroup\.org%'/.test(a));
+  check("SQL 02 : offmarket-photos, toutes les regles supprimees", a.includes("'offmarket_photos_admin_write'") && a.includes("'offmarket_photos_public_read'") && /LIKE '%''offmarket-photos''%'/.test(a) && /SET public = false WHERE id = 'offmarket-photos'/.test(a));
+  check("SQL 02 : refus de droits du stockage signale sans annuler le bloc", (a.match(/EXCEPTION WHEN insufficient_privilege/g) ?? []).length >= 3 && /'A FAIRE dans Storage, Policies'/.test(a));
+  check("SQL 02 : agency_admins conservee", !/DROP TABLE[^;]*agency_admins/i.test(a));
+  check("SQL 02 : is_mapa_admin non redefinie (bloc B)", !/CREATE OR REPLACE FUNCTION public\.is_mapa_admin/.test(a));
+  // Le site v28 en production ecrit encore leads et arcova_waitlist depuis
+  // le navigateur : insertion conservee mais bornee, droits inchanges.
+  const revoked = a.match(/FOREACH t IN ARRAY ARRAY\[([^\]]+)\][\s\S]{0,200}?REVOKE INSERT, UPDATE, DELETE ON public\.%I FROM anon/)?.[1] ?? "";
+  check("SQL 02 : droits d'ecriture anon retires sur les cinq tables sans besoin", ["estimation_requests", "estimations", "offmarket_requests", "property_views", "tracking_events"].every((t) => revoked.includes(`'${t}'`)) && !/'leads'|'arcova_waitlist'/.test(revoked), revoked);
+  check("SQL 02 : insertion bornee leads et arcova_waitlist (site v28)", /\('leads', 'leads_insert_borne', 'new'\)/.test(a) && /\('arcova_waitlist', 'arcova_waitlist_insert_borne', NULL\)/.test(a) && /FOR INSERT TO anon WITH CHECK \(%s\)/.test(a));
+  check("SQL 02 : bornes e-mail, longueurs, telephone, langue, statut", /'email IS NOT NULL'/.test(a) && /char_length\(%1\$I\) <= %2\$s/.test(a) && /\(1, 'email', 254, '\^\[\^@\[:space:\]\]\+@/.test(a) && /\(5, 'phone', 40,/.test(a) && /\(10, 'lang', 5, '\^\[a-z\]\{2\}\$'\)/.test(a) && /status IS NULL OR status::text = ANY/.test(a));
+  // Champs envoyes par le v28 (branche main) : tous bornes par le bloc A.
+  for (const col of ["email", "first_name", "last_name", "phone", "message", "type", "property_ref", "source", "lang", "company", "role"]) {
+    check(`SQL 02 : champ v28 ${col} borne`, new RegExp(`\\(\\d+, '${col}', \\d+, `).test(a));
+  }
+  check("SQL 02 : un seul tableau de controle", (a.match(/^SELECT controle::text/gm) ?? []).length === 1);
+  // SQL 05 bloc B : point 1 (aal2 et search_path de is_mapa_admin).
+  const b = read("supabase/manual/execution/05_bloc_B.sql");
+  check("SQL 05 : is_mapa_admin exige aal2 et fixe search_path", /CREATE OR REPLACE FUNCTION public\.is_mapa_admin\(\)[\s\S]*?SET search_path = public, pg_temp[\s\S]*?'aal2'/.test(b));
+  // SQL 09 nettoyage.
+  const n = strip(read("supabase/manual/execution/09_nettoyage.sql"));
+  const raw09 = read("supabase/manual/execution/09_nettoyage.sql");
+  check("SQL 09 : copie avant suppression de tmp_property_images_import", n.indexOf("SELECT * FROM public.tmp_property_images_import;") > 0 && n.indexOf("SELECT * FROM public.tmp_property_images_import;") < n.indexOf("DROP TABLE public.tmp_property_images_import;"));
+  check("SQL 09 : aucun bucket ni fichier supprime", !/DELETE FROM storage|DROP[^;]*bucket|storage\.buckets\s+SET|delete_bucket/i.test(n));
+  check("SQL 09 : retour arriere present", /RETOUR ARRIERE/.test(raw09) && /-- CREATE TABLE public\.tmp_property_images_import/.test(raw09));
+  check("tmp_property_images_import : aucun code ne l'utilise", !codeFiles.some((f) => /tmp_property_images_import/.test(read(f))));
+
+  // Decision E : fichiers supprimes.
+  const REMOVED = [
+    "components/admin/TwoFactorPrompt.tsx", "components/admin/ModuleComingSoon.tsx", "components/admin/AnalyticsHealthPill.tsx",
+    "components/admin/performance/ScoreCard.tsx", "components/admin/performance/SentryNotConfiguredCard.tsx",
+    "components/admin/performance/WebVitalBadge.tsx", "components/admin/performance/BundleSizeList.tsx",
+    "components/admin/analytics/KpiCard.tsx", "components/admin/analytics/PieChart.tsx", "components/admin/analytics/TokenMissingCard.tsx",
+    "app/api/admin/analytics/cloudflare/route.ts", "app/api/admin/analytics/vercel/route.ts", "app/api/admin/analytics/ga4/route.ts",
+    "app/api/admin/analytics/supabase/route.ts", "app/api/admin/performance/sentry/route.ts",
+  ];
+  const still = REMOVED.filter((f) => fs.existsSync(path.join(ROOT, f)));
+  check("fichiers inutilises supprimes (10 composants, 5 routes)", still.length === 0, still.join(", "));
+
+  // Decision F : purge quotidienne, memes durees que le bloc F.
+  check("purge lancee par la tache quotidienne", /step\("retention", \(\) => purgeExpiredRows\(now\)\)/.test(read("lib/pilotage/daily-task.ts")));
+  const f04 = read("supabase/manual/execution/04_bloc_F.sql");
+  const sqlRules = [...f04.matchAll(/\(\d, '(\w+)', '(\w+)', '(\d+) months'\)/g)].map((m) => `${m[1]}.${m[2]}.${m[3]}`).sort().join(",");
+  const codeRules = RETENTION_RULES.map((r) => `${r.table}.${r.column}.${r.months}`).sort().join(",");
+  check("durees de conservation identiques au bloc F", sqlRules === codeRules && codeRules === "admin_auth_log.created_at.12,chatbot_logs.created_at.6,property_views.viewed_at.13,tracking_events.created_at.13", `${codeRules} / ${sqlRules}`);
+  const ret = read("lib/pilotage/retention.ts");
+  check("purge : seules les tables de RETENTION_RULES", (ret.match(/\.from\(/g) ?? []).length === 1 && /\.from\(rule\.table\)/.test(ret) && /\.lt\(rule\.column, cutoff\)/.test(ret));
+  check("purge : 6 mois avant le 31 mars 2026 = 30 septembre 2025", retentionCutoff(6, new Date("2026-03-31T05:00:00Z")).toISOString() === "2025-09-30T05:00:00.000Z");
+  check("purge : 13 mois avant le 5 octobre 2026 = 5 septembre 2025", retentionCutoff(13, new Date("2026-10-05T05:00:00Z")).toISOString() === "2025-09-05T05:00:00.000Z");
+  check("purge : 12 mois avant le 29 fevrier 2028 = 28 fevrier 2027", retentionCutoff(12, new Date("2028-02-29T05:00:00Z")).toISOString() === "2027-02-28T05:00:00.000Z");
 }
 
 // ===========================================================================

@@ -42,3 +42,15 @@ export const SEARCH_CONSOLE_SITE = "sc-domain:mapaproperty.lu";
 
 /** Jour du resume hebdomadaire, heure de Luxembourg : 1 = lundi. */
 export const WEEKLY_SUMMARY_WEEKDAY = 1;
+
+/**
+ * Durees de conservation acceptees par Julien le 2026-10-05, purgees par
+ * la tache quotidienne (lib/pilotage/retention.ts). Memes valeurs que
+ * supabase/manual/execution/04_bloc_F.sql. Aucune autre table n'est purgee.
+ */
+export const RETENTION_RULES = [
+  { table: "admin_auth_log", column: "created_at", months: 12 },
+  { table: "property_views", column: "viewed_at", months: 13 },
+  { table: "tracking_events", column: "created_at", months: 13 },
+  { table: "chatbot_logs", column: "created_at", months: 6 },
+] as const;

@@ -36,9 +36,7 @@ Voir `.env.example`. Comportements quand une clé est absente :
 | Variable | Absente → comportement |
 |---|---|
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` | Leads INSERT Supabase only, pas d'email envoyé |
-| `RESEND_API_KEY` | Non utilisée, Resend retiré au profit du SMTP IONOS |
 | `MISTRAL_API_KEY` | Chatbot Eléna utilise fallback heuristique |
-| `GROQ_API_KEY` | Non utilisée, moteur de secours Groq retiré du chatbot |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Composant Turnstile no-op, validation serveur permissive |
 | `TURNSTILE_SECRET_KEY` | Validation serveur skip (MVP-friendly) |
 
