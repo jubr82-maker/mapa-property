@@ -1,0 +1,198 @@
+/* ============================================================
+   Admin sur telephone (oct. 2026), sous 768 px uniquement.
+   Fichier importe SEULEMENT par app/admin/layout.tsx, et chaque regle est
+   limitee a body[data-admin] : le site public n'est pas concerne.
+   Regles : aucun defilement horizontal de la page, texte courant 16 px,
+   aucun texte utile sous 14 px, zones tactiles d'au moins 44 px, champs a
+   16 px (pas de zoom automatique de l'iPhone), contraste AA (4,5:1).
+   Les couleurs viennent des variables du theme, jamais d'hexadecimal.
+   ============================================================ */
+@media (max-width: 767.98px) {
+  html:has(> body[data-admin]) {
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body[data-admin] {
+    overflow-x: clip;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  body[data-admin] main {
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- Taille du texte ---------- */
+  body[data-admin] :is(.text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-\[13px\], .text-xs) {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+  body[data-admin] :is(.text-sm, .text-\[15px\]) {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+  /* Majuscules tres espacees : moins d'espacement, sinon une ligne de
+     14 px deborde de l'ecran. */
+  body[data-admin] :is([class*="tracking-[0.1"], [class*="tracking-[0.2"], [class*="tracking-[0.3"], .tracking-widest, .tracking-wide) {
+    letter-spacing: 0.04em !important;
+  }
+  body[data-admin] main :is(h1.text-4xl, h1.text-5xl, h1.text-3xl) {
+    font-size: 28px !important;
+    line-height: 1.15 !important;
+  }
+
+  /* ---------- Contraste ---------- */
+  body[data-admin] :is([class*="text-[#3D4F63]/"], .text-ink-soft, [class*="text-ink/"]) {
+    color: var(--color-ink-mid) !important;
+  }
+  body[data-admin] :is(.text-gold, .text-gold-deep, .text-\[\#e0af6e\], .text-\[\#9E7B2A\]) {
+    color: color-mix(in srgb, var(--color-gold-deep) 45%, var(--color-ink)) !important;
+  }
+  /* Texte clair sur fond sombre (en-tete, boutons pleins) : inchange. */
+  body[data-admin] :is(.bg-ink, .bg-\[\#3D4F63\], .bg-\[\#1A1F2A\], .bg-bg-contrast) :is(.text-gold, .text-\[\#e0af6e\]) {
+    color: var(--color-gold-deep) !important;
+  }
+
+  /* ---------- Champs et zones tactiles ---------- */
+  body[data-admin] :is(input, select, textarea) {
+    font-size: 16px !important;
+    max-width: 100%;
+  }
+  body[data-admin] :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]), select) {
+    min-height: 44px;
+  }
+  body[data-admin] :is(input[type="checkbox"], input[type="radio"]) {
+    width: 22px;
+    height: 22px;
+  }
+  body[data-admin] :is(button, summary, [role="button"], [role="switch"], [role="tab"]) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  body[data-admin] a[class*="rounded-full"] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  body[data-admin] label:has(> input[type="checkbox"], > input[type="radio"]) {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ---------- Largeurs imposees ---------- */
+  body[data-admin] :is([class*="min-w-[1"], [class*="min-w-[2"], [class*="min-w-[3"], [class*="min-w-[4"], [class*="min-w-[5"], [class*="min-w-[6"], [class*="min-w-[7"], [class*="min-w-[8"], [class*="min-w-[9"]) {
+    min-width: 0 !important;
+  }
+  body[data-admin] main :is(img, video, iframe, canvas) {
+    max-width: 100%;
+  }
+  body[data-admin] main pre {
+    white-space: pre-wrap;
+  }
+  body[data-admin] main :is(.whitespace-nowrap) {
+    white-space: normal !important;
+  }
+  /* Lignes flexibles : passage a la ligne plutot que debordement
+     (en-tetes de page avec boutons, barres d'outils). Une ligne qui doit
+     defiler dans sa largeur porte flex-nowrap. */
+  body[data-admin] main .flex:not(.flex-col):not(.flex-nowrap) {
+    flex-wrap: wrap;
+  }
+  /* Grilles de formulaire a 3 ou 4 colonnes : 1 colonne sur telephone. */
+  body[data-admin] main :is(form, fieldset, section) :is(.grid-cols-3, .grid-cols-4, .grid-cols-5, .grid-cols-6) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  /* Cartes a grandes marges internes : marges reduites. */
+  body[data-admin] main :is(.p-8, .p-10, .p-12) {
+    padding: 20px !important;
+  }
+  body[data-admin] main :is(.px-8, .px-10) {
+    padding-inline: 16px !important;
+  }
+
+  /* ---------- Tableaux en cartes (AdminTableCards) ---------- */
+  body[data-admin] main :has(> table[data-cards]) {
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+  body[data-admin] main table[data-cards],
+  body[data-admin] main table[data-cards] > tbody {
+    display: block;
+    width: 100%;
+  }
+  body[data-admin] main table[data-cards] > thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  body[data-admin] main table[data-cards] > tbody > tr {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-line-strong);
+    border-radius: 16px;
+    background: var(--color-bg-soft);
+  }
+  body[data-admin] main table[data-cards] > tbody > tr > td {
+    display: block;
+    padding: 0 !important;
+    text-align: left !important;
+    white-space: normal !important;
+    border: 0 !important;
+  }
+  body[data-admin] main table[data-cards] > tbody > tr > td:empty {
+    display: none;
+  }
+  body[data-admin] main table[data-cards] td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-ink-mid);
+  }
+  body[data-admin] main table[data-cards] td[data-card-primary] {
+    order: -1;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  body[data-admin] main table[data-cards] td[data-card-primary]::before {
+    display: none;
+  }
+  body[data-admin] main table[data-cards] tr[data-card]:not([data-card-open]) > td[data-card-fold] {
+    display: none;
+  }
+  body[data-admin] main table[data-cards] tr[data-card][data-card-has-fold]::after {
+    content: attr(data-more-label);
+    order: 99;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 2px;
+    border-top: 1px solid var(--color-line);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  body[data-admin] main table[data-cards] tr[data-card][data-card-open]::after {
+    content: attr(data-less-label);
+  }
+
+  /* ---------- Barre d'enregistrement collee en bas (fiche d'un bien) ---------- */
+  body[data-admin] [data-admin-sticky-save] {
+    position: sticky;
+    bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    z-index: 30;
+  }
+}

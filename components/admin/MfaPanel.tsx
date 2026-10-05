@@ -18,7 +18,10 @@ function CodeInput({ value, onChange, id }: { value: string; onChange: (v: strin
   return (
     <input
       id={id}
+      name="one-time-code"
+      type="text"
       inputMode="numeric"
+      // Remplissage automatique des codes de verification de l'iPhone.
       autoComplete="one-time-code"
       pattern="[0-9 ]{6,7}"
       maxLength={7}

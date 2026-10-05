@@ -4,7 +4,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { formatDateTimeShort } from "@/lib/datetime";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { updateWorkflowStatus, updateLeadNotes } from "@/app/admin/leads/actions";
+import Link from "next/link";
+import { Mail, MessageSquarePlus, Phone } from "lucide-react";
+import { updateWorkflowStatus, updateLeadNotes, addAdminNote } from "@/app/admin/leads/actions";
+import { AdminFilterPanel } from "@/components/admin/AdminFilterPanel";
 import {
   WORKFLOW_STATUSES,
   WORKFLOW_LABEL_KEYS,
@@ -68,9 +71,12 @@ const LEAD_TYPES = [
 export function LeadsTable({
   leads,
   createdColumnLabel,
+  sortControl,
 }: {
   leads: Lead[];
   createdColumnLabel: string;
+  /** Tri par date (rendu serveur), place dans le panneau des filtres. */
+  sortControl?: React.ReactNode;
 }) {
   const t = useTranslations("admin_leads");
   const router = useRouter();
@@ -87,8 +93,12 @@ export function LeadsTable({
     });
   };
 
+  const activeFilters = (sp.get("q") ? 1 : 0) + (sp.get("type") ? 1 : 0);
+
   return (
     <div className="space-y-4">
+      <AdminFilterPanel active={activeFilters}>
+      {sortControl}
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#3D4F63]/15 bg-white p-4">
         <input
           type="search"
@@ -110,9 +120,20 @@ export function LeadsTable({
           ))}
         </select>
       </div>
+      </AdminFilterPanel>
 
-      <div className="overflow-hidden rounded-2xl border border-[#3D4F63]/15 bg-white">
-        <table className="w-full text-sm">
+      {/* Telephone : une carte par lead, actions rapides (appel, e-mail,
+          statut, note) en un ou deux gestes. Ordinateur : tableau. */}
+      <ul className="space-y-3 md:hidden" data-admin-lead-cards>
+        {leads.length === 0 ? (
+          <li className="rounded-2xl border border-ink/15 bg-bg-soft p-5 text-center text-base text-ink-mid">{t("empty")}</li>
+        ) : (
+          leads.map((l) => <LeadCard key={l.id} lead={l} />)
+        )}
+      </ul>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-[#3D4F63]/15 bg-white md:block">
+        <table data-no-cards className="w-full text-sm">
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
               <th className="px-4 py-3">{createdColumnLabel}</th>
@@ -287,5 +308,180 @@ function LeadRow({
         </tr>
       )}
     </>
+  );
+}
+
+
+/**
+ * Carte d'un lead sur telephone (oct. 2026). En grand : nom, sujet ou type,
+ * statut, date et heure. Actions rapides : appeler et ecrire (liens tel: et
+ * mailto: autorises, l'admin est prive et non indexe), changer le statut
+ * (liste deroulante native), ajouter une note. Le reste (message, lieu,
+ * origine) est replie.
+ */
+function LeadCard({ lead }: { lead: Lead }) {
+  const t = useTranslations("admin_leads");
+  const tw = useTranslations("admin_workflow");
+  const [status, setStatus] = useState<WorkflowStatus>(
+    lead.workflow_status && WORKFLOW_STATUSES.includes(lead.workflow_status as WorkflowStatus)
+      ? (lead.workflow_status as WorkflowStatus)
+      : "new",
+  );
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [note, setNote] = useState("");
+  const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
+  const [busy, startTransition] = useTransition();
+
+  const fullName = [lead.first_name, lead.last_name].filter(Boolean).join(" ");
+  const telHref = lead.phone ? `tel:${lead.phone.replace(/[^\d+]/g, "")}` : null;
+  const headline = subjectLabel(t, lead.subject) || typeLabel(t, lead.type);
+
+  const run = (action: () => Promise<unknown>, ok: string, after?: () => void) => {
+    setFeedback(null);
+    startTransition(async () => {
+      try {
+        await action();
+        after?.();
+        setFeedback({ ok: true, text: ok });
+      } catch (e) {
+        setFeedback({ ok: false, text: e instanceof Error && e.message ? e.message : t("quick_error") });
+      }
+    });
+  };
+
+  const changeStatus = (next: WorkflowStatus) => {
+    const previous = status;
+    setStatus(next);
+    setFeedback(null);
+    startTransition(async () => {
+      try {
+        await updateWorkflowStatus(lead.id, next);
+        setFeedback({ ok: true, text: t("quick_status_saved") });
+      } catch (e) {
+        setStatus(previous);
+        setFeedback({ ok: false, text: e instanceof Error && e.message ? e.message : t("quick_error") });
+      }
+    });
+  };
+
+  const actionCls =
+    "flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl border border-ink/20 bg-bg px-2 text-[14px] font-semibold text-ink";
+
+  return (
+    <li className="rounded-2xl border border-ink/15 bg-bg-soft p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-lg font-semibold leading-snug text-ink">{fullName || lead.email}</p>
+          {headline && <p className="mt-0.5 text-base text-ink-mid">{headline}</p>}
+          {lead.property_ref && <p className="mt-0.5 text-[14px] text-ink-mid">{t("property_ref_label")} {lead.property_ref}</p>}
+        </div>
+        <WorkflowBadge status={status} />
+      </div>
+      <p className="mt-2 text-[14px] text-ink-mid">
+        {lead.created_label ?? formatDateTimeShort(lead.created_at)}
+        {lead.updated_label ? ` · ${lead.updated_label}` : ""}
+      </p>
+
+      <div className="mt-3 grid grid-cols-4 gap-2">
+        {telHref ? (
+          <a href={telHref} className={actionCls}>
+            <Phone className="size-5" aria-hidden />
+            {t("quick_call")}
+          </a>
+        ) : (
+          <span aria-disabled className={`${actionCls} opacity-40`}>
+            <Phone className="size-5" aria-hidden />
+            {t("quick_call")}
+          </span>
+        )}
+        <a href={`mailto:${lead.email}`} className={actionCls}>
+          <Mail className="size-5" aria-hidden />
+          {t("quick_email")}
+        </a>
+        <label className={`${actionCls} relative`}>
+          <span className="sr-only">{tw("select_title")}</span>
+          <span aria-hidden>{t("quick_status")}</span>
+          <select
+            value={status}
+            disabled={busy}
+            onChange={(e) => changeStatus(e.target.value as WorkflowStatus)}
+            className="absolute inset-0 size-full cursor-pointer opacity-0"
+          >
+            {WORKFLOW_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {tw(WORKFLOW_LABEL_KEYS[s])}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="button" onClick={() => setNoteOpen((o) => !o)} aria-expanded={noteOpen} className={actionCls}>
+          <MessageSquarePlus className="size-5" aria-hidden />
+          {t("quick_note")}
+        </button>
+      </div>
+
+      {noteOpen && (
+        <form
+          className="mt-3 space-y-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!note.trim()) return;
+            run(() => addAdminNote(lead.id, note), t("quick_note_saved"), () => {
+              setNote("");
+              setNoteOpen(false);
+            });
+          }}
+        >
+          <label className="block text-[14px] font-semibold text-ink-mid" htmlFor={`note-${lead.id}`}>
+            {t("notes_label")}
+          </label>
+          <textarea
+            id={`note-${lead.id}`}
+            rows={3}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="block w-full rounded-xl border border-ink/20 bg-bg px-3 py-2 text-base text-ink"
+          />
+          <button
+            type="submit"
+            disabled={busy || !note.trim()}
+            className="w-full rounded-xl bg-ink px-4 py-3 text-base font-semibold text-bg disabled:opacity-50"
+          >
+            {busy ? tw("busy") : t("notes_save")}
+          </button>
+        </form>
+      )}
+
+      {feedback && (
+        <p role="status" className={`mt-2 text-[14px] ${feedback.ok ? "text-emerald-800" : "text-red-700"}`}>
+          {feedback.text}
+        </p>
+      )}
+
+      <details className="mt-3 border-t border-ink/10 pt-2">
+        <summary className="flex cursor-pointer items-center text-base font-semibold text-ink">{t("quick_details")}</summary>
+        <div className="mt-2 space-y-2 text-base text-ink">
+          <p className="break-words text-[14px] text-ink-mid">
+            {lead.email}
+            {lead.phone && ` · ${lead.phone}`}
+          </p>
+          <p className="whitespace-pre-wrap leading-relaxed">{lead.message || t("no_message")}</p>
+          <p className="text-[14px] text-ink-mid">
+            {[lead.country, lead.city].filter(Boolean).join(" · ") || tw("not_provided")}
+          </p>
+          {lead.source && (
+            <p className="text-[14px] text-ink-mid">
+              {t("source_label")} {sourceLabel(tw, lead.source)}
+            </p>
+          )}
+          <Link
+            href={`/admin/leads/${lead.id}`}
+            className="mt-1 inline-flex min-h-11 items-center rounded-full border border-ink/25 px-4 text-base font-semibold text-ink"
+          >
+            {t("quick_open")}
+          </Link>
+        </div>
+      </details>
+    </li>
   );
 }

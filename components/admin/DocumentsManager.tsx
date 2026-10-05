@@ -108,7 +108,7 @@ export function DocumentsManager({ documents }: { documents: Doc[] }) {
       </form>
 
       <div className="overflow-x-auto rounded-2xl border border-[#3D4F63]/15 bg-white">
-        <table className="w-full text-sm">
+        <table data-card-keep="1,4,5,6" className="w-full text-sm">
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
               <th className="px-4 py-3">{t("col_title")}</th>

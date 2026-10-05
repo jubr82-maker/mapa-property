@@ -1711,7 +1711,10 @@
     "refresh_running": "Refreshing…",
     "refresh_ok": "Public listing refreshed ✓",
     "refresh_failed": "Refresh failed (code {status}).",
-    "photos_autosaved": "Photos saved and published on the listing."
+    "photos_autosaved": "Photos saved and published on the listing.",
+    "photo_take": "Take a photo",
+    "photo_gallery": "Choose from gallery",
+    "photo_drag": "Move photo {n}"
   },
   "property_gone": {
     "title": "This property is no longer available",
@@ -2853,7 +2856,16 @@
     "pdf_section_request": "Request",
     "pdf_received_on": "Received on",
     "pdf_rgpd_consent": "GDPR consent",
-    "pdf_rgpd": "GDPR"
+    "pdf_rgpd": "GDPR",
+    "quick_call": "Call",
+    "quick_email": "Email",
+    "quick_status": "Status",
+    "quick_note": "Note",
+    "quick_note_saved": "Note added.",
+    "quick_status_saved": "Status saved.",
+    "quick_error": "Saving failed. Please try again.",
+    "quick_details": "Message and details",
+    "quick_open": "Open record"
   },
   "admin_mandats": {
     "title": "Mandates",
@@ -3103,7 +3115,18 @@
     "settings": "Settings",
     "account_security": "Password and devices",
     "version": "Version 1.0, {year}",
-    "header_title": "MAPA · Admin"
+    "header_title": "MAPA · Admin",
+    "mobile_nav": "Main navigation",
+    "menu": "Menu",
+    "menu_close": "Close menu",
+    "card_more": "Show details",
+    "card_less": "Hide details",
+    "filters_open": "Filters and sorting",
+    "filters_close": "Close filters",
+    "filters_active": "{count} active",
+    "app_name": "MAPA Admin",
+    "app_name_long": "MAPA Property, administration",
+    "app_description": "Private administration of MAPA Property."
   },
   "admin_alerts": {
     "login_burst_subject": "Alert: repeated failed admin sign-ins",

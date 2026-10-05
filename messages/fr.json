@@ -1711,7 +1711,10 @@
     "refresh_running": "Mise à jour en cours…",
     "refresh_ok": "Fiche publique mise à jour ✓",
     "refresh_failed": "Échec de la mise à jour (code {status}).",
-    "photos_autosaved": "Photos enregistrées et publiées sur la fiche."
+    "photos_autosaved": "Photos enregistrées et publiées sur la fiche.",
+    "photo_take": "Prendre une photo",
+    "photo_gallery": "Choisir dans la galerie",
+    "photo_drag": "Déplacer la photo {n}"
   },
   "property_gone": {
     "title": "Ce bien n'est plus disponible",
@@ -2853,7 +2856,16 @@
     "pdf_section_request": "Demande",
     "pdf_received_on": "Reçu le",
     "pdf_rgpd_consent": "Consentement RGPD",
-    "pdf_rgpd": "RGPD"
+    "pdf_rgpd": "RGPD",
+    "quick_call": "Appeler",
+    "quick_email": "E-mail",
+    "quick_status": "Statut",
+    "quick_note": "Note",
+    "quick_note_saved": "Note ajoutée.",
+    "quick_status_saved": "Statut enregistré.",
+    "quick_error": "L'enregistrement a échoué. Réessayez.",
+    "quick_details": "Message et détails",
+    "quick_open": "Ouvrir la fiche"
   },
   "admin_mandats": {
     "title": "Mandats",
@@ -3103,7 +3115,18 @@
     "settings": "Paramètres",
     "account_security": "Mot de passe et appareils",
     "version": "Version 1.0, {year}",
-    "header_title": "MAPA · Administration"
+    "header_title": "MAPA · Administration",
+    "mobile_nav": "Navigation principale",
+    "menu": "Menu",
+    "menu_close": "Fermer le menu",
+    "card_more": "Afficher le détail",
+    "card_less": "Masquer le détail",
+    "filters_open": "Filtres et tri",
+    "filters_close": "Fermer les filtres",
+    "filters_active": "{count, plural, one {# actif} other {# actifs}}",
+    "app_name": "MAPA Admin",
+    "app_name_long": "MAPA Property, administration",
+    "app_description": "Administration privée de MAPA Property."
   },
   "admin_alerts": {
     "login_burst_subject": "Alerte : échecs de connexion répétés à l'admin",

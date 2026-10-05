@@ -84,7 +84,7 @@ export function Empty({ children }: { children: React.ReactNode }) {
 export function Table({ head, children }: { head: string[]; children: React.ReactNode }) {
   return (
     <div className="overflow-x-auto rounded-2xl border border-ink/15 bg-bg-soft">
-      <table className="w-full text-left text-sm">
+      <table data-card-all className="w-full text-left text-sm">
         <thead className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
           <tr>
             {head.map((h) => (

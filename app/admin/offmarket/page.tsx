@@ -66,7 +66,7 @@ export default async function AdminOffmarketListPage({
       <OffmarketListFilters />
 
       <div className="overflow-hidden rounded-2xl border border-[#3D4F63]/15 bg-white">
-        <table className="w-full text-sm">
+        <table data-card-primary="2" data-card-keep="1,2,4,5,8" className="w-full text-sm">
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
               <th className="px-4 py-3">{t("list.col_reference")}</th>

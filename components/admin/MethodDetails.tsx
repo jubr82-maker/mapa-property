@@ -205,7 +205,7 @@ export function MethodDetails({ methodKey, details }: Props) {
   }
 
   return (
-    <table className="mt-3 w-full border-collapse text-xs">
+    <table data-card-all className="mt-3 w-full border-collapse text-xs">
       <tbody>
         {rows.map((r, i) => (
           <tr key={i} className="border-b border-ink/5 last:border-b-0">

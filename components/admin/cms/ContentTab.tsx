@@ -245,7 +245,7 @@ export function ContentTab({ initial }: { initial: ContentRow[] }) {
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-[#3D4F63]/15 bg-white">
-        <table className="w-full text-left">
+        <table data-card-all className="w-full text-left">
           <thead className="border-b border-[#3D4F63]/15 bg-[#F5EFE1]">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>

@@ -786,6 +786,85 @@ section = "O. Inactivite et nouvelle session";
 }
 
 // ===========================================================================
+// P. Admin sur telephone (aucune largeur imposee au-dela de l'ecran)
+// ===========================================================================
+section = "P. Admin sur telephone";
+{
+  // Largeur d'ecran la plus etroite visee (telephones courants). Une
+  // largeur minimale ou fixe au-dela, sans prefixe d'ecran large (sm:,
+  // md:, lg:, xl:, 2xl:), ferait defiler la page de l'admin a l'horizontale.
+  const SCREEN_PX = 360;
+  const toPx = (n: number, unit: string) => (unit === "rem" ? n * 16 : n);
+  const adminFiles = [...walk("app/admin", (x) => /\.(tsx|ts)$/.test(x)), ...walk("components/admin", (x) => /\.(tsx|ts)$/.test(x))];
+  const offenders: string[] = [];
+  for (const f of adminFiles) {
+    const src = read(f);
+    for (const m of src.matchAll(/(^|[\s"'`])((?:[a-z0-9-]+:)*)(min-w|w)-\[(\d+(?:\.\d+)?)(px|rem)\]/g)) {
+      const responsive = /(^|:)(sm|md|lg|xl|2xl):/.test(m[2]);
+      if (!responsive && toPx(Number(m[4]), m[5]) > SCREEN_PX) offenders.push(`${f} : ${m[2]}${m[3]}-[${m[4]}${m[5]}]`);
+    }
+    for (const m of src.matchAll(/(^|[\s"'`])((?:[a-z0-9-]+:)*)grid-cols-\[([^\]]+)\]/g)) {
+      const responsive = /(^|:)(sm|md|lg|xl|2xl):/.test(m[2]);
+      const fixed = [...m[3].matchAll(/(\d+(?:\.\d+)?)(px|rem)/g)].reduce((a, x) => a + toPx(Number(x[1]), x[2]), 0);
+      if (!responsive && fixed > SCREEN_PX) offenders.push(`${f} : grid-cols-[${m[3]}]`);
+    }
+    for (const m of src.matchAll(/\b(minWidth|width)\s*:\s*["']?(\d+)(px)?["']?/g)) {
+      if (Number(m[2]) > SCREEN_PX && !/matchMedia|max-width/.test(src.slice(Math.max(0, m.index! - 40), m.index! + 40))) offenders.push(`${f} : ${m[1]} ${m[2]}`);
+    }
+  }
+  check(`aucune page de l'admin n'impose une largeur superieure a ${SCREEN_PX} px (${adminFiles.length} fichiers)`, offenders.length === 0, offenders.slice(0, 10).join(" ; "));
+  // Le controle lui-meme detecte une largeur imposee.
+  const probe = 'className="min-w-[480px]" className="md:min-w-[900px]" className="grid-cols-[260px_1fr]"';
+  const probeHits = [...probe.matchAll(/(^|[\s"'`])((?:[a-z0-9-]+:)*)(min-w|w)-\[(\d+)(px)\]/g)].filter((m) => !/(sm|md|lg|xl|2xl):/.test(m[2]) && Number(m[4]) > SCREEN_PX).length;
+  check("controle des largeurs : detecte min-w-[480px], ignore md:", probeHits === 1);
+
+  // Coque mobile.
+  const layout = read("app/admin/layout.tsx");
+  check("coque : barre laterale masquee sous 768 px, grille seulement en md", /<div className="hidden md:block">\s*<AdminSidebar \/>/.test(layout) && /md:grid md:grid-cols-\[260px_1fr\]/.test(layout));
+  check("coque : en-tete compact, barre au pouce, cartes de tableaux", /<AdminMobileHeader \/>/.test(layout) && /<AdminMobileNav \/>/.test(layout) && /<AdminTableCards \/>/.test(layout));
+  const nav = read("components/admin/admin-nav.ts");
+  check("barre du bas : Tableau de bord, Leads, Biens, Activite commerciale", /ADMIN_THUMB_KEYS = \["dashboard", "leads", "properties", "activity"\]/.test(nav));
+  const mnav = read("components/admin/AdminMobileNav.tsx");
+  check("menu complet : groupes Pilotage, Gestion et Compte", /ADMIN_NAV_GROUPS\.map/.test(mnav) && /group_pilotage/.test(nav) && /group_gestion/.test(nav) && /group_compte/.test(nav));
+  check("barre du bas : zones de 64 px et marge de la barre d'accueil", /min-h-16/.test(mnav) && /env\(safe-area-inset-bottom\)/.test(mnav));
+  // Regles generales (feuille propre a l'admin).
+  const css = read("app/admin/admin-mobile.css");
+  check("feuille mobile : chargee seulement par l'admin", /import "\.\/admin-mobile\.css";/.test(layout) && ![...walk("app/[locale]", (x) => /\.(tsx|ts|css)$/.test(x)), ...walk("components", (x) => /\.(tsx|ts)$/.test(x) && !x.startsWith("components/admin/"))].some((f) => /admin-mobile\.css/.test(read(f))));
+  check("feuille mobile : limitee a body[data-admin] sous 768 px", /@media \(max-width: 767\.98px\)/.test(css) && !/^\s*[^@\s/*}][^{]*\{/m.test(css.replace(/body\[data-admin\][^{]*\{[^}]*\}/g, "").replace(/html:has\(> body\[data-admin\]\)[^{]*\{[^}]*\}/g, "").replace(/@media[^{]*\{/g, "").replace(/\/\*[\s\S]*?\*\//g, "")) && /<body data-admin/.test(layout));
+  check("feuille mobile : pas de defilement horizontal", /overflow-x: clip/.test(css));
+  check("feuille mobile : champs a 16 px, cibles de 44 px, texte utile a 14 px minimum", /:is\(input, select, textarea\) \{\s*font-size: 16px !important;/.test(css) && /min-height: 44px;/.test(css) && /\.text-\\\[10px\\\][^{]*\{\s*font-size: 14px !important;/.test(css));
+  check("feuille mobile : tableaux en cartes, aucune colonne coupee", /table\[data-cards\] td\[data-label\]::before/.test(css) && /white-space: normal !important;/.test(css));
+  // Leads : actions rapides.
+  const lt = read("components/admin/LeadsTable.tsx");
+  check("leads : carte avec appel, e-mail, statut et note", /function LeadCard/.test(lt) && /href=\{telHref\}/.test(lt) && /mailto:\$\{lead\.email\}/.test(lt) && /updateWorkflowStatus\(lead\.id, next\)/.test(lt) && /addAdminNote\(lead\.id, note\)/.test(lt));
+  check("leads : filtres et tri dans un panneau", /<AdminFilterPanel/.test(lt) && /\{sortControl\}/.test(lt));
+  // Fiche d'un bien.
+  const pef = read("components/admin/PropertyEditForm.tsx");
+  check("fiche d'un bien : sections repliables, enregistrement toujours accessible", /<details open data-admin-section/.test(pef) && /data-admin-sticky-save/.test(pef) && /\[data-admin-sticky-save\] \{\s*position: sticky;/.test(css));
+  const pm = read("components/admin/PhotoManager.tsx");
+  check("photos : appareil photo ou galerie", /capture="environment"/.test(pm) && /t\("photo_gallery"\)/.test(pm));
+  check("photos : reordonnancement au doigt, confirmation avant suppression", /onPointerDown=\{onHandlePointerDown\(idx\)\}/.test(pm) && /setPointerCapture/.test(pm) && /confirm\(t\("confirm_delete_photo"\)\)/.test(pm));
+  // Graphiques : trace telephone a 340 unites, texte 14.
+  check("graphiques : trace telephone lisible, sans largeur minimale", /const MOBILE: Layout = \{ W: 340, H: 0, padL: 44, padB: 36, font: 14/.test(read("components/admin/analytics/LineChart.tsx")) && !/min-w-\[480px\]/.test(read("components/admin/analytics/LineChart.tsx")));
+  // Connexion : code a 6 chiffres.
+  check("code a 6 chiffres : remplissage automatique de l'iPhone", /autoComplete="one-time-code"/.test(read("components/admin/MfaPanel.tsx")) && /inputMode="numeric"/.test(read("components/admin/MfaPanel.tsx")));
+  // Ecran d'accueil : manifeste sans donnees, jamais indexe, aucun cache hors ligne.
+  const mf = read("app/admin/manifest.webmanifest/route.ts");
+  check("ecran d'accueil : manifeste de l'admin, perimetre /admin, non indexe", /scope: "\/admin"/.test(mf) && /"x-robots-tag": "noindex, nofollow, noarchive"/.test(mf) && /manifest: "\/admin\/manifest\.webmanifest"/.test(layout) && /appleWebApp: \{ capable: true/.test(layout));
+  const sw = [...walk("app", (x) => /\.(tsx|ts|js)$/.test(x)), ...walk("components", (x) => /\.(tsx|ts|js)$/.test(x)), ...walk("public", (x) => /\.js$/.test(x))].filter((f) => /serviceWorker\.register|navigator\.serviceWorker/.test(read(f)));
+  check("ecran d'accueil : aucun service worker, rien en cache hors ligne", sw.length === 0, sw.join(", "));
+  // Site public inchange : aucune page publique prerendue ne charge la
+  // feuille mobile de l'admin.
+  if (hasBuild) {
+    const adminCss = walk(".next/static/css", (x) => x.endsWith(".css")).filter((f) => /data-admin/.test(read(f))).map((f) => path.basename(f));
+    const publicHtml = walk(".next/server/app", (x) => x.endsWith(".html") && !/[\\/]admin([\\/.]|$)/.test(x));
+    const leaks = publicHtml.filter((f) => adminCss.some((c) => read(f).includes(c)));
+    check(`site public : feuille mobile de l'admin absente de ${publicHtml.length} pages`, adminCss.length > 0 && publicHtml.length > 0 && leaks.length === 0, leaks.slice(0, 5).join(", "));
+  }
+  check("ecran d'accueil : manifeste hors du proxy, sans donnee", /\.\*\\\\\.\.\*/.test(read("proxy.ts")) && !/supabase|from\(/.test(mf));
+}
+
+// ===========================================================================
 // I. Requetes reelles en memoire (build de production)
 // ===========================================================================
 async function runtime() {

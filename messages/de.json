@@ -1711,7 +1711,10 @@
     "refresh_running": "Wird aktualisiert…",
     "refresh_ok": "Öffentliches Exposé aktualisiert ✓",
     "refresh_failed": "Aktualisierung fehlgeschlagen (Code {status}).",
-    "photos_autosaved": "Fotos gespeichert und in der Anzeige veröffentlicht."
+    "photos_autosaved": "Fotos gespeichert und in der Anzeige veröffentlicht.",
+    "photo_take": "Foto aufnehmen",
+    "photo_gallery": "Aus Galerie wählen",
+    "photo_drag": "Foto {n} verschieben"
   },
   "property_gone": {
     "title": "Diese Immobilie ist nicht mehr verfügbar",
@@ -2853,7 +2856,16 @@
     "pdf_section_request": "Anfrage",
     "pdf_received_on": "Eingegangen am",
     "pdf_rgpd_consent": "DSGVO-Einwilligung",
-    "pdf_rgpd": "DSGVO"
+    "pdf_rgpd": "DSGVO",
+    "quick_call": "Anrufen",
+    "quick_email": "E-Mail",
+    "quick_status": "Status",
+    "quick_note": "Notiz",
+    "quick_note_saved": "Notiz hinzugefügt.",
+    "quick_status_saved": "Status gespeichert.",
+    "quick_error": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "quick_details": "Nachricht und Details",
+    "quick_open": "Datensatz öffnen"
   },
   "admin_mandats": {
     "title": "Mandate",
@@ -3103,7 +3115,18 @@
     "settings": "Einstellungen",
     "account_security": "Passwort und Geräte",
     "version": "Version 1.0, {year}",
-    "header_title": "MAPA · Verwaltung"
+    "header_title": "MAPA · Verwaltung",
+    "mobile_nav": "Hauptnavigation",
+    "menu": "Menü",
+    "menu_close": "Menü schließen",
+    "card_more": "Details anzeigen",
+    "card_less": "Details ausblenden",
+    "filters_open": "Filter und Sortierung",
+    "filters_close": "Filter schließen",
+    "filters_active": "{count} aktiv",
+    "app_name": "MAPA Admin",
+    "app_name_long": "MAPA Property, Verwaltung",
+    "app_description": "Private Verwaltung von MAPA Property."
   },
   "admin_alerts": {
     "login_burst_subject": "Warnung: wiederholte fehlgeschlagene Admin-Anmeldungen",

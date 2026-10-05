@@ -198,14 +198,9 @@ export default async function AdminLeadsPage({
         <AdminNotice kind="workflow_list" />
       )}
 
-      <DateSortToggle
-        basePath="/admin/leads"
-        sort={sort}
-        params={{ tab: sp.tab, q: sp.q, type: sp.type }}
-      />
-
-      {/* Sous-onglets workflow */}
-      <nav className="flex flex-wrap items-center gap-2">
+      {/* Sous-onglets workflow : ligne defilante sur telephone (dans la
+          ligne seulement, jamais la page). */}
+      <nav className="-mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0">
         {TABS.map((t) => {
           const active = tab === t.key;
           const count = counts[t.key] ?? 0;
@@ -215,7 +210,7 @@ export default async function AdminLeadsPage({
               key={t.key}
               href={disabled ? "#" : buildTabHref(t.key)}
               aria-disabled={disabled}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
+              className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
                 active
                   ? "bg-[#3D4F63] text-[#F5EFE1]"
                   : disabled
@@ -241,6 +236,13 @@ export default async function AdminLeadsPage({
       {/* Date et heure formatees cote serveur (fuseau Europe/Luxembourg,
           libelles next-intl) puis transmises au tableau client. */}
       <LeadsTable
+        sortControl={
+          <DateSortToggle
+            basePath="/admin/leads"
+            sort={sort}
+            params={{ tab: sp.tab, q: sp.q, type: sp.type }}
+          />
+        }
         leads={
           filtered.map((l) => {
             const updated = lastModifiedAt(l);
@@ -257,8 +259,9 @@ export default async function AdminLeadsPage({
         createdColumnLabel={tDate("created_col")}
       />
 
-      {/* Vue compacte alternative : liste avec lien Voir */}
-      <section className="rounded-2xl border border-[#3D4F63]/15 bg-white">
+      {/* Vue compacte alternative : liste avec lien Voir (ordinateur ; sur
+          telephone, les cartes de LeadsTable la remplacent). */}
+      <section className="hidden rounded-2xl border border-[#3D4F63]/15 bg-white md:block">
         <header className="border-b border-[#3D4F63]/10 px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
             {t("quick_view", { count: filtered.length })}

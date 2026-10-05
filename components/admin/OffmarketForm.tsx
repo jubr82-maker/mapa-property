@@ -897,7 +897,7 @@ function CommercesTable({
   const t = useTranslations("admin_offmarket");
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table data-card-all className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
           <tr>
             <th className="px-3 py-2">{t("form.compo_name")}</th>
@@ -994,7 +994,7 @@ function BureauxTable({
   const t = useTranslations("admin_offmarket");
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table data-card-all className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
           <tr>
             <th className="px-3 py-2">{t("form.compo_floor")}</th>
@@ -1087,7 +1087,7 @@ function LogementsTable({
   const t = useTranslations("admin_offmarket");
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table data-card-all className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
           <tr>
             <th className="px-3 py-2">{t("form.compo_floor")}</th>

@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { AdminFilterPanel } from "@/components/admin/AdminFilterPanel";
 import {
   OFFMARKET_STATUSES,
   OFFMARKET_TRANSACTIONS,
@@ -24,7 +25,10 @@ export function OffmarketListFilters() {
     });
   };
 
+  const active = ["q", "status", "type", "transaction"].filter((k) => sp.get(k)).length;
+
   return (
+    <AdminFilterPanel active={active}>
     <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#3D4F63]/15 bg-white p-4">
       <input
         type="search"
@@ -70,5 +74,6 @@ export function OffmarketListFilters() {
         ))}
       </select>
     </div>
+    </AdminFilterPanel>
   );
 }

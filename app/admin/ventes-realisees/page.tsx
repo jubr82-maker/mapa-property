@@ -13,6 +13,7 @@
 //   La colonne comparable_override (migration 20260701d) est lue en
 //   best-effort : si absente, on degrade (mode auto par defaut) + banniere.
 
+import { AdminFilterPanel } from "@/components/admin/AdminFilterPanel";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
@@ -179,6 +180,7 @@ export default async function AdminVentesRealiseesPage({
           </p>
           <p className="mt-1 font-display text-3xl font-bold">{fmtEur(totalVolume)}</p>
         </div>
+        <AdminFilterPanel active={[communeFilter, agentFilter, yearFilter].filter(Boolean).length}>
         <form
           method="get"
           className="space-y-2 rounded-lg border border-[#3D4F63]/20 bg-white p-5"
@@ -222,6 +224,7 @@ export default async function AdminVentesRealiseesPage({
             {t("filters.apply")}
           </button>
         </form>
+        </AdminFilterPanel>
       </section>
 
       {/* Formulaire ajout */}
@@ -270,7 +273,7 @@ export default async function AdminVentesRealiseesPage({
         {/* Vue LISTE */}
         {!error && rows.length > 0 && vue === "liste" && (
           <div className="overflow-x-auto rounded-lg border border-[#3D4F63]/20 bg-white">
-            <table className="w-full text-sm">
+            <table data-card-primary="2" data-card-keep="1,2,4,6,10" className="w-full text-sm">
               <thead className="bg-[#3D4F63]/5 text-left">
                 <tr>
                   <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.date")}</th>

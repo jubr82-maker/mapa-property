@@ -103,7 +103,7 @@ export default async function AdminEstimationsPage({
       )}
 
       <div className="overflow-x-auto rounded-lg border border-[#3D4F63]/15 bg-white">
-        <table className="w-full text-sm">
+        <table data-card-primary="2" data-card-keep="1,2,3,7" className="w-full text-sm">
           <thead className="bg-[#F5EFE1] text-left font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/70">
             <tr>
               <th className="px-4 py-3">{tDate("created_col")}</th>

@@ -15,8 +15,9 @@
  * une fois (pas de sauvegarde partielle par section).
  */
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { ChevronDown } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { updateProperty } from "@/app/admin/properties/actions";
 import { parseDecimalInput } from "@/lib/format/numbers";
@@ -239,14 +240,19 @@ function Section({
   hint?: string;
   children: React.ReactNode;
 }) {
+  // Section repliable (oct. 2026) : ouverte par defaut ; sur telephone,
+  // l'admin ouvre seulement celle qu'il modifie. Une colonne sous 768 px.
   return (
-    <div className="rounded-xl border border-[#3D4F63]/10 bg-[#F5EFE1]/30 p-5">
-      <h3 className="font-display text-base font-bold text-[#3D4F63]">
-        {title}
-      </h3>
+    <details open data-admin-section className="group rounded-xl border border-[#3D4F63]/10 bg-[#F5EFE1]/30 p-5">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+        <h3 className="font-display text-base font-bold text-[#3D4F63]">
+          {title}
+        </h3>
+        <ChevronDown aria-hidden className="size-5 shrink-0 text-[#3D4F63] transition-transform group-open:rotate-180" />
+      </summary>
       {hint && <p className="mt-1 text-xs text-[#3D4F63]/60">{hint}</p>}
       <div className="mt-4 grid gap-4 md:grid-cols-2">{children}</div>
-    </div>
+    </details>
   );
 }
 
@@ -343,6 +349,17 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
     return parseDecimalInput(form[key]);
   }
 
+  // Telephone : seule la premiere section reste ouverte au chargement.
+  const formRef = useRef<HTMLFormElement | null>(null);
+  useEffect(() => {
+    if (!window.matchMedia("(max-width: 767.98px)").matches) return;
+    formRef.current
+      ?.querySelectorAll<HTMLDetailsElement>("details[data-admin-section]")
+      .forEach((d, i) => {
+        if (i > 0) d.open = false;
+      });
+  }, []);
+
   const onSave = (e: React.FormEvent) => {
     e.preventDefault();
     setFeedback(null);
@@ -409,9 +426,9 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
   };
 
   return (
-    <form onSubmit={onSave} className="space-y-5">
+    <form ref={formRef} onSubmit={onSave} className="space-y-5">
       {dirty && (
-        <div className="sticky top-2 z-10 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 shadow-sm">
+        <div className="sticky top-16 z-10 md:top-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 shadow-sm">
           {t("unsaved_banner")}
         </div>
       )}
@@ -669,11 +686,16 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         </Field>
       </Section>
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-[#3D4F63]/15 pt-5">
+      {/* Telephone : barre d'enregistrement collee en bas de l'ecran, au-dessus
+          de la navigation (admin-mobile.css, data-admin-sticky-save). */}
+      <div
+        data-admin-sticky-save
+        className="flex flex-wrap items-center gap-3 border-t border-[#3D4F63]/15 bg-bg pt-5 max-md:-mx-4 max-md:px-4 max-md:pb-3 max-md:pt-3 max-md:shadow-[0_-6px_16px_-10px_var(--color-ink)]"
+      >
         <button
           type="submit"
           disabled={busy}
-          className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
+          className="rounded-full bg-[#3D4F63] max-md:w-full max-md:py-3.5 px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
         >
           {busy ? t("saving") : t("save")}
         </button>

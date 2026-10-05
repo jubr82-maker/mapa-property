@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { AdminFilterPanel } from "@/components/admin/AdminFilterPanel";
 import {
   setPropertyPublished,
   setPropertyFeatured,
@@ -87,6 +88,7 @@ export function PropertiesTable({
 
   return (
     <div className="space-y-4">
+      <AdminFilterPanel active={(sp.get("q") ? 1 : 0) + (sp.get("transaction") ? 1 : 0)}>
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#3D4F63]/15 bg-white p-4">
         <input
           type="search"
@@ -105,6 +107,7 @@ export function PropertiesTable({
           <option value="rent">{t("transaction_rent")}</option>
         </select>
       </div>
+      </AdminFilterPanel>
 
     {deleted.map((d) => (
       <div
@@ -125,7 +128,10 @@ export function PropertiesTable({
     ))}
 
     <div className="overflow-x-auto rounded-2xl border border-[#3D4F63]/15 bg-white">
-      <table className="w-full text-sm">
+      {/* Telephone : carte par bien (AdminTableCards). En grand le titre ;
+          visibles la photo, le type, le prix, la mise en ligne et les
+          actions ; reference, surface et coup de coeur replies. */}
+      <table data-card-primary="3" data-card-keep="2,3,4,5,7,9" className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
           <tr>
             <th className="px-4 py-3">{t("col_reference")}</th>

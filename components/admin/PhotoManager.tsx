@@ -29,6 +29,7 @@
 
 import { useState, useTransition, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { Camera, GripVertical, ImagePlus, Trash2 } from "lucide-react";
 import { compressImageFile } from "@/lib/image-compress";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 
@@ -112,6 +113,7 @@ export function PhotoManager({
     startTransition(() => run);
   }
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
   function renormalize(list: PhotoData[]): PhotoData[] {
     return list.map((p, i) => ({ ...p, order: i, isCover: i === 0 }));
@@ -173,6 +175,7 @@ export function PhotoManager({
     setUploadProgress(null);
     setUploadErrors(failures);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
     if (added > 0) persist(photosRef.current);
   }
 
@@ -186,6 +189,46 @@ export function PhotoManager({
   function onDragOver(e: React.DragEvent<HTMLLIElement>) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+  }
+
+  // Reordonnancement au doigt (oct. 2026) : le glisser-deposer HTML5
+  // ci-dessous ne fonctionne pas au toucher sur iPhone. La poignee de chaque
+  // photo suit le doigt (evenements pointer) : la photo prend la place de
+  // celle survolee, et l'ordre est enregistre au lacher.
+  const touchDrag = useRef<{ from: number; pointerId: number } | null>(null);
+  const [touchDragging, setTouchDragging] = useState<number | null>(null);
+
+  function onHandlePointerDown(idx: number) {
+    return (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (busy || uploadProgress) return;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      touchDrag.current = { from: idx, pointerId: e.pointerId };
+      setTouchDragging(idx);
+    };
+  }
+
+  function onHandlePointerMove(e: React.PointerEvent<HTMLButtonElement>) {
+    const drag = touchDrag.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    const over = document
+      .elementFromPoint(e.clientX, e.clientY)
+      ?.closest<HTMLElement>("[data-photo-index]");
+    const target = over ? Number(over.dataset.photoIndex) : NaN;
+    if (!Number.isInteger(target) || target === drag.from) return;
+    const next = [...photosRef.current];
+    const [moved] = next.splice(drag.from, 1);
+    next.splice(target, 0, moved);
+    commit(renormalize(next));
+    drag.from = target;
+    setTouchDragging(target);
+  }
+
+  function onHandlePointerUp(e: React.PointerEvent<HTMLButtonElement>) {
+    const drag = touchDrag.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    touchDrag.current = null;
+    setTouchDragging(null);
+    persist(photosRef.current);
   }
 
   function onDrop(targetIdx: number) {
@@ -245,7 +288,38 @@ export function PhotoManager({
 
   return (
     <div className="space-y-4">
-      <label className="block rounded-xl border-2 border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-6 text-center hover:border-[#e0af6e]">
+      {/* Telephone : appareil photo ou galerie, deux gros boutons. */}
+      <div className="grid grid-cols-2 gap-3 md:hidden">
+        <label className="flex min-h-14 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl bg-ink px-3 py-3 text-center text-base font-semibold text-bg">
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => handleFiles(e.target.files)}
+            className="sr-only"
+          />
+          <Camera className="size-6" aria-hidden />
+          {t("photo_take")}
+        </label>
+        <label className="flex min-h-14 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-ink/30 bg-bg px-3 py-3 text-center text-base font-semibold text-ink">
+          <input
+            type="file"
+            multiple
+            accept={ACCEPT_ATTRIBUTE}
+            onChange={(e) => handleFiles(e.target.files)}
+            className="sr-only"
+          />
+          <ImagePlus className="size-6" aria-hidden />
+          {t("photo_gallery")}
+        </label>
+      </div>
+      {uploadProgress && (
+        <p className="text-base font-semibold text-ink md:hidden" role="status">
+          {t("upload_progress", { done: uploadProgress.done, total: uploadProgress.total })}
+        </p>
+      )}
+      <label className="hidden rounded-xl border-2 border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-6 text-center hover:border-[#e0af6e] md:block">
         <input
           ref={fileInputRef}
           type="file"
@@ -286,11 +360,14 @@ export function PhotoManager({
           {photos.map((p, idx) => (
             <li
               key={p.path}
+              data-photo-index={idx}
               draggable
               onDragStart={onDragStart(idx)}
               onDragOver={onDragOver}
               onDrop={onDrop(idx)}
-              className="group relative overflow-hidden rounded-xl border border-[#3D4F63]/15 bg-white"
+              className={`group relative overflow-hidden rounded-xl border bg-white ${
+                touchDragging === idx ? "border-ink ring-2 ring-ink" : "border-[#3D4F63]/15"
+              }`}
             >
               <div className="relative aspect-square">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -308,6 +385,18 @@ export function PhotoManager({
                 <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
                   #{idx + 1}
                 </span>
+                {/* Poignee de deplacement au doigt (telephone et tablette). */}
+                <button
+                  type="button"
+                  aria-label={t("photo_drag", { n: idx + 1 })}
+                  onPointerDown={onHandlePointerDown(idx)}
+                  onPointerMove={onHandlePointerMove}
+                  onPointerUp={onHandlePointerUp}
+                  onPointerCancel={onHandlePointerUp}
+                  className="absolute bottom-2 right-2 inline-flex size-11 touch-none items-center justify-center rounded-full bg-black/60 text-white md:hidden"
+                >
+                  <GripVertical className="size-5" aria-hidden />
+                </button>
               </div>
               <div className="flex items-center justify-between gap-2 px-2 py-2 text-[10px] uppercase tracking-[0.15em]">
                 <button
@@ -331,7 +420,7 @@ export function PhotoManager({
                   title={t("delete_photo_title")}
                   aria-label={t("delete_photo_title")}
                 >
-                  ✕
+                  <Trash2 className="size-4" aria-hidden />
                 </button>
               </div>
             </li>

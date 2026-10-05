@@ -8,10 +8,14 @@ import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 import "../globals.css";
+import "./admin-mobile.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { AdminIdleWatcher } from "@/components/admin/AdminIdleWatcher";
+import { AdminMobileHeader, AdminMobileNav } from "@/components/admin/AdminMobileNav";
+import { AdminTableCards } from "@/components/admin/AdminTableCards";
+import type { Viewport } from "next";
 
 // Tous les namespaces admin (prefixe admin_), pour les composants clients.
 
@@ -43,8 +47,25 @@ const mono = JetBrains_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_nav" });
-  return { ...staticMetadata, title: t("header_title") };
+  return {
+    ...staticMetadata,
+    title: t("header_title"),
+    // Ajout a l'ecran d'accueil (oct. 2026) : manifeste propre a l'admin
+    // (app/admin/manifest.webmanifest), icone et nom ; aucun service worker,
+    // donc rien n'est mis en cache hors ligne.
+    manifest: "/admin/manifest.webmanifest",
+    appleWebApp: { capable: true, title: t("app_name"), statusBarStyle: "default" },
+    icons: { apple: "/apple-touch-icon.png" },
+  };
 }
+
+// Telephone : largeur de l'appareil, zoom manuel autorise, contenu sous
+// l'encoche gere par les marges de securite (env(safe-area-inset-*)).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 const staticMetadata: Metadata = {
   robots: { index: false, follow: false },
@@ -57,7 +78,7 @@ export default async function AdminLayout({
 }) {
   return (
     <html lang="fr" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
-      <body className="min-h-dvh bg-bg text-ink antialiased">
+      <body data-admin className="min-h-dvh bg-bg text-ink antialiased">
         {/* Libelles next-intl de l'admin (langue de l'admin, ADMIN_LOCALE). */}
         <NextIntlClientProvider locale={ADMIN_LOCALE} messages={await adminMessages()}>
           <AdminShell>{children}</AdminShell>
@@ -86,14 +107,23 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
     : { data: null };
   const tNav = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_nav" });
   if (!user || aal?.currentLevel !== "aal2") {
-    return <main className="flex min-h-dvh items-center justify-center px-6">{children}</main>;
+    return (
+      <main data-admin-auth className="flex min-h-dvh items-center justify-center px-4 py-8 sm:px-6">
+        {children}
+      </main>
+    );
   }
 
   return (
-    <div className="grid min-h-dvh grid-cols-[260px_1fr] bg-bg">
-      <AdminSidebar />
-      <div className="flex min-h-dvh flex-col">
-        <header className="flex items-center justify-between border-b border-gold bg-ink px-8 py-4 text-bg">
+    <div className="min-h-dvh bg-bg md:grid md:grid-cols-[260px_1fr]">
+      {/* Ordinateur : barre laterale. Telephone : en-tete compact et barre
+          au pouce (AdminMobileNav). */}
+      <div className="hidden md:block">
+        <AdminSidebar />
+      </div>
+      <div className="flex min-h-dvh min-w-0 flex-col">
+        <AdminMobileHeader />
+        <header className="hidden items-center justify-between border-b border-gold bg-ink px-8 py-4 text-bg md:flex">
           <Link href="/admin" className="flex items-center gap-3">
             <span className="font-display text-xl font-bold uppercase tracking-[0.15em]">
               {tNav("header_title")}
@@ -106,7 +136,14 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
             <AdminLogoutButton />
           </div>
         </header>
-        <main className="flex-1 px-8 py-10">{children}</main>
+        <main
+          data-admin-main
+          className="min-w-0 flex-1 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-5 md:px-8 md:py-10"
+        >
+          {children}
+        </main>
+        <AdminMobileNav />
+        <AdminTableCards />
         <AdminIdleWatcher />
       </div>
     </div>
