@@ -32,6 +32,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PROPERTIES_LIST_TAG } from "@/lib/data";
 import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
+import { assertAdminAction } from "@/lib/admin/require-admin";
 
 const BUCKET = "property-images";
 
@@ -57,6 +58,8 @@ export async function uploadPropertyPhoto(
   propertyId: string,
   formData: FormData,
 ): Promise<UploadPhotoResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const file = formData.get("file");
   if (!(file instanceof File)) {
     return { ok: false, error: "Aucun fichier reçu." };
@@ -124,6 +127,8 @@ export async function savePropertyPhotos(
   propertyId: string,
   photos: PhotoData[],
 ): Promise<ActionResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   try {
     const supabase = await createSupabaseServerClient();
     // Sprint OPTIM-1A : fetch slug pour invalidation ciblee fiche SSG (C2).
@@ -201,6 +206,8 @@ export async function deletePropertyPhoto(
   _propertyId: string,
   path: string,
 ): Promise<ActionResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   try {
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.storage.from(BUCKET).remove([path]);

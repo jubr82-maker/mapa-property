@@ -21,6 +21,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 const ALLOWED_PREFIXES = ["/fr/", "/en/", "/de/"];
 
@@ -45,6 +46,10 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
+    // Oct. 2026 : connecte ne suffit pas. Compte de la liste admin ET
+    // session aal2 (double authentification), comme le reste de l'admin.
+    const adminCheck = await requireAdminRoute();
+    if (!adminCheck.ok) return adminCheck.response;
   }
 
   // ---- Body : accepte { path } (legacy) ou { paths: string[] }.

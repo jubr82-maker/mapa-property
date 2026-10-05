@@ -12,6 +12,7 @@ import {
   TRANSACTION_TYPES,
   transactionToBase,
 } from "@/lib/taxonomy/property-types";
+import { assertAdminAction } from "@/lib/admin/require-admin";
 
 /**
  * Sprint OPTIM-1A : helper de lecture du slug d'un bien par id. Utilise
@@ -39,6 +40,8 @@ async function fetchPropertySlug(
 }
 
 export async function setPropertyPublished(id: string, isPublished: boolean) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const slug = await fetchPropertySlug(supabase, id);
   const { error } = await supabase
@@ -54,6 +57,8 @@ export async function setPropertyPublished(id: string, isPublished: boolean) {
 }
 
 export async function setPropertyFeatured(id: string, isFeatured: boolean) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const slug = await fetchPropertySlug(supabase, id);
   const { error } = await supabase
@@ -181,6 +186,8 @@ export async function updateProperty(
     badge_position?: string | null;
   },
 ): Promise<UpdatePropertyResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const update: Record<string, unknown> = {};
 
@@ -312,6 +319,8 @@ export async function updatePropertyVideoUrl(
   propertyId: string,
   videoUrl: string | null,
 ) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const normalized =
     typeof videoUrl === "string" && videoUrl.trim().length > 0
@@ -402,6 +411,8 @@ async function generateUniquePropertySlug(
 export async function createProperty(
   formData: FormData,
 ): Promise<PropertyActionResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -536,6 +547,8 @@ async function readLifecycleRow(
 }
 
 export async function archiveProperty(id: string): Promise<PropertyLifecycleResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { row, error } = await readLifecycleRow(supabase, id);
   if (error || !row) return { ok: false, error: error ?? "not_found" };
@@ -549,6 +562,8 @@ export async function archiveProperty(id: string): Promise<PropertyLifecycleResu
 }
 
 export async function restoreProperty(id: string): Promise<PropertyLifecycleResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { row, error } = await readLifecycleRow(supabase, id);
   if (error || !row) return { ok: false, error: error ?? "not_found" };
@@ -577,6 +592,8 @@ export async function deleteProperty(
   id: string,
   typedReference: string,
 ): Promise<PropertyLifecycleResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { row, error } = await readLifecycleRow(supabase, id);
   if (error || !row) return { ok: false, error: error ?? "not_found" };
@@ -601,6 +618,8 @@ export async function deleteProperty(
  * photos hebergees ailleurs (media.apimo.pro) ne sont pas touchees.
  */
 export async function purgePropertyMedia(id: string): Promise<PropertyLifecycleResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { row, error } = await readLifecycleRow(supabase, id);
   if (error || !row) return { ok: false, error: error ?? "not_found" };

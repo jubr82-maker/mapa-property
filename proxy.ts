@@ -4,15 +4,16 @@ import { createServerClient } from "@supabase/ssr";
 import { routing } from "./i18n/routing";
 import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { getArchivedPropertyKeys } from "@/lib/archived-properties";
+import {
+  ADMIN_ACTIVITY_COOKIE,
+  ADMIN_IDLE_TIMEOUT_MINUTES,
+  ADMIN_MFA_PATH,
+  ADMIN_PUBLIC_PATHS,
+} from "@/lib/admin/security-config";
+import { logAdminAuthEvent } from "@/lib/admin/auth-log";
 
 const intlMiddleware = createMiddleware(routing);
 
-const ADMIN_PUBLIC_PATHS = new Set([
-  "/admin/login",
-  "/admin/auth/callback",
-  "/admin/forgot-password",
-  "/admin/reset-password",
-]);
 
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -54,23 +55,76 @@ export default async function middleware(request: NextRequest) {
     }
 
     const isPublicAdminPath = ADMIN_PUBLIC_PATHS.has(pathname);
+    const isMfaPath = pathname === ADMIN_MFA_PATH;
 
     // Anti-cache : aucune réponse admin (200, 307, redirect) ne doit
     // être cachée par le CDN Vercel — sinon une 307 émise pour un user
     // non-auth peut être resservie à un user auth (et inversement).
+    // Oct. 2026 : interdiction d'indexation sur toute reponse admin.
     const noStore = (res: NextResponse) => {
       res.headers.set("cache-control", "private, no-store, max-age=0, must-revalidate");
+      res.headers.set("x-robots-tag", "noindex, nofollow, noarchive");
       return res;
     };
+    // Redirection qui conserve les cookies poses par Supabase (session
+    // rafraichie ou effacee) sur la reponse courante.
+    const redirectTo = (path: string, params?: Record<string, string>) => {
+      const url = new URL(path, request.url);
+      for (const [k, v] of Object.entries(params ?? {})) url.searchParams.set(k, v);
+      const res = NextResponse.redirect(url);
+      response.cookies.getAll().forEach((c) => res.cookies.set(c));
+      return noStore(res);
+    };
 
-    if (!isAllowedAdmin && !isPublicAdminPath) {
-      const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("from", pathname);
-      return noStore(NextResponse.redirect(loginUrl));
+    // Double authentification obligatoire : niveau de la session validee.
+    let aal2 = false;
+    if (isAllowedAdmin) {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      aal2 = aal?.currentLevel === "aal2";
     }
 
-    if (isAllowedAdmin && pathname === "/admin/login") {
-      return noStore(NextResponse.redirect(new URL("/admin", request.url)));
+    // Deconnexion apres ADMIN_IDLE_TIMEOUT_MINUTES sans requete admin.
+    if (isAllowedAdmin) {
+      const last = Number(request.cookies.get(ADMIN_ACTIVITY_COOKIE)?.value ?? 0);
+      const idleMs = ADMIN_IDLE_TIMEOUT_MINUTES * 60_000;
+      if (last && Date.now() - last > idleMs) {
+        await supabase.auth.signOut();
+        await logAdminAuthEvent({
+          event: "idle_logout",
+          success: true,
+          email: user?.email,
+          ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+          userAgent: request.headers.get("user-agent"),
+        });
+        const res = redirectTo("/admin/login", { reason: "idle" });
+        res.cookies.delete(ADMIN_ACTIVITY_COOKIE);
+        return res;
+      }
+      response.cookies.set(ADMIN_ACTIVITY_COOKIE, String(Date.now()), {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/admin",
+        maxAge: ADMIN_IDLE_TIMEOUT_MINUTES * 60 * 2,
+      });
+    }
+
+    if (!isAllowedAdmin && !isPublicAdminPath) {
+      return redirectTo("/admin/login", { from: pathname });
+    }
+
+    // Admin connecte par mot de passe seulement (aal1) : uniquement la page
+    // d'inscription / verification du second facteur, et les pages publiques
+    // de reinitialisation du mot de passe.
+    if (isAllowedAdmin && !aal2 && !isMfaPath && !isPublicAdminPath) {
+      return redirectTo(ADMIN_MFA_PATH, { from: pathname });
+    }
+    if (isAllowedAdmin && !aal2 && pathname === "/admin/login") {
+      return redirectTo(ADMIN_MFA_PATH);
+    }
+
+    if (isAllowedAdmin && aal2 && (pathname === "/admin/login" || isMfaPath)) {
+      return redirectTo("/admin");
     }
 
     return noStore(response);

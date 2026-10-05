@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SITE_DESIGN_TOKENS_TAG } from "@/lib/site-content";
+import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 /**
  * PATCH /api/admin/cms/tokens
@@ -31,6 +32,10 @@ async function handle(req: Request) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Oct. 2026 : connecte ne suffit pas. Compte de la liste admin ET
+  // session aal2 (double authentification), comme le reste de l'admin.
+  const adminCheck = await requireAdminRoute();
+  if (!adminCheck.ok) return adminCheck.response;
 
   let body: unknown;
   try {

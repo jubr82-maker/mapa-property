@@ -2,8 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { assertAdminAction } from "@/lib/admin/require-admin";
 
 export async function uploadDocument(formData: FormData) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const file = formData.get("file") as File | null;
   const title = String(formData.get("title") ?? "").trim();
@@ -34,6 +37,8 @@ export async function uploadDocument(formData: FormData) {
 }
 
 export async function toggleDocumentPublic(id: string, isPublic: boolean) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from("documents")
@@ -44,6 +49,8 @@ export async function toggleDocumentPublic(id: string, isPublic: boolean) {
 }
 
 export async function deleteDocument(id: string) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from("documents").delete().eq("id", id);
   if (error) throw new Error(error.message);

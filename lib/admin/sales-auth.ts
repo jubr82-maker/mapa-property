@@ -47,6 +47,11 @@ export async function requireSalesAdmin(): Promise<RequireOk | RequireErr> {
   if (!user.email || !SALES_ALLOWED_EMAILS.has(user.email)) {
     return { ok: false, response: NextResponse.json({ error: "forbidden" }, { status: 403 }) };
   }
+  // Oct. 2026 : double authentification obligatoire (session aal2).
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== "aal2") {
+    return { ok: false, response: NextResponse.json({ error: "mfa_required" }, { status: 403 }) };
+  }
   return { ok: true, supabase, userEmail: user.email };
 }
 

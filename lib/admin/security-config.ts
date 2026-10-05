@@ -1,0 +1,39 @@
+// Parametres de securite de l'admin (oct. 2026), source unique. Aucun
+// import serveur : utilisable par le proxy, les pages et les composants.
+
+/** Longueur minimale des mots de passe admin (changement et reinitialisation). */
+export const ADMIN_PASSWORD_MIN_LENGTH = 14;
+
+/**
+ * Deconnexion automatique apres 30 minutes sans activite dans l'admin.
+ * Justification : l'admin donne acces aux donnees personnelles des
+ * prospects et aux biens ; 30 minutes est la duree d'inactivite maximale
+ * retenue par l'OWASP ASVS (niveau 2) pour une application sensible
+ * (SUPPOSE, reference a reverifier), et laisse le temps de rediger une
+ * fiche sans etre interrompu.
+ */
+export const ADMIN_IDLE_TIMEOUT_MINUTES = 30;
+
+/** Cookie d'activite (horodatage de la derniere requete admin). */
+export const ADMIN_ACTIVITY_COOKIE = "mapa_admin_activity";
+
+/** Page d'inscription ou de verification du second facteur. */
+export const ADMIN_MFA_PATH = "/admin/mfa";
+
+/** Pages admin accessibles sans session admin complete. */
+export const ADMIN_PUBLIC_PATHS: ReadonlySet<string> = new Set([
+  "/admin/login",
+  "/admin/auth/callback",
+  "/admin/forgot-password",
+  "/admin/reset-password",
+]);
+
+/**
+ * Destination interne sure apres connexion : uniquement un chemin /admin
+ * relatif (empeche toute redirection ouverte vers un site externe).
+ */
+export function safeAdminRedirect(target: string | null | undefined, fallback = "/admin"): string {
+  if (!target || !target.startsWith("/admin") || target.startsWith("//")) return fallback;
+  if (target.includes("\\") || /[\r\n]/.test(target)) return fallback;
+  return target;
+}

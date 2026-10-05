@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { assertAdminAction } from "@/lib/admin/require-admin";
 
 function slugify(s: string): string {
   return s
@@ -38,6 +39,8 @@ function buildPostPayload(formData: FormData) {
 }
 
 export async function createBlogPost(formData: FormData) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("blog_posts")
@@ -50,6 +53,8 @@ export async function createBlogPost(formData: FormData) {
 }
 
 export async function updateBlogPost(id: string, formData: FormData) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from("blog_posts")
@@ -61,6 +66,8 @@ export async function updateBlogPost(id: string, formData: FormData) {
 }
 
 export async function deleteBlogPost(id: string) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from("blog_posts").delete().eq("id", id);
   if (error) throw new Error(error.message);

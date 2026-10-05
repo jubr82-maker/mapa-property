@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 export default function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; error?: string }>;
+  searchParams: Promise<{ from?: string; error?: string; reason?: string }>;
 }) {
   return (
     <div className="w-full max-w-md rounded-2xl border border-[#3D4F63]/20 bg-white p-10 shadow-xl shadow-[#3D4F63]/10">

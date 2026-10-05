@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SITE_CONTENT_TAG, SITE_DESIGN_TOKENS_TAG } from "@/lib/site-content";
+import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 /**
  * POST /api/admin/cms/revalidate
@@ -24,6 +25,10 @@ export async function POST() {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Oct. 2026 : connecte ne suffit pas. Compte de la liste admin ET
+  // session aal2 (double authentification), comme le reste de l'admin.
+  const adminCheck = await requireAdminRoute();
+  if (!adminCheck.ok) return adminCheck.response;
 
   // Next 16 : revalidateTag exige un 2e arg `profile`. `{ expire: 0 }`
   // = invalidation immédiate (équivalent ancienne signature 1-arg).

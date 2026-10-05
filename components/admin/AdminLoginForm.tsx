@@ -1,117 +1,73 @@
 "use client";
 
+// Connexion admin, etape 1 (oct. 2026) : e-mail + mot de passe + Turnstile,
+// verifies cote serveur (loginAction, journalise). L'etape 2, second facteur
+// obligatoire, se fait sur /admin/mfa (inscription ou verification).
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use, useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase-ssr";
-import { TwoFactorPrompt } from "@/components/admin/TwoFactorPrompt";
+import { use, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Turnstile, type TurnstileHandle } from "@/components/ui/Turnstile";
+import { loginAction } from "@/app/admin/auth-actions";
+import { ADMIN_IDLE_TIMEOUT_MINUTES, ADMIN_MFA_PATH, safeAdminRedirect } from "@/lib/admin/security-config";
+import { authButtonCls, authErrorCls, authInputCls, authLabelCls, authLinkCls, authOkCls } from "@/components/admin/auth-ui";
 
 export function AdminLoginForm({
   searchParamsPromise,
 }: {
-  searchParamsPromise: Promise<{ from?: string; error?: string }>;
+  searchParamsPromise: Promise<{ from?: string; error?: string; reason?: string }>;
 }) {
   const searchParams = use(searchParamsPromise);
-  const from = searchParams.from ?? "/admin";
+  const t = useTranslations("admin_security");
   const router = useRouter();
+  const from = safeAdminRedirect(searchParams.from);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [mfaRequired, setMfaRequired] = useState(false);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setBusy(true);
-    const supabase = createSupabaseBrowserClient();
-    const { error: err } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (err) {
-      setError(err.message);
-      setBusy(false);
+    const res = await loginAction({ email, password, captchaToken });
+    setBusy(false);
+    if (!res.ok) {
+      setError(res.error === "captcha" ? t("captcha_error") : t("login_error"));
+      setPassword("");
+      turnstileRef.current?.reset();
+      setCaptchaToken("");
       return;
     }
-    // Vérifier si un facteur 2FA est requis avant l'accès admin.
-    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (aal?.nextLevel === "aal2" && aal.nextLevel !== aal.currentLevel) {
-      setMfaRequired(true);
-      setBusy(false);
-      return;
-    }
-    router.replace(from);
+    router.replace(`${ADMIN_MFA_PATH}?from=${encodeURIComponent(from)}`);
     router.refresh();
   };
 
-  if (mfaRequired) {
-    return (
-      <TwoFactorPrompt
-        onSuccess={() => {
-          router.replace(from);
-          router.refresh();
-        }}
-      />
-    );
-  }
-
   return (
     <form onSubmit={submit} className="space-y-4">
-      <div>
-        <label
-          htmlFor="email"
-          className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70"
-        >
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="password"
-          className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70"
-        >
-          Mot de passe
-        </label>
-        <input
-          id="password"
-          type="password"
-          required
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none"
-        />
-      </div>
-      {error && (
-        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
+      {searchParams.reason === "idle" && (
+        <p className={authOkCls}>{t("idle_notice", { minutes: ADMIN_IDLE_TIMEOUT_MINUTES })}</p>
       )}
-      <button
-        type="submit"
-        disabled={busy}
-        className="w-full rounded-md bg-[#3D4F63] px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
-      >
-        {busy ? "Connexion…" : "Se connecter"}
-      </button>
-      <div className="text-center">
-        <Link
-          href="/admin/forgot-password"
-          className="font-mono text-xs uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
-        >
-          Mot de passe oublié ?
-        </Link>
+      <div>
+        <label htmlFor="email" className={authLabelCls}>{t("email")}</label>
+        <input id="email" type="email" required autoComplete="username" value={email}
+          onChange={(e) => setEmail(e.target.value)} className={authInputCls} />
       </div>
+      <div>
+        <label htmlFor="password" className={authLabelCls}>{t("password")}</label>
+        <input id="password" type="password" required autoComplete="current-password" value={password}
+          onChange={(e) => setPassword(e.target.value)} className={authInputCls} />
+      </div>
+      <Turnstile ref={turnstileRef} onToken={setCaptchaToken} />
+      {error && <p role="alert" className={authErrorCls}>{error}</p>}
+      <button type="submit" disabled={busy} className={authButtonCls}>
+        {busy ? t("submitting") : t("login_submit")}
+      </button>
+      <p className="text-center">
+        <Link href="/admin/forgot-password" className={authLinkCls}>{t("forgot_link")}</Link>
+      </p>
     </form>
   );
 }

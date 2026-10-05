@@ -1,28 +1,35 @@
 "use client";
 
+// Mot de passe oublie (oct. 2026) : Turnstile + action serveur. Le lien
+// n'est envoye qu'aux adresses de la liste admin ; reponse identique dans
+// tous les cas (n'indique pas si un compte existe).
 import Link from "next/link";
-import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase-ssr";
+import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Turnstile, type TurnstileHandle } from "@/components/ui/Turnstile";
+import { forgotPasswordAction } from "@/app/admin/auth-actions";
+import { authButtonCls, authErrorCls, authInputCls, authLabelCls, authLinkCls, authOkCls } from "@/components/admin/auth-ui";
 
 export function ForgotPasswordForm() {
+  const t = useTranslations("admin_security");
   const [email, setEmail] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setBusy(true);
-    const supabase = createSupabaseBrowserClient();
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/admin/reset-password`,
-    });
+    const res = await forgotPasswordAction({ email, captchaToken });
     setBusy(false);
-    if (err) {
-      // On affiche un succès générique côté UI pour ne pas leaker l'existence
-      // d'un compte. Mais on garde l'erreur en console pour debug admin.
-      console.error("[forgot-password]", err);
+    if (!res.ok) {
+      setError(t("captcha_error"));
+      turnstileRef.current?.reset();
+      setCaptchaToken("");
+      return;
     }
     setSent(true);
   };
@@ -30,59 +37,26 @@ export function ForgotPasswordForm() {
   if (sent) {
     return (
       <div className="space-y-4">
-        <p className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Si cet email existe, un lien de récupération vient d&apos;être envoyé.
-          Vérifiez votre boîte de réception (et les spams).
-        </p>
-        <Link
-          href="/admin/login"
-          className="inline-block font-mono text-xs uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
-        >
-          ← Retour à la connexion
-        </Link>
+        <p className={authOkCls}>{t("forgot_sent")}</p>
+        <Link href="/admin/login" className={authLinkCls}>{t("back_to_login")}</Link>
       </div>
     );
   }
-
   return (
     <form onSubmit={submit} className="space-y-4">
       <div>
-        <label
-          htmlFor="email"
-          className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70"
-        >
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
-        />
+        <label htmlFor="email" className={authLabelCls}>{t("email")}</label>
+        <input id="email" type="email" required autoComplete="email" value={email}
+          onChange={(e) => setEmail(e.target.value)} className={authInputCls} />
       </div>
-      {error && (
-        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={busy}
-        className="w-full rounded-md bg-[#3D4F63] px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
-      >
-        {busy ? "Envoi…" : "Envoyer le lien de récupération"}
+      <Turnstile ref={turnstileRef} onToken={setCaptchaToken} />
+      {error && <p role="alert" className={authErrorCls}>{error}</p>}
+      <button type="submit" disabled={busy} className={authButtonCls}>
+        {busy ? t("submitting") : t("forgot_submit")}
       </button>
-      <div className="text-center">
-        <Link
-          href="/admin/login"
-          className="font-mono text-xs uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
-        >
-          ← Retour à la connexion
-        </Link>
-      </div>
+      <p className="text-center">
+        <Link href="/admin/login" className={authLinkCls}>{t("back_to_login")}</Link>
+      </p>
     </form>
   );
 }

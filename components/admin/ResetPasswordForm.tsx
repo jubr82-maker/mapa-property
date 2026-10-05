@@ -1,88 +1,73 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+// Nouveau mot de passe apres le lien e-mail (oct. 2026). Si le compte a un
+// second facteur, son code est demande d'abord (session aal2), puis le
+// mot de passe (14 caracteres minimum), puis reconnexion complete.
+import Link from "next/link";
 import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase-ssr";
+import { useTranslations } from "next-intl";
+import { resetPasswordAction, type FactorSummary } from "@/app/admin/auth-actions";
+import { MfaVerify } from "@/components/admin/MfaPanel";
+import { ADMIN_PASSWORD_MIN_LENGTH } from "@/lib/admin/security-config";
+import { authButtonCls, authErrorCls, authInputCls, authLabelCls, authLinkCls, authOkCls } from "@/components/admin/auth-ui";
 
-export function ResetPasswordForm() {
-  const router = useRouter();
+export function ResetPasswordForm({ needsMfa, factors }: { needsMfa: boolean; factors: FactorSummary[] }) {
+  const t = useTranslations("admin_security");
+  const [mfaDone, setMfaDone] = useState(!needsMfa);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  if (!mfaDone) return <MfaVerify factors={factors} onSuccess={() => setMfaDone(true)} />;
+  if (done) {
+    return (
+      <div className="space-y-4">
+        <p className={authOkCls}>{t("reset_done")}</p>
+        <Link href="/admin/login" className={authLinkCls}>{t("back_to_login")}</Link>
+      </div>
+    );
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password.length < 8) {
-      setError("Le mot de passe doit faire au moins 8 caractères.");
-      return;
-    }
-    if (password !== confirm) {
-      setError("Les mots de passe ne correspondent pas.");
-      return;
-    }
+    if (password.length < ADMIN_PASSWORD_MIN_LENGTH) return setError(t("too_short", { min: ADMIN_PASSWORD_MIN_LENGTH }));
+    if (password !== confirm) return setError(t("mismatch"));
     setBusy(true);
-    const supabase = createSupabaseBrowserClient();
-    const { error: err } = await supabase.auth.updateUser({ password });
+    const res = await resetPasswordAction({ next: password, confirm });
     setBusy(false);
-    if (err) {
-      setError(err.message);
+    if (!res.ok) {
+      setError(
+        res.error === "too_short"
+          ? t("too_short", { min: ADMIN_PASSWORD_MIN_LENGTH })
+          : res.error === "mismatch"
+            ? t("mismatch")
+            : res.error === "invalid_link"
+              ? t("reset_invalid_link")
+              : t("update_error", { message: res.error }),
+      );
       return;
     }
-    router.replace("/admin?reset=1");
-    router.refresh();
+    setDone(true);
   };
 
   return (
     <form onSubmit={submit} className="space-y-4">
       <div>
-        <label
-          htmlFor="password"
-          className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70"
-        >
-          Nouveau mot de passe
-        </label>
-        <input
-          id="password"
-          type="password"
-          required
-          minLength={8}
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
-        />
+        <label htmlFor="password" className={authLabelCls}>{t("new_password")}</label>
+        <input id="password" type="password" required minLength={ADMIN_PASSWORD_MIN_LENGTH} autoComplete="new-password"
+          value={password} onChange={(e) => setPassword(e.target.value)} className={authInputCls} />
       </div>
       <div>
-        <label
-          htmlFor="confirm"
-          className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70"
-        >
-          Confirmer
-        </label>
-        <input
-          id="confirm"
-          type="password"
-          required
-          minLength={8}
-          autoComplete="new-password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
-        />
+        <label htmlFor="confirm" className={authLabelCls}>{t("confirm_password")}</label>
+        <input id="confirm" type="password" required minLength={ADMIN_PASSWORD_MIN_LENGTH} autoComplete="new-password"
+          value={confirm} onChange={(e) => setConfirm(e.target.value)} className={authInputCls} />
       </div>
-      {error && (
-        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={busy}
-        className="w-full rounded-md bg-[#3D4F63] px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
-      >
-        {busy ? "Enregistrement…" : "Définir le mot de passe"}
+      {error && <p role="alert" className={authErrorCls}>{error}</p>}
+      <button type="submit" disabled={busy} className={authButtonCls}>
+        {busy ? t("submitting") : t("reset_submit")}
       </button>
     </form>
   );

@@ -22,6 +22,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { uploadToR2, isR2Configured } from "@/lib/r2";
+import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 const ALLOWED_CONTENT_TYPES = new Set([
   "video/mp4",
@@ -40,6 +41,10 @@ export async function POST(req: Request) {
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+  // Oct. 2026 : connecte ne suffit pas. Compte de la liste admin ET
+  // session aal2 (double authentification), comme le reste de l'admin.
+  const adminCheck = await requireAdminRoute();
+  if (!adminCheck.ok) return adminCheck.response;
 
   // 2. Verifier que R2 est configure cote serveur.
   if (!isR2Configured()) {

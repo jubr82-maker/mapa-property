@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
+  ShieldCheck,
   LayoutDashboard,
   Lock,
   Mail,
@@ -40,9 +42,11 @@ const items = [
   { href: "/admin/properties", label: "Properties (Apimo)", icon: Building2, match: "prefix" as const },
   { href: "/admin/contenu", label: "Contenu", icon: LayoutTemplate, match: "prefix" as const },
   { href: "/admin/settings", label: "Paramètres", icon: Settings, match: "prefix" as const },
+  { href: "/admin/securite", label: "", labelKey: "nav_security", icon: ShieldCheck, match: "prefix" as const },
 ];
 
 export function AdminSidebar() {
+  const tSecurity = useTranslations("admin_security");
   const pathname = usePathname();
   return (
     <aside className="flex min-h-dvh flex-col border-r border-ink/10 bg-bg py-6">
@@ -71,7 +75,7 @@ export function AdminSidebar() {
                   }`}
                 >
                   <Icon className="size-4" />
-                  {item.label}
+                  {"labelKey" in item && item.labelKey ? tSecurity(item.labelKey) : item.label}
                 </Link>
               </li>
             );

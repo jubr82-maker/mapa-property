@@ -14,6 +14,7 @@ import {
 } from "@/lib/admin/offmarket";
 import { translateBatch } from "@/lib/translate";
 import { formatPrice as formatPriceShared, parseDecimalInput } from "@/lib/format/numbers";
+import { assertAdminAction } from "@/lib/admin/require-admin";
 
 // Colonnes potentiellement absentes selon l'état d'application des migrations.
 // Si Postgres remonte "column does not exist" sur l'une d'elles, on la retire
@@ -492,6 +493,8 @@ async function audit(
 }
 
 export async function createOffmarket(formData: FormData): Promise<ActionResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -540,6 +543,8 @@ export async function createOffmarket(formData: FormData): Promise<ActionResult>
 }
 
 export async function updateOffmarket(id: string, formData: FormData): Promise<ActionResult> {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -633,6 +638,8 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
 }
 
 export async function deleteOffmarket(id: string) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from("properties_offmarket")
@@ -648,6 +655,8 @@ export async function deleteOffmarket(id: string) {
 }
 
 export async function duplicateOffmarket(id: string) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { data: source, error: fetchErr } = await supabase
     .from("properties_offmarket")

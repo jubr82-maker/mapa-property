@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { assertAdminAction } from "@/lib/admin/require-admin";
 
 function buildReviewPayload(formData: FormData) {
   return {
@@ -16,6 +17,8 @@ function buildReviewPayload(formData: FormData) {
 }
 
 export async function createReview(formData: FormData) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("reviews")
@@ -29,6 +32,8 @@ export async function createReview(formData: FormData) {
 }
 
 export async function updateReview(id: string, formData: FormData) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from("reviews")
@@ -40,6 +45,8 @@ export async function updateReview(id: string, formData: FormData) {
 }
 
 export async function deleteReview(id: string) {
+  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
+  await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from("reviews").delete().eq("id", id);
   if (error) throw new Error(error.message);

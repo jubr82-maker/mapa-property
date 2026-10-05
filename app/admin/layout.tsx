@@ -7,6 +7,17 @@ import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 import "../globals.css";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
+import { AdminIdleWatcher } from "@/components/admin/AdminIdleWatcher";
+
+const ADMIN_NAMESPACES = ["admin_security", "admin_datetime", "admin_properties"] as const;
+
+async function adminMessages() {
+  const all = (await getMessages({ locale: ADMIN_LOCALE })) as Record<string, unknown>;
+  return Object.fromEntries(ADMIN_NAMESPACES.map((ns) => [ns, all[ns]]));
+}
 
 const display = Big_Shoulders({
   variable: "--font-display",
@@ -42,7 +53,10 @@ export default async function AdminLayout({
   return (
     <html lang="fr" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <body className="min-h-dvh bg-bg text-ink antialiased">
-        <AdminShell>{children}</AdminShell>
+        {/* Libelles next-intl de l'admin (langue de l'admin, ADMIN_LOCALE). */}
+        <NextIntlClientProvider locale={ADMIN_LOCALE} messages={await adminMessages()}>
+          <AdminShell>{children}</AdminShell>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
@@ -59,8 +73,13 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
     redirect("/admin/login");
   }
 
-  // Login page : pas de shell admin
-  if (!user) {
+  // Oct. 2026 : coque admin complete seulement en session aal2 (second
+  // facteur verifie). Connexion, double authentification et
+  // reinitialisation : page centree, sans menu.
+  const { data: aal } = user
+    ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    : { data: null };
+  if (!user || aal?.currentLevel !== "aal2") {
     return <main className="flex min-h-dvh items-center justify-center px-6">{children}</main>;
   }
 
@@ -82,6 +101,7 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <main className="flex-1 px-8 py-10">{children}</main>
+        <AdminIdleWatcher />
       </div>
     </div>
   );
