@@ -12,7 +12,7 @@ function scoreColor(score: number | null): string {
 
 export function ScoreCard({ label, score }: ScoreCardProps) {
   const color = scoreColor(score);
-  const display = score === null ? "—" : String(score);
+  const display = score === null ? "" : String(score);
   const pct = score === null ? 0 : Math.max(0, Math.min(100, score));
   return (
     <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-4">

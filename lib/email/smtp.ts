@@ -24,7 +24,7 @@ import nodemailer, { type Transporter } from "nodemailer";
 const FROM_NAME = "MAPA Property";
 const FROM_ADDRESS = "site@mapagroup.org";
 // Adresse de reponse (Reply-To) : volontairement fixe, inchangee par la
-// configuration des destinataires internes ci-dessous — une reponse du
+// configuration des destinataires internes ci-dessous : une reponse du
 // prospect part toujours vers cette adresse, quel que soit le nombre de
 // personnes notifiees en interne.
 export const SMTP_REPLY_TO = "j.brebion@mapagroup.org";
@@ -137,7 +137,19 @@ export interface SendMailArgs {
   subject: string;
   text: string;
   replyTo?: string;
+  /** Type d'e-mail pour le journal des envois (jamais le contenu). */
+  kind?: EmailKind;
 }
+
+export type EmailKind =
+  | "lead_client"
+  | "lead_internal"
+  | "estimation_client"
+  | "estimation_internal"
+  | "estimation_refinement"
+  | "security_alert"
+  | "weekly_summary"
+  | "other";
 
 export interface SendMailResult {
   ok: boolean;
@@ -170,6 +182,37 @@ async function attemptSend(
  * premiere echoue, puis abandon journalise (code technique uniquement,
  * jamais d'adresse ni de contenu).
  */
+/**
+ * Adresse masquee pour le journal des envois : premiere lettre, domaine
+ * reduit a sa premiere lettre, extension conservee (j***@g***.com).
+ */
+export function maskEmail(email: string): string {
+  const [local, domain] = String(email).trim().toLowerCase().split("@");
+  if (!local || !domain) return "***";
+  const dot = domain.lastIndexOf(".");
+  const host = dot > 0 ? domain.slice(0, dot) : domain;
+  const tld = dot > 0 ? domain.slice(dot) : "";
+  return `${local[0]}***@${host[0] ?? ""}***${tld}`;
+}
+
+// Journal des envois (oct. 2026) : destinataire masque, type, resultat,
+// code d'echec. Jamais le sujet ni le contenu. Best effort.
+async function logEmail(args: SendMailArgs, result: SendMailResult): Promise<void> {
+  try {
+    const to = Array.isArray(args.to) ? args.to : [args.to];
+    const { supabaseService } = await import("@/lib/supabase-service");
+    const { error } = await supabaseService().from("email_log").insert({
+      recipient_masked: to.map(maskEmail).join(", ").slice(0, 300),
+      kind: args.kind ?? "other",
+      success: result.ok,
+      failure_reason: result.ok ? null : (result.error ?? "unknown_error").slice(0, 100),
+    });
+    if (error) console.warn("[email/smtp] journal des envois indisponible", { code: error.code });
+  } catch {
+    console.warn("[email/smtp] journal des envois indisponible");
+  }
+}
+
 export async function sendMail(args: SendMailArgs): Promise<SendMailResult> {
   // Preversion Vercel : jamais d'e-mail a un visiteur, seulement aux
   // destinataires internes configures (audit de securite, oct. 2026).
@@ -188,11 +231,15 @@ export async function sendMail(args: SendMailArgs): Promise<SendMailResult> {
   const transporter = getTransporter();
   if (!transporter) {
     console.warn("[email/smtp] configuration SMTP absente", { recipients });
-    return { ok: false, error: "smtp_not_configured" };
+    const res = { ok: false, error: "smtp_not_configured" };
+    await logEmail(args, res);
+    return res;
   }
   if (!withinRateLimit()) {
     console.error("[email/smtp] limite horaire atteinte", { recipients });
-    return { ok: false, error: "rate_limit_exceeded" };
+    const res = { ok: false, error: "rate_limit_exceeded" };
+    await logEmail(args, res);
+    return res;
   }
 
   let result = await attemptSend(transporter, args);
@@ -213,5 +260,6 @@ export async function sendMail(args: SendMailArgs): Promise<SendMailResult> {
   } else {
     console.log("[email/smtp] envoi reussi", { recipients });
   }
+  await logEmail(args, result);
   return result;
 }

@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * RichTextEditor — POL4-A1 (AGENT ELISE)
+ * RichTextEditor : editeur de texte formate de l'admin.
  *
  * Éditeur formaté minimaliste TipTap pour l'admin.
  * AUTORISE : paragraphes, gras (B), italique (I), sauts de ligne (Maj+Entrée).
  * INTERDIT : titres (h1-h6), listes, citations, code, code-block, strike,
  *            séparateurs, images.
  *
- * Sortie HTML : `<p>`, `<strong>`, `<em>`, `<br>` — sanitizable strictement
+ * Sortie HTML : `<p>`, `<strong>`, `<em>`, `<br>`, sanitizable strictement
  * côté rendu public (cf. AGENT MARC).
  *
  * Composant CONTRÔLÉ : `value` (HTML) + `onChange(html)`. À utiliser
@@ -20,6 +20,7 @@ import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   value: string;
@@ -81,14 +82,15 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
 }
 
 function Toolbar({ editor }: { editor: Editor | null }) {
+  const t = useTranslations("admin_cms");
   return (
     <div className="flex gap-1 border-b border-[#3D4F63]/15 px-2 py-1.5">
       <ToolbarButton
         onClick={() => editor?.chain().focus().toggleBold().run()}
         active={editor?.isActive("bold") ?? false}
         disabled={!editor}
-        ariaLabel="Gras"
-        title="Gras (Cmd/Ctrl + B)"
+        ariaLabel={t("editor_bold")}
+        title={t("editor_bold_title")}
       >
         <span className="font-display font-bold">B</span>
       </ToolbarButton>
@@ -96,8 +98,8 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         onClick={() => editor?.chain().focus().toggleItalic().run()}
         active={editor?.isActive("italic") ?? false}
         disabled={!editor}
-        ariaLabel="Italique"
-        title="Italique (Cmd/Ctrl + I)"
+        ariaLabel={t("editor_italic")}
+        title={t("editor_italic_title")}
       >
         <span className="font-display italic">I</span>
       </ToolbarButton>

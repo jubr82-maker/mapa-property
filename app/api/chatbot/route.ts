@@ -1,3 +1,5 @@
+import { attributionColumns } from "@/lib/pilotage/attribution";
+import { recordFormEvent } from "@/lib/pilotage/form-events";
 import { NextResponse } from "next/server";
 import { safeInternalPath } from "@/lib/security/sanitize";
 import { createHash } from "crypto";
@@ -29,6 +31,7 @@ interface RequestBody {
   phone?: string;
   transcript?: string;
   turnstileToken?: string;
+  attribution?: unknown;
 }
 
 interface NavigateIntent {
@@ -295,6 +298,7 @@ async function handleConsent(req: Request, body: RequestBody): Promise<Response>
   // chatbot, comme sur les autres formulaires du site.
   const turnstileOk = await verifyTurnstile(body.turnstileToken, clientIp(req));
   if (!turnstileOk) {
+    await recordFormEvent("chatbot_consent", "captcha", 403);
     return NextResponse.json({ ok: false, error: "turnstile_failed" }, { status: 403 });
   }
 
@@ -314,6 +318,7 @@ async function handleConsent(req: Request, body: RequestBody): Promise<Response>
       type: "chatbot",
       source: `chatbot:${pageContext || "home"}`,
       lang: locale,
+      ...attributionColumns(body.attribution),
     },
     consentAt,
   );
@@ -330,8 +335,10 @@ async function handleConsent(req: Request, body: RequestBody): Promise<Response>
       answer: "[echec insertion lead]",
       leadCreated: false,
     });
+    await recordFormEvent("chatbot_consent", "db_error", 500);
     return NextResponse.json({ ok: false, error: "db_error" }, { status: 500 });
   }
+  await recordFormEvent("chatbot_consent", "ok", 200);
 
   // Meme chemin que les formulaires : couche d'envoi existante, aucun
   // mecanisme d'envoi parallele.

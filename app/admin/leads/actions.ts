@@ -4,22 +4,35 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
+
+// Messages d'erreur affiches a l'ecran (namespace "admin_leads").
+function actionT() {
+  return getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_leads" });
+}
+
+// Erreur Supabase : detail dans les journaux serveur, message traduit a l'ecran.
+async function saveError(scope: string, error: { message: string }): Promise<Error> {
+  console.error(`[admin/leads] ${scope}`, error.message);
+  return new Error((await actionT())("error_save"));
+}
 
 export async function updateLeadNotes(id: string, notes: string) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const supabase = supabaseService();
   const { data, error } = await supabase
     .from("leads")
     .update({ notes })
     .eq("id", id)
     .select("id");
-  if (error) throw new Error(error.message);
-  if (!data || data.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
+  if (error) throw await saveError("update", error);
+  if (!data || data.length === 0) throw new Error((await actionT())("error_not_found"));
   revalidatePath("/admin/leads");
 }
 
-// ---------- Nouveau workflow (migration 20260512) ----------
+// ---------- Suivi (statut, historique, notes, relance) ----------
 
 type HistoryEntry = {
   at: string;
@@ -41,7 +54,7 @@ export async function updateWorkflowStatus(
   reason?: string,
 ) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   // Lecture défensive : si les colonnes n'existent pas, on récupère null
@@ -71,8 +84,8 @@ export async function updateWorkflowStatus(
     .eq("id", leadId)
     .select("id");
 
-  if (error) throw new Error(error.message);
-  if (!updated || updated.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
+  if (error) throw await saveError("update", error);
+  if (!updated || updated.length === 0) throw new Error((await actionT())("error_not_found"));
 
   revalidatePath("/admin/leads");
   revalidatePath(`/admin/leads/${leadId}`);
@@ -88,7 +101,7 @@ export async function addAdminNote(leadId: string, noteText: string) {
   if (!trimmed) return;
 
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   const { data: lead } = await sb
@@ -111,8 +124,8 @@ export async function addAdminNote(leadId: string, noteText: string) {
     .eq("id", leadId)
     .select("id");
 
-  if (error) throw new Error(error.message);
-  if (!updated || updated.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
+  if (error) throw await saveError("update", error);
+  if (!updated || updated.length === 0) throw new Error((await actionT())("error_not_found"));
 
   revalidatePath(`/admin/leads/${leadId}`);
 }
@@ -123,27 +136,27 @@ export async function addAdminNote(leadId: string, noteText: string) {
  */
 export async function setNextFollowUp(leadId: string, date: string | null) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
   const { data, error } = await sb
     .from("leads")
     .update({ next_follow_up: date })
     .eq("id", leadId)
     .select("id");
-  if (error) throw new Error(error.message);
-  if (!data || data.length === 0) throw new Error("lead introuvable — aucune ligne modifiée");
+  if (error) throw await saveError("update", error);
+  if (!data || data.length === 0) throw new Error((await actionT())("error_not_found"));
   revalidatePath(`/admin/leads/${leadId}`);
   revalidatePath("/admin/leads");
 }
 
-// ---------- Sprint MANDATS-A PARTIE 7 — Suppression RGPD (droit à l'oubli) ----------
+// ---------- Suppression RGPD (droit a l'oubli) ----------
 
 /**
  * Suppression définitive d'un lead (DELETE FROM leads WHERE id = ?).
  *
  * Effet de bord FK (mandats_lead_id_fkey ON DELETE SET NULL) : si ce lead
  * a déjà été converti en mandat, mandat.lead_id passe automatiquement à
- * NULL — le mandat survit comme document commercial autonome (correct
+ * NULL : le mandat survit comme document commercial autonome (correct
  * RGPD : on efface le prospect, pas la trace contractuelle).
  *
  * Confirmation utilisateur portée côté UI (DeleteLeadButton). Redirige
@@ -151,16 +164,16 @@ export async function setNextFollowUp(leadId: string, date: string | null) {
  */
 export async function deleteLead(id: string): Promise<void> {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
   const { data, error } = await sb.from("leads").delete().eq("id", id).select("id");
-  if (error) throw new Error(error.message);
-  if (!data || data.length === 0) throw new Error("lead introuvable — aucune ligne supprimée");
+  if (error) throw await saveError("update", error);
+  if (!data || data.length === 0) throw new Error((await actionT())("error_not_found"));
   revalidatePath("/admin/leads");
   redirect("/admin/leads");
 }
 
-// ---------- Sprint MANDATS-A PARTIE 4 — Conversion lead → mandat ----------
+// ---------- Conversion lead vers mandat ----------
 
 type ConvertResult =
   | { ok: true; mandatId: string; alreadyExisted: boolean }
@@ -177,14 +190,14 @@ const TYPE_MANDAT_MAP: Record<string, string> = {
  * Convertit un lead en mandat (table `mandats`).
  *
  * Anti-doublon : si un mandat existe déjà avec ce `lead_id`, on retourne
- * `alreadyExisted: true` + l'id du mandat existant — pas d'INSERT.
+ * `alreadyExisted: true` et l'id du mandat existant, sans INSERT.
  *
  * Déductions :
  *  - type_transaction : 'recherche' si type=search_mandate ou subject contient
  *    "recherche" ; 'location' si subject contient "location"/"mise_en_location" ;
  *    'vente' sinon.
  *  - type_mandat : mapping strict depuis lead.type (mandate_exclusive→exclusif,
- *    etc.). null si non déductible (search_mandate, general_contact, etc.) —
+ *    etc.). null si non déductible (search_mandate, general_contact, etc.),
  *    à compléter à la main dans la fiche mandat.
  */
 export async function convertLeadToMandat(
@@ -205,7 +218,10 @@ export async function convertLeadToMandat(
     .eq("id", leadId)
     .maybeSingle();
 
-  if (leadError) return { ok: false, error: leadError.message };
+  if (leadError) {
+    console.error("[admin/leads] convertLeadToMandat", leadError.message);
+    return { ok: false, error: "db_error" };
+  }
   if (!lead) return { ok: false, error: "lead_not_found" };
 
   type LeadRow = {
@@ -229,7 +245,10 @@ export async function convertLeadToMandat(
     .eq("lead_id", leadId)
     .maybeSingle();
 
-  if (existingError) return { ok: false, error: existingError.message };
+  if (existingError) {
+    console.error("[admin/leads] convertLeadToMandat", existingError.message);
+    return { ok: false, error: "db_error" };
+  }
   if (existing) {
     return {
       ok: true,
@@ -284,7 +303,10 @@ export async function convertLeadToMandat(
     .select("id")
     .single();
 
-  if (insertError) return { ok: false, error: insertError.message };
+  if (insertError) {
+    console.error("[admin/leads] convertLeadToMandat", insertError.message);
+    return { ok: false, error: "db_error" };
+  }
 
   revalidatePath("/admin/leads");
   revalidatePath(`/admin/leads/${leadId}`);
@@ -297,7 +319,7 @@ export async function convertLeadToMandat(
   };
 }
 
-// ---------- Sprint Export RGPD — droit d'acces/portabilite ----------
+// ---------- Export RGPD : droit d'acces et portabilite ----------
 
 /**
  * Exporte toutes les donnees d'un lead + le mandat associe eventuel
@@ -325,7 +347,7 @@ export async function exportLead(
       .single();
     if (leadError || !lead) return { ok: false, error: "not_found" };
 
-    // Mandat associe eventuel (0 ou 1 — anti-doublon dans convertLeadToMandat).
+    // Mandat associe eventuel (0 ou 1, anti-doublon dans convertLeadToMandat).
     const { data: mandats, error: mandatsError } = await sb
       .from("mandats")
       .select("*")

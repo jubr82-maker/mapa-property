@@ -1,9 +1,9 @@
-// lib/admin/exports/labels.ts — libellés français pour les exports.
+// lib/admin/exports/labels.ts : libellés français pour les exports.
 // Règle stricte (mission 2026-09-22) : aucune valeur brute de base dans
 // un export. On réutilise UNIQUEMENT des correspondances déjà présentes
 // ailleurs dans le code (jamais une traduction inventée ici). Toute
-// valeur sans correspondance connue passe par `capitalizeFallback` —
-// première lettre en majuscule, rien d'autre — et doit être listée dans
+// valeur sans correspondance connue passe par `capitalizeFallback` ,
+// première lettre en majuscule, rien d'autre : et doit être listée dans
 // le rapport de mission comme "valeur sans libellé connu".
 import { WORKFLOW_LABELS, type WorkflowStatus } from "@/components/admin/WorkflowBadge";
 import {
@@ -12,10 +12,10 @@ import {
   type PropertyType,
 } from "@/lib/admin/offmarket";
 
-/** Première lettre en majuscule, rien d'autre — pas de remplacement des
+/** Première lettre en majuscule, rien d'autre : pas de remplacement des
  * underscores, pas de traduction : c'est la règle explicite du fallback. */
 export function capitalizeFallback(raw: string | null | undefined): string {
-  if (!raw) return "—";
+  if (!raw) return "";
   return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
@@ -23,7 +23,7 @@ function lookup<T extends string>(
   map: Record<T, string>,
   value: string | null | undefined,
 ): string {
-  if (!value) return "—";
+  if (!value) return "";
   return (map as Record<string, string>)[value] ?? capitalizeFallback(value);
 }
 
@@ -49,7 +49,7 @@ export function requestStatusLabel(value: string | null | undefined): string {
 // ---------- Type de mandat ----------
 // Source : app/admin/mandats/page.tsx:65-70 et
 // app/admin/mandats/[id]/page.tsx:84-89 (TYPE_MANDAT_LABEL, identique
-// dans les deux fichiers — copié ici, pas importé, car ce sont des
+// dans les deux fichiers : copié ici, pas importé, car ce sont des
 // fichiers "page" non conçus pour être réutilisés).
 const TYPE_MANDAT_LABEL: Record<string, string> = {
   exclusif: "Exclusif",
@@ -94,14 +94,14 @@ const SUBJECT_LABEL: Record<string, string> = {
   estimation: "Estimation",
   mise_en_location: "Mettre en location",
   informations: "Informations",
-  offmarket_arcova: "Off-Market — ARCOVA",
+  offmarket_arcova: "Off-Market : ARCOVA",
 };
 export function subjectLabel(value: string | null | undefined): string {
   return lookup(SUBJECT_LABEL, value);
 }
 
 // ---------- État général du bien (estimations) ----------
-// Source : messages/fr.json:817-819 (estimate_form.state_*) — traductions
+// Source : messages/fr.json:817-819 (estimate_form.state_*) : traductions
 // next-intl existantes du tunnel public d'estimation, réutilisées ici
 // telles quelles (mêmes clés que lib/estimation/engine.ts:46-48/234-237).
 const ETAT_LABEL: Record<string, string> = {
@@ -121,7 +121,7 @@ export function etatLabel(value: string | null | undefined): string {
 
 // ---------- Moteur d'estimation ----------
 // Source : app/api/estimate/route.ts:593,623,671,678 ("evs_5_methods") et
-// :706,735,739 ("hedonic_legacy") — les 2 SEULES valeurs réellement
+// :706,735,739 ("hedonic_legacy") : les 2 SEULES valeurs réellement
 // écrites dans estimation_requests.engine (recherche exhaustive).
 const ENGINE_LABEL: Record<string, string> = {
   evs_5_methods: "EVS 5 méthodes",
@@ -161,7 +161,7 @@ export function methodLabel(value: string | null | undefined): string {
 
 // ---------- Type de demande (leads.type) ----------
 // Liste établie par lecture exhaustive de TOUT le code qui écrit
-// leads.type (routes publiques + lib partagée) — aucune valeur devinée :
+// leads.type (routes publiques + lib partagée) : aucune valeur devinée :
 //   general_contact   -> app/[locale]/contact/page.tsx:46
 //   property_request  -> app/[locale]/biens/[slug]/page.tsx:462
 //   mandate_exclusive -> lib/mandates.ts:22
@@ -175,7 +175,7 @@ export function methodLabel(value: string | null | undefined): string {
 //   chatbot           -> app/api/chatbot/route.ts:175 (auto-lead Éléna)
 // `components/admin/LeadsTable.tsx:51-63` liste aussi "contact", "buy",
 // "sell", "rent", "estimate", "mandate_search" dans son filtre déroulant
-// admin — aucune trace trouvée d'un code qui écrit ces valeurs exactes
+// admin : aucune trace trouvée d'un code qui écrit ces valeurs exactes
 // dans leads.type (recherche exhaustive, cf. rapport de mission
 // 2026-09-21). Traductions fournies explicitement par Julien (mission
 // 2026-09-23, étape 2) pour couvrir ces options malgré tout ; le filtre
@@ -217,7 +217,7 @@ export function rawTypeLabel(value: string | null | undefined): string {
 //   offmarket:<property_id>      -> app/api/offmarket-request/route.ts:52
 //   nda_request:offmarket:<ref>  -> app/api/nda-request/route.ts:132
 // `offmarket_requests` n'a PAS de colonne source (vérifié : absente du
-// SELECT admin app/admin/offmarket/requests/page.tsx) — seules les
+// SELECT admin app/admin/offmarket/requests/page.tsx) : seules les
 // LEADS générées par le flux off-market (nda-request/offmarket-request)
 // portent un `source`, ci-dessus.
 const SOURCE_LABEL: Record<string, string> = {
@@ -226,13 +226,13 @@ const SOURCE_LABEL: Record<string, string> = {
   "waitlist-home": "Page liste d'attente",
 };
 const SOURCE_PREFIX_LABEL: [prefix: string, label: string][] = [
-  ["nda_request:offmarket:", "Demande NDA off-market — bien "],
-  ["offmarket:", "Demande off-market — bien "],
-  ["property:", "Fiche bien — "],
-  ["mandate:", "Page mandat — "],
+  ["nda_request:offmarket:", "Demande NDA off-market : bien "],
+  ["offmarket:", "Demande off-market : bien "],
+  ["property:", "Fiche bien : "],
+  ["mandate:", "Page mandat : "],
 ];
 export function sourceLabel(value: string | null | undefined): string {
-  if (!value) return "—";
+  if (!value) return "";
   if (SOURCE_LABEL[value]) return SOURCE_LABEL[value];
   for (const [prefix, label] of SOURCE_PREFIX_LABEL) {
     if (value.startsWith(prefix)) return `${label}${value.slice(prefix.length)}`;
@@ -242,7 +242,7 @@ export function sourceLabel(value: string | null | undefined): string {
 
 // ---------- Niveau de confiance de l'estimation ----------
 // Aucune correspondance FR trouvée ailleurs dans le code (recherche
-// exhaustive) — traduction fournie explicitement par Julien (mission
+// exhaustive) : traduction fournie explicitement par Julien (mission
 // 2026-09-22, étape 2) : HIGH/MEDIUM/LOW -> Élevée/Moyenne/Faible.
 const CONFIDENCE_LABEL: Record<string, string> = {
   HIGH: "Élevée",

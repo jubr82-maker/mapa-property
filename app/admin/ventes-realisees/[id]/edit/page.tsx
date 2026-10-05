@@ -1,10 +1,12 @@
-// Page admin — edition d'une vente realisee. Server component : auth + fetch
+// Page admin : edition d'une vente realisee. Server component : auth + fetch
 // de la ligne, puis SaleForm en mode edition (PATCH /api/admin/ventes-realisees/[id]).
 
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SaleForm } from "../../SaleForm";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,7 @@ export default async function EditSalePage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect(`/admin/login?from=/admin/ventes-realisees/${id}/edit`);
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_sales" });
 
   const { data: row, error } = await supabase
     .from("mapa_historical_sales")
@@ -34,10 +37,10 @@ export default async function EditSalePage({
     return (
       <div className="space-y-4">
         <p className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700">
-          Erreur lecture Supabase : {error.message}
+          {t("loadErrorOne")}
         </p>
         <Link href="/admin/ventes-realisees" className="text-sm underline">
-          ← Retour à la liste
+          ← {t("backToList")}
         </Link>
       </div>
     );
@@ -51,7 +54,7 @@ export default async function EditSalePage({
       <header className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold uppercase tracking-[0.05em]">
-            Modifier une vente
+            {t("editTitle")}
           </h1>
           <p className="mt-1 text-xs text-[#3D4F63]/70">
             {row.commune} · {row.adresse}
@@ -61,7 +64,7 @@ export default async function EditSalePage({
           href="/admin/ventes-realisees"
           className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] underline"
         >
-          ← Retour
+          ← {t("back")}
         </Link>
       </header>
 

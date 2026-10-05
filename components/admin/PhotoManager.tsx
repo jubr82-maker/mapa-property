@@ -1,18 +1,18 @@
 "use client";
 
 /**
- * PhotoManager — POL4-A3 (AGENT HUGO)
+ * PhotoManager : gestion des photos d'un bien.
  *
  * Composant générique gestion photos : upload multi-fichier, grid 4 cols,
  * drag-and-drop HTML5 natif pour réordonner, sélection cover (sort=0),
  * suppression. Zéro dépendance externe.
  *
- * Branchable sur n'importe quel modèle (properties Apimo / off-market / …)
+ * Branchable sur n'importe quel modèle (biens, off-market, etc.)
  * via les 3 callbacks server actions (onUpload / onSave / onDelete).
  *
  * Type `PhotoData` : { url, path, isCover, order }.
  *
- * Mission "envoi de photos robuste et erreurs visibles" — réécriture de
+ * Mission "envoi de photos robuste et erreurs visibles" : réécriture de
  * handleFiles (cf. commentaire détaillé sur la fonction) : traitement
  * strictement séquentiel, un `setPhotos` par fichier réussi (jamais un
  * seul commit global en fin de boucle), progression visible, limite de
@@ -21,12 +21,13 @@
  */
 
 import { useState, useTransition, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { compressImageFile } from "@/lib/image-compress";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 
 // Valeur large (HEIC/HEIF sans type MIME reconnu sur certains OS/
 // navigateurs) : le controle reel du format se fait server-side, par le
-// contenu, pas ici — cf. lib/images/process-upload.ts.
+// contenu, pas ici (cf. lib/images/process-upload.ts).
 const ACCEPT_ATTRIBUTE = "image/*,.heic,.heif,.jpg,.jpeg,.png,.webp,.tif,.tiff";
 
 export interface PhotoData {
@@ -57,7 +58,8 @@ export function PhotoManager({
   onSave,
   onDelete,
 }: Props) {
-  // On normalise toujours l'ordre à partir de l'index courant — order/isCover
+  const t = useTranslations("admin_properties");
+  // On normalise toujours l'ordre à partir de l'index courant : order/isCover
   // recalculés à chaque mutation pour rester cohérents.
   const [photos, setPhotos] = useState<PhotoData[]>(() =>
     initialPhotos.map((p, i) => ({ ...p, order: i, isCover: i === 0 })),
@@ -79,7 +81,7 @@ export function PhotoManager({
   // (setPhotos) au lieu d'accumuler dans une variable locale envoyée en
   // un seul bloc en fin de boucle. Ainsi, si un fichier échoue (taille,
   // conversion, réseau), les photos déjà envoyées avant lui restent
-  // visibles et le compteur reste exact — jamais de "0 photo" après un
+  // visibles et le compteur reste exact, jamais de "0 photo" après un
   // échec partiel. La progression ("2/8…") est visible pendant l'envoi et
   // les échecs sont listés individuellement, jamais un message générique
   // opaque.
@@ -94,32 +96,32 @@ export function PhotoManager({
 
     for (let i = 0; i < list.length; i++) {
       const file = list[i];
-      const label = file.name || `fichier ${i + 1}`;
+      const label = file.name || t("file_fallback", { n: i + 1 });
 
       if (file.size > MAX_PHOTO_BYTES) {
-        failures.push(`${label} : dépasse ${MAX_PHOTO_MB} Mo, non envoyé.`);
+        failures.push(t("photo_too_large", { name: label, max: MAX_PHOTO_MB }));
         setUploadProgress({ done: i + 1, total: list.length });
         continue;
       }
 
       try {
         // compressImageFile retombe sur le fichier original en cas
-        // d'échec (ex. HEIC non décodable par le navigateur) — la
+        // d'échec (ex. HEIC non décodable par le navigateur) : la
         // conversion faite ensuite côté serveur reste autoritaire.
         const compressed = await compressImageFile(file);
         const fd = new FormData();
         fd.append("file", compressed);
         const result = await onUpload(fd);
         if (!result.ok) {
-          failures.push(`${label} : ${result.error}`);
+          failures.push(t("photo_failure", { name: label, message: result.error }));
         } else {
-          // Commit immédiat, un par un — jamais de batch en fin de boucle.
+          // Commit immédiat, un par un, jamais de batch en fin de boucle.
           setPhotos((prev) => renormalize([...prev, { url: result.url, path: result.path, isCover: false, order: prev.length }]));
         }
       } catch {
         // Filet ultime (ex. coupure réseau pendant l'appel) : jamais
         // laisser une exception non gérée remonter hors de cette boucle.
-        failures.push(`${label} : échec réseau, réessayez.`);
+        failures.push(t("photo_network_failure", { name: label }));
       }
       setUploadProgress({ done: i + 1, total: list.length });
     }
@@ -164,7 +166,7 @@ export function PhotoManager({
 
   function removeAt(idx: number) {
     const p = photos[idx];
-    if (!confirm("Supprimer cette photo ?")) return;
+    if (!confirm(t("confirm_delete_photo"))) return;
     setError(null);
     setFeedback(null);
     startTransition(async () => {
@@ -177,7 +179,7 @@ export function PhotoManager({
         const next = photos.filter((_, i) => i !== idx);
         setPhotos(renormalize(next));
       } catch {
-        setError("Erreur suppression, réessayez.");
+        setError(t("err_photo_delete"));
       }
     });
   }
@@ -192,9 +194,9 @@ export function PhotoManager({
           setError(result.error);
           return;
         }
-        setFeedback("Ordre et cover enregistrés.");
+        setFeedback(t("photos_saved"));
       } catch {
-        setError("Erreur enregistrement, réessayez.");
+        setError(t("err_photo_save"));
       }
     });
   }
@@ -212,21 +214,18 @@ export function PhotoManager({
         />
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63]">
           {uploadProgress
-            ? `Envoi ${uploadProgress.done}/${uploadProgress.total}…`
-            : "Cliquer pour ajouter des photos"}
+            ? t("upload_progress", { done: uploadProgress.done, total: uploadProgress.total })
+            : t("upload_cta")}
         </p>
         <p className="mt-1 text-xs text-[#3D4F63]/60">
-          HEIC / HEIF / JPG / PNG / WebP / TIFF — converties automatiquement,
-          {MAX_PHOTO_MB} Mo max par fichier. La première (sort 0) sert de
-          cover publique.
+          {t("upload_hint", { max: MAX_PHOTO_MB })}
         </p>
       </label>
 
       {uploadErrors.length > 0 && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-red-700/80">
-            {uploadErrors.length} photo{uploadErrors.length > 1 ? "s" : ""} non
-            envoyée{uploadErrors.length > 1 ? "s" : ""}
+            {t("upload_failed_count", { count: uploadErrors.length })}
           </p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5">
             {uploadErrors.map((msg, i) => (
@@ -234,6 +233,10 @@ export function PhotoManager({
             ))}
           </ul>
         </div>
+      )}
+
+      {photos.length === 0 && !uploadProgress && (
+        <p className="text-sm text-[#3D4F63]/60">{t("photos_empty")}</p>
       )}
 
       {photos.length > 0 && (
@@ -251,13 +254,13 @@ export function PhotoManager({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={p.url}
-                  alt={`Photo ${idx + 1}`}
+                  alt={t("photo_alt", { n: idx + 1 })}
                   className="size-full object-cover"
                   draggable={false}
                 />
                 {idx === 0 && (
                   <span className="absolute left-2 top-2 rounded-full bg-[#e0af6e] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
-                    Cover
+                    {t("main_photo")}
                   </span>
                 )}
                 <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
@@ -274,16 +277,17 @@ export function PhotoManager({
                       ? "border-[#e0af6e] text-[#e0af6e]"
                       : "border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   }`}
-                  title="Définir comme cover"
+                  title={t("set_main_title")}
                 >
-                  ★ Cover
+                  {t("set_main")}
                 </button>
                 <button
                   type="button"
                   onClick={() => removeAt(idx)}
                   disabled={busy}
                   className="rounded border border-red-200 px-2 py-1 text-red-700 hover:bg-red-50 disabled:opacity-40"
-                  title="Supprimer"
+                  title={t("delete_photo_title")}
+                  aria-label={t("delete_photo_title")}
                 >
                   ✕
                 </button>
@@ -300,17 +304,16 @@ export function PhotoManager({
           disabled={busy || uploadProgress != null || photos.length === 0}
           className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
         >
-          {busy ? "Enregistrement…" : "Enregistrer l'ordre"}
+          {busy ? t("saving") : t("save_order")}
         </button>
         {feedback && (
           <span className="text-sm text-emerald-700">{feedback}</span>
         )}
         {error && (
-          <span className="text-sm text-red-700">Erreur : {error}</span>
+          <span className="text-sm text-red-700">{t("error_prefix", { message: error })}</span>
         )}
         <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-          {photos.length} photo{photos.length > 1 ? "s" : ""} — glisser pour
-          réordonner
+          {t("photo_count", { count: photos.length })}
         </span>
       </div>
     </div>

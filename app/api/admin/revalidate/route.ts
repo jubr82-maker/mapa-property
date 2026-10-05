@@ -1,4 +1,4 @@
-// Sprint OPTIM-1A + OPTIM-1B C3 — POST /api/admin/revalidate
+// Sprint OPTIM-1A + OPTIM-1B C3, POST /api/admin/revalidate
 //
 // Endpoint admin pour forcer la revalidation ISR de pages publiques.
 //
@@ -11,7 +11,7 @@
 //
 // Body (deux formes acceptees) :
 //   - { path: string }         (legacy OPTIM-1A, single path)
-//   - { paths: string[] }      (OPTIM-1B C3, batch — utile pour purger
+//   - { paths: string[] }      (OPTIM-1B C3, batch, utile pour purger
 //                                les 3 locales d'un coup)
 //
 // Anti-abus : chaque path doit commencer par "/fr/", "/en/" ou "/de/".

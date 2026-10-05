@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ContentTab, type ContentRow } from "./ContentTab";
 import { FontsTab, type TokenRow } from "./FontsTab";
 import { ColorsTab } from "./ColorsTab";
@@ -14,6 +15,7 @@ export function ContenuTabs({
   initialContent: ContentRow[];
   initialTokens: TokenRow[];
 }) {
+  const t = useTranslations("admin_cms");
   const [tab, setTab] = useState<Tab>("content");
   const [revalidating, setRevalidating] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
@@ -24,10 +26,10 @@ export function ContenuTabs({
     try {
       const r = await fetch("/api/admin/cms/revalidate", { method: "POST" });
       if (!r.ok) throw new Error("revalidate failed");
-      setFlash("Cache vidé. Les changements sont en ligne.");
+      setFlash(t("refresh_ok"));
     } catch (e) {
       console.error(e);
-      setFlash("Échec — vérifier la console.");
+      setFlash(t("refresh_error"));
     } finally {
       setRevalidating(false);
       setTimeout(() => setFlash(null), 4000);
@@ -39,13 +41,13 @@ export function ContenuTabs({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <nav className="flex gap-1 rounded-lg border border-[#3D4F63]/15 bg-white p-1">
           <TabButton active={tab === "content"} onClick={() => setTab("content")}>
-            Textes
+            {t("tab_texts")}
           </TabButton>
           <TabButton active={tab === "fonts"} onClick={() => setTab("fonts")}>
-            Polices
+            {t("tab_fonts")}
           </TabButton>
           <TabButton active={tab === "colors"} onClick={() => setTab("colors")}>
-            Couleurs
+            {t("tab_colors")}
           </TabButton>
         </nav>
         <div className="flex items-center gap-3">
@@ -60,7 +62,7 @@ export function ContenuTabs({
             disabled={revalidating}
             className="rounded-lg border border-[#3D4F63]/20 bg-[#3D4F63] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#2D3F53] disabled:opacity-50"
           >
-            {revalidating ? "..." : "Vider cache"}
+            {revalidating ? t("busy") : t("refresh")}
           </button>
         </div>
       </div>

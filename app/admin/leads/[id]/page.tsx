@@ -1,13 +1,19 @@
 import Link from "next/link";
 import { AdminDateCell } from "@/components/admin/AdminDateCell";
-import { lastModifiedAt } from "@/lib/datetime";
+import { ADMIN_LOCALE, lastModifiedAt } from "@/lib/datetime";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { WorkflowSelect } from "@/components/admin/WorkflowSelect";
 import { AdminNotes } from "@/components/admin/AdminNotes";
-import { WorkflowBadge, type WorkflowStatus } from "@/components/admin/WorkflowBadge";
+import {
+  WorkflowBadge,
+  sourceLabel,
+  workflowLabelKey,
+  type WorkflowStatus,
+} from "@/components/admin/WorkflowBadge";
 import { ConvertToMandatButton } from "@/components/admin/ConvertToMandatButton";
 import { DeleteLeadButton } from "@/components/admin/DeleteLeadButton";
 import { ExportLeadButton } from "@/components/admin/ExportLeadButton";
@@ -40,7 +46,7 @@ type LeadFull = {
   status: string | null;
   property_ref: string | null;
   notes: string | null;
-  // Nouvelles colonnes (migration 20260512)
+  // Colonnes de suivi (absentes sur une base non mise a jour)
   workflow_status?: string | null;
   admin_notes?: string | null;
   next_follow_up?: string | null;
@@ -93,6 +99,20 @@ export default async function AdminLeadDetailPage({
     lead = tryFull.data as LeadFull;
   }
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_leads" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
+  const notProvided = tw("not_provided");
+  const typeLabel = (v: string | null) =>
+    v ? (t.has(`type_${v}`) ? t(`type_${v}`) : v) : null;
+  const subjectLabel = (v: string | null) =>
+    v ? (t.has(`subject_${v}`) ? t(`subject_${v}`) : v) : null;
+  // Ancienne colonne `status` : libelle de suivi si la valeur est connue.
+  const legacyStatus = (v: string | null) => {
+    if (!v) return null;
+    const key = workflowLabelKey(v);
+    return key === "status_unknown" ? v : tw(key);
+  };
+
   const fullName =
     [lead.first_name, lead.last_name].filter(Boolean).join(" ") ||
     lead.email;
@@ -111,14 +131,14 @@ export default async function AdminLeadDetailPage({
           className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           <ArrowLeft className="size-3" />
-          Retour aux leads
+          {t("back")}
         </Link>
       </div>
 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Lead · {lead.type ?? "contact"}
+            {t("detail_eyebrow", { type: typeLabel(lead.type) ?? t("type_contact") })}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
             {fullName}
@@ -146,22 +166,25 @@ export default async function AdminLeadDetailPage({
         <div className="space-y-4">
           <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-              Contact
+              {tw("section_contact")}
             </p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Field label="Email" value={lead.email} />
-              <Field label="Téléphone" value={lead.phone} />
-              <Field label="Pays" value={lead.country} />
-              <Field label="Ville" value={lead.city} />
-              <Field label="Source" value={lead.source} />
-              <Field label="Type" value={lead.type} />
+              <Field label={tw("field_email")} value={lead.email} empty={notProvided} />
+              <Field label={tw("field_phone")} value={lead.phone} empty={notProvided} />
+              <Field label={tw("field_country")} value={lead.country} empty={notProvided} />
+              <Field label={tw("field_city")} value={lead.city} empty={notProvided} />
+              <Field label={tw("field_source")} value={sourceLabel(tw, lead.source)} empty={notProvided} />
+              <Field label={t("field_type")} value={typeLabel(lead.type)} empty={notProvided} />
               {lead.property_ref && (
-                <Field label="Bien réf." value={lead.property_ref} />
+                <Field label={t("field_property_ref")} value={lead.property_ref} empty={notProvided} />
               )}
-              {lead.subject && <Field label="Sujet" value={lead.subject} />}
+              {lead.subject && (
+                <Field label={t("field_subject")} value={subjectLabel(lead.subject)} empty={notProvided} />
+              )}
               <Field
-                label="Statut legacy"
-                value={lead.status ?? "—"}
+                label={tw("field_legacy_status")}
+                value={legacyStatus(lead.status)}
+                empty={notProvided}
               />
             </dl>
           </div>
@@ -169,7 +192,7 @@ export default async function AdminLeadDetailPage({
           {lead.message && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Message
+                {tw("field_message")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {lead.message}
@@ -180,7 +203,7 @@ export default async function AdminLeadDetailPage({
           {lead.admin_notes && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Dernière note admin
+                {tw("last_note")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {lead.admin_notes}
@@ -191,7 +214,7 @@ export default async function AdminLeadDetailPage({
           {lead.notes && !lead.admin_notes && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Notes (legacy)
+                {tw("legacy_notes")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {lead.notes}
@@ -199,35 +222,31 @@ export default async function AdminLeadDetailPage({
             </div>
           )}
 
-          {/* Sprint Export RGPD — bloc actions non destructives.
-              Droit d'acces / portabilite : telecharge le lead + mandat
-              associe eventuel au format JSON. Place AVANT la Zone danger
-              pour separer visuellement export (neutre) et delete (rouge). */}
+          {/* Export RGPD : bloc d'actions non destructives.
+              Droit d'acces et portabilite : telecharge le lead et le mandat
+              associe eventuel au format JSON. Place avant la zone de
+              suppression pour separer export (neutre) et suppression (rouge). */}
           <div className="rounded-xl border border-[#e0af6e]/40 bg-[#e0af6e]/5 p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#9E7B2A]">
-              Actions RGPD
+              {tw("rgpd_title")}
             </p>
             <p className="mt-2 text-sm text-[#1A1F2A]">
-              Télécharger toutes les données de ce contact (format JSON,
-              portabilité RGPD). Inclut le mandat associé s&apos;il existe.
+              {t("rgpd_text")}
             </p>
             <div className="mt-3">
               <ExportLeadButton id={lead.id} />
             </div>
           </div>
 
-          {/* Sprint MANDATS-A PARTIE 7 — Zone danger : suppression RGPD.
-              FK ON DELETE SET NULL cote mandats : si ce lead a deja ete
-              converti, le mandat survit avec lead_id=NULL. */}
+          {/* Suppression RGPD. Cle etrangere ON DELETE SET NULL cote
+              mandats : si ce lead a deja ete converti, le mandat survit
+              avec lead_id=NULL. */}
           <div className="rounded-xl border border-red-300 bg-red-50/60 p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-700">
-              Zone danger
+              {tw("danger_title")}
             </p>
             <p className="mt-2 text-sm text-red-900">
-              La suppression définitive efface ce lead de la base. Action
-              irréversible — usage RGPD (droit à l&apos;oubli). Si ce lead
-              a été converti en mandat, le mandat reste accessible sans
-              référence au lead.
+              {t("danger_text")}
             </p>
             <div className="mt-3">
               <DeleteLeadButton id={lead.id} />
@@ -235,7 +254,7 @@ export default async function AdminLeadDetailPage({
           </div>
         </div>
 
-        {/* Colonne droite : actions workflow + conversion mandat */}
+        {/* Colonne droite : suivi et conversion en mandat */}
         <aside className="space-y-5">
           <WorkflowSelect leadId={lead.id} initialStatus={ws} />
           <AdminNotes
@@ -253,9 +272,11 @@ export default async function AdminLeadDetailPage({
 function Field({
   label,
   value,
+  empty,
 }: {
   label: string;
   value: string | null | undefined;
+  empty: string;
 }) {
   return (
     <div>
@@ -263,7 +284,7 @@ function Field({
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-[#1A1F2A]">
-        {value && value.trim() ? value : "—"}
+        {value && value.trim() ? value : empty}
       </dd>
     </div>
   );

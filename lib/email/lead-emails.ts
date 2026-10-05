@@ -1,4 +1,4 @@
-// MAPA Property — emails partages pour tous les flux "formulaire simple"
+// MAPA Property : emails partages pour tous les flux "formulaire simple"
 // (nom, email, telephone, message) : lead generique, contact, demande de
 // bien, NDA off-market, demande off-market, inscription liste d'attente,
 // inscription ARCOVA, lead chatbot.
@@ -166,21 +166,21 @@ function internalSubject(args: { subjectStr: string; name: string }): string {
 function internalBody(
   args: SendLeadEmailsArgs & { locale: Locale; subjectStr: string; receivedLine: string },
 ): string {
-  const fullName = [args.firstName, args.lastName].filter(Boolean).join(" ") || "—";
+  const fullName = [args.firstName, args.lastName].filter(Boolean).join(" ") || "";
   const lines: string[] = [
     `Nouveau lead reçu via le site (formulaire ${args.source ?? "website"}).`,
     args.receivedLine,
     ``,
     `= PROSPECT =`,
     `Nom         : ${fullName}`,
-    `Email       : ${args.contactEmail ?? "—"}`,
-    `Téléphone   : ${args.phone ?? "—"}`,
+    `Email       : ${args.contactEmail ?? ""}`,
+    `Téléphone   : ${args.phone ?? ""}`,
     `Locale      : ${args.locale}`,
     ``,
     `= DEMANDE =`,
     `Objet       : ${args.subjectStr}`,
-    `Type form   : ${args.type ?? "—"}`,
-    `Source      : ${args.source ?? "—"}`,
+    `Type form   : ${args.type ?? ""}`,
+    `Source      : ${args.source ?? ""}`,
   ];
   if (args.propertyRef) {
     lines.push(`Bien réf.   : ${args.propertyRef}`);
@@ -228,6 +228,7 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
         to: args.contactEmail,
         subject: clientSubject(locale),
         text: clientBody({ locale, firstName, subjectStr }),
+        kind: "lead_client",
       }),
     );
   }
@@ -238,6 +239,7 @@ export async function sendLeadEmails(args: SendLeadEmailsArgs): Promise<void> {
       to: internalTo,
       subject: internalSubject({ subjectStr, name: fullName }),
       text: internalBody({ ...args, locale, subjectStr, receivedLine: await receivedAtLine() }),
+      kind: "lead_internal",
     }),
   );
 

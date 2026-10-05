@@ -2,15 +2,12 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   OFFMARKET_STATUSES,
-  OFFMARKET_STATUS_LABELS,
   OFFMARKET_TRANSACTIONS,
-  OFFMARKET_TRANSACTION_LABELS,
   PROPERTY_TYPES,
-  PROPERTY_TYPE_LABELS,
   IMMEUBLE_SUB_TYPES,
-  IMMEUBLE_SUB_TYPE_LABELS,
   PROFESSIONAL_TYPES,
   RESIDENTIAL_TYPES,
   type OffmarketRow,
@@ -26,12 +23,9 @@ import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 type Tab = "location" | "specs" | "content" | "identity";
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "location", label: "1 · Localisation" },
-  { id: "specs", label: "2 · Caractéristiques" },
-  { id: "content", label: "3 · Contenu & Visuel" },
-  { id: "identity", label: "4 · Identification & Publication" },
-];
+const TABS: Tab[] = ["location", "specs", "content", "identity"];
+
+const COUNTRIES = ["LU", "BE", "FR", "DE", "CH", "MC", "PT", "ES"] as const;
 
 export function OffmarketForm({
   row,
@@ -40,9 +34,10 @@ export function OffmarketForm({
   row: OffmarketRow | null;
   mode: "create" | "edit";
 }) {
+  const t = useTranslations("admin_offmarket");
   const [tab, setTab] = useState<Tab>(mode === "create" ? "location" : "identity");
-  // En création : on commence par Localisation (workflow 1→4).
-  // En édition : on ouvre sur Identification pour basculer brouillon ↔ publié rapidement.
+  // En création : on commence par Localisation (étapes 1 à 4).
+  // En édition : on ouvre sur Identification pour passer de brouillon à publié rapidement.
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [propertyType, setPropertyType] = useState<PropertyType>(
@@ -77,13 +72,13 @@ export function OffmarketForm({
           setError(result.error);
         }
       } catch (e) {
-        // Ne pas masquer les exceptions internes Next (redirect / notFound) —
+        // Ne pas masquer les exceptions internes Next (redirect / notFound) :
         // elles doivent remonter pour que Next gère la navigation.
         if (isNextInternalError(e)) throw e;
         setError(
           e instanceof Error
-            ? `Erreur réseau : ${e.message}. Vérifie ta connexion et réessaie.`
-            : "Erreur réseau inconnue. Vérifie ta connexion.",
+            ? t("form.networkError", { message: e.message })
+            : t("form.networkErrorUnknown"),
         );
       }
     });
@@ -95,28 +90,28 @@ export function OffmarketForm({
     <form action={submit} className="space-y-8">
       <input type="hidden" name="property_type" value={propertyType} />
       <nav className="flex flex-wrap gap-2 border-b border-[#3D4F63]/15 pb-3">
-        {TABS.map((t) => (
+        {TABS.map((id) => (
           <button
-            key={t.id}
+            key={id}
             type="button"
-            onClick={() => setTab(t.id)}
+            onClick={() => setTab(id)}
             className={`rounded-full px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] transition-colors ${
-              tab === t.id
+              tab === id
                 ? "bg-[#3D4F63] text-[#F5EFE1]"
                 : "text-[#3D4F63] hover:bg-[#3D4F63]/10"
             }`}
           >
-            {t.label}
+            {t(`form.tab_${id}`)}
           </button>
         ))}
       </nav>
 
       {tab === "identity" && (
-        <Section title="Identification & Publication">
+        <Section title={t("form.section_identity")}>
           <div className="md:col-span-2">
             <PublishGuard row={row} mode={mode} />
           </div>
-          <Field label="Référence" hint="Auto-générée à la création. Modifiable.">
+          <Field label={t("form.reference")} hint={t("form.referenceHint")}>
             <input
               name="reference"
               defaultValue={ref}
@@ -126,11 +121,11 @@ export function OffmarketForm({
             />
           </Field>
           <Field
-            label="Statut"
+            label={t("form.status")}
             hint={
               mode === "create"
-                ? "Une fiche neuve reste en brouillon — vous pourrez publier après avoir rempli tous les onglets."
-                : "Passez en « Publié » uniquement quand titre, type, localisation et prix sont renseignés."
+                ? t("form.statusHintCreate")
+                : t("form.statusHintEdit")
             }
           >
             <select
@@ -141,12 +136,12 @@ export function OffmarketForm({
             >
               {OFFMARKET_STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {OFFMARKET_STATUS_LABELS[s]}
+                  {t(`status.${s}`)}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="Date de fin d'exclusivité">
+          <Field label={t("form.exclusiveUntil")}>
             <input
               type="date"
               name="exclusive_until"
@@ -155,8 +150,8 @@ export function OffmarketForm({
             />
           </Field>
           <Field
-            label="URL du mandat signé"
-            hint="Lien Supabase Storage (PDF) — upload manuel pour l'instant."
+            label={t("form.signedMandate")}
+            hint={t("form.signedMandateHint")}
           >
             <input
               name="signed_mandate_url"
@@ -169,27 +164,24 @@ export function OffmarketForm({
       )}
 
       {tab === "location" && (
-        <Section title="Localisation">
-          <Field label="Pays">
+        <Section title={t("form.section_location")}>
+          <Field label={t("form.country")}>
             <select name="country" defaultValue={row?.country ?? "LU"} className={inputCls}>
-              <option value="LU">Luxembourg</option>
-              <option value="BE">Belgique</option>
-              <option value="FR">France</option>
-              <option value="DE">Allemagne</option>
-              <option value="CH">Suisse</option>
-              <option value="MC">Monaco</option>
-              <option value="PT">Portugal</option>
-              <option value="ES">Espagne</option>
+              {COUNTRIES.map((c) => (
+                <option key={c} value={c}>
+                  {t(`country.${c}`)}
+                </option>
+              ))}
             </select>
           </Field>
-          <Field label="Région" hint="Texte libre (canton, département…)">
+          <Field label={t("form.region")} hint={t("form.regionHint")}>
             <input
               name="region"
               defaultValue={row?.region ?? ""}
               className={inputCls}
             />
           </Field>
-          <Field label="Ville réelle" hint="Visible uniquement après NDA signé.">
+          <Field label={t("form.cityReal")} hint={t("form.cityRealHint")}>
             <input
               name="city_real"
               defaultValue={row?.city_real ?? ""}
@@ -197,8 +189,8 @@ export function OffmarketForm({
             />
           </Field>
           <Field
-            label="Ville anonymisée"
-            hint="Affichée publiquement, ex : « Confidentiel · Luxembourg »."
+            label={t("form.cityAnonymized")}
+            hint={t("form.cityAnonymizedHint")}
           >
             <input
               name="city_anonymized"
@@ -211,8 +203,8 @@ export function OffmarketForm({
 
       {tab === "specs" && (
         <div className="space-y-6">
-          <Section title="Type">
-            <Field label="Type principal">
+          <Section title={t("form.section_type")}>
+            <Field label={t("form.mainType")}>
               <select
                 name="property_type_select"
                 value={propertyType}
@@ -220,14 +212,14 @@ export function OffmarketForm({
                 className={inputCls}
                 required
               >
-                {PROPERTY_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {PROPERTY_TYPE_LABELS[t]}
+                {PROPERTY_TYPES.map((pt) => (
+                  <option key={pt} value={pt}>
+                    {t(`propertyType.${pt}`)}
                   </option>
                 ))}
               </select>
             </Field>
-            <Field label="Transaction">
+            <Field label={t("form.transaction")}>
               <select
                 name="transaction"
                 defaultValue={row?.transaction ?? "sale"}
@@ -236,13 +228,13 @@ export function OffmarketForm({
               >
                 {OFFMARKET_TRANSACTIONS.map((tx) => (
                   <option key={tx} value={tx}>
-                    {OFFMARKET_TRANSACTION_LABELS[tx]}
+                    {t(`transaction.${tx}`)}
                   </option>
                 ))}
               </select>
             </Field>
             {isImmeuble && (
-              <Field label="Sous-type d'immeuble">
+              <Field label={t("form.subType")}>
                 <select
                   name="sub_type"
                   defaultValue={row?.sub_type ?? "rapport"}
@@ -250,19 +242,19 @@ export function OffmarketForm({
                 >
                   {IMMEUBLE_SUB_TYPES.map((s) => (
                     <option key={s} value={s}>
-                      {IMMEUBLE_SUB_TYPE_LABELS[s]}
+                      {t(`immeubleSubType.${s}`)}
                     </option>
                   ))}
                 </select>
               </Field>
             )}
-            <Field label="Classe énergétique">
+            <Field label={t("form.energyClass")}>
               <select
                 name="classe_energetique"
                 defaultValue={row?.classe_energetique ?? row?.energy_class ?? ""}
                 className={inputCls}
               >
-                <option value="">—</option>
+                <option value="">{t("form.energyNone")}</option>
                 {["A+", "A", "B", "C", "D", "E", "F", "G", "H", "I"].map((c) => (
                   <option key={c} value={c}>
                     {c}
@@ -272,9 +264,9 @@ export function OffmarketForm({
             </Field>
           </Section>
 
-          <Section title="Surfaces">
+          <Section title={t("form.section_surfaces")}>
             {!isTerrain && (
-              <Field label="Surface habitable (m²)">
+              <Field label={t("form.surfaceLiving")}>
                 <input
                   name="surface_habitable"
                   type="text"
@@ -286,7 +278,7 @@ export function OffmarketForm({
             )}
             {showProfessionalSurfaces && (
               <>
-                <Field label="Surface utile (m²)">
+                <Field label={t("form.surfaceUseful")}>
                   <input
                     name="surface_utile"
                     type="text"
@@ -295,7 +287,7 @@ export function OffmarketForm({
                     className={inputCls}
                   />
                 </Field>
-                <Field label="Surface pondérée (m²)">
+                <Field label={t("form.surfaceWeighted")}>
                   <input
                     name="surface_ponderee"
                     type="text"
@@ -307,11 +299,11 @@ export function OffmarketForm({
               </>
             )}
             <Field
-              label="Surface terrain (m²)"
+              label={t("form.surfaceLand")}
               hint={
                 row?.surface_terrain
-                  ? `= ${(row.surface_terrain / 100).toFixed(2)} ares`
-                  : "1 are = 100 m²"
+                  ? t("form.surfaceLandAres", { ares: (row.surface_terrain / 100).toFixed(2) })
+                  : t("form.surfaceLandHint")
               }
             >
               <input
@@ -325,9 +317,9 @@ export function OffmarketForm({
           </Section>
 
           {!isTerrain && (
-            <Section title="Pièces">
+            <Section title={t("form.section_rooms")}>
               {showBedrooms && (
-                <Field label="Chambres">
+                <Field label={t("form.bedrooms")}>
                   <input
                     name="chambres"
                     type="number"
@@ -338,7 +330,7 @@ export function OffmarketForm({
                 </Field>
               )}
               {showBureaux && (
-                <Field label="Bureaux">
+                <Field label={t("form.offices")}>
                   <input
                     name="bureaux"
                     type="number"
@@ -348,7 +340,7 @@ export function OffmarketForm({
                   />
                 </Field>
               )}
-              <Field label="Salles de bain">
+              <Field label={t("form.bathrooms")}>
                 <input
                   name="salles_de_bain"
                   type="number"
@@ -357,7 +349,7 @@ export function OffmarketForm({
                   className={inputCls}
                 />
               </Field>
-              <Field label="Salles de douche">
+              <Field label={t("form.showers")}>
                 <input
                   name="douches"
                   type="number"
@@ -366,7 +358,7 @@ export function OffmarketForm({
                   className={inputCls}
                 />
               </Field>
-              <Field label="WC séparés">
+              <Field label={t("form.wc")}>
                 <input
                   name="wc"
                   type="number"
@@ -375,7 +367,7 @@ export function OffmarketForm({
                   className={inputCls}
                 />
               </Field>
-              <Field label="Locaux de stockage">
+              <Field label={t("form.storage")}>
                 <input
                   name="locaux_stockage"
                   type="number"
@@ -384,16 +376,16 @@ export function OffmarketForm({
                   className={inputCls}
                 />
               </Field>
-              <Field label="Buanderie">
+              <Field label={t("form.laundry")}>
                 <Toggle name="buanderie" defaultChecked={!!row?.buanderie} />
               </Field>
-              <Field label="Dressing">
+              <Field label={t("form.dressing")}>
                 <Toggle name="dressing" defaultChecked={!!row?.dressing} />
               </Field>
-              <Field label="Cuisine">
+              <Field label={t("form.kitchen")}>
                 <Toggle name="cuisine" defaultChecked={!!row?.cuisine} />
               </Field>
-              <Field label="Cuisine — surface (m²)">
+              <Field label={t("form.kitchenSurface")}>
                 <input
                   name="cuisine_m2"
                   type="number"
@@ -406,8 +398,8 @@ export function OffmarketForm({
             </Section>
           )}
 
-          <Section title="Extérieurs">
-            <Field label="Terrasse — surface (m²)">
+          <Section title={t("form.section_outdoor")}>
+            <Field label={t("form.terraceSurface")}>
               <input
                 name="terrasse_m2"
                 type="number"
@@ -417,7 +409,7 @@ export function OffmarketForm({
                 className={inputCls}
               />
             </Field>
-            <Field label="Balcon — surface (m²)">
+            <Field label={t("form.balconySurface")}>
               <input
                 name="balcon_m2"
                 type="number"
@@ -427,7 +419,7 @@ export function OffmarketForm({
                 className={inputCls}
               />
             </Field>
-            <Field label="Jardin — surface (m²)">
+            <Field label={t("form.gardenSurface")}>
               <input
                 name="jardin_m2"
                 type="number"
@@ -437,13 +429,13 @@ export function OffmarketForm({
                 className={inputCls}
               />
             </Field>
-            <Field label="Piscine">
+            <Field label={t("form.pool")}>
               <Toggle name="has_piscine" defaultChecked={!!row?.has_piscine} />
             </Field>
           </Section>
 
-          <Section title="Stationnement">
-            <Field label="Parking extérieur">
+          <Section title={t("form.section_parking")}>
+            <Field label={t("form.parkingOutdoor")}>
               <input
                 name="parking_exterieur"
                 type="number"
@@ -452,7 +444,7 @@ export function OffmarketForm({
                 className={inputCls}
               />
             </Field>
-            <Field label="Parking intérieur">
+            <Field label={t("form.parkingIndoor")}>
               <input
                 name="parking_interieur"
                 type="number"
@@ -461,7 +453,7 @@ export function OffmarketForm({
                 className={inputCls}
               />
             </Field>
-            <Field label="Box">
+            <Field label={t("form.box")}>
               <input
                 name="box"
                 type="number"
@@ -470,7 +462,7 @@ export function OffmarketForm({
                 className={inputCls}
               />
             </Field>
-            <Field label="Garage">
+            <Field label={t("form.garage")}>
               <input
                 name="garage"
                 type="number"
@@ -481,18 +473,18 @@ export function OffmarketForm({
             </Field>
           </Section>
 
-          <Section title="Prestations libres">
+          <Section title={t("form.section_amenities")}>
             <div className="md:col-span-2">
               <Field
-                label="Prestations (tags libres)"
-                hint="Séparées par des virgules ou retours à la ligne."
+                label={t("form.amenities")}
+                hint={t("form.amenitiesHint")}
               >
                 <textarea
                   name="prestations"
                   rows={3}
                   defaultValue={(row?.prestations ?? row?.highlights ?? []).join(", ")}
                   className={inputCls + " font-sans"}
-                  placeholder="Ascenseur, Cave, Cheminée, Vue dégagée…"
+                  placeholder={t("form.amenitiesPlaceholder")}
                 />
               </Field>
             </div>
@@ -502,8 +494,8 @@ export function OffmarketForm({
 
       {tab === "content" && (
         <div className="space-y-6">
-          <Section title="Contenu rédactionnel">
-            <Field label="Titre">
+          <Section title={t("form.section_content")}>
+            <Field label={t("form.title")}>
               <input
                 name="title"
                 defaultValue={row?.title ?? ""}
@@ -512,8 +504,8 @@ export function OffmarketForm({
               />
             </Field>
             <Field
-              label="Description courte"
-              hint="Aperçu public — 200 caractères max."
+              label={t("form.shortDescription")}
+              hint={t("form.shortDescriptionHint")}
             >
               <textarea
                 name="short_description"
@@ -525,16 +517,16 @@ export function OffmarketForm({
             </Field>
             <div className="md:col-span-2">
               <Field
-                label="Description complète"
-                hint="Accessible après NDA signé. Mise en forme : gras (B) pour les titres « Description : », « Prestations : »… ; italique (I) ; saut de ligne Maj+Entrée."
+                label={t("form.fullDescription")}
+                hint={t("form.fullDescriptionHint")}
               >
-                {/* POL4-A1 (ELISE) : éditeur formaté TipTap (bold + italique
-                    + sauts uniquement). Hidden input `full_description`
-                    soumet le HTML à la server action existante. */}
+                {/* Éditeur formaté (gras, italique et sauts de ligne
+                    uniquement). Le champ caché `full_description` soumet
+                    le HTML à l'action serveur existante. */}
                 <RichTextEditor
                   value={fullDescription}
                   onChange={setFullDescription}
-                  placeholder="Description complète du bien"
+                  placeholder={t("form.fullDescriptionPlaceholder")}
                 />
                 <input
                   type="hidden"
@@ -544,12 +536,10 @@ export function OffmarketForm({
               </Field>
             </div>
             <div className="md:col-span-2">
-              {/* POL2-10 : champ URL vidéo (addition minimale). Upload
-                  drag-and-drop natif différé Phase B — cf.
-                  docs/admin/VIDEO_UPLOAD_GUIDE.md */}
+              {/* Champ URL de la vidéo de présentation. */}
               <Field
-                label="Vidéo de présentation — URL"
-                hint="URL publique d'un fichier vidéo (webm/mp4/mov). Bucket Supabase « property-videos » ou CDN. Laisser vide = pas de vidéo."
+                label={t("form.videoUrl")}
+                hint={t("form.videoUrlHint")}
               >
                 <input
                   name="video_url"
@@ -558,7 +548,7 @@ export function OffmarketForm({
                     (row as { video_url?: string | null } | null)?.video_url ??
                     ""
                   }
-                  placeholder="https://… .mp4"
+                  placeholder={t("form.videoUrlPlaceholder")}
                   className={inputCls}
                 />
               </Field>
@@ -567,13 +557,10 @@ export function OffmarketForm({
 
           <PriceSection row={row} />
 
-          <Section title="Composition de l'immeuble" >
+          <Section title={t("form.section_composition")}>
             <div className="md:col-span-2">
               <p className="text-sm text-[#3D4F63]/70">
-                Détaillez la composition uniquement si le bien est de type
-                Immeuble (rapport / mixte / bureaux / commercial / habitation).
-                Les totaux sont affichés au visiteur publiquement ; le détail
-                ne s&apos;ouvre qu&apos;après NDA.
+                {t("form.compositionIntro")}
               </p>
               <CompositionEditor
                 defaultCommerces={(row?.composition_commerces as CommerceRow[]) ?? []}
@@ -583,10 +570,10 @@ export function OffmarketForm({
             </div>
           </Section>
 
-          <Section title="Diffusion publique">
+          <Section title={t("form.section_public")}>
             <Field
-              label="Position dans la liste (1 = premier affiché)"
-              hint="Plus le chiffre est bas, plus le bien apparaît haut dans la liste publique. Laisse 100 si tu veux qu'il soit en ordre neutre."
+              label={t("form.displayOrder")}
+              hint={t("form.displayOrderHint")}
             >
               <input
                 name="display_order"
@@ -596,10 +583,10 @@ export function OffmarketForm({
                 className={inputCls}
               />
             </Field>
-            <Field label="Coup de cœur (apparaît sur la home)">
+            <Field label={t("form.favorite")}>
               <Toggle name="is_coup_de_coeur" defaultChecked={!!row?.is_coup_de_coeur} />
             </Field>
-            <Field label="Verrouiller les photos">
+            <Field label={t("form.lockPhotos")}>
               <label className="inline-flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
@@ -607,7 +594,7 @@ export function OffmarketForm({
                   defaultChecked={row?.photos_locked ?? true}
                   className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
                 />
-                <span>Cadenas même après NDA</span>
+                <span>{t("form.lockPhotosHint")}</span>
               </label>
             </Field>
           </Section>
@@ -627,7 +614,7 @@ export function OffmarketForm({
             disabled={busy}
             className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
           >
-            {busy ? "Enregistrement…" : mode === "create" ? "Créer le bien" : "Enregistrer"}
+            {busy ? t("form.saving") : mode === "create" ? t("form.create") : t("form.save")}
           </button>
           {mode === "edit" && row && (
             <Link
@@ -635,7 +622,7 @@ export function OffmarketForm({
               target="_blank"
               className="rounded-full border border-[#3D4F63]/20 px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
             >
-              Aperçu public ↗
+              {t("form.publicPreview")} ↗
             </Link>
           )}
         </div>
@@ -654,21 +641,21 @@ const inputCls =
 type PriceMode = "exact" | "range" | "custom" | "on_request" | "on_demand";
 
 function PriceSection({ row }: { row: OffmarketRow | null }) {
+  const t = useTranslations("admin_offmarket");
   const initial: PriceMode = (row?.price_mode as PriceMode) ||
     (row?.price_estimate ? "exact" : "on_request");
   const [mode, setMode] = useState<PriceMode>(initial);
-  // POL2-9 : drapeau "Prix sur demande" (masque le prix public).
-  // Colonne potentiellement absente tant que la migration n'est pas
-  // appliquée → lue de façon tolérante, défaut false.
+  // Drapeau "Prix sur demande" (masque le prix public). Lu de façon
+  // tolérante (colonne éventuellement absente), défaut false.
   const initialOnDemand =
     (row as { price_on_demand?: boolean | null } | null)?.price_on_demand ===
       true || (row?.price_mode as string | null) === "on_demand";
   const [priceOnDemand, setPriceOnDemand] = useState(initialOnDemand);
 
-  // POL3-5 : la case « Prix sur demande » pilote AUSSI price_mode.
-  //   cochée   → price_on_demand=true,  price_mode='on_demand'
-  //   décochée → price_on_demand=false, price_mode='exact'
-  //              (sauf si déjà 'range' → on conserve 'range')
+  // La case « Prix sur demande » pilote AUSSI price_mode.
+  //   cochée   : price_on_demand=true,  price_mode='on_demand'
+  //   décochée : price_on_demand=false, price_mode='exact'
+  //              (sauf si déjà 'range' : on conserve 'range')
   function handleOnDemandChange(checked: boolean) {
     setPriceOnDemand(checked);
     if (checked) {
@@ -679,11 +666,11 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
   }
 
   return (
-    <Section title="Prix">
+    <Section title={t("form.section_price")}>
       <div className="md:col-span-2">
         {/* Sentinelle toujours soumise : permet à l'action de distinguer
-            "formulaire soumis depuis cet onglet, case décochée" (→ false)
-            d'un onglet jamais monté (→ valeur DB conservée). */}
+            "formulaire soumis depuis cet onglet, case décochée" (false)
+            d'un onglet jamais monté (valeur en base conservée). */}
         <input type="hidden" name="price_on_demand_present" value="1" />
         <label className="flex items-start gap-3 rounded-md border border-[#3D4F63]/20 bg-[#F5EFE1]/40 px-3 py-3">
           <input
@@ -695,34 +682,32 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
           />
           <span className="text-sm leading-snug text-[#1A1F2A]">
             <span className="font-semibold">
-              Afficher « Prix sur demande » (masquer le prix)
+              {t("form.priceOnDemand")}
             </span>
             <span className="mt-0.5 block text-xs text-[#3D4F63]/70">
-              Décoché par défaut : le prix réel est affiché publiquement.
-              Cochez pour masquer le montant et n&apos;afficher que « Prix
-              sur demande ».
+              {t("form.priceOnDemandHint")}
             </span>
           </span>
         </label>
       </div>
       {priceOnDemand ? (
-        // POL3-5 : case cochée ⇒ price_mode='on_demand' soumis en dur.
+        // Case cochée : price_mode='on_demand' soumis en dur.
         // Le sélecteur de mode est masqué (le prix est de toute façon
         // entièrement masqué publiquement).
         <input type="hidden" name="price_mode" value="on_demand" />
       ) : (
         <div className="md:col-span-2">
-          <Field label="Mode d'affichage du prix">
+          <Field label={t("form.priceMode")}>
             <select
               name="price_mode"
               value={mode === "on_demand" ? "exact" : mode}
               onChange={(e) => setMode(e.target.value as PriceMode)}
               className={inputCls}
             >
-              <option value="exact">Afficher le prix exact</option>
-              <option value="range">Afficher une fourchette</option>
-              <option value="custom">Texte personnalisé</option>
-              <option value="on_request">Sur demande</option>
+              <option value="exact">{t("form.priceMode_exact")}</option>
+              <option value="range">{t("form.priceMode_range")}</option>
+              <option value="custom">{t("form.priceMode_custom")}</option>
+              <option value="on_request">{t("form.priceMode_on_request")}</option>
             </select>
           </Field>
         </div>
@@ -730,8 +715,8 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
 
       {mode === "exact" && (
         <Field
-          label="Prix exact (€)"
-          hint="Affiché publiquement formaté en euros."
+          label={t("form.priceExact")}
+          hint={t("form.priceExactHint")}
         >
           <input
             name="price_estimate"
@@ -746,7 +731,7 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
 
       {mode === "range" && (
         <>
-          <Field label="Prix min (€)">
+          <Field label={t("form.priceMin")}>
             <input
               name="price_min"
               type="number"
@@ -756,7 +741,7 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
               className={inputCls}
             />
           </Field>
-          <Field label="Prix max (€)">
+          <Field label={t("form.priceMax")}>
             <input
               name="price_max"
               type="number"
@@ -772,8 +757,8 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
       {mode === "custom" && (
         <div className="md:col-span-2">
           <Field
-            label="Texte personnalisé"
-            hint="Exemple : « À partir de 4,5 M€ »"
+            label={t("form.priceCustom")}
+            hint={t("form.priceCustomHint")}
           >
             <input
               name="price_custom_text"
@@ -784,7 +769,7 @@ function PriceSection({ row }: { row: OffmarketRow | null }) {
         </div>
       )}
 
-      {/* Champ caché toujours présent pour preserver la valeur DB privée */}
+      {/* Champ caché toujours présent pour préserver la valeur privée en base */}
       {mode !== "exact" && row?.price_estimate != null && (
         <input type="hidden" name="price_estimate" value={row.price_estimate} />
       )}
@@ -825,11 +810,12 @@ function CompositionEditor({
   const [bureaux, setBureaux] = useState<BureauRow[]>(defaultBureaux);
   const [logements, setLogements] = useState<LogementRow[]>(defaultLogements);
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const t = useTranslations("admin_offmarket");
 
   return (
     <div className="mt-4 space-y-3">
       <CollapsibleTable
-        title="Commerces"
+        title={t("form.compo_commerces")}
         count={commerces.length}
         open={openSection === "commerces"}
         onToggle={() =>
@@ -839,7 +825,7 @@ function CompositionEditor({
         <CommercesTable rows={commerces} setRows={setCommerces} />
       </CollapsibleTable>
       <CollapsibleTable
-        title="Bureaux"
+        title={t("form.compo_offices")}
         count={bureaux.length}
         open={openSection === "bureaux"}
         onToggle={() =>
@@ -849,7 +835,7 @@ function CompositionEditor({
         <BureauxTable rows={bureaux} setRows={setBureaux} />
       </CollapsibleTable>
       <CollapsibleTable
-        title="Logements"
+        title={t("form.compo_dwellings")}
         count={logements.length}
         open={openSection === "logements"}
         onToggle={() =>
@@ -908,14 +894,15 @@ function CommercesTable({
   rows: CommerceRow[];
   setRows: (r: CommerceRow[]) => void;
 }) {
+  const t = useTranslations("admin_offmarket");
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
           <tr>
-            <th className="px-3 py-2">Nom</th>
-            <th className="px-3 py-2 text-right">Surface (m²)</th>
-            <th className="px-3 py-2">Type</th>
+            <th className="px-3 py-2">{t("form.compo_name")}</th>
+            <th className="px-3 py-2 text-right">{t("form.compo_surface")}</th>
+            <th className="px-3 py-2">{t("form.compo_type")}</th>
             <th />
           </tr>
         </thead>
@@ -960,16 +947,18 @@ function CommercesTable({
                   }
                   className={inputCls + " py-1"}
                 >
-                  <option value="restauration">Restauration</option>
-                  <option value="retail">Retail</option>
-                  <option value="services">Services</option>
-                  <option value="autre">Autre</option>
+                  <option value="restauration">{t("form.commerce_restauration")}</option>
+                  <option value="retail">{t("form.commerce_retail")}</option>
+                  <option value="services">{t("form.commerce_services")}</option>
+                  <option value="autre">{t("form.commerce_autre")}</option>
                 </select>
               </td>
               <td className="px-3 py-2 text-right">
                 <button
                   type="button"
                   onClick={() => setRows(rows.filter((_, j) => j !== i))}
+                  aria-label={t("form.compo_remove")}
+                  title={t("form.compo_remove")}
                   className="rounded border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
                 >
                   ✕
@@ -989,7 +978,7 @@ function CommercesTable({
         }
         className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
       >
-        + Ajouter un commerce
+        + {t("form.compo_addCommerce")}
       </button>
     </div>
   );
@@ -1002,14 +991,15 @@ function BureauxTable({
   rows: BureauRow[];
   setRows: (r: BureauRow[]) => void;
 }) {
+  const t = useTranslations("admin_offmarket");
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
           <tr>
-            <th className="px-3 py-2">Étage</th>
-            <th className="px-3 py-2 text-right">Surface (m²)</th>
-            <th className="px-3 py-2">Type</th>
+            <th className="px-3 py-2">{t("form.compo_floor")}</th>
+            <th className="px-3 py-2 text-right">{t("form.compo_surface")}</th>
+            <th className="px-3 py-2">{t("form.compo_type")}</th>
             <th />
           </tr>
         </thead>
@@ -1054,15 +1044,17 @@ function BureauxTable({
                   }
                   className={inputCls + " py-1"}
                 >
-                  <option value="plateau_ouvert">Plateau ouvert</option>
-                  <option value="bureaux_separes">Bureaux séparés</option>
-                  <option value="mixte">Mixte</option>
+                  <option value="plateau_ouvert">{t("form.office_plateau_ouvert")}</option>
+                  <option value="bureaux_separes">{t("form.office_bureaux_separes")}</option>
+                  <option value="mixte">{t("form.office_mixte")}</option>
                 </select>
               </td>
               <td className="px-3 py-2 text-right">
                 <button
                   type="button"
                   onClick={() => setRows(rows.filter((_, j) => j !== i))}
+                  aria-label={t("form.compo_remove")}
+                  title={t("form.compo_remove")}
                   className="rounded border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
                 >
                   ✕
@@ -1079,7 +1071,7 @@ function BureauxTable({
         }
         className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
       >
-        + Ajouter un plateau de bureaux
+        + {t("form.compo_addOffice")}
       </button>
     </div>
   );
@@ -1092,15 +1084,16 @@ function LogementsTable({
   rows: LogementRow[];
   setRows: (r: LogementRow[]) => void;
 }) {
+  const t = useTranslations("admin_offmarket");
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
           <tr>
-            <th className="px-3 py-2">Étage</th>
-            <th className="px-3 py-2 text-right">Surface (m²)</th>
-            <th className="px-3 py-2">Type</th>
-            <th className="px-3 py-2 text-right">Chambres</th>
+            <th className="px-3 py-2">{t("form.compo_floor")}</th>
+            <th className="px-3 py-2 text-right">{t("form.compo_surface")}</th>
+            <th className="px-3 py-2">{t("form.compo_type")}</th>
+            <th className="px-3 py-2 text-right">{t("form.compo_bedrooms")}</th>
             <th />
           </tr>
         </thead>
@@ -1145,9 +1138,9 @@ function LogementsTable({
                   }
                   className={inputCls + " py-1"}
                 >
-                  {(["studio", "T1", "T2", "T3", "T4", "T5+"] as const).map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {(["studio", "T1", "T2", "T3", "T4", "T5+"] as const).map((lt) => (
+                    <option key={lt} value={lt}>
+                      {lt === "studio" ? t("form.dwelling_studio") : lt}
                     </option>
                   ))}
                 </select>
@@ -1171,6 +1164,8 @@ function LogementsTable({
                 <button
                   type="button"
                   onClick={() => setRows(rows.filter((_, j) => j !== i))}
+                  aria-label={t("form.compo_remove")}
+                  title={t("form.compo_remove")}
                   className="rounded border border-red-200 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
                 >
                   ✕
@@ -1190,7 +1185,7 @@ function LogementsTable({
         }
         className="mt-3 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
       >
-        + Ajouter un logement
+        + {t("form.compo_addDwelling")}
       </button>
     </div>
   );
@@ -1203,6 +1198,7 @@ function Toggle({
   name: string;
   defaultChecked?: boolean;
 }) {
+  const t = useTranslations("admin_offmarket");
   return (
     <label className="inline-flex cursor-pointer items-center gap-2">
       <input
@@ -1211,7 +1207,7 @@ function Toggle({
         defaultChecked={defaultChecked}
         className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
       />
-      <span className="text-sm text-[#3D4F63]/80">Activé</span>
+      <span className="text-sm text-[#3D4F63]/80">{t("form.enabled")}</span>
     </label>
   );
 }
@@ -1230,41 +1226,39 @@ function PublishGuard({
   row: OffmarketRow | null;
   mode: "create" | "edit";
 }) {
+  const t = useTranslations("admin_offmarket");
   if (mode === "create") {
     return (
       <div className="rounded-xl border border-[#e0af6e]/30 bg-[#e0af6e]/5 px-4 py-3">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e]">
-          Étape 4 sur 4 — Publication
+          {t("guard.createTitle")}
         </p>
         <p className="mt-2 text-sm text-[#3D4F63]">
-          Cette fiche sera créée en <strong>brouillon</strong>. Cliquez sur
-          « Créer le bien », puis re-ouvrez-la pour la passer en
-          « Publié » une fois les onglets 1, 2 et 3 remplis.
+          {t("guard.createText")}
         </p>
       </div>
     );
   }
 
   const missing: string[] = [];
-  if (!row?.title) missing.push("Titre");
-  if (!row?.property_type) missing.push("Type de bien");
-  if (!row?.country) missing.push("Pays");
+  if (!row?.title) missing.push(t("guard.missingTitle"));
+  if (!row?.property_type) missing.push(t("guard.missingType"));
+  if (!row?.country) missing.push(t("guard.missingCountry"));
   const hasPriceInfo =
     row?.price_estimate ||
     row?.price_min ||
     row?.price_custom_text ||
     row?.price_mode === "on_request";
-  if (!hasPriceInfo) missing.push("Prix (ou mode « Sur demande »)");
+  if (!hasPriceInfo) missing.push(t("guard.missingPrice"));
 
   if (missing.length === 0) {
     return (
       <div className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-700">
-          Prêt pour publication
+          {t("guard.readyTitle")}
         </p>
         <p className="mt-2 text-sm text-emerald-900">
-          Tous les champs critiques sont renseignés. Vous pouvez passer
-          le statut en « Publié » et enregistrer.
+          {t("guard.readyText")}
         </p>
       </div>
     );
@@ -1273,7 +1267,7 @@ function PublishGuard({
   return (
     <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-700">
-        Publication bloquée — champs manquants
+        {t("guard.blockedTitle")}
       </p>
       <ul className="mt-2 list-disc pl-5 text-sm text-amber-900">
         {missing.map((m) => (
@@ -1281,7 +1275,7 @@ function PublishGuard({
         ))}
       </ul>
       <p className="mt-2 text-sm text-amber-900">
-        Complétez les onglets 1 à 3 avant de passer cette fiche en « Publié ».
+        {t("guard.blockedText")}
       </p>
     </div>
   );
@@ -1317,13 +1311,14 @@ function Field({
 }
 
 function DeleteButton({ id }: { id: string }) {
+  const t = useTranslations("admin_offmarket");
   const [busy, startTransition] = useTransition();
   return (
     <button
       type="button"
       disabled={busy}
       onClick={() => {
-        if (!confirm("Supprimer ce bien off-market ? Cette action est irréversible.")) return;
+        if (!confirm(t("form.deleteConfirm"))) return;
         startTransition(async () => {
           try {
             await deleteOffmarket(id);
@@ -1335,7 +1330,7 @@ function DeleteButton({ id }: { id: string }) {
       }}
       className="rounded-full border border-red-200 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50"
     >
-      {busy ? "…" : "Supprimer"}
+      {busy ? "…" : t("form.delete")}
     </button>
   );
 }

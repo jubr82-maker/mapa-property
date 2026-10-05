@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 import { revalidateTag } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SITE_CONTENT_TAG, SITE_DESIGN_TOKENS_TAG } from "@/lib/site-content";
@@ -6,7 +8,7 @@ import { requireAdminRoute } from "@/lib/admin/require-admin";
 
 /**
  * POST /api/admin/cms/revalidate
- * Vide le cache CMS — utilisé depuis le bouton "Vider cache" de
+ * Vide le cache CMS, utilisé depuis le bouton "Actualiser le site" de
  * /admin/contenu. Force la prochaine requête à recharger les rows
  * site_content + site_design_tokens.
  *
@@ -18,12 +20,14 @@ import { requireAdminRoute } from "@/lib/admin/require-admin";
  * c'est strictement le tag-invalidate qui pilote la fraicheur.
  */
 export async function POST() {
+  // Messages d'erreur affiches a l'ecran, dans la langue de l'admin.
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_cms" });
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: t("api_unauthorized") }, { status: 401 });
   }
   // Oct. 2026 : connecte ne suffit pas. Compte de la liste admin ET
   // session aal2 (double authentification), comme le reste de l'admin.

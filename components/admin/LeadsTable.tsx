@@ -3,11 +3,13 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { formatDateTimeShort } from "@/lib/datetime";
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { updateWorkflowStatus, updateLeadNotes } from "@/app/admin/leads/actions";
 import {
   WORKFLOW_STATUSES,
-  WORKFLOW_LABELS,
+  WORKFLOW_LABEL_KEYS,
   WorkflowBadge,
+  sourceLabel,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
 
@@ -28,27 +30,25 @@ type Lead = {
   message: string | null;
   status: string | null;
   property_ref: string | null;
-  /** Sprint C3 : sujet pre-cadre depuis /contact (NULLABLE). */
+  /** Sujet pre-cadre du formulaire /contact (peut etre vide). */
   subject?: string | null;
-  /** Statut workflow partage avec la page /admin/mandats (migration 20260512). */
+  /** Statut de suivi partage avec la page /admin/mandats. */
   workflow_status?: string | null;
 };
 
-// Sprint C3 : libelle humain pour les 6 sujets pre-cadres du formulaire
-// /contact (sprint B3 dropdown). Fallback : valeur brute si subject
-// custom (NDA, mandat, etc.).
-const SUBJECT_LABELS: Record<string, string> = {
-  mandat_vente: "Mandat de vente",
-  mandat_recherche: "Mandat de recherche",
-  estimation: "Estimation",
-  mise_en_location: "Mettre en location",
-  informations: "Informations",
-  offmarket_arcova: "Off-Market — ARCOVA",
-};
+type Translator = ReturnType<typeof useTranslations>;
 
-function subjectLabel(s: string | null | undefined): string {
-  if (!s) return "—";
-  return SUBJECT_LABELS[s] ?? s;
+// Libelle lisible des sujets pre-cadres du formulaire /contact (cles
+// "subject_*" du namespace "admin_leads"). Sujet libre : affiche tel quel.
+function subjectLabel(t: Translator, s: string | null | undefined): string {
+  if (!s) return "";
+  return t.has(`subject_${s}`) ? t(`subject_${s}`) : s;
+}
+
+// Libelle lisible du type de demande (cles "type_*" de "admin_leads").
+function typeLabel(t: Translator, v: string | null | undefined): string {
+  if (!v) return "";
+  return t.has(`type_${v}`) ? t(`type_${v}`) : v;
 }
 
 const LEAD_TYPES = [
@@ -72,6 +72,7 @@ export function LeadsTable({
   leads: Lead[];
   createdColumnLabel: string;
 }) {
+  const t = useTranslations("admin_leads");
   const router = useRouter();
   const sp = useSearchParams();
   const [openId, setOpenId] = useState<string | null>(null);
@@ -91,7 +92,7 @@ export function LeadsTable({
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#3D4F63]/15 bg-white p-4">
         <input
           type="search"
-          placeholder="Recherche email / nom / tel…"
+          placeholder={t("search_placeholder")}
           defaultValue={sp.get("q") ?? ""}
           onChange={(e) => setParam("q", e.target.value)}
           className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
@@ -101,10 +102,10 @@ export function LeadsTable({
           onChange={(e) => setParam("type", e.target.value)}
           className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm"
         >
-          <option value="">Tous types</option>
-          {LEAD_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {t}
+          <option value="">{t("all_types")}</option>
+          {LEAD_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {typeLabel(t, type)}
             </option>
           ))}
         </select>
@@ -115,11 +116,11 @@ export function LeadsTable({
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
               <th className="px-4 py-3">{createdColumnLabel}</th>
-              <th className="px-4 py-3">Objet</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3">Contact</th>
-              <th className="px-4 py-3">Localisation</th>
-              <th className="px-4 py-3">Statut</th>
+              <th className="px-4 py-3">{t("col_subject")}</th>
+              <th className="px-4 py-3">{t("col_type")}</th>
+              <th className="px-4 py-3">{t("col_contact")}</th>
+              <th className="px-4 py-3">{t("col_location")}</th>
+              <th className="px-4 py-3">{t("col_status")}</th>
               <th />
             </tr>
           </thead>
@@ -127,7 +128,7 @@ export function LeadsTable({
             {leads.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
-                  Aucun lead.
+                  {t("empty")}
                 </td>
               </tr>
             ) : (
@@ -156,6 +157,8 @@ function LeadRow({
   open: boolean;
   onToggle: () => void;
 }) {
+  const t = useTranslations("admin_leads");
+  const tw = useTranslations("admin_workflow");
   const [status, setStatus] = useState<WorkflowStatus>(
     lead.workflow_status && WORKFLOW_STATUSES.includes(lead.workflow_status as WorkflowStatus)
       ? (lead.workflow_status as WorkflowStatus)
@@ -191,13 +194,13 @@ function LeadRow({
         <td className="px-4 py-3 text-xs">
           {lead.subject ? (
             <span className="inline-flex items-center rounded-full bg-[#e0af6e]/15 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-[#9E7B2A]">
-              {subjectLabel(lead.subject)}
+              {subjectLabel(t, lead.subject)}
             </span>
           ) : (
-            <span className="text-[#3D4F63]/40">—</span>
+            <span className="text-[#3D4F63]/40">{tw("not_provided")}</span>
           )}
         </td>
-        <td className="px-4 py-3 font-mono text-xs">{lead.type ?? "—"}</td>
+        <td className="px-4 py-3 text-xs">{typeLabel(t, lead.type) || tw("not_provided")}</td>
         <td className="px-4 py-3">
           <p className="font-medium text-[#1A1F2A]">{fullName || lead.email}</p>
           <p className="text-xs text-[#3D4F63]/60">
@@ -206,7 +209,7 @@ function LeadRow({
           </p>
         </td>
         <td className="px-4 py-3 text-xs text-[#3D4F63]/80">
-          {[lead.country, lead.city].filter(Boolean).join(" · ") || "—"}
+          {[lead.country, lead.city].filter(Boolean).join(" · ") || tw("not_provided")}
         </td>
         <td className="px-4 py-3">
           <WorkflowBadge status={status} />
@@ -221,26 +224,26 @@ function LeadRow({
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                  Message
+                  {t("message")}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
-                  {lead.message || "—"}
+                  {lead.message || t("no_message")}
                 </p>
                 {lead.property_ref && (
                   <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                    Bien réf : <span className="text-[#e0af6e]">{lead.property_ref}</span>
+                    {t("property_ref_label")} <span className="text-[#e0af6e]">{lead.property_ref}</span>
                   </p>
                 )}
                 {lead.source && (
                   <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                    Source : <span className="text-[#3D4F63]">{lead.source}</span>
+                    {t("source_label")} <span className="text-[#3D4F63]">{sourceLabel(tw, lead.source)}</span>
                   </p>
                 )}
               </div>
               <div className="space-y-3">
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                    Workflow
+                    {tw("select_title")}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {WORKFLOW_STATUSES.map((s) => (
@@ -255,14 +258,14 @@ function LeadRow({
                             : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e]"
                         }`}
                       >
-                        {WORKFLOW_LABELS[s]}
+                        {tw(WORKFLOW_LABEL_KEYS[s])}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div>
                   <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                    Notes admin
+                    {t("notes_label")}
                   </label>
                   <textarea
                     rows={3}
@@ -275,7 +278,7 @@ function LeadRow({
                     disabled={busy}
                     className="mt-2 rounded-full bg-[#3D4F63] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#F5EFE1] hover:bg-[#e0af6e] disabled:opacity-50"
                   >
-                    {busy ? "…" : "Enregistrer notes"}
+                    {busy ? tw("busy") : t("notes_save")}
                   </button>
                 </div>
               </div>

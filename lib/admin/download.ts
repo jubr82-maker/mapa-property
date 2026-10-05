@@ -1,4 +1,4 @@
-// Sprint Export RGPD — helper client de telechargement.
+// Sprint Export RGPD : helper client de telechargement.
 //
 // Pattern Blob generique en JSON, reutilisable depuis n'importe quel
 // composant admin client.

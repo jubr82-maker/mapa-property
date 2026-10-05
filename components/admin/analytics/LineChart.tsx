@@ -1,3 +1,4 @@
+import { formatDayMonth } from "@/lib/datetime";
 interface LinePoint {
   date: string;
   value: number;
@@ -5,13 +6,16 @@ interface LinePoint {
 
 interface LineChartProps {
   data: LinePoint[];
+  /** Libelle traduit de la serie (accessibilite et infobulles). */
   label?: string;
+  /** Message traduit affiche quand la serie est vide. */
+  emptyLabel?: string;
   height?: number;
 }
 
-export function LineChart({ data, label = "valeur", height = 160 }: LineChartProps) {
+export function LineChart({ data, label = "", height = 160, emptyLabel = "" }: LineChartProps) {
   if (!data || data.length === 0) {
-    return <p className="text-sm text-[#3D4F63]/60">Aucune donnée.</p>;
+    return <p className="text-sm text-[#3D4F63]/60">{emptyLabel}</p>;
   }
 
   const W = 640;
@@ -42,11 +46,7 @@ export function LineChart({ data, label = "valeur", height = 160 }: LineChartPro
     "Z",
   ].join(" ");
 
-  const fmtDate = (iso: string) => {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
-  };
+  const fmtDate = (iso: string) => formatDayMonth(iso) || iso;
 
   return (
     <div className="overflow-x-auto">
@@ -54,7 +54,7 @@ export function LineChart({ data, label = "valeur", height = 160 }: LineChartPro
         viewBox={`0 0 ${W} ${H}`}
         className="w-full min-w-[480px]"
         role="img"
-        aria-label={`Évolution ${label}`}
+        aria-label={label}
       >
         {/* Grid */}
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (

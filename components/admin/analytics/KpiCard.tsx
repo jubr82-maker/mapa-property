@@ -7,10 +7,12 @@ interface KpiCardProps {
   Icon?: LucideIcon;
   hint?: string;
   unit?: string;
+  /** Libelle traduit de la variation (ex. "par rapport a la periode precedente"). */
+  variationLabel?: string;
 }
 
 function formatValue(v: string | number | null, unit?: string): string {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "";
   if (typeof v === "number") {
     const formatted = new Intl.NumberFormat("fr-FR").format(v);
     return unit ? `${formatted} ${unit}` : formatted;
@@ -18,7 +20,7 @@ function formatValue(v: string | number | null, unit?: string): string {
   return unit ? `${v} ${unit}` : v;
 }
 
-export function KpiCard({ label, value, variation, Icon, hint, unit }: KpiCardProps) {
+export function KpiCard({ label, value, variation, Icon, hint, unit, variationLabel }: KpiCardProps) {
   const variationColor =
     variation === null || variation === undefined
       ? "text-[#3D4F63]/50"
@@ -44,7 +46,7 @@ export function KpiCard({ label, value, variation, Icon, hint, unit }: KpiCardPr
       {variation !== null && variation !== undefined ? (
         <p className={`mt-3 font-mono text-xs ${variationColor}`}>
           {variation > 0 ? "+" : ""}
-          {variation.toFixed(1)}% vs période précédente
+          {variation.toFixed(1)}%{variationLabel ? ` ${variationLabel}` : ""}
         </p>
       ) : hint ? (
         <p className="mt-3 text-xs text-[#3D4F63]/60">{hint}</p>

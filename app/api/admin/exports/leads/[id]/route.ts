@@ -1,12 +1,17 @@
-// Export PDF de la fiche d'un lead — sur le modèle validé (bandeau,
+// Export PDF de la fiche d'un lead, sur le modèle validé (bandeau,
 // cartouches, sections, historique, pied de page).
 import { NextResponse } from "next/server";
 import { requireAdminRoute } from "@/lib/admin/require-admin";
 import { supabaseService } from "@/lib/supabase-service";
 import { buildFichePdf, type PdfSection } from "@/lib/admin/exports/pdf";
 import { pdfResponse, exportFicheFilename } from "@/lib/admin/exports/http";
-import { fmtDateTimeShort, fmtDateShort, fullName, orDash } from "@/lib/admin/exports/format";
-import { rawTypeLabel, subjectLabel, sourceLabel, workflowStatusLabel } from "@/lib/admin/exports/labels";
+// Dates : formatteurs PDF de format.ts (heure de Luxembourg, via
+// lib/datetime.ts), construits sans Intl pour rester compatibles avec
+// l'encodage des polices PDF.
+import { fmtDateTimeShort, fmtDateShort } from "@/lib/admin/exports/format";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
+import { sourceLabel, workflowLabelKey } from "@/components/admin/WorkflowBadge";
 
 interface HistoryEntry {
   at: string;
@@ -73,40 +78,50 @@ export async function GET(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_leads" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
+  const notProvided = tw("not_provided");
+  // Valeur absente : libelle traduit "Non renseigne".
+  const v = (x: string | null | undefined): string => (x && x.trim() ? x : notProvided);
+  const labelOf = (prefix: string, x: string | null | undefined): string =>
+    !x ? notProvided : t.has(`${prefix}${x}`) ? t(`${prefix}${x}`) : x;
+  const status = (x: string | null | undefined): string => tw(workflowLabelKey(x ?? "new"));
+  const name = [row.first_name, row.last_name].filter(Boolean).join(" ");
+
   const consent = rgpdConsentAt(row);
   const history: HistoryEntry[] = Array.isArray(row.workflow_history) ? row.workflow_history : [];
 
   const sections: PdfSection[] = [
     {
       kind: "table",
-      heading: "Prospect",
+      heading: t("pdf_section_prospect"),
       rows: [
-        { label: "Nom", value: fullName(row.first_name, row.last_name) },
-        { label: "Email", value: orDash(row.email) },
-        { label: "Téléphone", value: orDash(row.phone) },
-        { label: "Pays", value: orDash(row.country) },
-        { label: "Ville", value: orDash(row.city) },
+        { label: tw("col_name"), value: v(name) },
+        { label: tw("field_email"), value: v(row.email) },
+        { label: tw("field_phone"), value: v(row.phone) },
+        { label: tw("field_country"), value: v(row.country) },
+        { label: tw("field_city"), value: v(row.city) },
       ],
     },
     {
       kind: "table",
-      heading: "Demande",
+      heading: t("pdf_section_request"),
       rows: [
-        { label: "Type", value: rawTypeLabel(row.type) },
-        { label: "Sujet", value: subjectLabel(row.subject) },
-        { label: "Source", value: sourceLabel(row.source) },
-        { label: "Bien référencé", value: orDash(row.property_ref) },
-        { label: "Reçue le", value: fmtDateTimeShort(row.created_at) },
-        { label: "Consentement RGPD", value: consent ? `Oui, le ${fmtDateShort(consent)}` : "Non" },
+        { label: t("field_type"), value: labelOf("type_", row.type) },
+        { label: t("field_subject"), value: labelOf("subject_", row.subject) },
+        { label: tw("field_source"), value: v(sourceLabel(tw, row.source)) },
+        { label: t("field_property_ref"), value: v(row.property_ref) },
+        { label: t("pdf_received_on"), value: fmtDateTimeShort(row.created_at) },
+        { label: t("pdf_rgpd_consent"), value: consent ? tw("yes_on", { date: fmtDateShort(consent) }) : tw("no") },
       ],
     },
     {
       kind: "table",
-      heading: "Suivi interne",
+      heading: tw("internal_title"),
       rows: [
-        { label: "Statut workflow", value: workflowStatusLabel(row.workflow_status) },
-        { label: "Prochain suivi", value: row.next_follow_up ? fmtDateShort(row.next_follow_up) : "—" },
-        { label: "Notes admin", value: orDash(row.admin_notes ?? row.notes) },
+        { label: tw("select_title"), value: status(row.workflow_status) },
+        { label: tw("followup_title"), value: row.next_follow_up ? fmtDateShort(row.next_follow_up) : notProvided },
+        { label: tw("internal_notes"), value: v(row.admin_notes ?? row.notes) },
       ],
     },
   ];
@@ -114,34 +129,34 @@ export async function GET(
   if (history.length > 0) {
     sections.push({
       kind: "timeline",
-      heading: "Historique du workflow",
+      heading: tw("history_heading"),
       entries: history.map((h) => ({
         date: fmtDateTimeShort(h.at),
         text: [
-          h.from && h.to ? `${workflowStatusLabel(h.from)} -> ${workflowStatusLabel(h.to)}` : null,
-          h.note ? `Note : ${h.note}` : null,
-          h.reason ? `Motif : ${h.reason}` : null,
+          h.from && h.to ? tw("history_transition", { from: status(h.from), to: status(h.to) }) : null,
+          h.note ? tw("history_note", { note: h.note }) : null,
+          h.reason ? tw("history_reason", { reason: h.reason }) : null,
         ]
           .filter(Boolean)
-          .join(" — ") || "—",
+          .join(" ; ") || notProvided,
       })),
     });
   }
 
   sections.push({
     kind: "freetext",
-    heading: "Message",
-    text: orDash(row.message),
+    heading: tw("field_message"),
+    text: v(row.message),
   });
 
   const buffer = await buildFichePdf({
-    documentTitle: "Fiche lead",
-    subtitle: fullName(row.first_name, row.last_name) !== "—" ? fullName(row.first_name, row.last_name) : row.email,
+    documentTitle: t("pdf_title"),
+    subtitle: name || row.email,
     reference: `LEAD-${row.id.slice(0, 8).toUpperCase()}`,
     kpis: [
-      { label: "Reçu le", value: fmtDateShort(row.created_at) },
-      { label: "Statut", value: workflowStatusLabel(row.workflow_status) },
-      { label: "RGPD", value: consent ? "Oui" : "Non" },
+      { label: t("pdf_received_on"), value: fmtDateShort(row.created_at) },
+      { label: tw("col_status"), value: status(row.workflow_status) },
+      { label: t("pdf_rgpd"), value: consent ? tw("yes") : tw("no") },
     ],
     sections,
   });

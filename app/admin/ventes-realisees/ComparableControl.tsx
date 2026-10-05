@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 // Controle 3 etats de la comparabilite d'une vente (pilote comparable_override,
 // la colonne que le moteur EVS lit) :
@@ -21,15 +22,16 @@ export function ComparableControl({
   id: string;
   /** Valeur brute de comparable_override en base (null = auto). */
   override: Override;
-  /** Comparabilite auto (date_acte <= 12 mois) — utilisee quand override = null. */
+  /** Comparabilite auto (date_acte <= 12 mois), utilisee quand override = null. */
   autoEffective: boolean;
 }) {
+  const t = useTranslations("admin_sales");
   const router = useRouter();
   const [current, setCurrent] = useState<Override>(override);
   const [pending, setPending] = useState(false);
 
   const effective = current === null ? autoEffective : current;
-  const mode = current === null ? "auto" : "forcé";
+  const mode = current === null ? t("comparable.mode_auto") : t("comparable.mode_forced");
 
   const setOverride = async (value: Override) => {
     if (value === current) return;
@@ -44,14 +46,15 @@ export function ComparableControl({
       });
       if (!res.ok) {
         setCurrent(prev);
-        const txt = await res.text();
-        window.alert(`Échec mise à jour : HTTP ${res.status} — ${txt}`);
+        const reason =
+          res.status === 401 || res.status === 403 ? t("errors.session") : t("errors.server");
+        window.alert(t("comparable.updateFailed", { reason }));
         return;
       }
       router.refresh();
     } catch (e) {
       setCurrent(prev);
-      window.alert(`Échec mise à jour : ${(e as Error).message}`);
+      window.alert(t("comparable.updateFailed", { reason: t("errors.network") }));
     } finally {
       setPending(false);
     }
@@ -60,15 +63,15 @@ export function ComparableControl({
   return (
     <div className="flex flex-col gap-1">
       <div className="inline-flex overflow-hidden rounded border border-[#3D4F63]/30">
-        <Seg label="Auto" active={current === null} onClick={() => setOverride(null)} disabled={pending} />
-        <Seg label="Oui" active={current === true} onClick={() => setOverride(true)} disabled={pending} />
-        <Seg label="Non" active={current === false} onClick={() => setOverride(false)} disabled={pending} />
+        <Seg label={t("comparable.auto")} active={current === null} onClick={() => setOverride(null)} disabled={pending} />
+        <Seg label={t("comparable.yes")} active={current === true} onClick={() => setOverride(true)} disabled={pending} />
+        <Seg label={t("comparable.no")} active={current === false} onClick={() => setOverride(false)} disabled={pending} />
       </div>
       <span className="font-mono text-[9px] uppercase tracking-[0.1em]">
         {effective ? (
-          <span className="text-emerald-700">● Compte</span>
+          <span className="text-emerald-700">● {t("comparable.counts")}</span>
         ) : (
-          <span className="text-[#3D4F63]/50">○ Ignorée</span>
+          <span className="text-[#3D4F63]/50">○ {t("comparable.ignored")}</span>
         )}
         <span className="text-[#3D4F63]/50"> · {mode}</span>
       </span>

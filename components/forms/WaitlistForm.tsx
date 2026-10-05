@@ -6,6 +6,7 @@
 // (textarea grande), rgpd obligatoire avec texte etendu + lien policy.
 // Reutilise Turnstile + honeypot. POST -> /api/liste-attente.
 
+import { getAttribution } from "@/lib/pilotage/attribution-client";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Turnstile } from "@/components/ui/Turnstile";
@@ -53,7 +54,7 @@ export function WaitlistForm() {
       const res = await fetch("/api/liste-attente", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, attribution: getAttribution() }),
       });
       if (res.ok) {
         setStatus("success");

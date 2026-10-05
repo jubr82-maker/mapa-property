@@ -2,15 +2,15 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   OFFMARKET_STATUSES,
-  OFFMARKET_STATUS_LABELS,
   OFFMARKET_TRANSACTIONS,
-  OFFMARKET_TRANSACTION_LABELS,
   PROPERTY_TYPES,
 } from "@/lib/admin/offmarket";
 
 export function OffmarketListFilters() {
+  const t = useTranslations("admin_offmarket");
   const router = useRouter();
   const sp = useSearchParams();
   const [, startTransition] = useTransition();
@@ -28,7 +28,7 @@ export function OffmarketListFilters() {
     <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#3D4F63]/15 bg-white p-4">
       <input
         type="search"
-        placeholder="Rechercher référence ou titre…"
+        placeholder={t("filters.search")}
         defaultValue={sp.get("q") ?? ""}
         onChange={(e) => setParam("q", e.target.value)}
         className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
@@ -38,22 +38,22 @@ export function OffmarketListFilters() {
         onChange={(e) => setParam("status", e.target.value)}
         className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm"
       >
-        <option value="">Tous statuts</option>
+        <option value="">{t("filters.allStatuses")}</option>
         {OFFMARKET_STATUSES.map((s) => (
           <option key={s} value={s}>
-            {OFFMARKET_STATUS_LABELS[s]}
+            {t(`status.${s}`)}
           </option>
         ))}
       </select>
       <select
         value={sp.get("type") ?? ""}
         onChange={(e) => setParam("type", e.target.value)}
-        className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm capitalize"
+        className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm"
       >
-        <option value="">Tous types</option>
-        {PROPERTY_TYPES.map((t) => (
-          <option key={t} value={t}>
-            {t}
+        <option value="">{t("filters.allTypes")}</option>
+        {PROPERTY_TYPES.map((pt) => (
+          <option key={pt} value={pt}>
+            {t(`propertyType.${pt}`)}
           </option>
         ))}
       </select>
@@ -62,10 +62,10 @@ export function OffmarketListFilters() {
         onChange={(e) => setParam("transaction", e.target.value)}
         className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm"
       >
-        <option value="">Vente + Location</option>
+        <option value="">{t("filters.allTransactions")}</option>
         {OFFMARKET_TRANSACTIONS.map((tx) => (
           <option key={tx} value={tx}>
-            {OFFMARKET_TRANSACTION_LABELS[tx]}
+            {t(`transaction.${tx}`)}
           </option>
         ))}
       </select>

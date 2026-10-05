@@ -1,4 +1,4 @@
-// lib/admin/exports/http.ts — reponses HTTP + noms de fichiers partages
+// lib/admin/exports/http.ts : reponses HTTP + noms de fichiers partages
 // pour les exports admin. Aucune de ces reponses ne doit etre mise en
 // cache par le CDN (no-store), et aucune ne doit etre generee sans que
 // l'appelant ait deja verifie requireAdminRoute() dans la meme fonction.

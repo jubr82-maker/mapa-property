@@ -7,10 +7,10 @@ export type LandZone = 1 | 2 | 3 | 4 | 5 | 6;
 // Prix médian par are converti en €/m² (1 are = 100 m²)
 // Valeurs post-correction marché -14.9% entre 2022 et 2024
 export const LAND_PRICE_PER_SQM: Record<LandZone, number> = {
-  1: 2728, // Luxembourg-Ville (tous quartiers) — 272 821 €/are
-  2: 1472, // 1ère couronne premium — 147 187 €/are
-  3: 1092, // 2ème couronne — 109 176 €/are
-  4: 1012, // 3ème couronne — 101 231 €/are
+  1: 2728, // Luxembourg-Ville (tous quartiers) : 272 821 €/are
+  2: 1472, // 1ère couronne premium : 147 187 €/are
+  3: 1092, // 2ème couronne : 109 176 €/are
+  4: 1012, // 3ème couronne : 101 231 €/are
   5: 750, // Sud / bassin minier
   6: 450, // Nord rural
 };
@@ -186,7 +186,7 @@ export function getLandZone(commune: string, quartier?: string): LandZone {
   return COMMUNE_TO_LAND_ZONE[key] || 4;
 }
 
-// Coef occupation : terrain construit (POL3-6, annonces réelles 2026 —
+// Coef occupation : terrain construit (POL3-6, annonces réelles 2026 ,
 // terrain construit Bertrange/Strassen ≈ 90-95 % du nu équivalent, validé
 // Julien : 0.75 sous-évaluait structurellement toutes les maisons).
 const TERRAIN_CONSTRUIT_RATIO = 0.9;

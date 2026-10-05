@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   createReview,
   updateReview,
@@ -24,6 +25,7 @@ export function ReviewForm({
   review: Review | null;
   mode: "create" | "edit";
 }) {
+  const t = useTranslations("admin_reviews");
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -35,28 +37,31 @@ export function ReviewForm({
         else if (review) await updateReview(review.id, formData);
       } catch (e) {
         if (isRedirect(e)) throw e;
-        setError(e instanceof Error ? e.message : "Erreur");
+        console.error(e);
+        setError(t("save_error"));
       }
     });
   };
 
   const onDelete = () => {
     if (!review) return;
-    if (!confirm("Supprimer cet avis ?")) return;
+    if (!confirm(t("delete_confirm"))) return;
+    setError(null);
     startTransition(async () => {
       try {
         await deleteReview(review.id);
       } catch (e) {
         if (isRedirect(e)) throw e;
         console.error(e);
+        setError(t("delete_error"));
       }
     });
   };
 
   return (
     <form action={submit} className="space-y-6">
-      <Section title="Avis">
-        <Field label="Nom du client">
+      <Section title={t("section")}>
+        <Field label={t("field_name")}>
           <input
             name="name"
             defaultValue={review?.name ?? ""}
@@ -64,7 +69,7 @@ export function ReviewForm({
             className={inputCls}
           />
         </Field>
-        <Field label="Note (1 à 5 étoiles)">
+        <Field label={t("field_rating")}>
           <select
             name="rating"
             defaultValue={String(review?.rating ?? 5)}
@@ -77,7 +82,7 @@ export function ReviewForm({
             ))}
           </select>
         </Field>
-        <Field label="Date">
+        <Field label={t("field_date")}>
           <input
             type="date"
             name="review_date"
@@ -85,15 +90,15 @@ export function ReviewForm({
             className={inputCls}
           />
         </Field>
-        <Field label="Langue">
+        <Field label={t("field_language")}>
           <select name="lang" defaultValue={review?.lang ?? "fr"} className={inputCls}>
-            <option value="fr">Français</option>
-            <option value="en">English</option>
-            <option value="de">Deutsch</option>
+            <option value="fr">{t("lang_fr")}</option>
+            <option value="en">{t("lang_en")}</option>
+            <option value="de">{t("lang_de")}</option>
           </select>
         </Field>
         <div className="md:col-span-2">
-          <Field label="Texte de l'avis">
+          <Field label={t("field_comment")}>
             <textarea
               name="comment"
               rows={5}
@@ -103,7 +108,7 @@ export function ReviewForm({
             />
           </Field>
         </div>
-        <Field label="Publié sur la home">
+        <Field label={t("field_published")}>
           <label className="inline-flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -111,7 +116,7 @@ export function ReviewForm({
               defaultChecked={review?.is_published ?? false}
               className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
             />
-            <span>Visible dans le carrousel public</span>
+            <span>{t("published_hint")}</span>
           </label>
         </Field>
       </Section>
@@ -128,7 +133,7 @@ export function ReviewForm({
           disabled={busy}
           className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] hover:bg-[#e0af6e] disabled:opacity-50"
         >
-          {busy ? "…" : mode === "create" ? "Créer l'avis" : "Enregistrer"}
+          {busy ? t("busy") : mode === "create" ? t("submit_create") : t("submit_save")}
         </button>
         {mode === "edit" && review && (
           <button
@@ -137,7 +142,7 @@ export function ReviewForm({
             disabled={busy}
             className="rounded-full border border-red-200 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:opacity-50"
           >
-            Supprimer
+            {t("delete")}
           </button>
         )}
       </footer>

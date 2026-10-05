@@ -17,6 +17,7 @@ import { assertAdminAction } from "@/lib/admin/require-admin";
 import { logAdminAuthEvent } from "@/lib/admin/auth-log";
 import { PASSKEY_ID_PATTERN, PASSKEY_NAME_MAX_LENGTH } from "@/lib/admin/security-config";
 import { verifyCaptchaIfConfigured } from "@/lib/security/captcha";
+import { maybeAlertLoginBurst, sendAdminAlert } from "@/lib/pilotage/alerts";
 import { headers } from "next/headers";
 
 export type PasskeyResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
@@ -67,6 +68,7 @@ export async function passkeyLoginCompleteAction(): Promise<PasskeyResult<{ aal2
   if (!isAdminEmail(user.email)) {
     await supabase.auth.signOut();
     await logAdminAuthEvent({ event: "passkey_login", success: false, email: user.email, reason: "not_allowlisted" });
+    await maybeAlertLoginBurst();
     return { ok: false, error: "credentials" };
   }
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -95,6 +97,7 @@ export async function passkeyRegisteredAction(passkeyId: string, name: string): 
   const friendlyName = cleanName(name);
   if (friendlyName) await supabase.auth.passkey.update({ passkeyId, friendlyName });
   await logAdminAuthEvent({ event: "passkey_add", success: true, email: user.email, reason: friendlyName });
+  await sendAdminAlert("passkey_added", { account: user.email, device: friendlyName });
   return { ok: true };
 }
 

@@ -47,7 +47,7 @@ export async function PATCH(
 
   // Pour weights_used + client_output_override on doit récupérer la ligne et
   // merger dans le JSONB. Le JSON natif PostgREST ne fait pas de merge profond
-  // facilement — on relit puis on réécrit.
+  // facilement : on relit puis on réécrit.
   if (body.weights_used || body.client_output_override) {
     const { data: current, error: readErr } = await supabase
       .from("estimation_requests")
@@ -105,7 +105,7 @@ export async function PATCH(
   return NextResponse.json({ ok: true });
 }
 
-// Soft delete (BUG 6) — status = "deleted" (jamais de suppression dure ;
+// Suppression logique : status = "deleted" (jamais de suppression dure ;
 // la liste admin filtre déjà neq("status","deleted")).
 export async function DELETE(
   _req: Request,

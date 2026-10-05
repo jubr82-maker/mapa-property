@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * CitySuggestInput — mission "saisie et affichage des biens", point 3.
+ * CitySuggestInput : mission "saisie et affichage des biens", point 3.
  *
  * Remplace le champ ville en texte libre par un champ a suggestions :
  * la liste se reduit au fil de la frappe, un clic (ou Entree/fleches)
@@ -13,7 +13,7 @@
  * l'ajout d'une liste deroulante filtree est nouveau.
  *
  * Source des suggestions : voir le composant appelant (liste passee en
- * prop, jamais generee ici) — cf. rapport de mission pour la provenance.
+ * prop, jamais generee ici), cf. rapport de mission pour la provenance.
  */
 
 import { useId, useMemo, useRef, useState } from "react";

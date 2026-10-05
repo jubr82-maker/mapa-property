@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE, formatDateTime } from "@/lib/datetime";
+import { REQUEST_STATUSES } from "@/lib/admin/offmarket";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { WorkflowSelect } from "@/components/admin/WorkflowSelect";
@@ -61,20 +64,6 @@ const FULL_SELECT =
 const FALLBACK_SELECT =
   "id,created_at,property_id,prenom,nom,email,telephone,pays_recherche,ville_quartier,budget_max_eur,surface_souhaitee_m2,criteres_precis,status,notes_admin,nda_url,properties_offmarket(id,reference,title,city_label)";
 
-function formatDateTime(iso: string) {
-  try {
-    return new Date(iso).toLocaleString("fr-FR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-}
-
 export default async function AdminOffmarketRequestDetailPage({
   params,
 }: {
@@ -82,6 +71,7 @@ export default async function AdminOffmarketRequestDetailPage({
 }) {
   const { id } = await params;
   await requireAdminPage();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_offmarket" });
   const supabase = supabaseService();
 
   let migrationApplied = true;
@@ -108,7 +98,8 @@ export default async function AdminOffmarketRequestDetailPage({
   }
 
   const fullName =
-    [item.prenom, item.nom].filter(Boolean).join(" ") || item.email || "—";
+    [item.prenom, item.nom].filter(Boolean).join(" ") || item.email || t("requests.anonymous");
+  const empty = t("notProvided");
   const ws = (item.workflow_status as WorkflowStatus | null) ?? "new";
   const history: HistoryEntry[] = Array.isArray(item.workflow_history)
     ? item.workflow_history
@@ -123,20 +114,20 @@ export default async function AdminOffmarketRequestDetailPage({
           className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           <ArrowLeft className="size-3" />
-          Retour aux demandes
+          {t("detail.back")}
         </Link>
       </div>
 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Off-Market · demande
+            {t("detail.eyebrow")}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
             {fullName}
           </h1>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-            Reçue le {formatDateTime(item.created_at)}
+            {t("detail.receivedOn", { date: formatDateTime(item.created_at) })}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -154,10 +145,10 @@ export default async function AdminOffmarketRequestDetailPage({
           {property && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Bien concerné
+                {t("detail.property")}
               </p>
               <p className="mt-2 text-sm font-medium text-[#1A1F2A]">
-                {property.reference} · {property.title ?? "Sans titre"}
+                {property.reference} · {property.title ?? t("untitled")}
               </p>
               {property.city_label && (
                 <p className="text-xs text-[#3D4F63]/70">
@@ -168,39 +159,48 @@ export default async function AdminOffmarketRequestDetailPage({
                 href={`/admin/offmarket/${property.id}/requests`}
                 className="mt-2 inline-block font-mono text-[10px] uppercase tracking-[0.2em] text-[#e0af6e] hover:underline"
               >
-                Voir toutes les demandes sur ce bien →
+                {t("detail.allRequests")} →
               </Link>
             </div>
           )}
 
           <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-              Demandeur
+              {t("detail.applicant")}
             </p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Field label="Email" value={item.email} />
-              <Field label="Téléphone" value={item.telephone} />
-              <Field label="Pays recherché" value={item.pays_recherche} />
-              <Field label="Ville / quartier" value={item.ville_quartier} />
+              <Field label={t("detail.email")} value={item.email} empty={empty} />
+              <Field label={t("detail.phone")} value={item.telephone} empty={empty} />
+              <Field label={t("requestRow.country")} value={item.pays_recherche} empty={empty} />
+              <Field label={t("requestRow.city")} value={item.ville_quartier} empty={empty} />
               <Field
-                label="Budget max"
+                label={t("requestRow.budget")}
+                empty={empty}
                 value={
                   item.budget_max_eur
                     ? formatPrice(item.budget_max_eur, "fr")
-                    : "—"
+                    : null
                 }
               />
               <Field
-                label="Surface souhaitée"
+                label={t("requestRow.surface")}
+                empty={empty}
                 value={
                   item.surface_souhaitee_m2
                     ? formatSurface(item.surface_souhaitee_m2, "fr")
-                    : "—"
+                    : null
                 }
               />
               <Field
-                label="Statut métier"
-                value={item.status ?? "—"}
+                label={t("detail.dossierStatus")}
+                empty={empty}
+                value={
+                  item.status
+                    ? (REQUEST_STATUSES as readonly string[]).includes(item.status)
+                      ? t(`requestStatus.${item.status}`)
+                      : t("requestStatus.unknown")
+                    : null
+                }
               />
             </dl>
           </div>
@@ -208,7 +208,7 @@ export default async function AdminOffmarketRequestDetailPage({
           {item.criteres_precis && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Critères précis
+                {t("requestRow.criteria")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {item.criteres_precis}
@@ -219,7 +219,7 @@ export default async function AdminOffmarketRequestDetailPage({
           {item.notes_admin && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Notes admin (métier off-market)
+                {t("detail.dossierNotes")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {item.notes_admin}
@@ -230,7 +230,7 @@ export default async function AdminOffmarketRequestDetailPage({
           {item.admin_notes && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Dernière note workflow
+                {t("detail.lastNote")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {item.admin_notes}
@@ -241,7 +241,7 @@ export default async function AdminOffmarketRequestDetailPage({
           {item.nda_url && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                NDA
+                {t("detail.nda")}
               </p>
               <a
                 href={item.nda_url}
@@ -249,7 +249,7 @@ export default async function AdminOffmarketRequestDetailPage({
                 rel="noopener noreferrer"
                 className="mt-2 inline-block font-mono text-sm text-[#e0af6e] hover:underline"
               >
-                Ouvrir le document NDA
+                {t("detail.openNda")}
               </a>
             </div>
           )}
@@ -277,9 +277,11 @@ export default async function AdminOffmarketRequestDetailPage({
 function Field({
   label,
   value,
+  empty,
 }: {
   label: string;
   value: string | null | undefined;
+  empty: string;
 }) {
   return (
     <div>
@@ -287,7 +289,7 @@ function Field({
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-[#1A1F2A]">
-        {value && value.trim() ? value : "—"}
+        {value && value.trim() ? value : empty}
       </dd>
     </div>
   );

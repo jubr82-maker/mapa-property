@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { formatDateTimeShort } from "@/lib/datetime";
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { updateWorkflowStatus } from "@/app/admin/liste-attente/actions";
 import {
   WORKFLOW_STATUSES,
-  WORKFLOW_LABELS,
+  WORKFLOW_LABEL_KEYS,
   WorkflowBadge,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
@@ -40,13 +41,14 @@ function extractTag(message: string | null, tag: string): string | null {
 }
 
 export function WaitlistTable({ items }: { items: WaitlistRow[] }) {
+  const t = useTranslations("admin_waitlist");
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
     <ul className="divide-y divide-[#3D4F63]/10">
       {items.length === 0 && (
         <li className="px-4 py-6 text-center text-sm text-[#3D4F63]/60">
-          Aucune inscription pour cette selection.
+          {t("empty")}
         </li>
       )}
       {items.map((r) => (
@@ -75,6 +77,8 @@ function WaitlistRow({
       ? (item.workflow_status as WorkflowStatus)
       : "new",
   );
+  const t = useTranslations("admin_waitlist");
+  const tw = useTranslations("admin_workflow");
   const [busy, startTransition] = useTransition();
 
   const changeStatus = (next: WorkflowStatus) => {
@@ -112,22 +116,22 @@ function WaitlistRow({
           <div className="text-right text-xs text-[#3D4F63]/80">
             <p>
               <span className="font-mono uppercase tracking-[0.15em] text-[#3D4F63]/50">
-                Budget
+                {t("budget")}
               </span>{" "}
-              {budget ?? "—"}
+              {budget ?? tw("not_provided")}
             </p>
             <p>
               <span className="font-mono uppercase tracking-[0.15em] text-[#3D4F63]/50">
-                Valide
+                {t("budget_validated")}
               </span>{" "}
-              {budgetValidated ?? "—"}
+              {budgetValidated ?? tw("not_provided")}
             </p>
           </div>
           <Link
             href={`/admin/liste-attente/${item.id}`}
             className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
           >
-            Voir
+            {tw("view")}
           </Link>
         </div>
       </div>
@@ -135,7 +139,7 @@ function WaitlistRow({
       {search && (
         <details className="mt-3">
           <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60 hover:text-[#e0af6e]">
-            Recherche
+            {t("search")}
           </summary>
           <p className="mt-2 whitespace-pre-wrap text-sm text-[#1A1F2A]">
             {search}
@@ -146,7 +150,7 @@ function WaitlistRow({
       {open && (
         <div className="mt-4 rounded-xl border border-[#3D4F63]/10 bg-[#F5EFE1]/40 p-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-            Statut workflow
+            {tw("select_title")}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {WORKFLOW_STATUSES.map((s) => (
@@ -161,7 +165,7 @@ function WaitlistRow({
                     : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e]"
                 }`}
               >
-                {WORKFLOW_LABELS[s]}
+                {tw(WORKFLOW_LABEL_KEYS[s])}
               </button>
             ))}
           </div>

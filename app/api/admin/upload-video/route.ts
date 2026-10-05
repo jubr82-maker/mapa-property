@@ -1,4 +1,4 @@
-// Sprint C11-bis — POST /api/admin/upload-video
+// Sprint C11-bis, POST /api/admin/upload-video
 //
 // Endpoint admin pour uploader directement une video vers Cloudflare R2
 // depuis /admin (sera consomme par /admin/biens/edit dans un sprint
@@ -17,7 +17,7 @@
 //   200 MB en migrant l'endpoint vers Edge / streaming si necessaire.
 // - Vercel serverless body limit : 4.5 MB par defaut. Vercel Pro permet
 //   jusqu'a 50 MB via config. Au-dela, passer par uploads directs R2
-//   (presigned URLs) — pas requis pour le 1er use case.
+//   (presigned URLs), pas requis pour le 1er use case.
 
 import { NextResponse } from "next/server";
 import { detectFileType } from "@/lib/security/file-type";
@@ -34,7 +34,7 @@ const ALLOWED_CONTENT_TYPES = new Set([
 const MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB (limite Vercel Pro)
 
 export async function POST(req: Request) {
-  // 1. Auth admin (pattern Supabase SSR — meme que /api/admin/estimations).
+  // 1. Auth admin (pattern Supabase SSR, meme que /api/admin/estimations).
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },

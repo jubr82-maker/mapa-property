@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { fetchOffmarketAdminById } from "@/lib/admin/offmarket-server";
@@ -14,6 +16,7 @@ export default async function OffmarketRequestsPage({
 }) {
   const { id } = await params;
   await requireAdminPage();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_offmarket" });
   // offmarket_requests : service_role (cf. app/admin/leads/page.tsx).
   // fetchOffmarketAdminById lit properties_offmarket (table publique en
   // lecture, client session inchangé).
@@ -37,24 +40,23 @@ export default async function OffmarketRequestsPage({
             {property.reference}
           </p>
           <h1 className="mt-2 font-display text-3xl font-bold text-[#3D4F63]">
-            Demandes — {property.title ?? "Sans titre"}
+            {t("propertyRequests.title", { title: property.title ?? t("untitled") })}
           </h1>
           <p className="mt-1 text-sm text-[#3D4F63]/70">
-            {requests.length} demande{requests.length > 1 ? "s" : ""} reçue
-            {requests.length > 1 ? "s" : ""}
+            {t("propertyRequests.count", { count: requests.length })}
           </p>
         </div>
         <Link
           href={`/admin/offmarket/${property.id}/edit`}
           className="rounded-full border border-[#3D4F63]/20 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
         >
-          ← Retour au bien
+          ← {t("propertyRequests.back")}
         </Link>
       </header>
 
       {requests.length === 0 ? (
         <div className="rounded-2xl border border-[#3D4F63]/15 bg-white px-6 py-16 text-center text-sm text-[#3D4F63]/70">
-          Aucune demande sur ce bien.
+          {t("propertyRequests.empty")}
         </div>
       ) : (
         <ul className="space-y-4">

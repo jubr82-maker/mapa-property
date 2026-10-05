@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { HexColorPicker } from "react-colorful";
 import type { TokenRow } from "./FontsTab";
 
 const COLOR_SLOTS = [
-  { key: "gold", label: "Gold / Copper (accent)", fallback: "#e0af6e" },
-  { key: "ink", label: "Ink (texte)", fallback: "#1A1F2A" },
-  { key: "bg", label: "Background (crème)", fallback: "#F5EFE1" },
+  { key: "gold", label: "color_gold", fallback: "#e0af6e" },
+  { key: "ink", label: "color_ink", fallback: "#1A1F2A" },
+  { key: "bg", label: "color_bg", fallback: "#F5EFE1" },
 ] as const;
 
 export function ColorsTab({ initial }: { initial: TokenRow[] }) {
+  const t = useTranslations("admin_cms");
   const colors = initial.filter((t) => t.category === "color");
 
   return (
@@ -21,7 +23,7 @@ export function ColorsTab({ initial }: { initial: TokenRow[] }) {
           <ColorCard
             key={slot.key}
             slotKey={slot.key}
-            label={slot.label}
+            label={t(slot.label)}
             initialValue={row?.token_value ?? slot.fallback}
             description={row?.description ?? null}
           />
@@ -43,6 +45,7 @@ function ColorCard({
   description: string | null;
 }) {
   const [value, setValue] = useState(initialValue);
+  const t = useTranslations("admin_cms");
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
   const dirty = value.toLowerCase() !== initialValue.toLowerCase();
@@ -61,9 +64,17 @@ function ColorCard({
           description,
         }),
       });
-      const json = await r.json();
-      if (!r.ok) throw new Error(json.error ?? "save failed");
-      setFlash("Enregistré.");
+      const json = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error(
+          r.status === 401 || r.status === 403
+            ? t("err_session")
+            : typeof json.error === "string"
+              ? json.error
+              : t("save_error"),
+        );
+      }
+      setFlash(t("saved"));
     } catch (e) {
       setFlash((e as Error).message);
     } finally {
@@ -76,9 +87,6 @@ function ColorCard({
     <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-5">
       <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
         {label}
-      </p>
-      <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[#3D4F63]/40">
-        color.{slotKey}
       </p>
 
       <div className="mt-4">
@@ -110,7 +118,7 @@ function ColorCard({
           disabled={!dirty || saving}
           className="rounded bg-[#3D4F63] px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-[#F5EFE1] transition-colors hover:bg-[#2D3F53] disabled:opacity-40"
         >
-          {saving ? "..." : "Enregistrer"}
+          {saving ? t("busy") : t("save")}
         </button>
         {flash && (
           <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]/70">

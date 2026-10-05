@@ -1,3 +1,7 @@
+import { sanitizeAttribution } from "@/lib/pilotage/attribution";
+import { recordFormEvent } from "@/lib/pilotage/form-events";
+import { recordEstimationRefusal } from "@/lib/pilotage/estimation-demand";
+import { withFormEvents } from "@/lib/pilotage/form-events";
 import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/turnstile";
@@ -366,6 +370,8 @@ async function persistEstimationRequest(args: {
       console.error("[api/estimate] PERTE ESTIMATION, tous les formats d'insertion ont echoue", {
         code: e4.code,
       });
+      // Visible le jour meme dans le tableau de bord (sante des formulaires).
+      await recordFormEvent("estimate", "db_error", 500);
     }
   } catch (err) {
     console.error("[api/estimate] persist failed", {
@@ -479,7 +485,7 @@ function c7Cast(body: Record<string, unknown>, key: string): string | undefined 
   return typeof v === "string" && v.trim() ? v.trim() : undefined;
 }
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   // Audit de securite (oct. 2026) : cette route ecrit en base et envoie un
   // e-mail a l'adresse saisie. Limite de debit (OWASP ASVS 11.1.4) et
   // anti-robots (Turnstile, exige si configure) contre l'abus et les couts.
@@ -500,6 +506,7 @@ export async function POST(req: Request) {
     sessionId?: string;
     locale?: string;
     rgpdConsent?: boolean;
+    attribution?: unknown;
     parkingInterior?: number;
     parkingExterior?: number;
     works?: unknown;
@@ -531,6 +538,9 @@ export async function POST(req: Request) {
     balconyArea?: number;
     gardenArea?: number;
   };
+  // Origine de la visite (apres consentement) : bornee, conservee dans
+  // l'instantane inputs de l'estimation.
+  body.attribution = sanitizeAttribution(body.attribution);
 
   const captcha = await verifyCaptchaIfConfigured(body.captchaToken, clientIp(req));
   if (!captcha.ok) {
@@ -564,6 +574,13 @@ export async function POST(req: Request) {
   // silencieuse. Une localite est rattachee a sa commune officielle pour le
   // calcul (cf. lib/estimation/coverage.ts).
   if (body.country && String(body.country).trim().toUpperCase() !== "LU") {
+    await recordEstimationRefusal({
+      reason: "country",
+      country: body.country,
+      place: body.locality || body.commune,
+      propertyType: body.type,
+      locale: body.locale,
+    });
     return NextResponse.json(
       { error: "OUT_OF_COVERAGE", reason: "country" },
       { status: 422 },
@@ -576,6 +593,13 @@ export async function POST(req: Request) {
     body.commune,
   );
   if (placeRes.status !== "exact") {
+    await recordEstimationRefusal({
+      reason: placeRes.status === "suggest" ? "place_approximate" : "place_unknown",
+      country: body.country,
+      place: body.locality || body.commune,
+      propertyType: body.type,
+      locale: body.locale,
+    });
     return NextResponse.json(
       {
         error: "OUT_OF_COVERAGE",
@@ -866,3 +890,6 @@ export async function POST(req: Request) {
 }
 
 export const dynamic = "force-dynamic";
+
+// Sante des formulaires (oct. 2026) : chaque envoi est compte par resultat.
+export const POST = withFormEvents("estimate", handlePost);

@@ -5,6 +5,8 @@ import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { EstimationDetailClient } from "./EstimationDetailClient";
 import { PdfExportButton } from "@/components/admin/PdfExportButton";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 interface EstimationRow {
   id: string;
@@ -49,25 +51,41 @@ interface EstimationRow {
   updated_at: string;
 }
 
-const METHOD_LABEL: Record<string, string> = {
-  observatoire: "Référentiel MAPA (calibré)",
-  sales_comparison: "Comparaison directe",
-  hedonic: "Hédoniste enrichi",
-  income_capitalization: "Capitalisation locative",
-  depreciated_replacement: "Coût de remplacement",
-  statec_reference: "STATEC référentiel",
+const METHOD_KEYS = [
+  "observatoire",
+  "sales_comparison",
+  "hedonic",
+  "income_capitalization",
+  "depreciated_replacement",
+  "statec_reference",
+];
+
+const STATUS_KEYS = ["new", "in_progress", "avis_sent", "mandate_signed", "closed"];
+const KNOWN_ENGINES = ["evs_5_methods", "hedonic_legacy", "manual_admin"];
+const KNOWN_CONFIDENCES = ["HIGH", "MEDIUM", "LOW", "MANUAL"];
+const KNOWN_LOCALES = ["fr", "en", "de"];
+
+// Valeurs d'énumération traduites, par champ saisi (cf. namespace
+// admin_estimations : propertyType, state, floorType, atypicalType, view).
+const ENUM_GROUP_BY_INPUT: Record<string, string> = {
+  type: "propertyType",
+  state: "state",
+  condition: "state",
+  floorType: "floorType",
+  atypicalType: "atypicalType",
+  view: "view",
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  new: "Nouveau",
-  in_progress: "En cours",
-  avis_sent: "Avis envoyé",
-  mandate_signed: "Mandat signé",
-  closed: "Clos",
-};
+function humanizeKey(key: string): string {
+  const spaced = key
+    .replace(/_/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .toLowerCase();
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
 
 function fmtPrice(n?: number | null) {
-  if (n == null) return "—";
+  if (n == null) return "";
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "EUR",
@@ -83,6 +101,7 @@ export default async function EstimationDetailPage({
 }) {
   const { id } = await params;
   await requireAdminPage();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_estimations" });
   const supabase = supabaseService();
 
   const { data: row, error } = await supabase
@@ -100,6 +119,42 @@ export default async function EstimationDetailPage({
   >;
   const methods = r.internal_output?.methods ?? {};
   const weights = r.internal_output?.weights_used ?? {};
+  const empty = t("notProvided");
+  const methodLabels: Record<string, string> = Object.fromEntries(
+    METHOD_KEYS.map((k) => [k, t(`method.${k}`)]),
+  );
+  const statusLabels: Record<string, string> = Object.fromEntries(
+    STATUS_KEYS.map((k) => [k, t(`status.${k}`)]),
+  );
+  const confidence = r.client_output.confidence as string;
+  const confidenceText = KNOWN_CONFIDENCES.includes(confidence)
+    ? t(`confidence.${confidence}`)
+    : empty;
+
+  const inputLabel = (k: string) =>
+    t.has(`inputs.${k}`) ? t(`inputs.${k}`) : humanizeKey(k);
+  const inputValue = (k: string, v: unknown): string => {
+    if (v === null || v === undefined || v === "") return empty;
+    if (typeof v === "boolean") return v ? t("yes") : t("no");
+    const group = ENUM_GROUP_BY_INPUT[k];
+    if (group && typeof v === "string" && t.has(`${group}.${v}`)) {
+      return t(`${group}.${v}`);
+    }
+    if (Array.isArray(v)) {
+      if (v.length === 0) return empty;
+      if (v.every((x) => typeof x === "string" || typeof x === "number")) {
+        return v.join(", ");
+      }
+      return t("inputs.itemsCount", { count: v.length });
+    }
+    if (typeof v === "object") {
+      return Object.entries(v as Record<string, unknown>)
+        .filter(([, x]) => x !== null && x !== undefined && x !== "")
+        .map(([sk, x]) => `${inputLabel(sk)} : ${String(x)}`)
+        .join(" · ") || empty;
+    }
+    return String(v);
+  };
 
   return (
     <div className="space-y-8">
@@ -109,10 +164,10 @@ export default async function EstimationDetailPage({
             href="/admin/estimations"
             className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#3D4F63]/60 hover:text-[#9E7B2A]"
           >
-            ← Estimations EVS
+            ← {t("detail.back")}
           </Link>
           <h1 className="mt-2 font-display text-3xl font-bold text-[#1A1F2A]">
-            Estimation #{r.id.slice(0, 8)}
+            {t("detail.title", { id: r.id.slice(0, 8) })}
           </h1>
           <div className="mt-1 font-mono text-xs text-[#1A1F2A]/60">
             <AdminDateCell
@@ -122,23 +177,35 @@ export default async function EstimationDetailPage({
             />
           </div>
           <p className="mt-1 font-mono text-xs text-[#1A1F2A]/60">
-            moteur{" "}
+            {t("detail.engineLabel")}{" "}
             <span className="font-semibold">
-              {r.engine === "evs_5_methods" ? "EVS 5 méthodes" : "Hédoniste legacy"}
+              {KNOWN_ENGINES.includes(r.engine) ? t(`engine.${r.engine}`) : r.engine}
             </span>
-            {r.locale && <> · locale {r.locale}</>}
+            {r.locale && (
+              <>
+                {" · "}
+                {t("detail.language", {
+                  language: KNOWN_LOCALES.includes(r.locale)
+                    ? t(`language.${r.locale}`)
+                    : r.locale,
+                })}
+              </>
+            )}
           </p>
         </div>
         <div className="flex items-start gap-3">
           <div className="rounded-md border border-[#3D4F63]/15 bg-white px-4 py-3 text-right">
             <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-              Prix retenu (client)
+              {t("detail.clientPrice")}
             </p>
             <p className="font-display text-2xl font-black text-[#9E7B2A]">
               {fmtPrice(r.client_output.price_mid)}
             </p>
             <p className="font-mono text-[10px] text-[#1A1F2A]/60">
-              {fmtPrice(r.client_output.price_low)} – {fmtPrice(r.client_output.price_high)}
+              {t("range", {
+                low: fmtPrice(r.client_output.price_low),
+                high: fmtPrice(r.client_output.price_high),
+              })}
             </p>
           </div>
           <PdfExportButton href={`/api/admin/exports/estimations/${r.id}`} />
@@ -163,29 +230,23 @@ export default async function EstimationDetailPage({
         refinementSentAt={r.refinement_sent_at ?? null}
         methods={methods}
         weightsInitial={weights}
-        statusLabels={STATUS_LABEL}
-        methodLabels={METHOD_LABEL}
+        statusLabels={statusLabels}
+        methodLabels={methodLabels}
       />
 
       {/* Inputs snapshot */}
       <section className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
         <h2 className="mb-4 font-display text-lg font-bold text-[#1A1F2A]">
-          Paramètres saisis
+          {t("detail.inputsTitle")}
         </h2>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:grid-cols-3">
           {Object.entries(inputs).map(([k, v]) => (
             <div key={k} className="flex justify-between gap-2">
               <dt className="font-mono text-[10px] uppercase tracking-widest text-[#1A1F2A]/50">
-                {k}
+                {inputLabel(k)}
               </dt>
               <dd className="text-right text-[#1A1F2A]">
-                {v === null || v === undefined
-                  ? "—"
-                  : typeof v === "boolean"
-                    ? v
-                      ? "oui"
-                      : "non"
-                    : String(v)}
+                {inputValue(k, v)}
               </dd>
             </div>
           ))}
@@ -196,7 +257,7 @@ export default async function EstimationDetailPage({
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-4">
           <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-            Confidence
+            {t("detail.confidence")}
           </p>
           <p
             className={`mt-1 font-display text-2xl font-bold ${
@@ -207,41 +268,41 @@ export default async function EstimationDetailPage({
                   : "text-red-700"
             }`}
           >
-            {r.client_output.confidence}
+            {confidenceText}
           </p>
           <p className="mt-1 font-mono text-[10px] text-[#1A1F2A]/60">
-            Score {r.internal_output.confidence_score}/100
+            {t("detail.score", { score: r.internal_output.confidence_score ?? 0 })}
           </p>
         </div>
         <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-4">
           <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-            Écart méthodes (σ)
+            {t("detail.spread")}
           </p>
           <p className="mt-1 font-display text-2xl font-bold text-[#1A1F2A]">
             {r.internal_output.std_deviation_pct}%
           </p>
           <p className="mt-1 font-mono text-[10px] text-[#1A1F2A]/60">
-            &lt; 8% HIGH, &lt; 15% MEDIUM, sinon LOW
+            {t("detail.spreadHint")}
           </p>
         </div>
         <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-4">
           <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-            Prix pondéré
+            {t("detail.weightedPrice")}
           </p>
           <p className="mt-1 font-display text-2xl font-bold text-[#1A1F2A]">
             {fmtPrice(r.internal_output.weighted_price)}
           </p>
           <p className="mt-1 font-mono text-[10px] text-[#1A1F2A]/60">
-            avant arrondi affichage
+            {t("detail.beforeRounding")}
           </p>
         </div>
       </section>
 
-      {/* Warnings globaux */}
+      {/* Points d'attention globaux */}
       {r.internal_output.warnings?.length > 0 && (
         <section className="rounded-lg border border-amber-300 bg-amber-50 p-4">
           <h3 className="mb-2 font-display text-sm font-bold text-amber-900">
-            ⚠ Warnings ({r.internal_output.warnings.length})
+            {t("detail.warnings", { count: r.internal_output.warnings.length })}
           </h3>
           <ul className="space-y-1 text-xs text-amber-900">
             {r.internal_output.warnings.map((w, i) => (
@@ -251,21 +312,20 @@ export default async function EstimationDetailPage({
         </section>
       )}
 
-      {/* PDF placeholder */}
+      {/* Avis de valeur PDF (à venir) */}
       <section className="rounded-lg border border-dashed border-[#3D4F63]/30 bg-white p-6">
         <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-          Avis de Valeur PDF (TEGoVA EVS 9 pages)
+          {t("detail.avisTitle")}
         </p>
         <p className="mt-2 text-sm text-[#1A1F2A]/70">
-          Génération PDF + upload Supabase Storage + email auto Resend — à venir
-          en session dédiée (Phase 5).
+          {t("detail.avisText")}
         </p>
         <button
           type="button"
           disabled
           className="mt-3 inline-flex cursor-not-allowed items-center gap-2 rounded-md border border-[#3D4F63]/20 bg-[#3D4F63]/5 px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-[#3D4F63]/40"
         >
-          Générer Avis de Valeur (Phase 5)
+          {t("detail.avisButton")}
         </button>
       </section>
     </div>

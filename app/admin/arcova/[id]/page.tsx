@@ -7,6 +7,7 @@ import { WorkflowSelect } from "@/components/admin/WorkflowSelect";
 import { AdminNotes } from "@/components/admin/AdminNotes";
 import {
   WorkflowBadge,
+  workflowLabelKey,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
 import {
@@ -15,6 +16,8 @@ import {
   setNextFollowUp,
 } from "@/app/admin/arcova/actions";
 import { AdminNotice } from "@/components/admin/AdminNotice";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE, formatDateTime } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -50,19 +53,6 @@ const FULL_SELECT =
 const FALLBACK_SELECT =
   "id,created_at,email,first_name,last_name,phone,company,role,message,status,notes";
 
-function formatDateTime(iso: string) {
-  try {
-    return new Date(iso).toLocaleString("fr-FR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-}
 
 export default async function AdminArcovaDetailPage({
   params,
@@ -96,6 +86,16 @@ export default async function AdminArcovaDetailPage({
     item = tryFull.data as ArcovaFull;
   }
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_arcova" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
+  const notProvided = tw("not_provided");
+  // Ancienne colonne `status` : libelle de suivi si la valeur est connue.
+  const legacyStatus = (v: string | null) => {
+    if (!v) return null;
+    const key = workflowLabelKey(v);
+    return key === "status_unknown" ? v : tw(key);
+  };
+
   const fullName =
     [item.first_name, item.last_name].filter(Boolean).join(" ") || item.email;
   const ws = (item.workflow_status as WorkflowStatus | null) ?? "new";
@@ -111,20 +111,20 @@ export default async function AdminArcovaDetailPage({
           className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           <ArrowLeft className="size-3" />
-          Retour à la waitlist
+          {t("back")}
         </Link>
       </div>
 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            ARCOVA · waitlist
+            {t("detail_eyebrow")}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
             {fullName}
           </h1>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-            Inscrit le {formatDateTime(item.created_at)}
+            {t("registered_on", { date: formatDateTime(item.created_at) })}
           </p>
         </div>
         <WorkflowBadge status={ws} size="md" />
@@ -138,21 +138,21 @@ export default async function AdminArcovaDetailPage({
         <div className="space-y-4">
           <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-              Contact
+              {tw("section_contact")}
             </p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Field label="Email" value={item.email} />
-              <Field label="Téléphone" value={item.phone} />
-              <Field label="Entreprise" value={item.company} />
-              <Field label="Rôle" value={item.role} />
-              <Field label="Statut legacy" value={item.status ?? "—"} />
+              <Field label={tw("field_email")} value={item.email} empty={notProvided} />
+              <Field label={tw("field_phone")} value={item.phone} empty={notProvided} />
+              <Field label={t("field_company")} value={item.company} empty={notProvided} />
+              <Field label={t("field_role")} value={item.role} empty={notProvided} />
+              <Field label={tw("field_legacy_status")} value={legacyStatus(item.status)} empty={notProvided} />
             </dl>
           </div>
 
           {item.message && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Message
+                {tw("field_message")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {item.message}
@@ -163,7 +163,7 @@ export default async function AdminArcovaDetailPage({
           {item.notes && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Notes (legacy)
+                {tw("legacy_notes")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {item.notes}
@@ -174,7 +174,7 @@ export default async function AdminArcovaDetailPage({
           {item.admin_notes && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Dernière note admin
+                {tw("last_note")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {item.admin_notes}
@@ -182,8 +182,6 @@ export default async function AdminArcovaDetailPage({
             </div>
           )}
 
-          {/* BUG 8 : placeholder « Action Phase B » masqué (bloc inerte).
-              Backlog : docs/admin/PHASE_B_BACKLOG_2026-05-18.md */}
         </div>
 
         <aside className="space-y-5">
@@ -208,9 +206,11 @@ export default async function AdminArcovaDetailPage({
 function Field({
   label,
   value,
+  empty,
 }: {
   label: string;
   value: string | null | undefined;
+  empty: string;
 }) {
   return (
     <div>
@@ -218,7 +218,7 @@ function Field({
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-[#1A1F2A]">
-        {value && value.trim() ? value : "—"}
+        {value && value.trim() ? value : empty}
       </dd>
     </div>
   );

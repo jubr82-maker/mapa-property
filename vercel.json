@@ -2,8 +2,8 @@
   "regions": ["arn1"],
   "crons": [
     {
-      "path": "/api/cron/bce-rates",
-      "schedule": "0 6 1 * *"
+      "path": "/api/cron/daily",
+      "schedule": "0 5 * * *"
     }
   ]
 }

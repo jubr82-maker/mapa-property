@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * PropertyPhotosSection — POL4-A3 (AGENT HUGO)
+ * PropertyPhotosSection : photos d'un bien.
  *
  * Client wrapper qui branche le PhotoManager générique sur les server
  * actions properties (table `property_images`, bucket `property-images`).
- * Bind propertyId une seule fois ici → PhotoManager reste 100 % générique
+ * Bind propertyId une seule fois ici : PhotoManager reste 100 % générique
  * (réutilisable pour off-market ou autre modèle plus tard sans modif).
  */
 

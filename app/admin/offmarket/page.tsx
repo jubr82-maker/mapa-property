@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 import {
-  OFFMARKET_STATUS_LABELS,
   OFFMARKET_STATUS_TONES,
-  OFFMARKET_TRANSACTION_LABELS,
+  PROPERTY_TYPES,
   type OffmarketStatus,
   type OffmarketTransaction,
 } from "@/lib/admin/offmarket";
@@ -24,6 +25,7 @@ export default async function AdminOffmarketListPage({
   }>;
 }) {
   await requireAdminPage();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_offmarket" });
   const sp = await searchParams;
   const all = await fetchOffmarketAdminList();
 
@@ -44,20 +46,20 @@ export default async function AdminOffmarketListPage({
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Off-Market
+            {t("list.eyebrow")}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
-            Biens confidentiels
+            {t("list.title")}
           </h1>
           <p className="mt-1 text-sm text-[#3D4F63]/70">
-            {filtered.length} bien{filtered.length > 1 ? "s" : ""} sur {all.length}
+            {t("list.count", { count: filtered.length, total: all.length })}
           </p>
         </div>
         <Link
           href="/admin/offmarket/new"
           className="inline-flex items-center gap-2 rounded-full bg-[#e0af6e] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-white shadow-md shadow-[#e0af6e]/30 transition-colors hover:bg-[#9d6e44]"
         >
-          + Nouveau bien off-market
+          + {t("list.new")}
         </Link>
       </header>
 
@@ -67,26 +69,29 @@ export default async function AdminOffmarketListPage({
         <table className="w-full text-sm">
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
-              <th className="px-4 py-3">Référence</th>
-              <th className="px-4 py-3">Titre · Localisation</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3 text-right">Prix estimé</th>
-              <th className="px-4 py-3">Statut</th>
-              <th className="px-4 py-3 text-right">Vues</th>
-              <th className="px-4 py-3 text-right">Demandes</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">{t("list.col_reference")}</th>
+              <th className="px-4 py-3">{t("list.col_title")}</th>
+              <th className="px-4 py-3">{t("list.col_type")}</th>
+              <th className="px-4 py-3 text-right">{t("list.col_price")}</th>
+              <th className="px-4 py-3">{t("list.col_status")}</th>
+              <th className="px-4 py-3 text-right">{t("list.col_views")}</th>
+              <th className="px-4 py-3 text-right">{t("list.col_requests")}</th>
+              <th className="px-4 py-3 text-right">{t("list.col_actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#3D4F63]/10">
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
-                  Aucun bien correspondant.
+                  {all.length === 0 ? t("list.empty") : t("list.emptyFiltered")}
                 </td>
               </tr>
             ) : (
               filtered.map((row) => {
-                const city = row.city_label ?? row.city_anonymized ?? "—";
+                const city = row.city_label ?? row.city_anonymized ?? "";
+                const typeKey = (PROPERTY_TYPES as readonly string[]).includes(row.property_type ?? "")
+                  ? (row.property_type as string)
+                  : null;
                 const status = (row.status ?? "draft") as OffmarketStatus;
                 return (
                   <tr key={row.id} className="hover:bg-[#3D4F63]/5">
@@ -94,27 +99,27 @@ export default async function AdminOffmarketListPage({
                       {row.reference}
                     </td>
                     <td className="px-4 py-3">
-                      <p className="font-medium text-[#1A1F2A]">{row.title ?? "—"}</p>
+                      <p className="font-medium text-[#1A1F2A]">{row.title ?? t("untitled")}</p>
                       <p className="text-xs text-[#3D4F63]/60">
                         {[row.country, city].filter(Boolean).join(" · ")}
                       </p>
                     </td>
                     <td className="px-4 py-3 text-xs uppercase tracking-wide text-[#3D4F63]/80">
-                      {row.property_type ?? "—"}
+                      {typeKey ? t(`propertyType.${typeKey}`) : (row.property_type ?? t("propertyType.unknown"))}
                       <span className="ml-1.5 text-[#e0af6e]">
-                        · {OFFMARKET_TRANSACTION_LABELS[(row.transaction ?? "sale") as OffmarketTransaction]}
+                        · {t(`transaction.${(row.transaction ?? "sale") as OffmarketTransaction}`)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-xs text-[#3D4F63]">
                       {row.price_estimate
                         ? formatPrice(row.price_estimate, "fr")
-                        : "—"}
+                        : t("list.priceNone")}
                     </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] ${OFFMARKET_STATUS_TONES[status]}`}
                       >
-                        {OFFMARKET_STATUS_LABELS[status]}
+                        {t(`status.${status}`)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-xs text-[#3D4F63]/70">
@@ -134,7 +139,7 @@ export default async function AdminOffmarketListPage({
                           href={`/admin/offmarket/${row.id}/edit`}
                           className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                         >
-                          Éditer
+                          {t("list.edit")}
                         </Link>
                       </div>
                     </td>

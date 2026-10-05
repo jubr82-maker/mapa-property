@@ -40,7 +40,7 @@ function colorFor(level: "good" | "ni" | "poor" | "na"): string {
 }
 
 function formatValue(metric: Metric, value: number | null): string {
-  if (value === null || value === undefined) return "—";
+  if (value === null || value === undefined) return "";
   if (metric === "cls") {
     return value.toFixed(3);
   }

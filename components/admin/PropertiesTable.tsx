@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   setPropertyPublished,
   setPropertyFeatured,
@@ -21,6 +22,8 @@ type Row = {
   city: string | null;
   country: string | null;
   transaction: string | null;
+  /** Libelle traduit de la transaction (cote serveur). */
+  transaction_label: string;
   price: number | null;
   surface: number | null;
   bedrooms: number | null;
@@ -50,6 +53,7 @@ export type PropertiesTableLabels = {
   purgeConfirm: string;
   purgeDoneTemplate: string;
   errorTemplate: string;
+  emptyList: string;
 };
 
 const fill = (template: string, values: Record<string, string | number>) =>
@@ -66,6 +70,7 @@ export function PropertiesTable({
   archiveEnabled?: boolean;
   labels: PropertiesTableLabels;
 }) {
+  const t = useTranslations("admin_properties");
   const router = useRouter();
   const sp = useSearchParams();
   const [, startTransition] = useTransition();
@@ -85,7 +90,7 @@ export function PropertiesTable({
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#3D4F63]/15 bg-white p-4">
         <input
           type="search"
-          placeholder="Recherche slug / titre / ville…"
+          placeholder={t("search_placeholder")}
           defaultValue={sp.get("q") ?? ""}
           onChange={(e) => setParam("q", e.target.value)}
           className="min-w-[260px] flex-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm focus:border-[#e0af6e] focus:outline-none"
@@ -95,9 +100,9 @@ export function PropertiesTable({
           onChange={(e) => setParam("transaction", e.target.value)}
           className="rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-sans text-sm"
         >
-          <option value="">Toutes transactions</option>
-          <option value="sale">Vente</option>
-          <option value="rent">Location</option>
+          <option value="">{t("filter_transaction_all")}</option>
+          <option value="sale">{t("transaction_sale")}</option>
+          <option value="rent">{t("transaction_rent")}</option>
         </select>
       </div>
 
@@ -123,28 +128,30 @@ export function PropertiesTable({
       <table className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
           <tr>
-            <th className="px-4 py-3">Slug</th>
-            <th className="px-4 py-3">Cover</th>
-            <th className="px-4 py-3">Titre · Localisation</th>
-            <th className="px-4 py-3">Transaction</th>
-            <th className="px-4 py-3 text-right">Prix</th>
-            <th className="px-4 py-3 text-right">Surface · CH</th>
+            <th className="px-4 py-3">{t("col_reference")}</th>
+            <th className="px-4 py-3">{t("col_photo")}</th>
+            <th className="px-4 py-3">{t("col_title")}</th>
+            <th className="px-4 py-3">{t("col_transaction")}</th>
+            <th className="px-4 py-3 text-right">{t("col_price")}</th>
+            <th className="px-4 py-3 text-right">{t("col_surface")}</th>
             {mode === "active" ? (
               <>
-                <th className="px-4 py-3 text-center">Publié</th>
-                <th className="px-4 py-3 text-center">Coup de cœur</th>
+                <th className="px-4 py-3 text-center">{t("col_published")}</th>
+                <th className="px-4 py-3 text-center">{t("col_featured")}</th>
               </>
             ) : (
               <th className="px-4 py-3" colSpan={2}>{labels.archivedCol}</th>
             )}
-            <th />
+            <th>
+              <span className="sr-only">{t("col_actions")}</span>
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-[#3D4F63]/10">
           {rows.length === 0 ? (
             <tr>
               <td colSpan={9} className="px-4 py-10 text-center text-sm text-[#3D4F63]/60">
-                Aucun bien.
+                {labels.emptyList}
               </td>
             </tr>
           ) : (
@@ -179,6 +186,7 @@ function PropertyRow({
   labels: PropertiesTableLabels;
   onDeleted: (d: { reference: string; media: string[] }) => void;
 }) {
+  const t = useTranslations("admin_properties");
   const router = useRouter();
   const [pub, setPub] = useState(row.is_published);
   const [feat, setFeat] = useState(row.is_featured);
@@ -199,7 +207,10 @@ function PropertyRow({
         setMessage(
           r.error === "reference_mismatch"
             ? labels.deleteMismatch
-            : fill(labels.errorTemplate, { message: r.error }),
+            : fill(labels.errorTemplate, {
+                // Codes d'erreur des actions traduits a l'affichage.
+                message: t.has(`err_code_${r.error}`) ? t(`err_code_${r.error}`) : r.error,
+              }),
         );
         return;
       }
@@ -258,27 +269,32 @@ function PropertyRow({
         )}
       </td>
       <td className="px-4 py-3">
-        <p className="font-medium text-[#1A1F2A]">{row.title ?? "—"}</p>
+        <p className="font-medium text-[#1A1F2A]">{row.title || t("untitled")}</p>
         <p className="text-xs text-[#3D4F63]/60">
           {[row.country, row.city].filter(Boolean).join(" · ")}
         </p>
       </td>
       <td className="px-4 py-3 text-xs uppercase tracking-wide text-[#3D4F63]/80">
-        {row.transaction ?? "—"}
+        {row.transaction_label}
       </td>
       <td className="px-4 py-3 text-right font-mono text-xs">
-        {row.price ? formatPrice(row.price, "fr") : "—"}
+        {row.price ? formatPrice(row.price, "fr") : ""}
       </td>
       <td className="px-4 py-3 text-right font-mono text-xs">
-        {row.surface ? formatSurface(row.surface, "fr") : "—"} · {row.bedrooms ?? "—"} ch
+        {[
+          row.surface ? formatSurface(row.surface, "fr") : "",
+          row.bedrooms != null ? t("bedrooms_short", { count: row.bedrooms }) : "",
+        ]
+          .filter(Boolean)
+          .join(" · ")}
       </td>
       {mode === "active" ? (
         <>
           <td className="px-4 py-3 text-center">
-            <Switch checked={pub} onChange={onPub} busy={busy} />
+            <Switch checked={pub} onChange={onPub} busy={busy} label={t("toggle_published")} />
           </td>
           <td className="px-4 py-3 text-center">
-            <Switch checked={feat} onChange={onFeat} busy={busy} />
+            <Switch checked={feat} onChange={onFeat} busy={busy} label={t("toggle_featured")} />
           </td>
         </>
       ) : (
@@ -292,7 +308,7 @@ function PropertyRow({
             href={`/admin/properties/${row.id}`}
             className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Éditer
+            {t("edit")}
           </Link>
           {mode === "active" ? (
             <>
@@ -301,7 +317,7 @@ function PropertyRow({
                 target="_blank"
                 className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Voir ↗
+                {t("view")}
               </Link>
               <button type="button" onClick={onArchive} disabled={busy || !archiveEnabled} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
                 {labels.archive}
@@ -374,10 +390,12 @@ function Switch({
   checked,
   onChange,
   busy,
+  label,
 }: {
   checked: boolean;
   onChange: (next: boolean) => void;
   busy: boolean;
+  label: string;
 }) {
   return (
     <button
@@ -385,6 +403,8 @@ function Switch({
       onClick={() => onChange(!checked)}
       disabled={busy}
       aria-pressed={checked}
+      aria-label={label}
+      title={label}
       className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors disabled:opacity-50 ${
         checked ? "bg-[#e0af6e]" : "bg-[#3D4F63]/20"
       }`}

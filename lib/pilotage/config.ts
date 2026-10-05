@@ -1,0 +1,44 @@
+// Parametres du pilotage de l'admin (oct. 2026), source unique. Aucun
+// import serveur : utilisable partout, y compris par les tests.
+
+/** Leads sans suivi : premier seuil puis seuil critique, en heures. */
+export const LEAD_FOLLOWUP_WARN_HOURS = 24;
+export const LEAD_FOLLOWUP_CRITICAL_HOURS = 48;
+
+/** Rafale d'echecs de connexion declenchant une alerte e-mail. */
+export const LOGIN_BURST_THRESHOLD = 5;
+export const LOGIN_BURST_WINDOW_MINUTES = 15;
+
+/** Expiration du nom de domaine (registrar Gandi) et preavis d'alerte. */
+export const DOMAIN_NAME = "mapaproperty.lu";
+export const DOMAIN_EXPIRY_DATE = "2027-06-13";
+export const DOMAIN_ALERT_MONTHS = 3;
+
+/** Sauvegarde R2 consideree en retard au-dela de ce nombre de jours. */
+export const BACKUP_MAX_AGE_DAYS = 8;
+
+/** Biens en ligne depuis plus de ce nombre de jours : a retravailler. */
+export const LISTING_STALE_DAYS = 90;
+
+/** Pages mesurees chaque jour par PageSpeed Insights. */
+export const PSI_PATHS = ["/fr", "/fr/biens", "/fr/services/estimer"] as const;
+export const PSI_STRATEGIES = ["mobile", "desktop"] as const;
+/** Delai minimal entre deux mesures lancees a la main. */
+export const PSI_MANUAL_COOLDOWN_MINUTES = 10;
+
+/**
+ * Seuils Core Web Vitals publies par Google (bon / a ameliorer / mauvais).
+ * INP a remplace FID comme indicateur de reactivite. Valeurs reprises de
+ * la documentation Google, non reverifiees en ligne dans ce depot.
+ */
+export const CWV_THRESHOLDS = {
+  lcpMs: { good: 2500, poor: 4000 },
+  inpMs: { good: 200, poor: 500 },
+  cls: { good: 0.1, poor: 0.25 },
+} as const;
+
+/** Propriete Search Console (propriete de domaine). */
+export const SEARCH_CONSOLE_SITE = "sc-domain:mapaproperty.lu";
+
+/** Jour du resume hebdomadaire, heure de Luxembourg : 1 = lundi. */
+export const WEEKLY_SUMMARY_WEEKDAY = 1;

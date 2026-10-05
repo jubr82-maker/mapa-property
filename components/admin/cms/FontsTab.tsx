@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export type TokenRow = {
   id: string;
@@ -25,12 +26,13 @@ const FONT_OPTIONS = [
 ] as const;
 
 const FONT_SLOTS = [
-  { key: "display", label: "Display (titres)" },
-  { key: "sans", label: "Sans (texte courant)" },
-  { key: "mono", label: "Mono (technique)" },
+  { key: "display", label: "font_display" },
+  { key: "sans", label: "font_sans" },
+  { key: "mono", label: "font_mono" },
 ] as const;
 
 export function FontsTab({ initial }: { initial: TokenRow[] }) {
+  const t = useTranslations("admin_cms");
   const fonts = initial.filter((t) => t.category === "font");
 
   return (
@@ -41,7 +43,7 @@ export function FontsTab({ initial }: { initial: TokenRow[] }) {
           <FontCard
             key={slot.key}
             slotKey={slot.key}
-            label={slot.label}
+            label={t(slot.label)}
             initialValue={row?.token_value ?? ""}
             description={row?.description ?? null}
           />
@@ -63,6 +65,7 @@ function FontCard({
   description: string | null;
 }) {
   const [value, setValue] = useState(initialValue || FONT_OPTIONS[0]);
+  const t = useTranslations("admin_cms");
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
   const dirty = value !== initialValue;
@@ -81,9 +84,17 @@ function FontCard({
           description,
         }),
       });
-      const json = await r.json();
-      if (!r.ok) throw new Error(json.error ?? "save failed");
-      setFlash("Enregistré.");
+      const json = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error(
+          r.status === 401 || r.status === 403
+            ? t("err_session")
+            : typeof json.error === "string"
+              ? json.error
+              : t("save_error"),
+        );
+      }
+      setFlash(t("saved"));
     } catch (e) {
       setFlash((e as Error).message);
     } finally {
@@ -96,9 +107,6 @@ function FontCard({
     <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-5">
       <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
         {label}
-      </p>
-      <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[#3D4F63]/40">
-        font.{slotKey}
       </p>
       <select
         value={value}
@@ -115,7 +123,7 @@ function FontCard({
         className="mt-3 text-xl text-[#1A1F2A]"
         style={{ fontFamily: `'${value}', sans-serif` }}
       >
-        Aperçu — MAPA Property
+        {t("font_preview")}
       </p>
       <div className="mt-4 flex items-center justify-between">
         <button
@@ -124,7 +132,7 @@ function FontCard({
           disabled={!dirty || saving}
           className="rounded bg-[#3D4F63] px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-[#F5EFE1] transition-colors hover:bg-[#2D3F53] disabled:opacity-40"
         >
-          {saving ? "..." : "Enregistrer"}
+          {saving ? t("busy") : t("save")}
         </button>
         {flash && (
           <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]/70">

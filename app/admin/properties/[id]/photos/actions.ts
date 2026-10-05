@@ -1,10 +1,10 @@
 "use server";
 
 /**
- * Server actions photos biens classiques (Apimo) — POL4-A3 (AGENT HUGO).
+ * Server actions photos des biens classiques.
  *
  * Schema réel : table SÉPARÉE `property_images` (rows : id, property_id,
- * url, sort) — PAS de colonne `images jsonb` sur `properties`. Cover =
+ * url, sort), PAS de colonne `images jsonb` sur `properties`. Cover =
  * `sort = 0`. Stratégie save : wipe-and-recreate l'ensemble des rows pour
  * ce property_id (simple, atomique en pratique grâce à transaction sup).
  *
@@ -14,14 +14,14 @@
  * Pas de DELETE des fichiers orphelins en savePhotos : c'est `deletePhoto`
  * qui supprime du bucket. Si une row est retirée du state sans appeler
  * deletePhoto, le fichier reste dans le bucket (perte d'espace minime
- * acceptée — cleanup batch séparé si besoin).
+ * acceptée, cleanup batch séparé si besoin).
  *
- * Mission "envoi de photos robuste et erreurs visibles" — ces trois
+ * Mission "envoi de photos robuste et erreurs visibles", ces trois
  * actions RETOURNENT désormais un résultat structuré { ok, error? } au
  * lieu de throw. Raison PROUVÉE (cf. rapport de mission) : une Server
  * Action qui throw voit son message REMPLACÉ en production par le texte
  * générique de l'erreur React #441 ("An error occurred in the Server
- * Components render...") — le message réel n'atteint jamais le visiteur
+ * Components render..."), le message réel n'atteint jamais le visiteur
  * ni l'admin. Retourner un objet normal n'est pas concerné par cette
  * redaction, exactement comme updateMandat/updateProperty ailleurs dans
  * ce dépôt.
@@ -33,8 +33,13 @@ import { PROPERTIES_LIST_TAG } from "@/lib/data";
 import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 import { assertAdminAction } from "@/lib/admin/require-admin";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 const BUCKET = "property-images";
+
+/** Libelles des messages renvoyes a l'ecran (admin_properties). */
+const tProps = () => getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
 
 export interface PhotoData {
   url: string;
@@ -62,7 +67,7 @@ export async function uploadPropertyPhoto(
   await assertAdminAction();
   const file = formData.get("file");
   if (!(file instanceof File)) {
-    return { ok: false, error: "Aucun fichier reçu." };
+    return { ok: false, error: (await tProps())("err_no_file") };
   }
 
   // Limite explicite (point 2) : message clair plutôt qu'un échec muet ou
@@ -75,7 +80,7 @@ export async function uploadPropertyPhoto(
     });
     return {
       ok: false,
-      error: `Fichier trop volumineux (max ${MAX_PHOTO_MB} Mo).`,
+      error: (await tProps())("err_file_too_large", { max: MAX_PHOTO_MB }),
     };
   }
 
@@ -92,7 +97,7 @@ export async function uploadPropertyPhoto(
     });
     return {
       ok: false,
-      error: "Ce fichier ne peut pas être converti en image (format non reconnu ou fichier corrompu).",
+      error: (await tProps())("err_convert"),
     };
   }
 
@@ -111,7 +116,7 @@ export async function uploadPropertyPhoto(
       console.error("[admin/properties/photos] upload storage echoue", {
         code: errorCode(error),
       });
-      return { ok: false, error: "Échec de l'envoi vers le stockage. Réessayez." };
+      return { ok: false, error: (await tProps())("err_upload_storage") };
     }
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
     return { ok: true, url: data.publicUrl, path };
@@ -119,7 +124,7 @@ export async function uploadPropertyPhoto(
     console.error("[admin/properties/photos] upload exception", {
       code: errorCode(e),
     });
-    return { ok: false, error: "Erreur inattendue pendant l'envoi. Réessayez." };
+    return { ok: false, error: (await tProps())("err_upload_unexpected") };
   }
 }
 
@@ -154,7 +159,7 @@ export async function savePropertyPhotos(
       console.error("[admin/properties/photos] delete rows echoue", {
         code: errorCode(delErr),
       });
-      return { ok: false, error: "Échec de l'enregistrement (suppression). Réessayez." };
+      return { ok: false, error: (await tProps())("err_save_delete") };
     }
     // Re-insert avec sort = order ; cover = order 0
     if (photos.length > 0) {
@@ -175,10 +180,10 @@ export async function savePropertyPhotos(
         console.error("[admin/properties/photos] insert rows echoue", {
           code: errorCode(insErr),
         });
-        return { ok: false, error: "Échec de l'enregistrement (insertion). Réessayez." };
+        return { ok: false, error: (await tProps())("err_save_insert") };
       }
     }
-    // La cover (fetchAllPropertiesWithCover) depend de property_images —
+    // La cover (fetchAllPropertiesWithCover) depend de property_images ,
     // invalider le cache tag pour que la grille /biens et les biens
     // similaires reflètent immédiatement la nouvelle cover/l'ordre photos.
     // PAS de revalidatePath sur /admin/properties/{id} elle-même : cette
@@ -186,7 +191,7 @@ export async function savePropertyPhotos(
     // encore envoyée via son propre bouton Enregistrer) serait effacée à
     // l'affichage par le refresh RSC immédiat que revalidatePath déclenche
     // sur la page actuellement affichée. PhotoManager reflète déjà l'état
-    // des photos localement (state client) — inutile de forcer un refresh
+    // des photos localement (state client), inutile de forcer un refresh
     // serveur de cette page pour ça.
     revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
     revalidatePath("/admin/properties");
@@ -198,7 +203,7 @@ export async function savePropertyPhotos(
     console.error("[admin/properties/photos] save exception", {
       code: errorCode(e),
     });
-    return { ok: false, error: "Erreur inattendue pendant l'enregistrement. Réessayez." };
+    return { ok: false, error: (await tProps())("err_save_unexpected") };
   }
 }
 
@@ -216,13 +221,13 @@ export async function deletePropertyPhoto(
       console.error("[admin/properties/photos] delete storage echoue", {
         code: errorCode(error),
       });
-      return { ok: false, error: "Échec de la suppression. Réessayez." };
+      return { ok: false, error: (await tProps())("err_delete") };
     }
     return { ok: true };
   } catch (e) {
     console.error("[admin/properties/photos] delete exception", {
       code: errorCode(e),
     });
-    return { ok: false, error: "Erreur inattendue pendant la suppression. Réessayez." };
+    return { ok: false, error: (await tProps())("err_delete_unexpected") };
   }
 }

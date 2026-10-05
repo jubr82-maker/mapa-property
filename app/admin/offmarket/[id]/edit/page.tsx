@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 import { fetchOffmarketAdminById } from "@/lib/admin/offmarket-server";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { OffmarketForm } from "@/components/admin/OffmarketForm";
@@ -14,6 +16,7 @@ export default async function EditOffmarketPage({
   searchParams: Promise<{ created?: string }>;
 }) {
   await requireAdminPage();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_offmarket" });
   const { id } = await params;
   const sp = await searchParams;
   const row = await fetchOffmarketAdminById(id);
@@ -27,19 +30,19 @@ export default async function EditOffmarketPage({
             {row.reference}
           </p>
           <h1 className="mt-2 font-display text-3xl font-bold text-[#3D4F63]">
-            {row.title ?? "Sans titre"}
+            {row.title ?? t("untitled")}
           </h1>
         </div>
         <Link
           href={`/admin/offmarket/${row.id}/requests`}
           className="rounded-full border border-[#3D4F63]/20 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
         >
-          Demandes ({row.requests_count ?? 0}) →
+          {t("edit.requestsLink", { count: row.requests_count ?? 0 })} →
         </Link>
       </header>
       {sp.created && (
         <p className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
-          Bien créé. N&apos;oubliez pas de passer en « Publié » quand prêt.
+          {t("edit.created")}
         </p>
       )}
       <OffmarketForm row={row} mode="edit" />

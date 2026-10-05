@@ -72,6 +72,9 @@ const ROOT_STATIC_FILES = [
   .join("|");
 
 const nextConfig: NextConfig = {
+  // Date de construction, affichee dans Sante du site (oct. 2026). Valeur
+  // non secrete, utilisee seulement cote serveur.
+  env: { BUILD_TIMESTAMP: new Date().toISOString() },
   // Défaut Next.js = 1 MB pour le body des Server Actions ; trop bas pour
   // l'upload de photos brutes (2-10 Mo) avant compression côté client.
   // 25mb absorbe même les photos non compressées, en fallback si la

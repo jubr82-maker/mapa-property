@@ -71,6 +71,13 @@ export function formatDateTimeShort(value: DateInput, locale: string = ADMIN_LOC
     .join("");
 }
 
+/** Jour et mois abreges pour les axes de graphiques : "02 oct." (fr). */
+export function formatDayMonth(value: DateInput, locale: string = ADMIN_LOCALE): string {
+  const d = toDate(value);
+  if (!d) return "";
+  return new Intl.DateTimeFormat(locale, { day: "2-digit", month: "short", timeZone: ADMIN_TIME_ZONE }).format(d);
+}
+
 /** Date seule, sans heure (champs de type date : debut et fin de mandat). */
 export function formatDateOnly(value: DateInput, locale: string = ADMIN_LOCALE): string {
   const d = toDate(value);

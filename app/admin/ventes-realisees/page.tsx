@@ -1,4 +1,4 @@
-// Page admin — ventes realisees MAPA Property (gestion complete).
+// Page admin : ventes realisees MAPA Property (gestion complete).
 // Source : table public.mapa_historical_sales (RLS strict : auth.email dans
 // (admin@mapagroup.org, j.brebion@mapagroup.org)).
 //
@@ -20,6 +20,11 @@ import { SaleForm } from "./SaleForm";
 import { DeleteSaleButton } from "./DeleteSaleButton";
 import { ComparableControl } from "./ComparableControl";
 import { AdminNotice } from "@/components/admin/AdminNotice";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE, formatDateOnly } from "@/lib/datetime";
+
+const KNOWN_TYPES = ["appartement", "maison", "penthouse", "duplex", "villa", "immeuble", "terrain"];
+const KNOWN_AGENTS = ["julien", "frederic"];
 
 interface SaleRow {
   id: string;
@@ -53,14 +58,6 @@ function fmtEur(n: number): string {
   }).format(n);
 }
 
-function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 function pricePerSqm(r: SaleRow): number | null {
   return r.surface_habitable ? Math.round(r.prix_vente / r.surface_habitable) : null;
 }
@@ -81,6 +78,9 @@ export default async function AdminVentesRealiseesPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/admin/login?from=/admin/ventes-realisees");
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_sales" });
+  const typeLabel = (v: string) => (KNOWN_TYPES.includes(v) ? t(`propertyType.${v}`) : v);
+  const agentLabel = (v: string) => (KNOWN_AGENTS.includes(v) ? t(`agent.${v}`) : v);
 
   const params = await searchParams;
   const communeFilter = params.commune?.trim() || undefined;
@@ -154,14 +154,10 @@ export default async function AdminVentesRealiseesPage({
     <div className="space-y-10">
       <header>
         <h1 className="font-display text-3xl font-bold uppercase tracking-[0.05em]">
-          Ventes réalisées MAPA Property
+          {t("title")}
         </h1>
         <p className="mt-2 text-sm text-[#3D4F63]/80">
-          Historique interne des actes notariés. Données strictement
-          confidentielles (RLS : admin uniquement). Alimente la méthode{" "}
-          <em>Comparaison Directe</em> du moteur EVS : une vente compte si elle
-          est en mode <strong>Auto</strong> et de moins de 12 mois, ou forcée{" "}
-          <strong>Oui</strong>.
+          {t("intro")}
         </p>
       </header>
 
@@ -173,13 +169,13 @@ export default async function AdminVentesRealiseesPage({
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-[#3D4F63]/20 bg-white p-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-            Nombre de ventes
+            {t("count")}
           </p>
           <p className="mt-1 font-display text-3xl font-bold">{totalCount}</p>
         </div>
         <div className="rounded-lg border border-[#3D4F63]/20 bg-white p-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-            Volume cumulé
+            {t("volume")}
           </p>
           <p className="mt-1 font-display text-3xl font-bold">{fmtEur(totalVolume)}</p>
         </div>
@@ -188,13 +184,13 @@ export default async function AdminVentesRealiseesPage({
           className="space-y-2 rounded-lg border border-[#3D4F63]/20 bg-white p-5"
         >
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-            Filtrer
+            {t("filters.title")}
           </p>
           {vue !== "liste" && <input type="hidden" name="vue" value={vue} />}
           <input
             type="text"
             name="commune"
-            placeholder="Commune"
+            placeholder={t("filters.commune")}
             defaultValue={communeFilter ?? ""}
             className="w-full rounded border border-[#3D4F63]/30 px-3 py-1.5 text-sm"
           />
@@ -203,16 +199,16 @@ export default async function AdminVentesRealiseesPage({
             defaultValue={agentFilter ?? ""}
             className="w-full rounded border border-[#3D4F63]/30 px-3 py-1.5 text-sm"
           >
-            <option value="">Tous les agents</option>
-            <option value="julien">Julien</option>
-            <option value="frederic">Frédéric</option>
+            <option value="">{t("filters.allAgents")}</option>
+            <option value="julien">{t("agent.julien")}</option>
+            <option value="frederic">{t("agent.frederic")}</option>
           </select>
           <select
             name="year"
             defaultValue={yearFilter ?? ""}
             className="w-full rounded border border-[#3D4F63]/30 px-3 py-1.5 text-sm"
           >
-            <option value="">Toutes les années</option>
+            <option value="">{t("filters.allYears")}</option>
             {availableYears.map((y) => (
               <option key={y} value={y}>
                 {y}
@@ -223,7 +219,7 @@ export default async function AdminVentesRealiseesPage({
             type="submit"
             className="w-full rounded bg-[#3D4F63] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-white"
           >
-            Appliquer
+            {t("filters.apply")}
           </button>
         </form>
       </section>
@@ -231,11 +227,10 @@ export default async function AdminVentesRealiseesPage({
       {/* Formulaire ajout */}
       <section className="rounded-lg border border-[#3D4F63]/20 bg-white p-6">
         <h2 className="font-display text-xl font-bold uppercase tracking-[0.05em]">
-          Ajouter une vente
+          {t("add.title")}
         </h2>
         <p className="mt-1 text-xs text-[#3D4F63]/70">
-          Tous les champs marqués * sont obligatoires. Précisez le bien et les
-          conditions exactes de la transaction.
+          {t("add.intro")}
         </p>
         <SaleForm />
       </section>
@@ -249,7 +244,7 @@ export default async function AdminVentesRealiseesPage({
               vue === "liste" ? "bg-[#3D4F63] text-white" : "border border-[#3D4F63]/20 text-[#3D4F63]"
             }`}
           >
-            Liste ({totalCount})
+            {t("tabs.list", { count: totalCount })}
           </Link>
           <Link
             href={qs({ vue: "commune" })}
@@ -257,18 +252,18 @@ export default async function AdminVentesRealiseesPage({
               vue === "commune" ? "bg-[#3D4F63] text-white" : "border border-[#3D4F63]/20 text-[#3D4F63]"
             }`}
           >
-            Par localité ({communeGroups.length})
+            {t("tabs.byCommune", { count: communeGroups.length })}
           </Link>
         </div>
 
         {error && (
           <p className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-            Erreur lecture Supabase : {error.message}
+            {t("loadError")}
           </p>
         )}
         {!error && rows.length === 0 && (
           <p className="rounded border border-[#3D4F63]/20 bg-white p-6 text-sm text-[#3D4F63]/70">
-            Aucune vente enregistrée pour ces filtres.
+            {allRows.length === 0 && !communeFilter && !agentFilter ? t("empty") : t("emptyFiltered")}
           </p>
         )}
 
@@ -278,16 +273,16 @@ export default async function AdminVentesRealiseesPage({
             <table className="w-full text-sm">
               <thead className="bg-[#3D4F63]/5 text-left">
                 <tr>
-                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">Date</th>
-                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">Commune</th>
-                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">Adresse</th>
-                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">Type</th>
-                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">Surface</th>
-                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">Prix</th>
-                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">€/m²</th>
-                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">Agent</th>
-                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">Comparable</th>
-                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">Actions</th>
+                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.date")}</th>
+                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.commune")}</th>
+                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.address")}</th>
+                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.type")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.surface")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.price")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.pricePerM2")}</th>
+                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.agent")}</th>
+                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.comparable")}</th>
+                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#3D4F63]/10">
@@ -295,20 +290,21 @@ export default async function AdminVentesRealiseesPage({
                   const ppsqm = pricePerSqm(r);
                   return (
                     <tr key={r.id} className="hover:bg-[#F5EFE1]/40">
-                      <td className="px-3 py-2 font-mono text-xs">{fmtDate(r.date_acte)}</td>
+                      <td className="px-3 py-2 font-mono text-xs">{formatDateOnly(r.date_acte)}</td>
                       <td className="px-3 py-2 font-medium">{r.commune}</td>
                       <td className="px-3 py-2 text-xs text-[#3D4F63]/80">{r.adresse}</td>
-                      <td className="px-3 py-2 text-xs">{r.property_type}</td>
+                      <td className="px-3 py-2 text-xs">{typeLabel(r.property_type)}</td>
                       <td className="px-3 py-2 text-right font-mono text-xs">{r.surface_habitable} m²</td>
                       <td className="px-3 py-2 text-right font-mono font-bold">{fmtEur(r.prix_vente)}</td>
                       <td className="px-3 py-2 text-right font-mono text-xs text-[#9E7B2A]">
-                        {ppsqm ? `${ppsqm} €` : "—"}
+                        {ppsqm ? `${ppsqm} €` : ""}
                       </td>
-                      <td className="px-3 py-2 text-xs capitalize">{r.agent}</td>
+                      <td className="px-3 py-2 text-xs">{agentLabel(r.agent)}</td>
                       <td className="px-3 py-2">
                         {overrideColumnMissing ? (
                           <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-[#3D4F63]/50">
-                            {isEffective(r) ? "● Compte (auto)" : "○ Ignorée (auto)"}
+                            {isEffective(r) ? `● ${t("comparable.counts")}` : `○ ${t("comparable.ignored")}`}
+                            {` (${t("comparable.mode_auto")})`}
                           </span>
                         ) : (
                           <ComparableControl
@@ -324,9 +320,9 @@ export default async function AdminVentesRealiseesPage({
                             href={`/admin/ventes-realisees/${r.id}/edit`}
                             className="rounded border border-[#3D4F63]/30 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63] hover:bg-[#3D4F63]/5"
                           >
-                            Éditer
+                            {t("edit")}
                           </Link>
-                          <DeleteSaleButton id={r.id} label={`${r.commune} — ${r.adresse}`} />
+                          <DeleteSaleButton id={r.id} label={`${r.commune} · ${r.adresse}`} />
                         </div>
                       </td>
                     </tr>
@@ -348,36 +344,36 @@ export default async function AdminVentesRealiseesPage({
                   <div className="flex items-baseline justify-between border-b border-[#3D4F63]/10 bg-[#3D4F63]/5 px-4 py-2">
                     <h3 className="font-display text-lg font-bold">{commune}</h3>
                     <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]/70">
-                      {list.length} vente{list.length > 1 ? "s" : ""} · {nbComparable} comparable{nbComparable > 1 ? "s" : ""} · {fmtEur(vol)}
+                      {t("group.summary", { count: list.length, comparable: nbComparable, volume: fmtEur(vol) })}
                     </p>
                   </div>
                   <table className="w-full text-sm">
                     <thead className="text-left">
                       <tr className="text-[#3D4F63]/60">
-                        <th className="px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em]">Date</th>
-                        <th className="px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em]">Type</th>
-                        <th className="px-4 py-1.5 text-right font-mono text-[10px] uppercase tracking-[0.15em]">Surface</th>
-                        <th className="px-4 py-1.5 text-right font-mono text-[10px] uppercase tracking-[0.15em]">Prix</th>
-                        <th className="px-4 py-1.5 text-right font-mono text-[10px] uppercase tracking-[0.15em]">€/m²</th>
-                        <th className="px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em]">Comparable</th>
+                        <th className="px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.date")}</th>
+                        <th className="px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.type")}</th>
+                        <th className="px-4 py-1.5 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.surface")}</th>
+                        <th className="px-4 py-1.5 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.price")}</th>
+                        <th className="px-4 py-1.5 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.pricePerM2")}</th>
+                        <th className="px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.comparable")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#3D4F63]/10">
                       {list.map((r) => {
                         const ppsqm = pricePerSqm(r);
                         const eff = isEffective(r);
-                        const mode = r.comparable_override === null ? "auto" : "forcé";
+                        const mode = r.comparable_override === null ? t("comparable.mode_auto") : t("comparable.mode_forced");
                         return (
                           <tr key={r.id} className={eff ? "" : "opacity-50"}>
-                            <td className="px-4 py-1.5 font-mono text-xs">{fmtDate(r.date_acte)}</td>
-                            <td className="px-4 py-1.5 text-xs">{r.property_type}</td>
+                            <td className="px-4 py-1.5 font-mono text-xs">{formatDateOnly(r.date_acte)}</td>
+                            <td className="px-4 py-1.5 text-xs">{typeLabel(r.property_type)}</td>
                             <td className="px-4 py-1.5 text-right font-mono text-xs">{r.surface_habitable} m²</td>
                             <td className="px-4 py-1.5 text-right font-mono font-bold">{fmtEur(r.prix_vente)}</td>
                             <td className="px-4 py-1.5 text-right font-mono text-xs text-[#9E7B2A]">
-                              {ppsqm ? `${ppsqm} €` : "—"}
+                              {ppsqm ? `${ppsqm} €` : ""}
                             </td>
                             <td className="px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-[#3D4F63]/60">
-                              {eff ? "● Compte" : "○ Ignorée"} · {mode}
+                              {eff ? `● ${t("comparable.counts")}` : `○ ${t("comparable.ignored")}`} · {mode}
                             </td>
                           </tr>
                         );

@@ -1,4 +1,4 @@
-// Export Excel de la liste des demandes d'acces off-market — memes
+// Export Excel de la liste des demandes d'acces off-market : memes
 // filtres que app/admin/offmarket/requests/page.tsx (tab/q/property).
 // Aucune photo/visuel de bien off-market dans cet export (donnees
 // tabulaires uniquement, cf. politique OFF MARKET sans visuel).
@@ -8,6 +8,8 @@ import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel"
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
 import { toDateOrNull, fullName, orDash } from "@/lib/admin/exports/format";
 import { workflowStatusLabel, requestStatusLabel } from "@/lib/admin/exports/labels";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 interface RequestExportRow {
   id: string;
@@ -31,22 +33,26 @@ interface RequestExportRow {
   } | null;
 }
 
-const COLUMNS: ExcelColumn<RequestExportRow>[] = [
-  { header: "Date", key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
-  { header: "Demandeur", key: "nom", type: "text", value: (r) => fullName(r.prenom, r.nom) },
-  { header: "Email", key: "email", type: "text", width: 28, value: (r) => orDash(r.email) },
-  { header: "Téléphone", key: "tel", type: "text", value: (r) => orDash(r.telephone) },
-  { header: "Référence bien", key: "ref", type: "text", value: (r) => orDash(r.properties_offmarket?.reference) },
-  { header: "Titre bien", key: "titre", type: "text", width: 28, value: (r) => orDash(r.properties_offmarket?.title) },
-  { header: "Pays recherché", key: "pays", type: "text", value: (r) => orDash(r.pays_recherche) },
-  { header: "Ville / quartier", key: "ville", type: "text", value: (r) => orDash(r.ville_quartier) },
-  { header: "Budget max", key: "budget", type: "amount", value: (r) => r.budget_max_eur },
-  { header: "Surface souhaitée (m²)", key: "surface", type: "number", value: (r) => r.surface_souhaitee_m2 },
-  { header: "Statut", key: "statut", type: "text", value: (r) => requestStatusLabel(r.status) },
-  { header: "Statut workflow", key: "workflow", type: "text", value: (r) => workflowStatusLabel(r.workflow_status) },
-  { header: "Prochain suivi", key: "suivi", type: "date", value: (r) => toDateOrNull(r.next_follow_up) },
-  { header: "Notes admin", key: "notes", type: "longText", value: (r) => orDash(r.notes_admin) },
-];
+type ExportT = Awaited<ReturnType<typeof getTranslations>>;
+
+function buildColumns(t: ExportT): ExcelColumn<RequestExportRow>[] {
+  return [
+    { header: t("export.date"), key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
+    { header: t("export.applicant"), key: "nom", type: "text", value: (r) => fullName(r.prenom, r.nom) },
+    { header: t("export.email"), key: "email", type: "text", width: 28, value: (r) => orDash(r.email) },
+    { header: t("export.phone"), key: "tel", type: "text", value: (r) => orDash(r.telephone) },
+    { header: t("export.propertyReference"), key: "ref", type: "text", value: (r) => orDash(r.properties_offmarket?.reference) },
+    { header: t("export.propertyTitle"), key: "titre", type: "text", width: 28, value: (r) => orDash(r.properties_offmarket?.title) },
+    { header: t("export.country"), key: "pays", type: "text", value: (r) => orDash(r.pays_recherche) },
+    { header: t("export.city"), key: "ville", type: "text", value: (r) => orDash(r.ville_quartier) },
+    { header: t("export.budget"), key: "budget", type: "amount", value: (r) => r.budget_max_eur },
+    { header: t("export.surfaceM2"), key: "surface", type: "number", value: (r) => r.surface_souhaitee_m2 },
+    { header: t("export.dossierStatus"), key: "statut", type: "text", value: (r) => requestStatusLabel(r.status) },
+    { header: t("export.followStatus"), key: "workflow", type: "text", value: (r) => workflowStatusLabel(r.workflow_status) },
+    { header: t("export.nextFollowUp"), key: "suivi", type: "date", value: (r) => toDateOrNull(r.next_follow_up) },
+    { header: t("export.notes"), key: "notes", type: "longText", value: (r) => orDash(r.notes_admin) },
+  ];
+}
 
 export async function GET(req: Request) {
   const admin = await requireAdminRoute();
@@ -98,11 +104,12 @@ export async function GET(req: Request) {
     });
   }
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_offmarket" });
   const buffer = await buildExcelWorkbook({
-    sheetName: "Demandes off-market",
-    columns: COLUMNS,
+    sheetName: t("export.sheetName"),
+    columns: buildColumns(t),
     rows: filtered,
   });
 
-  return excelResponse(buffer, exportListFilename("offmarket-requests"));
+  return excelResponse(buffer, exportListFilename("demandes-off-market"));
 }

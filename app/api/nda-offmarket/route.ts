@@ -1,3 +1,4 @@
+import { withFormEvents } from "@/lib/pilotage/form-events";
 import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
@@ -12,7 +13,7 @@ const str = (v: unknown) => (typeof v === "string" ? v : undefined);
 const strArr = (v: unknown) =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : undefined;
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const limit = rateLimit(req, { windowMs: 60_000, max: 5, namespace: "nda" });
   if (!limit.ok) return NextResponse.json({ error: "rate_limited" }, { status: 429 });
 
@@ -84,3 +85,6 @@ export async function POST(req: Request) {
 }
 
 export const dynamic = "force-dynamic";
+
+// Sante des formulaires (oct. 2026) : chaque envoi est compte par resultat.
+export const POST = withFormEvents("nda_offmarket", handlePost);

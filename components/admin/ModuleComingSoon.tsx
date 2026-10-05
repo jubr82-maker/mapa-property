@@ -19,7 +19,7 @@ export function ModuleComingSoon({
       </header>
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-10">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#e0af6e]">
-          Livraison en cours — PARTIE C du brief
+          Livraison en cours : PARTIE C du brief
         </p>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#3D4F63]">
           {description}

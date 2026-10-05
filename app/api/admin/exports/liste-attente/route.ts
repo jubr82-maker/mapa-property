@@ -1,12 +1,14 @@
-// Export Excel de la liste d'attente — memes filtres que
+// Export Excel de la liste d'attente : memes filtres que
 // app/admin/liste-attente/page.tsx (tab/q). Table `leads` filtree
 // type='waitlist' (pas une table dediee).
 import { requireAdminRoute } from "@/lib/admin/require-admin";
 import { supabaseService } from "@/lib/supabase-service";
 import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel";
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
-import { toDateOrNull, fullName, orDash } from "@/lib/admin/exports/format";
-import { workflowStatusLabel } from "@/lib/admin/exports/labels";
+import { toDateOrNull } from "@/lib/admin/exports/format";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
+import { sourceLabel, workflowLabelKey, type AdminTranslator } from "@/components/admin/WorkflowBadge";
 
 interface WaitlistExportRow {
   id: string;
@@ -32,17 +34,21 @@ function extractTag(message: string | null, tag: string): string | null {
   return null;
 }
 
-const COLUMNS: ExcelColumn<WaitlistExportRow>[] = [
-  { header: "Date", key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
-  { header: "Nom", key: "nom", type: "text", value: (r) => fullName(r.first_name, r.last_name) },
-  { header: "Email", key: "email", type: "text", width: 28, value: (r) => r.email },
-  { header: "Budget", key: "budget", type: "text", value: (r) => orDash(extractTag(r.message, "BUDGET")) },
-  { header: "Budget validé", key: "budget_valide", type: "text", value: (r) => orDash(extractTag(r.message, "BUDGET_VALIDE")) },
-  { header: "Recherche", key: "recherche", type: "longText", value: (r) => orDash(extractTag(r.message, "RECHERCHE")) },
-  { header: "Source", key: "source", type: "text", value: (r) => orDash(r.source) },
-  { header: "Statut workflow", key: "workflow", type: "text", value: (r) => workflowStatusLabel(r.workflow_status) },
-  { header: "Prochain suivi", key: "suivi", type: "date", value: (r) => toDateOrNull(r.next_follow_up) },
-];
+// En-tetes et libelles traduits (namespaces "admin_waitlist" et "admin_workflow").
+// Valeur absente : cellule vide.
+function buildColumns(t: AdminTranslator, tw: AdminTranslator): ExcelColumn<WaitlistExportRow>[] {
+  return [
+    { header: tw("col_date"), key: "date", type: "date", value: (r) => toDateOrNull(r.created_at) },
+    { header: tw("col_name"), key: "nom", type: "text", value: (r) => [r.first_name, r.last_name].filter(Boolean).join(" ") },
+    { header: tw("field_email"), key: "email", type: "text", width: 28, value: (r) => r.email },
+    { header: t("budget"), key: "budget", type: "text", value: (r) => extractTag(r.message, "BUDGET") ?? "" },
+    { header: t("budget_validated"), key: "budget_valide", type: "text", value: (r) => extractTag(r.message, "BUDGET_VALIDE") ?? "" },
+    { header: t("search"), key: "recherche", type: "longText", value: (r) => extractTag(r.message, "RECHERCHE") ?? "" },
+    { header: tw("field_source"), key: "source", type: "text", value: (r) => sourceLabel(tw, r.source) },
+    { header: tw("select_title"), key: "workflow", type: "text", value: (r) => tw(workflowLabelKey(r.workflow_status ?? "new")) },
+    { header: tw("followup_title"), key: "suivi", type: "date", value: (r) => toDateOrNull(r.next_follow_up) },
+  ];
+}
 
 export async function GET(req: Request) {
   const admin = await requireAdminRoute();
@@ -90,9 +96,11 @@ export async function GET(req: Request) {
     );
   }
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_waitlist" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
   const buffer = await buildExcelWorkbook({
-    sheetName: "Liste d'attente",
-    columns: COLUMNS,
+    sheetName: t("title"),
+    columns: buildColumns(t, tw),
     rows: filtered,
   });
 

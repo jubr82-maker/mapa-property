@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   REQUEST_STATUSES,
-  REQUEST_STATUS_LABELS,
   REQUEST_STATUS_TONES,
   type RequestStatus,
 } from "@/lib/admin/offmarket";
@@ -14,11 +14,11 @@ import {
 } from "@/app/admin/offmarket/actions";
 import {
   WORKFLOW_STATUSES,
-  WORKFLOW_LABELS,
   WorkflowBadge,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
 import { formatPrice, formatSurface } from "@/lib/format/numbers";
+import { formatDateTime } from "@/lib/datetime";
 
 type Request = {
   id: string;
@@ -40,6 +40,7 @@ type Request = {
 };
 
 export function RequestRow({ request }: { request: Request }) {
+  const t = useTranslations("admin_offmarket");
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<RequestStatus>(request.status as RequestStatus);
   const [workflowStatus, setWorkflowStatus] = useState<WorkflowStatus>(
@@ -85,9 +86,9 @@ export function RequestRow({ request }: { request: Request }) {
             <WorkflowBadge status={workflowStatus} />
             <span
               className={`rounded-full px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] ${REQUEST_STATUS_TONES[status]}`}
-              title="Suivi dossier off-market, n'affecte pas les onglets"
+              title={t("requestRow.dossierTitle")}
             >
-              Dossier : {REQUEST_STATUS_LABELS[status]}
+              {t("requestRow.dossier", { status: t(`requestStatus.${status}`) })}
             </span>
           </div>
           <p className="mt-1 text-sm text-[#3D4F63]/70">
@@ -95,10 +96,7 @@ export function RequestRow({ request }: { request: Request }) {
             {request.telephone && ` · ${request.telephone}`}
           </p>
           <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/50">
-            {new Date(request.created_at).toLocaleString("fr-FR", {
-              dateStyle: "medium",
-              timeStyle: "short",
-            })}
+            {formatDateTime(request.created_at)}
           </p>
         </div>
         <span className="font-mono text-xs text-[#3D4F63]/60">
@@ -109,10 +107,11 @@ export function RequestRow({ request }: { request: Request }) {
       {open && (
         <div className="mt-5 space-y-5 border-t border-[#3D4F63]/10 pt-5">
           <dl className="grid gap-3 text-sm sm:grid-cols-2">
-            <Info label="Pays cherché" value={request.pays_recherche} />
-            <Info label="Ville / quartier" value={request.ville_quartier} />
+            <Info label={t("requestRow.country")} value={request.pays_recherche} empty={t("notProvided")} />
+            <Info label={t("requestRow.city")} value={request.ville_quartier} empty={t("notProvided")} />
             <Info
-              label="Budget max"
+              empty={t("notProvided")}
+              label={t("requestRow.budget")}
               value={
                 request.budget_max_eur
                   ? formatPrice(request.budget_max_eur, "fr")
@@ -120,7 +119,8 @@ export function RequestRow({ request }: { request: Request }) {
               }
             />
             <Info
-              label="Surface souhaitée"
+              empty={t("notProvided")}
+              label={t("requestRow.surface")}
               value={
                 request.surface_souhaitee_m2
                   ? formatSurface(request.surface_souhaitee_m2, "fr")
@@ -130,7 +130,7 @@ export function RequestRow({ request }: { request: Request }) {
             {request.criteres_precis && (
               <div className="sm:col-span-2">
                 <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                  Critères précis
+                  {t("requestRow.criteria")}
                 </dt>
                 <dd className="mt-1 text-sm leading-relaxed text-[#1A1F2A]">
                   {request.criteres_precis}
@@ -141,10 +141,10 @@ export function RequestRow({ request }: { request: Request }) {
 
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-              Statut workflow
+              {t("requestRow.workflowTitle")}
             </p>
             <p className="mt-0.5 text-xs text-[#3D4F63]/60">
-              Pilote les onglets Nouveau, En cours, En suspens, Valide, Exclu, Traites de la liste des demandes.
+              {t("requestRow.workflowHint")}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {WORKFLOW_STATUSES.map((s) => (
@@ -159,7 +159,7 @@ export function RequestRow({ request }: { request: Request }) {
                       : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   }`}
                 >
-                  {WORKFLOW_LABELS[s]}
+                  {t(`workflow.${s}`)}
                 </button>
               ))}
             </div>
@@ -167,10 +167,10 @@ export function RequestRow({ request }: { request: Request }) {
 
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-              Suivi dossier off-market
+              {t("requestRow.dossierSection")}
             </p>
             <p className="mt-0.5 text-xs text-[#3D4F63]/60">
-              Etapes propres a la demande d&apos;acces (NDA, dossier, visite). N&apos;affecte pas les onglets ci-dessus.
+              {t("requestRow.dossierHint")}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {REQUEST_STATUSES.map((s) => (
@@ -185,7 +185,7 @@ export function RequestRow({ request }: { request: Request }) {
                       : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   }`}
                 >
-                  {REQUEST_STATUS_LABELS[s]}
+                  {t(`requestStatus.${s}`)}
                 </button>
               ))}
             </div>
@@ -196,7 +196,7 @@ export function RequestRow({ request }: { request: Request }) {
               htmlFor={`notes-${request.id}`}
               className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60"
             >
-              Notes dossier (metier)
+              {t("requestRow.notes")}
             </label>
             <textarea
               id={`notes-${request.id}`}
@@ -211,7 +211,7 @@ export function RequestRow({ request }: { request: Request }) {
               disabled={busy}
               className="mt-2 rounded-full bg-[#3D4F63] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
             >
-              {busy ? "…" : "Enregistrer notes"}
+              {busy ? "…" : t("requestRow.saveNotes")}
             </button>
           </div>
         </div>
@@ -220,13 +220,13 @@ export function RequestRow({ request }: { request: Request }) {
   );
 }
 
-function Info({ label, value }: { label: string; value: string | null }) {
+function Info({ label, value, empty }: { label: string; value: string | null; empty: string }) {
   return (
     <div>
       <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
         {label}
       </dt>
-      <dd className="mt-0.5 text-sm text-[#1A1F2A]">{value ?? "—"}</dd>
+      <dd className="mt-0.5 text-sm text-[#1A1F2A]">{value ?? empty}</dd>
     </div>
   );
 }

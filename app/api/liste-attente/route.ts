@@ -10,6 +10,8 @@
 // Emails : destinataires internes = configuration partagee de
 // lib/email/smtp.ts (MAPA_NOTIFICATION_EMAILS), pas de liste propre a ce
 // flux. No-op silencieux si la configuration SMTP est absente.
+import { attributionColumns } from "@/lib/pilotage/attribution";
+import { withFormEvents } from "@/lib/pilotage/form-events";
 import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
@@ -27,7 +29,7 @@ const str = (v: unknown): string | undefined =>
 
 const SUBJECT = "Liste d'attente, nouvelle inscription";
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const limit = rateLimit(req, {
     windowMs: 60_000,
     max: 5,
@@ -96,6 +98,7 @@ export async function POST(req: Request) {
     sb,
     "leads",
     {
+      ...attributionColumns(body.attribution),
       email,
       first_name: firstName,
       last_name: lastName,
@@ -138,3 +141,6 @@ export async function POST(req: Request) {
 }
 
 export const dynamic = "force-dynamic";
+
+// Sante des formulaires (oct. 2026) : chaque envoi est compte par resultat.
+export const POST = withFormEvents("waitlist", handlePost);

@@ -10,6 +10,8 @@
 // Email : notification interne + accusé de réception client, via la
 // couche SMTP partagée (lib/email/lead-emails.ts). Best effort, ne
 // throw jamais.
+import { attributionColumns } from "@/lib/pilotage/attribution";
+import { withFormEvents } from "@/lib/pilotage/form-events";
 import { NextResponse } from "next/server";
 import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
@@ -24,7 +26,7 @@ const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 const str = (v: unknown) => (typeof v === "string" ? v : undefined);
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const limit = rateLimit(req, {
     windowMs: 60_000,
     max: 5,
@@ -94,6 +96,7 @@ export async function POST(req: Request) {
     sb,
     "leads",
     {
+      ...attributionColumns(body.attribution),
       email: body.email,
       first_name: firstName,
       last_name: lastName,
@@ -138,3 +141,6 @@ export async function POST(req: Request) {
 }
 
 export const dynamic = "force-dynamic";
+
+// Sante des formulaires (oct. 2026) : chaque envoi est compte par resultat.
+export const POST = withFormEvents("nda_request", handlePost);

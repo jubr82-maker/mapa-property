@@ -1,18 +1,15 @@
-// Export Excel de la liste des mandats — respecte les memes filtres que
+// Export Excel de la liste des mandats : respecte les memes filtres que
 // app/admin/mandats/page.tsx (section/tab/q), pas seulement la page
 // affichee (limit 500, comme la page admin elle-meme).
 import { requireAdminRoute } from "@/lib/admin/require-admin";
 import { supabaseService } from "@/lib/supabase-service";
 import { buildExcelWorkbook, type ExcelColumn } from "@/lib/admin/exports/excel";
 import { excelResponse, exportListFilename } from "@/lib/admin/exports/http";
-import { toDateOrNull, toLuxembourgDateTimeCell, orDash } from "@/lib/admin/exports/format";
-import {
-  propertyTypeLabel,
-  typeTransactionLabel,
-  typeMandatLabel,
-  mandatStatusLabel,
-  workflowStatusLabel,
-} from "@/lib/admin/exports/labels";
+import { toDateOrNull, toLuxembourgDateTimeCell } from "@/lib/admin/exports/format";
+import { propertyTypeLabel } from "@/lib/admin/exports/labels";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
+import { workflowLabelKey, type AdminTranslator } from "@/components/admin/WorkflowBadge";
 
 interface MandatExportRow {
   id: string;
@@ -36,26 +33,39 @@ interface MandatExportRow {
   next_follow_up?: string | null;
 }
 
-const COLUMNS: ExcelColumn<MandatExportRow>[] = [
-  { header: "Date", key: "date", type: "datetime", value: (r) => toLuxembourgDateTimeCell(r.created_at) },
-  { header: "Client", key: "client", type: "text", value: (r) => orDash(r.client_name) },
-  { header: "Email", key: "email", type: "text", width: 28, value: (r) => orDash(r.client_email) },
-  { header: "Téléphone", key: "tel", type: "text", value: (r) => orDash(r.client_phone) },
-  { header: "Pays", key: "pays", type: "text", value: (r) => orDash(r.client_country) },
-  { header: "Ville", key: "ville", type: "text", value: (r) => orDash(r.client_city) },
-  { header: "Type transaction", key: "transaction", type: "text", value: (r) => typeTransactionLabel(r.type_transaction) },
-  { header: "Type mandat", key: "type_mandat", type: "text", value: (r) => typeMandatLabel(r.type_mandat) },
-  { header: "Type de bien", key: "type_bien", type: "text", value: (r) => propertyTypeLabel(r.property_type) },
-  { header: "Adresse du bien", key: "adresse", type: "text", width: 30, value: (r) => orDash(r.bien_adresse) },
-  { header: "Prix mise en vente", key: "prix", type: "amount", value: (r) => r.prix_mise_en_vente },
-  { header: "Budget min", key: "budget_min", type: "amount", value: (r) => r.budget_min },
-  { header: "Budget max", key: "budget_max", type: "amount", value: (r) => r.budget_max },
-  { header: "Zones recherchées", key: "zones", type: "text", width: 28, value: (r) => (r.zones ?? []).join(", ") || "—" },
-  { header: "Statut", key: "statut", type: "text", value: (r) => mandatStatusLabel(r.status) },
-  { header: "Statut workflow", key: "workflow", type: "text", value: (r) => workflowStatusLabel(r.workflow_status) },
-  { header: "Prochain suivi", key: "suivi", type: "date", value: (r) => toDateOrNull(r.next_follow_up) },
-  { header: "Notes", key: "notes", type: "longText", value: (r) => orDash(r.notes) },
-];
+// Valeur absente : cellule vide.
+const text = (v: string | null | undefined): string => v ?? "";
+
+// Libelle traduit d'une valeur enregistree ("semi-exclusif" -> cle "..._semi_exclusif").
+function labelOf(t: AdminTranslator, prefix: string, v: string | null | undefined): string {
+  if (!v) return "";
+  const key = `${prefix}${v.replace(/-/g, "_")}`;
+  return t.has(key) ? t(key) : v;
+}
+
+// En-tetes et libelles traduits (namespaces "admin_mandats" et "admin_workflow").
+function buildColumns(t: AdminTranslator, tw: AdminTranslator): ExcelColumn<MandatExportRow>[] {
+  return [
+    { header: tw("col_date"), key: "date", type: "datetime", value: (r) => toLuxembourgDateTimeCell(r.created_at) },
+    { header: t("col_client"), key: "client", type: "text", value: (r) => text(r.client_name) },
+    { header: tw("field_email"), key: "email", type: "text", width: 28, value: (r) => text(r.client_email) },
+    { header: tw("field_phone"), key: "tel", type: "text", value: (r) => text(r.client_phone) },
+    { header: tw("field_country"), key: "pays", type: "text", value: (r) => text(r.client_country) },
+    { header: tw("field_city"), key: "ville", type: "text", value: (r) => text(r.client_city) },
+    { header: t("col_transaction"), key: "transaction", type: "text", value: (r) => labelOf(t, "section_", r.type_transaction) },
+    { header: t("form_type_mandat"), key: "type_mandat", type: "text", value: (r) => labelOf(t, "type_mandat_", r.type_mandat) },
+    { header: t("form_property_type"), key: "type_bien", type: "text", value: (r) => (r.property_type ? propertyTypeLabel(r.property_type) : "") },
+    { header: t("form_address"), key: "adresse", type: "text", width: 30, value: (r) => text(r.bien_adresse) },
+    { header: t("field_price"), key: "prix", type: "amount", value: (r) => r.prix_mise_en_vente },
+    { header: t("col_budget_min"), key: "budget_min", type: "amount", value: (r) => r.budget_min },
+    { header: t("col_budget_max"), key: "budget_max", type: "amount", value: (r) => r.budget_max },
+    { header: t("col_zones"), key: "zones", type: "text", width: 28, value: (r) => (r.zones ?? []).join(", ") },
+    { header: t("form_status"), key: "statut", type: "text", value: (r) => labelOf(t, "status_", r.status) },
+    { header: tw("select_title"), key: "workflow", type: "text", value: (r) => tw(workflowLabelKey(r.workflow_status ?? "new")) },
+    { header: tw("followup_title"), key: "suivi", type: "date", value: (r) => toDateOrNull(r.next_follow_up) },
+    { header: t("notes_title"), key: "notes", type: "longText", value: (r) => text(r.notes) },
+  ];
+}
 
 export async function GET(req: Request) {
   const admin = await requireAdminRoute();
@@ -115,9 +125,11 @@ export async function GET(req: Request) {
     });
   }
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_mandats" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
   const buffer = await buildExcelWorkbook({
-    sheetName: "Mandats",
-    columns: COLUMNS,
+    sheetName: t("title"),
+    columns: buildColumns(t, tw),
     rows: filtered,
   });
 

@@ -1,16 +1,18 @@
 "use client";
 
-// Sprint Export RGPD — bouton de telechargement JSON des donnees d'un
+// Export RGPD : bouton de telechargement JSON des donnees d'un
 // lead (et de son mandat associe eventuel). Action NON destructive,
 // pas de feedback de longue duree : on declenche le download navigateur
 // et c'est tout. Erreur silencieuse + message discret si l'action server
 // remonte un probleme.
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { exportLead } from "@/app/admin/leads/actions";
 import { downloadJson } from "@/lib/admin/download";
 
 export function ExportLeadButton({ id }: { id: string }) {
+  const t = useTranslations("admin_leads");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -21,15 +23,14 @@ export function ExportLeadButton({ id }: { id: string }) {
         const res = await exportLead(id);
         if (!res.ok) {
           setError(
-            res.error === "not_found"
-              ? "Lead introuvable."
-              : "Erreur d'export. Réessaie.",
+            res.error === "not_found" ? t("export_not_found") : t("export_error"),
           );
           return;
         }
         downloadJson(res.filename, res.data);
       } catch (e) {
-        setError((e as Error).message || "Erreur inattendue.");
+        console.error("[export]", e);
+        setError(t("error_unexpected"));
       }
     });
   };
@@ -42,7 +43,7 @@ export function ExportLeadButton({ id }: { id: string }) {
         disabled={isPending}
         className="self-start rounded-full border border-[#3D4F63]/30 bg-white px-5 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#3D4F63] transition-colors hover:border-[#e0af6e] hover:text-[#9E7B2A] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isPending ? "Préparation…" : "Exporter les données (RGPD)"}
+        {isPending ? t("export_preparing") : t("export_button")}
       </button>
       {error && (
         <p className="rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-xs text-red-900">

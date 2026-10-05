@@ -1,20 +1,20 @@
 "use client";
 
 /**
- * PropertyCreateForm — Sprint SAISIE-MANUELLE, étape A (socle création).
+ * PropertyCreateForm : creation d'un bien saisi a la main (socle).
  *
  * Formulaire minimal de création d'un bien classique, calqué sur la
  * structure d'OffmarketForm.tsx (form action + FormData + Server Action
  * qui redirige, gestion des erreurs NEXT_REDIRECT). Champs de base
  * seulement (transaction, type, état, statut fixe brouillon, pays/ville,
- * titres, prix, référence interne) — le formulaire d'édition sera enrichi
- * séparément avec les 23 colonnes de la migration
- * 20260904_properties_saisie_manuelle.sql.
+ * titres, prix, référence interne). Le reste de la fiche se complete
+ * ensuite dans PropertyEditForm.
  *
  * Server Action : createProperty (cf. app/admin/properties/actions.ts).
  */
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { createProperty } from "@/app/admin/properties/actions";
 import {
   PROPERTY_TYPE_FAMILIES,
@@ -70,16 +70,8 @@ function Field({
   );
 }
 
-const COUNTRIES = [
-  { value: "LU", label: "Luxembourg" },
-  { value: "BE", label: "Belgique" },
-  { value: "FR", label: "France" },
-  { value: "DE", label: "Allemagne" },
-  { value: "CH", label: "Suisse" },
-  { value: "MC", label: "Monaco" },
-  { value: "PT", label: "Portugal" },
-  { value: "ES", label: "Espagne" },
-];
+// Codes pays enregistres ; libelles : admin_properties.country_XX.
+const COUNTRIES = ["LU", "BE", "FR", "DE", "CH", "MC", "PT", "ES"] as const;
 
 export function PropertyCreateForm({
   citySuggestions,
@@ -87,6 +79,7 @@ export function PropertyCreateForm({
   /** Communes/localites luxembourgeoises proposees (cf. page parente). */
   citySuggestions: string[];
 }) {
+  const t = useTranslations("admin_properties");
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [priceOnDemand, setPriceOnDemand] = useState(false);
@@ -97,16 +90,19 @@ export function PropertyCreateForm({
       try {
         const result = await createProperty(formData);
         if (!result.ok) {
-          setError(result.error);
+          // Codes d'erreur (ex. save_failed) traduits a l'affichage.
+          setError(
+            t.has(`err_code_${result.error}`) ? t(`err_code_${result.error}`) : result.error,
+          );
         }
       } catch (e) {
-        // Ne pas masquer redirect()/notFound() internes à Next — ils
+        // Ne pas masquer redirect()/notFound() internes à Next : ils
         // doivent remonter pour que la navigation post-création s'exécute.
         if (isNextInternalError(e)) throw e;
         setError(
           e instanceof Error
-            ? `Erreur réseau : ${e.message}. Vérifie ta connexion et réessaie.`
-            : "Erreur réseau inconnue. Vérifie ta connexion.",
+            ? t("err_network", { message: e.message })
+            : t("err_network_unknown"),
         );
       }
     });
@@ -114,64 +110,63 @@ export function PropertyCreateForm({
 
   return (
     <form action={submit} className="space-y-8">
-      <Section title="Identification">
-        <Field label="Statut">
+      <Section title={t("section_identification")}>
+        <Field label={t("field_status")}>
           <input
-            value="Brouillon"
+            value={t("status_draft_short")}
             disabled
             className={`${inputCls} bg-[#F5EFE1] cursor-not-allowed`}
           />
           <span className="mt-1 block text-xs text-[#3D4F63]/60">
-            Un bien neuf reste en brouillon — vous le publierez depuis la
-            fiche d&apos;édition une fois complétée.
+            {t("create_status_hint")}
           </span>
         </Field>
-        <Field label="Référence interne" hint="Facultatif — texte libre.">
+        <Field label={t("field_internal_ref")} hint={t("hint_optional_free")}>
           <input name="internal_ref" className={inputCls} />
         </Field>
-        <Field label="Titre (FR)" hint="Requis.">
+        <Field label={t("f_title_fr")} hint={t("hint_required")}>
           <input name="title_fr" required className={inputCls} />
         </Field>
-        <Field label="Titre (EN)" hint="Facultatif.">
+        <Field label={t("f_title_en")} hint={t("hint_optional")}>
           <input name="title_en" className={inputCls} />
         </Field>
-        <Field label="Titre (DE)" hint="Facultatif.">
+        <Field label={t("f_title_de")} hint={t("hint_optional")}>
           <input name="title_de" className={inputCls} />
         </Field>
       </Section>
 
-      <Section title="Type & état">
-        <Field label="Transaction">
+      <Section title={t("section_type_state")}>
+        <Field label={t("field_transaction")}>
           <select name="transaction" required defaultValue="" className={inputCls}>
             <option value="" disabled>
-              — Choisir —
+              {t("choose")}
             </option>
-            {TRANSACTION_TYPES.map((t) => (
-              <option key={t.slug} value={t.slug}>
-                {t.label}
+            {TRANSACTION_TYPES.map((tx) => (
+              <option key={tx.slug} value={tx.slug}>
+                {tx.label}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Type de bien">
+        <Field label={t("field_property_type")}>
           <select name="property_type" required defaultValue="" className={inputCls}>
             <option value="" disabled>
-              — Choisir —
+              {t("choose")}
             </option>
             {PROPERTY_TYPE_FAMILIES.map((family) => (
               <optgroup key={family.label} label={family.label}>
-                {family.types.map((t) => (
-                  <option key={t.slug} value={t.slug}>
-                    {t.label}
+                {family.types.map((pt) => (
+                  <option key={pt.slug} value={pt.slug}>
+                    {pt.label}
                   </option>
                 ))}
               </optgroup>
             ))}
           </select>
         </Field>
-        <Field label="État du bien" hint="Facultatif.">
+        <Field label={t("field_property_state")} hint={t("hint_optional")}>
           <select name="property_state" defaultValue="" className={inputCls}>
-            <option value="">—</option>
+            <option value="">{t("not_specified")}</option>
             {PROPERTY_STATES.map((s) => (
               <option key={s.slug} value={s.slug}>
                 {s.label}
@@ -181,17 +176,17 @@ export function PropertyCreateForm({
         </Field>
       </Section>
 
-      <Section title="Localisation">
-        <Field label="Pays">
+      <Section title={t("section_location")}>
+        <Field label={t("field_country")}>
           <select name="country" defaultValue="LU" className={inputCls}>
             {COUNTRIES.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
+              <option key={c} value={c}>
+                {t(`country_${c}`)}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Ville">
+        <Field label={t("field_city")}>
           <CitySuggestInput
             name="city"
             suggestions={citySuggestions}
@@ -200,8 +195,8 @@ export function PropertyCreateForm({
         </Field>
       </Section>
 
-      <Section title="Prix">
-        <Field label="Prix (€)">
+      <Section title={t("section_price")}>
+        <Field label={t("field_price")}>
           <input
             type="number"
             name="price"
@@ -211,7 +206,7 @@ export function PropertyCreateForm({
             className={`${inputCls} disabled:opacity-50`}
           />
         </Field>
-        <Field label="Affichage">
+        <Field label={t("field_display")}>
           <label className="inline-flex cursor-pointer items-center gap-2">
             <input
               type="checkbox"
@@ -220,7 +215,7 @@ export function PropertyCreateForm({
               onChange={(e) => setPriceOnDemand(e.target.checked)}
               className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
             />
-            <span className="text-sm text-[#3D4F63]/80">Prix sur demande</span>
+            <span className="text-sm text-[#3D4F63]/80">{t("price_on_demand")}</span>
           </label>
         </Field>
       </Section>
@@ -237,7 +232,7 @@ export function PropertyCreateForm({
           disabled={busy}
           className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
         >
-          {busy ? "Création…" : "Créer le bien"}
+          {busy ? t("creating") : t("create_submit")}
         </button>
       </footer>
     </form>

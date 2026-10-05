@@ -1,5 +1,6 @@
 "use client";
 
+import { getAttribution } from "@/lib/pilotage/attribution-client";
 import { useState, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { formatEuro } from "@/lib/finance";
@@ -379,6 +380,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          attribution: getAttribution(),
           country: "LU",
           locality: locality.trim() || undefined,
           commune: commune || undefined,

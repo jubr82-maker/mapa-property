@@ -1,10 +1,11 @@
 "use client";
 
-// Sprint MANDATS-A PARTIE 6 — formulaire d'edition unique de la fiche
+// Formulaire d'edition unique de la fiche
 // mandat. Edite 10 champs en une seule submit via la server action
 // updateMandat. Etat local controle, feedback inline succes/erreur.
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { updateMandat, type UpdateMandatFields } from "@/app/admin/mandats/actions";
 
 export type MandatEditable = {
@@ -21,20 +22,21 @@ export type MandatEditable = {
   notes: string | null;
 };
 
+// Valeurs enregistrees en base et cle de traduction (namespace "admin_mandats").
 const TYPE_MANDAT_OPTS = [
-  { value: "", label: "—" },
-  { value: "exclusif", label: "Exclusif" },
-  { value: "semi-exclusif", label: "Semi-exclusif" },
-  { value: "simple", label: "Simple" },
-  { value: "autonome", label: "Autonome" },
+  { value: "", key: "option_none" },
+  { value: "exclusif", key: "type_mandat_exclusif" },
+  { value: "semi-exclusif", key: "type_mandat_semi_exclusif" },
+  { value: "simple", key: "type_mandat_simple" },
+  { value: "autonome", key: "type_mandat_autonome" },
 ];
 
 const STATUS_OPTS = [
-  { value: "actif", label: "Actif" },
-  { value: "vendu", label: "Vendu" },
-  { value: "loue", label: "Loué" },
-  { value: "expire", label: "Expiré" },
-  { value: "resilie", label: "Résilié" },
+  { value: "actif", key: "status_actif" },
+  { value: "vendu", key: "status_vendu" },
+  { value: "loue", key: "status_loue" },
+  { value: "expire", key: "status_expire" },
+  { value: "resilie", key: "status_resilie" },
 ];
 
 export function EditMandatForm({
@@ -44,6 +46,7 @@ export function EditMandatForm({
   id: string;
   initial: MandatEditable;
 }) {
+  const t = useTranslations("admin_mandats");
   const [isPending, startTransition] = useTransition();
   const [data, setData] = useState<MandatEditable>(initial);
   const [feedback, setFeedback] = useState<
@@ -58,7 +61,7 @@ export function EditMandatForm({
     startTransition(async () => {
       setFeedback(null);
       const fields: UpdateMandatFields = {
-        // type_mandat n'est pertinent que pour les ventes — sinon laisser null.
+        // type_mandat n'est pertinent que pour les ventes, sinon laisser null.
         type_mandat:
           data.type_transaction === "vente" ? data.type_mandat : null,
         bien_adresse: data.bien_adresse,
@@ -73,16 +76,24 @@ export function EditMandatForm({
       };
       const res = await updateMandat(id, fields);
       setFeedback(
-        res.ok ? { kind: "saved" } : { kind: "error", message: res.error ?? "unknown" },
+        res.ok ? { kind: "saved" } : { kind: "error", message: errorMessage(res.error) },
       );
     });
   };
 
+  // Codes d'erreur renvoyes par updateMandat, traduits a l'ecran.
+  function errorMessage(code: string | undefined): string {
+    if (code === "unauthorized") return t("error_unauthorized");
+    if (code === "invalid_type_mandat") return t("error_invalid_type_mandat");
+    if (code === "invalid_status") return t("error_invalid_status");
+    return t("error_generic");
+  }
+
   const isVente = data.type_transaction === "vente";
   const priceLabel =
     data.type_transaction === "location"
-      ? "Loyer mensuel souhaité (€)"
-      : "Prix de mise en vente (€)";
+      ? t("form_rent")
+      : t("form_price");
 
   return (
     <form
@@ -90,11 +101,11 @@ export function EditMandatForm({
       className="space-y-5 rounded-2xl border border-[#3D4F63]/15 bg-white p-5"
     >
       <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-        Édition mandat
+        {t("form_title")}
       </p>
 
       {isVente && (
-        <Field label="Type de mandat">
+        <Field label={t("form_type_mandat")}>
           <select
             value={data.type_mandat ?? ""}
             onChange={(e) => set("type_mandat", e.target.value || null)}
@@ -102,7 +113,7 @@ export function EditMandatForm({
           >
             {TYPE_MANDAT_OPTS.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label}
+                {t(o.key)}
               </option>
             ))}
           </select>
@@ -110,7 +121,7 @@ export function EditMandatForm({
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Adresse du bien">
+        <Field label={t("form_address")}>
           <input
             type="text"
             value={data.bien_adresse ?? ""}
@@ -118,12 +129,12 @@ export function EditMandatForm({
             className={inputCls}
           />
         </Field>
-        <Field label="Type de bien">
+        <Field label={t("form_property_type")}>
           <input
             type="text"
             value={data.bien_type ?? ""}
             onChange={(e) => set("bien_type", e.target.value)}
-            placeholder="Appartement, Maison, Terrain…"
+            placeholder={t("form_property_type_placeholder")}
             className={inputCls}
           />
         </Field>
@@ -143,19 +154,19 @@ export function EditMandatForm({
             className={inputCls}
           />
         </Field>
-        <Field label="Commission">
+        <Field label={t("form_commission")}>
           <input
             type="text"
             value={data.commission ?? ""}
             onChange={(e) => set("commission", e.target.value)}
-            placeholder="3% HT, 15 000 € net, etc."
+            placeholder={t("form_commission_placeholder")}
             className={inputCls}
           />
         </Field>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Date début">
+        <Field label={t("form_date_start")}>
           <input
             type="date"
             value={data.date_debut ?? ""}
@@ -163,7 +174,7 @@ export function EditMandatForm({
             className={inputCls}
           />
         </Field>
-        <Field label="Date fin">
+        <Field label={t("form_date_end")}>
           <input
             type="date"
             value={data.date_fin ?? ""}
@@ -171,7 +182,7 @@ export function EditMandatForm({
             className={inputCls}
           />
         </Field>
-        <Field label="Date de signature">
+        <Field label={t("form_signed")}>
           <input
             type="date"
             value={data.signed_at ?? ""}
@@ -181,7 +192,7 @@ export function EditMandatForm({
         </Field>
       </div>
 
-      <Field label="Statut">
+      <Field label={t("form_status")}>
         <select
           value={data.status ?? "actif"}
           onChange={(e) => set("status", e.target.value)}
@@ -189,13 +200,13 @@ export function EditMandatForm({
         >
           {STATUS_OPTS.map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {t(o.key)}
             </option>
           ))}
         </select>
       </Field>
 
-      <Field label="Notes (visibles côté client si exportées)">
+      <Field label={t("form_notes")}>
         <textarea
           value={data.notes ?? ""}
           onChange={(e) => set("notes", e.target.value)}
@@ -206,12 +217,12 @@ export function EditMandatForm({
 
       {feedback?.kind === "saved" && (
         <p className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
-          Modifications enregistrées.
+          {t("form_saved")}
         </p>
       )}
       {feedback?.kind === "error" && (
         <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-900">
-          Erreur : {feedback.message}
+          {feedback.message}
         </p>
       )}
 
@@ -221,7 +232,7 @@ export function EditMandatForm({
           disabled={isPending}
           className="rounded-full bg-[#9E7B2A] px-6 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
         >
-          {isPending ? "Enregistrement…" : "Enregistrer"}
+          {isPending ? t("form_saving") : t("form_save")}
         </button>
       </div>
     </form>

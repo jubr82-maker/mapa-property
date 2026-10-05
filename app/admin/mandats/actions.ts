@@ -4,21 +4,31 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
+
+// Messages d'erreur affiches a l'ecran (namespace "admin_mandats").
+function actionT() {
+  return getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_mandats" });
+}
+
+// Erreur Supabase : detail dans les journaux serveur, message traduit a l'ecran.
+async function saveError(scope: string, error: { message: string }): Promise<Error> {
+  console.error(`[admin/mandats] ${scope}`, error.message);
+  return new Error((await actionT())("error_save"));
+}
 
 // ============================================================================
-// Workflow admin générique sur la table `mandats` (renommée depuis
-// mandats_recherche, sprint MANDATS-A — migration 20260603_mandats_unified).
-// Aligné EXACTEMENT sur app/admin/leads/actions.ts.
+// Suivi admin generique sur la table `mandats` (anciennement
+// mandats_recherche). Aligne exactement sur app/admin/leads/actions.ts.
 //
 // Durci (sept. 2026) : ces actions n'appelaient PAS requireAdmin() et
-// lisaient/écrivaient via le client de session, couvert par la policy RLS
-// "authenticated all mandats" (USING auth.uid() IS NOT NULL — cf. migration
-// 20260603_mandats_unified.sql:44-47) : tout utilisateur Supabase Auth
-// authentifié, même issu d'un autre projet sur la même base, pouvait lire/
-// modifier/supprimer n'importe quel mandat. Traitement aligné sur leads :
-// requireAdmin() (allowlist email) + supabaseService() (service_role).
-// La policy RLS elle-même reste permissive — hors périmètre de cette passe
-// (aucun SQL) — cf. rapport.
+// lisaient et ecrivaient via le client de session, couvert par la policy RLS
+// "authenticated all mandats" (USING auth.uid() IS NOT NULL) : tout
+// utilisateur Supabase Auth authentifie pouvait lire, modifier ou supprimer
+// n'importe quel mandat. Traitement aligne sur leads : requireAdmin()
+// (liste d'e-mails autorises) et supabaseService() (service_role). La policy
+// RLS elle-meme reste permissive (hors perimetre, aucun SQL).
 // ============================================================================
 
 const TABLE = "mandats";
@@ -38,7 +48,7 @@ export async function updateWorkflowStatus(
   reason?: string,
 ) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   const { data: current } = await sb
@@ -67,7 +77,7 @@ export async function updateWorkflowStatus(
     .update({ workflow_status: newStatus, workflow_history: history })
     .eq("id", id);
 
-  if (error) throw new Error(error.message);
+  if (error) throw await saveError("update", error);
 
   revalidatePath(ROUTE);
   revalidatePath(`${ROUTE}/${id}`);
@@ -78,7 +88,7 @@ export async function addAdminNote(id: string, noteText: string) {
   if (!trimmed) return;
 
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   const { data: current } = await sb
@@ -100,26 +110,26 @@ export async function addAdminNote(id: string, noteText: string) {
     .update({ workflow_history: history, admin_notes: trimmed })
     .eq("id", id);
 
-  if (error) throw new Error(error.message);
+  if (error) throw await saveError("update", error);
 
   revalidatePath(`${ROUTE}/${id}`);
 }
 
 export async function setNextFollowUp(id: string, date: string | null) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
   const { error } = await sb
     .from(TABLE)
     .update({ next_follow_up: date })
     .eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) throw await saveError("update", error);
   revalidatePath(`${ROUTE}/${id}`);
   revalidatePath(ROUTE);
 }
 
 // ============================================================================
-// Sprint MANDATS-A PARTIE 6 — Edition champs mandat + suppression RGPD.
+// Edition des champs du mandat et suppression RGPD.
 // ============================================================================
 
 export type UpdateMandatFields = {
@@ -191,7 +201,10 @@ export async function updateMandat(
   }
 
   const { error } = await sb.from(TABLE).update(cleaned).eq("id", id);
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    console.error("[admin/mandats] updateMandat", error.message);
+    return { ok: false, error: "db_error" };
+  }
 
   revalidatePath(`${ROUTE}/${id}`);
   revalidatePath(ROUTE);
@@ -204,20 +217,20 @@ export async function updateMandat(
  */
 export async function deleteMandat(id: string): Promise<void> {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
   const { error } = await sb.from(TABLE).delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) throw await saveError("update", error);
   revalidatePath(ROUTE);
   redirect(ROUTE);
 }
 
-// ---------- Sprint Export RGPD — droit d'acces/portabilite ----------
+// ---------- Export RGPD : droit d'acces et portabilite ----------
 
 /**
  * Exporte toutes les donnees d'un mandat au format JSON. Le mandat
  * contient deja les coordonnees client (client_*), inutile d'embarquer
- * le lead d'origine — on garde juste lead_id pour info.
+ * le lead d'origine : on garde juste lead_id pour information.
  *
  * Retour structure ({ok,data,filename} ou {ok,error}), jamais de throw
  * cote UI. Le bouton est non destructif : pas de write DB.

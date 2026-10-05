@@ -5,7 +5,14 @@ import { LeadsTable } from "@/components/admin/LeadsTable";
 import { AdminDateCell } from "@/components/admin/AdminDateCell";
 import { DateSortToggle, parseDateSort } from "@/components/admin/DateSortToggle";
 import { getAdminDateTimeT } from "@/lib/admin/datetime-labels";
-import { formatDateTime, formatDateTimeShort, lastModifiedAt } from "@/lib/datetime";
+import { getTranslations } from "next-intl/server";
+import {
+  ADMIN_LOCALE,
+  formatDateOnly,
+  formatDateTime,
+  formatDateTimeShort,
+  lastModifiedAt,
+} from "@/lib/datetime";
 import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 import {
   WorkflowBadge,
@@ -41,16 +48,14 @@ type LeadRow = {
   workflow_status?: string | null;
   next_follow_up?: string | null;
   rgpd_consent_at?: string | null;
-  /** Sprint C3 : sujet pre-cadre depuis /contact (NULLABLE). */
+  /** Sujet pre-cadre du formulaire /contact (peut etre vide). */
   subject?: string | null;
   workflow_history?: unknown;
 };
 
-// Consentement RGPD (BUG 7). Source structurée = colonne
-// rgpd_consent_at (après migration 20260518_rgpd_consent.sql). Tant
-// qu'elle n'est pas migrée, on dérive de l'audit toujours présent
-// dans `message` (« [RGPD] consentement accordé le <ISO> ») —
-// résilient, aucun changement de requête à risque.
+// Consentement RGPD. Source structuree : colonne rgpd_consent_at. A
+// defaut, on derive de l'audit toujours present dans `message`
+// (« [RGPD] consentement accordé le <ISO> »), sans changer la requete.
 function rgpdConsentAt(l: {
   rgpd_consent_at?: string | null;
   message: string | null;
@@ -62,14 +67,15 @@ function rgpdConsentAt(l: {
   return m ? m[1] : null;
 }
 
-const TABS: { key: string; label: string }[] = [
-  { key: "new", label: "Nouveau" },
-  { key: "in_progress", label: "En cours" },
-  { key: "on_hold", label: "En suspens" },
-  { key: "validated", label: "Validé" },
-  { key: "rejected", label: "Exclu" },
-  { key: "completed", label: "Traités" },
-  { key: "all", label: "Tous" },
+// Onglets de suivi ; libelles : cles "tab_*" du namespace "admin_workflow".
+const TABS: { key: string }[] = [
+  { key: "new" },
+  { key: "in_progress" },
+  { key: "on_hold" },
+  { key: "validated" },
+  { key: "rejected" },
+  { key: "completed" },
+  { key: "all" },
 ];
 
 export default async function AdminLeadsPage({
@@ -81,18 +87,19 @@ export default async function AdminLeadsPage({
   const tab = sp.tab && TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
   const sort = parseDateSort(sp.sort);
   const tDate = await getAdminDateTimeT();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_leads" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
   await requireAdminPage();
   // Lecture leads via service_role : table sans policy SELECT confirmée
-  // pour le rôle authenticated (cf. lib/lead-insert.ts, leads est
-  // write-only par design — brief MAPA_BRIEF_CLAUDE_CODE.md).
+  // pour le role authenticated (leads est en ecriture seule par conception).
   const supabase = supabaseService();
 
   // Tentative avec les nouvelles colonnes (workflow_status, next_follow_up)
   let migrationApplied = true;
   let leads: LeadRow[] = [];
 
-  // Sprint C3 : tentative avec subject (migration 20260527) ; fallback
-  // cascade vers workflow → legacy si colonnes manquantes.
+  // Tentative avec subject ; repli en cascade vers les colonnes de suivi
+  // puis vers les colonnes d'origine si certaines colonnes manquent.
   const tryC3 = await supabase
     .from("leads")
     .select(
@@ -113,7 +120,7 @@ export default async function AdminLeadsPage({
       .limit(500);
 
     if (tryNew.error) {
-      // Migration pas encore appliquée → fallback sur les colonnes existantes
+      // Colonnes de suivi absentes : repli sur les colonnes existantes
       migrationApplied = false;
       const fallback = await supabase
         .from("leads")
@@ -172,14 +179,13 @@ export default async function AdminLeadsPage({
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Console MAPA
+            {tw("console_eyebrow")}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
-            Leads
+            {t("title")}
           </h1>
           <p className="mt-1 text-sm text-[#3D4F63]/70">
-            {filtered.length} lead{filtered.length > 1 ? "s" : ""} affiché
-            {filtered.length > 1 ? "s" : ""} · {leads.length} au total
+            {t("count", { shown: filtered.length, total: leads.length })}
           </p>
         </div>
         <ExcelExportButton
@@ -217,7 +223,7 @@ export default async function AdminLeadsPage({
                     : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
               }`}
             >
-              <span>{t.label}</span>
+              <span>{tw(`tab_${t.key}`)}</span>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] ${
                   active
@@ -255,13 +261,13 @@ export default async function AdminLeadsPage({
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white">
         <header className="border-b border-[#3D4F63]/10 px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-            Vue rapide ({filtered.length})
+            {t("quick_view", { count: filtered.length })}
           </p>
         </header>
         <ul className="divide-y divide-[#3D4F63]/10">
           {filtered.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-[#3D4F63]/60">
-              Aucun lead pour cette sélection.
+              {t("empty_selection")}
             </li>
           )}
           {filtered.slice(0, 50).map((l) => {
@@ -289,15 +295,14 @@ export default async function AdminLeadsPage({
                     const c = rgpdConsentAt(l);
                     return c ? (
                       <span
-                        title={`Consentement RGPD obtenu le ${formatDateTime(c)}`}
+                        title={t("rgpd_consent_title", { date: formatDateTime(c) })}
                         className="rounded-full bg-emerald-600/15 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-emerald-700"
                       >
-                        RGPD ✓{" "}
-                        {formatDateTimeShort(c)}
+                        {t("rgpd_yes", { date: formatDateTimeShort(c) })}
                       </span>
                     ) : (
                       <span className="rounded-full bg-[#3D4F63]/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]/50">
-                        RGPD ✗
+                        {t("rgpd_no")}
                       </span>
                     );
                   })()}
@@ -306,14 +311,14 @@ export default async function AdminLeadsPage({
                   </span>
                   {l.next_follow_up && (
                     <span className="rounded-full bg-[#e0af6e]/15 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#e0af6e]">
-                      Suivi : {l.next_follow_up}
+                      {tw("followup_badge", { date: formatDateOnly(l.next_follow_up) })}
                     </span>
                   )}
                   <Link
                     href={`/admin/leads/${l.id}`}
                     className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   >
-                    Voir
+                    {tw("view")}
                   </Link>
                 </div>
               </li>

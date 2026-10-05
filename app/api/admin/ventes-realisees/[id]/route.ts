@@ -21,7 +21,7 @@ export async function PATCH(
   const overrideValue = body.comparable_override;
   const overrideValid = overrideValue === true || overrideValue === false || overrideValue === null;
 
-  // Cas 1 — bascule seule de comparable_override (controle 3 etats dans la
+  // Cas 1 : bascule seule de comparable_override (controle 3 etats dans la
   // liste : Auto=null / Oui=true / Non=false). Detecte quand aucun champ
   // "vente" complet n'est fourni.
   const isOverrideOnly =
@@ -42,7 +42,7 @@ export async function PATCH(
     return NextResponse.json({ ok: true });
   }
 
-  // Cas 2 — edition complete (memes CHECK que la creation).
+  // Cas 2 : edition complete (memes CHECK que la creation).
   const { insert, error: validationError } = parseSaleInput(body);
   if (validationError || !insert) {
     return NextResponse.json({ error: validationError ?? "invalid" }, { status: 400 });

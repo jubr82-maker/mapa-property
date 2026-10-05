@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminDateCell } from "@/components/admin/AdminDateCell";
-import { lastModifiedAt } from "@/lib/datetime";
+import { ADMIN_LOCALE, lastModifiedAt } from "@/lib/datetime";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { supabaseService } from "@/lib/supabase-service";
@@ -9,6 +10,8 @@ import { WorkflowSelect } from "@/components/admin/WorkflowSelect";
 import { AdminNotes } from "@/components/admin/AdminNotes";
 import {
   WorkflowBadge,
+  sourceLabel,
+  workflowLabelKey,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
 import {
@@ -99,6 +102,16 @@ export default async function AdminWaitlistDetailPage({
     item = tryFull.data as WaitlistFull;
   }
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_waitlist" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
+  const notProvided = tw("not_provided");
+  // Ancienne colonne `status` : libelle de suivi si la valeur est connue.
+  const legacyStatus = (v: string | null) => {
+    if (!v) return null;
+    const key = workflowLabelKey(v);
+    return key === "status_unknown" ? v : tw(key);
+  };
+
   const fullName =
     [item.first_name, item.last_name].filter(Boolean).join(" ") ||
     item.email;
@@ -119,14 +132,14 @@ export default async function AdminWaitlistDetailPage({
           className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           <ArrowLeft className="size-3" />
-          Retour a la liste d&apos;attente
+          {t("back")}
         </Link>
       </div>
 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Liste d&apos;attente
+            {t("title")}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
             {fullName}
@@ -150,21 +163,21 @@ export default async function AdminWaitlistDetailPage({
         <div className="space-y-4">
           <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-              Contact
+              {tw("section_contact")}
             </p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Field label="Email" value={item.email} />
-              <Field label="Source" value={item.source} />
-              <Field label="Budget" value={budget} />
-              <Field label="Budget valide" value={budgetValidated} />
-              <Field label="Statut legacy" value={item.status ?? "—"} />
+              <Field label={tw("field_email")} value={item.email} empty={notProvided} />
+              <Field label={tw("field_source")} value={sourceLabel(tw, item.source)} empty={notProvided} />
+              <Field label={t("budget")} value={budget} empty={notProvided} />
+              <Field label={t("budget_validated")} value={budgetValidated} empty={notProvided} />
+              <Field label={tw("field_legacy_status")} value={legacyStatus(item.status)} empty={notProvided} />
             </dl>
           </div>
 
           {search && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Recherche
+                {t("search")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {search}
@@ -175,7 +188,7 @@ export default async function AdminWaitlistDetailPage({
           {item.admin_notes && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Derniere note admin
+                {tw("last_note")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {item.admin_notes}
@@ -206,9 +219,11 @@ export default async function AdminWaitlistDetailPage({
 function Field({
   label,
   value,
+  empty,
 }: {
   label: string;
   value: string | null | undefined;
+  empty: string;
 }) {
   return (
     <div>
@@ -216,7 +231,7 @@ function Field({
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-[#1A1F2A]">
-        {value && value.trim() ? value : "—"}
+        {value && value.trim() ? value : empty}
       </dd>
     </div>
   );

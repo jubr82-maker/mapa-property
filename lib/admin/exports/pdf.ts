@@ -1,14 +1,14 @@
-// lib/admin/exports/pdf.ts — générateur PDF partagé pour les fiches admin
+// lib/admin/exports/pdf.ts : générateur PDF partagé pour les fiches admin
 // (lead / mandat / estimation / demande off-market), sur le modèle validé
 // par Julien le 2026-09-22. pdfkit (MIT), pur Node, sans Chromium headless
-// — compatible fonctions serverless Vercel (région arn1).
+// : compatible fonctions serverless Vercel (région arn1).
 //
-// COULEURS : lib/admin/exports/theme.ts uniquement — aucune couleur codée
+// COULEURS : lib/admin/exports/theme.ts uniquement : aucune couleur codée
 // en dur dans ce fichier.
 //
 // POLICES : l'admin charge Big Shoulders / Archivo / JetBrains Mono via
 // next/font/google (app/admin/layout.tsx:3,11-29). Ce module embarque les
-// vraies polices (statiques, pas variables — cf. justification ci-dessous)
+// vraies polices (statiques, pas variables : cf. justification ci-dessous)
 // si leurs fichiers sont présents dans public/fonts/, avec repli
 // AUTOMATIQUE et SILENCIEUX sur les 14 polices standard PDF sinon (aucune
 // génération ne doit jamais échouer faute de fichier de police) :
@@ -18,20 +18,20 @@
 //   public/fonts/JetBrainsMono-Regular.ttf     -> chasse fixe (repli Courier)
 //   public/fonts/JetBrainsMono-Bold.ttf        -> chasse fixe grasse (repli Courier-Bold)
 //
-// STATIQUE, PAS VARIABLE — PROUVÉ par lecture du code source de pdfkit
+// STATIQUE, PAS VARIABLE : PROUVÉ par lecture du code source de pdfkit
 // (node_modules/pdfkit/js/pdfkit.standalone.js:3774-3791,
 // `PDFFontFactory.open()`) : pdfkit appelle `fontkit.create(src, family)`
 // et embarque tel quel l'instance qu'il retourne, sans jamais appeler
 // `font.getVariation(...)` (API que fontkit expose pourtant, cf.
-// node_modules/fontkit@2.0.4/README.md:137-152 — variationAxes,
+// node_modules/fontkit@2.0.4/README.md:137-152 : variationAxes,
 // namedVariations, getVariation). Un fichier de police variable serait
 // donc TOUJOURS embarqué avec son instance par défaut (souvent le poids
 // le plus fin), sans aucun moyen de sélectionner "Bold"/"Black" via
-// l'API pdfkit — d'où l'usage de fichiers statiques, un par graisse.
+// l'API pdfkit : d'où l'usage de fichiers statiques, un par graisse.
 //
 // DÉFAUT CORRIGÉ (espace insécable étroite dans les montants) : tout le
 // texte affiché ici passe par lib/admin/exports/format.ts, qui construit
-// les nombres à la main avec une espace ASCII normale — jamais
+// les nombres à la main avec une espace ASCII normale : jamais
 // Intl.NumberFormat / toLocaleString.
 import PDFDocument from "pdfkit";
 import { readFileSync, existsSync } from "node:fs";
@@ -60,7 +60,7 @@ interface ResolvedFonts {
   mono: string;
   monoBold: string;
   /** true pour chaque graisse effectivement embarquée (fichier trouvé et
-   * valide) — false = repli sur la police standard, silencieusement. */
+   * valide) : false = repli sur la police standard, silencieusement. */
   embedded: Record<keyof typeof FONT_SOURCES, boolean>;
 }
 
@@ -102,7 +102,7 @@ const VALUE_COLUMN_X = 238; // point d'alignement des valeurs, cf. maquette vali
 const FOOTER_ZONE = 66; // espace réservé en bas de page pour le pied de page
 
 // Logo MAPA Property doré, seul fichier exploitable trouvé dans le dépôt
-// pour "logo doré" — PROUVÉ public/logos/mapa-logo-gold-h96.png (PNG
+// pour "logo doré" : PROUVÉ public/logos/mapa-logo-gold-h96.png (PNG
 // RGBA 156×96, vérifié à l'installation). Lu une seule fois par cold
 // start de la fonction serverless.
 const LOGO_PATH = path.join(process.cwd(), "public", "logos", "mapa-logo-gold-h96.png");
@@ -135,7 +135,7 @@ export interface PdfTableSection {
 }
 
 export interface PdfTimelineEntry {
-  /** Déjà formatée (ex. via fmtDateShort) — ce module ne formate pas les dates. */
+  /** Déjà formatée (ex. via fmtDateShort) : ce module ne formate pas les dates. */
   date: string;
   text: string;
 }
@@ -244,7 +244,7 @@ function drawBanner(ctx: Ctx, continuation: boolean): void {
 }
 
 /** Réduction automatique de la taille de police pour tenir sur une seule
- * ligne (titre du bandeau) — même principe que les cartouches (drawKpis). */
+ * ligne (titre du bandeau) : même principe que les cartouches (drawKpis). */
 function fittedFontSize(
   doc: PDFKit.PDFDocument,
   font: string,
@@ -349,7 +349,7 @@ function measureRowHeight(ctx: Ctx, row: PdfTableRow): number {
   const { doc, fonts } = ctx;
   const valueWidth = doc.page.width - PAGE_MARGIN - VALUE_COLUMN_X;
   const labelH = doc.font(fonts.bodyBold).fontSize(9.5).heightOfString(row.label, { width: LABEL_COLUMN_WIDTH });
-  const valueH = doc.font(fonts.body).fontSize(9.5).heightOfString(row.value || "—", { width: valueWidth });
+  const valueH = doc.font(fonts.body).fontSize(9.5).heightOfString(row.value || "", { width: valueWidth });
   return Math.max(labelH, valueH) + ROW_V_PADDING * 2;
 }
 
@@ -373,7 +373,7 @@ function drawTableRow(ctx: Ctx, row: PdfTableRow, index: number): void {
     .font(fonts.body)
     .fontSize(9.5)
     .fillColor(DARK)
-    .text(row.value || "—", VALUE_COLUMN_X, top + ROW_V_PADDING, { width: valueWidth, align: "right" });
+    .text(row.value || "", VALUE_COLUMN_X, top + ROW_V_PADDING, { width: valueWidth, align: "right" });
 
   doc.x = PAGE_MARGIN;
   doc.y = top + rowHeight;
@@ -450,7 +450,7 @@ function drawTimelineSection(ctx: Ctx, section: PdfTimelineSection): void {
 function drawFreeTextSection(ctx: Ctx, section: PdfFreeTextSection): void {
   const { doc, fonts } = ctx;
   const width = doc.page.width - PAGE_MARGIN * 2;
-  const text = section.text || "—";
+  const text = section.text || "";
   const textHeight = doc.font(fonts.body).fontSize(9.5).heightOfString(text, { width });
   const pageContentHeight = doc.page.height - FOOTER_ZONE - (BANNER_HEIGHT_CONT + 22);
 
@@ -478,7 +478,7 @@ function drawFooter(ctx: Ctx, pageLabel: string): void {
     .font(fonts.mono)
     .fontSize(7)
     .fillColor(GOLD_DARK)
-    .text(`${reference} — édité le ${editionDateShort()} — ${pageLabel}`, PAGE_MARGIN, y + 32, {
+    .text(`${reference}, édité le ${editionDateShort()}, ${pageLabel}`, PAGE_MARGIN, y + 32, {
       width,
       align: "center",
     });

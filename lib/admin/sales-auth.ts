@@ -1,4 +1,4 @@
-// MAPA Property — Auth + validation partagees pour /admin/ventes-realisees.
+// MAPA Property : Auth + validation partagees pour /admin/ventes-realisees.
 //
 // Source unique de l'allowlist (les 2 comptes admin reels) et de la
 // validation des champs d'une vente, reutilisees par :

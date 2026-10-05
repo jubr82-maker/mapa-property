@@ -6,7 +6,7 @@ type HealthStatus = "idle" | "ok" | "degraded" | "error";
 
 export function AnalyticsHealthPill() {
   const [status, setStatus] = useState<HealthStatus>("idle");
-  const [version, setVersion] = useState<string>("—");
+  const [version, setVersion] = useState<string>("");
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
 
   useEffect(() => {

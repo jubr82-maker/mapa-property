@@ -1,4 +1,4 @@
-// Export PDF de la fiche d'une demande d'accès off-market — sur le
+// Export PDF de la fiche d'une demande d'accès off-market, sur le
 // modèle validé. Aucune photo : cette table ne porte aucune colonne
 // image, et la politique OFF MARKET sans visuel s'applique de toute
 // façon à l'ensemble du module (cf. commit 38509c1).
@@ -9,6 +9,8 @@ import { buildFichePdf, type PdfSection } from "@/lib/admin/exports/pdf";
 import { pdfResponse, exportFicheFilename } from "@/lib/admin/exports/http";
 import { fmtDateShort, fmtDateTimeShort, fmtEuro, fmtSurface, fullName, orDash } from "@/lib/admin/exports/format";
 import { workflowStatusLabel, requestStatusLabel } from "@/lib/admin/exports/labels";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 interface HistoryEntry {
   at: string;
@@ -80,48 +82,50 @@ export async function GET(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_offmarket" });
+  const empty = orDash(null);
   const history: HistoryEntry[] = Array.isArray(row.workflow_history) ? row.workflow_history : [];
   const property = row.properties_offmarket;
 
   const sections: PdfSection[] = [
     {
       kind: "table",
-      heading: "Demandeur",
+      heading: t("export.applicant"),
       rows: [
-        { label: "Nom", value: fullName(row.prenom, row.nom) },
-        { label: "Email", value: orDash(row.email) },
-        { label: "Téléphone", value: orDash(row.telephone) },
-        { label: "Reçue le", value: fmtDateTimeShort(row.created_at) },
+        { label: t("export.name"), value: fullName(row.prenom, row.nom) },
+        { label: t("export.email"), value: orDash(row.email) },
+        { label: t("export.phone"), value: orDash(row.telephone) },
+        { label: t("export.receivedOn"), value: fmtDateTimeShort(row.created_at) },
       ],
     },
     {
       kind: "table",
-      heading: "Bien off-market concerné",
+      heading: t("export.propertySection"),
       rows: [
-        { label: "Référence", value: orDash(property?.reference) },
-        { label: "Titre", value: orDash(property?.title) },
-        { label: "Ville", value: orDash(property?.city_label) },
+        { label: t("export.reference"), value: orDash(property?.reference) },
+        { label: t("export.title"), value: orDash(property?.title) },
+        { label: t("export.town"), value: orDash(property?.city_label) },
       ],
     },
     {
       kind: "table",
-      heading: "Critères de recherche",
+      heading: t("export.searchCriteria"),
       rows: [
-        { label: "Pays recherché", value: orDash(row.pays_recherche) },
-        { label: "Ville / quartier", value: orDash(row.ville_quartier) },
-        { label: "Budget max", value: fmtEuro(row.budget_max_eur) },
-        { label: "Surface souhaitée", value: row.surface_souhaitee_m2 ? fmtSurface(row.surface_souhaitee_m2) : "—" },
-        { label: "Critères précis", value: orDash(row.criteres_precis) },
+        { label: t("export.country"), value: orDash(row.pays_recherche) },
+        { label: t("export.city"), value: orDash(row.ville_quartier) },
+        { label: t("export.budget"), value: fmtEuro(row.budget_max_eur) },
+        { label: t("export.surface"), value: row.surface_souhaitee_m2 ? fmtSurface(row.surface_souhaitee_m2) : empty },
+        { label: t("export.criteria"), value: orDash(row.criteres_precis) },
       ],
     },
     {
       kind: "table",
-      heading: "Suivi interne",
+      heading: t("export.internalFollowUp"),
       rows: [
-        { label: "Statut", value: requestStatusLabel(row.status) },
-        { label: "Statut workflow", value: workflowStatusLabel(row.workflow_status) },
-        { label: "Prochain suivi", value: row.next_follow_up ? fmtDateShort(row.next_follow_up) : "—" },
-        { label: "Notes admin", value: orDash(row.admin_notes ?? row.notes_admin) },
+        { label: t("export.dossierStatus"), value: requestStatusLabel(row.status) },
+        { label: t("export.followStatus"), value: workflowStatusLabel(row.workflow_status) },
+        { label: t("export.nextFollowUp"), value: row.next_follow_up ? fmtDateShort(row.next_follow_up) : empty },
+        { label: t("export.notes"), value: orDash(row.admin_notes ?? row.notes_admin) },
       ],
     },
   ];
@@ -129,31 +133,31 @@ export async function GET(
   if (history.length > 0) {
     sections.push({
       kind: "timeline",
-      heading: "Historique du workflow",
+      heading: t("export.history"),
       entries: history.map((h) => ({
         date: fmtDateTimeShort(h.at),
         text: [
           h.from && h.to ? `${workflowStatusLabel(h.from)} -> ${workflowStatusLabel(h.to)}` : null,
-          h.note ? `Note : ${h.note}` : null,
-          h.reason ? `Motif : ${h.reason}` : null,
+          h.note ? t("export.historyNote", { note: h.note }) : null,
+          h.reason ? t("export.historyReason", { reason: h.reason }) : null,
         ]
           .filter(Boolean)
-          .join(" — ") || "—",
+          .join(" · ") || empty,
       })),
     });
   }
 
   const buffer = await buildFichePdf({
-    documentTitle: "Fiche demande off-market",
-    subtitle: property?.reference ? `Bien ${property.reference}` : undefined,
+    documentTitle: t("export.documentTitle"),
+    subtitle: property?.reference ? t("export.subtitle", { reference: property.reference }) : undefined,
     reference: `OFFMKT-${row.id.slice(0, 8).toUpperCase()}`,
     kpis: [
-      { label: "Budget max", value: fmtEuro(row.budget_max_eur) },
-      { label: "Surface", value: row.surface_souhaitee_m2 ? fmtSurface(row.surface_souhaitee_m2) : "—" },
-      { label: "Statut", value: workflowStatusLabel(row.workflow_status) },
+      { label: t("export.budget"), value: fmtEuro(row.budget_max_eur) },
+      { label: t("export.surface"), value: row.surface_souhaitee_m2 ? fmtSurface(row.surface_souhaitee_m2) : empty },
+      { label: t("export.followStatus"), value: workflowStatusLabel(row.workflow_status) },
     ],
     sections,
   });
 
-  return pdfResponse(buffer, exportFicheFilename("offmarket-demande", row.id));
+  return pdfResponse(buffer, exportFicheFilename("demande-off-market", row.id));
 }

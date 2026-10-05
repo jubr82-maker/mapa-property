@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * PropertyEditForm — Sprint SAISIE-MANUELLE, étape B (formulaire complet).
+ * PropertyEditForm : formulaire complet de la fiche d'un bien.
  *
  * Édite l'intégralité des champs de contenu/caractéristiques d'un bien
- * classique (hors type/transaction/état, fixés à la création — cf.
- * PropertyCreateForm — et hors vidéo/photos, gérées par leurs propres
+ * classique (hors type/transaction/état, fixés à la création, cf.
+ * PropertyCreateForm, et hors vidéo/photos, gérées par leurs propres
  * sections sur la page d'édition). Sections/Field calqués sur
  * OffmarketForm.tsx / PropertyCreateForm.tsx pour une UI cohérente,
  * lisible par un utilisateur non technique.
@@ -16,31 +16,29 @@
  */
 
 import { useState, useTransition, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { updateProperty } from "@/app/admin/properties/actions";
 import { parseDecimalInput } from "@/lib/format/numbers";
 
+// Valeurs enregistrees en base (inchangees, cf. allowlists de
+// app/admin/properties/actions.ts) ; libelles : cles admin_properties.
 const BADGE_OPTIONS = [
-  "Exclusivité",
-  "Nouveau",
-  "Nouveau prix",
-  "Opportunité",
-  "Investissement",
-  "À découvrir",
+  { value: "Exclusivité", key: "badge_exclusivity" },
+  { value: "Nouveau", key: "badge_new" },
+  { value: "Nouveau prix", key: "badge_new_price" },
+  { value: "Opportunité", key: "badge_opportunity" },
+  { value: "Investissement", key: "badge_investment" },
+  { value: "À découvrir", key: "badge_discover" },
 ] as const;
 const BADGE_SIZE_OPTIONS = ["S", "M", "L"] as const;
 const BADGE_POSITION_OPTIONS = [
-  { value: "top-left", label: "Haut gauche" },
-  { value: "top-right", label: "Haut droit" },
-  { value: "bottom-left", label: "Bas gauche" },
-  { value: "bottom-right", label: "Bas droit" },
+  { value: "top-left", key: "pos_top_left" },
+  { value: "top-right", key: "pos_top_right" },
+  { value: "bottom-left", key: "pos_bottom_left" },
+  { value: "bottom-right", key: "pos_bottom_right" },
 ] as const;
-const STATUS_OPTIONS = [
-  { value: "draft", label: "Brouillon (non visible publiquement)" },
-  { value: "published", label: "Publié" },
-  { value: "sold", label: "Vendu" },
-  { value: "withdrawn", label: "Retiré" },
-] as const;
+const STATUS_OPTIONS = ["draft", "published", "sold", "withdrawn"] as const;
 
 interface PropertyEditFormInitial {
   title_fr: string | null;
@@ -217,7 +215,7 @@ function toFormState(initial: PropertyEditFormInitial): FormState {
 // Ceinture-bretelles : même si les actions sœurs (photos/vidéo) ne
 // rafraîchissent plus cette page (cf. photos/actions.ts et
 // updatePropertyVideoUrl), une saisie non envoyée reste fragile face à
-// toute navigation. Comparaison superficielle suffit — FormState n'a que
+// toute navigation. Comparaison superficielle suffit : FormState n'a que
 // des valeurs primitives (string/boolean).
 function isDirty(a: FormState, b: FormState): boolean {
   return (Object.keys(a) as (keyof FormState)[]).some((k) => a[k] !== b[k]);
@@ -297,6 +295,7 @@ function CheckboxField({
 }
 
 export function PropertyEditForm({ propertyId, initial }: Props) {
+  const t = useTranslations("admin_properties");
   const [form, setForm] = useState<FormState>(() => toFormState(initial));
   const [baseline, setBaseline] = useState<FormState>(() => toFormState(initial));
   const [busy, startTransition] = useTransition();
@@ -337,7 +336,7 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
   }
 
   // parseDecimalInput tolere la virgule ET le point comme separateur
-  // decimal (mission "surfaces decimales, formats de nombres...") —
+  // decimal (mission "surfaces decimales, formats de nombres..."),
   // necessaire des que les champs surface passent en saisie texte libre
   // pour accepter la virgule au clavier (type="number" natif la rejette).
   function numOrNull(key: (typeof NUMERIC_KEYS)[number]): number | null {
@@ -398,13 +397,13 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
           badge_position: form.badge.length > 0 ? form.badge_position : null,
         });
         if (result.ok) {
-          setFeedback("Enregistré.");
+          setFeedback(t("saved"));
           setBaseline(form);
         } else {
           setError(result.error);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erreur inconnue.");
+        setError(err instanceof Error ? err.message : t("err_unknown"));
       }
     });
   };
@@ -413,26 +412,26 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
     <form onSubmit={onSave} className="space-y-5">
       {dirty && (
         <div className="sticky top-2 z-10 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 shadow-sm">
-          Modifications non enregistrées — cliquez sur « Enregistrer » pour les conserver.
+          {t("unsaved_banner")}
         </div>
       )}
 
-      <Section title="Descriptions">
-        <Field label="Titre (FR)">
+      <Section title={t("sec_descriptions")}>
+        <Field label={t("f_title_fr")}>
           <input
             value={form.title_fr}
             onChange={(e) => set("title_fr", e.target.value)}
             className={inputCls}
           />
         </Field>
-        <Field label="Titre (EN)">
+        <Field label={t("f_title_en")}>
           <input
             value={form.title_en}
             onChange={(e) => set("title_en", e.target.value)}
             className={inputCls}
           />
         </Field>
-        <Field label="Titre (DE)" full>
+        <Field label={t("f_title_de")} full>
           <input
             value={form.title_de}
             onChange={(e) => set("title_de", e.target.value)}
@@ -441,34 +440,34 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         </Field>
 
         <Field
-          label="Description complète (FR)"
-          hint="Gras (B) pour les titres « Description : », « Prestations : »… ; italique (I) ; saut de ligne Maj+Entrée."
+          label={t("f_description_fr")}
+          hint={t("hint_description")}
           full
         >
           <RichTextEditor
             value={form.description_fr}
             onChange={(v) => set("description_fr", v)}
-            placeholder="Description complète du bien"
+            placeholder={t("ph_description_fr")}
           />
         </Field>
-        <Field label="Description complète (EN)" full>
+        <Field label={t("f_description_en")} full>
           <RichTextEditor
             value={form.description_en}
             onChange={(v) => set("description_en", v)}
-            placeholder="Full description (EN)"
+            placeholder={t("ph_description_en")}
           />
         </Field>
-        <Field label="Description complète (DE)" full>
+        <Field label={t("f_description_de")} full>
           <RichTextEditor
             value={form.description_de}
             onChange={(v) => set("description_de", v)}
-            placeholder="Vollständige Beschreibung (DE)"
+            placeholder={t("ph_description_de")}
           />
         </Field>
 
         <Field
-          label="Pitch court (FR)"
-          hint="Teaser affiché en aperçu/carte, distinct de la description complète."
+          label={t("f_short_fr")}
+          hint={t("hint_short")}
         >
           <textarea
             rows={2}
@@ -477,7 +476,7 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
             className={textareaCls}
           />
         </Field>
-        <Field label="Pitch court (EN)">
+        <Field label={t("f_short_en")}>
           <textarea
             rows={2}
             value={form.short_description_en}
@@ -485,7 +484,7 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
             className={textareaCls}
           />
         </Field>
-        <Field label="Pitch court (DE)" full>
+        <Field label={t("f_short_de")} full>
           <textarea
             rows={2}
             value={form.short_description_de}
@@ -495,92 +494,92 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         </Field>
       </Section>
 
-      <Section title="Surfaces" hint="Toutes en m², jusqu'à 2 décimales (virgule ou point) — laisser vide si non applicable.">
-        <Field label="Surface (référence)">
+      <Section title={t("sec_surfaces")} hint={t("hint_surfaces")}>
+        <Field label={t("f_surface")}>
           <input type="text" inputMode="decimal" value={form.surface} onChange={(e) => setDecimal("surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Surface habitable">
+        <Field label={t("f_living_surface")}>
           <input type="text" inputMode="decimal" value={form.living_surface} onChange={(e) => setDecimal("living_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Surface utile">
+        <Field label={t("f_usable_surface")}>
           <input type="text" inputMode="decimal" value={form.usable_surface} onChange={(e) => setDecimal("usable_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Surface terrain">
+        <Field label={t("f_land_surface")}>
           <input type="text" inputMode="decimal" value={form.land_surface} onChange={(e) => setDecimal("land_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Terrasse">
+        <Field label={t("f_terrace")}>
           <input type="text" inputMode="decimal" value={form.terrace_surface} onChange={(e) => setDecimal("terrace_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Balcon">
+        <Field label={t("f_balcony")}>
           <input type="text" inputMode="decimal" value={form.balcony_surface} onChange={(e) => setDecimal("balcony_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Jardin">
+        <Field label={t("f_garden")}>
           <input type="text" inputMode="decimal" value={form.garden_surface} onChange={(e) => setDecimal("garden_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Cuisine">
+        <Field label={t("f_kitchen")}>
           <input type="text" inputMode="decimal" value={form.kitchen_surface} onChange={(e) => setDecimal("kitchen_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Surface totale (immeuble)">
+        <Field label={t("f_area_total")}>
           <input type="number" min="0" step="0.1" value={form.area_total} onChange={(e) => set("area_total", e.target.value)} className={inputCls} />
         </Field>
       </Section>
 
-      <Section title="Pièces">
-        <Field label="Chambres">
+      <Section title={t("sec_rooms")}>
+        <Field label={t("f_bedrooms")}>
           <input type="number" min="0" step="1" value={form.bedrooms} onChange={(e) => set("bedrooms", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Salles de bain">
+        <Field label={t("f_bathrooms")}>
           <input type="number" min="0" step="1" value={form.bathrooms} onChange={(e) => set("bathrooms", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Douches">
+        <Field label={t("f_showers")}>
           <input type="number" min="0" step="1" value={form.douches} onChange={(e) => set("douches", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="WC">
+        <Field label={t("f_wc")}>
           <input type="number" min="0" step="1" value={form.wc} onChange={(e) => set("wc", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Bureaux">
+        <Field label={t("f_offices")}>
           <input type="number" min="0" step="1" value={form.bureaux} onChange={(e) => set("bureaux", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Locaux de stockage">
+        <Field label={t("f_storage")}>
           <input type="number" min="0" step="1" value={form.locaux_stockage} onChange={(e) => set("locaux_stockage", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Étage" hint='Texte libre, ex. "3ème étage" ou "RDC".'>
+        <Field label={t("f_floor")} hint={t("hint_floor")}>
           <input value={form.floor} onChange={(e) => set("floor", e.target.value)} className={inputCls} />
         </Field>
       </Section>
 
-      <Section title="Équipements">
-        <Field label="Buanderie">
-          <CheckboxField label="Présente" checked={form.has_laundry} onChange={(v) => set("has_laundry", v)} />
+      <Section title={t("sec_equipment")}>
+        <Field label={t("f_laundry")}>
+          <CheckboxField label={t("present_f")} checked={form.has_laundry} onChange={(v) => set("has_laundry", v)} />
         </Field>
-        <Field label="Dressing">
-          <CheckboxField label="Présent" checked={form.has_dressing} onChange={(v) => set("has_dressing", v)} />
+        <Field label={t("f_dressing")}>
+          <CheckboxField label={t("present_m")} checked={form.has_dressing} onChange={(v) => set("has_dressing", v)} />
         </Field>
-        <Field label="Piscine">
-          <CheckboxField label="Présente" checked={form.has_pool} onChange={(v) => set("has_pool", v)} />
+        <Field label={t("f_pool")}>
+          <CheckboxField label={t("present_f")} checked={form.has_pool} onChange={(v) => set("has_pool", v)} />
         </Field>
-        <Field label="Emplacements parking">
+        <Field label={t("f_parking")}>
           <input type="number" min="0" step="1" value={form.parking} onChange={(e) => set("parking", e.target.value)} className={inputCls} />
         </Field>
       </Section>
 
-      <Section title="Énergie">
-        <Field label="Classe énergétique (DPE)" hint='Ex. "A", "B"…'>
+      <Section title={t("sec_energy")}>
+        <Field label={t("f_energy")} hint={t("hint_energy")}>
           <input value={form.energy} onChange={(e) => set("energy", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Isolation thermique">
+        <Field label={t("f_thermal")}>
           <input value={form.thermal} onChange={(e) => set("thermal", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Classe GES">
+        <Field label={t("f_ges")}>
           <input value={form.ges} onChange={(e) => set("ges", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Année de construction">
+        <Field label={t("f_year")}>
           <input type="number" min="1800" max="2100" step="1" value={form.year} onChange={(e) => set("year", e.target.value)} className={inputCls} />
         </Field>
       </Section>
 
-      <Section title="Prix">
-        <Field label="Prix (€)">
+      <Section title={t("section_price")}>
+        <Field label={t("field_price")}>
           <input
             type="number"
             min="0"
@@ -591,56 +590,56 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
             className={`${inputCls} disabled:opacity-50`}
           />
         </Field>
-        <Field label="Affichage">
-          <CheckboxField label="Prix sur demande" checked={form.price_on_demand} onChange={(v) => set("price_on_demand", v)} />
+        <Field label={t("field_display")}>
+          <CheckboxField label={t("price_on_demand")} checked={form.price_on_demand} onChange={(v) => set("price_on_demand", v)} />
         </Field>
-        <Field label="Prix minimum (fourchette)" hint="Facultatif — pour une communication en fourchette plutôt qu'un prix fixe.">
+        <Field label={t("f_price_min")} hint={t("hint_price_min")}>
           <input type="number" min="0" step="1000" value={form.price_min} onChange={(e) => set("price_min", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Prix maximum (fourchette)">
+        <Field label={t("f_price_max")}>
           <input type="number" min="0" step="1000" value={form.price_max} onChange={(e) => set("price_max", e.target.value)} className={inputCls} />
         </Field>
       </Section>
 
-      <Section title="Prestations & usage">
-        <Field label="Prestations" hint="Texte libre — une ligne par prestation, par exemple." full>
+      <Section title={t("sec_amenities")}>
+        <Field label={t("f_amenities")} hint={t("hint_amenities")} full>
           <textarea rows={4} value={form.amenities} onChange={(e) => set("amenities", e.target.value)} className={textareaCls} />
         </Field>
-        <Field label="Usage actuel">
+        <Field label={t("f_current_use")}>
           <input value={form.current_use} onChange={(e) => set("current_use", e.target.value)} className={inputCls} />
         </Field>
-        <Field label="Usage potentiel">
+        <Field label={t("f_potential_use")}>
           <input value={form.potential_use} onChange={(e) => set("potential_use", e.target.value)} className={inputCls} />
         </Field>
       </Section>
 
       <Section
-        title="Statut"
-        hint="Publié rend le bien visible sur le site public ; les 3 autres statuts le masquent (même effet que dépublier)."
+        title={t("sec_status")}
+        hint={t("hint_status")}
       >
-        <Field label="Statut" full>
+        <Field label={t("field_status")} full>
           <select value={form.status} onChange={(e) => set("status", e.target.value)} className={inputCls}>
             {STATUS_OPTIONS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
+              <option key={s} value={s}>
+                {t(`status_${s}`)}
               </option>
             ))}
           </select>
         </Field>
       </Section>
 
-      <Section title="Mise en avant">
-        <Field label="Badge">
+      <Section title={t("sec_highlight")}>
+        <Field label={t("f_badge")}>
           <select value={form.badge} onChange={(e) => set("badge", e.target.value)} className={inputCls}>
-            <option value="">Aucun</option>
+            <option value="">{t("badge_none")}</option>
             {BADGE_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
+              <option key={opt.value} value={opt.value}>
+                {t(opt.key)}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Taille">
+        <Field label={t("f_badge_size")}>
           <select
             value={form.badge_size}
             onChange={(e) => set("badge_size", e.target.value)}
@@ -649,12 +648,12 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
           >
             {BADGE_SIZE_OPTIONS.map((opt) => (
               <option key={opt} value={opt}>
-                {opt}
+                {t(`size_${opt}`)}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Position" full>
+        <Field label={t("f_badge_position")} full>
           <select
             value={form.badge_position}
             onChange={(e) => set("badge_position", e.target.value)}
@@ -663,7 +662,7 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
           >
             {BADGE_POSITION_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
-                {opt.label}
+                {t(opt.key)}
               </option>
             ))}
           </select>
@@ -676,10 +675,10 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
           disabled={busy}
           className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
         >
-          {busy ? "Enregistrement…" : "Enregistrer"}
+          {busy ? t("saving") : t("save")}
         </button>
         {feedback && <span className="text-sm text-emerald-700">{feedback}</span>}
-        {error && <span className="text-sm text-red-700">Erreur : {error}</span>}
+        {error && <span className="text-sm text-red-700">{t("error_prefix", { message: error })}</span>}
       </div>
     </form>
   );

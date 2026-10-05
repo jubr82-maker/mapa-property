@@ -1,11 +1,11 @@
 import { luxembourgWallClockDate } from "@/lib/datetime";
 
-// lib/admin/exports/format.ts — formatteurs partagés par les exports
+// lib/admin/exports/format.ts : formatteurs partagés par les exports
 // admin (Excel + PDF). Aucune dépendance à exceljs/pdfkit ici.
 //
 // DÉFAUT CORRIGÉ (2026-09-22) : les montants ne doivent JAMAIS passer par
 // `toLocaleString("fr-FR", {style:"currency", ...})` ni par
-// `Intl.NumberFormat("fr-FR")` pour un rendu texte destiné à un PDF —
+// `Intl.NumberFormat("fr-FR")` pour un rendu texte destiné à un PDF ,
 // depuis les mises à jour ICU récentes, ce formateur utilise une ESPACE
 // FINE INSÉCABLE (U+202F) comme séparateur de milliers, un caractère
 // absent de l'encodage WinAnsi des polices standard PDF (pdfkit) : il
@@ -29,7 +29,7 @@ function pad2(n: number): string {
 /** "2026-09-20T17:51:00Z" -> "20/09/2026" (date, heure de Luxembourg). */
 export function fmtDateShort(iso: string | null | undefined): string {
   const d = luxembourgWallClockDate(iso);
-  if (!d) return "—";
+  if (!d) return "";
   return `${pad2(d.getUTCDate())}/${pad2(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`;
 }
 
@@ -37,7 +37,7 @@ export function fmtDateShort(iso: string | null | undefined): string {
  *  comme hiver ; cf. lib/datetime.ts, utilitaire unique). */
 export function fmtDateTimeShort(iso: string | null | undefined): string {
   const d = luxembourgWallClockDate(iso);
-  if (!d) return "—";
+  if (!d) return "";
   return `${fmtDateShort(iso)} ${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}`;
 }
 
@@ -57,19 +57,19 @@ function groupThousands(n: number): string {
 
 /** 1250000 -> "1 250 000 €" (espace ASCII, jamais insécable étroite). */
 export function fmtEuro(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "—";
+  if (n == null || Number.isNaN(n)) return "";
   return `${groupThousands(n)} €`;
 }
 
 /** 186 -> "186 m²" */
 export function fmtSurface(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "—";
+  if (n == null || Number.isNaN(n)) return "";
   return `${groupThousands(n)} m²`;
 }
 
 /** 3 -> "3 %" */
 export function fmtPercent(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "—";
+  if (n == null || Number.isNaN(n)) return "";
   return `${groupThousands(n)} %`;
 }
 
@@ -77,10 +77,10 @@ export function fullName(
   first: string | null | undefined,
   last: string | null | undefined,
 ): string {
-  return [first, last].filter(Boolean).join(" ") || "—";
+  return [first, last].filter(Boolean).join(" ") || "";
 }
 
 export function orDash(value: string | number | null | undefined): string {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") return "";
   return String(value);
 }

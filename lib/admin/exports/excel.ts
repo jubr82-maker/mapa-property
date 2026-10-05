@@ -1,11 +1,11 @@
-// lib/admin/exports/excel.ts — génération Excel (.xlsx) partagée, sur le
+// lib/admin/exports/excel.ts : génération Excel (.xlsx) partagée, sur le
 // modèle validé par Julien le 2026-09-22 : en-tête sombre/crème, ligne
 // figée, filtre automatique, colonnes typées, lignes alternées, bordure
 // fine, retour à la ligne réservé aux colonnes de texte long.
 //
 // IMPORTANT (condition posée par Julien à l'installation d'exceljs,
 // 2026-09-20) : ce module ne doit JAMAIS servir à LIRE ou analyser un
-// fichier Excel fourni par un tiers — uniquement l'API d'ÉCRITURE
+// fichier Excel fourni par un tiers : uniquement l'API d'ÉCRITURE
 // d'exceljs (Workbook.addWorksheet/addRow puis .xlsx.writeBuffer()).
 //
 // COULEURS : lib/admin/exports/theme.ts uniquement.
@@ -13,7 +13,7 @@
 // DÉFAUT CORRIGÉ (fichier .xlsx invalide / "réparé" par Excel) : ce
 // module est une réécriture complète, avec validation indépendante du
 // fichier produit (ouverture par un lecteur tiers, hors exceljs) avant
-// toute livraison — cf. rapport de mission, étape 5.
+// toute livraison : cf. rapport de mission, étape 5.
 import ExcelJS from "exceljs";
 import { DARK, CREAM, CREAM_VERY_LIGHT, BORDER, toArgb } from "@/lib/admin/exports/theme";
 

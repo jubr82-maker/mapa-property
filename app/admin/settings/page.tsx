@@ -1,9 +1,23 @@
+import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SettingsClient } from "@/components/admin/SettingsClient";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
+// Sous-traitants RGPD affiches (cles de traduction admin_settings).
+const PROCESSORS = [
+  "processor_vercel",
+  "processor_supabase",
+  "processor_cloudflare",
+  "processor_ionos",
+  "processor_apimo",
+  "processor_mistral",
+  "processor_gandi",
+] as const;
+
 export default async function AdminSettingsPage() {
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_settings" });
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -13,10 +27,10 @@ export default async function AdminSettingsPage() {
     <div className="space-y-8">
       <header>
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-          Console MAPA
+          {t("eyebrow")}
         </p>
         <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
-          Paramètres
+          {t("title")}
         </h1>
       </header>
 
@@ -24,36 +38,27 @@ export default async function AdminSettingsPage() {
 
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <h2 className="font-display text-xl font-bold text-[#3D4F63]">
-          Coordonnées agence
+          {t("agency_title")}
         </h2>
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-          <Info label="Téléphone" value="Voir mentions légales (source unique)" />
-          <Info label="Email" value="Voir mentions légales (source unique)" />
-          <Info
-            label="Notification admin"
-            value="Configurable via MAPA_NOTIFICATION_EMAILS (Vercel)"
-          />
-          <Info label="Siège (privé)" value="Dudelange, Luxembourg" />
+          <Info label={t("phone")} value={t("see_legal")} />
+          <Info label={t("email")} value={t("see_legal")} />
+          <Info label={t("notifications")} value={t("notifications_value")} />
+          <Info label={t("headquarters")} value={t("headquarters_value")} />
         </dl>
-        <p className="mt-3 text-xs text-[#3D4F63]/60">
-          Lecture seule. Les coordonnées Julien / Frédéric ne sont plus
-          dupliquées : source unique = <code>lib/legal/mentions.ts</code>.
-          Diffusion publique uniquement via le composant <code>&lt;ContactButtons /&gt;</code>.
-        </p>
+        <p className="mt-3 text-xs text-[#3D4F63]/60">{t("read_only_note")}</p>
       </section>
 
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <h2 className="font-display text-xl font-bold text-[#3D4F63]">
-          Sous-traitants RGPD
+          {t("processors_title")}
         </h2>
         <ul className="mt-4 space-y-2 text-sm text-[#3D4F63]/80">
-          <li>• <strong>Vercel</strong> — hébergement des pages et fonctions du site (région Stockholm)</li>
-          <li>• <strong>Supabase</strong> (Postgres, Auth) — base de données (région Stockholm) et stockage de fichiers</li>
-          <li>• <strong>Cloudflare</strong> — protection anti-robots des formulaires et stockage de fichiers (pas de DNS ni de pare-feu du site)</li>
-          <li>• <strong>Resend</strong> — envoi d&apos;emails transactionnels</li>
-          <li>• <strong>Apimo</strong> — sync biens classiques (lecture seule)</li>
-          <li>• <strong>Mistral AI</strong> — chatbot Eléna (modèle IA, société française)</li>
-          <li>• <strong>Gandi</strong> — nom de domaine</li>
+          {PROCESSORS.map((key) => (
+            <li key={key}>
+              • {t.rich(key, { b: (chunks) => <strong>{chunks}</strong> })}
+            </li>
+          ))}
         </ul>
       </section>
     </div>

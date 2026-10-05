@@ -3,13 +3,24 @@
 import { revalidatePath } from "next/cache";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
+
+// Messages d'erreur affiches a l'ecran (namespace "admin_arcova").
+function actionT() {
+  return getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_arcova" });
+}
+
+// Erreur Supabase : detail dans les journaux serveur, message traduit a l'ecran.
+async function saveError(scope: string, error: { message: string }): Promise<Error> {
+  console.error(`[admin/arcova] ${scope}`, error.message);
+  return new Error((await actionT())("error_save"));
+}
 
 // ============================================================================
-// Workflow admin générique sur la table `arcova_waitlist`.
-// Aligné EXACTEMENT sur app/admin/leads/actions.ts (Agent 13, Phase A-quater).
-// Dégrade gracieusement si la migration 20260512_admin_workflow_arcova.sql
-// n'est pas encore appliquée : remonte l'erreur Supabase telle quelle pour
-// que l'UI affiche le message.
+// Suivi admin generique sur la table `arcova_waitlist`.
+// Aligne exactement sur app/admin/leads/actions.ts. Si les colonnes de
+// suivi manquent, l'erreur est journalisee et un message traduit s'affiche.
 // ============================================================================
 
 const TABLE = "arcova_waitlist";
@@ -29,7 +40,7 @@ export async function updateWorkflowStatus(
   reason?: string,
 ) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   const { data: current } = await sb
@@ -59,8 +70,8 @@ export async function updateWorkflowStatus(
     .eq("id", id)
     .select("id");
 
-  if (error) throw new Error(error.message);
-  if (!updated || updated.length === 0) throw new Error("inscription introuvable — aucune ligne modifiée");
+  if (error) throw await saveError("update", error);
+  if (!updated || updated.length === 0) throw new Error((await actionT())("error_not_found"));
 
   revalidatePath(ROUTE);
   revalidatePath(`${ROUTE}/${id}`);
@@ -71,7 +82,7 @@ export async function addAdminNote(id: string, noteText: string) {
   if (!trimmed) return;
 
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   const { data: current } = await sb
@@ -94,23 +105,23 @@ export async function addAdminNote(id: string, noteText: string) {
     .eq("id", id)
     .select("id");
 
-  if (error) throw new Error(error.message);
-  if (!updated || updated.length === 0) throw new Error("inscription introuvable — aucune ligne modifiée");
+  if (error) throw await saveError("update", error);
+  if (!updated || updated.length === 0) throw new Error((await actionT())("error_not_found"));
 
   revalidatePath(`${ROUTE}/${id}`);
 }
 
 export async function setNextFollowUp(id: string, date: string | null) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
   const sb = supabaseService();
   const { data, error } = await sb
     .from(TABLE)
     .update({ next_follow_up: date })
     .eq("id", id)
     .select("id");
-  if (error) throw new Error(error.message);
-  if (!data || data.length === 0) throw new Error("inscription introuvable — aucune ligne modifiée");
+  if (error) throw await saveError("update", error);
+  if (!data || data.length === 0) throw new Error((await actionT())("error_not_found"));
   revalidatePath(`${ROUTE}/${id}`);
   revalidatePath(ROUTE);
 }

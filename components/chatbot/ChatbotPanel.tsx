@@ -1,5 +1,6 @@
 "use client";
 
+import { getAttribution } from "@/lib/pilotage/attribution-client";
 import { useEffect, useRef, useState } from "react";
 import { safeInternalPath } from "@/lib/security/sanitize";
 import Image from "next/image";
@@ -146,6 +147,7 @@ export function ChatbotPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "consent",
+          attribution: getAttribution(),
           decision,
           email: pendingContact.email,
           phone: pendingContact.phone,

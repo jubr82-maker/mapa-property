@@ -31,6 +31,9 @@ import {
   safeInternalPath,
 } from "../../lib/security/sanitize";
 import { detectFileType } from "../../lib/security/file-type";
+import { maskEmail } from "../../lib/email/smtp";
+import { classifyChannel, sanitizeAttribution } from "../../lib/pilotage/attribution";
+import { isTargetQuery } from "../../lib/pilotage/seo-targets";
 
 const ROOT = path.resolve(__dirname, "../..");
 const read = (p: string) => fs.readFileSync(path.join(ROOT, p), "utf8");
@@ -67,6 +70,13 @@ function localFunction(src: string, name: string): string | null {
   if (i < 0) return null;
   const end = src.indexOf("\n}\n", i);
   return src.slice(i, end < 0 ? src.length : end + 3);
+}
+/** Corps du gestionnaire POST, direct ou enveloppe (withFormEvents). */
+function postHandlerBody(src: string): string {
+  const direct = exportedFunctions(src).find((x) => x.name === "POST")?.body;
+  if (direct) return direct;
+  const wrapped = src.match(/export const POST = \w+\([^,]+, (\w+)\)/)?.[1];
+  return (wrapped && localFunction(src, wrapped)) || src;
 }
 /** Index de la premiere operation sensible (donnees, stockage, envoi). */
 const SENSITIVE_OP = /\.from\(|\.storage\b|\.rpc\(|uploadToR2|sendMail|revalidate(Path|Tag)\(|createClient\(|req\.(json|formData)\(\)|request\.(json|formData)\(\)|fetch\(/;
@@ -203,7 +213,7 @@ const CAPTCHA_EXEMPT: Record<string, string> = {
 };
 const publicWrites = walk("app/api", (p) => p.endsWith("route.ts"))
   .filter((f) => !/app\/api\/(admin|cron)\//.test(f))
-  .filter((f) => /export async function (POST|PUT|PATCH|DELETE)/.test(read(f)))
+  .filter((f) => /export (async function|const) (POST|PUT|PATCH|DELETE)\b/.test(read(f)))
   .sort();
 const captchaRoutes: string[] = [];
 for (const f of publicWrites) {
@@ -231,7 +241,12 @@ for (const f of publicWrites) {
     check(`${f} : reponse Mistral bornee (max_tokens)`, /max_tokens:\s*\d+/.test(src));
     continue;
   }
-  const post = exportedFunctions(src).find((x) => x.name === "POST")?.body ?? src;
+  const post = postHandlerBody(src);
+  // contact-reveal affiche le telephone d'un bien : action de visiteur
+  // (suivie dans tracking_events), pas une demande client a compter.
+  if (f !== "app/api/contact-reveal/route.ts") {
+    check(`${f} : envois comptes (sante des formulaires)`, /export const POST = withFormEvents\("[a-z_]+", handlePost\)/.test(src), "formulaire public non compte dans form_events");
+  }
   const c = firstIndex(post, /verifyTurnstile\(|verifyCaptchaIfConfigured\(/);
   const w = firstIndex(post, WRITE);
   check(`${f} : Turnstile verifie`, c >= 0, "formulaire public sans anti-robots");
@@ -428,6 +443,67 @@ section = "J. Passkeys";
 }
 
 // ===========================================================================
+// K. Pilotage (tableau de bord, suivi, sante, journal, tache quotidienne)
+// ===========================================================================
+section = "K. Pilotage";
+{
+  const PAGES = ["app/admin/page.tsx", "app/admin/activite/page.tsx", "app/admin/trafic/page.tsx", "app/admin/sante/page.tsx", "app/admin/journal/page.tsx", "app/admin/analytics/page.tsx", "app/admin/visiteurs/page.tsx", "app/admin/performance/page.tsx"];
+  for (const f of PAGES) {
+    const body = read(f).slice(read(f).indexOf("export default"));
+    const g = firstIndex(body, /requireAdminPage\(\)/);
+    const op = firstIndex(body, /load[A-Z]\w*\(|redirect\(/);
+    check(`${f} : garde admin aal2 avant toute lecture`, g >= 0 && (op < 0 || g < op));
+  }
+  const pa = read("app/admin/pilotage-actions.ts");
+  check("mesure a la demande : garde admin en tete", /export async function runPerformanceNowAction\(\)[^{]*\{\s*const \{ user \} = await assertAdminAction\(\)/.test(pa));
+  check("mesure a la demande : delai minimal entre deux mesures", /PSI_MANUAL_COOLDOWN_MINUTES/.test(pa));
+  const vercel = JSON.parse(read("vercel.json")) as { crons?: { path: string; schedule: string }[] };
+  check("une seule tache planifiee, quotidienne", vercel.crons?.length === 1 && vercel.crons[0].path === "/api/cron/daily" && /^\d+ \d+ \* \* \*$/.test(vercel.crons[0].schedule), JSON.stringify(vercel.crons));
+  check("tache quotidienne : secret obligatoire", /isAuthorizedCron\(req\)/.test(read("app/api/cron/daily/route.ts")));
+  // PageSpeed : jamais a l'ouverture d'une page ni par une lecture.
+  const measurers = [...walk("app", (p) => /\.(ts|tsx)$/.test(p)), ...walk("lib", (p) => /\.(ts|tsx)$/.test(p)), ...walk("components", (p) => /\.(ts|tsx)$/.test(p))]
+    .filter((f) => f !== "lib/pilotage/psi.ts" && /runPsiMeasurements\(/.test(read(f)));
+  check("PageSpeed lance seulement par la tache quotidienne ou le bouton", measurers.sort().join(",") === "app/admin/pilotage-actions.ts,lib/pilotage/daily-task.ts", measurers.join(", "));
+  check("PageSpeed : cle dediee obligatoire", /if \(!psiConfigured\(\)\) return \{ ok: false, detail: "not_configured" \}/.test(read("lib/pilotage/psi.ts")));
+  check("route de mesure : lecture seule", !/runPsiMeasurements|fetch\(/.test(read("app/api/admin/performance/psi/route.ts")));
+  // Requetes sortantes : aucun en-tete identifiant (User-Agent, nom, e-mail).
+  for (const f of [...walk("lib/google", (p) => p.endsWith(".ts")), ...walk("lib/pilotage", (p) => p.endsWith(".ts"))].filter((f) => /fetch\(/.test(read(f)))) {
+    const code = read(f).replace(/^\s*\/\/.*$/gm, "");
+    check(`${f} : aucun en-tete identifiant dans les requetes sortantes`, !/user-agent/i.test(code) && !/julien|brebion|mapagroup|"mapa/i.test(code));
+  }
+  // Journal des e-mails : destinataire masque, jamais le contenu.
+  const smtp = read("lib/email/smtp.ts");
+  const logBody = smtp.slice(smtp.indexOf("async function logEmail"), smtp.indexOf("export async function sendMail"));
+  check("journal des e-mails : ni sujet ni contenu", logBody.length > 0 && !/args\.(subject|text)/.test(logBody));
+  check("journal des e-mails : destinataire masque", /recipient_masked: to\.map\(maskEmail\)/.test(logBody));
+  check("masquage : j***@g***.com", maskEmail("julien.brebion@gmail.com") === "j***@g***.com", maskEmail("julien.brebion@gmail.com"));
+  check("origine : sans consentement, inconnue", classifyChannel(null) === "unknown");
+  check("origine : parametre UTM, campagne", classifyChannel(sanitizeAttribution({ referrerHost: "www.google.com", utmSource: "newsletter" })) === "campaign");
+  check("origine : Google", classifyChannel(sanitizeAttribution({ referrerHost: "www.google.lu" })) === "google");
+  check("origine : acces direct", classifyChannel(sanitizeAttribution({})) === "direct");
+  check("origine : valeur hostile neutralisee", sanitizeAttribution({ referrerHost: "<script>", utmCampaign: "x\"onload=" })?.referrerHost === null);
+  check("requete cible : agence immobiliere luxembourg", isTargetQuery("Agence Immobilière Luxembourg"));
+  check("requete cible : immobilier Esch-sur-Alzette", isTargetQuery("immobilier esch sur alzette"));
+  check("requete hors cible : immobilier paris", !isTargetQuery("immobilier paris"));
+  // Origine des visites : seulement apres consentement aux statistiques.
+  const attr = read("lib/pilotage/attribution-client.ts");
+  check("origine des visites : capture apres consentement", /if \(!hasStatsConsent\(\) \|\| window\.sessionStorage\.getItem\(KEY\)\) return;/.test(attr) && /if \(!hasStatsConsent\(\)\) return null;/.test(attr));
+  // Journal et alertes.
+  const props = read("app/admin/properties/actions.ts");
+  check("prix modifie : ancienne et nouvelle valeur journalisees", /action: "property_price_changed"[\s\S]{0,400}before:[\s\S]{0,200}after:/.test(props));
+  check("bien supprime : journal et alerte e-mail", /action: "property_deleted"/.test(props) && /sendAdminAlert\("property_deleted"/.test(props));
+  check("nouvel appareil : alerte e-mail", /sendAdminAlert\("factor_added"/.test(read("app/admin/auth-actions.ts")));
+  check("nouvelle Passkey : alerte e-mail", /sendAdminAlert\("passkey_added"/.test(read("app/admin/passkey-actions.ts")));
+  check("rafale d'echecs de connexion : alerte e-mail", (read("app/admin/auth-actions.ts").match(/maybeAlertLoginBurst\(\)/g) ?? []).length >= 3);
+  // SQL du pilotage et de l'effacement.
+  const sql06 = read("supabase/manual/execution/06_pilotage_tables.sql");
+  check("SQL 06 : RLS et lecture admin sur chaque table", /ENABLE ROW LEVEL SECURITY/.test(sql06) && /USING \(public\.is_mapa_admin\(\)\)/.test(sql06) && /REVOKE ALL ON public\.%I FROM anon, authenticated/.test(sql06));
+  const sql07 = read("supabase/manual/execution/07_effacement_statistiques_test.sql").replace(/^--.*$/gm, "");
+  check("SQL 07 : seulement vues de biens, evenements de suivi et chatbot", /VALUES \(1, 'property_views'\), \(2, 'tracking_events'\), \(3, 'chatbot_logs'\)/.test(sql07) && !/DELETE FROM public\.(?!%I)/.test(sql07));
+  check("SQL 07 : sauvegarde avant effacement dans la meme transaction", sql07.indexOf("INSERT INTO public.%I SELECT * FROM public.%I") < sql07.indexOf("DELETE FROM public.%I") && /BEGIN;[\s\S]*COMMIT;/.test(sql07));
+}
+
+// ===========================================================================
 // I. Requetes reelles en memoire (build de production)
 // ===========================================================================
 async function runtime() {
@@ -472,7 +548,7 @@ async function runtime() {
       const b = await server.request(url, { headers: { authorization: "Bearer undefined" } });
       check(`GET ${url} avec 'Bearer undefined' : 401`, b.status === 401, `statut ${b.status}`);
     }
-    for (const p of ["/admin", "/admin/leads", "/admin/securite", "/admin/documents"]) {
+    for (const p of ["/admin", "/admin/leads", "/admin/securite", "/admin/documents", "/admin/activite", "/admin/trafic", "/admin/sante", "/admin/journal"]) {
       const r = await server.request(p);
       const loc = r.headers["location"] ?? "";
       check(`${p} anonyme : redirection vers la connexion`, r.status >= 300 && r.status < 400 && /\/admin\/login/.test(loc), `statut ${r.status} location ${loc}`);

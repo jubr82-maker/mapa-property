@@ -1,4 +1,4 @@
-// lib/admin/admin-emails.ts — source unique des adresses autorisées à
+// lib/admin/admin-emails.ts : source unique des adresses autorisées à
 // accéder à l'espace /admin (au-delà de la simple authentification
 // Supabase). Valeurs en dur, PAS de variable d'environnement : liste
 // courte et connue, le risque de verrouillage (Julien perd l'accès à son

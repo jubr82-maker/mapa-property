@@ -1,5 +1,5 @@
-// POST /api/admin/estimations — création manuelle d'une estimation
-// par l'admin (BUG 6). Auth SSR obligatoire (même pattern que le PATCH
+// POST /api/admin/estimations : création manuelle d'une estimation
+// par l'admin. Auth SSR obligatoire (même pattern que le PATCH
 // existant). N'exécute PAS le moteur EVS : c'est une saisie manuelle,
 // l'admin fournit lui-même la fourchette. Écrit dans estimation_requests
 // (table déjà écrite par le tunnel public + le PATCH admin).

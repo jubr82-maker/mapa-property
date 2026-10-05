@@ -13,6 +13,7 @@ import { CtaBand } from "@/components/layout/CtaBand";
 import { Footer } from "@/components/layout/Footer";
 import { ChatbotWidgetLoader } from "@/components/chatbot/ChatbotWidgetLoader";
 import { ConsentGatedAnalytics } from "@/components/consent/ConsentGatedAnalytics";
+import { AttributionCapture } from "@/components/tracking/AttributionCapture";
 import { ConsentGatedMarketing } from "@/components/consent/ConsentGatedMarketing";
 import { CookieConsentBanner } from "@/components/consent/CookieConsentBanner";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -249,6 +250,7 @@ export default async function LocaleLayout({
           </NextIntlClientProvider>
         </ThemeProvider>
         <ConsentGatedAnalytics cfToken={process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN} />
+        <AttributionCapture />
         <ConsentGatedMarketing />
       </body>
     </html>

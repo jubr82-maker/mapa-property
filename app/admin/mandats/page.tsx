@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { AdminDateCell } from "@/components/admin/AdminDateCell";
-import { lastModifiedAt } from "@/lib/datetime";
+import { ADMIN_LOCALE, formatDateOnly, lastModifiedAt } from "@/lib/datetime";
+import { getTranslations } from "next-intl/server";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import {
   WorkflowBadge,
   WORKFLOW_STATUSES,
+  type AdminTranslator,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
 import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
@@ -14,9 +16,9 @@ import { AdminNotice } from "@/components/admin/AdminNotice";
 
 export const dynamic = "force-dynamic";
 
-// Sprint MANDATS-A PARTIE 5 — page admin /admin/mandats avec 3 sections
-// type_transaction (Vente / Recherche / Location) + onglets workflow
-// existants conserves PAR SECTION. Tri date asc/desc.
+// Page admin /admin/mandats avec 3 sections type_transaction (vente,
+// recherche, location) et onglets de suivi conserves par section. Tri par
+// date croissant ou decroissant.
 
 type Section = "vente" | "recherche" | "location";
 type SortDir = "asc" | "desc";
@@ -50,48 +52,42 @@ type MandatRow = {
   next_follow_up?: string | null;
 };
 
-const SECTIONS: { key: Section; label: string }[] = [
-  { key: "vente", label: "Vente" },
-  { key: "recherche", label: "Recherche" },
-  { key: "location", label: "Location" },
+// Sections ; libelles : cles "section_*" du namespace "admin_mandats".
+const SECTIONS: { key: Section }[] = [
+  { key: "vente" },
+  { key: "recherche" },
+  { key: "location" },
 ];
 
-const WORKFLOW_TABS: { key: string; label: string }[] = [
-  { key: "new", label: "Nouveau" },
-  { key: "in_progress", label: "En cours" },
-  { key: "on_hold", label: "En suspens" },
-  { key: "validated", label: "Validé" },
-  { key: "rejected", label: "Exclu" },
-  { key: "completed", label: "Traités" },
-  { key: "all", label: "Tous" },
+// Onglets de suivi ; libelles : cles "tab_*" du namespace "admin_workflow".
+const WORKFLOW_TABS: { key: string }[] = [
+  { key: "new" },
+  { key: "in_progress" },
+  { key: "on_hold" },
+  { key: "validated" },
+  { key: "rejected" },
+  { key: "completed" },
+  { key: "all" },
 ];
 
-const TYPE_MANDAT_LABEL: Record<string, string> = {
-  exclusif: "Exclusif",
-  "semi-exclusif": "Semi-exclusif",
-  simple: "Simple",
-  autonome: "Autonome",
-};
+type Translator = AdminTranslator;
 
-const STATUS_LABEL: Record<string, string> = {
-  actif: "Actif",
-  vendu: "Vendu",
-  loue: "Loué",
-  expire: "Expiré",
-  resilie: "Résilié",
-};
+/** Cle de traduction d'une valeur enregistree ("semi-exclusif" -> "semi_exclusif"). */
+function labelOf(t: Translator, prefix: string, value: string): string {
+  const key = `${prefix}${value.replace(/-/g, "_")}`;
+  return t.has(key) ? t(key) : value;
+}
 
-function formatBudget(min: number | null, max: number | null): string {
-  if (min == null && max == null) return "—";
-  const fmt = (n: number) => `${(n / 1000).toFixed(0)}k`;
-  if (min != null && max != null) return `${fmt(min)} – ${fmt(max)} €`;
-  if (min != null) return `≥ ${fmt(min)} €`;
-  if (max != null) return `≤ ${fmt(max)} €`;
-  return "—";
+function formatBudget(t: Translator, min: number | null, max: number | null): string {
+  const fmt = (n: number) => `${(n / 1000).toFixed(0)}k €`;
+  if (min != null && max != null) return t("budget_range", { min: fmt(min), max: fmt(max) });
+  if (min != null) return t("budget_from", { min: fmt(min) });
+  if (max != null) return t("budget_up_to", { max: fmt(max) });
+  return "";
 }
 
 function formatPrice(value: number | null): string {
-  if (value == null) return "—";
+  if (value == null) return "";
   return formatPriceShared(value, "fr");
 }
 
@@ -101,7 +97,7 @@ function formatZonesOrCity(
 ): string {
   if (Array.isArray(zones) && zones.length > 0) return zones.join(", ");
   if (city) return city;
-  return "—";
+  return "";
 }
 
 function isPast(dateStr: string | null | undefined): boolean {
@@ -132,9 +128,12 @@ export default async function AdminMandatsPage({
 
   await requireAdminPage();
   const supabase = supabaseService();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_mandats" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
+  const sectionLabel = (key: Section) => t(`section_${key}`);
 
   // 1 SELECT global (limit 500), filtrage section + workflow + q cote JS.
-  // Pour 500 rows max en admin (table peu volumineuse) c'est plus simple
+  // Pour 500 lignes max en admin (table peu volumineuse) c'est plus simple
   // que 4 requetes (1 par section + counts).
   let migrationApplied = true;
   let mandats: MandatRow[] = [];
@@ -222,15 +221,17 @@ export default async function AdminMandatsPage({
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Console MAPA
+            {tw("console_eyebrow")}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
-            Mandats
+            {t("title")}
           </h1>
           <p className="mt-1 text-sm text-[#3D4F63]/70">
-            {filtered.length} mandat{filtered.length > 1 ? "s" : ""} affiché
-            {filtered.length > 1 ? "s" : ""} · {sectionCounts[section]} dans la
-            section · {mandats.length} au total
+            {t("count", {
+              shown: filtered.length,
+              section: sectionCounts[section],
+              total: mandats.length,
+            })}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -243,11 +244,11 @@ export default async function AdminMandatsPage({
             className="inline-flex items-center gap-2 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
             aria-label={
               sortDir === "desc"
-                ? "Trier du plus ancien au plus récent"
-                : "Trier du plus récent au plus ancien"
+                ? t("sort_to_asc")
+                : t("sort_to_desc")
             }
           >
-            <span>Date</span>
+            <span>{t("sort_label")}</span>
             <span aria-hidden>{sortDir === "desc" ? "↓" : "↑"}</span>
           </Link>
         </div>
@@ -257,7 +258,7 @@ export default async function AdminMandatsPage({
         <AdminNotice kind="workflow_partial" />
       )}
 
-      {/* Onglets section type_transaction (Vente / Recherche / Location) */}
+      {/* Onglets de section type_transaction (vente, recherche, location) */}
       <nav className="flex flex-wrap items-center gap-2 border-b border-[#3D4F63]/15 pb-3">
         {SECTIONS.map((s) => {
           const active = section === s.key;
@@ -271,7 +272,7 @@ export default async function AdminMandatsPage({
                   : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
               }`}
             >
-              <span>{s.label}</span>
+              <span>{sectionLabel(s.key)}</span>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] ${
                   active
@@ -286,7 +287,7 @@ export default async function AdminMandatsPage({
         })}
       </nav>
 
-      {/* Sous-onglets workflow (preserves de l'existant) */}
+      {/* Sous-onglets de suivi */}
       <nav className="flex flex-wrap items-center gap-2">
         {WORKFLOW_TABS.map((t) => {
           const active = workflowTab === t.key;
@@ -305,7 +306,7 @@ export default async function AdminMandatsPage({
                     : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
               }`}
             >
-              <span>{t.label}</span>
+              <span>{tw(`tab_${t.key}`)}</span>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] ${
                   active
@@ -323,14 +324,13 @@ export default async function AdminMandatsPage({
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white">
         <header className="border-b border-[#3D4F63]/10 px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-            Liste — {SECTIONS.find((s) => s.key === section)?.label} (
-            {filtered.length})
+            {t("list_title", { section: sectionLabel(section), count: filtered.length })}
           </p>
         </header>
         <ul className="divide-y divide-[#3D4F63]/10">
           {filtered.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-[#3D4F63]/60">
-              Aucun mandat pour cette sélection.
+              {t("empty_selection")}
             </li>
           )}
           {filtered.slice(0, 100).map((m) => {
@@ -339,12 +339,21 @@ export default async function AdminMandatsPage({
             const localite =
               section === "recherche"
                 ? formatZonesOrCity(m.zones, m.client_city)
-                : (m.bien_adresse ?? m.client_city ?? "—");
+                : (m.bien_adresse ?? m.client_city ?? "");
             const prix =
               section === "recherche"
-                ? formatBudget(m.budget_min, m.budget_max)
+                ? formatBudget(t, m.budget_min, m.budget_max)
                 : formatPrice(m.prix_mise_en_vente);
-            const statusLabel = m.status ? (STATUS_LABEL[m.status] ?? m.status) : "—";
+            const statusLabel = m.status ? labelOf(t, "status_", m.status) : "";
+            // Elements secondaires renseignes uniquement, separes par " · ".
+            const details = [
+              section === "vente" && m.type_mandat
+                ? labelOf(t, "type_mandat_", m.type_mandat)
+                : "",
+              localite,
+              prix,
+              statusLabel,
+            ].filter(Boolean);
             return (
               <li
                 key={`mandat-${m.id}`}
@@ -354,17 +363,10 @@ export default async function AdminMandatsPage({
                   <WorkflowBadge status={ws} />
                   <div>
                     <p className="text-sm font-medium text-[#1A1F2A]">
-                      {m.client_name?.trim() || m.client_email || "—"}
+                      {m.client_name?.trim() || m.client_email || tw("not_provided")}
                     </p>
                     <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#3D4F63]/60">
-                      {section === "vente" && m.type_mandat
-                        ? `${TYPE_MANDAT_LABEL[m.type_mandat] ?? m.type_mandat} · `
-                        : ""}
-                      {localite}
-                      {" · "}
-                      {prix}
-                      {" · "}
-                      {statusLabel}
+                      {details.join(" · ")}
                     </p>
                   </div>
                 </div>
@@ -383,14 +385,14 @@ export default async function AdminMandatsPage({
                           : "bg-[#e0af6e]/15 text-[#e0af6e]"
                       }`}
                     >
-                      Suivi : {m.next_follow_up}
+                      {tw("followup_badge", { date: formatDateOnly(m.next_follow_up) })}
                     </span>
                   )}
                   <Link
                     href={`/admin/mandats/${m.id}`}
                     className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   >
-                    Voir
+                    {tw("view")}
                   </Link>
                 </div>
               </li>

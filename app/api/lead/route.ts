@@ -13,6 +13,8 @@
 // le widget Turnstile n'a pas fourni de token, sinon le serveur répond 403
 // avant d'atteindre l'INSERT et l'utilisateur croit avoir échoué alors
 // qu'aucune ligne n'a été créée.
+import { attributionColumns } from "@/lib/pilotage/attribution";
+import { withFormEvents } from "@/lib/pilotage/form-events";
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
 import { supabaseService } from "@/lib/supabase-service";
@@ -28,7 +30,7 @@ import { pushLeadToApimo } from "@/lib/apimo/push-lead";
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const limit = rateLimit(req, {
     windowMs: 60_000,
     max: 5,
@@ -109,7 +111,7 @@ export async function POST(req: Request) {
   const res = await insertLeadWithConsent(
     sbWrite,
     "leads",
-    lead as unknown as Record<string, unknown>,
+    { ...(lead as unknown as Record<string, unknown>), ...attributionColumns(body.attribution) },
     consentAt,
   );
   if (!res.ok) {
@@ -180,3 +182,6 @@ export async function POST(req: Request) {
 }
 
 export const dynamic = "force-dynamic";
+
+// Sante des formulaires (oct. 2026) : chaque envoi est compte par resultat.
+export const POST = withFormEvents("lead", handlePost);

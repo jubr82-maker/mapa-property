@@ -2,6 +2,8 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PROPERTIES_LIST_TAG } from "@/lib/data";
 import { invalidateArchivedPropertyKeys } from "@/lib/archived-properties";
@@ -13,6 +15,11 @@ import {
   transactionToBase,
 } from "@/lib/taxonomy/property-types";
 import { assertAdminAction } from "@/lib/admin/require-admin";
+import { logAdminAction } from "@/lib/pilotage/audit";
+import { sendAdminAlert } from "@/lib/pilotage/alerts";
+
+/** Libelles des messages renvoyes a l'ecran (admin_properties). */
+const tProps = () => getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
 
 /**
  * Sprint OPTIM-1A : helper de lecture du slug d'un bien par id. Utilise
@@ -41,7 +48,7 @@ async function fetchPropertySlug(
 
 export async function setPropertyPublished(id: string, isPublished: boolean) {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
-  await assertAdminAction();
+  const { user } = await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const slug = await fetchPropertySlug(supabase, id);
   const { error } = await supabase
@@ -49,6 +56,13 @@ export async function setPropertyPublished(id: string, isPublished: boolean) {
     .update({ is_published: isPublished })
     .eq("id", id);
   if (error) throw new Error(error.message);
+  await logAdminAction({
+    actorEmail: user.email,
+    action: isPublished ? "property_published" : "property_unpublished",
+    targetTable: "properties",
+    targetId: id,
+    diff: { slug },
+  });
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePath("/fr/biens");
@@ -75,7 +89,7 @@ export async function setPropertyFeatured(id: string, isFeatured: boolean) {
 }
 
 /**
- * POL4-A2 (AGENT CAMILLE) — Met à jour titre FR, description FR (HTML
+ * POL4-A2 (AGENT CAMILLE), Met à jour titre FR, description FR (HTML
  * formaté via RichTextEditor TipTap d'ELISE) et prix d'un bien Apimo.
  * Garde rétrocompat avec updatePropertyVideoUrl (form vidéo séparé).
  *
@@ -125,7 +139,7 @@ const INTEGER_COLUMNS = new Set([
 ]);
 
 /**
- * Point unique de normalisation numérique — NaN/Infinity -> null, arrondi
+ * Point unique de normalisation numérique, NaN/Infinity -> null, arrondi
  * optionnel (colonnes INTEGER). Utilisé par createProperty (num()) et
  * updateProperty (setNum()) pour un comportement identique.
  */
@@ -187,17 +201,17 @@ export async function updateProperty(
   },
 ): Promise<UpdatePropertyResult> {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
-  await assertAdminAction();
+  const { user: actor } = await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const update: Record<string, unknown> = {};
 
-  // --- Titre FR : NOT NULL en base (cf. lib/apimo/mapper.ts) — jamais
+  // --- Titre FR : NOT NULL en base (cf. lib/apimo/mapper.ts), jamais
   // écrasé par null. Bloqué AVANT toute écriture, message clair plutôt
   // qu'une violation de contrainte Postgres masquée en production.
   if (data.title_fr !== undefined) {
     const t = (data.title_fr ?? "").trim();
     if (t.length === 0) {
-      return { ok: false, error: "Le titre (FR) est requis." };
+      return { ok: false, error: (await tProps())("err_title_required") };
     }
     update.title_fr = t;
   }
@@ -271,7 +285,7 @@ export async function updateProperty(
   // --- Statut + pont is_published ---
   if (data.status !== undefined) {
     if (!PROPERTY_STATUSES.includes(data.status as (typeof PROPERTY_STATUSES)[number])) {
-      return { ok: false, error: "Statut invalide." };
+      return { ok: false, error: (await tProps())("err_status_invalid") };
     }
     update.status = data.status;
     update.is_published = data.status === "published";
@@ -294,6 +308,13 @@ export async function updateProperty(
 
   if (Object.keys(update).length === 0) return { ok: true };
   const slug = await fetchPropertySlug(supabase, id);
+  // Journal (oct. 2026) : ancien et nouveau prix si le prix change.
+  const priceKeys = ["price", "price_on_demand", "price_min", "price_max"].filter((k) => k in update);
+  let before: Record<string, unknown> | null = null;
+  if (priceKeys.length) {
+    const { data: prev } = await supabase.from("properties").select(priceKeys.join(",")).eq("id", id).maybeSingle();
+    before = (prev as Record<string, unknown> | null) ?? null;
+  }
   const { error } = await supabase
     .from("properties")
     .update(update)
@@ -301,6 +322,22 @@ export async function updateProperty(
   if (error) {
     console.error("[admin] updateProperty", error);
     return { ok: false, error: error.message };
+  }
+  if (before) {
+    const changed = priceKeys.filter((k) => (before as Record<string, unknown>)[k] !== update[k]);
+    if (changed.length) {
+      await logAdminAction({
+        actorEmail: actor.email,
+        action: "property_price_changed",
+        targetTable: "properties",
+        targetId: id,
+        diff: {
+          slug,
+          before: Object.fromEntries(changed.map((k) => [k, (before as Record<string, unknown>)[k] ?? null])),
+          after: Object.fromEntries(changed.map((k) => [k, update[k] ?? null])),
+        },
+      });
+    }
   }
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
@@ -313,7 +350,7 @@ export async function updateProperty(
 
 /**
  * Met à jour l'URL vidéo de présentation d'un bien (passe ?? null pour vider).
- * Pas d'upload natif dans cette passe — Phase B (Supabase Storage + signed URLs).
+ * Pas d'upload natif dans cette passe, Phase B (Supabase Storage + signed URLs).
  */
 export async function updatePropertyVideoUrl(
   propertyId: string,
@@ -332,7 +369,7 @@ export async function updatePropertyVideoUrl(
     .update({ video_url: normalized })
     .eq("id", propertyId);
   if (error) throw new Error(error.message);
-  // PAS de revalidatePath sur /admin/properties/{propertyId} — même
+  // PAS de revalidatePath sur /admin/properties/{propertyId}, même
   // raison que savePropertyPhotos (photos/actions.ts) : cette page
   // héberge PropertyEditForm, dont la saisie en cours non enregistrée
   // serait effacée à l'affichage par le refresh RSC immédiat.
@@ -345,10 +382,10 @@ export async function updatePropertyVideoUrl(
 }
 
 // ============================================================================
-// Sprint SAISIE-MANUELLE — Étape A : création d'un bien de zéro (socle).
+// Sprint SAISIE-MANUELLE, Étape A : création d'un bien de zéro (socle).
 // Calqué sur createOffmarket (app/admin/offmarket/actions.ts) pour la
 // structure : check auth serveur, insert, revalidate, redirect vers l'édition.
-// Périmètre volontairement minimal (champs de base) — le formulaire
+// Périmètre volontairement minimal (champs de base), le formulaire
 // d'édition sera enrichi dans une étape ultérieure avec les 23 colonnes de
 // la migration 20260904_properties_saisie_manuelle.sql.
 // ============================================================================
@@ -363,7 +400,7 @@ function str(value: FormDataEntryValue | null): string | null {
   return s === "" ? null : s;
 }
 
-// round=true pour les colonnes INTEGER (cf. INTEGER_COLUMNS plus haut) —
+// round=true pour les colonnes INTEGER (cf. INTEGER_COLUMNS plus haut) ,
 // même logique de normalisation que updateProperty, via parseNumOrNull.
 function num(value: FormDataEntryValue | null, round = false): number | null {
   if (value == null || value === "") return null;
@@ -383,7 +420,7 @@ function slugify(input: string): string {
 /**
  * Génère un slug unique à partir du titre + un suffixe court (pas
  * d'apimo_id disponible pour une saisie manuelle). Vérifie l'unicité en
- * base avant de retourner — retry avec un nouveau suffixe en cas de
+ * base avant de retourner, retry avec un nouveau suffixe en cas de
  * collision (improbable, mais vérifié plutôt que supposé).
  */
 async function generateUniquePropertySlug(
@@ -423,19 +460,19 @@ export async function createProperty(
 
   const titleFr = str(formData.get("title_fr"));
   if (!titleFr) {
-    return { ok: false, error: "Le titre (FR) est requis." };
+    return { ok: false, error: (await tProps())("err_title_required") };
   }
 
   const transaction = str(formData.get("transaction"));
   if (!transaction || !TRANSACTION_TYPES.some((t) => t.slug === transaction)) {
-    return { ok: false, error: "Transaction invalide." };
+    return { ok: false, error: (await tProps())("err_transaction_invalid") };
   }
   // properties.transaction reste le binaire sale/rent (CHECK constraint SQL
   // existante) ; le slug riche choisi (ex. "vente-en-viager") est conservé
   // dans transaction_detail pour l'affichage fiche, jamais à la place.
   const transactionBase = transactionToBase(transaction);
   if (!transactionBase) {
-    return { ok: false, error: "Transaction invalide." };
+    return { ok: false, error: (await tProps())("err_transaction_invalid") };
   }
 
   const propertyType = str(formData.get("property_type"));
@@ -443,12 +480,12 @@ export async function createProperty(
     f.types.some((t) => t.slug === propertyType),
   );
   if (!propertyType || !knownType) {
-    return { ok: false, error: "Type de bien invalide." };
+    return { ok: false, error: (await tProps())("err_type_invalid") };
   }
 
   const propertyState = str(formData.get("property_state"));
   if (propertyState && !PROPERTY_STATES.some((s) => s.slug === propertyState)) {
-    return { ok: false, error: "État du bien invalide." };
+    return { ok: false, error: (await tProps())("err_state_invalid") };
   }
 
   const priceOnDemand = formData.get("price_on_demand") === "on";
@@ -495,6 +532,13 @@ export async function createProperty(
     };
   }
 
+  await logAdminAction({
+    actorEmail: user!.email,
+    action: "property_created",
+    targetTable: "properties",
+    targetId: data.id,
+    diff: { slug: data.slug ?? null },
+  });
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   redirect(`/admin/properties/${data.id}?created=1`);
@@ -547,7 +591,7 @@ async function readLifecycleRow(
 
 export async function archiveProperty(id: string): Promise<PropertyLifecycleResult> {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
-  await assertAdminAction();
+  const { user } = await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { row, error } = await readLifecycleRow(supabase, id);
   if (error || !row) return { ok: false, error: error ?? "not_found" };
@@ -556,13 +600,14 @@ export async function archiveProperty(id: string): Promise<PropertyLifecycleResu
     .update({ is_published: false, archived_at: new Date().toISOString() })
     .eq("id", id);
   if (upErr) return { ok: false, error: upErr.message };
+  await logAdminAction({ actorEmail: user.email, action: "property_archived", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
   revalidatePropertyPaths(row.slug);
   return { ok: true };
 }
 
 export async function restoreProperty(id: string): Promise<PropertyLifecycleResult> {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
-  await assertAdminAction();
+  const { user } = await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { row, error } = await readLifecycleRow(supabase, id);
   if (error || !row) return { ok: false, error: error ?? "not_found" };
@@ -571,6 +616,7 @@ export async function restoreProperty(id: string): Promise<PropertyLifecycleResu
     .update({ is_published: true, archived_at: null })
     .eq("id", id);
   if (upErr) return { ok: false, error: upErr.message };
+  await logAdminAction({ actorEmail: user.email, action: "property_restored", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
   revalidatePropertyPaths(row.slug);
   return { ok: true };
 }
@@ -592,7 +638,7 @@ export async function deleteProperty(
   typedReference: string,
 ): Promise<PropertyLifecycleResult> {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
-  await assertAdminAction();
+  const { user } = await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const { row, error } = await readLifecycleRow(supabase, id);
   if (error || !row) return { ok: false, error: error ?? "not_found" };
@@ -607,6 +653,8 @@ export async function deleteProperty(
   const { error: delErr } = await supabase.from("properties").delete().eq("id", id);
   if (delErr) return { ok: false, error: delErr.message };
   console.info("[admin/properties] bien supprime, fichiers conserves", { id, files: media.length });
+  await logAdminAction({ actorEmail: user.email, action: "property_deleted", targetTable: "properties", targetId: id, diff: { slug: row.slug, files: media.length } });
+  await sendAdminAlert("property_deleted", { reference: row.slug || row.id, actor: user.email });
   revalidatePropertyPaths(row.slug);
   return { ok: true, media };
 }

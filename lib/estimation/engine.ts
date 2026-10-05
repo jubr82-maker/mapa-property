@@ -1,11 +1,11 @@
 /**
- * Moteur d'estimation EVS Luxembourg — 5 méthodes croisées.
+ * Moteur d'estimation EVS Luxembourg : 5 méthodes croisées.
  *
  * Référence : TEGoVA EVS 2020, IVSC, méthodologie Observatoire Habitat.
  * Périmètre V1 : résidentiel (appartement + maison), Luxembourg uniquement.
  *
  * Données : référentiel embedded `lib/data/luxembourg-prices.ts` (sources CC0,
- * Observatoire de l'Habitat). Pas de dépendance DB — le moteur est pur, testable,
+ * Observatoire de l'Habitat). Pas de dépendance DB : le moteur est pur, testable,
  * sans I/O. Inputs reçoit tout le nécessaire en argument.
  *
  * Pondération par défaut (réglable via opts.weights) :
@@ -16,8 +16,8 @@
  *   - Capitalisation         :  5%
  *
  * Output split :
- *   - client_output : 3 prix (low/mid/high) + confidence — affichage public
- *   - internal_output : détail des 5 méthodes + warnings + audit trail — BO admin
+ *   - client_output : 3 prix (low/mid/high) + confidence : affichage public
+ *   - internal_output : détail des 5 méthodes + warnings + audit trail : BO admin
  */
 
 import {
@@ -59,7 +59,7 @@ export type PropertyState =
   | "major_works";
 export type EnergyClass = "A++" | "A+" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I";
 
-// Sprint C7 — types Observatoire pour appartements (segment='apartment').
+// Sprint C7 : types Observatoire pour appartements (segment='apartment').
 // Tous OPTIONNELS dans EstimationInputs, avec defaults safe.
 export type FloorType =
   | "basement"
@@ -94,7 +94,7 @@ export interface WorkItem {
   category: WorkCategory;
   /** Année de réalisation des travaux (1980-2026). */
   year: number;
-  /** Montant € HT engagé (optionnel — 0 si non renseigné). */
+  /** Montant € HT engagé (optionnel : 0 si non renseigné). */
   amount: number;
 }
 
@@ -124,10 +124,10 @@ export interface EstimationInputs {
   totalFloors?: number;
   lift?: boolean;
   exposureSouth?: boolean;
-  /** Surface sous-sol AMÉNAGÉ/FINI m² (maisons — annexes au-delà de 30 m²). */
+  /** Surface sous-sol AMÉNAGÉ/FINI m² (maisons : annexes au-delà de 30 m²). */
   basementFinishedSqm?: number;
   // ──────────────────────────────────────────────────────────────────────
-  // Sprint C7 — Methode Observatoire (appartements uniquement).
+  // Sprint C7 : Methode Observatoire (appartements uniquement).
   // Tous optionnels. Si absents, defaults safe (cf. estimateObservatoire).
   // ──────────────────────────────────────────────────────────────────────
   /** Etat C7 enrichi (6 niveaux). Si absent, fallback sur `state` legacy
@@ -152,7 +152,7 @@ export interface EstimationInputs {
   /** Surface jardin m² (apartment only). 800€/m² plafond 50k€. */
   gardenArea?: number;
   // ──────────────────────────────────────────────────────────────────────
-  // Sprint 2 estimations — Donnees marche commune (capitalisation locative).
+  // Sprint 2 estimations : Donnees marche commune (capitalisation locative).
   // Optionnel. Si fourni, methodIncomeCapitalization utilise ces valeurs
   // (issues de lu_market_prices_by_commune) ; sinon fallback hardcode
   // (estimatedRentPerM2Month + DEFAULT_YIELD 3.5%).
@@ -165,7 +165,7 @@ export interface EstimationInputs {
     rentPerM2Month: number | null;
     yieldRate: number | null;
   };
-  // Sprint Comparaison Directe — prix/m² des ventes comparables (memes
+  // Sprint Comparaison Directe : prix/m² des ventes comparables (memes
   // commune + famille de type + regle "est comparable" deux etats), deja
   // filtrees et chargees EN AMONT par la route (service_role, best-effort).
   // Le moteur reste pur/sync : il ne fait que consommer cette liste. Absente
@@ -175,12 +175,12 @@ export interface EstimationInputs {
 }
 
 // ============================================================================
-// Sprint C7 — Constantes methode Observatoire (placeholders commit 1).
+// Sprint C7 : Constantes methode Observatoire (placeholders commit 1).
 // Les vraies valeurs sont injectees aux commits 2-7. Garder ces objets
 // dans le meme fichier evite un import circulaire avec methodHedonic etc.
 // ============================================================================
 
-/** Sprint C7 — coefficients CPE A++ → I (modele hedonique Observatoire LU
+/** Sprint C7 : coefficients CPE A++ → I (modele hedonique Observatoire LU
  *  + green premium STATEC/Spuerkeess 2023). D = reference 1.00.
  *  Brief Julien : A++/A+ alignes sur A (Observatoire publie 9 valeurs A→I,
  *  les classes A++/A+ historiques heritent du meme coef A). */
@@ -198,7 +198,7 @@ export const CPE_COEF_C7: Record<EnergyClass, number> = {
   I: 0.85,
 };
 
-/** Sprint C7 — coefficients etat general (6 niveaux Observatoire LU).
+/** Sprint C7 : coefficients etat general (6 niveaux Observatoire LU).
  *  good = reference 1.00. mapLegacyState() translate l'ancien 'renovated'
  *  vers 'excellent' avant l'appel a cette table. */
 export const STATE_COEF_C7: Record<PropertyState, number> = {
@@ -211,7 +211,7 @@ export const STATE_COEF_C7: Record<PropertyState, number> = {
   major_works: 0.8, // gros travaux necessaires
 };
 
-/** Sprint C7 — coefficients etage Observatoire (apartment uniquement).
+/** Sprint C7 : coefficients etage Observatoire (apartment uniquement).
  *  middle (2-3e) = reference 1.00. N/A pour segment='house' (=1.00).
  *  deriveFloorFromType() (commit 1) deduit 'penthouse' depuis PropertyType
  *  legacy = 'penthouse' si l'utilisateur n'a pas saisi floorType. */
@@ -225,7 +225,7 @@ export const FLOOR_COEF_C7: Record<FloorType, number> = {
   penthouse: 1.1, // attique / penthouse
 };
 
-/** Sprint C7 — coefficients atypique Observatoire (apartment uniquement).
+/** Sprint C7 : coefficients atypique Observatoire (apartment uniquement).
  *  standard = reference 1.00. N/A pour segment='house' (=1.00).
  *  Brief : 'studio si surface < 35m²' → applique automatiquement dans
  *  estimateObservatoire (deriveAtypicalFromType priorise inputs explicite). */
@@ -237,7 +237,7 @@ export const ATYPICAL_COEF_C7: Record<AtypicalType, number> = {
   loft: 1.05, // +5% prestige industriel
 };
 
-/** Sprint C7 — mapping doux state legacy → C7 (back-compat).
+/** Sprint C7 : mapping doux state legacy → C7 (back-compat).
  *  `renovated` ancien → `excellent` C7 (rename, meme coef cible 1.05). */
 function mapLegacyState(state: PropertyState | undefined): PropertyState {
   if (!state) return "good";
@@ -245,7 +245,7 @@ function mapLegacyState(state: PropertyState | undefined): PropertyState {
   return state;
 }
 
-/** Sprint C7 — derive floorType + atypicalType depuis PropertyType legacy
+/** Sprint C7 : derive floorType + atypicalType depuis PropertyType legacy
  *  si l'utilisateur n'a pas saisi explicitement les nouveaux champs C7. */
 function deriveAtypicalFromType(
   inputs: EstimationInputs,
@@ -264,12 +264,12 @@ function deriveFloorFromType(inputs: EstimationInputs): FloorType {
   return "middle";
 }
 
-/** Sprint C7 — segment Observatoire derive du PropertyType legacy. */
+/** Sprint C7 : segment Observatoire derive du PropertyType legacy. */
 function isHouseSegment(type: PropertyType): boolean {
   return type === "maison" || type === "villa";
 }
 
-/** Sprint C7 — bonus annexes Observatoire LU (€ ajoutes au mid).
+/** Sprint C7 : bonus annexes Observatoire LU (€ ajoutes au mid).
  *
  *  Calibre Observatoire/Tevaxia/STATEC 2026 :
  *  - parking interieur : 35 000€/place (cap 5)
@@ -295,7 +295,7 @@ export function bonusAnnexes(inputs: EstimationInputs, pricePerM2: number): numb
   return parkingValue + cellarValue + terraceBonus + gardenBonus;
 }
 
-/** Sprint C7 — coefficient de degressivite surface Observatoire.
+/** Sprint C7 : coefficient de degressivite surface Observatoire.
  *
  *  Plus la surface est grande, plus le prix/m² descend (le marche
  *  luxembourgeois absorbe difficilement les grandes surfaces, surtout
@@ -376,7 +376,7 @@ export interface MethodWeights {
  * Le blend n'est actif QUE si sales_comparison est applicable (>= 1 comparable) :
  * sinon le prix reste 100% observatoire (comportement historique preserve).
  * Julien peut ensuite ajuster ces poids par estimation via les sliders admin
- * (weights_used) — override manuel post-calcul.
+ * (weights_used) : override manuel post-calcul.
  */
 export const DEFAULT_WEIGHTS: MethodWeights = {
   observatoire: 0.7,
@@ -394,7 +394,7 @@ export const DEFAULT_WEIGHTS: MethodWeights = {
 /**
  * État : coefficient multiplicateur sur prix de base m².
  *
- * Recalibration POL2-6 (2026-05-19) — le brief définit l'état « bon » comme
+ * Recalibration POL2-6 (2026-05-19) : le brief définit l'état « bon » comme
  * −5/−10 % vs la baseline « neuf ». On retient le milieu (−7,5 %) :
  *   new = 1.20 (réf neuf) ; renovated = new −5 % ≈ 1.13 ;
  *   good = new −7,5 % ≈ 1.11 ; to_renovate = 0.80 (décote travaux ~33 % vs neuf).
@@ -421,13 +421,13 @@ const STATE_COEF: Record<PropertyState, number> = {
 /**
  * Classe énergétique : coefficient (impact sur prix au m²).
  *
- * Recalibration POL2-6 — barème brief, B = baseline (1.00) :
+ * Recalibration POL2-6 : barème brief, B = baseline (1.00) :
  *   A++/A+/A : +5/+8 %  | B : 0 % (réf) | C : −3/−5 %
  *   D : −8/−12 % (et NON −3 %) | E-F : −12/−18 % | G-H-I : −18/−25 %.
  * Valeurs retenues (extrémité la moins agressive de chaque plage pour D,
  * justifiée par le bon vieillissement du bâti early-2000s LU) :
  */
-// FIGÉ — calibration finale MAPA-validée Julien (POL3-6 Étape 1.D).
+// FIGÉ : calibration finale MAPA-validée Julien (POL3-6 Étape 1.D).
 // NE PAS modifier. Spec : A+/AP/A 1.10 ; "A++" = top tier → 1.10 (clé du
 // type EnergyClass, alignée sur A+/A conformément au barème Julien).
 const ENERGY_COEF: Record<EnergyClass, number> = {
@@ -445,12 +445,12 @@ const ENERGY_COEF: Record<EnergyClass, number> = {
 };
 
 /**
- * Année de construction : coefficient (POL2-6 — barème brief).
+ * Année de construction : coefficient (POL2-6 : barème brief).
  *   2020+ : +5/+10 % | 2010-19 : baseline | 2000-09 : −8/−12 %
  *   1990-99 : −12/−18 % | 1980-89 : −18/−25 % | <1980 non rénové : −25/−35 %.
  * Si l'année est inconnue → 1.0 (neutre, pas de pénalité arbitraire).
  */
-// FIGÉ — calibration finale MAPA-validée Julien (POL3-6 Étape 1.E).
+// FIGÉ : calibration finale MAPA-validée Julien (POL3-6 Étape 1.E).
 // NE PAS modifier. Année absente → 1.0 (neutre, dégradation gracieuse).
 function yearCoef(year: number | undefined): number {
   if (!year) return 1.0;
@@ -490,7 +490,7 @@ function computeParkingValue(inputs: EstimationInputs): number {
 // MODULE TRAVAUX / VÉTUSTÉ (POL3-6)
 // ============================================================================
 //
-// Barème MAPA Property — décote progressive par catégorie de travaux.
+// Barème MAPA Property : décote progressive par catégorie de travaux.
 // Chaque catégorie a un nombre d'années de GRÂCE (rétention 100 % de la
 // plus-value : travaux comme neufs) puis une DÉCOTE LINÉAIRE annuelle
 // (decayPerYear) jusqu'à un plancher (floor). Plus le poste est durable
@@ -544,7 +544,7 @@ export const WORKS_CATEGORIES: Record<WorkCategory, WorkCategorySpec> = {
   piscine: { graceYears: 7, decayPerYear: 0.05, premium: 0.15 },
 };
 
-/** Prime piscine par défaut (fraction de la valeur du bien) — fallback. */
+/** Prime piscine par défaut (fraction de la valeur du bien) : fallback. */
 export const POOL_PREMIUM = 0.15;
 
 /**
@@ -722,12 +722,12 @@ export function getBaseline(
 // Recalibration baseline communes périphériques LU (POL2-6, 2026-05-19)
 // ============================================================================
 //
-// Sources : Observatoire de l'Habitat (data.public.lu, CC0) — datasets
+// Sources : Observatoire de l'Habitat (data.public.lu, CC0) : datasets
 // prix-de-vente-des-appartements-par-commune (actes notariés 2025, publication
 // mars 2026) + narratif Observatoire Q4'25/Q1'26 (marché en correction/
 // stabilisation après le pic 2022, volumes notariés faibles donc moyennes
 // communales bruitées). estimator.lu : méthodologie publique non récupérable
-// (sandbox sans egress réseau — cf. EVS_RECALIBRATION_2026-05-18.md).
+// (sandbox sans egress réseau : cf. EVS_RECALIBRATION_2026-05-18.md).
 //
 // Problème : `real_existing_avg_m2` est une MOYENNE qui mélange tout le stock
 // (1960s à neuf) sur peu de ventes. Pour les 6 communes périphériques visées,
@@ -735,10 +735,10 @@ export function getBaseline(
 //   - stock vétuste / à rénover  → bas de fourchette  (revu À LA BAISSE,
 //     conforme au brief « marché 2026 en correction, revoir DOWN ») ;
 //   - bon état + post-2000       → haut de fourchette (segment supérieur réel
-//     des comparables notariés — pratique de segmentation Observatoire).
+//     des comparables notariés : pratique de segmentation Observatoire).
 // Puis facteur de correction marché 2026 = −3 % (Observatoire Q4'25/Q1'26).
 
-// POL3-6 — CADRAGE MÉTIER : le moteur s'applique UNIFORMÉMENT à TOUTES
+// POL3-6 : CADRAGE MÉTIER : le moteur s'applique UNIFORMÉMENT à TOUTES
 // les communes LU (aucune exclue), chacune avec SA baseline notariée. La
 // segmentation dans la fourchette notariée `real_existing_range` n'est
 // donc plus restreinte à 6 communes : elle s'applique à toute commune LU
@@ -746,7 +746,7 @@ export function getBaseline(
 // `real_existing_range` couvre les communes à volume ≥10 ventes). Sinon
 // (peu de ventes, range "*") → baseline standard inchangée (fallback).
 
-/** Correction marché 2026 (Observatoire Q4'25/Q1'26 — repli marché de masse). */
+/** Correction marché 2026 (Observatoire Q4'25/Q1'26 : repli marché de masse). */
 const MARKET_2026_CORRECTION = 0.97;
 
 /** Parse "4440 € - 10048 €" → { low, high } ; null si non parsable. */
@@ -778,7 +778,7 @@ function parseRange(range: string | null): { low: number; high: number } | null 
  * cibles brief POL3-6 vérifiées par scripts/test-engine.mjs.
  */
 // Calibration finale MAPA-validée Julien (POL3-6 Étape 1.C). "good" ne doit
-// jamais coller au plafond — plafond réservé à "new + récent 2020+".
+// jamais coller au plafond : plafond réservé à "new + récent 2020+".
 function rangePosition(state: PropertyState, year: number | undefined): number {
   let pos: number;
   switch (state) {
@@ -810,18 +810,18 @@ function rangePosition(state: PropertyState, year: number | undefined): number {
  * Recalibre le €/m² baseline par SEGMENTATION dans la fourchette notariée
  * publiée `real_existing_range` de la commune (Observatoire 2025).
  *
- * POL3-6 — CADRAGE : appliqué à TOUTE commune LU disposant d'une
+ * POL3-6 : CADRAGE : appliqué à TOUTE commune LU disposant d'une
  * fourchette notariée parsable, pour les APPARTEMENTS. Retourne null si
  * la commune n'a pas de fourchette notariée fiable (peu de ventes →
  * fallback baseline standard, jamais d'exclusion arbitraire).
  *
  * MAISON : la fourchette notariée `real_existing_range` du référentiel
  * mixe TOUT le stock vendu (fortement pondéré appartements/VEFA, plus
- * chers au m² que les maisons individuelles dans ces communes — cf.
+ * chers au m² que les maisons individuelles dans ces communes : cf.
  * écart `estimated_maison_m2_from_ann` ≈ 0,7 × appartement). La segmenter
  * sur-évaluerait les maisons. Les maisons restent donc sur leur baseline
  * `estimated_maison_m2_from_ann` (annonces maisons décotées au taux unique de lib/data/announced-discount.ts,
- * Observatoire) via getBaseline — recalibration appartement-only.
+ * Observatoire) via getBaseline : recalibration appartement-only.
  */
 function peripheralRecalibratedBaseline(
   type: "appartement" | "maison",
@@ -845,13 +845,13 @@ function peripheralRecalibratedBaseline(
   const corrected = Math.round(segmented * corrFactor);
   return {
     pricePerM2: corrected,
-    reference: `${c.commune} — segment notarié ${Math.round(pos * 100)}% de [${r.low}–${r.high}] €/m² (Observatoire 2025), correction 2026 ${corrFactor < 1 ? `−${Math.round((1 - corrFactor) * 100)}%` : "neutre (segment prime résilient)"}`,
+    reference: `${c.commune} : segment notarié ${Math.round(pos * 100)}% de [${r.low} à ${r.high}] €/m² (Observatoire 2025), correction 2026 ${corrFactor < 1 ? `−${Math.round((1 - corrFactor) * 100)}%` : "neutre (segment prime résilient)"}`,
   };
 }
 
 /**
  * Garde-fous Belair (POL2-6, demande Julien) : un appartement à Belair (VDL)
- * ne peut pas sortir hors de [8 500 ; 16 000] €/m² baseline — plancher CPE H-I,
+ * ne peut pas sortir hors de [8 500 ; 16 000] €/m² baseline : plancher CPE H-I,
  * plafond neuf A++. Source : fourchette de marché Belair 2025 (Observatoire +
  * relevés MAPA). Appliqué sur le €/m² AVANT coefficients état/énergie.
  */
@@ -898,7 +898,7 @@ function effectiveBaseline(
 }
 
 // ============================================================================
-// MÉTHODE 1 — Comparaison directe (Sales Comparison Approach)
+// MÉTHODE 1 : Comparaison directe (Sales Comparison Approach)
 // Consomme inputs.comparablesPpsqm (prix/m² des ventes MAPA comparables, deja
 // filtrees commune + famille de type + regle "est comparable", chargees par la
 // route en service_role). Prix = mediane des prix/m² retenus x surface du bien.
@@ -928,7 +928,7 @@ function quantile(sorted: number[], p: number): number {
 /**
  * Anti-outlier robuste : bornes de Tukey [Q1 - 1.5*IQR, Q3 + 1.5*IQR].
  * N'est applique QUE si >= 4 valeurs (sinon les quartiles ne sont pas fiables
- * et on ne filtre pas — regle Julien : "si trop peu de comparables, ne pas
+ * et on ne filtre pas : regle Julien : "si trop peu de comparables, ne pas
  * filtrer agressivement"). Si le filtre viderait la liste, on garde l'original.
  */
 function filterOutliersIqr(nums: number[]): number[] {
@@ -957,7 +957,7 @@ export function methodSalesComparison(inputs: EstimationInputs): MethodResult {
           "Aucune vente comparable en base (mapa_historical_sales) pour cette commune / famille de type.",
       },
       warnings: [
-        "Méthode comparaison directe : aucun comparable disponible — estimation basée sur l'observatoire seul.",
+        "Méthode comparaison directe : aucun comparable disponible, estimation basée sur l'observatoire seul.",
       ],
     };
   }
@@ -1002,7 +1002,7 @@ function blendWithSales(
 }
 
 // ============================================================================
-// MÉTHODE 2 — Hédoniste enrichi (Hedonic Pricing)
+// MÉTHODE 2 : Hédoniste enrichi (Hedonic Pricing)
 // Prix de base €/m² × coefficients état + énergie + étage + spécificités
 // ============================================================================
 
@@ -1019,7 +1019,7 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
   }
 
   const eff = effectiveBaseline(propType, inputs, baseline);
-  // Sprint calibrage 1 — aligne l'echelle etat sur l'Observatoire (good=1.00
+  // Sprint calibrage 1 : aligne l'echelle etat sur l'Observatoire (good=1.00
   // reference, pas de majoration legacy). mapLegacyState traduit le state
   // ancien (renovated -> excellent) avant le lookup C7.
   const stateCoef = STATE_COEF_C7[mapLegacyState(inputs.state)] ?? 1.0;
@@ -1032,7 +1032,7 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
   const exposureBonus = inputs.exposureSouth ? 1.03 : 1.0;
   const viewBonus =
     inputs.view === "exceptional" ? 1.08 : inputs.view === "open" ? 1.05 : 1.0;
-  // Sprint calibrage 1 — degressivite surface Observatoire (apparts/penthouse/
+  // Sprint calibrage 1 : degressivite surface Observatoire (apparts/penthouse/
   // duplex uniquement). Pour les maisons, methodHedonic est appelee mais on
   // n'applique PAS la degressivite (les maisons ont leur barème surfaceCoef
   // legacy via estimateHouse - on ne le perturbe pas ici).
@@ -1068,7 +1068,7 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
 
   // Travaux récents (POL3-6) : plus-value vétusté par catégorie. La prime
   // piscine porte sur la valeur du bien (gros œuvre + terrasse), pas le
-  // montant — base = `bareBricks + terraceBonus`.
+  // montant : base = `bareBricks + terraceBonus`.
   const worksValue = calcWorksAddedValue(
     inputs.works,
     bareBricks + terraceBonus,
@@ -1106,14 +1106,14 @@ export function methodHedonic(inputs: EstimationInputs): MethodResult {
 }
 
 // ============================================================================
-// MÉTHODE 3 — Capitalisation locative (Income Approach)
+// MÉTHODE 3 : Capitalisation locative (Income Approach)
 // Loyer annuel estimé / yield brut commune
 // ============================================================================
 
 /** Yields bruts approximatifs LU 2025 (source: ABBL + analyses MAPA). */
 const DEFAULT_YIELD = 0.035; // 3.5% pour LU-Ville et grosses communes
 
-// POL3-6 : yieldForCommune (calibration AGENT-B) SUPPRIMÉ — retour au
+// POL3-6 : yieldForCommune (calibration AGENT-B) SUPPRIMÉ : retour au
 // DEFAULT_YIELD unique (valeur MAPA fixée).
 
 /**
@@ -1121,7 +1121,7 @@ const DEFAULT_YIELD = 0.035; // 3.5% pour LU-Ville et grosses communes
  *
  * Recalibration POL2-6 : les valeurs périphériques 2025 (24 €/m²/mois appart)
  * étaient sous-estimées. Le marché locatif LU 2025-26 est resté tendu malgré
- * la correction des PRIX d'acquisition (Observatoire de l'Habitat — note
+ * la correction des PRIX d'acquisition (Observatoire de l'Habitat : note
  * loyers Q4'25 : loyers couronne périphérique appartements bon état
  * ~27-30 €/m²/mois). Valeur retenue : 29 €/m²/mois (couronne), 34 (LU-Ville).
  */
@@ -1168,7 +1168,7 @@ export function methodIncomeCapitalization(
     warnings.push("Loyers/rendement : données marché commune (mai 2026).");
   } else {
     warnings.push(
-      "Loyers €/m² indicatifs V1 — à raffiner avec Observatoire Habitat loyers en V2.",
+      "Loyers €/m² indicatifs, à affiner avec les loyers de l'Observatoire de l'Habitat.",
     );
   }
 
@@ -1189,17 +1189,17 @@ export function methodIncomeCapitalization(
 }
 
 // ============================================================================
-// MÉTHODE 4 — Coût de remplacement déprécié (Depreciated Replacement Cost)
+// MÉTHODE 4 : Coût de remplacement déprécié (Depreciated Replacement Cost)
 // Terrain + (construction neuve × (1 - dépréciation))
 // ============================================================================
 
-/** Prix €/m² terrain à bâtir LU 2025 — valeurs indicatives (Observatoire). */
+/** Prix €/m² terrain à bâtir LU 2025 : valeurs indicatives (Observatoire). */
 const LAND_PRICE_PER_M2: Record<string, number> = {
   "luxembourg-ville": 4500,
   default: 1800,
 };
 
-/** Coût construction neuf 2026 LU — ~3200 €/m² (ITM / Chambre des Métiers). */
+/** Coût construction neuf 2026 LU : ~3200 €/m² (ITM / Chambre des Métiers). */
 const CONSTRUCTION_COST_PER_M2 = 3200;
 
 /** Dépréciation annuelle, plafonnée à 60%. */
@@ -1262,7 +1262,7 @@ export function methodDepreciatedReplacement(
 }
 
 // ============================================================================
-// MÉTHODE 5 — STATEC référentiel
+// MÉTHODE 5 : STATEC référentiel
 // Application directe du prix moyen Observatoire avec ajustements simples
 // ============================================================================
 
@@ -1280,15 +1280,15 @@ export function methodStatecReference(
     };
   }
 
-  // Ajustements simples (moins de coefficients que hédoniste) — POL2-6 :
+  // Ajustements simples (moins de coefficients que hédoniste) : POL2-6 :
   // même baseline effective (recalibration périphérique + garde-fou Belair)
   // et coefficient année que l'hédoniste, pour cohérence inter-méthodes.
   const eff = effectiveBaseline(propType, inputs, baseline);
-  // Sprint calibrage 1 — aligne sur l'echelle C7 (good=1.00 reference).
+  // Sprint calibrage 1 : aligne sur l'echelle C7 (good=1.00 reference).
   const stateCoef = STATE_COEF_C7[mapLegacyState(inputs.state)] ?? 1.0;
   const energyCoef = inputs.energy ? ENERGY_COEF[inputs.energy] : 1.0;
   const yrCoef = yearCoef(inputs.yearBuilt);
-  // Sprint calibrage 1 — degressivite surface (apparts/penthouse/duplex only).
+  // Sprint calibrage 1 : degressivite surface (apparts/penthouse/duplex only).
   const surfaceDegCoef =
     propType === "appartement" ? surfaceDegressiveCoef(inputs.surfaceLiving) : 1.0;
   const adjusted =
@@ -1296,7 +1296,7 @@ export function methodStatecReference(
   const bareBricks = adjusted * inputs.surfaceLiving;
   // POL2-6/POL3-6 : une vente notariée bundle parking + travaux récents dans
   // le prix ; les inclure aussi ici (comme hédoniste) évite de sous-évaluer
-  // un bien équipé — cohérence inter-méthodes TEGoVA.
+  // un bien équipé : cohérence inter-méthodes TEGoVA.
   const parkingValue = computeParkingValue(inputs);
   const worksValue = calcWorksAddedValue(inputs.works, bareBricks);
   const price = bareBricks + parkingValue + worksValue;
@@ -1332,7 +1332,7 @@ export function methodStatecReference(
  * POL3-6). Le moteur travaux/parkings/vétusté/CPE/année/état s'applique
  * UNIFORMÉMENT à TOUTES les communes LU (chacune avec sa baseline). Pour
  * tout pays explicite ≠ LU (Dubai, Monaco, Paris…) le moteur retourne
- * immédiatement une erreur — JAMAIS un nombre.
+ * immédiatement une erreur : JAMAIS un nombre.
  *
  * Si `country` est absent → comportement historique (commune LU implicite,
  * cf. cas test 1-6/Cas 4 commune inconnue) ; on ne bloque pas.
@@ -1349,7 +1349,7 @@ export function isCountryNotCoveredError(
 }
 
 // ============================================================================
-// EVS V2 — CALIBRATION FINALE MAPA-VALIDÉE JULIEN (POL3-6)
+// EVS V2 : CALIBRATION FINALE MAPA-VALIDÉE JULIEN (POL3-6)
 // Refonte en deux branches : estimateApartment (€/m² simple) vs
 // estimateHouse (bâti + terrain + annexes). Sources : Observatoire de
 // l'Habitat (Ministère du Logement), STATEC, Notaires LU, Chambre
@@ -1358,7 +1358,7 @@ export function isCountryNotCoveredError(
 
 // Coefficients SURFACE (apparts ET maisons, sur le bâti). Plus c'est petit,
 // plus c'est cher au m² (rareté studio) ; plus c'est grand, moins cher
-// (marché de niche). FIGÉ — calibration finale Julien (Étape 1.B).
+// (marché de niche). FIGÉ : calibration finale Julien (Étape 1.B).
 function surfaceCoef(surface: number): number {
   if (surface < 40) return 1.25; // studio rare
   if (surface < 65) return 1.15; // 1 chambre
@@ -1372,7 +1372,7 @@ function surfaceCoef(surface: number): number {
 // Coûts construction LU 2026 (norme classe A obligatoire). FIGÉ Julien
 // (Étape 2.B). Inclut gros œuvre + second œuvre + finitions standard.
 // Source : observation marché construction LU 2026 + données internes MAPA.
-// Réajusté POL3-6 (annonces réelles 2026, validé Julien) — terrain construit
+// Réajusté POL3-6 (annonces réelles 2026, validé Julien) : terrain construit
 // Bertrange/Strassen ~2 200-2 750 €/m² → coûts bâti relevés.
 const BATI_COST_PER_SQM: Record<string, number> = {
   new: 4250,
@@ -1384,7 +1384,7 @@ const BATI_COST_PER_SQM: Record<string, number> = {
 // Sous-sols / annexes (déjà inclus pour apparts via €/m² marché). FIGÉ.
 const ANNEXE_COST_PER_SQM = 1750; // moyenne sous-sol fini / garage / box
 
-// ACTION 3 (POL3-6, calibration finale annonces 2026, validé Julien) —
+// ACTION 3 (POL3-6, calibration finale annonces 2026, validé Julien) ,
 // multiplicateur marché commune appliqué au sous-total des MAISONS
 // uniquement, APRÈS rangePosition et AVANT parking/travaux.
 const COMMUNE_MARKET_COEF_HOUSE: Record<string, number> = {
@@ -1549,7 +1549,7 @@ function houseSubtotalBeforeMarketCoef(inputs: EstimationInputs) {
   return { bati, land, annexes, landZone, pos, subtotal };
 }
 
-// FIX 2 (POL3-6, validé Julien) — prime type ; penthouse modulé par la
+// FIX 2 (POL3-6, validé Julien) : prime type ; penthouse modulé par la
 // baseline ancien €/m² du bien (tier haut/moyen/bas).
 function getTypePremium(type: string, baselineAncien: number): number {
   const t = type?.toLowerCase();
@@ -1649,14 +1649,14 @@ function estimateApartment(inputs: EstimationInputs): EstimationResult {
   const pos = rangePosition(inputs.state, inputs.yearBuilt);
   value *= 1 + (pos - 0.5) * 0.2;
 
-  // FIX 2 — prime type ; penthouse modulé par baseline ancien quartier.
+  // FIX 2 : prime type ; penthouse modulé par baseline ancien quartier.
   const baselineAncien = bl ? bl.pricePerM2_ancien : baseM2;
   value *= getTypePremium(inputs.type, baselineAncien);
 
   value += computeParkingAdjustment(inputs, value);
   value += calcWorksAddedValue(inputs.works, value);
 
-  // FIX 3 — bonus terrasse / dernier étage / vue / exposition (apparts).
+  // FIX 3 : bonus terrasse / dernier étage / vue / exposition (apparts).
   if (inputs.terrace && inputs.terrace > 5) {
     value += (inputs.terrace - 5) * 1500;
   }
@@ -1675,7 +1675,7 @@ function estimateApartment(inputs: EstimationInputs): EstimationResult {
     value *= 1.03;
   }
 
-  // ACTION 4 (POL3-6) — PAS de plafond FIX4 (retiré, validé Julien).
+  // ACTION 4 (POL3-6) : PAS de plafond FIX4 (retiré, validé Julien).
 
   return buildEvsResult(inputs, value, {
     method: "apartment_per_sqm",
@@ -1692,7 +1692,7 @@ function estimateHouse(inputs: EstimationInputs): EstimationResult {
     houseSubtotalBeforeMarketCoef(inputs);
   let subtotal = base;
 
-  // ACTION 3 — multiplicateur marché commune (maisons), APRÈS
+  // ACTION 3 : multiplicateur marché commune (maisons), APRÈS
   // rangePosition et AVANT parking/travaux.
   const market = getCommuneMarketCoefHouse(inputs.commune);
   if (!market) {
@@ -1709,7 +1709,7 @@ function estimateHouse(inputs: EstimationInputs): EstimationResult {
   }
   subtotal *= market.coef;
 
-  // FIX 2 — prime type (villa, etc.) ; maison/villa non modulés par baseline.
+  // FIX 2 : prime type (villa, etc.) ; maison/villa non modulés par baseline.
   subtotal *= getTypePremium(inputs.type, 0);
 
   // 6. Parkings (écart à la norme)
@@ -1731,7 +1731,7 @@ function estimateHouse(inputs: EstimationInputs): EstimationResult {
 }
 
 // ============================================================================
-// Sprint C7 — Methode Observatoire (appartements uniquement).
+// Sprint C7 : Methode Observatoire (appartements uniquement).
 //
 // Formule unique conforme standards Observatoire de l'Habitat (LISER) +
 // modele hedonique luxembourgeois :
@@ -1764,7 +1764,7 @@ function estimateHouse(inputs: EstimationInputs): EstimationResult {
 // ============================================================================
 
 function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
-  // 1. Prix de base m² commune (source TS hardcodee getBaseline — pas de
+  // 1. Prix de base m² commune (source TS hardcodee getBaseline : pas de
   //    migration Supabase async dans ce sprint, decision Julien).
   const baseline = getBaseline("appartement", inputs.commune, inputs.quartier);
   if (!baseline) {
@@ -1866,11 +1866,11 @@ function estimateObservatoire(inputs: EstimationInputs): EstimationResult {
  *  house/villa → estimateHouse (intact, calibre POL3-6 par Julien). */
 function estimateMain(inputs: EstimationInputs): EstimationResult {
   if (isHouseSegment(inputs.type)) {
-    return estimateHouse(inputs); // INTACT — bati + terrain + travaux
+    return estimateHouse(inputs); // INTACT : bati + terrain + travaux
   }
   return estimateObservatoire(inputs); // C7 nouvelle methode
   // NB : estimateApartment() ci-dessous reste defini comme code mort
-  // (POL3-6 conservation, dette technique acceptee — usage futur eventuel).
+  // (POL3-6 conservation, dette technique acceptee : usage futur eventuel).
 }
 
 export function estimate(

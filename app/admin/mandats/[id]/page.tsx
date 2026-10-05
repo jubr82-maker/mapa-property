@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { AdminDateCell } from "@/components/admin/AdminDateCell";
-import { formatDateOnly, lastModifiedAt } from "@/lib/datetime";
-
-const formatDateOrDash = (iso: string | null) => formatDateOnly(iso) || "-";
+import { ADMIN_LOCALE, formatDateOnly, lastModifiedAt } from "@/lib/datetime";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { supabaseService } from "@/lib/supabase-service";
@@ -11,6 +10,7 @@ import { WorkflowSelect } from "@/components/admin/WorkflowSelect";
 import { AdminNotes } from "@/components/admin/AdminNotes";
 import {
   WorkflowBadge,
+  type AdminTranslator,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
 import { formatPrice as formatPriceShared, formatSurface as formatSurfaceShared } from "@/lib/format/numbers";
@@ -29,10 +29,10 @@ import { PdfExportButton } from "@/components/admin/PdfExportButton";
 
 export const dynamic = "force-dynamic";
 
-// Sprint MANDATS-A PARTIE 6 — fiche detail editable. Affichage 3 sections
-// (type_transaction = vente / recherche / location), zones d'edition via
-// EditMandatForm + actions workflow (WorkflowSelect, AdminNotes) +
-// suppression RGPD via DeleteMandatButton + lien lead d'origine.
+// Fiche detail editable. Affichage selon 3 sections (type_transaction :
+// vente, recherche, location), edition via EditMandatForm, suivi
+// (WorkflowSelect, AdminNotes), suppression RGPD via DeleteMandatButton et
+// lien vers le lead d'origine.
 
 type HistoryEntry = {
   at: string;
@@ -80,41 +80,23 @@ const FULL_SELECT =
   "commission,date_debut,date_fin,signed_at,budget_min,budget_max,zones,min_bedrooms,min_surface," +
   "status,notes,workflow_status,admin_notes,next_follow_up,workflow_history";
 
-const TYPE_TRANSACTION_LABEL: Record<string, string> = {
-  vente: "Vente",
-  recherche: "Recherche",
-  location: "Location",
-};
-
-const TYPE_MANDAT_LABEL: Record<string, string> = {
-  exclusif: "Exclusif",
-  "semi-exclusif": "Semi-exclusif",
-  simple: "Simple",
-  autonome: "Autonome",
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  actif: "Actif",
-  vendu: "Vendu",
-  loue: "Loué",
-  expire: "Expiré",
-  resilie: "Résilié",
-};
-
-
+/** Libelle traduit d'une valeur enregistree ("semi-exclusif" -> cle "..._semi_exclusif"). */
+function labelOf(t: AdminTranslator, prefix: string, value: string): string {
+  const key = `${prefix}${value.replace(/-/g, "_")}`;
+  return t.has(key) ? t(key) : value;
+}
 
 function formatPrice(value: number | null): string {
-  if (value == null) return "—";
+  if (value == null) return "";
   return formatPriceShared(value, "fr");
 }
 
-function formatBudget(min: number | null, max: number | null): string {
-  if (min == null && max == null) return "—";
+function formatBudget(t: AdminTranslator, min: number | null, max: number | null): string {
   const fmt = (n: number) => formatPriceShared(n, "fr");
-  if (min != null && max != null) return `${fmt(min)} – ${fmt(max)}`;
-  if (min != null) return `≥ ${fmt(min)}`;
-  if (max != null) return `≤ ${fmt(max)}`;
-  return "—";
+  if (min != null && max != null) return t("budget_range", { min: fmt(min), max: fmt(max) });
+  if (min != null) return t("budget_from", { min: fmt(min) });
+  if (max != null) return t("budget_up_to", { max: fmt(max) });
+  return "";
 }
 
 export default async function AdminMandatDetailPage({
@@ -135,6 +117,10 @@ export default async function AdminMandatDetailPage({
   if (error || !data) notFound();
   const mandat = data as unknown as MandatFull;
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_mandats" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
+  const notProvided = tw("not_provided");
+
   const ws = (mandat.workflow_status as WorkflowStatus | null) ?? "new";
   const history: HistoryEntry[] = Array.isArray(mandat.workflow_history)
     ? mandat.workflow_history
@@ -154,14 +140,13 @@ export default async function AdminMandatDetailPage({
     notes: mandat.notes,
   };
 
-  const sectionLabel =
-    TYPE_TRANSACTION_LABEL[mandat.type_transaction] ?? mandat.type_transaction;
+  const sectionLabel = labelOf(t, "section_", mandat.type_transaction);
   const typeMandatLabel = mandat.type_mandat
-    ? (TYPE_MANDAT_LABEL[mandat.type_mandat] ?? mandat.type_mandat)
+    ? labelOf(t, "type_mandat_", mandat.type_mandat)
     : null;
   const statusLabel = mandat.status
-    ? (STATUS_LABEL[mandat.status] ?? mandat.status)
-    : "—";
+    ? labelOf(t, "status_", mandat.status)
+    : notProvided;
 
   const isVente = mandat.type_transaction === "vente";
   const isRecherche = mandat.type_transaction === "recherche";
@@ -175,14 +160,14 @@ export default async function AdminMandatDetailPage({
           className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
           <ArrowLeft className="size-3" />
-          Retour aux mandats
+          {t("back")}
         </Link>
         {mandat.lead_id && (
           <Link
             href={`/admin/leads/${mandat.lead_id}`}
             className="inline-flex items-center gap-2 rounded-full border border-[#e0af6e]/40 bg-[#e0af6e]/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.25em] text-[#9E7B2A] hover:bg-[#e0af6e]/20"
           >
-            ← Lead d&apos;origine
+            {t("origin_lead")}
           </Link>
         )}
       </div>
@@ -190,11 +175,11 @@ export default async function AdminMandatDetailPage({
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Mandat · {sectionLabel}
+            {t("detail_eyebrow", { section: sectionLabel })}
             {typeMandatLabel ? ` · ${typeMandatLabel}` : ""}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
-            {mandat.client_name?.trim() || mandat.client_email || "—"}
+            {mandat.client_name?.trim() || mandat.client_email || notProvided}
           </h1>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
             <AdminDateCell
@@ -202,7 +187,7 @@ export default async function AdminMandatDetailPage({
               updatedAt={lastModifiedAt(mandat)}
               variant="long"
             />
-            Statut {statusLabel}
+            {t("status_line", { status: statusLabel })}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -212,33 +197,34 @@ export default async function AdminMandatDetailPage({
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        {/* Colonne gauche : infos statiques + edit form + danger zone */}
+        {/* Colonne gauche : informations, edition et suppression */}
         <div className="space-y-4">
           <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-              Contact client
+              {t("contact_title")}
             </p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Field label="Email" value={mandat.client_email} />
-              <Field label="Téléphone" value={mandat.client_phone} />
-              <Field label="Pays" value={mandat.client_country} />
-              <Field label="Ville" value={mandat.client_city} />
+              <Field label={tw("field_email")} value={mandat.client_email} empty={notProvided} />
+              <Field label={tw("field_phone")} value={mandat.client_phone} empty={notProvided} />
+              <Field label={tw("field_country")} value={mandat.client_country} empty={notProvided} />
+              <Field label={tw("field_city")} value={mandat.client_city} empty={notProvided} />
             </dl>
           </div>
 
           {(isVente || isLocation) && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Bien
+                {t("property_title")}
               </p>
               <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                <Field label="Adresse" value={mandat.bien_adresse} />
-                <Field label="Type de bien" value={mandat.bien_type} />
+                <Field label={t("field_address")} value={mandat.bien_adresse} empty={notProvided} />
+                <Field label={t("form_property_type")} value={mandat.bien_type} empty={notProvided} />
                 <Field
-                  label={isLocation ? "Loyer souhaité" : "Prix de mise en vente"}
+                  label={isLocation ? t("field_rent") : t("field_price")}
                   value={formatPrice(mandat.prix_mise_en_vente)}
+                  empty={notProvided}
                 />
-                <Field label="Commission" value={mandat.commission} />
+                <Field label={t("form_commission")} value={mandat.commission} empty={notProvided} />
               </dl>
             </div>
           )}
@@ -246,24 +232,27 @@ export default async function AdminMandatDetailPage({
           {isRecherche && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Critères de recherche
+                {t("search_title")}
               </p>
               <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                <Field label="Type de bien recherché" value={mandat.property_type} />
+                <Field label={t("field_search_property_type")} value={mandat.property_type} empty={notProvided} />
                 <Field
-                  label="Budget"
-                  value={formatBudget(mandat.budget_min, mandat.budget_max)}
+                  label={t("field_budget")}
+                  value={formatBudget(t, mandat.budget_min, mandat.budget_max)}
+                  empty={notProvided}
                 />
                 <Field
-                  label="Zones"
+                  label={t("field_zones")}
                   value={
                     Array.isArray(mandat.zones) && mandat.zones.length > 0
                       ? mandat.zones.join(", ")
-                      : (mandat.client_city ?? "—")
+                      : mandat.client_city
                   }
+                  empty={notProvided}
                 />
                 <Field
-                  label="Chambres min."
+                  label={t("field_min_bedrooms")}
+                  empty={notProvided}
                   value={
                     mandat.min_bedrooms != null
                       ? String(mandat.min_bedrooms)
@@ -271,7 +260,8 @@ export default async function AdminMandatDetailPage({
                   }
                 />
                 <Field
-                  label="Surface min. (m²)"
+                  label={t("field_min_surface")}
+                  empty={notProvided}
                   value={
                     mandat.min_surface != null
                       ? formatSurfaceShared(mandat.min_surface, "fr", { withUnit: false })
@@ -284,23 +274,24 @@ export default async function AdminMandatDetailPage({
 
           <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-              Cycle commercial
+              {t("cycle_title")}
             </p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Field label="Date début" value={formatDateOrDash(mandat.date_debut)} />
-              <Field label="Date fin" value={formatDateOrDash(mandat.date_fin)} />
+              <Field label={t("form_date_start")} value={formatDateOnly(mandat.date_debut)} empty={notProvided} />
+              <Field label={t("form_date_end")} value={formatDateOnly(mandat.date_fin)} empty={notProvided} />
               <Field
-                label="Date de signature"
-                value={formatDateOrDash(mandat.signed_at)}
+                label={t("form_signed")}
+                value={formatDateOnly(mandat.signed_at)}
+                empty={notProvided}
               />
-              <Field label="Statut" value={statusLabel} />
+              <Field label={t("form_status")} value={statusLabel} empty={notProvided} />
             </dl>
           </div>
 
           {mandat.notes && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Notes
+                {t("notes_title")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {mandat.notes}
@@ -311,7 +302,7 @@ export default async function AdminMandatDetailPage({
           {mandat.admin_notes && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-                Dernière note admin
+                {tw("last_note")}
               </p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#1A1F2A]">
                 {mandat.admin_notes}
@@ -321,31 +312,29 @@ export default async function AdminMandatDetailPage({
 
           <EditMandatForm id={mandat.id} initial={editable} />
 
-          {/* Sprint Export RGPD — bloc actions non destructives.
-              Droit d'acces / portabilite : telecharge le mandat au format
-              JSON. Place AVANT la Zone danger pour separer export (neutre)
-              et delete (rouge). */}
+          {/* Export RGPD : bloc d'actions non destructives. Droit d'acces
+              et portabilite : telecharge le mandat au format JSON. Place
+              avant la zone de suppression pour separer export (neutre) et
+              suppression (rouge). */}
           <div className="rounded-xl border border-[#e0af6e]/40 bg-[#e0af6e]/5 p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#9E7B2A]">
-              Actions RGPD
+              {tw("rgpd_title")}
             </p>
             <p className="mt-2 text-sm text-[#1A1F2A]">
-              Télécharger toutes les données de ce mandat (format JSON,
-              portabilité RGPD).
+              {t("rgpd_text")}
             </p>
             <div className="mt-3">
               <ExportMandatButton id={mandat.id} />
             </div>
           </div>
 
-          {/* Zone danger : suppression RGPD definitive */}
+          {/* Suppression RGPD definitive */}
           <div className="rounded-xl border border-red-300 bg-red-50/60 p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-700">
-              Zone danger
+              {tw("danger_title")}
             </p>
             <p className="mt-2 text-sm text-red-900">
-              La suppression définitive efface ce mandat de la base. Action
-              irréversible — usage RGPD uniquement.
+              {t("danger_text")}
             </p>
             <div className="mt-3">
               <DeleteMandatButton id={mandat.id} />
@@ -353,7 +342,7 @@ export default async function AdminMandatDetailPage({
           </div>
         </div>
 
-        {/* Colonne droite : workflow + notes admin */}
+        {/* Colonne droite : suivi et notes internes */}
         <aside className="space-y-5">
           <WorkflowSelect
             leadId={mandat.id}
@@ -376,9 +365,11 @@ export default async function AdminMandatDetailPage({
 function Field({
   label,
   value,
+  empty,
 }: {
   label: string;
   value: string | null | undefined;
+  empty: string;
 }) {
   return (
     <div>
@@ -386,7 +377,7 @@ function Field({
         {label}
       </dt>
       <dd className="mt-0.5 text-sm text-[#1A1F2A]">
-        {value && value.trim() ? value : "—"}
+        {value && value.trim() ? value : empty}
       </dd>
     </div>
   );

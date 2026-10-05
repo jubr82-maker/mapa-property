@@ -5,6 +5,8 @@ import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 import { AdminDateCell } from "@/components/admin/AdminDateCell";
 import { DateSortToggle, parseDateSort } from "@/components/admin/DateSortToggle";
 import { getAdminDateTimeT } from "@/lib/admin/datetime-labels";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 interface EstimationRow {
   id: string;
@@ -18,13 +20,11 @@ interface EstimationRow {
   updated_at: string | null;
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  new: "Nouveau",
-  in_progress: "En cours",
-  avis_sent: "Avis envoyé",
-  mandate_signed: "Mandat signé",
-  closed: "Clos",
-};
+const KNOWN_STATUSES = ["new", "in_progress", "avis_sent", "mandate_signed", "closed"];
+const KNOWN_ENGINES = ["evs_5_methods", "hedonic_legacy", "manual_admin"];
+const KNOWN_CONFIDENCES = ["HIGH", "MEDIUM", "LOW", "MANUAL"];
+const KNOWN_TYPES = ["appartement", "maison", "penthouse", "duplex", "villa", "immeuble", "terrain"];
+const KNOWN_STATES = ["to_renovate", "good", "renovated", "new", "excellent", "fair", "major_works"];
 
 const STATUS_COLOR: Record<string, string> = {
   new: "bg-[#e0af6e]/15 text-[#9E7B2A]",
@@ -35,7 +35,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 function fmtPrice(n?: number) {
-  if (!n) return "—";
+  if (!n) return "";
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 }
 
@@ -49,13 +49,15 @@ export default async function AdminEstimationsPage({
   const supabase = supabaseService();
   const sort = parseDateSort((await searchParams).sort);
   const tDate = await getAdminDateTimeT();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_estimations" });
+  const unknown = t("notProvided");
 
   const { data: rows, error } = await supabase
     .from("estimation_requests")
     .select(
       "id, inputs, client_output, contact_email, contact_phone, engine, status, created_at, updated_at",
     )
-    .neq("status", "deleted") // BUG 6 : masque les estimations soft-deleted
+    .neq("status", "deleted") // masque les estimations supprimées (suppression logique)
     .order("created_at", { ascending: sort === "asc" })
     .limit(100);
 
@@ -64,14 +66,13 @@ export default async function AdminEstimationsPage({
       <header className="flex items-end justify-between gap-4">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3D4F63]/60">
-            Estimations EVS
+            {t("list.eyebrow")}
           </p>
           <h1 className="mt-1 font-display text-3xl font-bold text-[#1A1F2A]">
-            Demandes d&apos;estimation
+            {t("list.title")}
           </h1>
           <p className="mt-2 text-sm text-[#1A1F2A]/70">
-            Les 100 dernières demandes reçues via /fr/services/estimer (moteur EVS 5 méthodes
-            pour LU résidentiel, fallback hédoniste pour autres pays/types).
+            {t("list.intro")}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -80,11 +81,11 @@ export default async function AdminEstimationsPage({
             href="/admin/estimations/new"
             className="rounded-full bg-[#9E7B2A] px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#e0af6e]"
           >
-            + Nouvelle estimation
+            + {t("list.new")}
           </Link>
           <div className="rounded-md border border-[#3D4F63]/15 bg-white px-4 py-2 text-right">
             <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-              Total affiché
+              {t("list.total")}
             </p>
             <p className="font-display text-2xl font-bold text-[#3D4F63]">
               {rows?.length ?? 0}
@@ -97,7 +98,7 @@ export default async function AdminEstimationsPage({
 
       {error && (
         <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-700">
-          Erreur chargement : {error.message}
+          {t("list.loadError")}
         </div>
       )}
 
@@ -106,12 +107,12 @@ export default async function AdminEstimationsPage({
           <thead className="bg-[#F5EFE1] text-left font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/70">
             <tr>
               <th className="px-4 py-3">{tDate("created_col")}</th>
-              <th className="px-4 py-3">Bien</th>
-              <th className="px-4 py-3 text-right">Fourchette</th>
-              <th className="px-4 py-3 text-center">Confidence</th>
-              <th className="px-4 py-3">Contact</th>
-              <th className="px-4 py-3">Moteur</th>
-              <th className="px-4 py-3">Statut</th>
+              <th className="px-4 py-3">{t("list.col_property")}</th>
+              <th className="px-4 py-3 text-right">{t("list.col_range")}</th>
+              <th className="px-4 py-3 text-center">{t("list.col_confidence")}</th>
+              <th className="px-4 py-3">{t("list.col_contact")}</th>
+              <th className="px-4 py-3">{t("list.col_engine")}</th>
+              <th className="px-4 py-3">{t("list.col_status")}</th>
             </tr>
           </thead>
           <tbody>
@@ -121,9 +122,12 @@ export default async function AdminEstimationsPage({
                 commune?: string;
                 country?: string;
                 livingSurface?: number | string;
+                surfaceLiving?: number | string;
                 state?: string;
                 energy?: string;
               };
+              const surface = inputs.livingSurface ?? inputs.surfaceLiving;
+              const confidence = r.client_output?.confidence;
               return (
                 <tr
                   key={r.id}
@@ -141,10 +145,19 @@ export default async function AdminEstimationsPage({
                   <td className="px-4 py-3">
                     <Link href={`/admin/estimations/${r.id}`} className="block hover:text-[#9E7B2A]">
                       <div className="font-medium text-[#1A1F2A]">
-                        {inputs.type ?? "—"} · {inputs.commune ?? inputs.country ?? "—"}
+                        {inputs.type && KNOWN_TYPES.includes(inputs.type)
+                          ? t(`propertyType.${inputs.type}`)
+                          : (inputs.type ?? unknown)}{" "}
+                        · {inputs.commune ?? inputs.country ?? unknown}
                       </div>
                       <div className="text-xs text-[#1A1F2A]/60">
-                        {inputs.livingSurface ?? "—"} m² · {inputs.state ?? "—"} · CPE {inputs.energy ?? "—"}
+                        {surface != null && surface !== "" ? `${surface} m²` : unknown}
+                        {" · "}
+                        {inputs.state && KNOWN_STATES.includes(inputs.state)
+                          ? t(`state.${inputs.state}`)
+                          : (inputs.state ?? unknown)}
+                        {" · "}
+                        {t("list.energy", { energy: inputs.energy ?? unknown })}
                       </div>
                     </Link>
                   </td>
@@ -153,20 +166,25 @@ export default async function AdminEstimationsPage({
                       {fmtPrice(r.client_output?.price_mid)}
                     </div>
                     <div className="font-mono text-[10px] text-[#1A1F2A]/60">
-                      {fmtPrice(r.client_output?.price_low)} – {fmtPrice(r.client_output?.price_high)}
+                      {t("range", {
+                        low: fmtPrice(r.client_output?.price_low),
+                        high: fmtPrice(r.client_output?.price_high),
+                      })}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest ${
-                        r.client_output?.confidence === "HIGH"
+                        confidence === "HIGH"
                           ? "bg-emerald-500/15 text-emerald-700"
-                          : r.client_output?.confidence === "MEDIUM"
+                          : confidence === "MEDIUM"
                             ? "bg-[#e0af6e]/15 text-[#9E7B2A]"
                             : "bg-red-500/15 text-red-700"
                       }`}
                     >
-                      {r.client_output?.confidence ?? "—"}
+                      {confidence && KNOWN_CONFIDENCES.includes(confidence)
+                        ? t(`confidence.${confidence}`)
+                        : unknown}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs">
@@ -177,12 +195,12 @@ export default async function AdminEstimationsPage({
                       <div className="text-[#1A1F2A]/60 font-mono text-[11px]">{r.contact_phone}</div>
                     )}
                     {!r.contact_email && !r.contact_phone && (
-                      <span className="text-[#1A1F2A]/40">—</span>
+                      <span className="text-[#1A1F2A]/40">{t("list.noContact")}</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
                     <span className="font-mono text-[10px] text-[#1A1F2A]/60">
-                      {r.engine === "evs_5_methods" ? "EVS" : "Hédoniste"}
+                      {KNOWN_ENGINES.includes(r.engine) ? t(`engineShort.${r.engine}`) : r.engine}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -191,7 +209,7 @@ export default async function AdminEstimationsPage({
                         STATUS_COLOR[r.status] ?? STATUS_COLOR.new
                       }`}
                     >
-                      {STATUS_LABEL[r.status] ?? r.status}
+                      {KNOWN_STATUSES.includes(r.status) ? t(`status.${r.status}`) : t("status.unknown")}
                     </span>
                   </td>
                 </tr>
@@ -200,14 +218,14 @@ export default async function AdminEstimationsPage({
             {(!rows || rows.length === 0) && (
               <tr>
                 <td colSpan={7} className="px-4 py-12 text-center text-sm text-[#1A1F2A]/50">
-                  Aucune estimation reçue pour le moment.
+                  {t("list.empty")}
                   <br />
                   <Link
                     href="/fr/services/estimer"
                     target="_blank"
                     className="mt-2 inline-block font-mono text-[10px] uppercase tracking-widest text-[#9E7B2A] hover:underline"
                   >
-                    Tester le tunnel public →
+                    {t("list.testPublicForm")} →
                   </Link>
                 </td>
               </tr>
@@ -217,8 +235,7 @@ export default async function AdminEstimationsPage({
       </div>
 
       <p className="font-mono text-[10px] uppercase tracking-widest text-[#1A1F2A]/40">
-        Cliquez sur une ligne pour ouvrir la vue détail (5 méthodes, ajustement pondération, workflow).
-        Génération PDF Avis de Valeur → Phase 5 (session dédiée).
+        {t("list.footer")}
       </p>
     </div>
   );

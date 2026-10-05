@@ -1,16 +1,19 @@
+import { getTranslations } from "next-intl/server";
 import { BlogPostForm } from "@/components/admin/BlogPostForm";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
-export default function NewBlogPostPage() {
+export default async function NewBlogPostPage() {
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_blog" });
   return (
     <div className="space-y-8">
       <header>
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-          Blog
+          {t("title")}
         </p>
         <h1 className="mt-2 font-display text-3xl font-bold text-[#3D4F63]">
-          Nouvel article
+          {t("new_title")}
         </h1>
       </header>
       <BlogPostForm post={null} mode="create" />

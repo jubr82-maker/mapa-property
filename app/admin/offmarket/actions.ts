@@ -15,10 +15,17 @@ import {
 import { translateBatch } from "@/lib/translate";
 import { formatPrice as formatPriceShared, parseDecimalInput } from "@/lib/format/numbers";
 import { assertAdminAction } from "@/lib/admin/require-admin";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
+
+// Messages renvoyés à l'écran (next-intl, namespace admin_offmarket).
+function adminT() {
+  return getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_offmarket" });
+}
 
 // Colonnes potentiellement absentes selon l'état d'application des migrations.
 // Si Postgres remonte "column does not exist" sur l'une d'elles, on la retire
-// du payload et on réessaie — permet au BO de fonctionner même si Julien
+// du payload et on réessaie : permet au BO de fonctionner même si Julien
 // n'a pas encore appliqué les dernières migrations SQL.
 const OPTIONAL_OFFMARKET_COLUMNS = [
   // Sprint I18N : colonnes traduites auto (migration 20260526_offmarket_i18n_full).
@@ -92,7 +99,7 @@ async function insertWithRetry(
     if (!error) return { data, error: null };
     const col = extractMissingColumn(error);
     if (col && OPTIONAL_OFFMARKET_COLUMNS.includes(col)) {
-      console.warn(`[insertWithRetry] colonne ${col} absente — retry sans`);
+      console.warn(`[insertWithRetry] colonne ${col} absente, nouvel essai sans`);
       delete attempt[col];
       continue;
     }
@@ -113,7 +120,7 @@ async function updateWithRetry(
     if (!error) return { error: null };
     const col = extractMissingColumn(error);
     if (col && OPTIONAL_OFFMARKET_COLUMNS.includes(col)) {
-      console.warn(`[updateWithRetry] colonne ${col} absente — retry sans`);
+      console.warn(`[updateWithRetry] colonne ${col} absente, nouvel essai sans`);
       delete attempt[col];
       continue;
     }
@@ -122,7 +129,7 @@ async function updateWithRetry(
   return { error: new Error("Trop de tentatives") };
 }
 
-// Sprint I18N-Mistral — Auto-traduction des champs FR -> EN + DE au save.
+// Auto-traduction des champs FR -> EN + DE au save.
 // Lecture des champs FR depuis le payload (title, description, short_pitch),
 // appel Mistral en parallele (2 langues), ajout des 6 colonnes _en/_de dans
 // le payload. Si Mistral fail : console.warn + payload non modifie -> les
@@ -188,7 +195,7 @@ async function attachI18nTranslations(
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.warn(
-      `[translate] Mistral failed for offmarket: ${msg} — keeping previous EN/DE values in DB.`,
+      `[translate] Mistral failed for offmarket: ${msg}; keeping previous EN/DE values in DB.`,
     );
     // Pas de modification du payload : les colonnes _en/_de NE sont PAS
     // ajoutees -> updateWithRetry ne les touchera pas, les valeurs DB
@@ -306,11 +313,11 @@ function buildOffmarketPayload(formData: FormData, propertyType: PropertyType, s
     price_max: num(formData.get("price_max")),
     price_custom_text: str(formData.get("price_custom_text")),
     // price_label : conservé pour compat back-office / exports, JAMAIS lu
-    // par l'affichage public (POL3-5 — PropertyPrice ignore price_label).
+    // par l'affichage public (PropertyPrice ignore price_label).
     price_label: priceLabelByMode,
     // POL3-5 : price_display devient strictement numérique (prix exact)
     // ou null. PropertyPrice ne s'en sert qu'en dernier recours (étape 6)
-    // et parse un nombre — plus jamais de libellé legacy stocké ici.
+    // et parse un nombre : plus jamais de libellé legacy stocké ici.
     price_display:
       priceMode === "exact"
         ? (num(formData.get("price_estimate"))?.toString() ?? null)
@@ -460,7 +467,7 @@ function computePriceLabel(
   if (mode === "range") {
     const min = num(formData.get("price_min"));
     const max = num(formData.get("price_max"));
-    if (min && max) return `${fmt(min)} – ${fmt(max)}${suffix}`;
+    if (min && max) return `${fmt(min)} - ${fmt(max)}${suffix}`;
     if (min) return `À partir de ${fmt(min)}${suffix}`;
     if (max) return `Jusqu'à ${fmt(max)}${suffix}`;
     return "Prix sur demande";
@@ -505,7 +512,7 @@ export async function createOffmarket(formData: FormData): Promise<ActionResult>
 
   const propertyType = str(formData.get("property_type")) as PropertyType | null;
   if (!propertyType || !PROPERTY_TYPES.includes(propertyType)) {
-    return { ok: false, error: "Type de bien invalide." };
+    return { ok: false, error: (await adminT())("actions.invalidType") };
   }
 
   const requestedStatus = str(formData.get("status"));
@@ -533,7 +540,7 @@ export async function createOffmarket(formData: FormData): Promise<ActionResult>
     console.error("[admin] createOffmarket", error);
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "Erreur d'enregistrement (vérifier que toutes les migrations SQL sont appliquées).",
+      error: (await adminT())("actions.saveError"),
     };
   }
 
@@ -553,7 +560,7 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
 
   const propertyType = str(formData.get("property_type")) as PropertyType | null;
   if (!propertyType || !PROPERTY_TYPES.includes(propertyType)) {
-    return { ok: false, error: "Type de bien invalide." };
+    return { ok: false, error: (await adminT())("actions.invalidType") };
   }
 
   const requestedStatus = str(formData.get("status"));
@@ -563,7 +570,7 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
     ? (requestedStatus as OffmarketStatus)
     : "draft";
 
-  // Garde serveur — refuse status='published' sans champs critiques.
+  // Garde serveur : refuse status='published' sans champs critiques.
   // On lit la base (et non le formData), car le formData ne contient que
   // les champs de l'onglet actif (cf. OffmarketForm.tsx).
   if (status === "published") {
@@ -572,20 +579,21 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
       .select("title, country, property_type, price_estimate, price_min, price_custom_text, price_mode")
       .eq("id", id)
       .maybeSingle();
+    const t = await adminT();
     const missing: string[] = [];
-    if (!existing?.title) missing.push("Titre");
-    if (!existing?.country) missing.push("Pays");
-    if (!existing?.property_type) missing.push("Type");
+    if (!existing?.title) missing.push(t("guard.missingTitle"));
+    if (!existing?.country) missing.push(t("guard.missingCountry"));
+    if (!existing?.property_type) missing.push(t("guard.missingType"));
     const hasPriceInfo =
       existing?.price_mode === "on_request" ||
       !!existing?.price_estimate ||
       !!existing?.price_min ||
       !!existing?.price_custom_text;
-    if (!hasPriceInfo) missing.push("Prix (ou mode « Sur demande »)");
+    if (!hasPriceInfo) missing.push(t("guard.missingPrice"));
     if (missing.length > 0) {
       return {
         ok: false,
-        error: `Publication bloquée — champ(s) manquant(s) : ${missing.join(", ")}. La fiche reste en brouillon jusqu'à complétion.`,
+        error: t("actions.publishBlocked", { fields: missing.join(", ") }),
       };
     }
   }
@@ -598,7 +606,7 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
     .eq("id", id)
     .maybeSingle();
   if (fetchErr || !existing) {
-    return { ok: false, error: "Fiche introuvable ou inaccessible. Rechargez la page." };
+    return { ok: false, error: (await adminT())("actions.notFound") };
   }
   const payload = buildOffmarketUpdatePayload(
     formData,
@@ -620,7 +628,7 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
     console.error("[admin] updateOffmarket", error);
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "Erreur d'enregistrement (vérifier que toutes les migrations SQL sont appliquées).",
+      error: (await adminT())("actions.saveError"),
     };
   }
 
@@ -628,7 +636,7 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
   revalidatePath("/admin/offmarket");
   revalidatePath(`/admin/offmarket/${id}/edit`);
   // Sprint OPTIM-1B C3 : invalidation cross-locale (faille notee dans
-  // l'audit OPTIM-1B — auparavant SEUL /fr etait invalide -> EN et DE
+  // l'audit OPTIM-1B : auparavant SEUL /fr etait invalide -> EN et DE
   // restaient figes jusqu'a expiration revalidate 1800s).
   for (const locale of ["fr", "en", "de"]) {
     revalidatePath(`/${locale}/off-market`);
@@ -815,7 +823,7 @@ export async function updateRequestWorkflowStatus(
     .select("id");
 
   if (error) throw new Error(error.message);
-  if (!updated || updated.length === 0) throw new Error("demande introuvable — aucune ligne modifiée");
+  if (!updated || updated.length === 0) throw new Error("Demande introuvable : aucune ligne modifiée.");
 
   const propertyId = (current as { property_id?: string } | null)?.property_id;
   revalidatePath(WORKFLOW_LIST_ROUTE);
@@ -855,7 +863,7 @@ export async function addRequestAdminNote(id: string, noteText: string) {
     .select("id");
 
   if (error) throw new Error(error.message);
-  if (!updated || updated.length === 0) throw new Error("demande introuvable — aucune ligne modifiée");
+  if (!updated || updated.length === 0) throw new Error("Demande introuvable : aucune ligne modifiée.");
 
   const propertyId = (current as { property_id?: string } | null)?.property_id;
   revalidatePath(`${WORKFLOW_LIST_ROUTE}/${id}`);
@@ -878,7 +886,7 @@ export async function setRequestNextFollowUp(
     .select("property_id")
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("demande introuvable — aucune ligne modifiée");
+  if (!data) throw new Error("Demande introuvable : aucune ligne modifiée.");
   revalidatePath(`${WORKFLOW_LIST_ROUTE}/${id}`);
   revalidatePath(WORKFLOW_LIST_ROUTE);
   const propertyId = (data as { property_id?: string } | null)?.property_id;

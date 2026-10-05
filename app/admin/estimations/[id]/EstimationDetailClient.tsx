@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { formatDateTime } from "@/lib/datetime";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { sendRefinement } from "@/app/admin/estimations/actions";
 import { MethodDetails } from "@/components/admin/MethodDetails";
 
@@ -62,7 +63,7 @@ const STATUS_FLOW: Status[] = [
 ];
 
 function fmtPrice(n: number | null) {
-  if (n == null) return "—";
+  if (n == null) return "";
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "EUR",
@@ -89,6 +90,7 @@ export function EstimationDetailClient({
   statusLabels,
   methodLabels,
 }: Props) {
+  const t = useTranslations("admin_estimations");
   const router = useRouter();
   const [status, setStatus] = useState<Status>(initialStatus);
   const [notes, setNotes] = useState(initialNotes ?? "");
@@ -121,7 +123,7 @@ export function EstimationDetailClient({
       weighted += (methods[k].price as number) * w;
     }
     weighted = Math.round(weighted);
-    // Fourchette indicative ±10% (MEDIUM par défaut sur ajustement custom)
+    // Fourchette indicative ±10% (confiance moyenne par défaut sur ajustement manuel)
     return {
       weighted,
       low: roundDisplay(weighted * 0.9),
@@ -129,6 +131,19 @@ export function EstimationDetailClient({
       high: roundDisplay(weighted * 1.1),
     };
   }, [methods, weights]);
+
+  // Message lisible à partir du code d'erreur renvoyé par l'API.
+  async function errorMessage(res: Response): Promise<string> {
+    const code = await res
+      .json()
+      .then((j: { error?: string }) => j?.error ?? "")
+      .catch(() => "");
+    if (code === "not_found") return t("errors.notFound");
+    if (code === "invalid_status") return t("errors.invalidStatus");
+    if (code === "feature_unavailable") return t("errors.deleteUnavailable");
+    if (res.status === 401 || res.status === 403) return t("errors.sessionExpired");
+    return t("errors.saveFailed");
+  }
 
   async function patchEstimation(payload: Record<string, unknown>) {
     setSaving(true);
@@ -140,14 +155,13 @@ export function EstimationDetailClient({
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        const txt = await res.text();
-        setSavedMsg(`Erreur : ${txt}`);
+        setSavedMsg(await errorMessage(res));
         return;
       }
-      setSavedMsg("Enregistré");
+      setSavedMsg(t("detail.saved"));
       router.refresh();
     } catch (e) {
-      setSavedMsg(`Erreur réseau : ${(e as Error).message}`);
+      setSavedMsg(t("errors.network", { message: (e as Error).message }));
     } finally {
       setSaving(false);
       setTimeout(() => setSavedMsg(null), 4000);
@@ -156,9 +170,7 @@ export function EstimationDetailClient({
 
   async function deleteEstimation() {
     if (
-      !window.confirm(
-        "Supprimer cette estimation ? (soft delete — masquée de la liste, non détruite)",
-      )
+      !window.confirm(t("detail.deleteConfirm"))
     )
       return;
     setSaving(true);
@@ -168,13 +180,13 @@ export function EstimationDetailClient({
         method: "DELETE",
       });
       if (!res.ok) {
-        setSavedMsg(`Erreur : ${await res.text()}`);
+        setSavedMsg(await errorMessage(res));
         return;
       }
       router.push("/admin/estimations");
       router.refresh();
     } catch (e) {
-      setSavedMsg(`Erreur réseau : ${(e as Error).message}`);
+      setSavedMsg(t("errors.network", { message: (e as Error).message }));
     } finally {
       setSaving(false);
     }
@@ -197,45 +209,45 @@ export function EstimationDetailClient({
 
   return (
     <>
-      {/* Bloc contact + workflow */}
+      {/* Bloc contact + suivi */}
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-5">
           <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-            Contact client
+            {t("detail.contactTitle")}
           </h2>
           <dl className="space-y-2 text-sm">
             {contactName && (
               <div className="flex justify-between gap-3">
-                <dt className="text-[#1A1F2A]/60">Nom</dt>
+                <dt className="text-[#1A1F2A]/60">{t("detail.name")}</dt>
                 <dd className="font-medium text-[#1A1F2A]">{contactName}</dd>
               </div>
             )}
             <div className="flex justify-between gap-3">
-              <dt className="text-[#1A1F2A]/60">Email</dt>
+              <dt className="text-[#1A1F2A]/60">{t("detail.email")}</dt>
               <dd className="font-medium text-[#1A1F2A]">
                 {contactEmail ? (
                   <a className="underline hover:text-[#9E7B2A]" href={`mailto:${contactEmail}`}>
                     {contactEmail}
                   </a>
                 ) : (
-                  "—"
+                  t("notProvided")
                 )}
               </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-[#1A1F2A]/60">Téléphone</dt>
+              <dt className="text-[#1A1F2A]/60">{t("detail.phone")}</dt>
               <dd className="font-mono text-[#1A1F2A]">
                 {contactPhone ? (
                   <a className="underline hover:text-[#9E7B2A]" href={`tel:${contactPhone}`}>
                     {contactPhone}
                   </a>
                 ) : (
-                  "—"
+                  t("notProvided")
                 )}
               </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-[#1A1F2A]/60">Consentement RGPD</dt>
+              <dt className="text-[#1A1F2A]/60">{t("detail.consent")}</dt>
               <dd
                 className={
                   rgpdConsentAt || consent
@@ -244,10 +256,10 @@ export function EstimationDetailClient({
                 }
               >
                 {rgpdConsentAt
-                  ? `✓ obtenu le ${formatDateTime(rgpdConsentAt)}`
+                  ? t("detail.consentGivenOn", { date: formatDateTime(rgpdConsentAt) })
                   : consent
-                    ? "✓ obtenu"
-                    : "✗ non obtenu"}
+                    ? t("detail.consentGiven")
+                    : t("detail.consentMissing")}
               </dd>
             </div>
           </dl>
@@ -255,7 +267,7 @@ export function EstimationDetailClient({
 
         <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-5">
           <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-            Workflow
+            {t("detail.followUpTitle")}
           </h2>
           <div className="flex flex-wrap gap-2">
             {STATUS_FLOW.map((s) => {
@@ -282,7 +294,7 @@ export function EstimationDetailClient({
           </div>
           <div className="mt-4">
             <label className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-              Notes internes
+              {t("detail.notes")}
             </label>
             <textarea
               value={notes}
@@ -293,19 +305,19 @@ export function EstimationDetailClient({
                 }
               }}
               rows={3}
-              placeholder="RDV programmé, contact établi, à relancer le…"
+              placeholder={t("detail.notesPlaceholder")}
               className="mt-1 w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 text-sm text-[#1A1F2A] focus:border-[#9E7B2A] focus:outline-none"
             />
           </div>
         </div>
       </section>
 
-      {/* Sprint 3 estimations — Bloc "Proposer un affinage au client".
+      {/* Bloc "Proposer un affinage au client".
           Bouton desactive si consent absent OU mail deja envoye.
           Server action sendRefinement (auth check + garde-fous DB). */}
       <section className="rounded-lg border border-[#3D4F63]/15 bg-white p-5">
         <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-          Proposer un affinage au client
+          {t("refinement.title")}
         </h2>
         {(() => {
           const noEmail = !contactEmail;
@@ -315,19 +327,16 @@ export function EstimationDetailClient({
             noEmail || noConsent || alreadySent || isSendingRefinement;
           let helper: string | null = null;
           if (noEmail) {
-            helper = "Pas d'email prospect — impossible d'envoyer.";
+            helper = t("refinement.noEmail");
           } else if (noConsent) {
-            helper = "Pas de consentement recontact enregistré.";
+            helper = t("refinement.noConsent");
           } else if (alreadySent) {
-            helper = `Affinage proposé le ${formatDateTime(refinementSentAt as string)}.`;
+            helper = t("refinement.sentOn", { date: formatDateTime(refinementSentAt as string) });
           }
           return (
             <>
               <p className="text-sm text-[#1A1F2A]/70">
-                Envoie au prospect un email proposant un Avis de Valeur
-                détaillé (offert dans le cadre d&apos;un mandat exclusif ou
-                semi-exclusif). Signature Julien Brebion. Un seul envoi par
-                estimation.
+                {t("refinement.intro")}
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <button
@@ -348,26 +357,26 @@ export function EstimationDetailClient({
                       }
                       const msg =
                         res.reason === "no_email"
-                          ? "Pas d'email prospect — envoi impossible."
+                          ? t("refinement.noEmail")
                           : res.reason === "no_consent"
-                            ? "Pas de consentement recontact enregistré."
+                            ? t("refinement.noConsent")
                             : res.reason === "already_sent"
-                              ? `Déjà proposé le ${formatDateTime(res.sentAt)}.`
+                              ? t("refinement.alreadySentOn", { date: formatDateTime(res.sentAt) })
                               : res.reason === "unauthorized"
-                                ? "Session expirée. Reconnecte-toi."
+                                ? t("errors.sessionExpired")
                                 : res.reason === "not_found"
-                                  ? "Estimation introuvable."
-                                  : `Erreur DB : ${res.error}`;
+                                  ? t("errors.notFound")
+                                  : t("errors.saveFailed");
                       setRefinementFeedback({ kind: "error", message: msg });
                     });
                   }}
                   className="rounded-full bg-[#9E7B2A] px-5 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSendingRefinement
-                    ? "Envoi…"
+                    ? t("refinement.sending")
                     : alreadySent
-                      ? "Déjà proposé"
-                      : "Proposer un affinage par email"}
+                      ? t("refinement.alreadySent")
+                      : t("refinement.send")}
                 </button>
                 {helper && (
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#1A1F2A]/60">
@@ -377,7 +386,7 @@ export function EstimationDetailClient({
               </div>
               {refinementFeedback?.kind === "sent" && (
                 <p className="mt-3 rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
-                  Mail envoyé · {formatDateTime(refinementFeedback.sentAt)}
+                  {t("refinement.sent", { date: formatDateTime(refinementFeedback.sentAt) })}
                 </p>
               )}
               {refinementFeedback?.kind === "error" && (
@@ -393,11 +402,10 @@ export function EstimationDetailClient({
       {/* Les 6 methodes - chacune avec son detail tabulaire repliable */}
       <section>
         <h2 className="mb-4 font-display text-lg font-bold text-[#1A1F2A]">
-          Les 6 méthodes d&apos;estimation
+          {t("methods.title")}
         </h2>
         <p className="mb-4 text-xs text-[#1A1F2A]/60">
-          Référentiel MAPA = source du prix retenu (poids 100% par défaut). Les
-          5 autres sont calculées indépendamment et visibles à titre comparatif.
+          {t("methods.intro")}
         </p>
         <div className="grid gap-3 md:grid-cols-2">
           {METHOD_ORDER.map((k) => {
@@ -421,23 +429,23 @@ export function EstimationDetailClient({
                     {methodLabels[k] ?? k}
                     {isObservatoire && (
                       <span className="ml-2 rounded bg-gold/10 px-1.5 py-0.5 text-[9px] text-gold">
-                        source prix retenu
+                        {t("methods.source")}
                       </span>
                     )}
                   </p>
                 </header>
                 <p className={priceClass}>
-                  {m.applicable ? fmtPrice(m.price) : "Non applicable"}
+                  {m.applicable ? fmtPrice(m.price) : t("methods.notApplicable")}
                 </p>
                 {!m.applicable && (
                   <p className="mt-2 text-xs italic text-ink/60">
-                    {(m.details as { reason?: string })?.reason ?? "—"}
+                    {(m.details as { reason?: string })?.reason ?? t("methods.noReason")}
                   </p>
                 )}
                 {m.applicable && m.details && (
                   <details className="mt-3" open={isObservatoire}>
                     <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-ink/60 hover:text-gold">
-                      Détail du calcul
+                      {t("methods.details")}
                     </summary>
                     <MethodDetails
                       methodKey={k}
@@ -448,7 +456,7 @@ export function EstimationDetailClient({
                 {m.warnings.length > 0 && (
                   <ul className="mt-2 space-y-1 text-[10px] text-amber-700">
                     {m.warnings.map((w, i) => (
-                      <li key={i}>⚠ {w}</li>
+                      <li key={i}>{t("methods.warning", { text: w })}</li>
                     ))}
                   </ul>
                 )}
@@ -458,17 +466,15 @@ export function EstimationDetailClient({
         </div>
       </section>
 
-      {/* Sliders re-pondération */}
+      {/* Curseurs de pondération */}
       <section className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
         <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-display text-lg font-bold text-[#1A1F2A]">
-              Ajustement de la pondération
+              {t("weights.title")}
             </h2>
             <p className="mt-1 text-xs text-[#1A1F2A]/60">
-              Les poids sont renormalisés sur les méthodes applicables. Recalcul
-              live, ne modifie pas la fourchette client tant que tu n'enregistres
-              pas.
+              {t("weights.intro")}
             </p>
           </div>
           <button
@@ -476,7 +482,7 @@ export function EstimationDetailClient({
             onClick={resetDefaultWeights}
             className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60 hover:text-[#9E7B2A]"
           >
-            Reset défaut (Observatoire 100%)
+            {t("weights.reset")}
           </button>
         </header>
         <div className="grid gap-4 md:grid-cols-2">
@@ -491,7 +497,7 @@ export function EstimationDetailClient({
                     }`}
                   >
                     {methodLabels[k]}
-                    {!applicable && " (non applicable)"}
+                    {!applicable && ` ${t("weights.notApplicable")}`}
                   </label>
                   <span className="font-mono text-xs text-[#9E7B2A]">
                     {(weights[k] * 100).toFixed(0)}%
@@ -515,14 +521,15 @@ export function EstimationDetailClient({
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[#3D4F63]/10 pt-4">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-              Nouvelle fourchette (avec ces poids)
+              {t("weights.newRange")}
             </p>
             <p className="mt-1 font-display text-xl font-bold text-[#9E7B2A]">
               {fmtPrice(recomputed.mid)}
             </p>
             <p className="font-mono text-[10px] text-[#1A1F2A]/60">
-              {fmtPrice(recomputed.low)} – {fmtPrice(recomputed.high)}
-              {" · "}weighted brut {fmtPrice(recomputed.weighted)}
+              {t("range", { low: fmtPrice(recomputed.low), high: fmtPrice(recomputed.high) })}
+              {" · "}
+              {t("weights.rawWeighted", { price: fmtPrice(recomputed.weighted) })}
             </p>
           </div>
           <button
@@ -540,7 +547,7 @@ export function EstimationDetailClient({
             }
             className="rounded-md bg-[#9E7B2A] px-5 py-2 font-mono text-[11px] uppercase tracking-widest text-white hover:bg-[#9E7B2A]/90 disabled:opacity-50"
           >
-            {saving ? "Enregistrement…" : "Enregistrer pondération"}
+            {saving ? t("saving") : t("weights.save")}
           </button>
         </div>
         {savedMsg && (
@@ -550,7 +557,7 @@ export function EstimationDetailClient({
         )}
         <div className="mt-6 flex items-center justify-between gap-4 border-t border-red-200 pt-4">
           <p className="font-mono text-[10px] uppercase tracking-widest text-red-700/70">
-            Zone danger
+            {t("detail.dangerZone")}
           </p>
           <button
             type="button"
@@ -558,7 +565,7 @@ export function EstimationDetailClient({
             disabled={saving}
             className="rounded-full border border-red-300 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50"
           >
-            Supprimer
+            {t("detail.delete")}
           </button>
         </div>
       </section>

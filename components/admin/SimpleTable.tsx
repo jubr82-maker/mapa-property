@@ -6,11 +6,12 @@ export type SimpleTableRow = {
 export function SimpleTable({
   headers,
   rows,
-  emptyText = "Aucun élément.",
+  emptyText,
 }: {
   headers: string[];
   rows: SimpleTableRow[];
-  emptyText?: string;
+  // Message d'etat vide, deja traduit par la page appelante.
+  emptyText: string;
 }) {
   return (
     <div className="overflow-x-auto rounded-2xl border border-[#3D4F63]/15 bg-white">

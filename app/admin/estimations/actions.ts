@@ -1,6 +1,6 @@
 "use server";
 
-// Sprint 3 estimations — Server action manuelle declenchee depuis
+// Server action manuelle declenchee depuis
 // /admin/estimations/[id] pour proposer un Avis de Valeur detaille au
 // prospect. Pattern aligne sur app/admin/leads/actions.ts et
 // app/admin/mandats/actions.ts (auth check, retour structure, no throw).
@@ -34,7 +34,7 @@ type RefinementResult =
  * sendEstimationRefinementEmail). Le UPDATE refinement_sent_at est posee
  * APRES l'envoi best-effort, ce qui veut dire qu'en cas de stub local
  * (clef absente), on marque quand meme comme "envoye" pour eviter de
- * relancer en prod plus tard — comportement defendable cote dev local.
+ * relancer en prod plus tard : comportement defendable cote dev local.
  */
 export async function sendRefinement(
   id: string,

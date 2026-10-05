@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE, formatDateOnly } from "@/lib/datetime";
+import { REQUEST_STATUSES } from "@/lib/admin/offmarket";
+import { AdminDateCell } from "@/components/admin/AdminDateCell";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import {
@@ -42,14 +46,14 @@ type RequestRow = {
   } | null;
 };
 
-const TABS: { key: string; label: string }[] = [
-  { key: "new", label: "Nouveau" },
-  { key: "in_progress", label: "En cours" },
-  { key: "on_hold", label: "En suspens" },
-  { key: "validated", label: "Validé" },
-  { key: "rejected", label: "Exclu" },
-  { key: "completed", label: "Traités" },
-  { key: "all", label: "Tous" },
+const TABS: { key: string }[] = [
+  { key: "new" },
+  { key: "in_progress" },
+  { key: "on_hold" },
+  { key: "validated" },
+  { key: "rejected" },
+  { key: "completed" },
+  { key: "all" },
 ];
 
 function isPast(dateStr: string | null | undefined): boolean {
@@ -70,8 +74,9 @@ export default async function AdminOffmarketRequestsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
-  const tab = sp.tab && TABS.some((t) => t.key === sp.tab) ? sp.tab : "all";
+  const tab = sp.tab && TABS.some((x) => x.key === sp.tab) ? sp.tab : "all";
   await requireAdminPage();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_offmarket" });
   const supabase = supabaseService();
 
   let migrationApplied = true;
@@ -136,14 +141,13 @@ export default async function AdminOffmarketRequestsPage({
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Off-Market
+            {t("list.eyebrow")}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
-            Demandes d&apos;accès
+            {t("requests.title")}
           </h1>
           <p className="mt-1 text-sm text-[#3D4F63]/70">
-            {filtered.length} demande{filtered.length > 1 ? "s" : ""} affichée
-            {filtered.length > 1 ? "s" : ""} · {list.length} au total
+            {t("requests.count", { count: filtered.length, total: list.length })}
           </p>
         </div>
         <ExcelExportButton
@@ -157,14 +161,14 @@ export default async function AdminOffmarketRequestsPage({
       )}
 
       <nav className="flex flex-wrap items-center gap-2">
-        {TABS.map((t) => {
-          const active = tab === t.key;
-          const count = counts[t.key] ?? 0;
-          const disabled = !migrationApplied && t.key !== "all";
+        {TABS.map((tb) => {
+          const active = tab === tb.key;
+          const count = counts[tb.key] ?? 0;
+          const disabled = !migrationApplied && tb.key !== "all";
           return (
             <Link
-              key={t.key}
-              href={disabled ? "#" : buildTabHref(t.key)}
+              key={tb.key}
+              href={disabled ? "#" : buildTabHref(tb.key)}
               aria-disabled={disabled}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
                 active
@@ -174,7 +178,7 @@ export default async function AdminOffmarketRequestsPage({
                     : "border border-[#3D4F63]/20 text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
               }`}
             >
-              <span>{t.label}</span>
+              <span>{t(`requests.tab_${tb.key}`)}</span>
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] ${
                   active
@@ -192,13 +196,13 @@ export default async function AdminOffmarketRequestsPage({
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white">
         <header className="border-b border-[#3D4F63]/10 px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
-            Liste ({filtered.length})
+            {t("requests.listTitle", { count: filtered.length })}
           </p>
         </header>
         <ul className="divide-y divide-[#3D4F63]/10">
           {filtered.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-[#3D4F63]/60">
-              Aucune demande pour cette sélection.
+              {list.length === 0 ? t("requests.empty") : t("requests.emptyFiltered")}
             </li>
           )}
           {filtered.slice(0, 100).map((r) => {
@@ -215,7 +219,7 @@ export default async function AdminOffmarketRequestsPage({
                   <WorkflowBadge status={ws} />
                   <div>
                     <p className="text-sm font-medium text-[#1A1F2A]">
-                      {fullName || r.email || "—"}
+                      {fullName || r.email || t("requests.anonymous")}
                     </p>
                     <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#3D4F63]/60">
                       {r.email}
@@ -226,15 +230,13 @@ export default async function AdminOffmarketRequestsPage({
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-                    {new Date(r.created_at).toLocaleDateString("fr-FR", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    <AdminDateCell createdAt={r.created_at} />
                   </span>
                   {r.status && (
                     <span className="rounded-full bg-[#3D4F63]/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#3D4F63]">
-                      {r.status}
+                      {(REQUEST_STATUSES as readonly string[]).includes(r.status)
+                        ? t(`requestStatus.${r.status}`)
+                        : t("requestStatus.unknown")}
                     </span>
                   )}
                   {r.next_follow_up && (
@@ -245,14 +247,14 @@ export default async function AdminOffmarketRequestsPage({
                           : "bg-[#e0af6e]/15 text-[#e0af6e]"
                       }`}
                     >
-                      Suivi : {r.next_follow_up}
+                      {t("requests.followUp", { date: formatDateOnly(r.next_follow_up) })}
                     </span>
                   )}
                   <Link
                     href={`/admin/offmarket/requests/${r.id}`}
                     className="rounded-full border border-[#3D4F63]/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
                   >
-                    Voir
+                    {t("requests.view")}
                   </Link>
                 </div>
               </li>

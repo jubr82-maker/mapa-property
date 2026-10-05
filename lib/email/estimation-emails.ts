@@ -1,4 +1,4 @@
-// MAPA Property — emails du formulaire d'estimation public (/api/estimate).
+// MAPA Property : emails du formulaire d'estimation public (/api/estimate).
 //
 // Deux emails envoyés en parallèle via lib/email/smtp.ts (IONOS) :
 //   1. CLIENT : accusé de réception + fourchette indicative, dans la
@@ -138,8 +138,8 @@ function clientBody(args: {
 }
 
 function internalSubject(args: { commune?: string; type?: string }): string {
-  const c = args.commune ?? "—";
-  const t = args.type ?? "—";
+  const c = args.commune ?? "";
+  const t = args.type ?? "";
   return `Nouveau lead estimation, ${c}, ${t}`;
 }
 
@@ -149,15 +149,15 @@ function internalBody(args: SendEstimationEmailsArgs, receivedLine: string): str
     receivedLine,
     ``,
     `= PROSPECT =`,
-    `Nom         : ${args.contactName ?? "—"}`,
-    `Email       : ${args.contactEmail ?? "—"}`,
-    `Téléphone   : ${args.contactPhone ?? "—"}`,
+    `Nom         : ${args.contactName ?? ""}`,
+    `Email       : ${args.contactEmail ?? ""}`,
+    `Téléphone   : ${args.contactPhone ?? ""}`,
     `Locale      : ${args.locale ?? "fr"}`,
     ``,
     `= BIEN =`,
-    `Type        : ${args.type ?? "—"}`,
-    `Commune     : ${args.commune ?? "—"}`,
-    `Surface     : ${args.surfaceLiving ? formatSurface(args.surfaceLiving, "fr") : "—"}`,
+    `Type        : ${args.type ?? ""}`,
+    `Commune     : ${args.commune ?? ""}`,
+    `Surface     : ${args.surfaceLiving ? formatSurface(args.surfaceLiving, "fr") : ""}`,
     ``,
     `= ESTIMATION CLIENT (${args.engine}) =`,
     `Low         : ${fmtEur(args.range.low, "fr")} €`,
@@ -205,6 +205,7 @@ export async function sendEstimationEmails(
         to: args.contactEmail,
         subject: clientSubject(locale, commune),
         text: clientBody({ locale, name, commune, range: args.range }),
+        kind: "estimation_client",
       }),
     );
   }
@@ -214,6 +215,7 @@ export async function sendEstimationEmails(
       to: INTERNAL_NOTIFICATION_RECIPIENTS,
       subject: internalSubject({ commune, type: args.type }),
       text: internalBody(args, await receivedAtLine()),
+      kind: "estimation_internal",
     }),
   );
 
@@ -338,5 +340,6 @@ export async function sendEstimationRefinementEmail(
     to: args.contactEmail,
     subject: refinementSubject(locale),
     text: refinementBody(locale, args.contactName),
+    kind: "estimation_refinement",
   });
 }

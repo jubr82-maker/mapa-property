@@ -56,7 +56,7 @@ export async function GET() {
       .select("property_id, viewed_at")
       .gte("viewed_at", ninetyDaysAgo.toISOString())
       .limit(50_000),
-    // Table optionnelle — graceful si absente
+    // Table optionnelle : graceful si absente
     supabase
       .from("chatbot_logs")
       .select("question")

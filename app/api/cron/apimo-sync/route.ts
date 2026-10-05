@@ -1,4 +1,4 @@
-// Sprint Apimo Lot C — Cron de synchronisation Apimo -> Supabase.
+// Sprint Apimo Lot C : Cron de synchronisation Apimo -> Supabase.
 //
 // DESACTIVE le 2026-09-03 : l'entree cron a ete retiree de vercel.json (pas
 // d'acces API Apimo prevu, risque de reecrasement des modifs back-office).

@@ -61,15 +61,19 @@ export default async function AdminPropertiesPage({
     type Img = { url: string; sort: number | null };
     const imgs = (p.property_images as Img[] | null) ?? [];
     const sorted = [...imgs].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
-    // properties (Apimo) : cover uniquement via property_images.sort = 0.
+    // Photo principale : property_images.sort = 0.
     const cover = sorted[0]?.url ?? null;
     return {
       id: p.id,
       slug: p.slug,
       title: p.title_fr,
       city: p.city,
-      country: p.country,
+      country: p.country && tArchive.has(`country_${p.country}`) ? tArchive(`country_${p.country}`) : p.country,
       transaction: p.transaction,
+      transaction_label:
+        p.transaction && tArchive.has(`transaction_${p.transaction}`)
+          ? tArchive(`transaction_${p.transaction}`)
+          : (p.transaction ?? ""),
       price: p.price,
       surface: p.surface,
       bedrooms: p.bedrooms,
@@ -88,14 +92,15 @@ export default async function AdminPropertiesPage({
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Console MAPA
+            {tArchive("console_kicker")}
           </p>
           <h1 className="mt-2 font-display text-4xl font-bold text-[#3D4F63]">
-            Properties (Apimo)
+            {tArchive("list_title")}
           </h1>
           <p className="mt-1 text-sm text-[#3D4F63]/70">
-            {rows.length} bien{rows.length > 1 ? "s" : ""} synchronisé{rows.length > 1 ? "s" : ""}
-            {" "}— lecture seule, sauf <em>is_published</em> et <em>is_featured</em>.
+            {tArchive("list_count", { count: rows.length })}
+            {". "}
+            {tArchive("list_hint")}
           </p>
           {error && (
             <div className="mt-2"><AdminNotice kind="read_error" /></div>
@@ -110,7 +115,7 @@ export default async function AdminPropertiesPage({
                 : "border border-[#3D4F63]/20 text-[#3D4F63]"
             }`}
           >
-            Tous
+            {tArchive("filter_all")}
           </Link>
           <Link
             href="/admin/properties?featured=1"
@@ -120,13 +125,13 @@ export default async function AdminPropertiesPage({
                 : "border border-[#3D4F63]/20 text-[#3D4F63]"
             }`}
           >
-            Coups de cœur uniquement
+            {tArchive("filter_featured")}
           </Link>
           <Link
             href="/admin/properties/new"
             className="rounded-full bg-[#e0af6e] px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#3D4F63]"
           >
-            + Nouveau bien
+            {tArchive("new_property")}
           </Link>
         </div>
       </header>
@@ -177,6 +182,10 @@ export default async function AdminPropertiesPage({
             purgeConfirm: tArchive("purge_confirm"),
             purgeDoneTemplate: tArchive.raw("purge_done") as string,
             errorTemplate: tArchive.raw("error") as string,
+            emptyList:
+              sp.q || sp.transaction || sp.featured === "1"
+                ? tArchive("empty_filtered")
+                : tArchive("empty_list"),
           }}
         />
       )}

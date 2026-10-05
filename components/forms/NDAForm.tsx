@@ -1,5 +1,6 @@
 "use client";
 
+import { getAttribution } from "@/lib/pilotage/attribution-client";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Turnstile } from "@/components/ui/Turnstile";
@@ -77,6 +78,7 @@ export function NDAForm({ propertyRef, propertyTitle }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          attribution: getAttribution(),
           first_name: f.first_name,
           last_name: f.last_name,
           email: f.email,

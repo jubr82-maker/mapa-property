@@ -1,4 +1,4 @@
-// API admin POST /api/admin/ventes-realisees — insertion d'une vente
+// API admin POST /api/admin/ventes-realisees : insertion d'une vente
 // realisee MAPA Property dans la table mapa_historical_sales.
 //
 //   - Authentification : allowlist admin (admin@mapagroup.org +

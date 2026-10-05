@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PropertyVideoForm } from "@/components/admin/PropertyVideoForm";
 import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
@@ -15,17 +17,15 @@ export default async function AdminPropertyEditPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
   const supabase = await createSupabaseServerClient();
 
-  // Sprint SAISIE-MANUELLE étape B : select élargi aux 47 + 23 colonnes
-  // réelles de `properties` (cf. lib/apimo/mapper.ts pour les colonnes
-  // historiques, supabase/migrations/20260904_properties_saisie_manuelle.sql
-  // pour les 23 nouvelles) — PropertyEditForm doit pouvoir éditer chaque
-  // champ listé par Julien.
+  // Select elargi a toutes les colonnes de contenu de `properties` :
+  // PropertyEditForm doit pouvoir modifier chaque champ de la fiche.
   const { data, error } = await supabase
     .from("properties")
     // Chaîne unique (littéral) requise : Supabase infère le type des colonnes
-    // sélectionnées à partir du littéral exact passé à .select() — une
+    // sélectionnées à partir du littéral exact passé à .select() : une
     // concaténation ou un .join() runtime dégrade le type en GenericStringError.
     .select(
       "id, slug, title_fr, title_en, title_de, description_fr, description_en, description_de, short_description_fr, short_description_en, short_description_de, price, price_on_demand, price_min, price_max, city, country, transaction, video_url, badge, badge_size, badge_position, surface, living_surface, usable_surface, land_surface, terrace_surface, balcony_surface, garden_surface, kitchen_surface, area_total, bedrooms, bathrooms, douches, wc, bureaux, locaux_stockage, floor, has_laundry, has_dressing, has_pool, parking, energy, thermal, ges, year, year_built, amenities, current_use, potential_use, status",
@@ -38,7 +38,7 @@ export default async function AdminPropertyEditPage({
   }
   if (!data) notFound();
 
-  // POL4-A3 (HUGO) — fetch photos depuis la table `property_images` (schema
+  // Photos depuis la table `property_images` (schema
   // réel = table jointe, pas colonne jsonb). cover = sort 0.
   // Reconstruire le path bucket à partir de l'URL publique : Supabase Storage
   // public URL pattern = `.../storage/v1/object/public/{bucket}/{path}`.
@@ -59,6 +59,13 @@ export default async function AdminPropertyEditPage({
     };
   });
 
+  const countryLabel =
+    data.country && t.has(`country_${data.country}`) ? t(`country_${data.country}`) : data.country;
+  const transactionLabel =
+    data.transaction && t.has(`transaction_${data.transaction}`)
+      ? t(`transaction_${data.transaction}`)
+      : (data.transaction ?? "");
+
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -66,36 +73,39 @@ export default async function AdminPropertyEditPage({
           href="/admin/properties"
           className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70 hover:text-[#e0af6e]"
         >
-          ← Properties
+          {t("back_to_list")}
         </Link>
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-          Édition bien
+          {t("edit_kicker")}
         </p>
         <h1 className="font-display text-3xl font-bold text-[#3D4F63]">
           {data.title_fr ?? data.slug ?? data.id}
         </h1>
         <p className="text-sm text-[#3D4F63]/70">
-          {[data.country, data.city].filter(Boolean).join(" · ")} ·{" "}
-          <span className="font-mono text-[11px] uppercase tracking-[0.2em]">
-            {data.transaction ?? "—"}
-          </span>
+          {[countryLabel, data.city].filter(Boolean).join(" · ")}
+          {transactionLabel && (
+            <>
+              {" · "}
+              <span className="font-mono text-[11px] uppercase tracking-[0.2em]">
+                {transactionLabel}
+              </span>
+            </>
+          )}
         </p>
       </header>
 
-      {/* POL4-A2 (CAMILLE) : édition titre + description (TipTap) + prix.
-          Au-DESSUS de la section vidéo existante (PropertyVideoForm intact). */}
+      {/* Formulaire complet de la fiche (description, caractéristiques,
+          prix), au-dessus de la section vidéo. */}
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <header className="mb-4">
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Contenu rédactionnel
+            {t("content_kicker")}
           </p>
           <h2 className="mt-1 font-display text-xl font-bold text-[#3D4F63]">
-            Titre, description, prix
+            {t("content_title")}
           </h2>
           <p className="mt-2 text-sm text-[#3D4F63]/70">
-            Les champs synchronisés depuis Apimo sont écrasés à chaque
-            sauvegarde locale. La description supporte le gras et l&apos;italique
-            (rendu uniforme côté fiche publique).
+            {t("content_hint")}
           </p>
         </header>
         <PropertyEditForm
@@ -153,15 +163,13 @@ export default async function AdminPropertyEditPage({
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <header className="mb-4">
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Vidéo de présentation
+            {t("video_kicker")}
           </p>
           <h2 className="mt-1 font-display text-xl font-bold text-[#3D4F63]">
-            URL vidéo (MP4 / WebM / lien Vimeo direct)
+            {t("video_title")}
           </h2>
           <p className="mt-2 text-sm text-[#3D4F63]/70">
-            Collez ici l&apos;URL d&apos;un fichier vidéo accessible publiquement.
-            L&apos;upload natif Supabase Storage arrive en Phase B — pour le moment,
-            hébergez le fichier sur un CDN (Cloudflare R2, Vimeo direct file, etc.).
+            {t("video_hint")}
           </p>
         </header>
         <PropertyVideoForm
@@ -170,21 +178,18 @@ export default async function AdminPropertyEditPage({
         />
       </section>
 
-      {/* POL4-A3 (HUGO) : gestion photos via PhotoManager générique
-          (drag-drop HTML5 natif, cover, suppression). Bucket
-          property-images + table property_images en wipe-and-recreate. */}
+      {/* Photos via PhotoManager generique (glisser-deposer, photo
+          principale, suppression). */}
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <header className="mb-4">
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e0af6e]">
-            Photos
+            {t("photos_kicker")}
           </p>
           <h2 className="mt-1 font-display text-xl font-bold text-[#3D4F63]">
-            Galerie ({initialPhotos.length})
+            {t("photos_title", { count: initialPhotos.length })}
           </h2>
           <p className="mt-2 text-sm text-[#3D4F63]/70">
-            Glissez-déposez pour réordonner. La première sert de cover
-            publique. Cliquez sur « Enregistrer l&apos;ordre » pour
-            persister.
+            {t("photos_hint")}
           </p>
         </header>
         <PropertyPhotosSection
@@ -195,18 +200,18 @@ export default async function AdminPropertyEditPage({
 
       <section className="rounded-2xl border border-[#3D4F63]/10 bg-[#F5EFE1]/40 p-6">
         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
-          Aperçu public
+          {t("public_preview")}
         </p>
         <Link
           href={`/fr/biens/${data.slug ?? data.id}`}
           target="_blank"
           className="mt-2 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:text-[#e0af6e]"
         >
-          Voir la fiche ↗
+          {t("view_listing")}
         </Link>
-        {/* Sprint OPTIM-1A : bouton refresh ISR manuel. Utile si l'admin
-            veut voir ses modifs immediatement (le TTL revalidate ISR sur
-            la fiche est de 30 min — cf. C2). Les server actions
+        {/* Bouton de mise a jour manuelle de la fiche publique. Utile si
+            l'admin veut voir ses modifs immediatement (revalidation de la
+            fiche toutes les 30 min). Les server actions
             invalident deja la fiche par slug, ce bouton est un fallback
             de confort. */}
         {data.slug && (

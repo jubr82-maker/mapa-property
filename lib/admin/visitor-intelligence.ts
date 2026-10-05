@@ -3,7 +3,7 @@ import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 
 // ============================================================================
-// MAPA Property — Tableau de bord "Intelligence visiteurs" (admin)
+// MAPA Property : analyses visiteurs, reprises dans Activite commerciale
 // Lecture seule : exploite leads, tracking_events, property_views déjà en
 // base. Indépendant de GA4 (pas encore de trafic réel côté GA4).
 //
@@ -14,10 +14,10 @@ import { requireAdminPage } from "@/lib/admin/require-admin";
 //     /api/nda-request, type='offmarket_request'). Les deux formats
 //     coexistent dans la même colonne texte.
 //   - tracking_events.event_data->>'property_id' = SLUG pour un
-//     contact_reveal sur une fiche classique, UUID pour off-market —
+//     contact_reveal sur une fiche classique, UUID pour off-market ,
 //     même logique, cohérente avec ContactReveal (propertyId={slug} vs
 //     {id} selon la fiche).
-//   - property_views.property_id = properties.id (UUID) — UNIQUEMENT les
+//   - property_views.property_id = properties.id (UUID) : UNIQUEMENT les
 //     biens classiques : PropertyViewTracker n'est monté que sur
 //     /biens/[slug], jamais sur /off-market/[id]. L'off-market n'a donc
 //     aucun compteur de vues aujourd'hui (limite documentée, pas un bug
@@ -74,14 +74,16 @@ export type ResolvedProperty = {
   label: string;
   href: string;
   kind: "classic" | "offmarket";
-  badge: string;
+  /** Cle de traduction (admin_pilotage.badge_*) : sale, rent, offmarket. */
+  badge: "sale" | "rent" | "offmarket";
 };
 
 export type RankedItem = {
   id: string;
   label: string;
   href: string;
-  badge: string;
+  /** Cle de traduction (admin_pilotage.badge_*) : sale, rent, offmarket. */
+  badge: "sale" | "rent" | "offmarket";
   count: number;
 };
 
@@ -89,25 +91,20 @@ export type ViewedConversionItem = {
   id: string;
   label: string;
   href: string;
-  badge: string;
+  /** Cle de traduction (admin_pilotage.badge_*) : sale, rent, offmarket. */
+  badge: "sale" | "rent" | "offmarket";
   views: number;
   contacts: number;
   ratePct: number;
 };
 
-type Bucket = "contact" | "estimation" | "offmarket" | "simulateur" | "telephone";
+export type Bucket = "contact" | "estimation" | "offmarket" | "simulateur" | "telephone";
 
-export const BUCKET_LABELS: Record<Bucket, string> = {
-  contact: "Contact / demande",
-  estimation: "Estimation",
-  offmarket: "Off-market (NDA)",
-  simulateur: "Simulateur emprunt",
-  telephone: "Téléphone / email",
-};
+/** Types d'action, libelles en traductions (admin_pilotage.bucket_*). */
+export const BUCKETS: Bucket[] = ["contact", "estimation", "offmarket", "simulateur", "telephone"];
 
 export type RecentAction = {
   bucket: Bucket;
-  label: string;
   propertyLabel: string | null;
   href: string | null;
   createdAt: string;
@@ -133,12 +130,8 @@ function bucketOf(e: Pick<TrackingRow, "event_type" | "event_data">): Bucket | n
 
 export type BudgetBand = "<500k" | "500k-1M" | "1M-2M" | ">2M";
 
-export const BUDGET_BAND_LABELS: Record<BudgetBand, string> = {
-  "<500k": "Moins de 500 000 €",
-  "500k-1M": "500 000 € – 1 M€",
-  "1M-2M": "1 M€ – 2 M€",
-  ">2M": "Plus de 2 M€",
-};
+/** Tranches de budget, libelles en traductions (admin_pilotage.budget_*). */
+export const BUDGET_BANDS: BudgetBand[] = ["<500k", "500k-1M", "1M-2M", ">2M"];
 
 function budgetBandOf(value: number): BudgetBand {
   if (value < 500_000) return "<500k";
@@ -287,7 +280,7 @@ export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
     ...((bySlugR.data ?? []) as PropertyMini[]),
   ]) {
     const label = p.title_fr || p.title_en || p.title_de || p.slug || p.id.slice(0, 8);
-    const badge = p.transaction === "rent" ? "Location" : "Vente";
+    const badge = p.transaction === "rent" ? ("rent" as const) : ("sale" as const);
     const entry: ResolvedProperty = {
       id: p.id,
       label,
@@ -301,10 +294,10 @@ export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
   for (const o of (offR.data ?? []) as OffmarketMini[]) {
     resolved.set(o.id, {
       id: o.id,
-      label: `${o.reference ?? "OM"} · ${o.title ?? "Off-Market"}`,
+      label: [o.reference, o.title].filter(Boolean).join(" · ") || o.id.slice(0, 8),
       href: `/fr/off-market/${o.id}`,
       kind: "offmarket",
-      badge: "Off-Market",
+      badge: "offmarket",
     });
   }
 
@@ -401,7 +394,6 @@ export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
         typeof data.property_title === "string" ? (data.property_title as string) : null;
       return {
         bucket: b,
-        label: BUCKET_LABELS[b],
         propertyLabel: info?.label ?? rawTitle,
         href: info?.href ?? null,
         createdAt: e.created_at,
@@ -468,7 +460,7 @@ export async function loadVisitorIntelligence(): Promise<VisitorIntelligence> {
     .map(({ label, count }) => ({ key: label, value: count }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
-  const budgetBands = (Object.keys(BUDGET_BAND_LABELS) as BudgetBand[]).map((key) => ({
+  const budgetBands = BUDGET_BANDS.map((key) => ({
     key,
     value: budgetCounts[key],
   }));

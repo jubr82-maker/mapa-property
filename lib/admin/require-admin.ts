@@ -1,17 +1,17 @@
-// lib/admin/require-admin.ts — garde admin serveur, à appeler dans la
+// lib/admin/require-admin.ts : garde admin serveur, à appeler dans la
 // MÊME fonction que tout usage de supabaseService() côté admin.
 //
 // Modèle de sécurité : session Supabase authentifiée + email présent dans
 // l'allowlist lib/admin/admin-emails.ts (source unique, partagée avec
 // lib/admin/sales-auth.ts). Avant durcissement (cf. commit précédent),
 // TOUT utilisateur Supabase Auth authentifié était considéré admin, sans
-// vérification d'adresse — un compte créé pour un autre projet sur la
+// vérification d'adresse : un compte créé pour un autre projet sur la
 // même base Supabase passait donc requireAdmin/requireAdminPage/
 // requireAdminRoute et voyait les données lues en service_role (hors RLS).
 //
 // Toujours supabase.auth.getUser() (revalide le JWT côté serveur Supabase),
 // jamais getSession() seul (getSession ne fait que lire le cookie, sans
-// revalidation — usurpable si le cookie est forgé).
+// revalidation : usurpable si le cookie est forgé).
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
@@ -82,7 +82,7 @@ export async function assertAdminAction(): Promise<{ supabase: SupabaseClient; u
 /**
  * À appeler en tête d'une page admin (Server Component). Redirige vers
  * /admin/login si non authentifié OU si l'email n'est pas dans
- * l'allowlist — ne retourne jamais dans ce cas.
+ * l'allowlist : ne retourne jamais dans ce cas.
  */
 export async function requireAdminPage(): Promise<{
   supabase: SupabaseClient;
@@ -100,7 +100,7 @@ export type RequireAdminResult =
 
 /**
  * À appeler en tête d'une Server Action admin. Retourne { ok: false } si
- * non authentifié ou hors allowlist — à l'appelant de renvoyer son propre
+ * non authentifié ou hors allowlist : à l'appelant de renvoyer son propre
  * type d'erreur (cohérent avec les Result types déjà en place, ex.
  * ConvertResult).
  */

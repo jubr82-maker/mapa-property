@@ -1,17 +1,17 @@
-// Export PDF de la fiche d'un mandat — sur le modèle validé.
+// Export PDF de la fiche d'un mandat, sur le modèle validé.
+// Dates : formatteurs PDF de format.ts (heure de Luxembourg, via
+// lib/datetime.ts), construits sans Intl pour rester compatibles avec
+// l'encodage des polices PDF.
 import { NextResponse } from "next/server";
 import { requireAdminRoute } from "@/lib/admin/require-admin";
 import { supabaseService } from "@/lib/supabase-service";
 import { buildFichePdf, type PdfSection } from "@/lib/admin/exports/pdf";
 import { pdfResponse, exportFicheFilename } from "@/lib/admin/exports/http";
-import { fmtDateShort, fmtDateTimeShort, fmtEuro, orDash } from "@/lib/admin/exports/format";
-import {
-  propertyTypeLabel,
-  typeTransactionLabel,
-  typeMandatLabel,
-  mandatStatusLabel,
-  workflowStatusLabel,
-} from "@/lib/admin/exports/labels";
+import { fmtDateShort, fmtDateTimeShort, fmtEuro } from "@/lib/admin/exports/format";
+import { propertyTypeLabel } from "@/lib/admin/exports/labels";
+import { getTranslations } from "next-intl/server";
+import { ADMIN_LOCALE } from "@/lib/datetime";
+import { workflowLabelKey } from "@/components/admin/WorkflowBadge";
 
 interface HistoryEntry {
   at: string;
@@ -74,49 +74,64 @@ export async function GET(
   const isRecherche = mandat.type_transaction === "recherche";
   const montantCle = isRecherche ? mandat.budget_max : mandat.prix_mise_en_vente;
 
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_mandats" });
+  const tw = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_workflow" });
+  const notProvided = tw("not_provided");
+  // Valeur absente : libelle traduit "Non renseigne".
+  const v = (x: string | null | undefined): string => (x && x.trim() ? x : notProvided);
+  const euro = (n: number | null | undefined): string => (n == null ? notProvided : fmtEuro(n));
+  const date = (x: string | null | undefined): string => (x ? fmtDateShort(x) : notProvided);
+  const labelOf = (prefix: string, x: string | null | undefined): string => {
+    if (!x) return notProvided;
+    const key = `${prefix}${x.replace(/-/g, "_")}`;
+    return t.has(key) ? t(key) : x;
+  };
+  const status = (x: string | null | undefined): string => tw(workflowLabelKey(x ?? "new"));
+  const propertyType = mandat.property_type ?? mandat.bien_type;
+
   const sections: PdfSection[] = [
     {
       kind: "table",
-      heading: "Client",
+      heading: t("col_client"),
       rows: [
-        { label: "Nom", value: orDash(mandat.client_name) },
-        { label: "Email", value: orDash(mandat.client_email) },
-        { label: "Téléphone", value: orDash(mandat.client_phone) },
-        { label: "Pays", value: orDash(mandat.client_country) },
-        { label: "Ville", value: orDash(mandat.client_city) },
+        { label: tw("col_name"), value: v(mandat.client_name) },
+        { label: tw("field_email"), value: v(mandat.client_email) },
+        { label: tw("field_phone"), value: v(mandat.client_phone) },
+        { label: tw("field_country"), value: v(mandat.client_country) },
+        { label: tw("field_city"), value: v(mandat.client_city) },
       ],
     },
     {
       kind: "table",
-      heading: "Mandat",
+      heading: t("pdf_section_mandat"),
       rows: [
-        { label: "Type de transaction", value: typeTransactionLabel(mandat.type_transaction) },
-        { label: "Type de mandat", value: typeMandatLabel(mandat.type_mandat) },
-        { label: "Type de bien", value: propertyTypeLabel(mandat.property_type ?? mandat.bien_type) },
-        { label: "Adresse du bien", value: orDash(mandat.bien_adresse) },
-        { label: "Prix mise en vente", value: fmtEuro(mandat.prix_mise_en_vente) },
-        { label: "Commission", value: orDash(mandat.commission) },
-        { label: "Date de début", value: mandat.date_debut ? fmtDateShort(mandat.date_debut) : "—" },
-        { label: "Date de fin", value: mandat.date_fin ? fmtDateShort(mandat.date_fin) : "—" },
+        { label: t("col_transaction"), value: labelOf("section_", mandat.type_transaction) },
+        { label: t("form_type_mandat"), value: labelOf("type_mandat_", mandat.type_mandat) },
+        { label: t("form_property_type"), value: propertyType ? propertyTypeLabel(propertyType) : notProvided },
+        { label: t("form_address"), value: v(mandat.bien_adresse) },
+        { label: t("field_price"), value: euro(mandat.prix_mise_en_vente) },
+        { label: t("form_commission"), value: v(mandat.commission) },
+        { label: t("form_date_start"), value: date(mandat.date_debut) },
+        { label: t("form_date_end"), value: date(mandat.date_fin) },
       ],
     },
     {
       kind: "table",
-      heading: "Recherche (si mandat de recherche)",
+      heading: t("pdf_section_search"),
       rows: [
-        { label: "Budget min", value: fmtEuro(mandat.budget_min) },
-        { label: "Budget max", value: fmtEuro(mandat.budget_max) },
-        { label: "Zones", value: (mandat.zones ?? []).join(", ") || "—" },
+        { label: t("col_budget_min"), value: euro(mandat.budget_min) },
+        { label: t("col_budget_max"), value: euro(mandat.budget_max) },
+        { label: t("field_zones"), value: v((mandat.zones ?? []).join(", ")) },
       ],
     },
     {
       kind: "table",
-      heading: "Suivi interne",
+      heading: tw("internal_title"),
       rows: [
-        { label: "Statut", value: mandatStatusLabel(mandat.status) },
-        { label: "Statut workflow", value: workflowStatusLabel(mandat.workflow_status) },
-        { label: "Prochain suivi", value: mandat.next_follow_up ? fmtDateShort(mandat.next_follow_up) : "—" },
-        { label: "Notes", value: orDash(mandat.admin_notes ?? mandat.notes) },
+        { label: t("form_status"), value: labelOf("status_", mandat.status) },
+        { label: tw("select_title"), value: status(mandat.workflow_status) },
+        { label: tw("followup_title"), value: date(mandat.next_follow_up) },
+        { label: t("notes_title"), value: v(mandat.admin_notes ?? mandat.notes) },
       ],
     },
   ];
@@ -124,28 +139,28 @@ export async function GET(
   if (history.length > 0) {
     sections.push({
       kind: "timeline",
-      heading: "Historique du workflow",
+      heading: tw("history_heading"),
       entries: history.map((h) => ({
         date: fmtDateTimeShort(h.at),
         text: [
-          h.from && h.to ? `${workflowStatusLabel(h.from)} -> ${workflowStatusLabel(h.to)}` : null,
-          h.note ? `Note : ${h.note}` : null,
-          h.reason ? `Motif : ${h.reason}` : null,
+          h.from && h.to ? tw("history_transition", { from: status(h.from), to: status(h.to) }) : null,
+          h.note ? tw("history_note", { note: h.note }) : null,
+          h.reason ? tw("history_reason", { reason: h.reason }) : null,
         ]
           .filter(Boolean)
-          .join(" — ") || "—",
+          .join(" ; ") || notProvided,
       })),
     });
   }
 
   const buffer = await buildFichePdf({
-    documentTitle: "Fiche mandat",
-    subtitle: orDash(mandat.client_name ?? mandat.client_email),
+    documentTitle: t("pdf_title"),
+    subtitle: v(mandat.client_name ?? mandat.client_email),
     reference: `MANDAT-${mandat.id.slice(0, 8).toUpperCase()}`,
     kpis: [
-      { label: isRecherche ? "Budget max" : "Prix de vente", value: fmtEuro(montantCle) },
-      { label: "Type", value: typeTransactionLabel(mandat.type_transaction) },
-      { label: "Statut", value: mandatStatusLabel(mandat.status) },
+      { label: isRecherche ? t("col_budget_max") : t("pdf_kpi_sale_price"), value: euro(montantCle) },
+      { label: t("pdf_kpi_type"), value: labelOf("section_", mandat.type_transaction) },
+      { label: t("form_status"), value: labelOf("status_", mandat.status) },
     ],
     sections,
   });

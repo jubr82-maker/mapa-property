@@ -10,6 +10,7 @@ import {
   useReactTable,
   type ColumnFiltersState,
 } from "@tanstack/react-table";
+import { formatDateTimeShort } from "@/lib/datetime";
 
 export type ContentRow = {
   id: string;
@@ -26,6 +27,16 @@ const helper = createColumnHelper<Editable>();
 
 export function ContentTab({ initial }: { initial: ContentRow[] }) {
   const notices = useTranslations("admin_notices");
+  const t = useTranslations("admin_cms");
+  // Libelles lisibles : langue, section et emplacement (groupe de la cle,
+  // ex. "home.hero.title" donne "place_home_hero"). Valeur brute si inconnue.
+  const langLabel = (l: string) => (t.has(`lang_${l}`) ? t(`lang_${l}`) : l);
+  const sectionLabel = (s: string | null) =>
+    !s ? "" : t.has(`section_${s}`) ? t(`section_${s}`) : s;
+  const placeLabel = (key: string) => {
+    const group = key.split(".").slice(0, 2).join("_");
+    return t.has(`place_${group}`) ? t(`place_${group}`) : "";
+  };
   const [rows, setRows] = useState<Editable[]>(() =>
     initial.map((r) => ({ ...r, _draft: r.content, _saving: false })),
   );
@@ -54,8 +65,16 @@ export function ContentTab({ initial }: { initial: ContentRow[] }) {
           section: row.section,
         }),
       });
-      const json = await r.json();
-      if (!r.ok) throw new Error(json.error ?? "save failed");
+      const json = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error(
+          r.status === 401 || r.status === 403
+            ? t("err_session")
+            : typeof json.error === "string"
+              ? json.error
+              : t("save_error"),
+        );
+      }
       setRows((rs) =>
         rs.map((r) =>
           r.id === id
@@ -75,32 +94,38 @@ export function ContentTab({ initial }: { initial: ContentRow[] }) {
   const columns = useMemo(
     () => [
       helper.accessor("key", {
-        header: "Clé",
-        cell: (info) => (
-          <code className="font-mono text-[11px] text-[#3D4F63]">{info.getValue()}</code>
-        ),
+        header: t("col_place"),
+        cell: (info) => {
+          const label = placeLabel(info.getValue());
+          return (
+            <span className="block">
+              {label && <span className="block text-xs text-[#1A1F2A]">{label}</span>}
+              <code className="font-mono text-[10px] text-[#3D4F63]/60">{info.getValue()}</code>
+            </span>
+          );
+        },
       }),
       helper.accessor("locale", {
-        header: "Locale",
+        header: t("col_language"),
         filterFn: "equals",
         cell: (info) => (
           <span className="rounded bg-[#3D4F63]/10 px-2 py-0.5 font-mono text-[10px] uppercase text-[#3D4F63]">
-            {info.getValue()}
+            {langLabel(info.getValue())}
           </span>
         ),
       }),
       helper.accessor("section", {
-        header: "Section",
+        header: t("col_section"),
         filterFn: "equals",
         cell: (info) => (
           <span className="font-mono text-[10px] uppercase text-[#3D4F63]/70">
-            {info.getValue() ?? "—"}
+            {sectionLabel(info.getValue())}
           </span>
         ),
       }),
       helper.display({
         id: "content",
-        header: "Contenu",
+        header: t("col_text"),
         cell: ({ row }) => (
           <textarea
             value={row.original._draft}
@@ -116,10 +141,10 @@ export function ContentTab({ initial }: { initial: ContentRow[] }) {
         ),
       }),
       helper.accessor("updated_at", {
-        header: "Maj",
+        header: t("col_updated"),
         cell: (info) => (
           <span className="font-mono text-[10px] text-[#3D4F63]/60">
-            {new Date(info.getValue()).toLocaleDateString("fr-LU")}
+            {formatDateTimeShort(info.getValue())}
           </span>
         ),
       }),
@@ -137,7 +162,7 @@ export function ContentTab({ initial }: { initial: ContentRow[] }) {
                 disabled={!dirty || r._saving}
                 className="rounded bg-[#3D4F63] px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-[#F5EFE1] transition-colors hover:bg-[#2D3F53] disabled:opacity-40"
               >
-                {r._saving ? "..." : "Enregistrer"}
+                {r._saving ? t("busy") : t("save")}
               </button>
               {r._error && (
                 <span className="font-mono text-[10px] text-red-600">{r._error}</span>
@@ -187,35 +212,35 @@ export function ContentTab({ initial }: { initial: ContentRow[] }) {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[#3D4F63]/15 bg-white p-3">
         <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
-          Locale
+          {t("filter_language")}
           <select
             value={localeFilter}
             onChange={(e) => setFilter("locale", e.target.value)}
             className="rounded border border-[#3D4F63]/20 bg-white px-2 py-1 font-sans text-xs"
           >
-            <option value="">Toutes</option>
-            <option value="fr">FR</option>
-            <option value="en">EN</option>
-            <option value="de">DE</option>
+            <option value="">{t("filter_all")}</option>
+            <option value="fr">{t("lang_fr")}</option>
+            <option value="en">{t("lang_en")}</option>
+            <option value="de">{t("lang_de")}</option>
           </select>
         </label>
         <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
-          Section
+          {t("filter_section")}
           <select
             value={sectionFilter}
             onChange={(e) => setFilter("section", e.target.value)}
             className="rounded border border-[#3D4F63]/20 bg-white px-2 py-1 font-sans text-xs"
           >
-            <option value="">Toutes</option>
+            <option value="">{t("filter_all")}</option>
             {sections.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {sectionLabel(s)}
               </option>
             ))}
           </select>
         </label>
         <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/50">
-          {table.getRowModel().rows.length} / {initial.length} rows
+          {t("rows_count", { shown: table.getRowModel().rows.length, total: initial.length })}
         </span>
       </div>
 

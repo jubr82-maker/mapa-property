@@ -1,15 +1,19 @@
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { ContenuTabs } from "@/components/admin/cms/ContenuTabs";
 import type { ContentRow } from "@/components/admin/cms/ContentTab";
 import type { TokenRow } from "@/components/admin/cms/FontsTab";
 import { AdminNotice } from "@/components/admin/AdminNotice";
+import { ADMIN_LOCALE } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Contenu — MAPA Admin",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_cms" });
+  return { title: t("meta_title") };
+}
 
 async function loadData(): Promise<{
   content: ContentRow[];
@@ -63,17 +67,17 @@ export default async function AdminContenuPage() {
   if (!user) redirect("/admin/login");
 
   const { content, tokens, warning } = await loadData();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_cms" });
 
   return (
     <div className="space-y-6">
       <header>
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#3D4F63]/60">
-          Édition CMS
+          {t("eyebrow")}
         </p>
-        <h1 className="font-display text-3xl font-bold text-[#3D4F63]">Contenu du site</h1>
+        <h1 className="font-display text-3xl font-bold text-[#3D4F63]">{t("title")}</h1>
         <p className="mt-2 max-w-2xl text-sm text-[#3D4F63]/80">
-          Textes éditables, polices et couleurs du site public. Les changements
-          sont immédiats après &laquo;&nbsp;Vider cache&nbsp;&raquo;.
+          {t("intro")}
         </p>
       </header>
 

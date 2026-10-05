@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   createBlogPost,
   updateBlogPost,
@@ -29,7 +30,9 @@ type Post = {
 type Lang = "fr" | "en" | "de";
 
 export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create" | "edit" }) {
+  const t = useTranslations("admin_blog");
   const [lang, setLang] = useState<Lang>("fr");
+  const langName = t(`lang_${lang}`);
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -41,50 +44,53 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
         else if (post) await updateBlogPost(post.id, formData);
       } catch (e) {
         if (isRedirect(e)) throw e;
-        setError(e instanceof Error ? e.message : "Erreur");
+        console.error(e);
+        setError(t("save_error"));
       }
     });
   };
 
   const onDelete = () => {
     if (!post) return;
-    if (!confirm("Supprimer cet article ?")) return;
+    if (!confirm(t("delete_confirm"))) return;
+    setError(null);
     startTransition(async () => {
       try {
         await deleteBlogPost(post.id);
       } catch (e) {
         if (isRedirect(e)) throw e;
         console.error(e);
+        setError(t("delete_error"));
       }
     });
   };
 
   return (
     <form action={submit} className="space-y-6">
-      <Section title="Métadonnées">
-        <Field label="Slug (URL)" hint="Auto-généré du titre FR si vide.">
+      <Section title={t("section_info")}>
+        <Field label={t("field_slug")} hint={t("slug_hint")}>
           <input name="slug" defaultValue={post?.slug ?? ""} className={inputCls} />
         </Field>
-        <Field label="Catégorie principale">
+        <Field label={t("field_category")}>
           <input
             name="primary_tag"
             defaultValue={post?.primary_tag ?? ""}
-            placeholder="actualité, marché, fiscalité…"
+            placeholder={t("category_placeholder")}
             className={inputCls}
           />
         </Field>
-        <Field label="Auteur">
+        <Field label={t("field_author")}>
           <input name="author" defaultValue={post?.author ?? "Julien"} className={inputCls} />
         </Field>
-        <Field label="Image cover (URL)" hint="Upload manuellement dans Supabase Storage et coller l'URL publique.">
+        <Field label={t("field_cover")} hint={t("cover_hint")}>
           <input
             name="cover_image"
             defaultValue={post?.cover_image ?? ""}
-            placeholder="https://…"
+            placeholder={t("cover_placeholder")}
             className={inputCls}
           />
         </Field>
-        <Field label="Date de publication">
+        <Field label={t("field_date")}>
           <input
             type="date"
             name="published_at"
@@ -96,7 +102,7 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
             className={inputCls}
           />
         </Field>
-        <Field label="Publié">
+        <Field label={t("field_published")}>
           <label className="inline-flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -104,12 +110,12 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
               defaultChecked={post?.is_published ?? false}
               className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
             />
-            <span>Visible côté public</span>
+            <span>{t("published_hint")}</span>
           </label>
         </Field>
       </Section>
 
-      <Section title="Contenu">
+      <Section title={t("section_content")}>
         <div className="md:col-span-2">
           <nav className="mb-4 flex gap-2">
             {(["fr", "en", "de"] as Lang[]).map((l) => (
@@ -123,12 +129,12 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
                     : "border border-[#3D4F63]/20 text-[#3D4F63]"
                 }`}
               >
-                {l.toUpperCase()}
+                {t(`lang_${l}`)}
               </button>
             ))}
           </nav>
           <div className="space-y-4">
-            <Field label={`Titre (${lang.toUpperCase()})`}>
+            <Field label={t("field_title", { lang: langName })}>
               <input
                 key={`title-${lang}`}
                 name={`title_${lang}`}
@@ -142,7 +148,7 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
                 className={inputCls}
               />
             </Field>
-            <Field label={`Résumé (${lang.toUpperCase()})`}>
+            <Field label={t("field_excerpt", { lang: langName })}>
               <textarea
                 key={`excerpt-${lang}`}
                 name={`excerpt_${lang}`}
@@ -158,8 +164,8 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
               />
             </Field>
             <Field
-              label={`Contenu (${lang.toUpperCase()})`}
-              hint="Markdown supporté côté front via la convention existante du site."
+              label={t("field_body", { lang: langName })}
+              hint={t("body_hint")}
             >
               <textarea
                 key={`content-${lang}`}
@@ -179,7 +185,7 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
         </div>
       </Section>
 
-      {/* Hidden inputs pour les langues non-actives — gardent leur valeur */}
+      {/* Champs caches pour les langues non actives : ils gardent leur valeur. */}
       {(["fr", "en", "de"] as Lang[])
         .filter((l) => l !== lang)
         .map((l) => (
@@ -228,7 +234,7 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
           disabled={busy}
           className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] hover:bg-[#e0af6e] disabled:opacity-50"
         >
-          {busy ? "…" : mode === "create" ? "Créer l'article" : "Enregistrer"}
+          {busy ? t("busy") : mode === "create" ? t("submit_create") : t("submit_save")}
         </button>
         {mode === "edit" && post && (
           <button
@@ -237,7 +243,7 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
             disabled={busy}
             className="rounded-full border border-red-200 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:opacity-50"
           >
-            Supprimer
+            {t("delete")}
           </button>
         )}
       </footer>

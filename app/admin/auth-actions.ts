@@ -13,6 +13,7 @@ import { assertAdminAction } from "@/lib/admin/require-admin";
 import { logAdminAuthEvent } from "@/lib/admin/auth-log";
 import { ADMIN_PASSWORD_MIN_LENGTH } from "@/lib/admin/security-config";
 import { verifyCaptchaIfConfigured } from "@/lib/security/captcha";
+import { maybeAlertLoginBurst, sendAdminAlert } from "@/lib/pilotage/alerts";
 
 export type AuthResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -62,11 +63,13 @@ export async function loginAction(input: {
   });
   if (error || !data.user) {
     await logAdminAuthEvent({ event: "login", success: false, email, reason: error?.code ?? "unknown" });
+    await maybeAlertLoginBurst();
     return { ok: false, error: "credentials" };
   }
   if (!isAdminEmail(data.user.email)) {
     await supabase.auth.signOut();
     await logAdminAuthEvent({ event: "login", success: false, email, reason: "not_allowlisted" });
+    await maybeAlertLoginBurst();
     return { ok: false, error: "credentials" };
   }
   await logAdminAuthEvent({ event: "login", success: true, email, reason: captcha.reason === "captcha_not_configured" ? captcha.reason : null });
@@ -128,6 +131,7 @@ export async function mfaVerifyAction(factorId: string, code: string): Promise<A
   if (!user || !isAdminEmail(user.email)) return { ok: false, error: "forbidden" };
   const { error } = await challengeAndVerify(supabase, factorId, code);
   await logAdminAuthEvent({ event: "mfa", success: !error, email: user.email, reason: error });
+  if (error) await maybeAlertLoginBurst();
   return error ? { ok: false, error } : { ok: true };
 }
 
@@ -176,6 +180,7 @@ export async function enrollConfirmAction(factorId: string, code: string): Promi
   if (!user || !isAdminEmail(user.email)) return { ok: false, error: "forbidden" };
   const { error } = await challengeAndVerify(supabase, factorId, code);
   await logAdminAuthEvent({ event: "factor_add", success: !error, email: user.email, reason: error });
+  if (!error) await sendAdminAlert("factor_added", { account: user.email });
   return error ? { ok: false, error } : { ok: true };
 }
 

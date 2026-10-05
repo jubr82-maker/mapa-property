@@ -1,6 +1,8 @@
 "use client";
 
-// Sprint 6-methodes Lot 2 — rendu structure cle->valeur du `details` d'une
+import { useTranslations } from "next-intl";
+
+// Rendu structure cle->valeur du `details` d'une
 // methode d'estimation. Remplace l'ancien <pre>{JSON.stringify}</pre>.
 //
 // Robustesse : tout champ absent du SCHEMA tombe sur un rendu fallback
@@ -16,6 +18,7 @@ type Format =
   | "text";
 
 interface FieldSchema {
+  /** Clé de traduction (namespace admin_estimations, "details.*"). */
   label: string;
   format: Format;
 }
@@ -25,82 +28,96 @@ type SchemaEntry = FieldSchema | "coefficients_block";
 const SCHEMAS: Record<string, Record<string, SchemaEntry>> = {
   observatoire: {
     // Variante appartement (method:"observatoire_c7")
-    method: { label: "Méthode interne", format: "text" },
-    base_per_m2: { label: "Prix de base au m²", format: "currency" },
-    surface: { label: "Surface habitable", format: "surface" },
-    coef_cpe: { label: "Coefficient CPE", format: "coef" },
-    coef_etat: { label: "Coefficient état", format: "coef" },
-    coef_etage: { label: "Coefficient étage", format: "coef" },
-    coef_atypique: { label: "Coefficient atypique", format: "coef" },
-    coef_vefa: { label: "Coefficient VEFA (neuf)", format: "coef" },
-    coef_surface: { label: "Coefficient dégressivité surface", format: "coef" },
-    annexes: { label: "Bonus annexes", format: "currency" },
+    method: { label: "internalMethod", format: "text" },
+    base_per_m2: { label: "basePerM2", format: "currency" },
+    surface: { label: "livingSurface", format: "surface" },
+    coef_cpe: { label: "coefEnergyCert", format: "coef" },
+    coef_etat: { label: "coefState", format: "coef" },
+    coef_etage: { label: "coefFloor", format: "coef" },
+    coef_atypique: { label: "coefAtypical", format: "coef" },
+    coef_vefa: { label: "coefVefa", format: "coef" },
+    coef_surface: { label: "coefSurface", format: "coef" },
+    annexes: { label: "annexesBonus", format: "currency" },
     // Variante maison (method:"hedonic_terrain_bati")
-    bati_value: { label: "Valeur bâti", format: "currency" },
-    land_value: { label: "Valeur terrain", format: "currency" },
-    annexes_value: { label: "Valeur annexes", format: "currency" },
-    land_zone: { label: "Zone terrain (1-4)", format: "integer" },
-    range_position: { label: "Position dans la fourchette", format: "decimal" },
+    bati_value: { label: "buildingValue", format: "currency" },
+    land_value: { label: "landValue", format: "currency" },
+    annexes_value: { label: "annexesValue", format: "currency" },
+    land_zone: { label: "landZone", format: "integer" },
+    range_position: { label: "rangePosition", format: "decimal" },
+    market_coef: { label: "marketCoef", format: "coef" },
+    market_coef_source: { label: "marketCoefSource", format: "text" },
+    // Variante appartement simplifiée (method:"apartment_per_sqm")
+    baseline_per_m2: { label: "basePerM2", format: "currency" },
+    surface_coef: { label: "coefSurface", format: "coef" },
     // Fallback no-baseline
-    reason: { label: "Note", format: "text" },
+    reason: { label: "note", format: "text" },
   },
   hedonic: {
-    baseline_per_m2: { label: "Prix de base au m² (effectif)", format: "currency" },
-    baseline_per_m2_raw: { label: "Prix de base au m² (brut)", format: "currency" },
-    baseline_source: { label: "Source baseline", format: "text" },
-    baseline_reference: { label: "Référence marché", format: "text" },
+    baseline_per_m2: { label: "baselineEffective", format: "currency" },
+    baseline_per_m2_raw: { label: "baselineRaw", format: "currency" },
+    baseline_source: { label: "baselineSource", format: "text" },
+    baseline_reference: { label: "marketReference", format: "text" },
     coefficients: "coefficients_block",
-    adjusted_per_m2: { label: "Prix au m² ajusté", format: "currency" },
-    bonus_terrace_eur: { label: "Bonus terrasse", format: "currency" },
-    bonus_parking_eur: { label: "Bonus parking", format: "currency" },
-    works_added_value_eur: { label: "Plus-value travaux", format: "currency" },
+    adjusted_per_m2: { label: "adjustedPerM2", format: "currency" },
+    bonus_terrace_eur: { label: "terraceBonus", format: "currency" },
+    bonus_parking_eur: { label: "parkingBonus", format: "currency" },
+    works_added_value_eur: { label: "worksAddedValue", format: "currency" },
   },
   statec_reference: {
-    baseline_per_m2: { label: "Prix de base au m² (effectif)", format: "currency" },
-    baseline_per_m2_raw: { label: "Prix de base au m² (brut)", format: "currency" },
-    baseline_source: { label: "Source baseline", format: "text" },
-    baseline_reference: { label: "Référence marché", format: "text" },
-    state_coef: { label: "Coefficient état", format: "coef" },
-    energy_coef: { label: "Coefficient énergie", format: "coef" },
-    year_coef: { label: "Coefficient année", format: "coef" },
-    bonus_parking_eur: { label: "Bonus parking", format: "currency" },
-    works_added_value_eur: { label: "Plus-value travaux", format: "currency" },
-    adjusted_per_m2: { label: "Prix au m² ajusté", format: "currency" },
+    baseline_per_m2: { label: "baselineEffective", format: "currency" },
+    baseline_per_m2_raw: { label: "baselineRaw", format: "currency" },
+    baseline_source: { label: "baselineSource", format: "text" },
+    baseline_reference: { label: "marketReference", format: "text" },
+    state_coef: { label: "coefState", format: "coef" },
+    energy_coef: { label: "coefEnergy", format: "coef" },
+    year_coef: { label: "coefYear", format: "coef" },
+    surface_degressive_coef: { label: "coefSurface", format: "coef" },
+    bonus_parking_eur: { label: "parkingBonus", format: "currency" },
+    works_added_value_eur: { label: "worksAddedValue", format: "currency" },
+    adjusted_per_m2: { label: "adjustedPerM2", format: "currency" },
   },
   income_capitalization: {
-    rent_per_m2_month: { label: "Loyer estimé €/m²/mois", format: "decimal" },
-    annual_rent: { label: "Loyer annuel", format: "currency" },
-    yield_used: { label: "Rendement utilisé", format: "percent_decimal" },
-    reasoning: { label: "Formule", format: "text" },
-    legal_max_rent_month: { label: "Plafond légal mensuel (5%)", format: "currency" },
-    legal_rent_cap_note: { label: "Note plafond", format: "text" },
+    rent_per_m2_month: { label: "rentPerM2Month", format: "decimal" },
+    annual_rent: { label: "annualRent", format: "currency" },
+    yield_used: { label: "yieldUsed", format: "percent_decimal" },
+    reasoning: { label: "formula", format: "text" },
+    legal_max_rent_month: { label: "legalMaxRent", format: "currency" },
+    legal_rent_cap_note: { label: "legalRentNote", format: "text" },
   },
   depreciated_replacement: {
-    land_per_m2: { label: "Prix terrain €/m²", format: "currency" },
-    land_surface: { label: "Surface terrain", format: "surface" },
-    land_value: { label: "Valeur terrain", format: "currency" },
-    construction_cost_new: { label: "Coût construction neuf", format: "currency" },
-    depreciation_factor: { label: "Facteur dépréciation", format: "decimal" },
-    depreciated_construction: { label: "Coût construction déprécié", format: "currency" },
+    land_per_m2: { label: "landPerM2", format: "currency" },
+    land_surface: { label: "landSurface", format: "surface" },
+    land_value: { label: "landValue", format: "currency" },
+    construction_cost_new: { label: "constructionCostNew", format: "currency" },
+    depreciation_factor: { label: "depreciationFactor", format: "decimal" },
+    depreciated_construction: { label: "depreciatedConstruction", format: "currency" },
   },
   sales_comparison: {
-    reason: { label: "Statut", format: "text" },
+    reason: { label: "status", format: "text" },
+    method: { label: "internalMethod", format: "text" },
+    n_comparables_raw: { label: "comparablesFound", format: "integer" },
+    n_comparables_used: { label: "comparablesUsed", format: "integer" },
+    median_ppsqm: { label: "medianPerM2", format: "currency" },
+    outlier_method: { label: "outlierMethod", format: "text" },
+    surface: { label: "livingSurface", format: "surface" },
   },
 };
 
-const COEF_LABELS: Record<string, string> = {
-  state: "État",
-  energy: "Énergie",
-  year: "Année",
-  type: "Type",
-  floor: "Étage",
-  lift_bonus: "Ascenseur",
-  exposure_bonus: "Exposition",
-  view_bonus: "Vue",
-};
+// Coefficients connus (libellés : namespace admin_estimations, "coef.*").
+const COEF_KEYS = [
+  "state",
+  "energy",
+  "year",
+  "type",
+  "floor",
+  "lift_bonus",
+  "exposure_bonus",
+  "view_bonus",
+  "surface_degressive",
+];
 
 function fmt(value: unknown, format: Format): string {
-  if (value == null || value === "") return "—";
+  if (value == null || value === "") return "";
   const n = Number(value);
   switch (format) {
     case "currency":
@@ -132,9 +149,8 @@ function fmt(value: unknown, format: Format): string {
 }
 
 function humanize(key: string): string {
-  return key
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  const spaced = key.replace(/_/g, " ").toLowerCase();
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
 interface Row {
@@ -149,6 +165,7 @@ interface Props {
 }
 
 export function MethodDetails({ methodKey, details }: Props) {
+  const t = useTranslations("admin_estimations");
   const schema = SCHEMAS[methodKey] ?? {};
   const rows: Row[] = [];
 
@@ -160,14 +177,21 @@ export function MethodDetails({ methodKey, details }: Props) {
           raw as Record<string, unknown>,
         )) {
           rows.push({
-            label: COEF_LABELS[coefKey] ?? humanize(coefKey),
+            label: COEF_KEYS.includes(coefKey) ? t(`coef.${coefKey}`) : humanize(coefKey),
             value: fmt(coefValue, "coef"),
             indent: true,
           });
         }
       }
     } else if (entry) {
-      rows.push({ label: entry.label, value: fmt(raw, entry.format) });
+      // Codes internes (variante de méthode, filtrage, source) : affichés
+      // sous forme lisible quand un libellé existe.
+      const code = typeof raw === "string" ? raw.replace(/\./g, "_") : "";
+      const value =
+        code && entry.format === "text" && t.has(`methodCode.${code}`)
+          ? t(`methodCode.${code}`)
+          : fmt(raw, entry.format);
+      rows.push({ label: t(`details.${entry.label}`), value });
     } else {
       const fallbackFormat: Format = typeof raw === "number" ? "decimal" : "text";
       rows.push({ label: humanize(key), value: fmt(raw, fallbackFormat) });
@@ -176,7 +200,7 @@ export function MethodDetails({ methodKey, details }: Props) {
 
   if (rows.length === 0) {
     return (
-      <p className="mt-2 text-xs italic text-ink/60">Aucun détail disponible.</p>
+      <p className="mt-2 text-xs italic text-ink/60">{t("details.empty")}</p>
     );
   }
 

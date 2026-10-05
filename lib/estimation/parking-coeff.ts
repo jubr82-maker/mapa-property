@@ -1,7 +1,7 @@
 /**
- * Parking — module DÉDIÉ (ne pas éditer lib/markets.ts partagé).
+ * Parking : module DÉDIÉ (ne pas éditer lib/markets.ts partagé).
  *
- * POL3-6 — logique "ÉCART À LA NORME" (calibration finale MAPA, validée
+ * POL3-6 : logique "ÉCART À LA NORME" (calibration finale MAPA, validée
  * Julien). Périmètre : LUXEMBOURG UNIQUEMENT (le moteur EVS est LU-only).
  *
  * Une vente notariée bundle le parking dans le prix. On ne valorise donc
@@ -15,13 +15,13 @@
  * Sources : Observatoire de l'Habitat (Ministère du Logement), Notaires LU,
  * Chambre Immobilière Grand-Duché, données internes MAPA Property.
  *
- * Aucune dépendance I/O — fonctions pures, testables.
+ * Aucune dépendance I/O : fonctions pures, testables.
  */
 
 import type { EstimationInputs } from "@/lib/estimation/engine";
 
 // ============================================================================
-// Legacy POL2-6 (conservé pour rétro-compat des appels existants — le
+// Legacy POL2-6 (conservé pour rétro-compat des appels existants : le
 // pipeline EVS V2 utilise computeParkingAdjustment ci-dessous)
 // ============================================================================
 
@@ -103,7 +103,7 @@ export function calcParkingValue(
 }
 
 // ============================================================================
-// POL3-6 — PARKING "ÉCART À LA NORME" (calibration finale MAPA)
+// POL3-6 : PARKING "ÉCART À LA NORME" (calibration finale MAPA)
 // ============================================================================
 
 // Norme parking selon type et surface
@@ -116,7 +116,7 @@ function normParkings(type: string, surface: number): number {
   return 2; // 3 chambres+ ou >100m²
 }
 
-// Strates communes — Limpertsberg → FIRST_RING (corrigé vs Agent B en PRIME)
+// Strates communes : Limpertsberg → FIRST_RING (corrigé vs Agent B en PRIME)
 const PARKING_PRIME = [
   "belair",
   "centre",

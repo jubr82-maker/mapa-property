@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Big_Shoulders, Archivo, JetBrains_Mono } from "next/font/google";
@@ -12,11 +13,11 @@ import { getMessages } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { AdminIdleWatcher } from "@/components/admin/AdminIdleWatcher";
 
-const ADMIN_NAMESPACES = ["admin_security", "admin_datetime", "admin_properties", "admin_notices"] as const;
+// Tous les namespaces admin (prefixe admin_), pour les composants clients.
 
 async function adminMessages() {
   const all = (await getMessages({ locale: ADMIN_LOCALE })) as Record<string, unknown>;
-  return Object.fromEntries(ADMIN_NAMESPACES.map((ns) => [ns, all[ns]]));
+  return Object.fromEntries(Object.entries(all).filter(([ns]) => ns.startsWith("admin_")));
 }
 
 const display = Big_Shoulders({
@@ -40,8 +41,12 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "MAPA Admin",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_nav" });
+  return { ...staticMetadata, title: t("header_title") };
+}
+
+const staticMetadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
@@ -79,6 +84,7 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
   const { data: aal } = user
     ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
     : { data: null };
+  const tNav = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_nav" });
   if (!user || aal?.currentLevel !== "aal2") {
     return <main className="flex min-h-dvh items-center justify-center px-6">{children}</main>;
   }
@@ -90,7 +96,7 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
         <header className="flex items-center justify-between border-b border-gold bg-ink px-8 py-4 text-bg">
           <Link href="/admin" className="flex items-center gap-3">
             <span className="font-display text-xl font-bold uppercase tracking-[0.15em]">
-              MAPA · Admin
+              {tNav("header_title")}
             </span>
           </Link>
           <div className="flex items-center gap-4 text-sm">

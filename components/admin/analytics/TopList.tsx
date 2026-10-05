@@ -13,7 +13,7 @@ interface TopListProps {
   emptyLabel?: string;
 }
 
-export function TopList({ items, unit, emptyLabel = "Aucune donnée." }: TopListProps) {
+export function TopList({ items, unit, emptyLabel = "" }: TopListProps) {
   if (!items || items.length === 0) {
     return <p className="text-sm text-[#3D4F63]/60">{emptyLabel}</p>;
   }

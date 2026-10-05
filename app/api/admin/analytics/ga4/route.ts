@@ -26,7 +26,7 @@ type GaRow = { dimensionValues?: { value?: string }[]; metricValues?: { value?: 
 
 function rowsToList(rows: GaRow[] | undefined) {
   return (rows ?? []).map((r) => ({
-    key: r.dimensionValues?.[0]?.value ?? "—",
+    key: r.dimensionValues?.[0]?.value ?? "",
     value: Number(r.metricValues?.[0]?.value ?? 0),
   }));
 }
