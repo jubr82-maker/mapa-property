@@ -14,6 +14,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { safeAdminRedirect } from "@/lib/admin/security-config";
+import { resetAdminActivity } from "@/lib/admin/activity";
 
 const OTP_TYPES: ReadonlySet<string> = new Set(["recovery", "email", "magiclink", "signup", "invite", "email_change"]);
 
@@ -34,6 +35,8 @@ export async function GET(request: NextRequest) {
     ok = !error;
   }
 
+  // Session ouverte par le lien : activite remise a zero (lib/admin/activity.ts).
+  if (ok) await resetAdminActivity(supabase);
   const target = new URL(ok ? next : "/admin/reset-password", request.url);
   if (!ok) target.searchParams.set("error", "invalid_link");
   const res = NextResponse.redirect(target);

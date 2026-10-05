@@ -14,8 +14,17 @@ export const ADMIN_PASSWORD_MIN_LENGTH = 14;
  */
 export const ADMIN_IDLE_TIMEOUT_MINUTES = 30;
 
-/** Cookie d'activite (horodatage de la derniere requete admin). */
+/**
+ * Cookie d'activite : "<session_id>:<horodatage ms>" de la derniere requete
+ * admin de la session en cours (lib/admin/idle.ts).
+ */
 export const ADMIN_ACTIVITY_COOKIE = "mapa_admin_activity";
+/**
+ * Duree de vie du cookie d'activite (12 h). Son expiration ne prolonge
+ * jamais une session : sans trace d'activite, la reference devient
+ * l'heure d'ouverture de la session.
+ */
+export const ADMIN_ACTIVITY_COOKIE_MAX_AGE_SECONDS = 12 * 60 * 60;
 
 /** Page d'inscription ou de verification du second facteur. */
 export const ADMIN_MFA_PATH = "/admin/mfa";

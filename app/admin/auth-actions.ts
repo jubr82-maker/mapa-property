@@ -10,6 +10,7 @@ import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { assertAdminAction } from "@/lib/admin/require-admin";
+import { resetAdminActivity } from "@/lib/admin/activity";
 import { logAdminAuthEvent } from "@/lib/admin/auth-log";
 import { ADMIN_PASSWORD_MIN_LENGTH } from "@/lib/admin/security-config";
 import { verifyCaptchaIfConfigured } from "@/lib/security/captcha";
@@ -73,6 +74,7 @@ export async function loginAction(input: {
     return { ok: false, error: "credentials" };
   }
   await logAdminAuthEvent({ event: "login", success: true, email, reason: captcha.reason === "captcha_not_configured" ? captcha.reason : null });
+  await resetAdminActivity(supabase);
   return { ok: true };
 }
 
@@ -132,6 +134,7 @@ export async function mfaVerifyAction(factorId: string, code: string): Promise<A
   const { error } = await challengeAndVerify(supabase, factorId, code);
   await logAdminAuthEvent({ event: "mfa", success: !error, email: user.email, reason: error });
   if (error) await maybeAlertLoginBurst();
+  else await resetAdminActivity(supabase);
   return error ? { ok: false, error } : { ok: true };
 }
 
@@ -180,7 +183,10 @@ export async function enrollConfirmAction(factorId: string, code: string): Promi
   if (!user || !isAdminEmail(user.email)) return { ok: false, error: "forbidden" };
   const { error } = await challengeAndVerify(supabase, factorId, code);
   await logAdminAuthEvent({ event: "factor_add", success: !error, email: user.email, reason: error });
-  if (!error) await sendAdminAlert("factor_added", { account: user.email });
+  if (!error) {
+    await sendAdminAlert("factor_added", { account: user.email });
+    await resetAdminActivity(supabase);
+  }
   return error ? { ok: false, error } : { ok: true };
 }
 

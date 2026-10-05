@@ -15,6 +15,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { assertAdminAction } from "@/lib/admin/require-admin";
 import { logAdminAuthEvent } from "@/lib/admin/auth-log";
+import { resetAdminActivity } from "@/lib/admin/activity";
 import { PASSKEY_ID_PATTERN, PASSKEY_NAME_MAX_LENGTH } from "@/lib/admin/security-config";
 import { verifyCaptchaIfConfigured } from "@/lib/security/captcha";
 import { maybeAlertLoginBurst, sendAdminAlert } from "@/lib/pilotage/alerts";
@@ -151,6 +152,7 @@ export async function passkeyLoginCompleteAction(): Promise<PasskeyResult<{ aal2
   }
   const level = aal?.currentLevel ?? "none";
   await logAdminAuthEvent({ event: "passkey_login", success: true, email: user.email, reason: `complete:${level}` });
+  await resetAdminActivity(supabase);
   return { ok: true, aal2: level === "aal2" };
 }
 

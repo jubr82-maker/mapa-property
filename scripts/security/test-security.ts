@@ -44,6 +44,7 @@ import { RETENTION_RULES } from "../../lib/pilotage/config";
 import { retentionCutoff } from "../../lib/pilotage/retention";
 import { selectPublicImages, isApimoImageUrl } from "../../lib/property-images";
 import { formatRateFraction } from "../../lib/format/numbers";
+import { evaluateAdminIdle, sessionStartFromClaims, parseActivityCookie } from "../../lib/admin/idle";
 
 const ROOT = path.resolve(__dirname, "../..");
 const read = (p: string) => fs.readFileSync(path.join(ROOT, p), "utf8");
@@ -735,6 +736,53 @@ section = "N. Cartes, visionneuse, Passkey, region";
   check("Passkey : debut et reussite des etapes journalises", /reason: "turnstile:start"/.test(pka) && /turnstile:ok/.test(pka) && /reason: "complete:start"/.test(pka) && /complete:\$\{level\}/.test(pka));
   check("Passkey : etapes du navigateur acceptees seulement pendant une tentative", /if \(!\(await attemptIsOpen\(\)\)\) return/.test(pka) && /rateLimit\(/.test(pka));
   check("Passkey : aal2 jamais fabrique, lu dans le jeton Supabase", /getAuthenticatorAssuranceLevel\(\)/.test(pka) && !/aal2:\s*true/.test(pka));
+}
+
+// ===========================================================================
+// O. Inactivite : jamais a cause d'une session precedente
+// ===========================================================================
+section = "O. Inactivite et nouvelle session";
+{
+  const TIMEOUT = 30 * 60_000;
+  const at = (iso: string) => new Date(iso).getTime();
+  const passkeyStart = at("2026-10-05T16:20:32.000Z");
+  const claimsNew = { session_id: "session-nouvelle", amr: [{ method: "passkey", timestamp: Math.floor(passkeyStart / 1000) }] };
+  const oldActivity = at("2026-10-05T16:20:20.365Z") - 60 * 60_000; // ancienne activite vieille d'une heure
+  const base = { timeoutMs: TIMEOUT, loginInProgress: false };
+  // Sequence du journal du 5 octobre (id 7 a 14).
+  // id 7 : ouverture de la page de connexion avec l'ANCIENNE session, inactive depuis 1 h : deconnexion legitime.
+  const id7 = evaluateAdminIdle({ ...base, now: at("2026-10-05T16:20:20.365Z"), cookieValue: `session-ancienne:${oldActivity}`, sessionId: "session-ancienne", sessionStartMs: oldActivity - 3600_000 });
+  check("journal id 7 : ancienne session inactive deconnectee", id7.action === "logout");
+  check("heure d'ouverture lue dans le jeton", sessionStartFromClaims(claimsNew) === passkeyStart);
+  // id 11 : action serveur du parcours Passkey avec la NOUVELLE session, l'ancien cookie toujours present (deux formats).
+  for (const stale of [`session-ancienne:${oldActivity}`, String(oldActivity)]) {
+    for (const loginInProgress of [true, false]) {
+      const d = evaluateAdminIdle({ timeoutMs: TIMEOUT, loginInProgress, now: at("2026-10-05T16:20:32.570Z"), cookieValue: stale, sessionId: claimsNew.session_id, sessionStartMs: sessionStartFromClaims(claimsNew) });
+      check(`journal id 11 : nouvelle session conservee (cookie ${stale.includes(":") ? "d'une autre session" : "ancien format"}, parcours ${loginInProgress ? "en cours" : "termine"})`, d.action === "keep" && parseActivityCookie(d.action === "keep" ? d.cookieValue : "").sessionId === "session-nouvelle", JSON.stringify(d));
+    }
+  }
+  // id 13 et 14 : fin de connexion puis ouverture de l'admin, toujours conservee.
+  const id14 = evaluateAdminIdle({ ...base, now: at("2026-10-05T16:20:33.000Z"), cookieValue: `session-ancienne:${oldActivity}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart });
+  check("journal id 13 et 14 : session Passkey jamais supprimee", id14.action === "keep");
+  // La regle des 30 minutes reste appliquee a la session en cours.
+  const lastNew = at("2026-10-05T16:20:33.000Z");
+  check("29 minutes sans activite : session conservee", evaluateAdminIdle({ ...base, now: lastNew + 29 * 60_000, cookieValue: `session-nouvelle:${lastNew}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "keep");
+  check("31 minutes sans activite : deconnexion", evaluateAdminIdle({ ...base, now: lastNew + 31 * 60_000, cookieValue: `session-nouvelle:${lastNew}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "logout");
+  check("cookie expire sur une session ancienne : deconnexion", evaluateAdminIdle({ ...base, now: lastNew + 2 * 3600_000, cookieValue: undefined, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "logout");
+  check("parcours de connexion en cours : jamais de deconnexion", evaluateAdminIdle({ ...base, loginInProgress: true, now: lastNew + 5 * 3600_000, cookieValue: `session-nouvelle:${lastNew}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "keep");
+  // Branchement reel.
+  const px = read("proxy.ts");
+  check("proxy : decision d'inactivite partagee et testee", /evaluateAdminIdle\(\{/.test(px) && /supabase\.auth\.getClaims\(\)/.test(px) && /sessionStartFromClaims\(claims\)/.test(px));
+  check("proxy : parcours de connexion exempte (action publique, tentative Passkey)", /isServerAction && ADMIN_PUBLIC_PATHS\.has\(pathname\)/.test(px) && /PASSKEY_ATTEMPT_COOKIE/.test(px));
+  check("proxy : cookie supprime sur son propre chemin", /res\.cookies\.delete\(\{ name: ADMIN_ACTIVITY_COOKIE, path: "\/admin" \}\)/.test(px) && !/res\.cookies\.delete\(ADMIN_ACTIVITY_COOKIE\)/.test(px));
+  check("proxy : deconnexion d'inactivite limitee a ce navigateur", /signOut\(\{ scope: "local" \}\)/.test(px));
+  const aa = read("app/admin/auth-actions.ts");
+  check("remise a zero : mot de passe, code, nouvel appareil", (aa.match(/resetAdminActivity\(supabase\)/g) ?? []).length >= 3);
+  check("remise a zero : Passkey", /resetAdminActivity\(supabase\)/.test(read("app/admin/passkey-actions.ts")));
+  check("remise a zero : lien e-mail (reinitialisation)", /resetAdminActivity\(supabase\)/.test(read("app/admin/auth/callback/route.ts")));
+  // L'inactivite ne peut que deconnecter : jamais d'acces ni de niveau accorde.
+  const idleSrc = read("lib/admin/idle.ts");
+  check("inactivite : ne decide que deconnexion ou maintien, jamais aal", !/aal2|currentLevel|evaluateAdminAccess/.test(idleSrc.replace(/^\s*\/\/.*$/gm, "")) && !/from "@\/lib\/admin\/idle"/.test(read("lib/admin/admin-access.ts")));
 }
 
 // ===========================================================================

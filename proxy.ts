@@ -6,8 +6,13 @@ import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { getArchivedPropertyKeys } from "@/lib/archived-properties";
 import {
   ADMIN_ACTIVITY_COOKIE,
+  ADMIN_ACTIVITY_COOKIE_MAX_AGE_SECONDS,
   ADMIN_IDLE_TIMEOUT_MINUTES,
+  ADMIN_PUBLIC_PATHS,
+  PASSKEY_ATTEMPT_COOKIE,
+  PASSKEY_ATTEMPT_MAX_AGE_SECONDS,
 } from "@/lib/admin/security-config";
+import { evaluateAdminIdle, sessionStartFromClaims } from "@/lib/admin/idle";
 import { adminPageRedirect, evaluateAdminAccess } from "@/lib/admin/admin-access";
 import { logAdminAuthEvent } from "@/lib/admin/auth-log";
 
@@ -79,35 +84,55 @@ export default async function middleware(request: NextRequest) {
       aal2 = aal?.currentLevel === "aal2";
     }
 
-    // Deconnexion apres ADMIN_IDLE_TIMEOUT_MINUTES sans requete admin.
+    // Deconnexion apres ADMIN_IDLE_TIMEOUT_MINUTES sans requete admin, sur
+    // la session EN COURS uniquement (lib/admin/idle.ts) : l'activite d'une
+    // session precedente n'est jamais prise en compte, et rien ne se
+    // declenche pendant un parcours de connexion.
+    const isServerAction = request.method === "POST" && request.headers.has("next-action");
     if (isAllowedAdmin) {
-      const last = Number(request.cookies.get(ADMIN_ACTIVITY_COOKIE)?.value ?? 0);
-      const idleMs = ADMIN_IDLE_TIMEOUT_MINUTES * 60_000;
-      if (last && Date.now() - last > idleMs) {
-        await supabase.auth.signOut();
+      // session_id et heure d'ouverture lus dans le jeton valide (signature
+      // verifiee par getClaims, ou par Supabase en repli).
+      const { data: claimsData } = await supabase.auth.getClaims();
+      const claims = claimsData?.claims ?? null;
+      const attempt = Number((request.cookies.get(PASSKEY_ATTEMPT_COOKIE)?.value ?? "").split(".")[1] ?? 0);
+      const loginInProgress =
+        (isServerAction && ADMIN_PUBLIC_PATHS.has(pathname)) ||
+        (attempt > 0 && Date.now() - attempt < PASSKEY_ATTEMPT_MAX_AGE_SECONDS * 1000);
+      const idle = evaluateAdminIdle({
+        now: Date.now(),
+        cookieValue: request.cookies.get(ADMIN_ACTIVITY_COOKIE)?.value,
+        sessionId: typeof claims?.session_id === "string" ? claims.session_id : null,
+        sessionStartMs: sessionStartFromClaims(claims),
+        timeoutMs: ADMIN_IDLE_TIMEOUT_MINUTES * 60_000,
+        loginInProgress,
+      });
+      if (idle.action === "logout") {
+        // Portee locale : seule la session de ce navigateur est fermee.
+        await supabase.auth.signOut({ scope: "local" });
         await logAdminAuthEvent({
           event: "idle_logout",
           success: true,
           email: user?.email,
+          reason: idle.reason,
           ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
           userAgent: request.headers.get("user-agent"),
         });
         const res = redirectTo("/admin/login", { reason: "idle" });
-        res.cookies.delete(ADMIN_ACTIVITY_COOKIE);
+        // Meme chemin que le cookie pose, sinon il survit a la suppression.
+        res.cookies.delete({ name: ADMIN_ACTIVITY_COOKIE, path: "/admin" });
         return res;
       }
-      response.cookies.set(ADMIN_ACTIVITY_COOKIE, String(Date.now()), {
+      response.cookies.set(ADMIN_ACTIVITY_COOKIE, idle.cookieValue, {
         httpOnly: true,
         secure: true,
         sameSite: "lax",
         path: "/admin",
-        maxAge: ADMIN_IDLE_TIMEOUT_MINUTES * 60 * 2,
+        maxAge: ADMIN_ACTIVITY_COOKIE_MAX_AGE_SECONDS,
       });
     }
 
     // Decision partagee et testee (lib/admin/admin-access.ts).
     const access = evaluateAdminAccess(user, aal2 ? "aal2" : "aal1");
-    const isServerAction = request.method === "POST" && request.headers.has("next-action");
     const target = adminPageRedirect(pathname, access, { serverAction: isServerAction });
     if (target) return redirectTo(target.path, target.params);
 
