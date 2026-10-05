@@ -1453,5 +1453,34 @@
     "sort_desc": "Plus récents d'abord",
     "sort_asc": "Plus anciens d'abord",
     "email_received": "Reçu le {date} (heure de Luxembourg)"
+  },
+  "admin_properties": {
+    "tab_active": "Actifs",
+    "tab_archived": "Archivés",
+    "archive": "Archiver",
+    "restore": "Restaurer",
+    "delete": "Supprimer définitivement",
+    "purge_media": "Supprimer les médias",
+    "archived_col": "Archivé le",
+    "archived_on": "Archivé le {date}",
+    "archive_confirm": "Archiver ce bien ? Il disparaîtra immédiatement du site public. Vous pourrez le restaurer.",
+    "delete_title": "Suppression définitive",
+    "delete_body": "Cette action est irréversible. Le bien et ses lignes d'images seront supprimés de la base. Les fichiers (photos, vidéo) ne sont pas supprimés. Pour confirmer, saisissez la référence du bien : {ref}",
+    "delete_input_label": "Référence du bien",
+    "delete_mismatch": "La référence saisie ne correspond pas.",
+    "cancel": "Annuler",
+    "deleted_media_title": "Bien supprimé. Fichiers restant à supprimer séparément :",
+    "deleted_no_media": "Bien supprimé. Aucun fichier associé.",
+    "purge_confirm": "Supprimer définitivement les fichiers (photos et vidéo) de ce bien archivé ? Action irréversible.",
+    "purge_done": "{count} fichier(s) supprimé(s).",
+    "migration_missing": "L'archivage nécessite le SQL supabase/manual/20261005_archivage_biens.sql, pas encore exécuté. Les actions Archiver, Restaurer et Supprimer sont indisponibles en attendant.",
+    "empty_archived": "Aucun bien archivé.",
+    "error": "Action impossible : {message}"
+  },
+  "property_gone": {
+    "title": "Ce bien n'est plus disponible",
+    "body": "Le bien que vous recherchez a été retiré de notre catalogue. Découvrez nos autres biens à la vente et à la location au Luxembourg.",
+    "cta": "Voir le catalogue",
+    "meta_title": "Bien plus disponible, MAPA Property"
   }
 }

@@ -89,6 +89,24 @@ export async function GET(req: Request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
+  // --- Biens archives (oct. 2026) : jamais republies par la synchro. ---
+  // Silencieux si la colonne archived_at n'existe pas encore.
+  const archivedApimoIds = new Set<string>();
+  try {
+    const { data: archivedRows, error: archivedErr } = await sb
+      .from("properties")
+      .select("apimo_id")
+      .not("archived_at", "is", null)
+      .not("apimo_id", "is", null);
+    if (!archivedErr) {
+      for (const r of (archivedRows ?? []) as { apimo_id: string | number }[]) {
+        archivedApimoIds.add(String(r.apimo_id));
+      }
+    }
+  } catch {
+    // ignore : aucun bien considere comme archive
+  }
+
   // --- TIMESTAMP sync incrementale ---
   let sinceUnix: number | undefined;
   try {
@@ -147,6 +165,9 @@ export async function GET(req: Request) {
     for (const bien of biens) {
       try {
         const row = mapApimoToProperty(bien);
+        if (row.apimo_id !== null && row.apimo_id !== undefined && archivedApimoIds.has(String(row.apimo_id))) {
+          row.is_published = false;
+        }
         const { data: upserted, error: upsertErr } = await sb
           .from("properties")
           .upsert(row, { onConflict: "apimo_id" })

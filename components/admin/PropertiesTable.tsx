@@ -7,6 +7,10 @@ import { useState, useTransition } from "react";
 import {
   setPropertyPublished,
   setPropertyFeatured,
+  archiveProperty,
+  restoreProperty,
+  deleteProperty,
+  purgePropertyMedia,
 } from "@/app/admin/properties/actions";
 import { formatPrice, formatSurface } from "@/lib/format/numbers";
 
@@ -24,12 +28,50 @@ type Row = {
   cover: string | null;
   is_published: boolean;
   is_featured: boolean;
+  /** "Archive le ..." (lib/datetime.ts, Europe/Luxembourg), onglet Archives. */
+  archived_label?: string | null;
 };
 
-export function PropertiesTable({ rows }: { rows: Row[] }) {
+/** Libelles next-intl (admin_properties), resolus cote serveur. */
+export type PropertiesTableLabels = {
+  archive: string;
+  restore: string;
+  delete: string;
+  purgeMedia: string;
+  archivedCol: string;
+  archiveConfirm: string;
+  deleteTitle: string;
+  deleteBodyTemplate: string;
+  deleteInputLabel: string;
+  deleteMismatch: string;
+  cancel: string;
+  deletedMediaTitle: string;
+  deletedNoMedia: string;
+  purgeConfirm: string;
+  purgeDoneTemplate: string;
+  errorTemplate: string;
+};
+
+const fill = (template: string, values: Record<string, string | number>) =>
+  template.replace(/\{(\w+)\}/g, (m, k: string) => (k in values ? String(values[k]) : m));
+
+export function PropertiesTable({
+  rows,
+  mode = "active",
+  archiveEnabled = false,
+  labels,
+}: {
+  rows: Row[];
+  mode?: "active" | "archived";
+  archiveEnabled?: boolean;
+  labels: PropertiesTableLabels;
+}) {
   const router = useRouter();
   const sp = useSearchParams();
   const [, startTransition] = useTransition();
+  // Biens supprimes pendant la session : fichiers restants a supprimer
+  // separement (affiches ici car la ligne disparait apres rafraichissement).
+  const [deleted, setDeleted] = useState<{ reference: string; media: string[] }[]>([]);
 
   const setParam = (key: string, value: string) => {
     const next = new URLSearchParams(sp.toString());
@@ -59,6 +101,24 @@ export function PropertiesTable({ rows }: { rows: Row[] }) {
         </select>
       </div>
 
+    {deleted.map((d) => (
+      <div
+        key={d.reference}
+        className="rounded-md border border-[#3D4F63]/20 bg-[#3D4F63]/5 p-3 text-[11px] text-[#3D4F63]"
+      >
+        <p className="font-semibold">
+          {d.reference} : {d.media.length ? labels.deletedMediaTitle : labels.deletedNoMedia}
+        </p>
+        {d.media.length > 0 && (
+          <ul className="mt-1 list-disc space-y-0.5 pl-4 font-mono break-all">
+            {d.media.map((u) => (
+              <li key={u}>{u}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    ))}
+
     <div className="overflow-x-auto rounded-2xl border border-[#3D4F63]/15 bg-white">
       <table className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
@@ -69,8 +129,14 @@ export function PropertiesTable({ rows }: { rows: Row[] }) {
             <th className="px-4 py-3">Transaction</th>
             <th className="px-4 py-3 text-right">Prix</th>
             <th className="px-4 py-3 text-right">Surface · CH</th>
-            <th className="px-4 py-3 text-center">Publié</th>
-            <th className="px-4 py-3 text-center">Coup de cœur</th>
+            {mode === "active" ? (
+              <>
+                <th className="px-4 py-3 text-center">Publié</th>
+                <th className="px-4 py-3 text-center">Coup de cœur</th>
+              </>
+            ) : (
+              <th className="px-4 py-3" colSpan={2}>{labels.archivedCol}</th>
+            )}
             <th />
           </tr>
         </thead>
@@ -82,7 +148,16 @@ export function PropertiesTable({ rows }: { rows: Row[] }) {
               </td>
             </tr>
           ) : (
-            rows.map((r) => <PropertyRow key={r.id} row={r} />)
+            rows.map((r) => (
+              <PropertyRow
+                key={r.id}
+                row={r}
+                mode={mode}
+                archiveEnabled={archiveEnabled}
+                labels={labels}
+                onDeleted={(d) => setDeleted((prev) => [d, ...prev])}
+              />
+            ))
           )}
         </tbody>
       </table>
@@ -91,10 +166,73 @@ export function PropertiesTable({ rows }: { rows: Row[] }) {
   );
 }
 
-function PropertyRow({ row }: { row: Row }) {
+function PropertyRow({
+  row,
+  mode,
+  archiveEnabled,
+  labels,
+  onDeleted,
+}: {
+  row: Row;
+  mode: "active" | "archived";
+  archiveEnabled: boolean;
+  labels: PropertiesTableLabels;
+  onDeleted: (d: { reference: string; media: string[] }) => void;
+}) {
+  const router = useRouter();
   const [pub, setPub] = useState(row.is_published);
   const [feat, setFeat] = useState(row.is_featured);
   const [busy, startTransition] = useTransition();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [typedRef, setTypedRef] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+  const reference = row.slug || row.id;
+
+  const run = (
+    action: () => Promise<{ ok: true; media?: string[]; purged?: number } | { ok: false; error: string }>,
+    onDone?: (r: { media?: string[]; purged?: number }) => void,
+  ) => {
+    setMessage(null);
+    startTransition(async () => {
+      const r = await action();
+      if (!r.ok) {
+        setMessage(
+          r.error === "reference_mismatch"
+            ? labels.deleteMismatch
+            : fill(labels.errorTemplate, { message: r.error }),
+        );
+        return;
+      }
+      onDone?.(r);
+      router.refresh();
+    });
+  };
+
+  const onArchive = () => {
+    if (window.confirm(labels.archiveConfirm)) run(() => archiveProperty(row.id));
+  };
+  const onRestore = () => run(() => restoreProperty(row.id));
+  const onPurge = () => {
+    if (window.confirm(labels.purgeConfirm)) {
+      run(
+        () => purgePropertyMedia(row.id),
+        (r) => setMessage(fill(labels.purgeDoneTemplate, { count: r.purged ?? 0 })),
+      );
+    }
+  };
+  const onDelete = () => {
+    if (typedRef.trim() !== reference) {
+      setMessage(labels.deleteMismatch);
+      return;
+    }
+    run(
+      () => deleteProperty(row.id, typedRef),
+      (r) => {
+        setConfirmDelete(false);
+        onDeleted({ reference, media: r.media ?? [] });
+      },
+    );
+  };
 
   const onPub = (next: boolean) => {
     setPub(next);
@@ -134,28 +272,99 @@ function PropertyRow({ row }: { row: Row }) {
       <td className="px-4 py-3 text-right font-mono text-xs">
         {row.surface ? formatSurface(row.surface, "fr") : "—"} · {row.bedrooms ?? "—"} ch
       </td>
-      <td className="px-4 py-3 text-center">
-        <Switch checked={pub} onChange={onPub} busy={busy} />
-      </td>
-      <td className="px-4 py-3 text-center">
-        <Switch checked={feat} onChange={onFeat} busy={busy} />
-      </td>
+      {mode === "active" ? (
+        <>
+          <td className="px-4 py-3 text-center">
+            <Switch checked={pub} onChange={onPub} busy={busy} />
+          </td>
+          <td className="px-4 py-3 text-center">
+            <Switch checked={feat} onChange={onFeat} busy={busy} />
+          </td>
+        </>
+      ) : (
+        <td className="px-4 py-3 font-mono text-[11px] text-[#3D4F63]/80" colSpan={2}>
+          {row.archived_label}
+        </td>
+      )}
       <td className="px-4 py-3 text-right">
-        <div className="flex justify-end gap-1.5">
+        <div className="flex flex-wrap justify-end gap-1.5">
           <Link
             href={`/admin/properties/${row.id}`}
-            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
+            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Éditer
           </Link>
-          <Link
-            href={`/fr/biens/${row.slug || row.id}`}
-            target="_blank"
-            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
-          >
-            Voir ↗
-          </Link>
+          {mode === "active" ? (
+            <>
+              <Link
+                href={`/fr/biens/${row.slug || row.id}`}
+                target="_blank"
+                className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Voir ↗
+              </Link>
+              <button type="button" onClick={onArchive} disabled={busy || !archiveEnabled} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
+                {labels.archive}
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" onClick={onRestore} disabled={busy || !archiveEnabled} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
+                {labels.restore}
+              </button>
+              <button type="button" onClick={onPurge} disabled={busy || !archiveEnabled} className="rounded border border-red-300 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40">
+                {labels.purgeMedia}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmDelete(true);
+                  setTypedRef("");
+                  setMessage(null);
+                }}
+                disabled={busy || !archiveEnabled}
+                className="rounded border border-red-300 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {labels.delete}
+              </button>
+            </>
+          )}
         </div>
+        {confirmDelete && (
+          <div
+            role="alertdialog"
+            aria-label={labels.deleteTitle}
+            className="mt-3 rounded-md border border-red-300 bg-red-50 p-3 text-left text-xs text-red-900"
+          >
+            <p className="font-semibold">{labels.deleteTitle}</p>
+            <p className="mt-1">{fill(labels.deleteBodyTemplate, { ref: reference })}</p>
+            <label className="mt-2 block">
+              <span className="sr-only">{labels.deleteInputLabel}</span>
+              <input
+                type="text"
+                value={typedRef}
+                onChange={(e) => setTypedRef(e.target.value)}
+                placeholder={labels.deleteInputLabel}
+                autoComplete="off"
+                className="w-full rounded border border-red-300 bg-white px-2 py-1 font-mono text-xs text-[#1A1F2A]"
+              />
+            </label>
+            <div className="mt-2 flex justify-end gap-1.5">
+              <button type="button" onClick={() => setConfirmDelete(false)} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
+                {labels.cancel}
+              </button>
+              <button
+                type="button"
+                onClick={onDelete}
+                disabled={busy || typedRef.trim() !== reference}
+                className="rounded border border-red-300 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {labels.delete}
+              </button>
+            </div>
+          </div>
+        )}
+        {message && <p className="mt-2 text-left text-xs text-red-700">{message}</p>}
       </td>
     </tr>
   );

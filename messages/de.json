@@ -1453,5 +1453,34 @@
     "sort_desc": "Neueste zuerst",
     "sort_asc": "Älteste zuerst",
     "email_received": "Eingegangen am {date} (Luxemburger Zeit)"
+  },
+  "admin_properties": {
+    "tab_active": "Aktiv",
+    "tab_archived": "Archiviert",
+    "archive": "Archivieren",
+    "restore": "Wiederherstellen",
+    "delete": "Endgültig löschen",
+    "purge_media": "Mediendateien löschen",
+    "archived_col": "Archiviert am",
+    "archived_on": "Archiviert am {date}",
+    "archive_confirm": "Diese Immobilie archivieren? Sie verschwindet sofort von der öffentlichen Website. Sie können sie wiederherstellen.",
+    "delete_title": "Endgültige Löschung",
+    "delete_body": "Diese Aktion kann nicht rückgängig gemacht werden. Die Immobilie und ihre Bildeinträge werden aus der Datenbank gelöscht. Dateien (Fotos, Video) werden nicht gelöscht. Geben Sie zur Bestätigung die Referenz ein: {ref}",
+    "delete_input_label": "Referenz der Immobilie",
+    "delete_mismatch": "Die Referenz stimmt nicht überein.",
+    "cancel": "Abbrechen",
+    "deleted_media_title": "Immobilie gelöscht. Separat zu löschende Dateien:",
+    "deleted_no_media": "Immobilie gelöscht. Keine zugehörige Datei.",
+    "purge_confirm": "Die Dateien (Fotos und Video) dieser archivierten Immobilie endgültig löschen? Nicht umkehrbar.",
+    "purge_done": "{count} Datei(en) gelöscht.",
+    "migration_missing": "Die Archivierung erfordert das SQL supabase/manual/20261005_archivage_biens.sql, das noch nicht ausgeführt wurde. Archivieren, Wiederherstellen und Löschen sind bis dahin nicht verfügbar.",
+    "empty_archived": "Keine archivierte Immobilie.",
+    "error": "Aktion nicht möglich: {message}"
+  },
+  "property_gone": {
+    "title": "Diese Immobilie ist nicht mehr verfügbar",
+    "body": "Die gesuchte Immobilie wurde aus unserem Katalog entfernt. Entdecken Sie unsere weiteren Immobilien zum Kauf und zur Miete in Luxemburg.",
+    "cta": "Zum Katalog",
+    "meta_title": "Immobilie nicht mehr verfügbar, MAPA Property"
   }
 }

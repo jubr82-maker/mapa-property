@@ -1453,5 +1453,34 @@
     "sort_desc": "Newest first",
     "sort_asc": "Oldest first",
     "email_received": "Received on {date} (Luxembourg time)"
+  },
+  "admin_properties": {
+    "tab_active": "Active",
+    "tab_archived": "Archived",
+    "archive": "Archive",
+    "restore": "Restore",
+    "delete": "Delete permanently",
+    "purge_media": "Delete media files",
+    "archived_col": "Archived on",
+    "archived_on": "Archived on {date}",
+    "archive_confirm": "Archive this property? It will disappear from the public site immediately. You can restore it.",
+    "delete_title": "Permanent deletion",
+    "delete_body": "This action cannot be undone. The property and its image rows will be deleted from the database. Files (photos, video) are not deleted. To confirm, type the property reference: {ref}",
+    "delete_input_label": "Property reference",
+    "delete_mismatch": "The reference does not match.",
+    "cancel": "Cancel",
+    "deleted_media_title": "Property deleted. Files still to be deleted separately:",
+    "deleted_no_media": "Property deleted. No associated file.",
+    "purge_confirm": "Permanently delete the files (photos and video) of this archived property? This cannot be undone.",
+    "purge_done": "{count} file(s) deleted.",
+    "migration_missing": "Archiving requires the SQL supabase/manual/20261005_archivage_biens.sql, not yet run. Archive, Restore and Delete are unavailable until then.",
+    "empty_archived": "No archived property.",
+    "error": "Action failed: {message}"
+  },
+  "property_gone": {
+    "title": "This property is no longer available",
+    "body": "The property you are looking for has been removed from our catalogue. Discover our other properties for sale and for rent in Luxembourg.",
+    "cta": "View the catalogue",
+    "meta_title": "Property no longer available, MAPA Property"
   }
 }

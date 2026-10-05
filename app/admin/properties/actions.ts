@@ -4,6 +4,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PROPERTIES_LIST_TAG } from "@/lib/data";
+import { invalidateArchivedPropertyKeys } from "@/lib/archived-properties";
+import { deleteFromR2, isR2Configured, R2_PUBLIC_URL_BASE } from "@/lib/r2";
 import {
   PROPERTY_TYPE_FAMILIES,
   PROPERTY_STATES,
@@ -486,4 +488,138 @@ export async function createProperty(
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   redirect(`/admin/properties/${data.id}?created=1`);
+}
+
+// ---------------------------------------------------------------------------
+// Archivage et suppression des biens (oct. 2026)
+// ---------------------------------------------------------------------------
+// Archiver = depublier (is_published = false) + horodater archived_at : le
+// site public ne lit que les biens publies (lib/data.ts), le bien disparait
+// donc partout ; sa fiche repond 410 (proxy.ts + app/api/property-gone).
+// Restaurer = remettre en ligne tel quel (is_published = true).
+// Supprimer = UNIQUEMENT un bien deja archive, apres saisie de sa reference
+// (slug, sinon id), verifiee ICI cote serveur. Les fichiers (photos du
+// bucket property-images, video R2) ne sont jamais supprimes avec le bien :
+// action separee purgePropertyMedia, declenchee explicitement.
+
+export type PropertyLifecycleResult =
+  | { ok: true; media?: string[]; purged?: number }
+  | { ok: false; error: string };
+
+const PHOTO_BUCKET = "property-images";
+
+function revalidatePropertyPaths(slug: string | null) {
+  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
+  revalidatePath("/admin/properties");
+  for (const l of ["fr", "en", "de"]) {
+    revalidatePath(`/${l}`);
+    revalidatePath(`/${l}/biens`);
+    if (slug) revalidatePath(`/${l}/biens/${slug}`);
+  }
+  invalidateArchivedPropertyKeys();
+}
+
+async function readLifecycleRow(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  id: string,
+) {
+  const { data, error } = await supabase
+    .from("properties")
+    .select("id,slug,archived_at,video_url")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) return { row: null, error: error.message };
+  return {
+    row: data as { id: string; slug: string | null; archived_at: string | null; video_url: string | null } | null,
+    error: null,
+  };
+}
+
+export async function archiveProperty(id: string): Promise<PropertyLifecycleResult> {
+  const supabase = await createSupabaseServerClient();
+  const { row, error } = await readLifecycleRow(supabase, id);
+  if (error || !row) return { ok: false, error: error ?? "not_found" };
+  const { error: upErr } = await supabase
+    .from("properties")
+    .update({ is_published: false, archived_at: new Date().toISOString() })
+    .eq("id", id);
+  if (upErr) return { ok: false, error: upErr.message };
+  revalidatePropertyPaths(row.slug);
+  return { ok: true };
+}
+
+export async function restoreProperty(id: string): Promise<PropertyLifecycleResult> {
+  const supabase = await createSupabaseServerClient();
+  const { row, error } = await readLifecycleRow(supabase, id);
+  if (error || !row) return { ok: false, error: error ?? "not_found" };
+  const { error: upErr } = await supabase
+    .from("properties")
+    .update({ is_published: true, archived_at: null })
+    .eq("id", id);
+  if (upErr) return { ok: false, error: upErr.message };
+  revalidatePropertyPaths(row.slug);
+  return { ok: true };
+}
+
+/** Fichiers du bien : chemins du bucket property-images et video R2. */
+async function listPropertyMedia(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  id: string,
+  videoUrl: string | null,
+): Promise<string[]> {
+  const { data } = await supabase.from("property_images").select("url").eq("property_id", id);
+  const urls = ((data ?? []) as { url: string }[]).map((r) => r.url);
+  if (videoUrl) urls.push(videoUrl);
+  return urls;
+}
+
+export async function deleteProperty(
+  id: string,
+  typedReference: string,
+): Promise<PropertyLifecycleResult> {
+  const supabase = await createSupabaseServerClient();
+  const { row, error } = await readLifecycleRow(supabase, id);
+  if (error || !row) return { ok: false, error: error ?? "not_found" };
+  // Garde serveur : jamais depuis la liste active, jamais sans la reference.
+  if (!row.archived_at) return { ok: false, error: "not_archived" };
+  const expected = row.slug || row.id;
+  if (typedReference.trim() !== expected) return { ok: false, error: "reference_mismatch" };
+
+  const media = await listPropertyMedia(supabase, id, row.video_url);
+  const { error: imgErr } = await supabase.from("property_images").delete().eq("property_id", id);
+  if (imgErr) return { ok: false, error: imgErr.message };
+  const { error: delErr } = await supabase.from("properties").delete().eq("id", id);
+  if (delErr) return { ok: false, error: delErr.message };
+  console.info("[admin/properties] bien supprime, fichiers conserves", { id, files: media.length });
+  revalidatePropertyPaths(row.slug);
+  return { ok: true, media };
+}
+
+/**
+ * ACTION SEPAREE, jamais appelee par deleteProperty : supprime les fichiers
+ * d'un bien ARCHIVE (photos du bucket property-images, video sur R2). Les
+ * photos hebergees ailleurs (media.apimo.pro) ne sont pas touchees.
+ */
+export async function purgePropertyMedia(id: string): Promise<PropertyLifecycleResult> {
+  const supabase = await createSupabaseServerClient();
+  const { row, error } = await readLifecycleRow(supabase, id);
+  if (error || !row) return { ok: false, error: error ?? "not_found" };
+  if (!row.archived_at) return { ok: false, error: "not_archived" };
+  const media = await listPropertyMedia(supabase, id, row.video_url);
+  const marker = `/storage/v1/object/public/${PHOTO_BUCKET}/`;
+  const paths = media
+    .filter((u) => u.includes(marker))
+    .map((u) => decodeURIComponent(u.split(marker)[1].split("?")[0]));
+  let purged = 0;
+  if (paths.length) {
+    const { data, error: rmErr } = await supabase.storage.from(PHOTO_BUCKET).remove(paths);
+    if (rmErr) return { ok: false, error: rmErr.message };
+    purged += data?.length ?? 0;
+  }
+  const r2Base = R2_PUBLIC_URL_BASE;
+  if (row.video_url && r2Base && row.video_url.startsWith(`${r2Base}/`) && isR2Configured()) {
+    await deleteFromR2(row.video_url.slice(r2Base.length + 1));
+    purged += 1;
+  }
+  return { ok: true, purged };
 }

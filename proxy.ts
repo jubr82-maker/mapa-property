@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "./i18n/routing";
 import { isAdminEmail } from "@/lib/admin/admin-emails";
+import { getArchivedPropertyKeys } from "@/lib/archived-properties";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -73,6 +74,17 @@ export default async function middleware(request: NextRequest) {
     }
 
     return noStore(response);
+  }
+
+  // Fiche d'un bien ARCHIVE (oct. 2026) : 410 + page "plus disponible"
+  // (app/api/property-gone), au lieu d'une erreur brute.
+  const ficheMatch = pathname.match(/^\/(fr|en|de)\/biens\/([^/]+)\/?$/);
+  if (ficheMatch) {
+    const archived = await getArchivedPropertyKeys();
+    if (archived.has(decodeURIComponent(ficheMatch[2]))) {
+      const gone = new URL(`/api/property-gone?locale=${ficheMatch[1]}`, request.url);
+      return NextResponse.rewrite(gone);
+    }
   }
 
   return intlMiddleware(request);
