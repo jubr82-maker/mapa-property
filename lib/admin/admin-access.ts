@@ -20,14 +20,25 @@ export function evaluateAdminAccess(
 /**
  * Redirection imposee par proxy.ts pour une page /admin, ou null si la page
  * peut etre servie.
+ *
+ * `serverAction` (oct. 2026) : appel d'action serveur (POST avec en-tete
+ * Next-Action) sur une page publique (connexion...). Il n'est JAMAIS
+ * redirige : la connexion par Passkey ouvre la session dans le navigateur
+ * PUIS appelle une action depuis /admin/login ; la regle "session ouverte
+ * sur /admin/login -> /admin/mfa ou /admin" detournait cet appel, qui
+ * n'atteignait jamais le serveur (rien au journal) et laissait l'ecran
+ * bloque. Les actions se protegent elles-memes (gardes testees), et un
+ * visiteur anonyme pouvait deja appeler une action depuis ces pages.
  */
 export function adminPageRedirect(
   pathname: string,
   access: AdminAccess,
+  opts?: { serverAction?: boolean },
 ): { path: string; params?: Record<string, string> } | null {
   const allowed = access === "admin" || access === "mfa_required";
   const isPublic = ADMIN_PUBLIC_PATHS.has(pathname);
   const isMfa = pathname === ADMIN_MFA_PATH;
+  if (opts?.serverAction && isPublic) return null;
   if (!allowed && !isPublic) return { path: "/admin/login", params: { from: pathname } };
   if (access === "mfa_required" && !isMfa && !isPublic) return { path: ADMIN_MFA_PATH, params: { from: pathname } };
   if (access === "mfa_required" && pathname === "/admin/login") return { path: ADMIN_MFA_PATH };

@@ -232,7 +232,8 @@
     "investment_1": "Income properties",
     "investment_2": "Yield-oriented new builds",
     "investment_3": "Off-market value-add deals",
-    "investment_4": "International diversification"
+    "investment_4": "International diversification",
+    "card_aria": "{title}, {action}"
   },
   "services_home": {
     "eyebrow": "Our expertise",
@@ -392,7 +393,7 @@
   },
   "method_coverage": {
     "title": "Method & Coverage",
-    "subtitle": "Four asset families, Three steps, One framework."
+    "subtitle": "Four asset families. Three steps. One framework."
   },
   "quote_band": {
     "text": "Working together matters. Protecting each party's interest with a clear framework matters more.",
@@ -488,7 +489,7 @@
     "gallery_prev": "Previous photo",
     "gallery_next": "Next photo",
     "gallery_thumb": "Show photo {n}",
-    "gallery_counter": "{current} / {total}",
+    "gallery_counter": "{current} of {total}",
     "video_play": "Play video",
     "video_close": "Close video",
     "print_advisor_title": "Your advisor, MAPA Property",
@@ -496,7 +497,8 @@
     "print_phone": "Phone: {value}",
     "print_email": "Email: {value}",
     "print_listing": "Full listing:",
-    "print_footer_brand": "MAPA PROPERTY, a brand of MAPA Synergy Sàrl"
+    "print_footer_brand": "MAPA PROPERTY, a brand of MAPA Synergy Sàrl",
+    "gallery_swipe_hint": "Swipe to change photo, down to close"
   },
   "property_financing": {
     "eyebrow": "Indicative financing plan",
@@ -1827,7 +1829,14 @@
     "event_passkey_rename": "Passkey renamed",
     "event_passkey_remove": "Passkey deleted",
     "auth_log_moved": "The log of sign-ins and admin actions is now in the Security space of the management menu.",
-    "auth_log_open": "Open the log"
+    "auth_log_open": "Open the log",
+    "passkey_step_failed": "Step “{step}” interrupted (error or time limit reached). Sign-in did not complete.",
+    "passkey_phase_turnstile": "Bot check",
+    "passkey_phase_ceremony": "Passkey: confirm on your device",
+    "passkey_phase_complete": "Opening the session",
+    "passkey_use_password": "Sign in with your email, password and 6-digit code.",
+    "passkey_no_session": "The session opened by the passkey was not passed to the server.",
+    "event_passkey_step": "Passkey sign-in step"
   },
   "admin_notices": {
     "workflow_partial_title": "Tracking unavailable",
@@ -3496,6 +3505,7 @@
     "reason_aal1": "single factor, 6-digit code required next",
     "reason_aal2": "two-factor",
     "reason_invalid_credentials": "wrong credentials",
-    "reason_wrong_current": "wrong current password"
+    "reason_wrong_current": "wrong current password",
+    "event_auth_passkey_step": "Passkey sign-in step"
   }
 }

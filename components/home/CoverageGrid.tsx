@@ -64,13 +64,21 @@ export function CoverageGrid({ hideHeader = false }: CoverageGridProps = {}) {
           </header>
         )}
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:grid-cols-4">
+        {/* Point de rupture (oct. 2026) : une colonne sous 640 px. Sur
+            iPhone 17 Pro Max (440 px), 2 colonnes laissaient environ 150 px
+            de texte par liste (environ 23 caracteres par ligne) : les
+            elements les plus longs (45 caracteres en anglais, 44 en
+            allemand) passaient sur 3 lignes et la liste la plus longue
+            (138 caracteres, allemand) devenait illisible. En une colonne :
+            environ 340 px de texte, un element par ligne. */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-4">
           {typologies.map((typo, idx) => {
             const isFlipped = isMobile && expandedKey === typo.key;
             return (
-              <FadeInOnScroll key={typo.key} delay={idx * 200} y={30}>
+              <FadeInOnScroll key={typo.key} delay={idx * 200} y={30} className="h-full">
               <HoverFlipCard
-                height="h-52 sm:h-60 md:h-64"
+                className="h-full"
+                minHeight="min-h-36 sm:min-h-60 md:min-h-64"
                 flipped={isMobile ? expandedKey === typo.key : undefined}
                 onFlipToggle={
                   isMobile
@@ -80,9 +88,10 @@ export function CoverageGrid({ hideHeader = false }: CoverageGridProps = {}) {
                         )
                     : undefined
                 }
-                ariaLabel={`${t(`${typo.key}_title`)} — ${
-                  isFlipped ? t("show_less") : t("show_more")
-                }`}
+                ariaLabel={t("card_aria", {
+                  title: t(`${typo.key}_title`),
+                  action: isFlipped ? t("show_less") : t("show_more"),
+                })}
                 front={
                   <div className="flex size-full flex-col justify-between rounded-xl border border-border-subtle bg-bg p-3 md:p-6">
                     <span className="font-mono text-[10px] font-light uppercase tracking-[0.3em] text-gold-deep">

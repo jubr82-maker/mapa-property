@@ -43,3 +43,29 @@ export function safeAdminRedirect(target: string | null | undefined, fallback = 
   if (target.includes("\\") || /[\r\n]/.test(target)) return fallback;
   return target;
 }
+
+/**
+ * Connexion par Passkey (oct. 2026) : cookie httpOnly d'une tentative
+ * ouverte par la verification Turnstile, condition pour journaliser les
+ * etapes rapportees par le navigateur.
+ */
+export const PASSKEY_ATTEMPT_COOKIE = "mapa_passkey_attempt";
+export const PASSKEY_ATTEMPT_MAX_AGE_SECONDS = 300;
+
+/** Delais maximaux du parcours (ms) avant message d'erreur. */
+export const PASSKEY_SERVER_STEP_TIMEOUT_MS = 20_000;
+export const PASSKEY_CEREMONY_TIMEOUT_MS = 90_000;
+export const PASSKEY_REPORT_TIMEOUT_MS = 5_000;
+
+/** Etapes que le navigateur peut rapporter au journal. */
+export const PASSKEY_CLIENT_STEPS = [
+  "ceremony:start",
+  "ceremony:ok",
+  "ceremony_error",
+  "ceremony_timeout",
+  "turnstile_error",
+  "turnstile_timeout",
+  "complete_error",
+  "complete_timeout",
+] as const;
+export type PasskeyClientStep = (typeof PASSKEY_CLIENT_STEPS)[number];

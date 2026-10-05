@@ -232,7 +232,8 @@
     "investment_1": "Immeubles de rapport",
     "investment_2": "Programmes neufs avec rendement",
     "investment_3": "Biens off-market à valeur ajoutée",
-    "investment_4": "Diversification internationale"
+    "investment_4": "Diversification internationale",
+    "card_aria": "{title}, {action}"
   },
   "services_home": {
     "eyebrow": "Nos expertises",
@@ -392,7 +393,7 @@
   },
   "method_coverage": {
     "title": "Méthode & Couverture",
-    "subtitle": "Quatre familles d'actifs, Trois étapes, Un cadre."
+    "subtitle": "Quatre familles d'actifs. Trois étapes. Un cadre."
   },
   "quote_band": {
     "text": "Travailler ensemble est important. Protéger les intérêts de chacun par un cadre clair l'est davantage.",
@@ -488,7 +489,7 @@
     "gallery_prev": "Photo précédente",
     "gallery_next": "Photo suivante",
     "gallery_thumb": "Afficher la photo {n}",
-    "gallery_counter": "{current} / {total}",
+    "gallery_counter": "{current} sur {total}",
     "video_play": "Lire la vidéo",
     "video_close": "Fermer la vidéo",
     "print_advisor_title": "Votre conseiller, MAPA Property",
@@ -496,7 +497,8 @@
     "print_phone": "Téléphone : {value}",
     "print_email": "E-mail : {value}",
     "print_listing": "Annonce complète :",
-    "print_footer_brand": "MAPA PROPERTY, une marque de MAPA Synergy Sàrl"
+    "print_footer_brand": "MAPA PROPERTY, une marque de MAPA Synergy Sàrl",
+    "gallery_swipe_hint": "Glissez pour changer de photo, vers le bas pour fermer"
   },
   "property_financing": {
     "eyebrow": "Plan de financement indicatif",
@@ -1827,7 +1829,14 @@
     "event_passkey_rename": "Passkey renommée",
     "event_passkey_remove": "Suppression de Passkey",
     "auth_log_moved": "Le journal des connexions et des actions de l'admin se consulte désormais dans l'espace Sécurité du pilotage.",
-    "auth_log_open": "Ouvrir le journal"
+    "auth_log_open": "Ouvrir le journal",
+    "passkey_step_failed": "Étape « {step} » interrompue (erreur ou délai dépassé). La connexion n'a pas abouti.",
+    "passkey_phase_turnstile": "Vérification anti-robot",
+    "passkey_phase_ceremony": "Passkey : validez sur l'appareil",
+    "passkey_phase_complete": "Ouverture de la session",
+    "passkey_use_password": "Connectez-vous avec l'e-mail, le mot de passe et le code à 6 chiffres.",
+    "passkey_no_session": "La session ouverte par la Passkey n'a pas été transmise au serveur.",
+    "event_passkey_step": "Étape de connexion par Passkey"
   },
   "admin_notices": {
     "workflow_partial_title": "Suivi indisponible",
@@ -3496,6 +3505,7 @@
     "reason_aal1": "un seul facteur, code à 6 chiffres exigé ensuite",
     "reason_aal2": "double authentification",
     "reason_invalid_credentials": "identifiants incorrects",
-    "reason_wrong_current": "ancien mot de passe incorrect"
+    "reason_wrong_current": "ancien mot de passe incorrect",
+    "event_auth_passkey_step": "Étape de connexion par Passkey"
   }
 }

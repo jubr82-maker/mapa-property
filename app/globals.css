@@ -797,6 +797,21 @@ body {
    ============================================================ */
 .flip-card {
   perspective: 1000px;
+  /* Hauteur mesuree (HoverFlipCard) : meme duree et meme courbe que le
+     retournement, a l'ouverture comme a la fermeture. */
+  transition: height 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Doubles de mesure des deux faces : meme largeur que la carte, hauteur
+   naturelle, invisibles et sans effet sur la mise en page. */
+.flip-card-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
 }
 .flip-card-inner {
   position: relative;
@@ -808,6 +823,7 @@ body {
   will-change: transform;
 }
 @media (prefers-reduced-motion: reduce) {
+  .flip-card,
   .flip-card-inner {
     transition: none;
   }

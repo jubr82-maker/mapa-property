@@ -107,7 +107,8 @@ export default async function middleware(request: NextRequest) {
 
     // Decision partagee et testee (lib/admin/admin-access.ts).
     const access = evaluateAdminAccess(user, aal2 ? "aal2" : "aal1");
-    const target = adminPageRedirect(pathname, access);
+    const isServerAction = request.method === "POST" && request.headers.has("next-action");
+    const target = adminPageRedirect(pathname, access, { serverAction: isServerAction });
     if (target) return redirectTo(target.path, target.params);
 
     return noStore(response);

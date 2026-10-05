@@ -150,9 +150,10 @@ export function MandatesGrid() {
             600ms (vs 250 avant) + flip auto declenchee par l'observer. */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
           {middleMandates.map((m, idx) => (
-            <FadeInOnScroll key={m.key} delay={idx * 600} y={30}>
+            <FadeInOnScroll key={m.key} delay={idx * 600} y={30} className="h-full">
               <HoverFlipCard
-                height="h-36 sm:h-44 md:h-48"
+                className="h-full"
+                minHeight="min-h-36 sm:min-h-44 md:min-h-48"
                 flipped={flipped[m.key]}
                 front={
                   <div className="relative flex size-full flex-col justify-between rounded-lg border border-border-subtle bg-bg p-3 md:p-4">

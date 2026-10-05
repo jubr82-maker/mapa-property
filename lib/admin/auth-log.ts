@@ -15,6 +15,7 @@ export type AdminAuthEvent =
   | "factor_remove"
   | "passkey_add"
   | "passkey_login"
+  | "passkey_step"
   | "passkey_rename"
   | "passkey_remove"
   | "logout"

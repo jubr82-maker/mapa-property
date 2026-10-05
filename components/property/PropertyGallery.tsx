@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { PropertyLightbox } from "@/components/property/PropertyLightbox";
 
 interface GalleryItem {
   type: "image" | "video";
@@ -31,8 +32,11 @@ export function PropertyGallery({ items, title }: Props) {
   const [direct, setDirect] = useState<ReadonlySet<string>>(() => new Set());
 
   const mainRef = useRef<HTMLButtonElement | null>(null);
-  const fallbackToDirect = (url: string) =>
-    setDirect((prev) => (prev.has(url) ? prev : new Set(prev).add(url)));
+  const fallbackToDirect = useCallback(
+    (url: string) => setDirect((prev) => (prev.has(url) ? prev : new Set(prev).add(url))),
+    [],
+  );
+  const closeLightbox = useCallback(() => setLightbox(false), []);
 
   // Une erreur de chargement survenue AVANT l'hydratation n'atteint pas
   // onError : on verifie donc l'etat reel de la photo principale apres
@@ -50,23 +54,6 @@ export function PropertyGallery({ items, title }: Props) {
     img.addEventListener("error", check);
     return () => img.removeEventListener("error", check);
   }, [currentUrl, direct]);
-
-  useEffect(() => {
-    if (!lightbox) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightbox(false);
-      if (e.key === "ArrowRight")
-        setActive((a) => (a + 1) % items.length);
-      if (e.key === "ArrowLeft")
-        setActive((a) => (a - 1 + items.length) % items.length);
-    };
-    window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [lightbox, items.length]);
 
   if (items.length === 0) {
     return (
@@ -155,66 +142,15 @@ export function PropertyGallery({ items, title }: Props) {
       </p>
 
       {lightbox && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-bg-contrast/95 p-4 backdrop-blur">
-          <button
-            type="button"
-            onClick={() => setLightbox(false)}
-            aria-label={t("gallery_close")}
-            className="absolute right-4 top-4 z-10 inline-flex size-12 items-center justify-center rounded-full border border-text-contrast/30 text-text-contrast transition-colors hover:border-gold hover:text-gold"
-          >
-            <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
-
-          {items.length > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={() => setActive((a) => (a - 1 + items.length) % items.length)}
-                aria-label={t("gallery_prev")}
-                className="absolute left-4 top-1/2 z-10 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-text-contrast/30 text-text-contrast transition-colors hover:border-gold hover:text-gold"
-              >
-                <ArrowIcon direction="left" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setActive((a) => (a + 1) % items.length)}
-                aria-label={t("gallery_next")}
-                className="absolute right-4 top-1/2 z-10 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-text-contrast/30 text-text-contrast transition-colors hover:border-gold hover:text-gold"
-              >
-                <ArrowIcon direction="right" />
-              </button>
-            </>
-          )}
-
-          <div className="relative size-full max-w-6xl">
-            {current.type === "image" ? (
-              <Image
-                key={current.url}
-                src={current.url}
-                alt={current.alt ?? title}
-                fill
-                sizes="100vw"
-                unoptimized={direct.has(current.url)}
-                onError={() => fallbackToDirect(current.url)}
-                className="object-contain"
-              />
-            ) : (
-              <video
-                src={current.url}
-                controls
-                autoPlay
-                playsInline
-                className="size-full object-contain"
-              />
-            )}
-          </div>
-
-          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.3em] text-text-contrast/70">
-            {t("gallery_counter", { current: active + 1, total: items.length })}
-          </span>
-        </div>
+        <PropertyLightbox
+          items={items}
+          title={title}
+          startIndex={Math.min(active, items.length - 1)}
+          direct={direct}
+          onDirect={fallbackToDirect}
+          onIndexChange={setActive}
+          onClose={closeLightbox}
+        />
       )}
     </>
   );
@@ -224,14 +160,6 @@ function PlayIcon() {
   return (
     <svg viewBox="0 0 24 24" className="size-5" fill="currentColor" aria-hidden="true">
       <path d="M8 5v14l11-7z" />
-    </svg>
-  );
-}
-
-function ArrowIcon({ direction }: { direction: "left" | "right" }) {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={direction === "left" ? "M15 6l-6 6 6 6" : "M9 6l6 6-6 6"} />
     </svg>
   );
 }

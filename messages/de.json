@@ -232,7 +232,8 @@
     "investment_1": "Renditeobjekte",
     "investment_2": "Renditeorientierte Neubauten",
     "investment_3": "Off-Market-Wertsteigerung",
-    "investment_4": "Internationale Diversifikation"
+    "investment_4": "Internationale Diversifikation",
+    "card_aria": "{title}, {action}"
   },
   "services_home": {
     "eyebrow": "Unsere Expertisen",
@@ -392,7 +393,7 @@
   },
   "method_coverage": {
     "title": "Methode & Abdeckung",
-    "subtitle": "Vier Anlageklassen, Drei Schritte, Ein Rahmen."
+    "subtitle": "Vier Anlageklassen. Drei Schritte. Ein Rahmen."
   },
   "quote_band": {
     "text": "Zusammenarbeiten ist wichtig. Den Schutz der Interessen jedes Einzelnen durch einen klaren Rahmen zu gewährleisten ist noch wichtiger.",
@@ -488,7 +489,7 @@
     "gallery_prev": "Vorheriges Foto",
     "gallery_next": "Nächstes Foto",
     "gallery_thumb": "Foto {n} anzeigen",
-    "gallery_counter": "{current} / {total}",
+    "gallery_counter": "{current} von {total}",
     "video_play": "Video abspielen",
     "video_close": "Video schließen",
     "print_advisor_title": "Ihr Berater, MAPA Property",
@@ -496,7 +497,8 @@
     "print_phone": "Telefon: {value}",
     "print_email": "E-Mail: {value}",
     "print_listing": "Vollständige Anzeige:",
-    "print_footer_brand": "MAPA PROPERTY, eine Marke der MAPA Synergy Sàrl"
+    "print_footer_brand": "MAPA PROPERTY, eine Marke der MAPA Synergy Sàrl",
+    "gallery_swipe_hint": "Wischen, um das Foto zu wechseln, nach unten zum Schließen"
   },
   "property_financing": {
     "eyebrow": "Indikativer Finanzierungsplan",
@@ -1827,7 +1829,14 @@
     "event_passkey_rename": "Passkey umbenannt",
     "event_passkey_remove": "Passkey gelöscht",
     "auth_log_moved": "Das Protokoll der Anmeldungen und Admin-Aktionen befindet sich jetzt im Bereich Sicherheit der Steuerung.",
-    "auth_log_open": "Protokoll öffnen"
+    "auth_log_open": "Protokoll öffnen",
+    "passkey_step_failed": "Schritt „{step}“ unterbrochen (Fehler oder Zeitlimit). Die Anmeldung wurde nicht abgeschlossen.",
+    "passkey_phase_turnstile": "Bot-Prüfung",
+    "passkey_phase_ceremony": "Passkey: am Gerät bestätigen",
+    "passkey_phase_complete": "Sitzung wird geöffnet",
+    "passkey_use_password": "Melden Sie sich mit E-Mail, Passwort und 6-stelligem Code an.",
+    "passkey_no_session": "Die per Passkey geöffnete Sitzung wurde nicht an den Server übermittelt.",
+    "event_passkey_step": "Schritt der Passkey-Anmeldung"
   },
   "admin_notices": {
     "workflow_partial_title": "Nachverfolgung nicht verfügbar",
@@ -3496,6 +3505,7 @@
     "reason_aal1": "ein Faktor, danach 6-stelliger Code erforderlich",
     "reason_aal2": "Zwei-Faktor",
     "reason_invalid_credentials": "falsche Zugangsdaten",
-    "reason_wrong_current": "falsches aktuelles Passwort"
+    "reason_wrong_current": "falsches aktuelles Passwort",
+    "event_auth_passkey_step": "Schritt der Passkey-Anmeldung"
   }
 }

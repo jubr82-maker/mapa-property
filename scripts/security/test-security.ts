@@ -162,6 +162,7 @@ const AUTH_FLOW: Record<string, RegExp> = {
   resetPasswordAction: /isAdminEmail\(/,
   passkeyLoginStartAction: /verifyCaptchaIfConfigured\(/,
   passkeyLoginCompleteAction: /isAdminEmail\(/,
+  passkeyLoginReportAction: /attemptIsOpen\(/,
 };
 const actionFiles = [...walk("app", (p) => /\.tsx?$/.test(p)), ...walk("lib", (p) => /\.tsx?$/.test(p)), ...walk("components", (p) => /\.tsx?$/.test(p))]
   .filter((f) => /^\s*["']use server["']/.test(read(f).slice(0, 60)))
@@ -416,7 +417,7 @@ section = "J. Passkeys";
     const op = firstIndex(body, /passkey\.|\.from\(|logAdminAuthEvent/);
     check(`${n} : garde admin aal2 avant toute operation`, body.length > 0 && g >= 0 && (op < 0 || g < op), "action absente ou garde manquante");
   }
-  check("aucune autre action de gestion exportee", fns.every((x) => MANAGEMENT.includes(x.name) || /^passkeyLogin(Start|Complete)Action$/.test(x.name)), fns.map((x) => x.name).join(", "));
+  check("aucune autre action de gestion exportee", fns.every((x) => MANAGEMENT.includes(x.name) || /^passkeyLogin(Start|Complete|Report)Action$/.test(x.name)), fns.map((x) => x.name).join(", "));
   // La garde de gestion refuse les trois cas (meme decision que l'admin).
   check("gestion : session anonyme refusee", evaluateAdminAccess(null, null) !== "admin");
   check("gestion : compte hors liste refuse (meme en aal2)", evaluateAdminAccess({ email: "intrus@example.org" }, "aal2") !== "admin");
@@ -687,6 +688,53 @@ section = "M. Fiche de bien et coordonnees";
   }
   // Le controle lui-meme detecte bien chaque cas.
   check("controle HTML : detecte admin@, mailto:, tel:, numero", forbiddenHits('<a href="mailto:x">admin@mapagroup.org</a><a href="tel:+352691620127">+352 691 620 127</a>').length === 4 && forbiddenHits('<input type="tel" autocomplete="tel-national"> Stadtviertel: x').length === 0);
+}
+
+// ===========================================================================
+// N. Cartes depliables, accroches, visionneuse, Passkey, region
+// ===========================================================================
+section = "N. Cartes, visionneuse, Passkey, region";
+{
+  // Region d'execution : arn1 (Stockholm), a cote de la base Supabase.
+  const vj = JSON.parse(read("vercel.json")) as { regions?: string[] };
+  check("region des fonctions : arn1 uniquement", JSON.stringify(vj.regions) === JSON.stringify(["arn1"]), JSON.stringify(vj.regions));
+  // Cartes retournables : plus de hauteur fixe, hauteur mesuree.
+  const flip = read("components/ui/HoverFlipCard.tsx");
+  check("cartes : hauteur mesuree, jamais fixe", /ResizeObserver/.test(flip) && /minHeight/.test(flip) && !/height = "h-/.test(flip));
+  for (const f of ["components/home/CoverageGrid.tsx", "components/home/MandatesGrid.tsx"]) {
+    check(`${f} : hauteur minimale seulement`, /minHeight="min-h-/.test(read(f)) && !/\sheight="h-/.test(read(f)));
+  }
+  check("cartes : une colonne sous 640 px", /grid grid-cols-1 gap-3 sm:grid-cols-2/.test(read("components/home/CoverageGrid.tsx")));
+  check("cartes : transition de hauteur symetrique", /\.flip-card \{[\s\S]*?transition: height 500ms/.test(read("app/globals.css")));
+  // Accroches : jamais une virgule devant une majuscule.
+  for (const l of ["fr", "en", "de"]) {
+    const m = JSON.parse(read(`messages/${l}.json`)) as { method_coverage: { subtitle: string } };
+    check(`accroche ${l} : trois phrases`, !/, \p{Lu}/u.test(m.method_coverage.subtitle) && (m.method_coverage.subtitle.match(/\./g) ?? []).length === 3, m.method_coverage.subtitle);
+  }
+  // Visionneuse.
+  const lb = read("components/property/PropertyLightbox.tsx");
+  check("visionneuse : glissement qui suit le doigt (embla)", /useEmblaCarousel\(/.test(lb) && /from "embla-carousel-react"/.test(lb));
+  check("visionneuse : pincement sans changer de photo", /touches\.length > 1\) return false/.test(lb) && /isPageZoomed\(\)/.test(lb));
+  check("visionneuse : touches Gauche, Droite, Echap", /"Escape"/.test(lb) && /"ArrowRight"/.test(lb) && /"ArrowLeft"/.test(lb));
+  check("visionneuse : glisser vers le bas pour fermer", /CLOSE_DISTANCE/.test(lb) && /translateY/.test(lb));
+  check("visionneuse : compteur et photos voisines prechargees", /gallery_counter/.test(lb) && /PRELOAD_RADIUS/.test(lb) && /loading="eager"/.test(lb));
+  check("visionneuse : page derriere figee", /body\.style\.position = "fixed"/.test(lb) && /window\.scrollTo\(0, scrollY\)/.test(lb));
+  check("visionneuse : branchee sur la galerie des fiches", /<PropertyLightbox/.test(read("components/property/PropertyGallery.tsx")));
+  // Passkey : l'action de fin n'est plus detournee par le proxy.
+  check("proxy : action serveur sur la page de connexion jamais redirigee", adminPageRedirect("/admin/login", "mfa_required", { serverAction: true }) === null && adminPageRedirect("/admin/login", "admin", { serverAction: true }) === null);
+  check("proxy : navigation vers la connexion avec session toujours redirigee", adminPageRedirect("/admin/login", "mfa_required")?.path === "/admin/mfa" && adminPageRedirect("/admin/login", "admin")?.path === "/admin");
+  check("proxy : action serveur hors pages publiques toujours protegee", adminPageRedirect("/admin/leads", "anonymous", { serverAction: true })?.path === "/admin/login" && adminPageRedirect("/admin/leads", "mfa_required", { serverAction: true })?.path === "/admin/mfa");
+  check("proxy : detection de l'action serveur", /request\.method === "POST" && request\.headers\.has\("next-action"\)/.test(read("proxy.ts")));
+  const pkc = read("components/admin/PasskeyClient.tsx");
+  const startBody = pkc.slice(pkc.indexOf("const start = async"), pkc.indexOf("const label ="));
+  check("Passkey : chaque appel du parcours a un delai maximal", /withTimeout\(passkeyLoginStartAction/.test(startBody) && /withTimeout\(\s*supabase\.auth\.signInWithPasskey/.test(startBody) && /withTimeout\(passkeyLoginCompleteAction/.test(startBody));
+  check("Passkey : aucune attente nue d'un appel du parcours", !/await (passkeyLogin\w+Action|createSupabaseBrowserClient\(\)\.auth\.signInWithPasskey)\(/.test(startBody));
+  check("Passkey : erreurs affichees et journalisees, mot de passe propose", (startBody.match(/catch \(e\)/g) ?? []).length >= 3 && /passkey_use_password/.test(pkc) && /console\.error/.test(pkc));
+  check("Passkey : ceremonie annulee au delai depasse", /abort\.abort\(\)/.test(startBody));
+  const pka = read("app/admin/passkey-actions.ts");
+  check("Passkey : debut et reussite des etapes journalises", /reason: "turnstile:start"/.test(pka) && /turnstile:ok/.test(pka) && /reason: "complete:start"/.test(pka) && /complete:\$\{level\}/.test(pka));
+  check("Passkey : etapes du navigateur acceptees seulement pendant une tentative", /if \(!\(await attemptIsOpen\(\)\)\) return/.test(pka) && /rateLimit\(/.test(pka));
+  check("Passkey : aal2 jamais fabrique, lu dans le jeton Supabase", /getAuthenticatorAssuranceLevel\(\)/.test(pka) && !/aal2:\s*true/.test(pka));
 }
 
 // ===========================================================================
