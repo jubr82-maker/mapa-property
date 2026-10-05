@@ -1,3 +1,5 @@
+import { ADMIN_LOCALE } from "@/lib/datetime";
+import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import Link from "next/link";
 import {
@@ -30,6 +32,7 @@ import { TokenMissingCard } from "@/components/admin/analytics/TokenMissingCard"
 import { TopList } from "@/components/admin/analytics/TopList";
 import { PieChart } from "@/components/admin/analytics/PieChart";
 import { LineChart as AnalyticsLineChart } from "@/components/admin/analytics/LineChart";
+import { AdminNotice } from "@/components/admin/AdminNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -671,6 +674,9 @@ function Leads12mLine({ byMonth }: { byMonth: Record<string, number> }) {
 // ---------------------------------------------------------------------------
 
 export default async function AdminAnalyticsPage() {
+  const notices = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_notices" });
+  const notConfigured = notices("source_not_configured_title");
+  const dataUnavailable = notices("data_unavailable");
   const [data, ext] = await Promise.all([loadAnalytics(), loadExternalAnalytics()]);
   const { ga4, vercel, cloudflare, supa } = ext;
 
@@ -703,7 +709,7 @@ export default async function AdminAnalyticsPage() {
           label="Sessions · 30 j (GA4)"
           value={ga4Ok ? ga4Ok.sessions30d : null}
           Icon={Globe}
-          hint={ga4Ok ? undefined : "Configurer GA4_PROPERTY_ID"}
+          hint={ga4Ok ? undefined : notConfigured}
         />
         <KpiCard
           label="Conversions · 30 j"
@@ -909,10 +915,7 @@ export default async function AdminAnalyticsPage() {
           </header>
 
           {!data.biens.viewsAvailable ? (
-            <p className="rounded-xl border border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-6 text-sm text-[#3D4F63]/70">
-              Données disponibles après migration <code className="font-mono text-xs">20260512_property_views.sql</code>.
-              À appliquer dans Supabase SQL Editor.
-            </p>
+            <AdminNotice kind="views_unavailable" />
           ) : data.biens.topProperties.length === 0 ? (
             <p className="text-sm text-[#3D4F63]/60">
               Aucune vue enregistrée pour le moment.
@@ -1018,15 +1021,10 @@ export default async function AdminAnalyticsPage() {
         <SectionHeader eyebrow="Section E" title="Trafic GA4" Icon={Globe} />
 
         {ga4Missing && ga4Missing.reason === "missing_token" ? (
-          <TokenMissingCard
-            title="Google Analytics 4 Data API"
-            envVars={["GA4_PROPERTY_ID", "GA4_SERVICE_ACCOUNT_KEY"]}
-            configUrl={ga4Missing.configUrl ?? "https://console.cloud.google.com/iam-admin/serviceaccounts"}
-            instructions={ga4Missing.instructions}
-          />
+          <TokenMissingCard title="Google Analytics 4 Data API" />
         ) : ga4Missing ? (
           <div className="rounded-lg border border-[#C2604B]/30 bg-white p-6 text-sm text-[#C2604B]">
-            Erreur GA4 : {ga4Missing.message ?? ga4Missing.reason}
+            {dataUnavailable}
           </div>
         ) : ga4Ok ? (
           <>
@@ -1078,16 +1076,10 @@ export default async function AdminAnalyticsPage() {
         <SectionHeader eyebrow="Section F" title="Web Vitals (Vercel)" Icon={Zap} />
 
         {vercelMissing && vercelMissing.reason === "missing_token" ? (
-          <TokenMissingCard
-            title="Vercel REST API · Web Insights"
-            envVars={["VERCEL_API_TOKEN", "VERCEL_PROJECT_ID"]}
-            configUrl={vercelMissing.configUrl ?? "https://vercel.com/account/tokens"}
-            instructions={vercelMissing.instructions}
-          />
+          <TokenMissingCard title="Vercel REST API · Web Insights" />
         ) : vercelMissing ? (
           <div className="rounded-lg border border-[#e0af6e]/40 bg-white p-6 text-sm text-[#3D4F63]/70">
-            API Vercel indisponible : {vercelMissing.message ?? vercelMissing.reason}. Consulter
-            le dashboard Vercel directement.
+            {dataUnavailable}
           </div>
         ) : vercelOk ? (
           <>
@@ -1164,15 +1156,10 @@ export default async function AdminAnalyticsPage() {
         <SectionHeader eyebrow="Section G" title="Cloudflare · 30 j" Icon={Cloud} />
 
         {cfMissing && cfMissing.reason === "missing_token" ? (
-          <TokenMissingCard
-            title="Cloudflare GraphQL Analytics"
-            envVars={["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_ZONE_ID"]}
-            configUrl={cfMissing.configUrl ?? "https://dash.cloudflare.com/profile/api-tokens"}
-            instructions={cfMissing.instructions}
-          />
+          <TokenMissingCard title="Cloudflare GraphQL Analytics" />
         ) : cfMissing ? (
           <div className="rounded-lg border border-[#C2604B]/30 bg-white p-6 text-sm text-[#C2604B]">
-            Erreur Cloudflare : {cfMissing.message ?? cfMissing.reason}
+            {dataUnavailable}
           </div>
         ) : cfOk ? (
           <>

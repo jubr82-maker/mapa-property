@@ -13,6 +13,10 @@ export type AdminAuthEvent =
   | "reset_request"
   | "factor_add"
   | "factor_remove"
+  | "passkey_add"
+  | "passkey_login"
+  | "passkey_rename"
+  | "passkey_remove"
   | "logout"
   | "idle_logout";
 

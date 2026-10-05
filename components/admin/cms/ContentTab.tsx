@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   createColumnHelper,
   flexRender,
@@ -24,6 +25,7 @@ type Editable = ContentRow & { _draft: string; _saving: boolean; _error?: string
 const helper = createColumnHelper<Editable>();
 
 export function ContentTab({ initial }: { initial: ContentRow[] }) {
+  const notices = useTranslations("admin_notices");
   const [rows, setRows] = useState<Editable[]>(() =>
     initial.map((r) => ({ ...r, _draft: r.content, _saving: false })),
   );
@@ -170,15 +172,13 @@ export function ContentTab({ initial }: { initial: ContentRow[] }) {
   }
 
   if (initial.length === 0) {
+    // Avertissement sans commande technique (audit oct. 2026).
     return (
       <div className="rounded-lg border border-dashed border-[#3D4F63]/30 bg-white p-8 text-center">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63]/70">
-          Aucun contenu CMS en base
+          {notices("cms_empty_title")}
         </p>
-        <p className="mt-2 text-sm text-[#3D4F63]">
-          Lance le seeder pour initialiser :{" "}
-          <code className="font-mono text-xs">pnpm exec tsx scripts/seed-cms.ts</code>
-        </p>
+        <p className="mt-2 text-sm text-[#3D4F63]">{notices("cms_empty")}</p>
       </div>
     );
   }

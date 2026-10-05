@@ -20,6 +20,12 @@ export const ADMIN_ACTIVITY_COOKIE = "mapa_admin_activity";
 /** Page d'inscription ou de verification du second facteur. */
 export const ADMIN_MFA_PATH = "/admin/mfa";
 
+/** Longueur maximale du nom d'une Passkey (Supabase accepte 120). */
+export const PASSKEY_NAME_MAX_LENGTH = 60;
+
+/** Identifiant de Passkey Supabase (UUID). */
+export const PASSKEY_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** Pages admin accessibles sans session admin complete. */
 export const ADMIN_PUBLIC_PATHS: ReadonlySet<string> = new Set([
   "/admin/login",

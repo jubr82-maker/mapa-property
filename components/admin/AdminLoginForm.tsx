@@ -3,6 +3,8 @@
 // Connexion admin, etape 1 (oct. 2026) : e-mail + mot de passe + Turnstile,
 // verifies cote serveur (loginAction, journalise). L'etape 2, second facteur
 // obligatoire, se fait sur /admin/mfa (inscription ou verification).
+// Alternative : Passkey (empreinte, Face ID), meme Turnstile ; le code a 6
+// chiffres reste exige si Supabase n'attribue pas aal2 a la session.
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useRef, useState } from "react";
@@ -10,6 +12,7 @@ import { useTranslations } from "next-intl";
 import { Turnstile, type TurnstileHandle } from "@/components/ui/Turnstile";
 import { loginAction } from "@/app/admin/auth-actions";
 import { ADMIN_IDLE_TIMEOUT_MINUTES, ADMIN_MFA_PATH, safeAdminRedirect } from "@/lib/admin/security-config";
+import { PasskeyLoginButton } from "@/components/admin/PasskeyClient";
 import { authButtonCls, authErrorCls, authInputCls, authLabelCls, authLinkCls, authOkCls } from "@/components/admin/auth-ui";
 
 export function AdminLoginForm({
@@ -65,6 +68,14 @@ export function AdminLoginForm({
       <button type="submit" disabled={busy} className={authButtonCls}>
         {busy ? t("submitting") : t("login_submit")}
       </button>
+      <PasskeyLoginButton
+        captchaToken={captchaToken}
+        redirectTo={from}
+        onCaptchaUsed={() => {
+          turnstileRef.current?.reset();
+          setCaptchaToken("");
+        }}
+      />
       <p className="text-center">
         <Link href="/admin/forgot-password" className={authLinkCls}>{t("forgot_link")}</Link>
       </p>

@@ -12,7 +12,7 @@ import { getMessages } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { AdminIdleWatcher } from "@/components/admin/AdminIdleWatcher";
 
-const ADMIN_NAMESPACES = ["admin_security", "admin_datetime", "admin_properties"] as const;
+const ADMIN_NAMESPACES = ["admin_security", "admin_datetime", "admin_properties", "admin_notices"] as const;
 
 async function adminMessages() {
   const all = (await getMessages({ locale: ADMIN_LOCALE })) as Record<string, unknown>;

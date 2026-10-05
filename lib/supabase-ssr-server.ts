@@ -7,6 +7,9 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
   return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    // Gestion des Passkeys cote serveur (liste, nom, suppression) : cf.
+    // lib/supabase-ssr.ts pour la portee du drapeau experimental.
+    auth: { experimental: { passkey: true } },
     cookies: {
       getAll() {
         return cookieStore.getAll();

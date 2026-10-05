@@ -12,6 +12,7 @@ import { ConvertToMandatButton } from "@/components/admin/ConvertToMandatButton"
 import { DeleteLeadButton } from "@/components/admin/DeleteLeadButton";
 import { ExportLeadButton } from "@/components/admin/ExportLeadButton";
 import { PdfExportButton } from "@/components/admin/PdfExportButton";
+import { AdminNotice } from "@/components/admin/AdminNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -137,19 +138,7 @@ export default async function AdminLeadDetailPage({
       </header>
 
       {!migrationApplied && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-700">
-            Migration en attente
-          </p>
-          <p className="mt-1">
-            Les fonctionnalités workflow (statut, notes, follow-up) sont
-            désactivées tant que{" "}
-            <code className="font-mono">
-              supabase/migrations/20260512_admin_workflow_leads.sql
-            </code>{" "}
-            n&apos;est pas appliqué dans le SQL Editor Supabase.
-          </p>
-        </div>
+        <AdminNotice kind="workflow_partial" />
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">

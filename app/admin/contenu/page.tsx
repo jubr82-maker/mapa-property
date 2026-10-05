@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { ContenuTabs } from "@/components/admin/cms/ContenuTabs";
 import type { ContentRow } from "@/components/admin/cms/ContentTab";
 import type { TokenRow } from "@/components/admin/cms/FontsTab";
+import { AdminNotice } from "@/components/admin/AdminNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export const metadata = {
 async function loadData(): Promise<{
   content: ContentRow[];
   tokens: TokenRow[];
-  warning?: string;
+  warning?: boolean;
 }> {
   const supabase = await createSupabaseServerClient();
 
@@ -42,8 +43,7 @@ async function loadData(): Promise<{
     return {
       content: [],
       tokens: [],
-      warning:
-        "Tables CMS introuvables — appliquer les migrations supabase/migrations/20260513_cms_*.sql avant utilisation.",
+      warning: true,
     };
   }
 
@@ -77,11 +77,7 @@ export default async function AdminContenuPage() {
         </p>
       </header>
 
-      {warning && (
-        <div className="rounded-lg border border-amber-500/40 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          {warning}
-        </div>
-      )}
+      {warning && <AdminNotice kind="cms_unavailable" />}
 
       <ContenuTabs initialContent={content} initialTokens={tokens} />
     </div>

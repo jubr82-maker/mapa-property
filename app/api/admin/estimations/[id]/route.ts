@@ -131,7 +131,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         error: isCheck
-          ? "Migration requise : appliquer supabase/migrations/20260518_estimation_status_deleted.sql (CHECK status n'autorise pas encore 'deleted')."
+          ? "feature_unavailable"
           : "db_error",
       },
       { status: isCheck ? 409 : 500 },

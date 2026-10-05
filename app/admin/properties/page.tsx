@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE, formatDateTime } from "@/lib/datetime";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PropertiesTable } from "@/components/admin/PropertiesTable";
+import { AdminNotice } from "@/components/admin/AdminNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -97,11 +98,7 @@ export default async function AdminPropertiesPage({
             {" "}— lecture seule, sauf <em>is_published</em> et <em>is_featured</em>.
           </p>
           {error && (
-            <p className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-              Lecture impossible : {error.message}. Vérifie que la migration
-              <code className="mx-1 rounded bg-white px-1 font-mono text-xs">20260511_admin_rls_properties.sql</code>
-              a bien été appliquée dans Supabase.
-            </p>
+            <div className="mt-2"><AdminNotice kind="read_error" /></div>
           )}
         </div>
         <div className="flex gap-2">

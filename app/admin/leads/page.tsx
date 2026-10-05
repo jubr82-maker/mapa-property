@@ -12,6 +12,7 @@ import {
   WORKFLOW_STATUSES,
   type WorkflowStatus,
 } from "@/components/admin/WorkflowBadge";
+import { AdminNotice } from "@/components/admin/AdminNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -188,24 +189,7 @@ export default async function AdminLeadsPage({
       </header>
 
       {!migrationApplied && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-700">
-            Migration en attente
-          </p>
-          <p className="mt-1">
-            Les colonnes <code className="font-mono">workflow_status</code>,{" "}
-            <code className="font-mono">admin_notes</code>,{" "}
-            <code className="font-mono">next_follow_up</code> et{" "}
-            <code className="font-mono">workflow_history</code> n&apos;existent
-            pas encore. Applique{" "}
-            <code className="font-mono">
-              supabase/migrations/20260512_admin_workflow_leads.sql
-            </code>{" "}
-            dans le SQL Editor Supabase pour activer les sous-onglets, le
-            workflow 6 statuts et les notes admin. En attendant, vue
-            &laquo;&nbsp;Tous&nbsp;&raquo; uniquement.
-          </p>
-        </div>
+        <AdminNotice kind="workflow_list" />
       )}
 
       <DateSortToggle

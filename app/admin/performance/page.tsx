@@ -1,3 +1,5 @@
+import { ADMIN_LOCALE } from "@/lib/datetime";
+import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { Activity, Gauge, Package, ShieldCheck } from "lucide-react";
 import { ScoreCard } from "@/components/admin/performance/ScoreCard";
@@ -161,6 +163,7 @@ function SectionHeader({
 // ---------------------------------------------------------------------------
 
 export default async function AdminPerformancePage() {
+  const notices = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_notices" });
   const [psi, sentry, bundle] = await Promise.all([
     fetchInternal<PsiResponse>("/api/admin/performance/psi"),
     fetchInternal<SentryResponse>("/api/admin/performance/sentry"),
@@ -266,7 +269,7 @@ export default async function AdminPerformancePage() {
         <article className="rounded-lg border border-[#3D4F63]/15 bg-white p-6">
           {!psiOk || psiResults.length === 0 ? (
             <p className="text-sm text-[#3D4F63]/60">
-              Données indisponibles — réessayer dans 10 minutes ou configurer PSI_API_KEY.
+              {notices("data_unavailable")}
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -346,9 +349,7 @@ export default async function AdminPerformancePage() {
             </p>
           ) : !bundle.ok ? (
             <p className="rounded-md border border-dashed border-[#3D4F63]/20 bg-[#F5EFE1] p-4 text-sm text-[#3D4F63]/70">
-              {bundle.reason === "no_build"
-                ? "Aucun build trouvé — lancer pnpm build d'abord."
-                : bundle.message ?? bundle.reason}
+              {notices("data_unavailable")}
             </p>
           ) : (
             <>
@@ -372,11 +373,7 @@ export default async function AdminPerformancePage() {
             API Sentry interne injoignable.
           </p>
         ) : !sentry.ok ? (
-          <SentryNotConfiguredCard
-            signupUrl={sentry.signupUrl}
-            instructions={sentry.instructions}
-            missing={sentry.missing}
-          />
+          <SentryNotConfiguredCard />
         ) : (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">

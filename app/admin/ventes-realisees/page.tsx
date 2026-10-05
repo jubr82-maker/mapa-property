@@ -19,6 +19,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SaleForm } from "./SaleForm";
 import { DeleteSaleButton } from "./DeleteSaleButton";
 import { ComparableControl } from "./ComparableControl";
+import { AdminNotice } from "@/components/admin/AdminNotice";
 
 interface SaleRow {
   id: string;
@@ -165,16 +166,7 @@ export default async function AdminVentesRealiseesPage({
       </header>
 
       {overrideColumnMissing && (
-        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-700">
-            Migration en attente
-          </p>
-          <p className="mt-1">
-            Colonne <code className="font-mono">comparable_override</code> absente —
-            appliquer <code className="font-mono">supabase/migrations/20260701d_add_comparable_override.sql</code>{" "}
-            dans Supabase Studio. En attendant, la comparabilité est en mode auto (12 mois) et non modifiable.
-          </p>
-        </div>
+        <AdminNotice kind="comparable" />
       )}
 
       {/* Totaux + filtres */}

@@ -10,6 +10,7 @@ import {
 } from "@/components/admin/WorkflowBadge";
 import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 import { formatPrice as formatPriceShared } from "@/lib/format/numbers";
+import { AdminNotice } from "@/components/admin/AdminNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -253,19 +254,7 @@ export default async function AdminMandatsPage({
       </header>
 
       {!migrationApplied && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-700">
-            Données partielles
-          </p>
-          <p className="mt-1">
-            Les colonnes workflow (statut, notes, follow-up) ne sont pas
-            disponibles. Vérifie que la migration{" "}
-            <code className="font-mono">
-              20260512_admin_workflow_mandats.sql
-            </code>{" "}
-            est appliquée.
-          </p>
-        </div>
+        <AdminNotice kind="workflow_partial" />
       )}
 
       {/* Onglets section type_transaction (Vente / Recherche / Location) */}

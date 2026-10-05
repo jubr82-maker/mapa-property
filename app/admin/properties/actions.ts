@@ -491,8 +491,7 @@ export async function createProperty(
     return {
       ok: false,
       error:
-        error?.message ??
-        "Erreur d'enregistrement (vérifier que la migration 20260904_properties_saisie_manuelle.sql est appliquée).",
+        error?.message ?? "save_failed",
     };
   }
 

@@ -7,44 +7,25 @@ import Link from "next/link";
 export function SettingsClient({ userEmail }: { userEmail: string | null }) {
   return (
     <div className="space-y-6">
-      {/* Oct. 2026 : mot de passe et double authentification deplaces dans
-          /admin/securite (ancien mot de passe exige, 14 caracteres, QR code
-          fourni par Supabase sans service tiers). */}
+      {/* Oct. 2026 : mot de passe, Passkeys et double authentification
+          dans /admin/securite. */}
       <SecurityMovedNotice />
-      <PasskeySection />
       <AccountInfoSection email={userEmail} />
     </div>
   );
 }
 
-function PasskeySection() {
-  return (
-    <Section title="Touch ID / Passkey (WebAuthn)">
-      <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-        <p className="font-semibold">Module en cours d&apos;intégration.</p>
-        <p className="mt-2 text-amber-700">
-          L&apos;authentification Passkey / Touch ID requiert un service WebAuthn
-          côté serveur (génération de challenge, vérification de signature),
-          stockage des clés publiques en base, et l&apos;extension du flux Supabase
-          Auth. À livrer en pair-programming avec Julien — voir BLOCKERS.md.
-          En attendant, l&apos;équipe MAPA peut s&apos;appuyer sur la 2FA TOTP
-          ci-dessus pour la sécurité renforcée.
-        </p>
-      </div>
-    </Section>
-  );
-}
-
 // ----- Account info --------------------------------------------------------
 function AccountInfoSection({ email }: { email: string | null }) {
+  const t = useTranslations("admin_security");
   return (
-    <Section title="Compte">
+    <Section title={t("account_section")}>
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
         <div>
           <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
-            Email
+            {t("email")}
           </dt>
-          <dd className="mt-0.5 font-mono text-sm text-[#1A1F2A]">{email ?? "—"}</dd>
+          <dd className="mt-0.5 font-mono text-sm text-[#1A1F2A]">{email ?? ""}</dd>
         </div>
       </dl>
     </Section>

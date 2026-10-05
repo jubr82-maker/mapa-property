@@ -140,6 +140,8 @@ const AUTH_FLOW: Record<string, RegExp> = {
   enrollStartAction: /isAdminEmail\(/,
   enrollConfirmAction: /isAdminEmail\(/,
   resetPasswordAction: /isAdminEmail\(/,
+  passkeyLoginStartAction: /verifyCaptchaIfConfigured\(/,
+  passkeyLoginCompleteAction: /isAdminEmail\(/,
 };
 const actionFiles = [...walk("app", (p) => /\.tsx?$/.test(p)), ...walk("lib", (p) => /\.tsx?$/.test(p)), ...walk("components", (p) => /\.tsx?$/.test(p))]
   .filter((f) => /^\s*["']use server["']/.test(read(f).slice(0, 60)))
@@ -149,9 +151,9 @@ let actionCount = 0;
 for (const f of actionFiles) {
   for (const { name, body } of exportedFunctions(read(f))) {
     actionCount++;
-    if (AUTH_FLOW[name] && f.endsWith("auth-actions.ts")) {
+    if (AUTH_FLOW[name] && /app\/admin\/(auth|passkey)-actions\.ts$/.test(f)) {
       const c = firstIndex(body, AUTH_FLOW[name]);
-      const op = firstIndex(body, /signInWithPassword|resetPasswordForEmail|updateUser|mfa\.(enroll|challenge|verify|unenroll)|\.from\(/);
+      const op = firstIndex(body, /signInWithPassword|resetPasswordForEmail|updateUser|mfa\.(enroll|challenge|verify|unenroll)|passkey\.|getAuthenticatorAssuranceLevel|\.from\(/);
       check(`${f} ${name} : controle propre au parcours de connexion avant toute operation`, c >= 0 && (op < 0 || c < op), `controle ${AUTH_FLOW[name]} absent ou apres l'operation`);
       continue;
     }
@@ -373,6 +375,56 @@ if (hasBuild) {
     for (const [label, re] of SECRET_PATTERNS) if (re.test(text)) hits.push(`${f} : ${label}`);
   }
   check(`aucune cle serveur dans ${clientFiles.length} fichiers servis au navigateur`, hits.length === 0, hits.slice(0, 10).join(" ; "));
+}
+
+// ===========================================================================
+// J. Passkeys
+// ===========================================================================
+section = "J. Passkeys";
+{
+  const src = read("app/admin/passkey-actions.ts");
+  const fns = exportedFunctions(src);
+  const MANAGEMENT = ["passkeyRegisteredAction", "passkeyRenameAction", "passkeyDeleteAction"];
+  for (const n of MANAGEMENT) {
+    const body = fns.find((x) => x.name === n)?.body ?? "";
+    const g = firstIndex(body, /assertAdminAction\(\)/);
+    const op = firstIndex(body, /passkey\.|\.from\(|logAdminAuthEvent/);
+    check(`${n} : garde admin aal2 avant toute operation`, body.length > 0 && g >= 0 && (op < 0 || g < op), "action absente ou garde manquante");
+  }
+  check("aucune autre action de gestion exportee", fns.every((x) => MANAGEMENT.includes(x.name) || /^passkeyLogin(Start|Complete)Action$/.test(x.name)), fns.map((x) => x.name).join(", "));
+  // La garde de gestion refuse les trois cas (meme decision que l'admin).
+  check("gestion : session anonyme refusee", evaluateAdminAccess(null, null) !== "admin");
+  check("gestion : compte hors liste refuse (meme en aal2)", evaluateAdminAccess({ email: "intrus@example.org" }, "aal2") !== "admin");
+  check("gestion : session aal1 refusee", evaluateAdminAccess({ email: "admin@mapagroup.org" }, "aal1") !== "admin");
+  check("garde de gestion fondee sur aal2", /evaluateAdminAccess\(user, aal2 \? "aal2" : "aal1"\)/.test(read("lib/admin/require-admin.ts")) && /currentLevel === "aal2"/.test(read("lib/admin/require-admin.ts")));
+  // Regle A2 : une session ouverte par Passkey n'ouvre l'admin que si le
+  // jeton emis par Supabase porte aal2 ; sinon le code a 6 chiffres.
+  for (const p of ["/admin", "/admin/securite"]) {
+    check(`Passkey avec aal1 sur ${p} : code a 6 chiffres exige`, adminPageRedirect(p, evaluateAdminAccess({ email: "admin@mapagroup.org" }, "aal1"))?.path === "/admin/mfa");
+    check(`Passkey avec aal2 sur ${p} : admin servi`, adminPageRedirect(p, evaluateAdminAccess({ email: "admin@mapagroup.org" }, "aal2")) === null);
+  }
+  check("Passkey sans niveau (jeton sans aal) : code exige", evaluateAdminAccess({ email: "admin@mapagroup.org" }, undefined) === "mfa_required");
+  // Jamais de niveau fabrique ni de methode (amr) lue pour accorder l'acces.
+  const accessFiles = ["proxy.ts", "lib/admin/require-admin.ts", "lib/admin/admin-access.ts", "lib/admin/sales-auth.ts", "app/admin/passkey-actions.ts", "app/admin/auth-actions.ts", "components/admin/PasskeyClient.tsx"];
+  for (const f of accessFiles) {
+    const t = read(f);
+    check(`${f} : aucune methode de connexion (amr) utilisee`, !/currentAuthenticationMethods|\bamr\b/.test(t));
+    check(`${f} : aucun aal2 fabrique`, !/(currentLevel|aal)\s*[:=]\s*["']aal2["']|aal2\s*[:=]\s*true\b/.test(t));
+  }
+  const complete = fns.find((x) => x.name === "passkeyLoginCompleteAction")?.body ?? "";
+  check("connexion Passkey : compte hors liste deconnecte", /!isAdminEmail\(user\.email\)\)\s*\{\s*await supabase\.auth\.signOut\(\)/.test(complete));
+  check("connexion Passkey : niveau lu cote serveur apres getUser", firstIndex(complete, /getUser\(\)/) >= 0 && firstIndex(complete, /getUser\(\)/) < firstIndex(complete, /getAuthenticatorAssuranceLevel\(\)/));
+  const blocB = read("supabase/manual/execution/05_bloc_B.sql");
+  check("SQL bloc B : aal2 lu dans le jeton Supabase", /auth\.jwt\(\) ->> 'aal', ''\) = 'aal2'/.test(blocB));
+  check("SQL bloc B : search_path conserve (bloc D)", /SET search_path = public, pg_temp/.test(blocB));
+  check("SQL bloc B : test Passkey aal1 refuse avant validation", /Passkey en aal1 : refuse/.test(blocB) && /RAISE EXCEPTION/.test(blocB));
+  check("SQL bloc C : search_path conserve", /SET search_path = public, pg_temp/.test(read("supabase/manual/execution/05_bloc_C_secours.sql")));
+  for (const f of fs.readdirSync(path.join(ROOT, "supabase/manual/execution"))) {
+    const sql = read(`supabase/manual/execution/${f}`);
+    check(`SQL ${f} : aucune reference a leads_notifications`, !/leads_notifications/.test(sql));
+    check(`SQL ${f} : aucun tiret long ou moyen`, !/[\u2013\u2014]/.test(sql));
+  }
+  check("connexion Passkey : Turnstile conserve", /passkeyLoginStartAction\(captchaToken\)/.test(read("components/admin/PasskeyClient.tsx")) && /<PasskeyLoginButton/.test(read("components/admin/AdminLoginForm.tsx")));
 }
 
 // ===========================================================================

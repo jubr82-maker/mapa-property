@@ -132,9 +132,6 @@ function FontCard({
           </span>
         )}
       </div>
-      <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[#3D4F63]/40">
-        TODO: chargement dynamique Google Fonts (phase ultérieure)
-      </p>
     </div>
   );
 }
