@@ -47,7 +47,9 @@ export default async function EditSalePage({
   }
   if (!row) notFound();
 
-  const agent = row.agent === "frederic" ? "frederic" : "julien";
+  // Seul agent : Julien. Enregistrer une ancienne vente "frederic" la
+  // reattribue a Julien.
+  const agent = "julien" as const;
 
   return (
     <div className="space-y-6">

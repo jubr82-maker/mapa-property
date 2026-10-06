@@ -25,7 +25,12 @@ import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE, formatDateOnly } from "@/lib/datetime";
 
 const KNOWN_TYPES = ["appartement", "maison", "penthouse", "duplex", "villa", "immeuble", "terrain"];
-const KNOWN_AGENTS = ["julien", "frederic"];
+// Julien Brebion est le seul agent (oct. 2026) : toute vente est affichee
+// a son nom, y compris une vente encore enregistree sous une ancienne
+// valeur (a reattribuer en base par
+// supabase/manual/execution/13_ventes_agent_julien.sql).
+const KNOWN_AGENTS = ["julien"];
+const displayAgent = (_v: string) => "julien";
 
 interface SaleRow {
   id: string;
@@ -81,7 +86,7 @@ export default async function AdminVentesRealiseesPage({
   if (!user) redirect("/admin/login?from=/admin/ventes-realisees");
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_sales" });
   const typeLabel = (v: string) => (KNOWN_TYPES.includes(v) ? t(`propertyType.${v}`) : v);
-  const agentLabel = (v: string) => (KNOWN_AGENTS.includes(v) ? t(`agent.${v}`) : v);
+  const agentLabel = (v: string) => (KNOWN_AGENTS.includes(displayAgent(v)) ? t(`agent.${displayAgent(v)}`) : v);
 
   const params = await searchParams;
   const communeFilter = params.commune?.trim() || undefined;
@@ -101,7 +106,9 @@ export default async function AdminVentesRealiseesPage({
       .order("date_acte", { ascending: false })
       .limit(500);
     if (communeFilter) q = q.ilike("commune", `%${communeFilter}%`);
-    if (agentFilter) q = q.eq("agent", agentFilter);
+    // Seul agent : le filtre "julien" couvre toutes les ventes (anciennes
+    // valeurs comprises) ; toute autre valeur ne correspond a rien.
+    if (agentFilter && agentFilter !== "julien") q = q.eq("agent", agentFilter);
     return q;
   }
 
@@ -203,7 +210,6 @@ export default async function AdminVentesRealiseesPage({
           >
             <option value="">{t("filters.allAgents")}</option>
             <option value="julien">{t("agent.julien")}</option>
-            <option value="frederic">{t("agent.frederic")}</option>
           </select>
           <select
             name="year"

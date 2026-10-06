@@ -994,6 +994,21 @@ section = "P. Admin sur telephone";
     return out;
   });
   check("textes d'aide de l'admin : aucun \"cliquez\" (geste tactile)", clickTexts.length === 0, clickTexts.join(", "));
+
+  // Julien Brebion, seul agent et seul contact (oct. 2026). Le nom de
+  // Frederic Mannis ne reste que dans les textes juridiques (lib/legal/ :
+  // gerant de la societe, referent RGPD), en attente de decision de Julien.
+  const nameRe = /fr[eé]d[eé]ric|mannis/i;
+  const codeFiles = [...walk("app", (x) => /\.(tsx?|css)$/.test(x)), ...walk("components", (x) => /\.(tsx?)$/.test(x)), ...walk("lib", (x) => /\.tsx?$/.test(x) && !x.startsWith("lib/legal/"))];
+  const nameInCode = codeFiles.filter((f) => nameRe.test(read(f).replace(/^\s*\/\/.*$/gm, "")));
+  check("Frederic : absent du code de l'admin et du site (hors textes juridiques)", nameInCode.length === 0, nameInCode.join(", "));
+  const nameInMessages = (["fr", "en", "de"] as const).filter((l) => nameRe.test(read(`messages/${l}.json`)));
+  check("Frederic : absent des libelles (trois langues)", nameInMessages.length === 0, nameInMessages.join(", "));
+  check("ventes : Julien seul agent propose et accepte", /ALLOWED_AGENTS = new Set\(\["julien"\]\)/.test(read("lib/admin/sales-auth.ts")) && /type Agent = "julien";/.test(read("app/admin/ventes-realisees/SaleForm.tsx")) && /KNOWN_AGENTS = \["julien"\]/.test(read("app/admin/ventes-realisees/page.tsx")));
+  check("contact : seul le contact de Julien peut etre revele", !/MAPA_PHONE_FREDERIC|"frederic"/.test(read("app/api/contact-reveal/route.ts")));
+  const sqlAgent = read("supabase/manual/execution/13_ventes_agent_julien.sql");
+  check("ventes : fichier SQL de reattribution avec sauvegarde prealable et tableau avant et apres", /CREATE TABLE public\.mapa_historical_sales_sauvegarde_agent_20261006 AS TABLE public\.mapa_historical_sales/.test(sqlAgent) &&
+    /SET agent = 'julien'\s*WHERE agent = 'frederic'/.test(sqlAgent) && /ventes_avant[\s\S]*ventes_apres/.test(sqlAgent.slice(sqlAgent.lastIndexOf("COMMIT;"))));
 }
 
 // ===========================================================================

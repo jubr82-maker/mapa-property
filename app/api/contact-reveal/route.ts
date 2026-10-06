@@ -8,7 +8,8 @@ const SUSPECT_UA =
   /curl|wget|python-requests|Go-http-client|HTTPie|Apache-HttpClient|libwww|scrapy|httpclient|axios\/|node-fetch|Java\//i;
 
 type RevealType = "phone" | "email";
-type RevealTarget = "julien" | "frederic";
+// Un seul contact : Julien Brebion (oct. 2026).
+type RevealTarget = "julien";
 
 interface RevealBody {
   type?: RevealType;
@@ -61,11 +62,10 @@ export async function POST(req: Request) {
     }
   }
 
-  const target: RevealTarget = body.target === "frederic" ? "frederic" : "julien";
-  const phone =
-    target === "frederic"
-      ? (process.env.MAPA_PHONE_FREDERIC ?? FALLBACK_PHONE)
-      : (process.env.MAPA_PHONE ?? FALLBACK_PHONE);
+  // Toute cible demandee recoit le contact de Julien : aucune autre
+  // coordonnee n'est jamais revelee.
+  const target: RevealTarget = "julien";
+  const phone = process.env.MAPA_PHONE ?? FALLBACK_PHONE;
   const email = process.env.MAPA_EMAIL ?? FALLBACK_EMAIL;
 
   console.log(

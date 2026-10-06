@@ -26,7 +26,8 @@ export const SALES_ALLOWED_EMAILS = new Set([
   ADMIN_EMAIL_JBREBION,
 ]);
 
-const ALLOWED_AGENTS = new Set(["julien", "frederic"]);
+// Julien Brebion est le seul agent (oct. 2026) : toute autre valeur est refusee.
+const ALLOWED_AGENTS = new Set(["julien"]);
 
 type RequireOk = { ok: true; supabase: SupabaseClient; userEmail: string };
 type RequireErr = { ok: false; response: NextResponse };

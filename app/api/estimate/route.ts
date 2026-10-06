@@ -796,7 +796,7 @@ async function handlePost(req: Request) {
       });
 
       // Sprint B1 : emails client (confirmation + promesse rapport 48h ouvrees) +
-      // interne (notification lead Julien/Frederic). Best-effort, jamais bloquant.
+      // interne (notification lead a Julien). Best-effort, jamais bloquant.
       // AWAIT obligatoire (serverless Vercel) : sans await le process est gele
       // apres la reponse et le mail n'est jamais envoye. La fonction a son
       // try/catch interne (Promise.allSettled) → ne throw jamais.

@@ -8,7 +8,8 @@ import { useTranslations } from "next-intl";
 // et "edit" (PATCH /api/admin/ventes-realisees/[id]). En edition, les champs
 // sont pre-remplis via `initial` et on redirige vers la liste apres succes.
 
-type Agent = "julien" | "frederic";
+// Julien Brebion est le seul agent (oct. 2026).
+type Agent = "julien";
 
 interface State {
   property_type: string;
@@ -262,7 +263,6 @@ export function SaleForm({
             className={inputCls}
           >
             <option value="julien">{t("agent.julien")}</option>
-            <option value="frederic">{t("agent.frederic")}</option>
           </select>
         </Field>
       </div>
