@@ -85,7 +85,7 @@ export function NewEstimationForm() {
 
   return (
     <div className="max-w-3xl space-y-6 rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5">
           <span className={labelCls}>{t("new.type")}</span>
           <select className={inputCls} value={f.type} onChange={(e) => set("type", e.target.value)}>
@@ -136,7 +136,7 @@ export function NewEstimationForm() {
         </label>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className={labelCls}>{t("new.email")}</span>
           <input type="email" className={inputCls} value={f.contact_email} onChange={(e) => set("contact_email", e.target.value)} />
@@ -147,7 +147,7 @@ export function NewEstimationForm() {
         </label>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5">
           <span className={labelCls}>{t("new.priceLow")}</span>
           <input type="number" min="0" className={inputCls} value={f.price_low} onChange={(e) => set("price_low", e.target.value)} />

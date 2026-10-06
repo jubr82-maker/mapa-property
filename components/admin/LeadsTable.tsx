@@ -242,7 +242,7 @@ function LeadRow({
       {open && (
         <tr className="bg-[#F5EFE1]/40">
           <td colSpan={7} className="px-4 py-5">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
                   {t("message")}

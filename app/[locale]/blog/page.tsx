@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { seoPageMetadata } from "@/lib/seo-page-meta";
 import Image from "next/image";
+import { displayableImageSrc, isOptimizedImageSrc } from "@/lib/image-hosts";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchAllBlogPosts } from "@/lib/data";
@@ -62,9 +63,10 @@ export default async function BlogIndexPage({
                   className="group flex flex-col overflow-hidden rounded-xl border border-line bg-bg transition-colors hover:border-gold"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden bg-bg-deep">
-                    {post.cover_image ? (
+                    {displayableImageSrc(post.cover_image) ? (
                       <Image
-                        src={post.cover_image}
+                        src={displayableImageSrc(post.cover_image)!}
+                        unoptimized={!isOptimizedImageSrc(displayableImageSrc(post.cover_image)!)}
                         alt={title}
                         fill
                         sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 90vw"

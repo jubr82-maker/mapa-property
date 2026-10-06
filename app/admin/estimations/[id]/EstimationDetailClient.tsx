@@ -210,7 +210,7 @@ export function EstimationDetailClient({
   return (
     <>
       {/* Bloc contact + suivi */}
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-5">
           <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
             {t("detail.contactTitle")}
@@ -407,7 +407,7 @@ export function EstimationDetailClient({
         <p className="mb-4 text-xs text-[#1A1F2A]/60">
           {t("methods.intro")}
         </p>
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {METHOD_ORDER.map((k) => {
             const m = methods[k];
             if (!m) return null;
@@ -485,7 +485,7 @@ export function EstimationDetailClient({
             {t("weights.reset")}
           </button>
         </header>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {METHOD_ORDER.map((k) => {
             const applicable = methods[k]?.applicable;
             return (

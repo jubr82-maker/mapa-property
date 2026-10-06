@@ -2,9 +2,10 @@
 
 // Navigation de l'admin sur telephone (oct. 2026), sous 768 px :
 //  - en-tete compact en haut : titre de la page et deconnexion ;
-//  - barre fixe en bas, a portee du pouce : Tableau de bord, Leads, Biens,
-//    Activite commerciale, et Menu qui ouvre la liste complete (groupes
-//    Pilotage, Gestion et Compte).
+//  - barre fixe en bas, a portee du pouce : Accueil, Leads, Biens,
+//    Activite, et Menu qui ouvre la liste complete (groupes Pilotage,
+//    Gestion et Compte). Libelles courts propres a la barre (thumb_*),
+//    sur une ligne.
 // Zones tactiles d'au moins 44 px, marges de securite de l'iPhone
 // (encoche et barre d'accueil) respectees. Sur ordinateur, rien ne change :
 // barre laterale (AdminSidebar) et en-tete existant.
@@ -25,17 +26,50 @@ import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 const ALL_ITEMS: AdminNavItem[] = ADMIN_NAV_GROUPS.flatMap((g) => g.items);
 const THUMB_ITEMS: AdminNavItem[] = ADMIN_THUMB_KEYS.map((k) => ALL_ITEMS.find((i) => i.key === k)!).filter(Boolean);
 
+// Seconde passe (oct. 2026) : un seul titre par page sur telephone. L'en-tete
+// reprend le texte du h1 de la page (nom du bien, du lead...), masque dans
+// la page par admin-mobile.css ; a defaut, le libelle du menu.
+const PAGE_H1 = "main[data-admin-main] h1";
+const PAGE_INTRO = "main[data-admin-main] h1 + p";
+
 export function AdminMobileHeader() {
   const t = useTranslations("admin_nav");
   const pathname = usePathname();
   const item = currentNavItem(pathname);
+  const [pageTitle, setPageTitle] = useState<string | null>(null);
+
+  useEffect(() => {
+    const read = () => {
+      const text = document.querySelector(PAGE_H1)?.textContent?.trim();
+      setPageTitle(text || null);
+    };
+    read();
+    const main = document.querySelector("main[data-admin-main]");
+    if (!main) return;
+    const observer = new MutationObserver(read);
+    observer.observe(main, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
+  }, [pathname]);
+
+  // Description de la page : une ligne, depliee ou repliee d'une touche.
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const intro = (e.target as Element | null)?.closest?.(PAGE_INTRO);
+      if (!intro) return;
+      if (intro.hasAttribute("data-expanded")) intro.removeAttribute("data-expanded");
+      else intro.setAttribute("data-expanded", "");
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
   return (
     <header
       data-admin-mobile-header
       className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-gold bg-ink px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] text-bg md:hidden"
     >
-      <p className="min-w-0 truncate font-display text-xl font-bold">
-        {item ? t(item.key) : t("header_title")}
+      <p className="min-w-0 truncate font-display text-xl font-bold" data-admin-mobile-title>
+        {pageTitle ?? (item ? t(item.key) : t("header_title"))}
       </p>
       <AdminLogoutButton />
     </header>
@@ -94,7 +128,7 @@ export function AdminMobileNav() {
                   }`}
                 >
                   <Icon className={`size-6 ${active ? "text-gold-deep" : ""}`} aria-hidden />
-                  <span className="line-clamp-2">{t(item.key)}</span>
+                  <span className="line-clamp-1">{t(`thumb_${item.key}`)}</span>
                 </Link>
               </li>
             );
@@ -110,7 +144,7 @@ export function AdminMobileNav() {
               }`}
             >
               <Menu className="size-6" aria-hidden />
-              <span>{t("menu")}</span>
+              <span>{t("thumb_menu")}</span>
             </button>
           </li>
         </ul>

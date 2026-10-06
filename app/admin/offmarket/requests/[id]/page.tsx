@@ -140,7 +140,7 @@ export default async function AdminOffmarketRequestDetailPage({
         <AdminNotice kind="workflow_partial" />
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
         <div className="space-y-4">
           {property && (
             <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">

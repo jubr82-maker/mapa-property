@@ -16,6 +16,32 @@ export default async function AdminReviewsPage() {
 
   const rows = (data ?? []).map((r) => ({
     id: r.id,
+    // Telephone : nom, note et date, statut, action sur une ligne.
+    card: {
+      title: r.name ?? "",
+      titleHref: `/admin/reviews/${r.id}/edit`,
+      meta: [
+        "★".repeat(r.rating ?? 0) + "☆".repeat(Math.max(0, 5 - (r.rating ?? 0))),
+        formatDateOnly(r.review_date),
+      ].join(" · "),
+      sub: r.comment ?? undefined,
+      badge: (
+        <span
+          className={`rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] ${
+            r.is_published ? "bg-emerald-100 text-emerald-800" : "bg-[#3D4F63]/10 text-[#3D4F63]"
+          }`}
+        >
+          {r.is_published ? t("status_published") : t("status_draft")}
+        </span>
+      ),
+      actions: (
+        <div className="flex gap-2">
+          <Link href={`/admin/reviews/${r.id}/edit`} className="rounded border border-ink/20 text-[14px] text-ink">
+            {t("edit")}
+          </Link>
+        </div>
+      ),
+    },
     cells: [
       r.name ?? "",
       "★".repeat(r.rating ?? 0) + "☆".repeat(Math.max(0, 5 - (r.rating ?? 0))),

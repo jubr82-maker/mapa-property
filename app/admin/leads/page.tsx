@@ -200,7 +200,7 @@ export default async function AdminLeadsPage({
 
       {/* Sous-onglets workflow : ligne defilante sur telephone (dans la
           ligne seulement, jamais la page). */}
-      <nav className="-mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0">
+      <nav className="-mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0" data-admin-chips>
         {TABS.map((t) => {
           const active = tab === t.key;
           const count = counts[t.key] ?? 0;

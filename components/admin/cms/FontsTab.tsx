@@ -36,7 +36,7 @@ export function FontsTab({ initial }: { initial: TokenRow[] }) {
   const fonts = initial.filter((t) => t.category === "font");
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       {FONT_SLOTS.map((slot) => {
         const row = fonts.find((f) => f.token_key === slot.key);
         return (

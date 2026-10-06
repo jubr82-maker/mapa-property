@@ -16,7 +16,7 @@ export function ColorsTab({ initial }: { initial: TokenRow[] }) {
   const colors = initial.filter((t) => t.category === "color");
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       {COLOR_SLOTS.map((slot) => {
         const row = colors.find((c) => c.token_key === slot.key);
         return (

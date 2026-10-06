@@ -8,6 +8,8 @@ import {
   toggleDocumentPublic,
   deleteDocument,
 } from "@/app/admin/documents/actions";
+import { AdminListCard } from "@/components/admin/AdminListCard";
+import { AdminSwitch } from "@/components/admin/AdminSwitch";
 
 type Doc = {
   id: string;
@@ -52,7 +54,7 @@ export function DocumentsManager({ documents }: { documents: Doc[] }) {
         <h2 className="mb-5 font-display text-xl font-bold text-[#3D4F63]">
           {t("add_title")}
         </h2>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Field label={t("field_title")}>
             <input
               name="title"
@@ -107,8 +109,16 @@ export function DocumentsManager({ documents }: { documents: Doc[] }) {
         </button>
       </form>
 
-      <div className="overflow-x-auto rounded-2xl border border-[#3D4F63]/15 bg-white">
-        <table data-card-keep="1,4,5,6" className="w-full text-sm">
+      <ul className="space-y-3 md:hidden" data-admin-list-cards>
+        {documents.length === 0 ? (
+          <li className="rounded-2xl border border-ink/15 bg-bg-soft p-5 text-center text-base text-ink-mid">{t("empty")}</li>
+        ) : (
+          documents.map((d) => <DocRow key={d.id} doc={d} variant="card" />)
+        )}
+      </ul>
+
+      <div className="hidden overflow-x-auto rounded-2xl border border-[#3D4F63]/15 bg-white md:block">
+        <table data-no-cards className="w-full text-sm">
           <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
             <tr>
               <th className="px-4 py-3">{t("col_title")}</th>
@@ -138,10 +148,43 @@ export function DocumentsManager({ documents }: { documents: Doc[] }) {
   );
 }
 
-function DocRow({ doc }: { doc: Doc }) {
+function DocRow({ doc, variant = "row" }: { doc: Doc; variant?: "row" | "card" }) {
   const t = useTranslations("admin_documents");
   const [pub, setPub] = useState(!!doc.is_public);
   const [busy, startTransition] = useTransition();
+  const setPublic = (next: boolean) => {
+    setPub(next);
+    startTransition(() => toggleDocumentPublic(doc.id, next));
+  };
+  const remove = () => {
+    if (!confirm(t("delete_confirm"))) return;
+    startTransition(() => deleteDocument(doc.id));
+  };
+
+  // Telephone (seconde passe, oct. 2026) : carte compacte.
+  if (variant === "card") {
+    return (
+      <AdminListCard
+        title={doc.title}
+        meta={[categoryLabel(t, doc.category), formatDateTimeShort(doc.created_at)].filter(Boolean).join(" · ")}
+        controls={<AdminSwitch checked={pub} onChange={setPublic} disabled={busy} label={pub ? t("public") : t("private")} showLabel />}
+        actions={
+          <div className="flex gap-2">
+            {doc.signed_url ? (
+              <a href={doc.signed_url} target="_blank" rel="noopener noreferrer" className="rounded border border-ink/20 text-[14px] text-ink">
+                {t("open")}
+              </a>
+            ) : (
+              <span className="rounded border border-ink/10 text-[14px] text-ink-mid">{t("unavailable")}</span>
+            )}
+            <button type="button" disabled={busy} onClick={remove} className="rounded border border-red-200 text-[14px] text-red-700">
+              {t("delete")}
+            </button>
+          </div>
+        }
+      />
+    );
+  }
 
   return (
     <tr className="hover:bg-[#3D4F63]/5">
@@ -158,11 +201,7 @@ function DocRow({ doc }: { doc: Doc }) {
             type="checkbox"
             checked={pub}
             disabled={busy}
-            onChange={(e) => {
-              const next = e.target.checked;
-              setPub(next);
-              startTransition(() => toggleDocumentPublic(doc.id, next));
-            }}
+            onChange={(e) => setPublic(e.target.checked)}
             className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
           />
           {pub ? t("public") : t("private")}
@@ -188,10 +227,7 @@ function DocRow({ doc }: { doc: Doc }) {
         <button
           type="button"
           disabled={busy}
-          onClick={() => {
-            if (!confirm(t("delete_confirm"))) return;
-            startTransition(() => deleteDocument(doc.id));
-          }}
+          onClick={remove}
           aria-label={t("delete")}
           title={t("delete")}
           className="rounded border border-red-200 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50"

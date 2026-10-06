@@ -149,7 +149,7 @@ export default async function AdminArcovaPage({
         <AdminNotice kind="workflow_list" />
       )}
 
-      <nav className="flex flex-wrap items-center gap-2">
+      <nav className="flex flex-wrap items-center gap-2" data-admin-chips>
         {TABS.map((t) => {
           const active = tab === t.key;
           const count = counts[t.key] ?? 0;

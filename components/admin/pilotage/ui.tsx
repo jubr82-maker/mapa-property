@@ -36,7 +36,7 @@ export function Section({
 
 export function Card({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
-    <article className="rounded-2xl border border-ink/15 bg-bg-soft p-5">
+    <article className="min-w-0 rounded-2xl border border-ink/15 bg-bg-soft p-4 md:p-5">
       {title ? <h3 className="mb-3 font-display text-lg font-bold text-ink">{title}</h3> : null}
       {children}
     </article>
@@ -45,10 +45,10 @@ export function Card({ title, children }: { title?: string; children: React.Reac
 
 export function Stat({ label, value, hint, tone = "neutral" }: { label: string; value: string | number; hint?: string; tone?: Tone }) {
   return (
-    <div className={`rounded-2xl border bg-bg-soft p-5 ${TONE_BORDER[tone]}`}>
-      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">{label}</p>
-      <p className="mt-2 font-display text-3xl font-bold text-ink">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-ink-soft">{hint}</p> : null}
+    <div className={`min-w-0 rounded-2xl border bg-bg-soft p-4 md:p-5 ${TONE_BORDER[tone]}`} data-admin-stat>
+      <p className="break-words font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft [hyphens:auto]">{label}</p>
+      <p className="mt-2 break-words font-display text-3xl font-bold text-ink">{value}</p>
+      {hint ? <p className="mt-1 break-words text-xs text-ink-soft">{hint}</p> : null}
     </div>
   );
 }

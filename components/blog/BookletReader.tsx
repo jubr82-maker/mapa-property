@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { displayableImageSrc, isOptimizedImageSrc } from "@/lib/image-hosts";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -30,6 +31,9 @@ export function BookletReader({
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("booklet");
+  // Couverture : https ou chemin du site ; hote non optimise -> chargee
+  // directement (lib/image-hosts.ts).
+  const coverSrc = displayableImageSrc(coverImage);
 
   const formattedDate = publishedAt
     ? new Date(publishedAt).toLocaleDateString(
@@ -64,12 +68,13 @@ export function BookletReader({
             <h1 className="font-display text-xl font-black leading-[1.1] tracking-tight text-ink sm:text-5xl lg:text-6xl">
               {title}
             </h1>
-            {coverImage && (
+            {coverSrc && (
               // Perf oct. 2026 : next/image (AVIF/WebP redimensionne) au lieu
               // du fichier source plein format. Memes hotes que BlogTeaser.
               <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
                 <Image
-                  src={coverImage}
+                  src={coverSrc}
+                  unoptimized={!isOptimizedImageSrc(coverSrc)}
                   alt={title}
                   fill
                   priority

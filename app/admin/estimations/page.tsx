@@ -4,6 +4,7 @@ import { requireAdminPage } from "@/lib/admin/require-admin";
 import { ExcelExportButton } from "@/components/admin/ExcelExportButton";
 import { AdminDateCell } from "@/components/admin/AdminDateCell";
 import { DateSortToggle, parseDateSort } from "@/components/admin/DateSortToggle";
+import { AdminMobileFilterPanel } from "@/components/admin/AdminFilterPanel";
 import { getAdminDateTimeT } from "@/lib/admin/datetime-labels";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
@@ -94,7 +95,13 @@ export default async function AdminEstimationsPage({
         </div>
       </header>
 
-      <DateSortToggle basePath="/admin/estimations" sort={sort} />
+      <div className="hidden md:block">
+        <DateSortToggle basePath="/admin/estimations" sort={sort} />
+      </div>
+      {/* Telephone : tri dans le panneau "Filtres et tri". */}
+      <AdminMobileFilterPanel>
+        <DateSortToggle basePath="/admin/estimations" sort={sort} />
+      </AdminMobileFilterPanel>
 
       {error && (
         <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-700">

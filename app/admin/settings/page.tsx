@@ -40,7 +40,7 @@ export default async function AdminSettingsPage() {
         <h2 className="font-display text-xl font-bold text-[#3D4F63]">
           {t("agency_title")}
         </h2>
-        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        <dl className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
           <Info label={t("phone")} value={t("see_legal")} />
           <Info label={t("email")} value={t("see_legal")} />
           <Info label={t("notifications")} value={t("notifications_value")} />

@@ -251,7 +251,7 @@ function Section({
         <ChevronDown aria-hidden className="size-5 shrink-0 text-[#3D4F63] transition-transform group-open:rotate-180" />
       </summary>
       {hint && <p className="mt-1 text-xs text-[#3D4F63]/60">{hint}</p>}
-      <div className="mt-4 grid gap-4 md:grid-cols-2">{children}</div>
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">{children}</div>
     </details>
   );
 }

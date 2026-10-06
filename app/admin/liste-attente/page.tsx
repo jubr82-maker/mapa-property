@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DateSortToggle, parseDateSort } from "@/components/admin/DateSortToggle";
+import { AdminMobileFilterPanel } from "@/components/admin/AdminFilterPanel";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import {
@@ -130,7 +131,7 @@ export default async function AdminWaitlistPage({
         <AdminNotice kind="workflow_list" />
       )}
 
-      <nav className="flex flex-wrap items-center gap-2">
+      <nav className="flex flex-wrap items-center gap-2" data-admin-chips>
         {TABS.map((tt) => {
           const active = tab === tt.key;
           const count = counts[tt.key] ?? 0;
@@ -163,13 +164,20 @@ export default async function AdminWaitlistPage({
         })}
       </nav>
 
+      {/* Telephone : tri dans le panneau "Filtres et tri". */}
+      <AdminMobileFilterPanel>
+        <DateSortToggle basePath="/admin/liste-attente" sort={sort} params={sp as Record<string, string | undefined>} />
+      </AdminMobileFilterPanel>
+
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white">
         <header className="border-b border-[#3D4F63]/10 px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">
             {t("list_title", { count: filtered.length })}
           </p>
         </header>
-        <DateSortToggle basePath="/admin/liste-attente" sort={sort} params={sp as Record<string, string | undefined>} />
+        <div className="hidden md:block">
+          <DateSortToggle basePath="/admin/liste-attente" sort={sort} params={sp as Record<string, string | undefined>} />
+        </div>
         <WaitlistTable items={filtered} />
       </section>
     </div>

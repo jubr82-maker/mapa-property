@@ -11,11 +11,40 @@ export default async function AdminBlogPage() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("blog_posts")
-    .select("id,slug,title_fr,primary_tag,published_at,is_published")
+    .select("id,slug,title_fr,primary_tag,published_at,is_published,cover_image")
     .order("published_at", { ascending: false });
 
+  const pill = (published: boolean | null) => (
+    <span
+      className={`rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] ${
+        published ? "bg-emerald-100 text-emerald-800" : "bg-[#3D4F63]/10 text-[#3D4F63]"
+      }`}
+    >
+      {published ? t("status_published") : t("status_draft")}
+    </span>
+  );
   const rows = (data ?? []).map((p) => ({
     id: p.id,
+    // Telephone : vignette de couverture, titre, categorie et date.
+    card: {
+      thumb: p.cover_image ?? null,
+      title: p.title_fr || p.slug || t("untitled"),
+      titleHref: `/admin/blog/${p.id}/edit`,
+      meta: [p.primary_tag, formatDateOnly(p.published_at)].filter(Boolean).join(" · "),
+      badge: pill(p.is_published),
+      actions: (
+        <div className="flex gap-2">
+          <Link href={`/admin/blog/${p.id}/edit`} className="rounded border border-ink/20 text-[14px] text-ink">
+            {t("edit")}
+          </Link>
+          {p.is_published && p.slug ? (
+            <Link href={`/fr/blog/${p.slug}`} target="_blank" className="rounded border border-ink/20 text-[14px] text-ink">
+              {t("view")}
+            </Link>
+          ) : null}
+        </div>
+      ),
+    },
     cells: [
       p.title_fr || p.slug || t("untitled"),
       p.primary_tag ?? "",

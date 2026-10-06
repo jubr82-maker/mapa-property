@@ -51,7 +51,7 @@ export default async function AdminDashboardPage() {
       </Section>
 
       <Section title={t("dashboard_spaces")}>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {spaces.map((s) => (
             <Card key={s.href} title={s.title}>
               <p className="text-sm text-ink-mid">{s.text}</p>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminMobileFilterPanel } from "@/components/admin/AdminFilterPanel";
 import { AdminDateCell } from "@/components/admin/AdminDateCell";
 import { ADMIN_LOCALE, formatDateOnly, lastModifiedAt } from "@/lib/datetime";
 import { getTranslations } from "next-intl/server";
@@ -241,7 +242,7 @@ export default async function AdminMandatsPage({
           />
           <Link
             href={buildHref({ sort: sortDir === "desc" ? "asc" : "desc" })}
-            className="inline-flex items-center gap-2 rounded-full border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
+            className="hidden items-center gap-2 rounded-full md:inline-flex border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
             aria-label={
               sortDir === "desc"
                 ? t("sort_to_asc")
@@ -259,7 +260,7 @@ export default async function AdminMandatsPage({
       )}
 
       {/* Onglets de section type_transaction (vente, recherche, location) */}
-      <nav className="flex flex-wrap items-center gap-2 border-b border-[#3D4F63]/15 pb-3">
+      <nav className="flex flex-wrap items-center gap-2 border-b border-[#3D4F63]/15 pb-3" data-admin-chips>
         {SECTIONS.map((s) => {
           const active = section === s.key;
           return (
@@ -288,7 +289,7 @@ export default async function AdminMandatsPage({
       </nav>
 
       {/* Sous-onglets de suivi */}
-      <nav className="flex flex-wrap items-center gap-2">
+      <nav className="flex flex-wrap items-center gap-2" data-admin-chips>
         {WORKFLOW_TABS.map((t) => {
           const active = workflowTab === t.key;
           const count = workflowCounts[t.key] ?? 0;
@@ -320,6 +321,22 @@ export default async function AdminMandatsPage({
           );
         })}
       </nav>
+
+      {/* Telephone : tri dans le panneau "Filtres et tri". */}
+      <AdminMobileFilterPanel>
+            <Link
+              href={buildHref({ sort: sortDir === "desc" ? "asc" : "desc" })}
+              className="inline-flex items-center gap-2 rounded-full bg-white border border-[#3D4F63]/20 px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e]"
+              aria-label={
+                sortDir === "desc"
+                  ? t("sort_to_asc")
+                  : t("sort_to_desc")
+              }
+            >
+              <span>{t("sort_label")}</span>
+              <span aria-hidden>{sortDir === "desc" ? "↓" : "↑"}</span>
+            </Link>
+      </AdminMobileFilterPanel>
 
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white">
         <header className="border-b border-[#3D4F63]/10 px-4 py-3">

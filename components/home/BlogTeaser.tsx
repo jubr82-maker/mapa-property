@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { displayableImageSrc, isOptimizedImageSrc } from "@/lib/image-hosts";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { pickLang, type BlogPost, type Locale } from "@/lib/types";
@@ -47,9 +48,10 @@ export function BlogTeaser({ posts, locale }: Props) {
                 className="group flex h-full flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg transition-colors hover:border-gold"
               >
                 <div className="relative h-24 overflow-hidden bg-bg-deep sm:h-auto sm:aspect-[4/3]">
-                  {post.cover_image ? (
+                  {displayableImageSrc(post.cover_image) ? (
                     <Image
-                      src={post.cover_image}
+                      src={displayableImageSrc(post.cover_image)!}
+                      unoptimized={!isOptimizedImageSrc(displayableImageSrc(post.cover_image)!)}
                       alt={title}
                       fill
                       sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 90vw"

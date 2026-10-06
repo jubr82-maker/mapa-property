@@ -136,7 +136,7 @@ export function SaleForm({
 
   return (
     <form onSubmit={submit} className="mt-5 space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Field label={t("form.type")}>
           <select
             value={data.property_type}

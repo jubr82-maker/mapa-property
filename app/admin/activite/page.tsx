@@ -133,7 +133,7 @@ export default async function ActivitePage() {
                 ))}
               </Table>
             )}
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <Card title={t("top_demand_title")}>
                 <TopList items={vi.topDemand.map((p) => propertyItem(p, p.count))} emptyLabel={t("empty_demand")} />
               </Card>
@@ -150,7 +150,7 @@ export default async function ActivitePage() {
       </Section>
 
       <Section title={t("actions_title")} intro={t("actions_intro")}>
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Card title={t("actions_daily")}>
             <LineChart data={vi.volumeByType.dailySeries} label={t("actions_daily")} emptyLabel={t("empty_actions")} />
           </Card>
@@ -189,7 +189,7 @@ export default async function ActivitePage() {
         {vi.searchDemand.totalSearches === 0 ? (
           <Empty>{t("empty_searches")}</Empty>
         ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card title={t("searches_types")}>
               <TopList items={vi.searchDemand.topTypes} emptyLabel={t("empty_searches")} />
             </Card>
@@ -216,7 +216,7 @@ export default async function ActivitePage() {
         {!demand.available ? (
           <Empty>{t("unavailable")}</Empty>
         ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card title={t("demand_by_commune", { count: demand.total })}>
               <TopList items={demand.byCommune} emptyLabel={t("empty_estimations")} />
             </Card>

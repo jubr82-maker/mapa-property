@@ -54,7 +54,7 @@ export default async function SantePage() {
       <PageHeader eyebrow={t("eyebrow")} title={t("health_title")} intro={t("health_intro")} />
 
       <Section id="echeances" title={t("deadlines_title")}>
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Stat
             label={t("domain_label", { domain: domain.domain })}
             value={formatDateOnly(domain.expiresOn)}

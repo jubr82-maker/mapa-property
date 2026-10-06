@@ -140,7 +140,7 @@ export default async function AdminPropertiesPage({
           {tArchive("migration_missing")}
         </p>
       )}
-      <nav className="flex flex-wrap gap-2">
+      <nav className="flex flex-wrap gap-2" data-admin-chips>
         <Link
           href="/admin/properties"
           className={`rounded-full px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] ${

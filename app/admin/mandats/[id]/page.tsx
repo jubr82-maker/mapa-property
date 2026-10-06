@@ -196,7 +196,7 @@ export default async function AdminMandatDetailPage({
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
         {/* Colonne gauche : informations, edition et suppression */}
         <div className="space-y-4">
           <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">

@@ -1,4 +1,5 @@
 import createNextIntlPlugin from "next-intl/plugin";
+import { IMAGE_REMOTE_PATTERNS } from "./lib/image-hosts";
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
@@ -100,39 +101,8 @@ const nextConfig: NextConfig = {
     // imageSizes (vignettes, < plus petite deviceSize) = defaut Next 16.
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [32, 48, 64, 96, 128, 256, 384],
-    remotePatterns: [
-      {
-        // Poster de la video hero (Cloudflare R2, cf. components/home/Hero.tsx).
-        protocol: "https",
-        hostname: "pub-c9fa8716c00f4a0c965197a93086bdce.r2.dev",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "dutfkblygfvhhwpzxmfz.supabase.co",
-        pathname: "/storage/v1/object/public/**",
-      },
-      {
-        // URL signees (buckets prives "documents"/"offmarket-photos" —
-        // cf. lib/storage-signed-url.ts) : chemin /object/sign/, distinct
-        // du chemin /object/public/ ci-dessus.
-        protocol: "https",
-        hostname: "dutfkblygfvhhwpzxmfz.supabase.co",
-        pathname: "/storage/v1/object/sign/**",
-      },
-      {
-        protocol: "https",
-        hostname: "media.apimo.pro",
-      },
-      {
-        protocol: "https",
-        hostname: "*.apimo.pro",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-    ],
+    // Hotes autorises : lib/image-hosts.ts (source unique).
+    remotePatterns: IMAGE_REMOTE_PATTERNS.map((p) => ({ ...p })),
   },
   // Redirections permanentes (308, oct. 2026). Les anciennes adresses sans
   // extension sont traitees par proxy.ts (lib/legacy-redirects.ts) ; ici,

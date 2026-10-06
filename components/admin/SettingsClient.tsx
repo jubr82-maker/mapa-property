@@ -20,7 +20,7 @@ function AccountInfoSection({ email }: { email: string | null }) {
   const t = useTranslations("admin_security");
   return (
     <Section title={t("account_section")}>
-      <dl className="grid gap-3 text-sm sm:grid-cols-2">
+      <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
         <div>
           <dt className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
             {t("email")}

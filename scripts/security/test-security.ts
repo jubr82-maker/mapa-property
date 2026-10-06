@@ -40,6 +40,9 @@ import { detectFileType } from "../../lib/security/file-type";
 import { maskEmail } from "../../lib/email/smtp";
 import { classifyChannel, sanitizeAttribution } from "../../lib/pilotage/attribution";
 import { isTargetQuery } from "../../lib/pilotage/seo-targets";
+import { abbreviateAccount, journalLines, journalSummary, paginate, parseJournalParams } from "../../lib/pilotage/journal-view";
+import { displayableImageSrc, isOptimizedImageSrc } from "../../lib/image-hosts";
+import { sanitizeArticleHtml as sanitizeArticleForTest } from "../../lib/security/sanitize";
 import { RETENTION_RULES } from "../../lib/pilotage/config";
 import { retentionCutoff } from "../../lib/pilotage/retention";
 import { selectPublicImages, isApimoImageUrl } from "../../lib/property-images";
@@ -863,6 +866,134 @@ section = "P. Admin sur telephone";
     check(`site public : feuille mobile de l'admin absente de ${publicHtml.length} pages`, adminCss.length > 0 && publicHtml.length > 0 && leaks.length === 0, leaks.slice(0, 5).join(", "));
   }
   check("ecran d'accueil : manifeste hors du proxy, sans donnee", /\.\*\\\\\.\.\*/.test(read("proxy.ts")) && !/supabase|from\(/.test(mf));
+
+  // ---------- Seconde passe telephone (oct. 2026) ----------
+  // 1. Largeurs : cartes de statistiques et barres.
+  const gridOffenders: string[] = [];
+  const barOffenders: string[] = [];
+  for (const f of adminFiles) {
+    const src = read(f);
+    // Grille sans nombre de colonnes de base mais avec colonnes sur ecran
+    // large : piste "auto" dimensionnee sur le plus long texte non coupe.
+    for (const m of src.matchAll(/className=\{?[`"]([^`"]*)[`"]/g)) {
+      const toks = m[1].split(/\s+/);
+      if (!toks.includes("grid")) continue;
+      const base = toks.some((x) => /^grid-cols-/.test(x));
+      const wide = toks.some((x) => /^(sm|md|lg|xl|2xl):grid-cols-/.test(x));
+      if (wide && !base) gridOffenders.push(`${f} : ${m[1].slice(0, 60)}`);
+    }
+    // Grille de cartes de statistiques : 1 ou 2 colonnes sur telephone.
+    for (const m of src.matchAll(/className="([^"]*\bgrid\b[^"]*)"[^>]*>\s*<Stat\b/g)) {
+      const base = m[1].split(/\s+/).find((x) => /^grid-cols-\d+$/.test(x));
+      if (!base || Number(base.split("-")[2]) > 2) gridOffenders.push(`${f} : statistiques "${m[1]}"`);
+    }
+    // Barres : largeur toujours en pourcentage, jamais en pixels.
+    for (const m of src.matchAll(/style=\{\{[^\n]*?\bwidth:\s*([^\n]*?)\s*(?:,|\}\})/g)) {
+      if (!/%/.test(m[1])) barOffenders.push(`${f} : width ${m[1].trim()}`);
+    }
+  }
+  check("statistiques et listes : aucune grille a piste automatique, cartes de statistiques sur 2 colonnes au plus", gridOffenders.length === 0, gridOffenders.slice(0, 8).join(" ; "));
+  check("barres : largeur en pourcentage uniquement", barOffenders.length === 0, barOffenders.slice(0, 8).join(" ; "));
+  const ui = read("components/admin/pilotage/ui.tsx");
+  const tl = read("components/admin/analytics/TopList.tsx");
+  check("cartes de statistiques, cartes et barres : largeur minimale nulle (texte coupe, jamais la page)",
+    /min-w-0 rounded-2xl border bg-bg-soft/.test(ui) && /<article className="min-w-0/.test(ui) && /data-admin-bars/.test(tl) && /min-w-0 truncate/.test(tl) &&
+    /body\[data-admin\] main \.grid > \* \{\s*min-width: 0;/.test(css));
+  // Le controle detecte une grille fautive.
+  const gridProbe = 'className="grid gap-4 lg:grid-cols-2" className="grid grid-cols-1 gap-4 lg:grid-cols-2"';
+  const gridProbeHits = [...gridProbe.matchAll(/className="([^"]*)"/g)].filter((m) => { const k = m[1].split(" "); return k.includes("grid") && k.some((x) => /^lg:grid-cols-/.test(x)) && !k.some((x) => /^grid-cols-/.test(x)); }).length;
+  check("controle des grilles : detecte une piste automatique", gridProbeHits === 1);
+
+  // 2. Journal de securite compact.
+  const jAt = (h: number) => new Date(Date.UTC(2026, 9, 6, h, 0, 0)).toISOString();
+  const jEntries = [
+    { at: jAt(9), source: "auth" as const, event: "mfa", actor: "julien@example.com", success: true, detail: null, ip: null },
+    { at: jAt(8), source: "auth" as const, event: "login", actor: "julien@example.com", success: true, detail: null, ip: null },
+    { at: jAt(7), source: "auth" as const, event: "passkey_login", actor: "julien@example.com", success: true, detail: null, ip: null },
+    { at: jAt(6), source: "auth" as const, event: "login", actor: "x@example.com", success: false, detail: "bad", ip: null },
+    { at: jAt(5), source: "admin" as const, event: "property_deleted", actor: "julien@example.com", success: true, detail: null, ip: null },
+    { at: jAt(4), source: "admin" as const, event: "property_created", actor: "julien@example.com", success: true, detail: null, ip: null },
+  ];
+  const essential = journalLines(jEntries, { type: "all", result: "all", view: "essential" });
+  const grouped = essential.filter((l) => l.kind === "sign_ins");
+  check("journal : connexions reussies regroupees en une ligne par jour (2 connexions abouties)", grouped.length === 1 && grouped[0].kind === "sign_ins" && grouped[0].count === 2);
+  check("journal : par defaut, echecs et evenements sensibles seulement", essential.length === 3 && essential.some((l) => l.kind === "event" && l.entry.event === "property_deleted") && !essential.some((l) => l.kind === "event" && l.entry.event === "property_created"));
+  check("journal : filtres type et resultat", journalLines(jEntries, { type: "auth", result: "failed", view: "essential" }).length === 1 && journalLines(jEntries, { type: "admin", result: "all", view: "all" }).length === 2);
+  check("journal : pages de 20", paginate(Array.from({ length: 45 }, (_, i) => i), 3).items.length === 5 && paginate(Array.from({ length: 45 }, (_, i) => i), 9).page === 3 && paginate([], 1).pages === 1);
+  check("journal : compte abrege", abbreviateAccount("julien.brebion@example.com") === "jul…@example.com" && abbreviateAccount(null) === "");
+  const sum = journalSummary(jEntries, 7, new Date(jAt(12)).getTime());
+  check("journal : resume 7 jours", sum.signIns === 2 && sum.failures === 1 && sum.sensitive === 1);
+  check("journal : parametres invalides ignores", JSON.stringify(parseJournalParams({ type: "x", result: "ok", vue: "tout", page: "2" })) === JSON.stringify({ type: "all", result: "ok", view: "all", page: 2 }));
+  const jp = read("app/admin/journal/page.tsx");
+  check("journal : vue telephone compacte, tableau inchange sur ordinateur", /md:hidden" data-admin-journal-mobile/.test(jp) && /<div className="hidden space-y-12 md:block">/.test(jp) && /data-admin-chips/.test(jp));
+
+  // 3. Un seul titre par page sur telephone.
+  const mh = read("components/admin/AdminMobileNav.tsx");
+  check("titre unique : l'en-tete reprend le h1, masque dans la page avec son surtitre", /main\[data-admin-main\] h1/.test(mh) && /MutationObserver/.test(mh) &&
+    /main\[data-admin-main\] h1 \{\s*position: absolute;/.test(css) && /:is\(p, div\):has\(\+ h1\) \{\s*display: none;/.test(css) && /h1 \+ p \{[^}]*-webkit-line-clamp: 1;/.test(css));
+
+  // 4. Filtres sur une ligne, tri dans le panneau.
+  const chipPages = ["app/admin/mandats/page.tsx", "app/admin/liste-attente/page.tsx", "app/admin/leads/page.tsx", "app/admin/properties/page.tsx", "app/admin/ventes-realisees/page.tsx", "app/admin/arcova/page.tsx", "app/admin/offmarket/requests/page.tsx"];
+  const noChips = chipPages.filter((f) => !/data-admin-chips/.test(read(f)));
+  check("filtres de statut et de type : ligne defilante (Mandats, Liste d'attente, Leads, Biens, Ventes, ARCOVA, Off-Market)", noChips.length === 0 && /AdminFilterPanel/.test(read("components/admin/OffmarketListFilters.tsx")), noChips.join(", "));
+  check("filtres : ligne defilante avec marges internes de 16 px", /\[data-admin-chips\] \{\s*flex-wrap: nowrap !important;\s*overflow-x: auto;\s*margin-inline: -16px;\s*padding: 2px 16px 6px;/.test(css));
+  const sortPages = ["app/admin/mandats/page.tsx", "app/admin/liste-attente/page.tsx", "app/admin/estimations/page.tsx"];
+  const sortOut = sortPages.filter((f) => !/<AdminMobileFilterPanel>/.test(read(f)));
+  check("tri : dans le panneau Filtres et tri sur telephone (Mandats, Liste d'attente, Estimations, Leads)", sortOut.length === 0 && /\{sortControl\}/.test(read("components/admin/LeadsTable.tsx")) &&
+    /hidden items-center gap-2 rounded-full md:inline-flex/.test(read("app/admin/mandats/page.tsx")) && /<div className="hidden md:block">\s*<DateSortToggle basePath="\/admin\/estimations"/.test(read("app/admin/estimations/page.tsx")), sortOut.join(", "));
+
+  // 5. Cartes compactes et vrais interrupteurs.
+  const swSrc = read("components/admin/AdminSwitch.tsx");
+  check("interrupteurs : role switch, piste et curseur distincts, zone de 44 px sur le bouton exterieur", /role="switch"/.test(swSrc) && /aria-checked=\{checked\}/.test(swSrc) && /data-track/.test(swSrc) && /data-thumb/.test(swSrc) &&
+    /\[data-admin-switch\] \{\s*min-height: 44px;\s*min-width: 44px;/.test(css) && /\[data-admin-switch\] \[data-track\] \{\s*width: 52px;\s*height: 32px;/.test(css));
+  const oldSwitch = adminFiles.filter((f) => f !== "components/admin/AdminSwitch.tsx" && /<button[^>]*className=\{?`[^`]*relative inline-flex h-6 w-10/.test(read(f)));
+  check("interrupteurs : plus de bouton dessine deforme par les 44 px", oldSwitch.length === 0, oldSwitch.join(", "));
+  const lc = read("components/admin/AdminListCard.tsx");
+  const cardLists = { Biens: "components/admin/PropertiesTable.tsx", Documents: "components/admin/DocumentsManager.tsx", Blog: "app/admin/blog/page.tsx", Avis: "app/admin/reviews/page.tsx" };
+  const noCard = Object.entries(cardLists).filter(([, f]) => !/AdminListCard|card: \{/.test(read(f))).map(([k]) => k);
+  check("listes : cartes compactes (vignette, titre, une ligne, actions sur une ligne) sur Biens, Blog, Documents, Avis", noCard.length === 0 && /size-16 shrink-0/.test(lc) && /data-admin-card-actions/.test(lc) &&
+    /<ul className="space-y-3 md:hidden" data-admin-list-cards>/.test(read("components/admin/SimpleTable.tsx")) && /\[data-admin-card-actions\] > div:first-child \{\s*flex-wrap: nowrap !important;/.test(css), noCard.join(", "));
+
+  // 6. Images du blog.
+  const bf = read("components/admin/BlogPostForm.tsx");
+  const ba = read("app/admin/blog/actions.ts");
+  check("blog : apercu de la couverture, appareil photo ou galerie, adresse web en option", /data-admin-blog-cover/.test(bf) && /capture="environment"/.test(bf) && /onError=\{\(\) => setCoverBroken\(true\)\}/.test(bf) && /name="cover_image"/.test(bf));
+  check("blog : envoi d'image garde aal2, bucket blog-covers, image reconvertie", /export async function uploadBlogImage[\s\S]{0,120}await assertAdminAction\(\)/.test(ba) && /COVER_BUCKET = "blog-covers"/.test(ba) && /processUploadedImage/.test(ba));
+  check("blog : couverture affichable (https ou chemin du site), hote non optimise charge directement",
+    displayableImageSrc("assets/x.jpg") === null && displayableImageSrc("http://a/b.jpg") === null && displayableImageSrc("https://a/b.jpg") === "https://a/b.jpg" &&
+    isOptimizedImageSrc("https://dutfkblygfvhhwpzxmfz.supabase.co/storage/v1/object/public/blog-covers/a.webp") && !isOptimizedImageSrc("https://example.com/a.jpg") &&
+    ["app/[locale]/blog/page.tsx", "components/blog/BookletReader.tsx", "components/home/BlogTeaser.tsx"].every((f) => /unoptimized=\{!isOptimizedImageSrc/.test(read(f))));
+  const cleaned = sanitizeArticleForTest('<img data-src="https://a/b.jpg" src="data:image/gif;base64,R0"><img src="assets/c.jpg"><script>x</script>');
+  check("blog : image du texte a chargement differe recuperee, image relative retiree, script retire", /src="https:\/\/a\/b\.jpg"/.test(cleaned) && !/assets\/c/.test(cleaned) && !/script/.test(cleaned));
+  const sqlRead = read("supabase/manual/execution/11_blog_images_lecture.sql").replace(/--.*$/gm, "");
+  check("blog : fichier SQL de diagnostic en lecture seule", /storage\.objects/.test(sqlRead) && !/\b(INSERT|UPDATE|DELETE|ALTER|DROP|CREATE|TRUNCATE|GRANT|REVOKE)\b/i.test(sqlRead));
+
+  // 7. Editeur visuel et nettoyage.
+  check("blog : editeur visuel (tiptap deja installe), plus de saisie HTML brute par defaut", /<BlogBodyEditor/.test(bf) && !/name=\{`content_\$\{lang\}`\}/.test(bf) && /from "@tiptap\/react"/.test(read("components/admin/BlogBodyEditor.tsx")));
+  check("blog : texte nettoye cote serveur a l'enregistrement", /content_fr: cleanBody\(formData\.get\("content_fr"\)\)/.test(ba) && /sanitizeArticleHtml\(String\(v \?\? ""\)\)/.test(ba));
+  const sqlDash = read("supabase/manual/execution/12_blog_tirets.sql");
+  check("blog : fichier SQL des tirets rejouable, sauvegarde prealable, tableau final, aucun tiret ecrit",
+    /IF to_regclass\('public\.blog_posts_sauvegarde_tirets_20261006'\) IS NULL/.test(sqlDash) && /CREATE TABLE public\.blog_posts_sauvegarde_tirets_20261006 AS TABLE public\.blog_posts/.test(sqlDash) &&
+    /chr\(8212\)/.test(sqlDash) && /chr\(8211\)/.test(sqlDash) && !/[\u2013\u2014]/.test(sqlDash) && /FROM tirets_resultat/.test(sqlDash.slice(sqlDash.lastIndexOf("COMMIT;"))));
+
+  // 8. Barre du bas et textes d'aide.
+  const thumbOk = (["fr", "en", "de"] as const).every((l) => {
+    const n = JSON.parse(read(`messages/${l}.json`)).admin_nav;
+    return ["thumb_dashboard", "thumb_leads", "thumb_properties", "thumb_activity", "thumb_menu"].every((k) => typeof n[k] === "string" && n[k].length <= 10);
+  });
+  const fr = JSON.parse(read("messages/fr.json")).admin_nav;
+  check("barre du bas : Accueil, Leads, Biens, Activite, Menu (trois langues, une ligne)", thumbOk && fr.thumb_dashboard === "Accueil" && fr.thumb_activity === "Activité" && /t\(`thumb_\$\{item\.key\}`\)/.test(mnav) && /line-clamp-1/.test(mnav));
+  const clickTexts = (["fr", "en", "de"] as const).flatMap((l) => {
+    const all = JSON.parse(read(`messages/${l}.json`));
+    const out: string[] = [];
+    const walkMsg = (o: unknown, p: string) => {
+      if (typeof o === "string") { if (/\b(cliqu|clic\b|click|klick)/i.test(o) && !/col_clicks/.test(p)) out.push(`${l}:${p}`); return; }
+      if (o && typeof o === "object") for (const [k, v] of Object.entries(o)) walkMsg(v, p ? `${p}.${k}` : k);
+    };
+    for (const [ns, v] of Object.entries(all)) if (ns.startsWith("admin_")) walkMsg(v, ns);
+    return out;
+  });
+  check("textes d'aide de l'admin : aucun \"cliquez\" (geste tactile)", clickTexts.length === 0, clickTexts.join(", "));
 }
 
 // ===========================================================================

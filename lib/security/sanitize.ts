@@ -30,9 +30,21 @@ export function sanitizeArticleHtml(html: string | null | undefined): string {
     allowedSchemes: ["https", "http", "mailto", "tel"],
     allowedSchemesByTag: { img: ["https"] },
     allowProtocolRelative: false,
+    // Image sans adresse affichable (vide, relative comme "assets/x.jpg"
+    // du site v28) : retiree plutot qu'affichee cassee.
+    exclusiveFilter: (frame) =>
+      frame.tag === "img" && !/^(https:\/\/|\/(?!\/))/i.test(String(frame.attribs.src ?? "")),
     transformTags: {
       // Lien externe : jamais d'acces a window.opener.
       a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }, true),
+      // Image a chargement differe (adresse dans data-src, src vide ou
+      // absent) : l'adresse est reprise dans src, puis filtree comme toute
+      // autre (https uniquement). Sinon l'image restait vide.
+      img: (tagName, attribs) => {
+        const lazy = attribs["data-src"];
+        const src = attribs.src && !attribs.src.startsWith("data:") ? attribs.src : lazy || attribs.src;
+        return { tagName, attribs: { ...attribs, ...(src ? { src } : {}), loading: "lazy" } };
+      },
     },
   });
 }

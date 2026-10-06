@@ -189,6 +189,97 @@
     content: attr(data-less-label);
   }
 
+  /* ---------- Seconde passe (oct. 2026) ---------- */
+  /* Grilles : un element ne peut plus elargir sa piste au-dela de l'ecran
+     (cartes de statistiques, listes a barres : Pays, Pages, Canaux). Une
+     grille sans nombre de colonnes cree une piste "auto", dimensionnee
+     sur le plus long texte non coupe (adresse de page en "truncate"). */
+  body[data-admin] main .grid > * {
+    min-width: 0;
+  }
+  /* Un seul titre par page : celui de l'en-tete (AdminMobileHeader, qui
+     reprend le texte du h1). Le h1 reste lu par les lecteurs d'ecran ;
+     le surtitre disparait ; la description tient sur une ligne et se
+     deplie d'une touche (data-expanded, pose par AdminMobileHeader). */
+  body[data-admin] main[data-admin-main] h1 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  body[data-admin] main[data-admin-main] :is(p, div):has(+ h1) {
+    display: none;
+  }
+  body[data-admin] main[data-admin-main] h1 + p {
+    margin-top: 0 !important;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  body[data-admin] main[data-admin-main] h1 + p[data-expanded] {
+    display: block;
+    -webkit-line-clamp: unset;
+  }
+  /* Filtres de statut et de type : une seule ligne qui defile dans sa
+     largeur (jamais la page), marges internes de 16 px : aucun bouton ne
+     touche un bord. */
+  body[data-admin] main [data-admin-chips] {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    margin-inline: -16px;
+    padding: 2px 16px 6px;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  body[data-admin] main [data-admin-chips]::-webkit-scrollbar {
+    display: none;
+  }
+  body[data-admin] main [data-admin-chips] > * {
+    flex-shrink: 0;
+    white-space: nowrap !important;
+  }
+
+  /* Interrupteurs (AdminSwitch) : zone tactile de 44 px sur le bouton
+     exterieur, piste et curseur agrandis mais non deformes, piste
+     visible meme eteinte. */
+  body[data-admin] [data-admin-switch] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  body[data-admin] [data-admin-switch] [data-track] {
+    width: 52px;
+    height: 32px;
+    box-shadow: inset 0 0 0 1px var(--color-line-strong);
+  }
+  body[data-admin] [data-admin-switch] [data-thumb] {
+    width: 26px;
+    height: 26px;
+    translate: 3px 0 !important;
+  }
+  body[data-admin] [data-admin-switch][aria-checked="true"] [data-thumb] {
+    translate: 23px 0 !important;
+  }
+  /* Cartes compactes (AdminListCard) : actions sur une seule ligne, a
+     partir de la gauche ; defilement dans la ligne si elles debordent. */
+  body[data-admin] main [data-admin-card-actions] > div:first-child {
+    flex-wrap: nowrap !important;
+    justify-content: flex-start;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  body[data-admin] main [data-admin-card-actions] > div:first-child > * {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 12px;
+  }
+
   /* ---------- Barre d'enregistrement collee en bas (fiche d'un bien) ---------- */
   body[data-admin] [data-admin-sticky-save] {
     position: sticky;

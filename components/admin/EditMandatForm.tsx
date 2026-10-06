@@ -120,7 +120,7 @@ export function EditMandatForm({
         </Field>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label={t("form_address")}>
           <input
             type="text"
@@ -140,7 +140,7 @@ export function EditMandatForm({
         </Field>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label={priceLabel}>
           <input
             type="number"
@@ -165,7 +165,7 @@ export function EditMandatForm({
         </Field>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Field label={t("form_date_start")}>
           <input
             type="date"

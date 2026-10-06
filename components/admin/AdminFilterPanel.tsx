@@ -31,3 +31,16 @@ export function AdminFilterPanel({ children, active = 0 }: { children: React.Rea
     </div>
   );
 }
+
+/**
+ * Telephone seulement (seconde passe, oct. 2026) : le tri d'une liste,
+ * affiche ailleurs sur ordinateur, regroupe dans le panneau "Filtres et
+ * tri". Sur ordinateur, rien n'est rendu ici.
+ */
+export function AdminMobileFilterPanel({ children, active = 0 }: { children: React.ReactNode; active?: number }) {
+  return (
+    <div className="md:hidden" data-admin-mobile-sort>
+      <AdminFilterPanel active={active}>{children}</AdminFilterPanel>
+    </div>
+  );
+}

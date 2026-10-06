@@ -39,7 +39,7 @@ export default async function TraficPage() {
             <Card title={t("ga4_daily")}>
               <LineChart data={ga4.daily} label={t("ga4_daily")} emptyLabel={t("empty_data")} />
             </Card>
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card title={t("ga4_channels")}>
                 <TopList items={ga4.channels} emptyLabel={t("empty_data")} />
               </Card>

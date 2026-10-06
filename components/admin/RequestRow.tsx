@@ -106,7 +106,7 @@ export function RequestRow({ request }: { request: Request }) {
 
       {open && (
         <div className="mt-5 space-y-5 border-t border-[#3D4F63]/10 pt-5">
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
             <Info label={t("requestRow.country")} value={request.pays_recherche} empty={t("notProvided")} />
             <Info label={t("requestRow.city")} value={request.ville_quartier} empty={t("notProvided")} />
             <Info

@@ -134,7 +134,7 @@ export default async function AdminArcovaDetailPage({
         <AdminNotice kind="workflow_partial" />
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
         <div className="space-y-4">
           <div className="rounded-xl border border-[#3D4F63]/15 bg-white p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/60">

@@ -254,7 +254,7 @@ export default async function EstimationDetailPage({
       </section>
 
       {/* Indicateurs croisés */}
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="rounded-lg border border-[#3D4F63]/15 bg-white p-4">
           <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
             {t("detail.confidence")}

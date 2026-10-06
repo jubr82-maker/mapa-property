@@ -167,7 +167,7 @@ export default async function AdminVentesRealiseesPage({
       )}
 
       {/* Totaux + filtres */}
-      <section className="grid gap-4 sm:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-[#3D4F63]/20 bg-white p-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">
             {t("count")}
@@ -240,7 +240,7 @@ export default async function AdminVentesRealiseesPage({
 
       {/* Onglets de vue */}
       <section>
-        <div className="mb-4 flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2" data-admin-chips>
           <Link
             href={qs({ vue: "liste" })}
             className={`rounded-full px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] ${

@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { AdminFilterPanel } from "@/components/admin/AdminFilterPanel";
+import { AdminListCard } from "@/components/admin/AdminListCard";
+import { AdminSwitch } from "@/components/admin/AdminSwitch";
 import {
   setPropertyPublished,
   setPropertyFeatured,
@@ -127,11 +129,27 @@ export function PropertiesTable({
       </div>
     ))}
 
-    <div className="overflow-x-auto rounded-2xl border border-[#3D4F63]/15 bg-white">
-      {/* Telephone : carte par bien (AdminTableCards). En grand le titre ;
-          visibles la photo, le type, le prix, la mise en ligne et les
-          actions ; reference, surface et coup de coeur replies. */}
-      <table data-card-primary="3" data-card-keep="2,3,4,5,7,9" className="w-full text-sm">
+    {/* Telephone (seconde passe, oct. 2026) : cartes compactes. */}
+    <ul className="space-y-3 md:hidden" data-admin-list-cards>
+      {rows.length === 0 ? (
+        <li className="rounded-2xl border border-ink/15 bg-bg-soft p-5 text-center text-base text-ink-mid">{labels.emptyList}</li>
+      ) : (
+        rows.map((r) => (
+          <PropertyRow
+            key={r.id}
+            row={r}
+            mode={mode}
+            archiveEnabled={archiveEnabled}
+            labels={labels}
+            onDeleted={(d) => setDeleted((prev) => [d, ...prev])}
+            variant="card"
+          />
+        ))
+      )}
+    </ul>
+
+    <div className="hidden overflow-x-auto rounded-2xl border border-[#3D4F63]/15 bg-white md:block">
+      <table data-no-cards className="w-full text-sm">
         <thead className="bg-[#3D4F63]/5 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-[#3D4F63]/70">
           <tr>
             <th className="px-4 py-3">{t("col_reference")}</th>
@@ -185,12 +203,15 @@ function PropertyRow({
   archiveEnabled,
   labels,
   onDeleted,
+  variant = "row",
 }: {
   row: Row;
   mode: "active" | "archived";
   archiveEnabled: boolean;
   labels: PropertiesTableLabels;
   onDeleted: (d: { reference: string; media: string[] }) => void;
+  /** "row" : ligne du tableau (ordinateur) ; "card" : carte compacte (telephone). */
+  variant?: "row" | "card";
 }) {
   const t = useTranslations("admin_properties");
   const router = useRouter();
@@ -260,6 +281,121 @@ function PropertyRow({
     startTransition(() => setPropertyFeatured(row.id, next));
   };
 
+  const actionsBlock = (
+    <>
+      <div className="flex flex-wrap justify-end gap-1.5">
+        <Link
+          href={`/admin/properties/${row.id}`}
+          className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {t("edit")}
+        </Link>
+        {mode === "active" ? (
+          <>
+            <Link
+              href={`/fr/biens/${row.slug || row.id}`}
+              target="_blank"
+              className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {t("view")}
+            </Link>
+            <button type="button" onClick={onArchive} disabled={busy || !archiveEnabled} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
+              {labels.archive}
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={onRestore} disabled={busy || !archiveEnabled} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
+              {labels.restore}
+            </button>
+            <button type="button" onClick={onPurge} disabled={busy || !archiveEnabled} className="rounded border border-red-300 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40">
+              {labels.purgeMedia}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setConfirmDelete(true);
+                setTypedRef("");
+                setMessage(null);
+              }}
+              disabled={busy || !archiveEnabled}
+              className="rounded border border-red-300 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {labels.delete}
+            </button>
+          </>
+        )}
+      </div>
+      {confirmDelete && (
+        <div
+          role="alertdialog"
+          aria-label={labels.deleteTitle}
+          className="mt-3 rounded-md border border-red-300 bg-red-50 p-3 text-left text-xs text-red-900"
+        >
+          <p className="font-semibold">{labels.deleteTitle}</p>
+          <p className="mt-1">{fill(labels.deleteBodyTemplate, { ref: reference })}</p>
+          <label className="mt-2 block">
+            <span className="sr-only">{labels.deleteInputLabel}</span>
+            <input
+              type="text"
+              value={typedRef}
+              onChange={(e) => setTypedRef(e.target.value)}
+              placeholder={labels.deleteInputLabel}
+              autoComplete="off"
+              className="w-full rounded border border-red-300 bg-white px-2 py-1 font-mono text-xs text-[#1A1F2A]"
+            />
+          </label>
+          <div className="mt-2 flex justify-end gap-1.5">
+            <button type="button" onClick={() => setConfirmDelete(false)} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
+              {labels.cancel}
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={busy || typedRef.trim() !== reference}
+              className="rounded border border-red-300 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {labels.delete}
+            </button>
+          </div>
+        </div>
+      )}
+      {message && <p className="mt-2 text-left text-xs text-red-700">{message}</p>}
+    </>
+  );
+
+  // Telephone (seconde passe, oct. 2026) : vignette a gauche, titre, une
+  // ligne d'essentiel, interrupteurs, actions sur une ligne.
+  if (variant === "card") {
+    const essentials = [
+      row.transaction_label,
+      row.price ? formatPrice(row.price, "fr") : "",
+      row.surface ? formatSurface(row.surface, "fr") : "",
+      row.bedrooms != null ? t("bedrooms_short", { count: row.bedrooms }) : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    return (
+      <AdminListCard
+        thumb={row.cover}
+        title={row.title || t("untitled")}
+        meta={essentials}
+        sub={[row.slug, row.city].filter(Boolean).join(" · ")}
+        controls={
+          mode === "active" ? (
+            <>
+              <AdminSwitch checked={pub} onChange={onPub} disabled={busy} label={t("toggle_published")} showLabel />
+              <AdminSwitch checked={feat} onChange={onFeat} disabled={busy} label={t("toggle_featured")} showLabel />
+            </>
+          ) : row.archived_label ? (
+            <span className="text-[14px] text-ink-mid">{row.archived_label}</span>
+          ) : null
+        }
+        actions={actionsBlock}
+      />
+    );
+  }
+
   return (
     <tr className="hover:bg-[#3D4F63]/5">
       <td className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[#e0af6e]">
@@ -297,10 +433,10 @@ function PropertyRow({
       {mode === "active" ? (
         <>
           <td className="px-4 py-3 text-center">
-            <Switch checked={pub} onChange={onPub} busy={busy} label={t("toggle_published")} />
+            <AdminSwitch checked={pub} onChange={onPub} disabled={busy} label={t("toggle_published")} />
           </td>
           <td className="px-4 py-3 text-center">
-            <Switch checked={feat} onChange={onFeat} busy={busy} label={t("toggle_featured")} />
+            <AdminSwitch checked={feat} onChange={onFeat} disabled={busy} label={t("toggle_featured")} />
           </td>
         </>
       ) : (
@@ -309,117 +445,8 @@ function PropertyRow({
         </td>
       )}
       <td className="px-4 py-3 text-right">
-        <div className="flex flex-wrap justify-end gap-1.5">
-          <Link
-            href={`/admin/properties/${row.id}`}
-            className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("edit")}
-          </Link>
-          {mode === "active" ? (
-            <>
-              <Link
-                href={`/fr/biens/${row.slug || row.id}`}
-                target="_blank"
-                className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {t("view")}
-              </Link>
-              <button type="button" onClick={onArchive} disabled={busy || !archiveEnabled} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
-                {labels.archive}
-              </button>
-            </>
-          ) : (
-            <>
-              <button type="button" onClick={onRestore} disabled={busy || !archiveEnabled} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
-                {labels.restore}
-              </button>
-              <button type="button" onClick={onPurge} disabled={busy || !archiveEnabled} className="rounded border border-red-300 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40">
-                {labels.purgeMedia}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setConfirmDelete(true);
-                  setTypedRef("");
-                  setMessage(null);
-                }}
-                disabled={busy || !archiveEnabled}
-                className="rounded border border-red-300 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {labels.delete}
-              </button>
-            </>
-          )}
-        </div>
-        {confirmDelete && (
-          <div
-            role="alertdialog"
-            aria-label={labels.deleteTitle}
-            className="mt-3 rounded-md border border-red-300 bg-red-50 p-3 text-left text-xs text-red-900"
-          >
-            <p className="font-semibold">{labels.deleteTitle}</p>
-            <p className="mt-1">{fill(labels.deleteBodyTemplate, { ref: reference })}</p>
-            <label className="mt-2 block">
-              <span className="sr-only">{labels.deleteInputLabel}</span>
-              <input
-                type="text"
-                value={typedRef}
-                onChange={(e) => setTypedRef(e.target.value)}
-                placeholder={labels.deleteInputLabel}
-                autoComplete="off"
-                className="w-full rounded border border-red-300 bg-white px-2 py-1 font-mono text-xs text-[#1A1F2A]"
-              />
-            </label>
-            <div className="mt-2 flex justify-end gap-1.5">
-              <button type="button" onClick={() => setConfirmDelete(false)} className="rounded border border-[#3D4F63]/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] hover:text-[#e0af6e] disabled:cursor-not-allowed disabled:opacity-40">
-                {labels.cancel}
-              </button>
-              <button
-                type="button"
-                onClick={onDelete}
-                disabled={busy || typedRef.trim() !== reference}
-                className="rounded border border-red-300 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {labels.delete}
-              </button>
-            </div>
-          </div>
-        )}
-        {message && <p className="mt-2 text-left text-xs text-red-700">{message}</p>}
+        {actionsBlock}
       </td>
     </tr>
-  );
-}
-
-function Switch({
-  checked,
-  onChange,
-  busy,
-  label,
-}: {
-  checked: boolean;
-  onChange: (next: boolean) => void;
-  busy: boolean;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      disabled={busy}
-      aria-pressed={checked}
-      aria-label={label}
-      title={label}
-      className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors disabled:opacity-50 ${
-        checked ? "bg-[#e0af6e]" : "bg-[#3D4F63]/20"
-      }`}
-    >
-      <span
-        className={`inline-block size-5 transform rounded-full bg-white shadow transition-transform ${
-          checked ? "translate-x-4" : "translate-x-0.5"
-        }`}
-      />
-    </button>
   );
 }

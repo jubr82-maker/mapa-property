@@ -160,7 +160,7 @@ export default async function AdminOffmarketRequestsPage({
         <AdminNotice kind="workflow_list" />
       )}
 
-      <nav className="flex flex-wrap items-center gap-2">
+      <nav className="flex flex-wrap items-center gap-2" data-admin-chips>
         {TABS.map((tb) => {
           const active = tab === tb.key;
           const count = counts[tb.key] ?? 0;
