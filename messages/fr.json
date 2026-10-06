@@ -2451,12 +2451,12 @@
       "MANUAL": "Saisie manuelle"
     },
     "engine": {
-      "evs_5_methods": "EVS (5 méthodes)",
+      "evs_5_methods": "Croisement de 5 méthodes",
       "hedonic_legacy": "Hédoniste (ancien moteur)",
       "manual_admin": "Saisie manuelle"
     },
     "engineShort": {
-      "evs_5_methods": "EVS",
+      "evs_5_methods": "5 méthodes",
       "hedonic_legacy": "Hédoniste",
       "manual_admin": "Manuelle"
     },
@@ -2633,7 +2633,7 @@
     "list": {
       "eyebrow": "Estimations",
       "title": "Demandes d'estimation",
-      "intro": "Les 100 dernières demandes reçues depuis le formulaire d'estimation du site (moteur EVS à 5 méthodes pour le résidentiel au Luxembourg, modèle hédoniste pour les autres pays et types de biens).",
+      "intro": "Les 100 dernières demandes reçues depuis le formulaire d'estimation du site (moteur croisant 5 méthodes pour le résidentiel au Luxembourg, modèle hédoniste pour les autres pays et types de biens).",
       "new": "Nouvelle estimation",
       "total": "Total affiché",
       "loadError": "Impossible de charger les estimations. Rechargez la page.",
@@ -2692,9 +2692,9 @@
       "weightedPrice": "Prix pondéré",
       "beforeRounding": "avant arrondi d'affichage",
       "warnings": "Points d'attention ({count})",
-      "avisTitle": "Avis de valeur PDF (TEGoVA EVS, 9 pages)",
-      "avisText": "La génération automatique de l'avis de valeur n'est pas encore disponible.",
-      "avisButton": "Générer l'avis de valeur (bientôt disponible)",
+      "avisTitle": "Avis de valeur MAPA Property",
+      "avisText": "Document PDF de 9 pages, établi par croisement des méthodes de cette estimation. Il n'est pas une expertise et n'est enregistré nulle part : il est téléchargé directement, et chaque génération est inscrite au journal.",
+      "avisButton": "Générer l'avis de valeur",
       "contactTitle": "Contact client",
       "name": "Nom",
       "email": "E-mail",
@@ -2709,7 +2709,8 @@
       "saved": "Enregistré",
       "deleteConfirm": "Supprimer cette estimation ? Elle sera masquée de la liste, sans être effacée définitivement.",
       "dangerZone": "Zone sensible",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "avisLanguage": "Langue du document"
     },
     "refinement": {
       "title": "Proposer un affinage au client",
@@ -2771,6 +2772,11 @@
       "methods": "Détail des méthodes (usage interne)",
       "documentTitle": "Fiche estimation",
       "range": "Fourchette"
+    },
+    "units": {
+      "sqm": "m²",
+      "perSqm": "/m²",
+      "perSqmMonth": "/m²/mois"
     }
   },
   "admin_workflow": {
@@ -3644,7 +3650,9 @@
     "jshort_offmarket_offmarket_delete": "Off-Market supprimé",
     "jshort_offmarket_offmarket_duplicate": "Off-Market dupliqué",
     "jshort_offmarket_request_status_change": "Demande : statut",
-    "jshort_offmarket_request_notes_update": "Demande : notes"
+    "jshort_offmarket_request_notes_update": "Demande : notes",
+    "event_admin_estimation_value_opinion": "Avis de valeur généré",
+    "jshort_admin_estimation_value_opinion": "Avis de valeur"
   },
   "breadcrumb": {
     "home": "Accueil",
@@ -3820,5 +3828,71 @@
       "faq_q4": "Quels sont les honoraires à l'international ?",
       "faq_a4": "Pour une recherche en Europe, France comprise, 3 % à 8 % hors TVA du prix d'acquisition selon la complexité et le pays. Hors d'Europe, sur devis défini au mandat."
     }
+  },
+  "value_opinion": {
+    "title": "Avis de valeur MAPA Property",
+    "subtitle": "Valeur établie par croisement de plusieurs méthodes d'évaluation",
+    "not_expertise": "Ce document est un avis de valeur. Il ne constitue pas une expertise immobilière et ne remplace pas le rapport d'un expert : il n'est pas opposable à un tiers (banque, administration, juridiction).",
+    "prepared_for": "Établi pour {name}",
+    "reference": "Référence du dossier : {ref}",
+    "issued_on": "Date d'émission : {date}",
+    "property_line": "{type} à {commune}",
+    "page": "Page {n} sur {total}",
+    "footer": "MAPA Property, une marque de MAPA Synergy Sàrl · Avis de valeur",
+    "s_scope": "Objet et limites",
+    "scope_p1": "Le présent avis estime la valeur vénale du bien décrit à la page suivante, c'est-à-dire le prix auquel il pourrait raisonnablement être vendu sur le marché libre à la date d'émission, entre un vendeur et un acquéreur consentants et informés.",
+    "scope_p2": "La valeur est établie par croisement de plusieurs méthodes d'évaluation, chacune présentée avec son principe, son résultat et son poids réel dans la synthèse.",
+    "scope_p3": "Les caractéristiques retenues sont celles enregistrées dans le dossier. Elles n'ont pas fait l'objet d'une vérification documentaire (titre de propriété, cadastre, urbanisme, règlement de copropriété, diagnostics).",
+    "scope_p4": "Cet avis est valable à sa date d'émission : l'évolution du marché ou des caractéristiques du bien peut en modifier la conclusion.",
+    "s_description": "Description du bien",
+    "description_intro": "Caractéristiques enregistrées dans le dossier :",
+    "s_market": "Données marché Luxembourg, {date}",
+    "market_reference": "Prix de référence au m² de la commune",
+    "market_adjusted": "Prix au m² après ajustements",
+    "market_rent": "Loyer de marché au m² par mois",
+    "market_yield": "Rendement locatif brut de marché",
+    "market_comparables": "Ventes comparables retenues",
+    "market_comparables_median": "Prix médian au m² des ventes comparables",
+    "market_none": "Aucune donnée de marché chiffrée n'est enregistrée pour ce dossier.",
+    "s_methods": "Méthodes d'évaluation",
+    "methods_intro": "Chaque méthode applicable produit une valeur. Son poids réel est la part qu'elle représente dans la synthèse ; une méthode non applicable pèse 0 %.",
+    "col_method": "Méthode",
+    "col_value": "Valeur",
+    "col_weight": "Poids réel",
+    "not_applicable": "Non applicable",
+    "principle": "Principe",
+    "p_observatoire": "Prix de référence au m² de la commune, ajusté par des coefficients propres au bien (état, performance énergétique, étage, configuration, surface), auquel s'ajoutent les annexes. Pour une maison : valeur du bâti et valeur du terrain.",
+    "p_sales_comparison": "Médiane des prix au m² des ventes comparables enregistrées (même commune, même famille de bien), après exclusion des valeurs extrêmes, appliquée à la surface habitable.",
+    "p_hedonic": "Prix de base au m² corrigé par un coefficient pour chaque caractéristique (état, énergie, année, étage, ascenseur, exposition, vue, surface), puis plus-values éventuelles de terrasse, de stationnement et de travaux.",
+    "p_income_capitalization": "Loyer annuel de marché estimé pour le bien, divisé par un taux de rendement de marché, dans le respect du plafond légal du loyer au Luxembourg.",
+    "p_depreciated_replacement": "Valeur du terrain, augmentée du coût de reconstruction à neuf diminué de la vétusté.",
+    "p_statec_reference": "Prix moyen de référence de la commune, avec des ajustements simples (état, énergie, année de construction, surface).",
+    "s_synthesis": "Synthèse",
+    "synthesis_value": "Valeur retenue",
+    "synthesis_range": "Fourchette de valeur",
+    "synthesis_range_value": "de {low} à {high}",
+    "synthesis_per_sqm": "Soit, au m² habitable",
+    "synthesis_weighted": "Valeur pondérée des méthodes, avant arrondi",
+    "synthesis_spread": "Écart entre les méthodes",
+    "synthesis_confidence": "Niveau de confiance",
+    "synthesis_text": "La valeur retenue tient compte du poids réel de chaque méthode. La fourchette traduit l'incertitude propre à toute estimation ; le prix de vente dépendra aussi de la négociation et des conditions du marché.",
+    "s_assumptions": "Hypothèses et réserves",
+    "a1": "Bien supposé libre de toute occupation, sauf mention contraire au dossier.",
+    "a2": "Bien supposé conforme aux règles d'urbanisme et de construction, sans servitude ni charge particulière non déclarée.",
+    "a3": "Absence supposée de pollution, d'amiante ou de désordre caché non visible lors de l'examen du dossier.",
+    "a4": "Surfaces reprises telles qu'elles ont été déclarées, sans mesurage certifié.",
+    "a5": "Aucun frais d'acquisition, droit d'enregistrement ni honoraire n'est inclus dans la valeur.",
+    "a6": "Les données de marché utilisées sont celles disponibles à la date d'émission.",
+    "s_legal": "Mentions légales",
+    "s_signature": "Signature",
+    "signature_intro": "Avis de valeur établi le {date} par :",
+    "signer_name": "Julien Brebion",
+    "signer_title": "Real Estate Director",
+    "brand_line": "MAPA Property, une marque de MAPA Synergy Sàrl",
+    "address": "26 Rue du Commerce, L-3450 Dudelange",
+    "signature_label": "Signature",
+    "empty": "Non renseigné",
+    "yes": "Oui",
+    "no": "Non"
   }
 }

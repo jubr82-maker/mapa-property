@@ -20,7 +20,8 @@ export type AdminAuditAction =
   | "document_deleted"
   | "settings_content_changed"
   | "settings_design_changed"
-  | "performance_measured";
+  | "performance_measured"
+  | "estimation_value_opinion";
 
 export async function logAdminAction(entry: {
   actorEmail: string | null | undefined;

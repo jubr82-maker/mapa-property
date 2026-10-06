@@ -13,6 +13,7 @@ type Format =
   | "coef"              // x1.050
   | "surface"           // 115 m2
   | "percent_decimal"   // 0.035 -> 3.50 %
+  | "currency_decimal"  // 28.5 -> 28,50 EUR (loyer au m² par mois)
   | "integer"
   | "decimal"
   | "text";
@@ -77,7 +78,7 @@ const SCHEMAS: Record<string, Record<string, SchemaEntry>> = {
     adjusted_per_m2: { label: "adjustedPerM2", format: "currency" },
   },
   income_capitalization: {
-    rent_per_m2_month: { label: "rentPerM2Month", format: "decimal" },
+    rent_per_m2_month: { label: "rentPerM2Month", format: "currency_decimal" },
     annual_rent: { label: "annualRent", format: "currency" },
     yield_used: { label: "yieldUsed", format: "percent_decimal" },
     reasoning: { label: "formula", format: "text" },
@@ -126,6 +127,14 @@ function fmt(value: unknown, format: Format): string {
         style: "currency",
         currency: "EUR",
         maximumFractionDigits: 0,
+      }).format(n);
+    case "currency_decimal":
+      if (!Number.isFinite(n)) return String(value);
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
       }).format(n);
     case "coef":
       if (!Number.isFinite(n)) return String(value);

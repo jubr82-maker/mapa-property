@@ -7,6 +7,8 @@ import { EstimationDetailClient } from "./EstimationDetailClient";
 import { PdfExportButton } from "@/components/admin/PdfExportButton";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
+import { estimationInputEntries, formatInputNumber, type NumberFormatters } from "@/lib/estimation/display";
+import { formatPrice, formatRateFraction } from "@/lib/format/numbers";
 
 interface EstimationRow {
   id: string;
@@ -133,15 +135,28 @@ export default async function EstimationDetailPage({
 
   const inputLabel = (k: string) =>
     t.has(`inputs.${k}`) ? t(`inputs.${k}`) : humanizeKey(k);
+  // Nombres formates selon leur nature (surface, prix au m², rendement...),
+  // jamais bruts (lib/estimation/display.ts).
+  const numFmt: NumberFormatters = {
+    price: (n) => formatPrice(n, ADMIN_LOCALE),
+    decimal: (n, d) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: d }).format(n),
+    percent: (f) => formatRateFraction(f, ADMIN_LOCALE),
+    money: (n) => `${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} €`,
+    units: { sqm: t("units.sqm"), perSqm: t("units.perSqm"), perSqmMonth: t("units.perSqmMonth") },
+  };
   const inputValue = (k: string, v: unknown): string => {
     if (v === null || v === undefined || v === "") return empty;
     if (typeof v === "boolean") return v ? t("yes") : t("no");
+    if (typeof v === "number" && Number.isFinite(v)) return formatInputNumber(k, v, numFmt);
     const group = ENUM_GROUP_BY_INPUT[k];
     if (group && typeof v === "string" && t.has(`${group}.${v}`)) {
       return t(`${group}.${v}`);
     }
     if (Array.isArray(v)) {
       if (v.length === 0) return empty;
+      if (v.every((x) => typeof x === "number")) {
+        return (v as number[]).map((x) => formatInputNumber(k, x, numFmt)).join(", ");
+      }
       if (v.every((x) => typeof x === "string" || typeof x === "number")) {
         return v.join(", ");
       }
@@ -150,7 +165,7 @@ export default async function EstimationDetailPage({
     if (typeof v === "object") {
       return Object.entries(v as Record<string, unknown>)
         .filter(([, x]) => x !== null && x !== undefined && x !== "")
-        .map(([sk, x]) => `${inputLabel(sk)} : ${String(x)}`)
+        .map(([sk, x]) => `${inputLabel(sk)} : ${typeof x === "number" ? formatInputNumber(sk, x, numFmt) : String(x)}`)
         .join(" · ") || empty;
     }
     return String(v);
@@ -240,7 +255,7 @@ export default async function EstimationDetailPage({
           {t("detail.inputsTitle")}
         </h2>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm md:grid-cols-3">
-          {Object.entries(inputs).map(([k, v]) => (
+          {estimationInputEntries(inputs).map(([k, v]) => (
             <div key={k} className="flex justify-between gap-2">
               <dt className="font-mono text-[10px] uppercase tracking-widest text-[#1A1F2A]/50">
                 {inputLabel(k)}
@@ -312,21 +327,41 @@ export default async function EstimationDetailPage({
         </section>
       )}
 
-      {/* Avis de valeur PDF (à venir) */}
-      <section className="rounded-lg border border-dashed border-[#3D4F63]/30 bg-white p-6">
+      {/* Avis de valeur MAPA Property (PDF, 9 pages) : langue choisie a la
+          generation, telechargement direct (aucun stockage), journal. */}
+      <section className="rounded-lg border border-[#3D4F63]/15 bg-white p-6" data-admin-value-opinion>
         <p className="font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
           {t("detail.avisTitle")}
         </p>
-        <p className="mt-2 text-sm text-[#1A1F2A]/70">
-          {t("detail.avisText")}
-        </p>
-        <button
-          type="button"
-          disabled
-          className="mt-3 inline-flex cursor-not-allowed items-center gap-2 rounded-md border border-[#3D4F63]/20 bg-[#3D4F63]/5 px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-[#3D4F63]/40"
+        <p className="mt-2 text-sm text-[#1A1F2A]/70">{t("detail.avisText")}</p>
+        <form
+          method="get"
+          action={`/api/admin/exports/estimations/${r.id}/avis-de-valeur`}
+          className="mt-3 flex flex-wrap items-end gap-3"
         >
-          {t("detail.avisButton")}
-        </button>
+          <label className="block">
+            <span className="block font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
+              {t("detail.avisLanguage")}
+            </span>
+            <select
+              name="lang"
+              defaultValue={r.locale && KNOWN_LOCALES.includes(r.locale) ? r.locale : "fr"}
+              className="mt-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 text-sm"
+            >
+              {KNOWN_LOCALES.map((l) => (
+                <option key={l} value={l}>
+                  {t(`language.${l}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="submit"
+            className="inline-flex items-center gap-2 rounded-md bg-[#9E7B2A] px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-white hover:bg-[#9E7B2A]/90"
+          >
+            {t("detail.avisButton")}
+          </button>
+        </form>
       </section>
     </div>
   );

@@ -58,3 +58,11 @@ export const BORDER = "#E0E0DF";
 export function toArgb(hex: string): string {
   return `FF${hex.replace("#", "").toUpperCase()}`;
 }
+
+// Avis de valeur PDF (oct. 2026, decision de Julien) : noir et or, or de
+// marque #D89C4E. VO_GREY et VO_LINE : texte secondaire et filets sur
+// fond blanc (gris neutres, contraste du gris sur blanc 6.6:1).
+export const VO_BLACK = "#111111";
+export const VO_GOLD = "#D89C4E";
+export const VO_GREY = "#555555";
+export const VO_LINE = "#E4DED3";

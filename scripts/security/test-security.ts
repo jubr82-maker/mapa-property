@@ -45,6 +45,8 @@ import { displayableImageSrc, isOptimizedImageSrc } from "../../lib/image-hosts"
 import { revealLines } from "../../lib/contact/reveal-lines";
 import { REVIEW_COLUMNS, buildReviewWrite, reviewTextFor } from "../../lib/reviews";
 import { dbErrorReason } from "../../lib/admin/db-error";
+import { buildValueOpinionPdf, VALUE_OPINION_LANGS, voPrice, voPercent } from "../../lib/estimation/value-opinion-pdf";
+import { estimationInputEntries } from "../../lib/estimation/display";
 import { sanitizeArticleHtml as sanitizeArticleForTest } from "../../lib/security/sanitize";
 import { RETENTION_RULES } from "../../lib/pilotage/config";
 import { retentionCutoff } from "../../lib/pilotage/retention";
@@ -1063,6 +1065,57 @@ section = "P. Admin sur telephone";
 }
 
 // ===========================================================================
+// R. Avis de valeur PDF (mission C, oct. 2026)
+// ===========================================================================
+async function valueOpinionChecks() {
+  section = "R. Avis de valeur PDF";
+  const sample = {
+    id: "3f9a21c0-aaaa-bbbb-cccc-000000000000",
+    created_at: "2026-10-01T10:00:00Z",
+    contact_name: "Client Test",
+    inputs: { type: "appartement", commune: "Strassen", surfaceLiving: 92, terrace: 12, terraceSurface: 12, bedrooms: 2, state: "good", energy: "B", rentData: { rentPerM2Month: 31.2, yieldRate: 0.03 }, comparablesPpsqm: [7710.843, 8020.1], email: "client@example.com" },
+    client_output: { price_low: 690000, price_mid: 760000, price_high: 830000, confidence: "MEDIUM" },
+    internal_output: {
+      computed_at: "2026-10-01T10:00:00Z",
+      std_deviation_pct: 6.4,
+      weights_used: { observatoire: 0.5, sales_comparison: 0.3, income_capitalization: 0.2, depreciated_replacement: 0.1 },
+      methods: {
+        observatoire: { applicable: true, price: 770000, details: { base_per_m2: 8100 } },
+        sales_comparison: { applicable: true, price: 745000, details: { n_comparables_used: 6, median_ppsqm: 7710.843 } },
+        income_capitalization: { applicable: true, price: 760000, details: { rent_per_m2_month: 31.2, yield_used: 0.03 } },
+        depreciated_replacement: { applicable: false, price: null, details: {} },
+      },
+    },
+  };
+  const FORBIDDEN = /tegova|\bevs\b|[\u2013\u2014]|fr[eé]d[eé]ric|mannis/i;
+  for (const lang of VALUE_OPINION_LANGS) {
+    const messages = JSON.parse(read(`messages/${lang}.json`));
+    const texts: string[] = [];
+    const pdf = await buildValueOpinionPdf(sample, lang, messages, new Date("2026-10-06T10:00:00Z"), texts);
+    const raw = pdf.toString("latin1");
+    const pages = (raw.match(/\/Type \/Page\b/g) ?? []).length;
+    const all = texts.join("\n");
+    const bad = texts.filter((x) => FORBIDDEN.test(x));
+    check(`avis de valeur ${lang} : PDF valide de 9 pages`, raw.startsWith("%PDF-") && pages === 9, `${pages} pages`);
+    check(`avis de valeur ${lang} : ni TEGoVA, ni EVS, ni tiret long ou moyen, ni Frederic Mannis`, bad.length === 0 && !/tegova|\(EVS|\bEVS\b/i.test(raw), bad.slice(0, 3).join(" | "));
+    const vo = messages.value_opinion;
+    check(`avis de valeur ${lang} : titre, sous-titre, mention "pas une expertise", signataire unique`,
+      all.includes(vo.title) && all.includes(vo.subtitle) && all.includes(vo.not_expertise) && all.includes("Julien Brebion") && all.includes("Real Estate Director") && all.includes(vo.brand_line) && all.includes("26 Rue du Commerce, L-3450 Dudelange"));
+    check(`avis de valeur ${lang} : contexte de marche titre "${vo.s_market.split(",")[0]}, [date]" seulement`, texts.some((x) => x === vo.s_market.replace("{date}", "") + x.slice(vo.s_market.indexOf("{date}"))) && !/STATEC|Observatoire/.test(texts.filter((x) => x.startsWith(vo.s_market.split(",")[0])).join("")));
+    check(`avis de valeur ${lang} : aucune coordonnee du client ni numero de telephone`, !/client@example\.com|\+352|@mapagroup/i.test(all));
+    check(`avis de valeur ${lang} : poids reels (50, 30, 20, 0) et valeur ponderee 760 500`, ["50", "30", "20", "0"].every((w) => all.includes(voPercent(Number(w) / 100, lang, 0))) && all.includes(voPrice(760500, lang)));
+    check(`avis de valeur ${lang} : prix au m² formate, rendement en pourcentage, terrasse une fois`, all.includes(voPrice(7711, lang)) && all.includes(voPercent(0.03, lang, 2)) && !/7710[.,]84/.test(all) && !/\b0[.,]03\b/.test(all) && (texts.filter((x) => x === messages.admin_estimations.inputs.terrace).length === 1));
+  }
+  // Fiche de l'admin : memes corrections (alias et objets).
+  const entries = estimationInputEntries({ terrace: 12, terraceSurface: 12, rentData: { rentPerM2Month: 31.2, yieldRate: 0.03 } });
+  check("fiche d'estimation : terrasse une seule fois, loyer et rendement separes", entries.filter(([k]) => /terrace/i.test(k)).length === 1 && entries.some(([k]) => k === "yieldRate") && !entries.some(([k]) => k === "rentData"));
+  const route = read("app/api/admin/exports/estimations/[id]/avis-de-valeur/route.ts");
+  check("avis de valeur : admin aal2, debit limite, journal, aucun stockage", /const admin = await requireAdminRoute\(\);\s*if \(!admin\.ok\) return admin\.response;/.test(route) && /rateLimit\(req,/.test(route) && /action: "estimation_value_opinion"/.test(route) && !/storage\.from|\.upload\(/.test(route));
+  const visible = (["fr", "en", "de"] as const).filter((l) => /tegova|\bEVS\b/i.test(read(`messages/${l}.json`)));
+  check("TEGoVA et EVS absents des libelles (trois langues)", visible.length === 0, visible.join(", "));
+}
+
+// ===========================================================================
 // Q. Performance mobile et diffusion (garde-fous)
 // ===========================================================================
 section = "Q. Performance mobile et diffusion";
@@ -1178,7 +1231,9 @@ async function runtime() {
   }
 }
 
-runtime()
+valueOpinionChecks()
+  .catch((e) => check("avis de valeur PDF", false, String(e)))
+  .then(runtime)
   .catch((e) => check("requetes en memoire", false, String(e)))
   .finally(() => {
     let current = "";

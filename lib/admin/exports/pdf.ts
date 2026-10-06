@@ -53,7 +53,7 @@ const FONT_SOURCES = {
   monoBold: { file: "JetBrainsMono-Bold.ttf", fallback: "Courier-Bold" },
 } satisfies Record<string, FontSpec>;
 
-interface ResolvedFonts {
+export interface ResolvedFonts {
   title: string;
   body: string;
   bodyBold: string;
@@ -70,7 +70,7 @@ interface ResolvedFonts {
  * le reste du rendu. Ne lève jamais : un fichier absent, illisible ou
  * corrompu retombe silencieusement sur la police standard correspondante.
  */
-function resolveFonts(doc: PDFKit.PDFDocument): ResolvedFonts {
+export function resolveFonts(doc: PDFKit.PDFDocument): ResolvedFonts {
   const fonts = {} as ResolvedFonts;
   const embedded = {} as ResolvedFonts["embedded"];
   for (const key of Object.keys(FONT_SOURCES) as (keyof typeof FONT_SOURCES)[]) {

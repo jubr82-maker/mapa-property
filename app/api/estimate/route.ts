@@ -826,7 +826,7 @@ async function handlePost(req: Request) {
           evs.internal_output.methods.sales_comparison.applicable === true,
       });
     } catch (err) {
-      console.error("[api/estimate] EVS engine failed, fallback legacy:", err);
+      console.error("[api/estimate] moteur 5 methodes en echec, repli sur le modele hedoniste :", err);
       // Fallback gracieux : moteur hédoniste legacy.
     }
   }

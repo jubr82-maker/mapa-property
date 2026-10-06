@@ -124,7 +124,7 @@ export function etatLabel(value: string | null | undefined): string {
 // :706,735,739 ("hedonic_legacy") : les 2 SEULES valeurs réellement
 // écrites dans estimation_requests.engine (recherche exhaustive).
 const ENGINE_LABEL: Record<string, string> = {
-  evs_5_methods: "EVS 5 méthodes",
+  evs_5_methods: "Croisement de 5 méthodes",
   hedonic_legacy: "Hédoniste (legacy)",
 };
 export function engineLabel(value: string | null | undefined): string {

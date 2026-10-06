@@ -2451,12 +2451,12 @@
       "MANUAL": "Manuelle Eingabe"
     },
     "engine": {
-      "evs_5_methods": "EVS (5 Methoden)",
+      "evs_5_methods": "Abgleich von 5 Methoden",
       "hedonic_legacy": "Hedonisch (früheres Modell)",
       "manual_admin": "Manuelle Eingabe"
     },
     "engineShort": {
-      "evs_5_methods": "EVS",
+      "evs_5_methods": "5 Methoden",
       "hedonic_legacy": "Hedonisch",
       "manual_admin": "Manuell"
     },
@@ -2633,7 +2633,7 @@
     "list": {
       "eyebrow": "Bewertungen",
       "title": "Bewertungsanfragen",
-      "intro": "Die letzten 100 Anfragen aus dem Bewertungsformular der Website (EVS-Modell mit 5 Methoden für Wohnimmobilien in Luxemburg, hedonisches Modell für andere Länder und Immobilienarten).",
+      "intro": "Die letzten 100 Anfragen aus dem Bewertungsformular der Website (Modell mit Abgleich von 5 Methoden für Wohnimmobilien in Luxemburg, hedonisches Modell für andere Länder und Immobilienarten).",
       "new": "Neue Bewertung",
       "total": "Angezeigt insgesamt",
       "loadError": "Die Bewertungen konnten nicht geladen werden. Bitte laden Sie die Seite neu.",
@@ -2692,9 +2692,9 @@
       "weightedPrice": "Gewichteter Preis",
       "beforeRounding": "vor Rundung für die Anzeige",
       "warnings": "Hinweise ({count})",
-      "avisTitle": "PDF-Wertgutachten (TEGoVA EVS, 9 Seiten)",
-      "avisText": "Die automatische Erstellung des Wertgutachtens ist noch nicht verfügbar.",
-      "avisButton": "Wertgutachten erstellen (demnächst verfügbar)",
+      "avisTitle": "Werteinschätzung MAPA Property",
+      "avisText": "PDF-Dokument mit 9 Seiten, erstellt durch den Abgleich der Methoden dieser Bewertung. Es ist kein Gutachten und wird nirgends gespeichert: Es wird direkt heruntergeladen, und jede Erstellung wird im Protokoll vermerkt.",
+      "avisButton": "Werteinschätzung erstellen",
       "contactTitle": "Kundenkontakt",
       "name": "Name",
       "email": "E-Mail",
@@ -2709,7 +2709,8 @@
       "saved": "Gespeichert",
       "deleteConfirm": "Diese Bewertung löschen? Sie wird aus der Liste ausgeblendet, aber nicht endgültig entfernt.",
       "dangerZone": "Gefahrenbereich",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "avisLanguage": "Sprache des Dokuments"
     },
     "refinement": {
       "title": "Dem Kunden eine genauere Bewertung anbieten",
@@ -2771,6 +2772,11 @@
       "methods": "Methodendetails (interne Verwendung)",
       "documentTitle": "Bewertungsblatt",
       "range": "Spanne"
+    },
+    "units": {
+      "sqm": "m²",
+      "perSqm": "/m²",
+      "perSqmMonth": "/m²/Monat"
     }
   },
   "admin_workflow": {
@@ -3644,7 +3650,9 @@
     "jshort_offmarket_offmarket_delete": "Off-Market gelöscht",
     "jshort_offmarket_offmarket_duplicate": "Off-Market dupliziert",
     "jshort_offmarket_request_status_change": "Anfrage: Status",
-    "jshort_offmarket_request_notes_update": "Anfrage: Notizen"
+    "jshort_offmarket_request_notes_update": "Anfrage: Notizen",
+    "event_admin_estimation_value_opinion": "Werteinschätzung erstellt",
+    "jshort_admin_estimation_value_opinion": "Werteinschätzung"
   },
   "breadcrumb": {
     "home": "Startseite",
@@ -3820,5 +3828,71 @@
       "faq_q4": "Wie hoch sind die Honorare im Ausland?",
       "faq_a4": "Für eine Suche in Europa, einschließlich Frankreich, 3 % bis 8 % zzgl. MwSt. des Kaufpreises je nach Komplexität und Land. Außerhalb Europas nach Angebot im Mandat."
     }
+  },
+  "value_opinion": {
+    "title": "Werteinschätzung MAPA Property",
+    "subtitle": "Wert ermittelt durch den Abgleich mehrerer Bewertungsmethoden",
+    "not_expertise": "Dieses Dokument ist eine Werteinschätzung. Es ist kein Immobiliengutachten und ersetzt nicht den Bericht eines Sachverständigen: Dritte (Bank, Behörde, Gericht) können sich nicht darauf berufen.",
+    "prepared_for": "Erstellt für {name}",
+    "reference": "Aktenzeichen: {ref}",
+    "issued_on": "Ausstellungsdatum: {date}",
+    "property_line": "{type} in {commune}",
+    "page": "Seite {n} von {total}",
+    "footer": "MAPA Property, eine Marke der MAPA Synergy Sàrl · Werteinschätzung",
+    "s_scope": "Gegenstand und Grenzen",
+    "scope_p1": "Diese Einschätzung ermittelt den Verkehrswert der auf der folgenden Seite beschriebenen Immobilie, also den Preis, zu dem sie am Ausstellungsdatum auf dem freien Markt zwischen einem verkaufsbereiten und einem kaufbereiten, informierten Partner vernünftigerweise verkauft werden könnte.",
+    "scope_p2": "Der Wert wird durch den Abgleich mehrerer Bewertungsmethoden ermittelt, jeweils mit ihrem Prinzip, ihrem Ergebnis und ihrem tatsächlichen Gewicht in der Zusammenfassung.",
+    "scope_p3": "Die verwendeten Merkmale sind die in der Akte erfassten. Sie wurden nicht anhand von Unterlagen geprüft (Eigentumsurkunde, Kataster, Bauplanung, Teilungserklärung, Gutachten).",
+    "scope_p4": "Diese Einschätzung gilt zum Ausstellungsdatum: Veränderungen des Marktes oder der Immobilie können ihr Ergebnis ändern.",
+    "s_description": "Beschreibung der Immobilie",
+    "description_intro": "In der Akte erfasste Merkmale:",
+    "s_market": "Marktdaten Luxemburg, {date}",
+    "market_reference": "Referenzpreis pro m² der Gemeinde",
+    "market_adjusted": "Preis pro m² nach Anpassungen",
+    "market_rent": "Marktmiete pro m² und Monat",
+    "market_yield": "Marktübliche Bruttomietrendite",
+    "market_comparables": "Verwendete Vergleichsverkäufe",
+    "market_comparables_median": "Medianpreis pro m² der Vergleichsverkäufe",
+    "market_none": "Für diese Akte sind keine bezifferten Marktdaten erfasst.",
+    "s_methods": "Bewertungsmethoden",
+    "methods_intro": "Jede anwendbare Methode ergibt einen Wert. Ihr tatsächliches Gewicht ist ihr Anteil an der Zusammenfassung; eine nicht anwendbare Methode wiegt 0 %.",
+    "col_method": "Methode",
+    "col_value": "Wert",
+    "col_weight": "Tatsächliches Gewicht",
+    "not_applicable": "Nicht anwendbar",
+    "principle": "Prinzip",
+    "p_observatoire": "Referenzpreis pro m² der Gemeinde, angepasst durch objektbezogene Koeffizienten (Zustand, Energieeffizienz, Etage, Aufteilung, Fläche), zuzüglich Nebenflächen. Bei einem Haus: Wert des Gebäudes und Wert des Grundstücks.",
+    "p_sales_comparison": "Median der Quadratmeterpreise erfasster Vergleichsverkäufe (gleiche Gemeinde, gleiche Objektart) nach Ausschluss von Ausreißern, angewendet auf die Wohnfläche.",
+    "p_hedonic": "Basispreis pro m², korrigiert durch einen Koeffizienten je Merkmal (Zustand, Energie, Baujahr, Etage, Aufzug, Ausrichtung, Aussicht, Fläche), danach etwaige Wertzuschläge für Terrasse, Stellplatz und Arbeiten.",
+    "p_income_capitalization": "Geschätzte jährliche Marktmiete der Immobilie, geteilt durch eine marktübliche Rendite, unter Einhaltung der gesetzlichen Mietobergrenze in Luxemburg.",
+    "p_depreciated_replacement": "Wert des Grundstücks zuzüglich der Neubaukosten abzüglich der Alterswertminderung.",
+    "p_statec_reference": "Durchschnittlicher Referenzpreis der Gemeinde mit einfachen Anpassungen (Zustand, Energie, Baujahr, Fläche).",
+    "s_synthesis": "Zusammenfassung",
+    "synthesis_value": "Ermittelter Wert",
+    "synthesis_range": "Wertspanne",
+    "synthesis_range_value": "von {low} bis {high}",
+    "synthesis_per_sqm": "Pro m² Wohnfläche",
+    "synthesis_weighted": "Gewichteter Wert der Methoden, vor Rundung",
+    "synthesis_spread": "Abweichung zwischen den Methoden",
+    "synthesis_confidence": "Vertrauensniveau",
+    "synthesis_text": "Der ermittelte Wert berücksichtigt das tatsächliche Gewicht jeder Methode. Die Spanne drückt die jeder Bewertung eigene Unsicherheit aus; der Verkaufspreis hängt auch von der Verhandlung und den Marktbedingungen ab.",
+    "s_assumptions": "Annahmen und Vorbehalte",
+    "a1": "Die Immobilie wird als frei von Nutzung angenommen, sofern die Akte nichts anderes angibt.",
+    "a2": "Die Immobilie wird als konform mit Bau- und Planungsvorschriften angenommen, ohne nicht angegebene Dienstbarkeiten oder Lasten.",
+    "a3": "Es wird angenommen, dass keine Verschmutzung, kein Asbest und keine verborgenen Mängel über die Akte hinaus vorliegen.",
+    "a4": "Flächen werden wie angegeben übernommen, ohne zertifizierte Vermessung.",
+    "a5": "Erwerbsnebenkosten, Registrierungsgebühren und Honorare sind im Wert nicht enthalten.",
+    "a6": "Die verwendeten Marktdaten sind die zum Ausstellungsdatum verfügbaren.",
+    "s_legal": "Rechtliche Hinweise",
+    "s_signature": "Unterschrift",
+    "signature_intro": "Werteinschätzung ausgestellt am {date} von:",
+    "signer_name": "Julien Brebion",
+    "signer_title": "Real Estate Director",
+    "brand_line": "MAPA Property, eine Marke der MAPA Synergy Sàrl",
+    "address": "26 Rue du Commerce, L-3450 Dudelange",
+    "signature_label": "Unterschrift",
+    "empty": "Nicht angegeben",
+    "yes": "Ja",
+    "no": "Nein"
   }
 }

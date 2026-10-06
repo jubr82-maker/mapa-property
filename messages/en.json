@@ -2451,12 +2451,12 @@
       "MANUAL": "Manual entry"
     },
     "engine": {
-      "evs_5_methods": "EVS (5 methods)",
+      "evs_5_methods": "Cross-check of 5 methods",
       "hedonic_legacy": "Hedonic (former engine)",
       "manual_admin": "Manual entry"
     },
     "engineShort": {
-      "evs_5_methods": "EVS",
+      "evs_5_methods": "5 methods",
       "hedonic_legacy": "Hedonic",
       "manual_admin": "Manual"
     },
@@ -2633,7 +2633,7 @@
     "list": {
       "eyebrow": "Valuations",
       "title": "Valuation requests",
-      "intro": "The latest 100 requests received from the website valuation form (5-method EVS engine for residential property in Luxembourg, hedonic model for other countries and property types).",
+      "intro": "The latest 100 requests received from the website valuation form (engine cross-checking 5 methods for residential property in Luxembourg, hedonic model for other countries and property types).",
       "new": "New valuation",
       "total": "Total shown",
       "loadError": "The valuations could not be loaded. Please reload the page.",
@@ -2692,9 +2692,9 @@
       "weightedPrice": "Weighted price",
       "beforeRounding": "before display rounding",
       "warnings": "Points of attention ({count})",
-      "avisTitle": "PDF valuation report (TEGoVA EVS, 9 pages)",
-      "avisText": "Automatic generation of the valuation report is not available yet.",
-      "avisButton": "Generate valuation report (coming soon)",
+      "avisTitle": "MAPA Property value opinion",
+      "avisText": "A 9-page PDF document, established by cross-checking the methods of this estimate. It is not an expert appraisal and is not stored anywhere: it is downloaded directly, and each generation is recorded in the log.",
+      "avisButton": "Generate the value opinion",
       "contactTitle": "Client contact",
       "name": "Name",
       "email": "Email",
@@ -2709,7 +2709,8 @@
       "saved": "Saved",
       "deleteConfirm": "Delete this valuation? It will be hidden from the list without being permanently erased.",
       "dangerZone": "Danger zone",
-      "delete": "Delete"
+      "delete": "Delete",
+      "avisLanguage": "Document language"
     },
     "refinement": {
       "title": "Offer the client a refined valuation",
@@ -2771,6 +2772,11 @@
       "methods": "Method details (internal use)",
       "documentTitle": "Valuation sheet",
       "range": "Range"
+    },
+    "units": {
+      "sqm": "sq m",
+      "perSqm": "/sq m",
+      "perSqmMonth": "/sq m/month"
     }
   },
   "admin_workflow": {
@@ -3644,7 +3650,9 @@
     "jshort_offmarket_offmarket_delete": "Off-Market deleted",
     "jshort_offmarket_offmarket_duplicate": "Off-Market duplicated",
     "jshort_offmarket_request_status_change": "Request: status",
-    "jshort_offmarket_request_notes_update": "Request: notes"
+    "jshort_offmarket_request_notes_update": "Request: notes",
+    "event_admin_estimation_value_opinion": "Value opinion generated",
+    "jshort_admin_estimation_value_opinion": "Value opinion"
   },
   "breadcrumb": {
     "home": "Home",
@@ -3820,5 +3828,71 @@
       "faq_q4": "What are the fees abroad?",
       "faq_a4": "For a search in Europe, including France, 3% to 8% excluding VAT of the purchase price depending on complexity and country. Outside Europe, quoted in the mandate."
     }
+  },
+  "value_opinion": {
+    "title": "MAPA Property value opinion",
+    "subtitle": "Value established by cross-checking several valuation methods",
+    "not_expertise": "This document is a value opinion. It is not a real estate expert appraisal and does not replace an expert's report: it cannot be relied upon by a third party (bank, authority, court).",
+    "prepared_for": "Prepared for {name}",
+    "reference": "File reference: {ref}",
+    "issued_on": "Issue date: {date}",
+    "property_line": "{type} in {commune}",
+    "page": "Page {n} of {total}",
+    "footer": "MAPA Property, a brand of MAPA Synergy Sàrl · Value opinion",
+    "s_scope": "Purpose and limits",
+    "scope_p1": "This opinion estimates the market value of the property described on the next page, that is, the price at which it could reasonably be sold on the open market at the issue date, between a willing and informed seller and buyer.",
+    "scope_p2": "The value is established by cross-checking several valuation methods, each presented with its principle, its result and its real weight in the synthesis.",
+    "scope_p3": "The characteristics used are those recorded in the file. They have not been checked against documents (title deed, land register, planning, co-ownership rules, surveys).",
+    "scope_p4": "This opinion is valid at its issue date: changes in the market or in the property may alter its conclusion.",
+    "s_description": "Property description",
+    "description_intro": "Characteristics recorded in the file:",
+    "s_market": "Luxembourg market data, {date}",
+    "market_reference": "Reference price per sq m in the municipality",
+    "market_adjusted": "Price per sq m after adjustments",
+    "market_rent": "Market rent per sq m per month",
+    "market_yield": "Gross market rental yield",
+    "market_comparables": "Comparable sales used",
+    "market_comparables_median": "Median price per sq m of comparable sales",
+    "market_none": "No quantified market data is recorded for this file.",
+    "s_methods": "Valuation methods",
+    "methods_intro": "Each applicable method produces a value. Its real weight is its share in the synthesis; a method that does not apply weighs 0%.",
+    "col_method": "Method",
+    "col_value": "Value",
+    "col_weight": "Real weight",
+    "not_applicable": "Not applicable",
+    "principle": "Principle",
+    "p_observatoire": "Reference price per sq m of the municipality, adjusted by coefficients specific to the property (condition, energy performance, floor, layout, size), plus outbuildings. For a house: value of the building and value of the land.",
+    "p_sales_comparison": "Median price per sq m of recorded comparable sales (same municipality, same type of property), after excluding outliers, applied to the living area.",
+    "p_hedonic": "Base price per sq m corrected by a coefficient for each characteristic (condition, energy, year, floor, lift, exposure, view, size), then any added value for terrace, parking and works.",
+    "p_income_capitalization": "Estimated annual market rent for the property, divided by a market yield, within the Luxembourg legal rent cap.",
+    "p_depreciated_replacement": "Value of the land, plus the cost of rebuilding new, less depreciation.",
+    "p_statec_reference": "Average reference price of the municipality, with simple adjustments (condition, energy, year of construction, size).",
+    "s_synthesis": "Synthesis",
+    "synthesis_value": "Value retained",
+    "synthesis_range": "Value range",
+    "synthesis_range_value": "from {low} to {high}",
+    "synthesis_per_sqm": "Per sq m of living area",
+    "synthesis_weighted": "Weighted value of the methods, before rounding",
+    "synthesis_spread": "Spread between methods",
+    "synthesis_confidence": "Confidence level",
+    "synthesis_text": "The value retained reflects the real weight of each method. The range expresses the uncertainty inherent in any valuation; the sale price will also depend on negotiation and market conditions.",
+    "s_assumptions": "Assumptions and reservations",
+    "a1": "The property is assumed to be vacant, unless stated otherwise in the file.",
+    "a2": "The property is assumed to comply with planning and building rules, with no undeclared easement or charge.",
+    "a3": "No pollution, asbestos or hidden defect is assumed beyond what the file shows.",
+    "a4": "Areas are taken as declared, without certified measurement.",
+    "a5": "No acquisition costs, registration duties or fees are included in the value.",
+    "a6": "The market data used is that available at the issue date.",
+    "s_legal": "Legal notices",
+    "s_signature": "Signature",
+    "signature_intro": "Value opinion issued on {date} by:",
+    "signer_name": "Julien Brebion",
+    "signer_title": "Real Estate Director",
+    "brand_line": "MAPA Property, a brand of MAPA Synergy Sàrl",
+    "address": "26 Rue du Commerce, L-3450 Dudelange",
+    "signature_label": "Signature",
+    "empty": "Not provided",
+    "yes": "Yes",
+    "no": "No"
   }
 }
