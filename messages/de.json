@@ -426,7 +426,8 @@
     "error": "Erneut versuchen",
     "aria_call_julien": "Julien Brebion anrufen",
     "aria_email_julien": "Julien Brebion eine E-Mail schreiben",
-    "aria_call_secondary": "Die Zweitnummer von MAPA Property anrufen"
+    "aria_call_secondary": "Die Zweitnummer von MAPA Property anrufen",
+    "aria_email_secondary": "MAPA Property eine E-Mail schreiben"
   },
   "home": {
     "placeholder": "MAPA Property, Startseite im Aufbau."

@@ -426,7 +426,8 @@
     "error": "Try again shortly",
     "aria_call_julien": "Call Julien Brebion",
     "aria_email_julien": "Email Julien Brebion",
-    "aria_call_secondary": "Call the MAPA Property secondary number"
+    "aria_call_secondary": "Call the MAPA Property secondary number",
+    "aria_email_secondary": "Email MAPA Property"
   },
   "home": {
     "placeholder": "MAPA Property, homepage under construction."

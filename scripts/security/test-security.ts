@@ -42,6 +42,7 @@ import { classifyChannel, sanitizeAttribution } from "../../lib/pilotage/attribu
 import { isTargetQuery } from "../../lib/pilotage/seo-targets";
 import { abbreviateAccount, journalLines, journalSummary, paginate, parseJournalParams } from "../../lib/pilotage/journal-view";
 import { displayableImageSrc, isOptimizedImageSrc } from "../../lib/image-hosts";
+import { revealLines } from "../../lib/contact/reveal-lines";
 import { sanitizeArticleHtml as sanitizeArticleForTest } from "../../lib/security/sanitize";
 import { RETENTION_RULES } from "../../lib/pilotage/config";
 import { retentionCutoff } from "../../lib/pilotage/retention";
@@ -629,6 +630,10 @@ const FORBIDDEN_IN_HTML: [string, RegExp][] = [
   ["lien mailto:", /(?<![a-z])mailto:/i],
   ["lien tel:", /(?<![a-z])tel:/i],
   ["numero de Julien", /691[\s.-]*620[\s.-]*127/],
+  // Second numero et e-mail du site (oct. 2026) : reveles au clic
+  // seulement, jamais en clair dans le HTML servi.
+  ["second numero", /691[\s.-]*113[\s.-]*018/],
+  ["site@mapagroup.org", /site@mapagroup\.org/i],
 ];
 function forbiddenHits(text: string): string[] {
   return FORBIDDEN_IN_HTML.filter(([, re]) => re.test(text)).map(([label]) => label);
@@ -678,11 +683,25 @@ section = "M. Fiche de bien et coordonnees";
   const meta = fiche.slice(fiche.indexOf("export async function generateMetadata"), fiche.indexOf("export default"));
   check("metadonnees : carte X de la fiche = Open Graph (image et description)", /openGraph: \{[\s\S]*?images: \[\{ url: shareImage \}\]/.test(meta) && /twitter: \{[\s\S]*?description: description \|\| undefined,[\s\S]*?images: \[shareImage\]/.test(meta));
   // Coordonnees dans le code des pages publiques.
-  const publicSources = [...walk("app/[locale]", (x) => /\.(ts|tsx)$/.test(x)), ...walk("components", (x) => /\.(ts|tsx)$/.test(x) && !x.startsWith("components/admin/")), "lib/seo.ts", ...walk("lib/legal", (x) => x.endsWith(".ts")), "messages/fr.json", "messages/en.json", "messages/de.json", "public/llms.txt"];
-  const leaks = publicSources.filter((f) => /admin@mapagroup\.org|j\.brebion@mapagroup\.org|691[\s.]?620[\s.]?127|href=["'](tel|mailto):/i.test(read(f)));
+  const publicSources = [...walk("app/[locale]", (x) => /\.(ts|tsx)$/.test(x)), ...walk("components", (x) => /\.(ts|tsx)$/.test(x) && !x.startsWith("components/admin/")), "lib/seo.ts", ...walk("lib/legal", (x) => x.endsWith(".ts")), "messages/fr.json", "messages/en.json", "messages/de.json", "public/llms.txt", "lib/contact/reveal-lines.ts"];
+  const leaks = publicSources.filter((f) => /admin@mapagroup\.org|j\.brebion@mapagroup\.org|site@mapagroup\.org|691[\s.]?620[\s.]?127|691[\s.]?113[\s.]?018|href=["'](tel|mailto):/i.test(read(f)));
   check("coordonnees : aucune en clair dans les sources publiques", leaks.length === 0, leaks.join(", "));
   const reveal = read("components/contact-reveal.tsx");
-  check("coordonnees : adresse admin retiree de ContactReveal", !/EMAIL_ADMIN|\["admin"\]/.test(reveal));
+  check("coordonnees : adresse admin retiree de ContactReveal", !/EMAIL_ADMIN|\["admin"\]/.test(reveal) && !/\["admin"\]/.test(read("lib/contact/reveal-lines.ts")));
+  // Revelation (oct. 2026) : telephone et e-mail de Julien, puis le second
+  // numero sans nom ni libelle, puis site@mapagroup.org dessous, meme mise
+  // en forme que l'e-mail de Julien. Echoue si l'un disparait.
+  const lines = revealLines();
+  const at = String.fromCharCode(64);
+  check("revelation : second numero present, sans nom", lines[2]?.kind === "phone" && lines[2].display === "+352 691 113 018" && lines[2].href === "tel:+352691113018" && lines[2].ariaKey === "aria_call_secondary");
+  check("revelation : site@mapagroup.org sous le second numero, comme l'e-mail de Julien", lines.length === 4 && lines[3]?.kind === "email" && lines[3].display === `site${at}mapagroup.org` && lines[3].href === `mailto:site${at}mapagroup.org` && lines[1].kind === "email");
+  check("revelation : aucune adresse admin, Julien en premier", lines[0].display === "+352 691 620 127" && lines[1].display === `j.brebion${at}mapagroup.org` && !lines.some((l) => /^admin/.test(l.display)));
+  check("revelation : chaque ligne affichee par ContactReveal apres le clic", /\{revealLines\(\)\.map\(\(line\) => \(\s*<ContactLine/.test(reveal) && /icon=\{line\.kind === "phone" \? <PhoneIcon \/> : <MailIcon \/>\}/.test(reveal) && /!revealed \?/.test(reveal));
+  const ariaOk = (["fr", "en", "de"] as const).every((l) => {
+    const c = JSON.parse(read(`messages/${l}.json`)).contact as Record<string, string>;
+    return ["aria_call_julien", "aria_email_julien", "aria_call_secondary", "aria_email_secondary"].every((k) => typeof c[k] === "string" && c[k].length > 0) && !/fr[eé]d[eé]ric|mannis/i.test(c.aria_call_secondary + c.aria_email_secondary);
+  });
+  check("revelation : libelles accessibles des quatre lignes, trois langues, sans nom pour la seconde ligne", ariaOk);
   check("version imprimee : coordonnees seulement apres clic", /<PrintAdvisorContact/.test(fiche) && /useContactRevealed\(\)/.test(read("components/property/fiche/PrintAdvisorContact.tsx")));
   check("version imprimee : numeros RCS, TVA, AE retires", !/RCS Luxembourg|TVA : LU|AE N/.test(fiche));
   // HTML prerendu par le build.
@@ -693,6 +712,7 @@ section = "M. Fiche de bien et coordonnees";
   }
   // Le controle lui-meme detecte bien chaque cas.
   check("controle HTML : detecte admin@, mailto:, tel:, numero", forbiddenHits('<a href="mailto:x">admin@mapagroup.org</a><a href="tel:+352691620127">+352 691 620 127</a>').length === 4 && forbiddenHits('<input type="tel" autocomplete="tel-national"> Stadtviertel: x').length === 0);
+  check("controle HTML : detecte le second numero et site@", forbiddenHits("+352 691 113 018").length === 1 && forbiddenHits("site@mapagroup.org").length === 1 && forbiddenHits("691.113.018 site@MAPAGROUP.org").length === 2);
 }
 
 // ===========================================================================

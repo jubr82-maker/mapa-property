@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { track } from "@/lib/tracking/track";
+import { advisorContactLines, revealLines } from "@/lib/contact/reveal-lines";
 
 type Variant = "compact" | "full" | "sidebar";
 type Align = "left" | "center" | "right";
@@ -19,35 +20,14 @@ interface ContactRevealProps {
   propertyTitle?: string;
 }
 
-// Coordonnees en pieces — assemblees uniquement APRES clic, jamais en SSR.
-// Anti-scraping : aucune chaine complete "+352..." ni "j.brebion@..." dans
-// le HTML SSR initial. Les arrays sont dans le bundle JS, mais le DOM
-// rendu cote serveur ne contient que le bouton "Nous contacter".
-const PHONE_JULIEN_PARTS = ["+352", "691", "620", "127"];
-const PHONE_SECONDARY_PARTS = ["+352", "691", "113", "018"];
-const EMAIL_JULIEN_USER = ["j", "brebion"];
-const EMAIL_DOMAIN = ["mapagroup", "org"];
-// Oct. 2026 (decision de Julien) : l'adresse du compte administrateur
-// n'apparait plus nulle part sur le site public, meme apres clic.
+// Coordonnees en pieces, assemblees uniquement APRES clic, jamais en SSR :
+// lib/contact/reveal-lines.ts (source unique, ordre d'affichage, test).
+// Le DOM rendu cote serveur ne contient que le bouton "Nous contacter".
 
 // Delai minimum entre mount et premier clic (anti-bot naif).
 // Sprint UI-MAI : baisse de 300ms a 150ms pour limiter les faux positifs
 // sur clic rapide post-hydration.
 const MIN_CLICK_DELAY_MS = 150;
-
-function buildPhoneDisplay(parts: string[]) {
-  return parts.join(" ");
-}
-
-function buildPhoneTel(parts: string[]) {
-  return parts.join("");
-}
-
-// Assemblage email cote client uniquement : user + "@" (fromCharCode 64) +
-// domaine. Aucune chaine complete "...@..." dans le SSR ni le source.
-function buildEmail(userParts: string[]) {
-  return `${userParts.join(".")}${String.fromCharCode(64)}${EMAIL_DOMAIN.join(".")}`;
-}
 
 // Revelation partagee (oct. 2026) : la carte conseiller de la version
 // imprimee n'affiche telephone et e-mail que si le visiteur les a reveles
@@ -73,7 +53,7 @@ export function useContactRevealed(): boolean {
 
 /** Coordonnees de Julien, assemblees cote client uniquement. */
 export function advisorContact(): { phone: string; email: string } {
-  return { phone: buildPhoneDisplay(PHONE_JULIEN_PARTS), email: buildEmail(EMAIL_JULIEN_USER) };
+  return advisorContactLines();
 }
 
 export function ContactReveal({
@@ -206,40 +186,22 @@ export function ContactReveal({
         // ligne est un <a> cliquable (tel: ou mailto:) avec le numero /
         // email visible en texte.
         <>
-          {/* 1. Téléphone Julien */}
-          <ContactLine
-            display={buildPhoneDisplay(PHONE_JULIEN_PARTS)}
-            href={`tel:${buildPhoneTel(PHONE_JULIEN_PARTS)}`}
-            ariaLabel={t("aria_call_julien")}
-            icon={<PhoneIcon />}
-            onClick={() => trackReveal("call_julien")}
-            linkBase={linkBase}
-            iconColor={iconColor}
-            variant={variant}
-          />
-          {/* 2. Email Julien */}
-          <ContactLine
-            display={buildEmail(EMAIL_JULIEN_USER)}
-            href={`mailto:${buildEmail(EMAIL_JULIEN_USER)}`}
-            ariaLabel={t("aria_email_julien")}
-            icon={<MailIcon />}
-            onClick={() => trackReveal("email")}
-            linkBase={linkBase}
-            iconColor={iconColor}
-            variant={variant}
-          />
-          {/* 3. Téléphone secondaire (ligne anonyme — regle Julien : seul son
-              propre nom peut apparaitre dans l'aria-label) */}
-          <ContactLine
-            display={buildPhoneDisplay(PHONE_SECONDARY_PARTS)}
-            href={`tel:${buildPhoneTel(PHONE_SECONDARY_PARTS)}`}
-            ariaLabel={t("aria_call_secondary")}
-            icon={<PhoneIcon />}
-            onClick={() => trackReveal("call_secondary")}
-            linkBase={linkBase}
-            iconColor={iconColor}
-            variant={variant}
-          />
+          {/* Telephone et e-mail de Julien, second telephone (sans nom ni
+              libelle), e-mail du site sous ce numero : meme ligne, meme
+              mise en forme pour chaque coordonnee. */}
+          {revealLines().map((line) => (
+            <ContactLine
+              key={line.href}
+              display={line.display}
+              href={line.href}
+              ariaLabel={t(line.ariaKey)}
+              icon={line.kind === "phone" ? <PhoneIcon /> : <MailIcon />}
+              onClick={() => trackReveal(line.trackTarget)}
+              linkBase={linkBase}
+              iconColor={iconColor}
+              variant={variant}
+            />
+          ))}
         </>
       )}
 

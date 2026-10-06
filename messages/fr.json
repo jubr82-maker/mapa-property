@@ -426,7 +426,8 @@
     "error": "Réessayez dans un instant",
     "aria_call_julien": "Appeler Julien Brebion",
     "aria_email_julien": "Écrire un e-mail à Julien Brebion",
-    "aria_call_secondary": "Appeler le numéro secondaire MAPA Property"
+    "aria_call_secondary": "Appeler le numéro secondaire MAPA Property",
+    "aria_email_secondary": "Écrire un e-mail à MAPA Property"
   },
   "home": {
     "placeholder": "MAPA Property, page d'accueil en construction."
