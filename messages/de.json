@@ -1728,7 +1728,20 @@
     "photos_autosaved": "Fotos gespeichert und in der Anzeige veröffentlicht.",
     "photo_take": "Foto aufnehmen",
     "photo_gallery": "Aus Galerie wählen",
-    "photo_drag": "Foto {n} verschieben"
+    "photo_drag": "Foto {n} verschieben",
+    "translate_button": "Aus dem Französischen übersetzen",
+    "translate_running": "Übersetzung läuft…",
+    "translate_hint": "Füllt Titel, Beschreibung und Kurztext auf Englisch und Deutsch. Prüfen und dann speichern: Vorher wird nichts gespeichert.",
+    "translate_done": "{count, plural, =0 {Kein Feld ausgefüllt.} one {# Feld ausgefüllt: prüfen, dann speichern.} other {# Felder ausgefüllt: prüfen, dann speichern.}}",
+    "translate_confirm_overwrite": "{count, plural, one {# bereits ausgefülltes Feld wird durch die Übersetzung ersetzt.} other {# bereits ausgefüllte Felder werden durch die Übersetzung ersetzt.}} Fortfahren? Abbrechen füllt nur leere Felder.",
+    "translate_err_no_key": "Übersetzung nicht verfügbar: Der Mistral-Schlüssel ist auf dem Server nicht konfiguriert.",
+    "translate_err_rate": "Mistral begrenzt die Anzahl der Anfragen (kostenloses Angebot): Warten Sie eine Minute und versuchen Sie es erneut.",
+    "translate_err_key_refused": "Mistral lehnt den Serverschlüssel ab (ungültig oder abgelaufen).",
+    "translate_err_http": "Mistral hat die Übersetzung abgelehnt (Code {status}).",
+    "translate_err_network": "Mistral hat nicht geantwortet ({detail}).",
+    "translate_err_local_rate": "Zu viele Übersetzungen angefordert: Versuchen Sie es in {seconds} Sekunden erneut.",
+    "translate_err_empty": "Nichts zu übersetzen: Französischer Titel, Beschreibung und Kurztext sind leer.",
+    "translate_err_too_long": "Französischer Text zu lang für eine Übersetzung (Titel 300, Kurztext 2.000, Beschreibung 20.000 Zeichen höchstens)."
   },
   "property_gone": {
     "title": "Diese Immobilie ist nicht mehr verfügbar",

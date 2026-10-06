@@ -1728,7 +1728,20 @@
     "photos_autosaved": "Photos enregistrées et publiées sur la fiche.",
     "photo_take": "Prendre une photo",
     "photo_gallery": "Choisir dans la galerie",
-    "photo_drag": "Déplacer la photo {n}"
+    "photo_drag": "Déplacer la photo {n}",
+    "translate_button": "Traduire depuis le français",
+    "translate_running": "Traduction en cours…",
+    "translate_hint": "Remplit le titre, la description et l'accroche en anglais et en allemand. Relisez puis enregistrez : rien n'est enregistré avant.",
+    "translate_done": "{count, plural, =0 {Aucun champ rempli.} one {# champ rempli : relisez puis enregistrez.} other {# champs remplis : relisez puis enregistrez.}}",
+    "translate_confirm_overwrite": "{count, plural, one {# champ déjà rempli sera remplacé par la traduction.} other {# champs déjà remplis seront remplacés par la traduction.}} Continuer ? Annuler ne remplit que les champs vides.",
+    "translate_err_no_key": "Traduction indisponible : la clé Mistral n'est pas configurée sur le serveur.",
+    "translate_err_rate": "Mistral limite le nombre de demandes (offre gratuite) : patientez une minute puis recommencez.",
+    "translate_err_key_refused": "Mistral refuse la clé du serveur (clé invalide ou expirée).",
+    "translate_err_http": "Mistral a refusé la traduction (code {status}).",
+    "translate_err_network": "Mistral n'a pas répondu ({detail}).",
+    "translate_err_local_rate": "Trop de traductions demandées : réessayez dans {seconds} secondes.",
+    "translate_err_empty": "Rien à traduire : le titre, la description et l'accroche en français sont vides.",
+    "translate_err_too_long": "Texte français trop long pour une traduction (titre 300, accroche 2000, description 20 000 caractères au plus)."
   },
   "property_gone": {
     "title": "Ce bien n'est plus disponible",

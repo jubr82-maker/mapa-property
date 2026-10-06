@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { publicCoverUrl } from "@/lib/property-images";
 import { dbFailure } from "@/lib/admin/action-result";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE, formatDateTime } from "@/lib/datetime";
@@ -60,10 +61,8 @@ export default async function AdminPropertiesPage({
   });
   const rows = filtered.map((p) => {
     type Img = { url: string; sort: number | null };
-    const imgs = (p.property_images as Img[] | null) ?? [];
-    const sorted = [...imgs].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
-    // Photo principale : property_images.sort = 0.
-    const cover = sorted[0]?.url ?? null;
+    // Photo principale : meme regle que le site (lib/property-images.ts).
+    const cover = publicCoverUrl((p.property_images as Img[] | null) ?? []);
     return {
       id: p.id,
       slug: p.slug,

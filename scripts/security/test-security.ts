@@ -1086,6 +1086,29 @@ section = "P. Admin sur telephone";
     return out;
   });
   check("admin : aucun message \"a echoue, reessayez\" sans motif (trois langues)", vague.length === 0, vague.slice(0, 6).join(", "));
+  // Partie 3 (oct. 2026) : qualite des annonces.
+  const lq = read("lib/pilotage/listing-quality.ts");
+  check("qualite : couverture = premiere photo du site (publicCoverUrl), plus de rang 0 exige", /if \(!publicCoverUrl\(r\.property_images\)\) issues\.push\("no_cover"\)/.test(lq) && !/sort \?\? 0\) === 0/.test(lq) &&
+    /const cover = publicCoverUrl\(/.test(read("app/admin/properties/page.tsx")) && (read("lib/data.ts").match(/publicCoverUrl\(row\.property_images\)/g) ?? []).length === 3);
+  const tr = read("app/admin/properties/translate-actions.ts");
+  check("traduction : admin aal2, debit limite, aucun enregistrement en base", /const admin = await requireAdmin\(\);\s*if \(!admin\.ok\) return sessionFailure\(\);/.test(tr) && /actionRateLimit\(/.test(tr) && !/\.from\(|\.update\(|\.insert\(/.test(tr));
+  const promptSrc = read("lib/translate.ts").replace(/^\s*\/\/.*$/gm, "");
+  check("traduction : aucune mention de Julien ni de MAPA ajoutee par le code", !/julien|mapa/i.test(promptSrc) && !/julien|mapa/i.test(tr.replace(/^\s*\/\/.*$/gm, "")));
+  const pefTr = read("components/admin/PropertyEditForm.tsx");
+  check("traduction : confirmation avant de remplacer un texte deja saisi", /window\.confirm\(t\("translate_confirm_overwrite"/.test(pefTr) && /translatePropertyFromFrench\(/.test(pefTr));
+  // Titres : motif du fichier SQL 15 reproduit a l'identique en JavaScript.
+  const sql15 = read("supabase/manual/execution/15_titres_mentions_vente.sql");
+  check("titres : SQL rejouable, sauvegarde prealable de properties, tableau avant et apres, aucun tiret ecrit", /IF to_regclass\('public\.properties_sauvegarde_titres_20261006'\) IS NULL/.test(sql15) && /CREATE TABLE public\.properties_sauvegarde_titres_20261006 AS TABLE public\.properties/.test(sql15) && /titre_avant[\s\S]*titre_apres/.test(sql15.slice(sql15.lastIndexOf("COMMIT;"))) && !/[\u2013\u2014]/.test(sql15));
+  const ch = String.fromCharCode;
+  const motif15 = new RegExp(`^[\\s${ch(160)}]*([aA${ch(224)}${ch(192)}]\\s+vendre|vente\\s+d['${ch(8217)}]\\s*une?|for\\s+sale|zu\\s+verkaufen)[\\s${ch(160)}]*[:,;.!|/${ch(8211)}${ch(8212)}-]*[\\s${ch(160)}]*`, "i");
+  const clean = (x: string) => { const r = x.replace(motif15, ""); return r.trim() ? r.charAt(0).toUpperCase() + r.slice(1) : x; };
+  const cases: [string, string][] = [
+    [`${ch(192)} Vendre : Villa contemporaine`, "Villa contemporaine"], ["A vendre: Maison", "Maison"], [`${ch(192)} VENDRE, Penthouse`, "Penthouse"],
+    [`${ch(192)} vendre, appartement`, "Appartement"], ["Vente d'un appartement lumineux", "Appartement lumineux"], [`Vente d${ch(8217)}une villa`, "Villa"],
+    [`For sale ${ch(8211)} house`, "House"], ["Zu verkaufen: Haus", "Haus"], [`Villa ${ch(224)} vendre`, `Villa ${ch(224)} vendre`], ["A vendre", "A vendre"],
+  ];
+  const bad15 = cases.filter(([a, b]) => clean(a) !== b).map(([a, b]) => `${a} -> ${clean(a)} (attendu ${b})`);
+  check("titres : mentions retirees en tete seulement, majuscule remise, titre vide jamais", bad15.length === 0 && /\^\[\[:space:\]' \|\| chr\(160\) \|\| '\]\*\(/.test(sql15), bad15.join(" ; "));
   check("avis et blog : plus de message d'erreur generique", !/save_error|delete_error/.test(rf + read("components/admin/BlogPostForm.tsx")) && /setError\(r\.error\)/.test(rf) && /setError\(r\.error\)/.test(read("components/admin/BlogPostForm.tsx")));
   check("ventes : fichier SQL de reattribution avec sauvegarde prealable et tableau avant et apres", /CREATE TABLE public\.mapa_historical_sales_sauvegarde_agent_20261006 AS TABLE public\.mapa_historical_sales/.test(sqlAgent) &&
     /SET agent = 'julien'\s*WHERE agent = 'frederic'/.test(sqlAgent) && /ventes_avant[\s\S]*ventes_apres/.test(sqlAgent.slice(sqlAgent.lastIndexOf("COMMIT;"))));

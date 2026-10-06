@@ -1,11 +1,14 @@
 // Qualite des annonces (oct. 2026) : biens publies et non archives sans
-// traduction anglaise ou allemande, sans photo de couverture (photo de
-// rang 0 dans property_images, meme regle que la liste admin), sans prix
+// traduction anglaise ou allemande, sans photo de couverture (meme regle
+// que le site : premiere photo de property_images dans l'ordre de l'admin,
+// images Apimo ecartees des qu'une photo de l'admin existe ; avant :
+// photo de rang 0 exigee, d'ou des biens signales a tort), sans prix
 // (hors "prix sur demande"), sans surface, ou en ligne depuis plus de
 // LISTING_STALE_DAYS jours (date de creation de la fiche : il n'existe pas
 // de date de publication en base).
 import { supabaseService } from "@/lib/supabase-service";
 import { LISTING_STALE_DAYS } from "@/lib/pilotage/config";
+import { publicCoverUrl } from "@/lib/property-images";
 
 export type ListingIssue = "no_en" | "no_de" | "no_cover" | "no_price" | "no_surface" | "stale";
 
@@ -55,7 +58,7 @@ export async function loadListingQuality(): Promise<ListingQuality> {
     const issues: ListingIssue[] = [];
     if (!r.title_en?.trim() || !r.description_en?.trim()) issues.push("no_en");
     if (!r.title_de?.trim() || !r.description_de?.trim()) issues.push("no_de");
-    if (!(r.property_images ?? []).some((i) => (i.sort ?? 0) === 0)) issues.push("no_cover");
+    if (!publicCoverUrl(r.property_images)) issues.push("no_cover");
     if (!r.price_on_demand && !(r.price && r.price > 0)) issues.push("no_price");
     if (!((r.surface ?? 0) > 0 || (r.living_surface ?? 0) > 0)) issues.push("no_surface");
     if (r.created_at && new Date(r.created_at).getTime() < staleBefore) issues.push("stale");

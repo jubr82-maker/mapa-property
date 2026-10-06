@@ -20,6 +20,7 @@ import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { updateProperty } from "@/app/admin/properties/actions";
+import { translatePropertyFromFrench } from "@/app/admin/properties/translate-actions";
 import { parseDecimalInput } from "@/lib/format/numbers";
 
 // Valeurs enregistrees en base (inchangees, cf. allowlists de
@@ -302,6 +303,7 @@ function CheckboxField({
 
 export function PropertyEditForm({ propertyId, initial }: Props) {
   const t = useTranslations("admin_properties");
+  const tn = useTranslations("admin_notices");
   const [form, setForm] = useState<FormState>(() => toFormState(initial));
   const [baseline, setBaseline] = useState<FormState>(() => toFormState(initial));
   const [busy, startTransition] = useTransition();
@@ -318,6 +320,42 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, [dirty]);
+
+  // Traduction depuis le francais (Mistral) : remplit les champs anglais et
+  // allemands pour relecture, n'enregistre rien (bouton Enregistrer), ne
+  // remplace un texte deja saisi qu'apres confirmation.
+  const [translating, setTranslating] = useState(false);
+  const [translateMsg, setTranslateMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  async function translateFromFrench() {
+    setTranslateMsg(null);
+    setTranslating(true);
+    try {
+      const r = await translatePropertyFromFrench({
+        title: form.title_fr,
+        description: form.description_fr,
+        short: form.short_description_fr,
+      });
+      if (!r.ok) return setTranslateMsg({ ok: false, text: r.error });
+      const map: [keyof FormState, string | undefined][] = [
+        ["title_en", r.en.title], ["description_en", r.en.description], ["short_description_en", r.en.short],
+        ["title_de", r.de.title], ["description_de", r.de.description], ["short_description_de", r.de.short],
+      ];
+      const proposals = map.filter(([, v]) => typeof v === "string" && v.trim().length > 0) as [keyof FormState, string][];
+      const filled = proposals.filter(([k, v]) => String(form[k] ?? "").trim() && String(form[k]) !== v);
+      const overwrite = filled.length === 0 || window.confirm(t("translate_confirm_overwrite", { count: filled.length }));
+      let applied = 0;
+      for (const [k, v] of proposals) {
+        if (!overwrite && String(form[k] ?? "").trim()) continue;
+        set(k, v as FormState[typeof k]);
+        applied++;
+      }
+      setTranslateMsg({ ok: true, text: t("translate_done", { count: applied }) });
+    } catch {
+      setTranslateMsg({ ok: false, text: tn("err_network") });
+    } finally {
+      setTranslating(false);
+    }
+  }
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -434,6 +472,22 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
       )}
 
       <Section title={t("sec_descriptions")}>
+        <div className="md:col-span-2" data-admin-translate>
+          <button
+            type="button"
+            onClick={translateFromFrench}
+            disabled={translating || (!form.title_fr.trim() && !form.description_fr.trim() && !form.short_description_fr.trim())}
+            className="rounded-full border border-[#3D4F63]/30 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] disabled:opacity-50"
+          >
+            {translating ? t("translate_running") : t("translate_button")}
+          </button>
+          <p className="mt-1 text-xs text-[#3D4F63]/70">{t("translate_hint")}</p>
+          {translateMsg && (
+            <p role={translateMsg.ok ? "status" : "alert"} className={`mt-1 text-sm ${translateMsg.ok ? "text-emerald-800" : "text-red-700"}`}>
+              {translateMsg.text}
+            </p>
+          )}
+        </div>
         <Field label={t("f_title_fr")}>
           <input
             value={form.title_fr}

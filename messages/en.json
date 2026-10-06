@@ -1728,7 +1728,20 @@
     "photos_autosaved": "Photos saved and published on the listing.",
     "photo_take": "Take a photo",
     "photo_gallery": "Choose from gallery",
-    "photo_drag": "Move photo {n}"
+    "photo_drag": "Move photo {n}",
+    "translate_button": "Translate from French",
+    "translate_running": "Translating…",
+    "translate_hint": "Fills the title, description and tagline in English and German. Review, then save: nothing is saved before.",
+    "translate_done": "{count, plural, =0 {No field filled.} one {# field filled: review, then save.} other {# fields filled: review, then save.}}",
+    "translate_confirm_overwrite": "{count, plural, one {# field already filled will be replaced by the translation.} other {# fields already filled will be replaced by the translation.}} Continue? Cancel only fills empty fields.",
+    "translate_err_no_key": "Translation unavailable: the Mistral key is not configured on the server.",
+    "translate_err_rate": "Mistral limits the number of requests (free tier): wait a minute, then retry.",
+    "translate_err_key_refused": "Mistral refuses the server key (invalid or expired).",
+    "translate_err_http": "Mistral refused the translation (code {status}).",
+    "translate_err_network": "Mistral did not respond ({detail}).",
+    "translate_err_local_rate": "Too many translations requested: retry in {seconds} seconds.",
+    "translate_err_empty": "Nothing to translate: the French title, description and tagline are empty.",
+    "translate_err_too_long": "French text too long to translate (title 300, tagline 2,000, description 20,000 characters at most)."
   },
   "property_gone": {
     "title": "This property is no longer available",

@@ -26,7 +26,7 @@ export async function dbFailure(e: DbError, scope: string): Promise<ActionFailur
 }
 
 /** Session absente, compte hors liste ou sans double authentification. */
-export async function sessionFailure(): Promise<ActionResult> {
+export async function sessionFailure(): Promise<{ ok: false; error: string }> {
   return { ok: false, error: (await notices())("err_session") };
 }
 
