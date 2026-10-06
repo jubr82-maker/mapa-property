@@ -1875,7 +1875,16 @@
     "data_unavailable": "Daten nicht verfügbar, versuchen Sie es in einigen Minuten erneut.",
     "error_monitoring_title": "Fehlerüberwachung",
     "cms_empty_title": "Keine bearbeitbaren Inhalte",
-    "cms_empty": "Bearbeitbare Inhalte wurden noch nicht initialisiert."
+    "cms_empty": "Bearbeitbare Inhalte wurden noch nicht initialisiert.",
+    "err_session": "Aktion abgelehnt: Die Sitzung ist nicht mehr zweistufig authentifiziert oder das Konto ist nicht berechtigt. Melden Sie sich erneut an und versuchen Sie es noch einmal.",
+    "db_unknown_column": "Die Datenbank lehnt den Eintrag ab: Die Spalte „{value}“ existiert in der Tabelle nicht.",
+    "db_forbidden": "Die Datenbank lehnt das Schreiben ab: Zugriffsregel nicht erfüllt (Konto nicht berechtigt oder Sitzung ohne Zwei-Faktor-Authentifizierung).",
+    "db_missing_value": "Die Datenbank lehnt den Eintrag ab: Die Spalte „{value}“ ist Pflicht und hat keinen Wert.",
+    "db_duplicate": "Die Datenbank lehnt den Eintrag ab: Dieser Wert existiert bereits ({value}). Prüfen Sie die automatische Nummerierung der Tabelle.",
+    "db_invalid_value": "Die Datenbank lehnt einen Wert im falschen Format ab: {value}",
+    "db_check": "Die Datenbank lehnt einen Wert außerhalb der zulässigen Grenzen ab: {value}",
+    "db_not_found": "Keine Zeile geändert: Das Element existiert nicht mehr oder die Zugriffsregel verbietet es.",
+    "db_other": "Die Datenbank lehnt den Eintrag ab: {value}"
   },
   "admin_reviews": {
     "eyebrow": "MAPA Konsole",
@@ -1909,8 +1918,14 @@
     "busy": "Wird gespeichert…",
     "delete": "Löschen",
     "delete_confirm": "Diese Bewertung löschen?",
-    "save_error": "Speichern fehlgeschlagen. Prüfen Sie die Felder und versuchen Sie es erneut.",
-    "delete_error": "Löschen fehlgeschlagen. Bitte versuchen Sie es in einigen Minuten erneut."
+    "err_session": "Aktion abgelehnt: Die Sitzung ist nicht mehr zweistufig authentifiziert oder das Konto ist nicht berechtigt. Melden Sie sich erneut an und versuchen Sie es noch einmal.",
+    "err_name": "Geben Sie den Namen des Kunden an (höchstens 200 Zeichen).",
+    "err_rating": "Wählen Sie eine Bewertung von 1 bis 5 Sternen.",
+    "err_date": "Geben Sie ein gültiges Datum an.",
+    "err_lang": "Wählen Sie die Sprache der Bewertung: Französisch, Englisch oder Deutsch.",
+    "err_text": "Geben Sie den Text der Bewertung ein (höchstens 5000 Zeichen).",
+    "err_network": "Der Server hat nicht geantwortet: Prüfen Sie die Internetverbindung und versuchen Sie es erneut.",
+    "saved": "Bewertung gespeichert."
   },
   "admin_blog": {
     "eyebrow": "MAPA Konsole",
@@ -1953,8 +1968,6 @@
     "busy": "Wird gespeichert…",
     "delete": "Löschen",
     "delete_confirm": "Diesen Artikel löschen?",
-    "save_error": "Speichern fehlgeschlagen. Prüfen Sie die Felder und versuchen Sie es erneut.",
-    "delete_error": "Löschen fehlgeschlagen. Bitte versuchen Sie es in einigen Minuten erneut.",
     "view": "Ansehen",
     "cover_url_label": "Oder Webadresse des Bildes",
     "cover_preview_alt": "Vorschau des Titelbilds",
@@ -1984,7 +1997,8 @@
     "tb_image": "Bild einfügen",
     "tb_undo": "Rückgängig",
     "tb_redo": "Wiederholen",
-    "link_prompt": "Linkadresse (leer lassen, um den Link zu entfernen)"
+    "link_prompt": "Linkadresse (leer lassen, um den Link zu entfernen)",
+    "err_network": "Der Server hat nicht geantwortet: Prüfen Sie die Internetverbindung und versuchen Sie es erneut."
   },
   "admin_documents": {
     "eyebrow": "MAPA Konsole",

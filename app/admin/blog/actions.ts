@@ -3,13 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { revalidatePublicBlogPages } from "@/lib/revalidate-property";
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
-import { assertAdminAction } from "@/lib/admin/require-admin";
+import { requireAdmin } from "@/lib/admin/require-admin";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { sanitizeArticleHtml } from "@/lib/security/sanitize";
 import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
+import { dbErrorReason, type DbError } from "@/lib/admin/db-error";
 
 /** Bucket public des couvertures du blog (cree par le site v28). */
 const COVER_BUCKET = "blog-covers";
@@ -64,41 +64,58 @@ function buildPostPayload(formData: FormData) {
   };
 }
 
-export async function createBlogPost(formData: FormData) {
-  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
-  await assertAdminAction();
-  const supabase = await createSupabaseServerClient();
+export type BlogActionResult = { ok: true } | { ok: false; error: string };
+
+/** Motif clair d'un echec (garde ou base), jamais un message generique. */
+async function blogFailure(e: DbError | "session"): Promise<BlogActionResult> {
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_notices" });
+  if (e === "session") return { ok: false, error: t("err_session") };
+  const r = dbErrorReason(e);
+  console.error("[admin/blog] ecriture refusee", { code: e.code ?? null });
+  return { ok: false, error: t(r.key, { value: r.value }) };
+}
+
+export async function createBlogPost(formData: FormData): Promise<BlogActionResult> {
+  // Garde serveur : admin de la liste en session aal2 ; motif clair sinon.
+  const admin = await requireAdmin();
+  if (!admin.ok) return blogFailure("session");
+  const supabase = admin.supabase;
   const { data, error } = await supabase
     .from("blog_posts")
     .insert(buildPostPayload(formData))
     .select("id")
     .single();
-  if (error) throw new Error(error.message);
+  if (error) return blogFailure(error);
   revalidatePath("/admin/blog");
   revalidatePublicBlogPages(data.id);
   redirect(`/admin/blog/${data.id}/edit`);
 }
 
-export async function updateBlogPost(id: string, formData: FormData) {
-  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
-  await assertAdminAction();
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
+export async function updateBlogPost(id: string, formData: FormData): Promise<BlogActionResult> {
+  // Garde serveur : admin de la liste en session aal2 ; motif clair sinon.
+  const admin = await requireAdmin();
+  if (!admin.ok) return blogFailure("session");
+  const supabase = admin.supabase;
+  const { count, error } = await supabase
     .from("blog_posts")
-    .update(buildPostPayload(formData))
+    .update(buildPostPayload(formData), { count: "exact" })
     .eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return blogFailure(error);
+  if (!count) return blogFailure({ code: "PGRST116" });
   revalidatePath("/admin/blog");
   // Toutes les langues, l'article et l'accueil ; IndexNow (oct. 2026).
   revalidatePublicBlogPages(id);
+  return { ok: true };
 }
 
-export async function deleteBlogPost(id: string) {
-  // Garde serveur (oct. 2026) : admin de la liste en session aal2.
-  await assertAdminAction();
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("blog_posts").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+export async function deleteBlogPost(id: string): Promise<BlogActionResult> {
+  // Garde serveur : admin de la liste en session aal2 ; motif clair sinon.
+  const admin = await requireAdmin();
+  if (!admin.ok) return blogFailure("session");
+  const supabase = admin.supabase;
+  const { count, error } = await supabase.from("blog_posts").delete({ count: "exact" }).eq("id", id);
+  if (error) return blogFailure(error);
+  if (!count) return blogFailure({ code: "PGRST116" });
   revalidatePath("/admin/blog");
   revalidatePublicBlogPages();
   redirect("/admin/blog");
@@ -114,7 +131,8 @@ export type UploadCoverResult = { ok: true; url: string } | { ok: false; error: 
  * encoder. Resultat structure, jamais d'exception (message lisible).
  */
 export async function uploadBlogImage(formData: FormData): Promise<UploadCoverResult> {
-  await assertAdminAction();
+  const admin = await requireAdmin();
+  if (!admin.ok) return { ok: false, error: (await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_notices" }))("err_session") };
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_blog" });
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { ok: false, error: t("err_upload_type") };
@@ -128,7 +146,7 @@ export async function uploadBlogImage(formData: FormData): Promise<UploadCoverRe
   const base = slugify(String(formData.get("slug") ?? "")).slice(0, 60) || "article";
   const path = `${base}-${Date.now()}.${processed.extension}`;
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = admin.supabase;
     const { error } = await supabase.storage
       .from(COVER_BUCKET)
       .upload(path, processed.buffer, { cacheControl: "31536000", upsert: false, contentType: processed.contentType });

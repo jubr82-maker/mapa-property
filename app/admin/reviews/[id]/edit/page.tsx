@@ -15,7 +15,7 @@ export default async function EditReviewPage({
   const supabase = await createSupabaseServerClient();
   const { data: review } = await supabase
     .from("reviews")
-    .select("*")
+    .select("id,name,rating,review_date,comment,comment_en,comment_de,source_lang,is_published")
     .eq("id", id)
     .maybeSingle();
   if (!review) notFound();

@@ -19,7 +19,8 @@
  */
 
 import { useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { reviewTextFor } from "@/lib/reviews";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import type { Review } from "@/lib/types";
@@ -31,6 +32,9 @@ interface Props {
 
 export function ReviewsCarousel({ reviews }: Props) {
   const t = useTranslations("reviews_home");
+  // Texte dans la langue de la page si traduit, sinon le texte d'origine
+  // (comment, comment_en ou comment_de selon source_lang).
+  const locale = useLocale();
   const reduced =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -80,11 +84,11 @@ export function ReviewsCarousel({ reviews }: Props) {
                     className="line-clamp-5 text-sm italic leading-relaxed md:line-clamp-none md:text-base"
                     style={{ color: "#e0af6e" }}
                   >
-                    “{r.comment ?? ""}”
+                    “{reviewTextFor(r, locale)}”
                   </blockquote>
                   <footer className="mt-auto flex items-center justify-between border-t border-line pt-3 md:pt-4">
                     <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-ink md:text-xs">
-                      {r.name ?? "—"}
+                      {r.name ?? ""}
                     </span>
                     {r.review_date && (
                       <time

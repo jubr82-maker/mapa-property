@@ -77,12 +77,11 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
     setError(null);
     startTransition(async () => {
       try {
-        if (mode === "create") await createBlogPost(formData);
-        else if (post) await updateBlogPost(post.id, formData);
+        const r = mode === "create" ? await createBlogPost(formData) : post ? await updateBlogPost(post.id, formData) : null;
+        if (r && !r.ok) setError(r.error);
       } catch (e) {
         if (isRedirect(e)) throw e;
-        console.error(e);
-        setError(t("save_error"));
+        setError(t("err_network"));
       }
     });
   };
@@ -93,11 +92,11 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
     setError(null);
     startTransition(async () => {
       try {
-        await deleteBlogPost(post.id);
+        const r = await deleteBlogPost(post.id);
+        if (r && !r.ok) setError(r.error);
       } catch (e) {
         if (isRedirect(e)) throw e;
-        console.error(e);
-        setError(t("delete_error"));
+        setError(t("err_network"));
       }
     });
   };

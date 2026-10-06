@@ -601,7 +601,7 @@ export async function fetchPublishedReviews(limit = 12): Promise<Review[]> {
   const sb = supabaseServer();
   const { data, error } = await sb
     .from("reviews")
-    .select("*")
+    .select("id,name,rating,comment,comment_en,comment_de,source_lang,review_date,is_published")
     .eq("is_published", true)
     .order("review_date", { ascending: false })
     .limit(limit);

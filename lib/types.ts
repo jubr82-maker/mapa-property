@@ -97,11 +97,15 @@ export interface PropertyOffmarket {
   display_order: number | null;
 }
 
+// Colonnes reelles de public.reviews : lib/reviews.ts (REVIEW_COLUMNS).
 export interface Review {
   id: string;
   name: string | null;
   rating: number | null;
   comment: string | null;
+  comment_en: string | null;
+  comment_de: string | null;
+  source_lang: string | null;
   review_date: string | null;
   is_published: boolean | null;
 }

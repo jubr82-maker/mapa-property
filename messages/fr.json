@@ -1875,7 +1875,16 @@
     "data_unavailable": "Données indisponibles, réessayez dans quelques minutes.",
     "error_monitoring_title": "Suivi des erreurs",
     "cms_empty_title": "Aucun contenu modifiable",
-    "cms_empty": "Le contenu modifiable n'a pas encore été initialisé."
+    "cms_empty": "Le contenu modifiable n'a pas encore été initialisé.",
+    "err_session": "Action refusée : la session n'est plus en double authentification ou le compte n'est pas autorisé. Reconnectez-vous puis recommencez.",
+    "db_unknown_column": "La base refuse l'enregistrement : la colonne « {value} » n'existe pas dans la table.",
+    "db_forbidden": "La base refuse l'écriture : règle d'accès non satisfaite (compte non autorisé ou session sans double authentification).",
+    "db_missing_value": "La base refuse l'enregistrement : la colonne « {value} » est obligatoire et n'a pas de valeur.",
+    "db_duplicate": "La base refuse l'enregistrement : cette valeur existe déjà ({value}). Vérifiez la numérotation automatique de la table.",
+    "db_invalid_value": "La base refuse une valeur au mauvais format : {value}",
+    "db_check": "La base refuse une valeur hors des limites autorisées : {value}",
+    "db_not_found": "Aucune ligne modifiée : l'élément n'existe plus ou la règle d'accès l'interdit.",
+    "db_other": "La base refuse l'enregistrement : {value}"
   },
   "admin_reviews": {
     "eyebrow": "Console MAPA",
@@ -1909,8 +1918,14 @@
     "busy": "Enregistrement…",
     "delete": "Supprimer",
     "delete_confirm": "Supprimer cet avis ?",
-    "save_error": "L'enregistrement a échoué. Vérifiez les champs puis réessayez.",
-    "delete_error": "La suppression a échoué. Réessayez dans quelques minutes."
+    "err_session": "Action refusée : la session n'est plus en double authentification ou le compte n'est pas autorisé. Reconnectez-vous puis recommencez.",
+    "err_name": "Indiquez le nom du client (200 caractères au plus).",
+    "err_rating": "Choisissez une note de 1 à 5 étoiles.",
+    "err_date": "Indiquez une date d'avis valide.",
+    "err_lang": "Choisissez la langue de l'avis : français, anglais ou allemand.",
+    "err_text": "Saisissez le texte de l'avis (5000 caractères au plus).",
+    "err_network": "Le serveur n'a pas répondu : vérifiez la connexion internet, puis recommencez.",
+    "saved": "Avis enregistré."
   },
   "admin_blog": {
     "eyebrow": "Console MAPA",
@@ -1953,8 +1968,6 @@
     "busy": "Enregistrement…",
     "delete": "Supprimer",
     "delete_confirm": "Supprimer cet article ?",
-    "save_error": "L'enregistrement a échoué. Vérifiez les champs puis réessayez.",
-    "delete_error": "La suppression a échoué. Réessayez dans quelques minutes.",
     "view": "Voir",
     "cover_url_label": "Ou adresse web de l'image",
     "cover_preview_alt": "Aperçu de la couverture",
@@ -1984,7 +1997,8 @@
     "tb_image": "Insérer une image",
     "tb_undo": "Annuler",
     "tb_redo": "Rétablir",
-    "link_prompt": "Adresse du lien (laisser vide pour retirer le lien)"
+    "link_prompt": "Adresse du lien (laisser vide pour retirer le lien)",
+    "err_network": "Le serveur n'a pas répondu : vérifiez la connexion internet, puis recommencez."
   },
   "admin_documents": {
     "eyebrow": "Console MAPA",

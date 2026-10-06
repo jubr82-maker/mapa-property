@@ -43,6 +43,8 @@ import { isTargetQuery } from "../../lib/pilotage/seo-targets";
 import { abbreviateAccount, journalLines, journalSummary, paginate, parseJournalParams } from "../../lib/pilotage/journal-view";
 import { displayableImageSrc, isOptimizedImageSrc } from "../../lib/image-hosts";
 import { revealLines } from "../../lib/contact/reveal-lines";
+import { REVIEW_COLUMNS, buildReviewWrite, reviewTextFor } from "../../lib/reviews";
+import { dbErrorReason } from "../../lib/admin/db-error";
 import { sanitizeArticleHtml as sanitizeArticleForTest } from "../../lib/security/sanitize";
 import { RETENTION_RULES } from "../../lib/pilotage/config";
 import { retentionCutoff } from "../../lib/pilotage/retention";
@@ -978,7 +980,7 @@ section = "P. Admin sur telephone";
   const bf = read("components/admin/BlogPostForm.tsx");
   const ba = read("app/admin/blog/actions.ts");
   check("blog : apercu de la couverture, appareil photo ou galerie, adresse web en option", /data-admin-blog-cover/.test(bf) && /capture="environment"/.test(bf) && /onError=\{\(\) => setCoverBroken\(true\)\}/.test(bf) && /name="cover_image"/.test(bf));
-  check("blog : envoi d'image garde aal2, bucket blog-covers, image reconvertie", /export async function uploadBlogImage[\s\S]{0,120}await assertAdminAction\(\)/.test(ba) && /COVER_BUCKET = "blog-covers"/.test(ba) && /processUploadedImage/.test(ba));
+  check("blog : envoi d'image garde aal2, bucket blog-covers, image reconvertie", /export async function uploadBlogImage[\s\S]{0,120}const admin = await requireAdmin\(\);\s*if \(!admin\.ok\) return/.test(ba) && /COVER_BUCKET = "blog-covers"/.test(ba) && /processUploadedImage/.test(ba));
   check("blog : couverture affichable (https ou chemin du site), hote non optimise charge directement",
     displayableImageSrc("assets/x.jpg") === null && displayableImageSrc("http://a/b.jpg") === null && displayableImageSrc("https://a/b.jpg") === "https://a/b.jpg" &&
     isOptimizedImageSrc("https://dutfkblygfvhhwpzxmfz.supabase.co/storage/v1/object/public/blog-covers/a.webp") && !isOptimizedImageSrc("https://example.com/a.jpg") &&
@@ -1027,6 +1029,35 @@ section = "P. Admin sur telephone";
   check("ventes : Julien seul agent propose et accepte", /ALLOWED_AGENTS = new Set\(\["julien"\]\)/.test(read("lib/admin/sales-auth.ts")) && /type Agent = "julien";/.test(read("app/admin/ventes-realisees/SaleForm.tsx")) && /KNOWN_AGENTS = \["julien"\]/.test(read("app/admin/ventes-realisees/page.tsx")));
   check("contact : seul le contact de Julien peut etre revele", !/MAPA_PHONE_FREDERIC|"frederic"/.test(read("app/api/contact-reveal/route.ts")));
   const sqlAgent = read("supabase/manual/execution/13_ventes_agent_julien.sql");
+  // Avis clients (oct. 2026) : uniquement les colonnes reelles de
+  // public.reviews, relevees en base par Julien.
+  const REVIEWS_IN_DB = ["id", "name", "rating", "review_date", "comment", "comment_en", "comment_de", "source_lang", "source", "is_published", "apimo_id_link", "created_at"];
+  check("avis : liste des colonnes identique a la base", JSON.stringify([...REVIEW_COLUMNS].sort()) === JSON.stringify([...REVIEWS_IN_DB].sort()));
+  const reviewWrites = (["fr", "en", "de"] as const).flatMap((lang) => [
+    buildReviewWrite({ name: "A", rating: "5", review_date: "2026-10-06", lang, text: "Tres bien", carousel: true }),
+    buildReviewWrite({ name: "A", rating: "4", review_date: "2026-10-06", lang, text: "Tres bien", carousel: false, previous_lang: lang === "fr" ? "en" : "fr" }),
+  ]);
+  const badCols = reviewWrites.flatMap((w) => (w.ok ? Object.keys(w.data) : ["(saisie refusee)"])).filter((k) => !REVIEWS_IN_DB.includes(k));
+  check("avis : le formulaire n'ecrit que dans les colonnes de la table", badCols.length === 0, [...new Set(badCols)].join(", "));
+  const wEn = buildReviewWrite({ name: "A", rating: "5", review_date: "2026-10-06", lang: "en", text: "Great", carousel: false, previous_lang: "fr" });
+  check("avis : texte dans la colonne de la langue, langue dans source_lang, carrousel dans is_published",
+    wEn.ok && wEn.data.comment_en === "Great" && wEn.data.source_lang === "en" && wEn.data.is_published === false && wEn.data.comment === null && !("lang" in wEn.data));
+  check("avis : saisies invalides refusees avec un motif", ["0", "6", "x"].every((r) => { const w = buildReviewWrite({ name: "A", rating: r, review_date: "2026-10-06", lang: "fr", text: "t", carousel: true }); return !w.ok && w.error === "err_rating"; }) &&
+    !buildReviewWrite({ name: "A", rating: "5", review_date: "2026-10-06", lang: "it", text: "t", carousel: true }).ok);
+  const ra = read("app/admin/reviews/actions.ts");
+  const extraKeys = [...ra.matchAll(/\.(?:insert|update)\(\{\s*\.\.\.built\.data,?\s*([^}]*)\}/g)].flatMap((m) => [...m[1].matchAll(/([a-z_]+)\s*:/g)].map((x) => x[1])).filter((k) => !REVIEWS_IN_DB.includes(k));
+  check("avis : actions sans colonne ajoutee hors de la table, plus d'ancien envoi \"lang\"", extraKeys.length === 0 && !/buildReviewPayload|\blang:\s*String/.test(ra) && /buildReviewWrite\(readForm\(formData\)\)/.test(ra), extraKeys.join(", "));
+  const reviewReadFiles = ["lib/data.ts", "app/admin/reviews/page.tsx", "app/admin/reviews/[id]/edit/page.tsx"];
+  const badRead = reviewReadFiles.flatMap((f) => [...read(f).matchAll(/from\("reviews"\)\s*\.select\("([^"]*)"\)/g)].flatMap((m) => m[1] === "*" ? [`${f} : *`] : m[1].split(",").map((c) => c.trim()).filter((c) => !REVIEWS_IN_DB.includes(c)).map((c) => `${f} : ${c}`)));
+  check("avis : lectures limitees aux colonnes de la table", badRead.length === 0, badRead.join(", "));
+  const rf = read("components/admin/ReviewForm.tsx");
+  const formNames = [...rf.matchAll(/\bname="([a-z_]+)"/g)].map((m) => m[1]);
+  check("avis : champs du formulaire connus de l'action", formNames.length > 0 && formNames.every((n) => ["name", "rating", "review_date", "lang", "text", "carousel", "previous_lang"].includes(n)), formNames.join(", "));
+  check("avis : texte public dans la langue de la page, sinon l'original", reviewTextFor({ id: 1, name: "A", rating: 5, review_date: null, comment: null, comment_en: "Great", comment_de: null, source_lang: "en", is_published: true }, "fr") === "Great" &&
+    reviewTextFor({ id: 1, name: "A", rating: 5, review_date: null, comment: "Bien", comment_en: "Good", comment_de: null, source_lang: "fr", is_published: true }, "en") === "Good" && /reviewTextFor\(r, locale\)/.test(read("components/home/ReviewsCarousel.tsx")));
+  check("erreurs de base : motif clair (colonne inconnue, regle d'acces, valeur manquante)", dbErrorReason({ code: "PGRST204", message: "Could not find the 'lang' column of 'reviews' in the schema cache" }).value === "lang" &&
+    dbErrorReason({ code: "42501", message: "new row violates row-level security policy" }).key === "db_forbidden" && dbErrorReason({ code: "23502", message: 'null value in column "id" violates not-null constraint' }).value === "id");
+  check("avis et blog : plus de message d'erreur generique", !/save_error|delete_error/.test(rf + read("components/admin/BlogPostForm.tsx")) && /setError\(r\.error\)/.test(rf) && /setError\(r\.error\)/.test(read("components/admin/BlogPostForm.tsx")));
   check("ventes : fichier SQL de reattribution avec sauvegarde prealable et tableau avant et apres", /CREATE TABLE public\.mapa_historical_sales_sauvegarde_agent_20261006 AS TABLE public\.mapa_historical_sales/.test(sqlAgent) &&
     /SET agent = 'julien'\s*WHERE agent = 'frederic'/.test(sqlAgent) && /ventes_avant[\s\S]*ventes_apres/.test(sqlAgent.slice(sqlAgent.lastIndexOf("COMMIT;"))));
 }

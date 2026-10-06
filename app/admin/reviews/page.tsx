@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SimpleTable } from "@/components/admin/SimpleTable";
+import { reviewSourceText } from "@/lib/reviews";
 import { ADMIN_LOCALE, formatDateOnly } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export default async function AdminReviewsPage() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("reviews")
-    .select("id,name,rating,comment,review_date,is_published")
+    .select("id,name,rating,comment,comment_en,comment_de,source_lang,review_date,is_published")
     .order("review_date", { ascending: false });
 
   const rows = (data ?? []).map((r) => ({
@@ -24,7 +25,7 @@ export default async function AdminReviewsPage() {
         "★".repeat(r.rating ?? 0) + "☆".repeat(Math.max(0, 5 - (r.rating ?? 0))),
         formatDateOnly(r.review_date),
       ].join(" · "),
-      sub: r.comment ?? undefined,
+      sub: reviewSourceText(r) || undefined,
       badge: (
         <span
           className={`rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] ${

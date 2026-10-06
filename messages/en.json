@@ -1875,7 +1875,16 @@
     "data_unavailable": "Data unavailable, try again in a few minutes.",
     "error_monitoring_title": "Error monitoring",
     "cms_empty_title": "No editable content",
-    "cms_empty": "Editable content has not been initialised yet."
+    "cms_empty": "Editable content has not been initialised yet.",
+    "err_session": "Action refused: the session is no longer two-factor authenticated or the account is not authorised. Sign in again and retry.",
+    "db_unknown_column": "The database refused the record: the column “{value}” does not exist in the table.",
+    "db_forbidden": "The database refused the write: access rule not met (account not authorised or session without two-factor authentication).",
+    "db_missing_value": "The database refused the record: the column “{value}” is required and has no value.",
+    "db_duplicate": "The database refused the record: this value already exists ({value}). Check the table's automatic numbering.",
+    "db_invalid_value": "The database refused a value in the wrong format: {value}",
+    "db_check": "The database refused a value outside the allowed limits: {value}",
+    "db_not_found": "No row changed: the item no longer exists or the access rule forbids it.",
+    "db_other": "The database refused the record: {value}"
   },
   "admin_reviews": {
     "eyebrow": "MAPA Console",
@@ -1909,8 +1918,14 @@
     "busy": "Saving…",
     "delete": "Delete",
     "delete_confirm": "Delete this review?",
-    "save_error": "Saving failed. Check the fields and try again.",
-    "delete_error": "Deletion failed. Please try again in a few minutes."
+    "err_session": "Action refused: the session is no longer two-factor authenticated or the account is not authorised. Sign in again and retry.",
+    "err_name": "Enter the client's name (200 characters at most).",
+    "err_rating": "Choose a rating from 1 to 5 stars.",
+    "err_date": "Enter a valid review date.",
+    "err_lang": "Choose the review language: French, English or German.",
+    "err_text": "Enter the review text (5000 characters at most).",
+    "err_network": "The server did not respond: check the internet connection, then retry.",
+    "saved": "Review saved."
   },
   "admin_blog": {
     "eyebrow": "MAPA Console",
@@ -1953,8 +1968,6 @@
     "busy": "Saving…",
     "delete": "Delete",
     "delete_confirm": "Delete this article?",
-    "save_error": "Saving failed. Check the fields and try again.",
-    "delete_error": "Deletion failed. Please try again in a few minutes.",
     "view": "View",
     "cover_url_label": "Or web address of the image",
     "cover_preview_alt": "Cover preview",
@@ -1984,7 +1997,8 @@
     "tb_image": "Insert an image",
     "tb_undo": "Undo",
     "tb_redo": "Redo",
-    "link_prompt": "Link address (leave empty to remove the link)"
+    "link_prompt": "Link address (leave empty to remove the link)",
+    "err_network": "The server did not respond: check the internet connection, then retry."
   },
   "admin_documents": {
     "eyebrow": "MAPA Console",

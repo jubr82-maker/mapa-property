@@ -1,22 +1,20 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   createReview,
   updateReview,
   deleteReview,
 } from "@/app/admin/reviews/actions";
+import { reviewSourceLang, reviewSourceText, type ReviewRow } from "@/lib/reviews";
 
-type Review = {
-  id: string;
-  name: string | null;
-  rating: number | null;
-  comment: string | null;
-  review_date: string | null;
-  lang: string | null;
-  is_published: boolean | null;
-};
+// Champs envoyes (oct. 2026) : name, rating, review_date, lang (ecrit dans
+// source_lang), text (ecrit dans comment, comment_en ou comment_de selon la
+// langue), carousel (ecrit dans is_published), previous_lang (edition).
+// Correspondance avec les colonnes reelles : lib/reviews.ts.
+type Review = ReviewRow & { id: string | number };
 
 export function ReviewForm({
   review,
@@ -27,18 +25,28 @@ export function ReviewForm({
 }) {
   const t = useTranslations("admin_reviews");
   const [busy, startTransition] = useTransition();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const sourceLang = review ? reviewSourceLang(review) : "fr";
 
+  // Motif reel de l'echec, renvoye en clair par l'action ; une exception
+  // inattendue (reseau coupe) a son propre message, jamais generique.
   const submit = (formData: FormData) => {
     setError(null);
+    setSaved(false);
     startTransition(async () => {
       try {
-        if (mode === "create") await createReview(formData);
-        else if (review) await updateReview(review.id, formData);
-      } catch (e) {
-        if (isRedirect(e)) throw e;
-        console.error(e);
-        setError(t("save_error"));
+        const r = mode === "create" ? await createReview(formData) : review ? await updateReview(String(review.id), formData) : null;
+        if (!r) return;
+        if (!r.ok) return setError(r.error);
+        if (mode === "create") router.push("/admin/reviews");
+        else {
+          setSaved(true);
+          router.refresh();
+        }
+      } catch {
+        setError(t("err_network"));
       }
     });
   };
@@ -49,11 +57,11 @@ export function ReviewForm({
     setError(null);
     startTransition(async () => {
       try {
-        await deleteReview(review.id);
-      } catch (e) {
-        if (isRedirect(e)) throw e;
-        console.error(e);
-        setError(t("delete_error"));
+        const r = await deleteReview(String(review.id));
+        if (!r.ok) return setError(r.error);
+        router.push("/admin/reviews");
+      } catch {
+        setError(t("err_network"));
       }
     });
   };
@@ -91,7 +99,7 @@ export function ReviewForm({
           />
         </Field>
         <Field label={t("field_language")}>
-          <select name="lang" defaultValue={review?.lang ?? "fr"} className={inputCls}>
+          <select name="lang" defaultValue={sourceLang} className={inputCls}>
             <option value="fr">{t("lang_fr")}</option>
             <option value="en">{t("lang_en")}</option>
             <option value="de">{t("lang_de")}</option>
@@ -100,9 +108,9 @@ export function ReviewForm({
         <div className="md:col-span-2">
           <Field label={t("field_comment")}>
             <textarea
-              name="comment"
+              name="text"
               rows={5}
-              defaultValue={review?.comment ?? ""}
+              defaultValue={review ? reviewSourceText(review) : ""}
               required
               className={inputCls + " font-sans"}
             />
@@ -112,8 +120,8 @@ export function ReviewForm({
           <label className="inline-flex items-center gap-2 text-sm">
             <input
               type="checkbox"
-              name="is_published"
-              defaultChecked={review?.is_published ?? false}
+              name="carousel"
+              defaultChecked={review?.is_published ?? true}
               className="size-4 rounded border-[#3D4F63]/30 accent-[#e0af6e]"
             />
             <span>{t("published_hint")}</span>
@@ -121,8 +129,16 @@ export function ReviewForm({
         </Field>
       </Section>
 
+      {review ? <input type="hidden" name="previous_lang" value={sourceLang} /> : null}
+
+      {saved && !error && (
+        <p role="status" className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          {t("saved")}
+        </p>
+      )}
+
       {error && (
-        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </p>
       )}
@@ -171,10 +187,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <div className="mt-1">{children}</div>
     </label>
   );
-}
-
-function isRedirect(e: unknown): boolean {
-  if (!e || typeof e !== "object") return false;
-  const digest = (e as { digest?: unknown }).digest;
-  return typeof digest === "string" && (digest.startsWith("NEXT_REDIRECT") || digest === "NEXT_NOT_FOUND");
 }
