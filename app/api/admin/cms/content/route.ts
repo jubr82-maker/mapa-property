@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { dbFailure } from "@/lib/admin/action-result";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { revalidateTag } from "next/cache";
@@ -94,9 +95,8 @@ async function handle(req: Request) {
     );
 
   if (error) {
-    console.error("[admin/cms/content] upsert error", error.message);
-    console.error("[api/admin/cms/content]", { code: error.code });
-    return NextResponse.json({ error: t("api_save_failed") }, { status: 500 });
+    // Motif reel (colonne, regle d'acces, valeur), jamais un message vague.
+    return NextResponse.json({ error: (await dbFailure(error, "cms/content")).message }, { status: 500 });
   }
 
   // Invalide le cache pour que le nouveau contenu soit visible immédiatement.

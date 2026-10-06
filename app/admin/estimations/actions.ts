@@ -1,4 +1,5 @@
 "use server";
+import { dbFailure } from "@/lib/admin/action-result";
 
 // Server action manuelle declenchee depuis
 // /admin/estimations/[id] pour proposer un Avis de Valeur detaille au
@@ -83,7 +84,7 @@ export async function sendRefinement(
     .select("id");
 
   if (updateError) {
-    return { ok: false, reason: "db_error", error: updateError.message };
+    return { ok: false, reason: "db_error", error: (await dbFailure(updateError, "estimations")).message };
   }
   if (!updated || updated.length === 0) {
     return { ok: false, reason: "not_found" };

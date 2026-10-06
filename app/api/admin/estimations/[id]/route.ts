@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { dbFailure } from "@/lib/admin/action-result";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminRoute } from "@/lib/admin/require-admin";
 
@@ -95,8 +96,8 @@ export async function PATCH(
     .select("id");
 
   if (updErr) {
-    console.error("[api/admin/estimations/id] update", { code: updErr.code });
-    return NextResponse.json({ error: "db_error" }, { status: 500 });
+    // Motif reel (colonne, regle d'acces, valeur) dans "message".
+    return NextResponse.json({ error: "db_error", message: (await dbFailure(updErr, "estimations")).message }, { status: 500 });
   }
   if (!updated || updated.length === 0) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -133,6 +134,7 @@ export async function DELETE(
         error: isCheck
           ? "feature_unavailable"
           : "db_error",
+        message: isCheck ? undefined : (await dbFailure(error, "estimations")).message,
       },
       { status: isCheck ? 409 : 500 },
     );

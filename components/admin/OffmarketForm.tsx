@@ -1313,18 +1313,23 @@ function Field({
 function DeleteButton({ id }: { id: string }) {
   const t = useTranslations("admin_offmarket");
   const [busy, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const tn = useTranslations("admin_notices");
   return (
+    <span className="inline-flex flex-col">
     <button
       type="button"
       disabled={busy}
       onClick={() => {
         if (!confirm(t("form.deleteConfirm"))) return;
+        setError(null);
         startTransition(async () => {
           try {
-            await deleteOffmarket(id);
+            const r = await deleteOffmarket(id);
+            if (!r.ok) setError(r.error);
           } catch (e) {
             if (isNextInternalError(e)) throw e;
-            console.error(e);
+            setError(tn("err_network"));
           }
         });
       }}
@@ -1332,6 +1337,12 @@ function DeleteButton({ id }: { id: string }) {
     >
       {busy ? "…" : t("form.delete")}
     </button>
+    {error && (
+      <span role="alert" className="mt-2 text-sm text-red-700">
+        {error}
+      </span>
+    )}
+    </span>
   );
 }
 

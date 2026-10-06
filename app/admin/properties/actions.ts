@@ -15,7 +15,8 @@ import {
   TRANSACTION_TYPES,
   transactionToBase,
 } from "@/lib/taxonomy/property-types";
-import { assertAdminAction } from "@/lib/admin/require-admin";
+import { assertAdminAction, requireAdmin } from "@/lib/admin/require-admin";
+import { dbFailure, runAction, sessionFailure, type ActionResult as AdminActionResult } from "@/lib/admin/action-result";
 import { logAdminAction } from "@/lib/pilotage/audit";
 import { sendAdminAlert } from "@/lib/pilotage/alerts";
 
@@ -43,7 +44,7 @@ async function fetchPropertySlug(
   return typeof slug === "string" && slug.length > 0 ? slug : null;
 }
 
-export async function setPropertyPublished(id: string, isPublished: boolean) {
+async function setPropertyPublishedImpl(id: string, isPublished: boolean) {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
   const { user } = await assertAdminAction();
   const supabase = await createSupabaseServerClient();
@@ -52,7 +53,7 @@ export async function setPropertyPublished(id: string, isPublished: boolean) {
     .from("properties")
     .update({ is_published: isPublished })
     .eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) throw await dbFailure(error, "properties");
   await logAdminAction({
     actorEmail: user.email,
     action: isPublished ? "property_published" : "property_unpublished",
@@ -65,7 +66,7 @@ export async function setPropertyPublished(id: string, isPublished: boolean) {
   revalidatePublicPropertyPages(id);
 }
 
-export async function setPropertyFeatured(id: string, isFeatured: boolean) {
+async function setPropertyFeaturedImpl(id: string, isFeatured: boolean) {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
   await assertAdminAction();
   const supabase = await createSupabaseServerClient();
@@ -73,7 +74,7 @@ export async function setPropertyFeatured(id: string, isFeatured: boolean) {
     .from("properties")
     .update({ is_featured: isFeatured })
     .eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) throw await dbFailure(error, "properties");
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePublicPropertyPages(id);
@@ -312,7 +313,7 @@ export async function updateProperty(
     .eq("id", id);
   if (error) {
     console.error("[admin] updateProperty", error);
-    return { ok: false, error: error.message };
+    return { ok: false, error: (await dbFailure(error, "updateProperty")).message };
   }
   if (before) {
     const changed = priceKeys.filter((k) => (before as Record<string, unknown>)[k] !== update[k]);
@@ -341,7 +342,7 @@ export async function updateProperty(
  * Met à jour l'URL vidéo de présentation d'un bien (passe ?? null pour vider).
  * Pas d'upload natif dans cette passe, Phase B (Supabase Storage + signed URLs).
  */
-export async function updatePropertyVideoUrl(
+async function updatePropertyVideoUrlImpl(
   propertyId: string,
   videoUrl: string | null,
 ) {
@@ -356,7 +357,7 @@ export async function updatePropertyVideoUrl(
     .from("properties")
     .update({ video_url: normalized })
     .eq("id", propertyId);
-  if (error) throw new Error(error.message);
+  if (error) throw await dbFailure(error, "properties");
   // PAS de revalidatePath sur /admin/properties/{propertyId}, même
   // raison que savePropertyPhotos (photos/actions.ts) : cette page
   // héberge PropertyEditForm, dont la saisie en cours non enregistrée
@@ -510,11 +511,9 @@ export async function createProperty(
     .single();
 
   if (error || !data) {
-    console.error("[admin] createProperty", error);
     return {
       ok: false,
-      error:
-        error?.message ?? "save_failed",
+      error: (await dbFailure(error ?? { code: "PGRST116" }, "createProperty")).message,
     };
   }
 
@@ -564,7 +563,7 @@ async function readLifecycleRow(
     .select("id,slug,archived_at,video_url")
     .eq("id", id)
     .maybeSingle();
-  if (error) return { row: null, error: error.message };
+  if (error) return { row: null, error: (await dbFailure(error, "properties")).message };
   return {
     row: data as { id: string; slug: string | null; archived_at: string | null; video_url: string | null } | null,
     error: null,
@@ -581,7 +580,7 @@ export async function archiveProperty(id: string): Promise<PropertyLifecycleResu
     .from("properties")
     .update({ is_published: false, archived_at: new Date().toISOString() })
     .eq("id", id);
-  if (upErr) return { ok: false, error: upErr.message };
+  if (upErr) return { ok: false, error: (await dbFailure(upErr, "properties")).message };
   await logAdminAction({ actorEmail: user.email, action: "property_archived", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
   revalidatePropertyPaths(id);
   return { ok: true };
@@ -597,7 +596,7 @@ export async function restoreProperty(id: string): Promise<PropertyLifecycleResu
     .from("properties")
     .update({ is_published: true, archived_at: null })
     .eq("id", id);
-  if (upErr) return { ok: false, error: upErr.message };
+  if (upErr) return { ok: false, error: (await dbFailure(upErr, "properties")).message };
   await logAdminAction({ actorEmail: user.email, action: "property_restored", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
   revalidatePropertyPaths(id);
   return { ok: true };
@@ -631,9 +630,9 @@ export async function deleteProperty(
 
   const media = await listPropertyMedia(supabase, id, row.video_url);
   const { error: imgErr } = await supabase.from("property_images").delete().eq("property_id", id);
-  if (imgErr) return { ok: false, error: imgErr.message };
+  if (imgErr) return { ok: false, error: (await dbFailure(imgErr, "properties")).message };
   const { error: delErr } = await supabase.from("properties").delete().eq("id", id);
-  if (delErr) return { ok: false, error: delErr.message };
+  if (delErr) return { ok: false, error: (await dbFailure(delErr, "properties")).message };
   console.info("[admin/properties] bien supprime, fichiers conserves", { id, files: media.length });
   await logAdminAction({ actorEmail: user.email, action: "property_deleted", targetTable: "properties", targetId: id, diff: { slug: row.slug, files: media.length } });
   await sendAdminAlert("property_deleted", { reference: row.slug || row.id, actor: user.email });
@@ -661,7 +660,7 @@ export async function purgePropertyMedia(id: string): Promise<PropertyLifecycleR
   let purged = 0;
   if (paths.length) {
     const { data, error: rmErr } = await supabase.storage.from(PHOTO_BUCKET).remove(paths);
-    if (rmErr) return { ok: false, error: rmErr.message };
+    if (rmErr) return { ok: false, error: (await dbFailure(rmErr, "properties")).message };
     purged += data?.length ?? 0;
   }
   const r2Base = R2_PUBLIC_URL_BASE;
@@ -670,4 +669,24 @@ export async function purgePropertyMedia(id: string): Promise<PropertyLifecycleR
     purged += 1;
   }
   return { ok: true, purged };
+}
+
+// Actions exportees : resultat { ok, error } avec le motif reel, jamais une
+// exception (dont Next.js masque le texte en production).
+export async function setPropertyPublished(id: string, isPublished: boolean): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => setPropertyPublishedImpl(id, isPublished));
+}
+
+export async function setPropertyFeatured(id: string, isFeatured: boolean): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => setPropertyFeaturedImpl(id, isFeatured));
+}
+
+export async function updatePropertyVideoUrl(propertyId: string, videoUrl: string | null): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => updatePropertyVideoUrlImpl(propertyId, videoUrl));
 }

@@ -1059,6 +1059,33 @@ section = "P. Admin sur telephone";
     reviewTextFor({ id: 1, name: "A", rating: 5, review_date: null, comment: "Bien", comment_en: "Good", comment_de: null, source_lang: "fr", is_published: true }, "en") === "Good" && /reviewTextFor\(r, locale\)/.test(read("components/home/ReviewsCarousel.tsx")));
   check("erreurs de base : motif clair (colonne inconnue, regle d'acces, valeur manquante)", dbErrorReason({ code: "PGRST204", message: "Could not find the 'lang' column of 'reviews' in the schema cache" }).value === "lang" &&
     dbErrorReason({ code: "42501", message: "new row violates row-level security policy" }).key === "db_forbidden" && dbErrorReason({ code: "23502", message: 'null value in column "id" violates not-null constraint' }).value === "id");
+  // Partie 2 (oct. 2026) : motifs d'erreur explicites dans tout l'admin.
+  const serverActionFiles = [...walk("app/admin", (x) => /\.ts$/.test(x)), ...walk("lib/admin", (x) => /\.ts$/.test(x))].filter((f) => /^\s*["']use server["']/.test(read(f).slice(0, 80)));
+  const rawThrows = serverActionFiles.filter((f) => /throw new Error\(/.test(read(f)));
+  check("actions de l'admin : plus aucune exception brute (texte masque par Next.js en production)", rawThrows.length === 0, rawThrows.join(", "));
+  const resultFiles = ["app/admin/leads/actions.ts", "app/admin/mandats/actions.ts", "app/admin/liste-attente/actions.ts", "app/admin/arcova/actions.ts", "app/admin/offmarket/actions.ts", "app/admin/documents/actions.ts", "app/admin/properties/actions.ts"];
+  const voidActions = resultFiles.flatMap((f) => [...read(f).matchAll(/export async function (\w+)\([^)]*\)\s*(?::\s*Promise<([^>]+)>)?\s*\{/g)].filter((m) => !m[2] || m[2] === "void").map((m) => `${f} ${m[1]}`));
+  check("actions de l'admin : chaque action exportee renvoie un resultat { ok, error }", voidActions.length === 0, voidActions.join(", "));
+  const notices = JSON.parse(read("messages/fr.json")).admin_notices as Record<string, string>;
+  check("motifs communs : session, reseau, inattendu, HTTP, colonne, regle d'acces", ["err_session", "err_network", "err_unexpected", "err_http", "db_unknown_column", "db_forbidden", "db_missing_value", "db_other"].every((k) => typeof notices[k] === "string"));
+  const removedKeys = ["error_save", "error_generic", "export_error", "quick_error", "upload_error", "api_save_failed", "refresh_error", "err_code_save_failed", "errors.saveFailed"];
+  const adminCode = [...walk("app/admin", (x) => /\.tsx?$/.test(x)), ...walk("components/admin", (x) => /\.tsx?$/.test(x)), ...walk("app/api/admin", (x) => /\.ts$/.test(x))].map((f) => [f, read(f)] as const);
+  const stillUsed = removedKeys.flatMap((k) => adminCode.filter(([, src]) => new RegExp(`["'\`.]${k}["'\`]`).test(src)).map(([f]) => `${f}:${k}`));
+  check("libelles vagues retires et plus utilises", stillUsed.length === 0, stillUsed.join(", "));
+  const vague = (["fr", "en", "de"] as const).flatMap((l) => {
+    const all = JSON.parse(read(`messages/${l}.json`)) as Record<string, unknown>;
+    const out: string[] = [];
+    const w = (o: unknown, p: string) => {
+      if (typeof o === "string") {
+        if (/(a échoué|failed|fehlgeschlagen)\.?\s*(réessayez|veuillez réessayer|try again|versuchen sie es)/i.test(o) && !/\{/.test(o)) out.push(`${l}:${p}`);
+        return;
+      }
+      if (o && typeof o === "object") for (const [k, v] of Object.entries(o)) w(v, `${p}.${k}`);
+    };
+    for (const [ns, v] of Object.entries(all)) if (ns.startsWith("admin_")) w(v, ns);
+    return out;
+  });
+  check("admin : aucun message \"a echoue, reessayez\" sans motif (trois langues)", vague.length === 0, vague.slice(0, 6).join(", "));
   check("avis et blog : plus de message d'erreur generique", !/save_error|delete_error/.test(rf + read("components/admin/BlogPostForm.tsx")) && /setError\(r\.error\)/.test(rf) && /setError\(r\.error\)/.test(read("components/admin/BlogPostForm.tsx")));
   check("ventes : fichier SQL de reattribution avec sauvegarde prealable et tableau avant et apres", /CREATE TABLE public\.mapa_historical_sales_sauvegarde_agent_20261006 AS TABLE public\.mapa_historical_sales/.test(sqlAgent) &&
     /SET agent = 'julien'\s*WHERE agent = 'frederic'/.test(sqlAgent) && /ventes_avant[\s\S]*ventes_apres/.test(sqlAgent.slice(sqlAgent.lastIndexOf("COMMIT;"))));

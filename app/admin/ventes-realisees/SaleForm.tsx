@@ -67,6 +67,7 @@ export function SaleForm({
   initial?: Partial<State>;
 }) {
   const t = useTranslations("admin_sales");
+  const tn = useTranslations("admin_notices");
   const router = useRouter();
   const [data, setData] = useState<State>({ ...emptyState, ...initial });
   const [pending, setPending] = useState(false);
@@ -104,16 +105,14 @@ export function SaleForm({
         }),
       });
       if (!res.ok) {
-        const code = await res
-          .json()
-          .then((j: { error?: string }) => j?.error ?? "")
-          .catch(() => "");
+        const body = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
+        const code = body?.error ?? "";
         const reason =
           res.status === 401 || res.status === 403
             ? t("errors.session")
             : code === "missing_or_invalid_fields" || code === "invalid"
               ? t("errors.invalidFields")
-              : t("errors.server");
+              : body?.message || tn("err_http", { status: res.status });
         throw new Error(t("form.saveFailed", { reason }));
       }
       setSuccess(true);

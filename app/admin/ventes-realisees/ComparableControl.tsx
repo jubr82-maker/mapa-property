@@ -46,8 +46,11 @@ export function ComparableControl({
       });
       if (!res.ok) {
         setCurrent(prev);
+        const body = (await res.json().catch(() => ({}))) as { message?: string };
         const reason =
-          res.status === 401 || res.status === 403 ? t("errors.session") : t("errors.server");
+          res.status === 401 || res.status === 403
+            ? t("errors.session")
+            : body?.message || t("errors.http", { status: res.status });
         window.alert(t("comparable.updateFailed", { reason }));
         return;
       }

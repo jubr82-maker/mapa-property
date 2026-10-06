@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import type { ActionResult } from "@/lib/admin/action-result";
 import { formatDateTime } from "@/lib/datetime";
 import {
   addAdminNote as addLeadAdminNote,
@@ -9,8 +10,8 @@ import {
 } from "@/app/admin/leads/actions";
 import { workflowLabelKey } from "@/components/admin/WorkflowBadge";
 
-type AddNoteAction = (id: string, noteText: string) => Promise<void>;
-type SetFollowUpAction = (id: string, date: string | null) => Promise<void>;
+type AddNoteAction = (id: string, noteText: string) => Promise<ActionResult>;
+type SetFollowUpAction = (id: string, date: string | null) => Promise<ActionResult>;
 
 type HistoryEntry = {
   at: string;
@@ -40,6 +41,7 @@ export function AdminNotes({
   setFollowUpAction?: SetFollowUpAction;
 }) {
   const t = useTranslations("admin_workflow");
+  const tn = useTranslations("admin_notices");
   const addAdminNote = addNoteAction ?? addLeadAdminNote;
   const setNextFollowUp = setFollowUpAction ?? setLeadNextFollowUp;
   const [note, setNote] = useState("");
@@ -58,11 +60,11 @@ export function AdminNotes({
     setError(null);
     startTransition(async () => {
       try {
-        await addAdminNote(leadId, note);
+        const r = await addAdminNote(leadId, note);
+        if (!r.ok) return setError(r.error);
         setNote("");
-      } catch (e) {
-        console.error("[AdminNotes]", e);
-        setError(t("error_generic"));
+      } catch {
+        setError(tn("err_network"));
       }
     });
   };
@@ -72,10 +74,10 @@ export function AdminNotes({
     setError(null);
     startTransition(async () => {
       try {
-        await setNextFollowUp(leadId, value || null);
-      } catch (e) {
-        console.error("[AdminNotes]", e);
-        setError(t("error_generic"));
+        const r = await setNextFollowUp(leadId, value || null);
+        if (!r.ok) setError(r.error);
+      } catch {
+        setError(tn("err_network"));
       }
     });
   };

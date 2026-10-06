@@ -16,6 +16,7 @@ export function ContenuTabs({
   initialTokens: TokenRow[];
 }) {
   const t = useTranslations("admin_cms");
+  const tn = useTranslations("admin_notices");
   const [tab, setTab] = useState<Tab>("content");
   const [revalidating, setRevalidating] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
@@ -25,11 +26,12 @@ export function ContenuTabs({
     setFlash(null);
     try {
       const r = await fetch("/api/admin/cms/revalidate", { method: "POST" });
-      if (!r.ok) throw new Error("revalidate failed");
-      setFlash(t("refresh_ok"));
-    } catch (e) {
-      console.error(e);
-      setFlash(t("refresh_error"));
+      if (!r.ok) {
+        const json = (await r.json().catch(() => ({}))) as { error?: unknown };
+        setFlash(r.status === 401 || r.status === 403 ? tn("err_session") : typeof json.error === "string" ? json.error : tn("err_http", { status: r.status }));
+      } else setFlash(t("refresh_ok"));
+    } catch {
+      setFlash(tn("err_network"));
     } finally {
       setRevalidating(false);
       setTimeout(() => setFlash(null), 4000);

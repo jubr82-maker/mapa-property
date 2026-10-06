@@ -214,6 +214,7 @@ function PropertyRow({
   variant?: "row" | "card";
 }) {
   const t = useTranslations("admin_properties");
+  const tn = useTranslations("admin_notices");
   const router = useRouter();
   const [pub, setPub] = useState(row.is_published);
   const [feat, setFeat] = useState(row.is_featured);
@@ -272,14 +273,26 @@ function PropertyRow({
     );
   };
 
-  const onPub = (next: boolean) => {
-    setPub(next);
-    startTransition(() => setPropertyPublished(row.id, next));
+  // Interrupteurs : retour a l'etat precedent et motif reel si l'action
+  // echoue (resultat { ok, error }).
+  const toggle = (set: (v: boolean) => void, next: boolean, action: () => Promise<{ ok: boolean; error?: string }>) => {
+    set(next);
+    setMessage(null);
+    startTransition(async () => {
+      try {
+        const r = await action();
+        if (!r.ok) {
+          set(!next);
+          setMessage(r.error ?? "");
+        }
+      } catch {
+        set(!next);
+        setMessage(tn("err_network"));
+      }
+    });
   };
-  const onFeat = (next: boolean) => {
-    setFeat(next);
-    startTransition(() => setPropertyFeatured(row.id, next));
-  };
+  const onPub = (next: boolean) => toggle(setPub, next, () => setPropertyPublished(row.id, next));
+  const onFeat = (next: boolean) => toggle(setFeat, next, () => setPropertyFeatured(row.id, next));
 
   const actionsBlock = (
     <>

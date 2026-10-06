@@ -20,6 +20,7 @@ type Status =
 
 export function ConvertToMandatButton({ leadId }: { leadId: string }) {
   const t = useTranslations("admin_leads");
+  const tn = useTranslations("admin_notices");
   const [isPending, startTransition] = useTransition();
 
   // Codes d'erreur renvoyes par convertLeadToMandat, traduits a l'ecran.
@@ -28,7 +29,7 @@ export function ConvertToMandatButton({ leadId }: { leadId: string }) {
       ? t("error_unauthorized")
       : code === "lead_not_found"
         ? t("error_lead_not_found")
-        : t("error_generic");
+        : code;
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
   const onClick = () => {
@@ -45,9 +46,8 @@ export function ConvertToMandatButton({ leadId }: { leadId: string }) {
             ? { kind: "already_existed", mandatId: res.mandatId }
             : { kind: "success", mandatId: res.mandatId },
         );
-      } catch (e) {
-        console.error("[ConvertToMandatButton]", e);
-        setStatus({ kind: "error", message: t("error_generic") });
+      } catch {
+        setStatus({ kind: "error", message: tn("err_network") });
       }
     });
   };

@@ -1,4 +1,5 @@
 // API admin POST /api/admin/ventes-realisees : insertion d'une vente
+import { dbFailure } from "@/lib/admin/action-result";
 // realisee MAPA Property dans la table mapa_historical_sales.
 //
 //   - Authentification : allowlist admin (admin@mapagroup.org +
@@ -29,10 +30,11 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    // Detail technique dans les journaux serveur uniquement (ASVS 7.4.1).
+    // Detail technique dans les journaux serveur (ASVS 7.4.1) ; a l'ecran,
+    // motif traduit en clair (lib/admin/db-error.ts), admin aal2 seulement.
     console.error("[admin/ventes-realisees] insert error", error.code, error.message);
     return NextResponse.json(
-      { error: "db_error" },
+      { error: "db_error", message: (await dbFailure(error, "ventes")).message },
       { status: 500 },
     );
   }

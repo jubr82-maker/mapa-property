@@ -33,6 +33,7 @@ function categoryLabel(t: ReturnType<typeof useTranslations>, c: string | null):
 
 export function DocumentsManager({ documents }: { documents: Doc[] }) {
   const t = useTranslations("admin_documents");
+  const tn = useTranslations("admin_notices");
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -40,10 +41,10 @@ export function DocumentsManager({ documents }: { documents: Doc[] }) {
     setError(null);
     startTransition(async () => {
       try {
-        await uploadDocument(formData);
-      } catch (e) {
-        console.error(e);
-        setError(t("upload_error"));
+        const r = await uploadDocument(formData);
+        if (!r.ok) setError(r.error);
+      } catch {
+        setError(tn("err_network"));
       }
     });
   };
@@ -152,13 +153,31 @@ function DocRow({ doc, variant = "row" }: { doc: Doc; variant?: "row" | "card" }
   const t = useTranslations("admin_documents");
   const [pub, setPub] = useState(!!doc.is_public);
   const [busy, startTransition] = useTransition();
+  // Motif reel d'un echec (action { ok, error }).
+  const [rowError, setRowError] = useState<string | null>(null);
+  const tn = useTranslations("admin_notices");
+  const run = (action: () => Promise<{ ok: boolean; error?: string }>, undo?: () => void) => {
+    setRowError(null);
+    startTransition(async () => {
+      try {
+        const r = await action();
+        if (!r.ok) {
+          undo?.();
+          setRowError(r.error ?? "");
+        }
+      } catch {
+        undo?.();
+        setRowError(tn("err_network"));
+      }
+    });
+  };
   const setPublic = (next: boolean) => {
     setPub(next);
-    startTransition(() => toggleDocumentPublic(doc.id, next));
+    run(() => toggleDocumentPublic(doc.id, next), () => setPub(!next));
   };
   const remove = () => {
     if (!confirm(t("delete_confirm"))) return;
-    startTransition(() => deleteDocument(doc.id));
+    run(() => deleteDocument(doc.id));
   };
 
   // Telephone (seconde passe, oct. 2026) : carte compacte.
@@ -168,6 +187,7 @@ function DocRow({ doc, variant = "row" }: { doc: Doc; variant?: "row" | "card" }
         title={doc.title}
         meta={[categoryLabel(t, doc.category), formatDateTimeShort(doc.created_at)].filter(Boolean).join(" · ")}
         controls={<AdminSwitch checked={pub} onChange={setPublic} disabled={busy} label={pub ? t("public") : t("private")} showLabel />}
+        sub={rowError ?? undefined}
         actions={
           <div className="flex gap-2">
             {doc.signed_url ? (
@@ -234,6 +254,11 @@ function DocRow({ doc, variant = "row" }: { doc: Doc; variant?: "row" | "card" }
         >
           ✕
         </button>
+        {rowError && (
+          <p role="alert" className="mt-1 text-xs text-red-700">
+            {rowError}
+          </p>
+        )}
       </td>
     </tr>
   );

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { ActionFailure, dbFailure, runAction, sessionFailure, type ActionResult as AdminActionResult } from "@/lib/admin/action-result";
 import {
   generateOffmarketReference,
   PROPERTY_TYPES,
@@ -537,10 +538,9 @@ export async function createOffmarket(formData: FormData): Promise<ActionResult>
   const { data, error } = await insertWithRetry(supabase, "properties_offmarket", payload);
 
   if (error || !data) {
-    console.error("[admin] createOffmarket", error);
     return {
       ok: false,
-      error: (await adminT())("actions.saveError"),
+      error: (await dbFailure(error ?? { code: "PGRST116" }, "createOffmarket")).message,
     };
   }
 
@@ -625,10 +625,9 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
   const { error } = await updateWithRetry(supabase, "properties_offmarket", payload, id);
 
   if (error) {
-    console.error("[admin] updateOffmarket", error);
     return {
       ok: false,
-      error: (await adminT())("actions.saveError"),
+      error: (await dbFailure(error, "updateOffmarket")).message,
     };
   }
 
@@ -645,7 +644,7 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
   return { ok: true, id };
 }
 
-export async function deleteOffmarket(id: string) {
+async function deleteOffmarketImpl(id: string) {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
   await assertAdminAction();
   const supabase = await createSupabaseServerClient();
@@ -653,16 +652,13 @@ export async function deleteOffmarket(id: string) {
     .from("properties_offmarket")
     .delete()
     .eq("id", id);
-  if (error) {
-    console.error("[admin] deleteOffmarket", error);
-    throw new Error(error.message);
-  }
+  if (error) throw await dbFailure(error, "deleteOffmarket");
   await audit(id, "offmarket.delete");
   revalidatePath("/admin/offmarket");
   redirect("/admin/offmarket");
 }
 
-export async function duplicateOffmarket(id: string) {
+async function duplicateOffmarketImpl(id: string) {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
   await assertAdminAction();
   const supabase = await createSupabaseServerClient();
@@ -671,7 +667,8 @@ export async function duplicateOffmarket(id: string) {
     .select("*")
     .eq("id", id)
     .maybeSingle();
-  if (fetchErr || !source) throw new Error(fetchErr?.message ?? "Bien introuvable");
+  if (fetchErr) throw await dbFailure(fetchErr, "duplicateOffmarket");
+  if (!source) throw new ActionFailure((await adminT())("actions.notFound"));
 
   const { id: _omit, created_at: _ca, updated_at: _ua, ...rest } = source as Record<
     string,
@@ -691,7 +688,7 @@ export async function duplicateOffmarket(id: string) {
     .insert(payload)
     .select("id")
     .single();
-  if (error) throw new Error(error.message);
+  if (error) throw await dbFailure(error, "duplicateOffmarket");
   await audit(data.id, "offmarket.duplicate", { source_id: id });
   revalidatePath("/admin/offmarket");
   redirect(`/admin/offmarket/${data.id}/edit`);
@@ -714,16 +711,16 @@ const ALLOWED_REQUEST_STATUSES: RequestStatus[] = [
   "rejected",
 ];
 
-export async function updateRequestStatus(
+async function updateRequestStatusImpl(
   requestId: string,
   status: string,
   notes: string | null = null,
 ) {
   if (!ALLOWED_REQUEST_STATUSES.includes(status as RequestStatus)) {
-    throw new Error("Statut invalide.");
+    throw new ActionFailure((await adminT())("actions.invalidStatus"));
   }
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new ActionFailure((await adminT())("actions.unauthorized"));
   const supabase = supabaseService();
   const update: Record<string, unknown> = { status };
   if (notes !== null) update.notes_admin = notes;
@@ -735,7 +732,7 @@ export async function updateRequestStatus(
     .select("property_id")
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) throw await dbFailure(error, "offmarket_requests");
   await audit(data?.property_id ?? null, "request.status_change", {
     request_id: requestId,
     status,
@@ -746,9 +743,9 @@ export async function updateRequestStatus(
   }
 }
 
-export async function updateRequestNotes(requestId: string, notes: string) {
+async function updateRequestNotesImpl(requestId: string, notes: string) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new ActionFailure((await adminT())("actions.unauthorized"));
   const supabase = supabaseService();
   const { data, error } = await supabase
     .from("offmarket_requests")
@@ -756,7 +753,7 @@ export async function updateRequestNotes(requestId: string, notes: string) {
     .eq("id", requestId)
     .select("property_id")
     .single();
-  if (error) throw new Error(error.message);
+  if (error) throw await dbFailure(error, "offmarket_requests");
   await audit(data?.property_id ?? null, "request.notes_update", { request_id: requestId });
   if (data?.property_id) {
     revalidatePath(`/admin/offmarket/${data.property_id}/requests`);
@@ -785,13 +782,13 @@ type WorkflowHistoryEntry = {
 const WORKFLOW_TABLE = "offmarket_requests";
 const WORKFLOW_LIST_ROUTE = "/admin/offmarket/requests";
 
-export async function updateRequestWorkflowStatus(
+async function updateRequestWorkflowStatusImpl(
   id: string,
   newStatus: string,
   reason?: string,
 ) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new ActionFailure((await adminT())("actions.unauthorized"));
   const sb = supabaseService();
 
   const { data: current } = await sb
@@ -822,8 +819,8 @@ export async function updateRequestWorkflowStatus(
     .eq("id", id)
     .select("id");
 
-  if (error) throw new Error(error.message);
-  if (!updated || updated.length === 0) throw new Error("Demande introuvable : aucune ligne modifiée.");
+  if (error) throw await dbFailure(error, "offmarket_requests");
+  if (!updated || updated.length === 0) throw new ActionFailure((await adminT())("actions.requestNotFound"));
 
   const propertyId = (current as { property_id?: string } | null)?.property_id;
   revalidatePath(WORKFLOW_LIST_ROUTE);
@@ -833,12 +830,12 @@ export async function updateRequestWorkflowStatus(
   }
 }
 
-export async function addRequestAdminNote(id: string, noteText: string) {
+async function addRequestAdminNoteImpl(id: string, noteText: string) {
   const trimmed = noteText.trim();
   if (!trimmed) return;
 
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new ActionFailure((await adminT())("actions.unauthorized"));
   const sb = supabaseService();
 
   const { data: current } = await sb
@@ -862,8 +859,8 @@ export async function addRequestAdminNote(id: string, noteText: string) {
     .eq("id", id)
     .select("id");
 
-  if (error) throw new Error(error.message);
-  if (!updated || updated.length === 0) throw new Error("Demande introuvable : aucune ligne modifiée.");
+  if (error) throw await dbFailure(error, "offmarket_requests");
+  if (!updated || updated.length === 0) throw new ActionFailure((await adminT())("actions.requestNotFound"));
 
   const propertyId = (current as { property_id?: string } | null)?.property_id;
   revalidatePath(`${WORKFLOW_LIST_ROUTE}/${id}`);
@@ -872,12 +869,12 @@ export async function addRequestAdminNote(id: string, noteText: string) {
   }
 }
 
-export async function setRequestNextFollowUp(
+async function setRequestNextFollowUpImpl(
   id: string,
   date: string | null,
 ) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error("unauthorized");
+  if (!admin.ok) throw new ActionFailure((await adminT())("actions.unauthorized"));
   const sb = supabaseService();
   const { data, error } = await sb
     .from(WORKFLOW_TABLE)
@@ -885,12 +882,56 @@ export async function setRequestNextFollowUp(
     .eq("id", id)
     .select("property_id")
     .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Demande introuvable : aucune ligne modifiée.");
+  if (error) throw await dbFailure(error, "offmarket_requests");
+  if (!data) throw new ActionFailure((await adminT())("actions.requestNotFound"));
   revalidatePath(`${WORKFLOW_LIST_ROUTE}/${id}`);
   revalidatePath(WORKFLOW_LIST_ROUTE);
   const propertyId = (data as { property_id?: string } | null)?.property_id;
   if (propertyId) {
     revalidatePath(`/admin/offmarket/${propertyId}/requests`);
   }
+}
+
+// Actions exportees : resultat { ok, error } avec le motif reel, jamais une
+// exception (dont Next.js masque le texte en production).
+export async function deleteOffmarket(id: string): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => deleteOffmarketImpl(id));
+}
+
+export async function duplicateOffmarket(id: string): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => duplicateOffmarketImpl(id));
+}
+
+export async function updateRequestStatus(requestId: string, status: string, notes: string | null = null): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => updateRequestStatusImpl(requestId, status, notes));
+}
+
+export async function updateRequestNotes(requestId: string, notes: string): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => updateRequestNotesImpl(requestId, notes));
+}
+
+export async function updateRequestWorkflowStatus(id: string, newStatus: string, reason?: string): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => updateRequestWorkflowStatusImpl(id, newStatus, reason));
+}
+
+export async function addRequestAdminNote(id: string, noteText: string): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => addRequestAdminNoteImpl(id, noteText));
+}
+
+export async function setRequestNextFollowUp(id: string, date: string | null): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => setRequestNextFollowUpImpl(id, date));
 }

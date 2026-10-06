@@ -70,7 +70,7 @@ export function RevalidateButton({
       )}
       {status === "err" && (
         <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-700">
-          {errorMsg ?? t("error_generic")}
+          {errorMsg}
         </span>
       )}
     </div>

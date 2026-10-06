@@ -91,6 +91,7 @@ export function EstimationDetailClient({
   methodLabels,
 }: Props) {
   const t = useTranslations("admin_estimations");
+  const tn = useTranslations("admin_notices");
   const router = useRouter();
   const [status, setStatus] = useState<Status>(initialStatus);
   const [notes, setNotes] = useState(initialNotes ?? "");
@@ -134,16 +135,16 @@ export function EstimationDetailClient({
 
   // Message lisible à partir du code d'erreur renvoyé par l'API.
   async function errorMessage(res: Response): Promise<string> {
-    const code = await res
-      .json()
-      .then((j: { error?: string }) => j?.error ?? "")
-      .catch(() => "");
+    const body = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
+    const code = body?.error ?? "";
     if (code === "not_found") return t("errors.notFound");
     if (code === "invalid_status") return t("errors.invalidStatus");
     if (code === "feature_unavailable") return t("errors.deleteUnavailable");
     if (res.status === 401 || res.status === 403) return t("errors.sessionExpired");
-    return t("errors.saveFailed");
+    // Motif reel renvoye par la route, sinon le statut HTTP.
+    return body?.message || tn("err_http", { status: res.status });
   }
+
 
   async function patchEstimation(payload: Record<string, unknown>) {
     setSaving(true);
@@ -366,7 +367,7 @@ export function EstimationDetailClient({
                                 ? t("errors.sessionExpired")
                                 : res.reason === "not_found"
                                   ? t("errors.notFound")
-                                  : t("errors.saveFailed");
+                                  : res.error || tn("err_http", { status: 500 });
                       setRefinementFeedback({ kind: "error", message: msg });
                     });
                   }}

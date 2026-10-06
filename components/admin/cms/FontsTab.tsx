@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
+/** Motif renvoye par le serveur (distinct d'une coupure reseau). */
+class CmsError extends Error {}
+
 export type TokenRow = {
   id: string;
   category: string;
@@ -66,6 +69,7 @@ function FontCard({
 }) {
   const [value, setValue] = useState(initialValue || FONT_OPTIONS[0]);
   const t = useTranslations("admin_cms");
+  const tn = useTranslations("admin_notices");
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
   const dirty = value !== initialValue;
@@ -86,17 +90,17 @@ function FontCard({
       });
       const json = await r.json().catch(() => ({}));
       if (!r.ok) {
-        throw new Error(
+        throw new CmsError(
           r.status === 401 || r.status === 403
             ? t("err_session")
             : typeof json.error === "string"
               ? json.error
-              : t("save_error"),
+              : tn("err_http", { status: r.status }),
         );
       }
       setFlash(t("saved"));
     } catch (e) {
-      setFlash((e as Error).message);
+      setFlash(e instanceof CmsError ? e.message : tn("err_network"));
     } finally {
       setSaving(false);
       setTimeout(() => setFlash(null), 3000);

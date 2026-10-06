@@ -80,10 +80,26 @@ function WaitlistRow({
   const t = useTranslations("admin_waitlist");
   const tw = useTranslations("admin_workflow");
   const [busy, startTransition] = useTransition();
+  // Motif reel d'un echec (action { ok, error }).
+  const [rowError, setRowError] = useState<string | null>(null);
+  const tn = useTranslations("admin_notices");
 
   const changeStatus = (next: WorkflowStatus) => {
+    const previous = status;
     setStatus(next);
-    startTransition(() => updateWorkflowStatus(item.id, next));
+    setRowError(null);
+    startTransition(async () => {
+      try {
+        const r = await updateWorkflowStatus(item.id, next);
+        if (!r.ok) {
+          setStatus(previous);
+          setRowError(r.error);
+        }
+      } catch {
+        setStatus(previous);
+        setRowError(tn("err_network"));
+      }
+    });
   };
 
   const fullName = [item.first_name, item.last_name].filter(Boolean).join(" ");
@@ -169,6 +185,11 @@ function WaitlistRow({
               </button>
             ))}
           </div>
+          {rowError && (
+            <p role="alert" className="mt-2 text-sm text-red-700">
+              {rowError}
+            </p>
+          )}
         </div>
       )}
     </li>

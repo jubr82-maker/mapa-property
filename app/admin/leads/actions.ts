@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { ActionFailure, dbFailure, runAction, sessionFailure, type ActionResult } from "@/lib/admin/action-result";
+import type { DbError } from "@/lib/admin/db-error";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 
@@ -12,15 +14,14 @@ function actionT() {
   return getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_leads" });
 }
 
-// Erreur Supabase : detail dans les journaux serveur, message traduit a l'ecran.
-async function saveError(scope: string, error: { message: string }): Promise<Error> {
-  console.error(`[admin/leads] ${scope}`, error.message);
-  return new Error((await actionT())("error_save"));
+// Erreur Supabase : motif reel a l'ecran (lib/admin/action-result.ts).
+async function saveError(scope: string, error: DbError): Promise<ActionFailure> {
+  return dbFailure(error, scope);
 }
 
-export async function updateLeadNotes(id: string, notes: string) {
+async function updateLeadNotesImpl(id: string, notes: string) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
+  if (!admin.ok) throw new ActionFailure((await actionT())("error_unauthorized"));
   const supabase = supabaseService();
   const { data, error } = await supabase
     .from("leads")
@@ -28,7 +29,7 @@ export async function updateLeadNotes(id: string, notes: string) {
     .eq("id", id)
     .select("id");
   if (error) throw await saveError("update", error);
-  if (!data || data.length === 0) throw new Error((await actionT())("error_not_found"));
+  if (!data || data.length === 0) throw new ActionFailure((await actionT())("error_not_found"));
   revalidatePath("/admin/leads");
 }
 
@@ -48,13 +49,13 @@ type HistoryEntry = {
  * appliquée : remonte l'erreur Supabase telle quelle pour que l'UI affiche
  * le message.
  */
-export async function updateWorkflowStatus(
+async function updateWorkflowStatusImpl(
   leadId: string,
   newStatus: string,
   reason?: string,
 ) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
+  if (!admin.ok) throw new ActionFailure((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   // Lecture défensive : si les colonnes n'existent pas, on récupère null
@@ -85,7 +86,7 @@ export async function updateWorkflowStatus(
     .select("id");
 
   if (error) throw await saveError("update", error);
-  if (!updated || updated.length === 0) throw new Error((await actionT())("error_not_found"));
+  if (!updated || updated.length === 0) throw new ActionFailure((await actionT())("error_not_found"));
 
   revalidatePath("/admin/leads");
   revalidatePath(`/admin/leads/${leadId}`);
@@ -96,12 +97,12 @@ export async function updateWorkflowStatus(
  * Persiste également la dernière note dans `admin_notes` pour l'affichage
  * rapide dans la table.
  */
-export async function addAdminNote(leadId: string, noteText: string) {
+async function addAdminNoteImpl(leadId: string, noteText: string) {
   const trimmed = noteText.trim();
   if (!trimmed) return;
 
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
+  if (!admin.ok) throw new ActionFailure((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   const { data: lead } = await sb
@@ -125,7 +126,7 @@ export async function addAdminNote(leadId: string, noteText: string) {
     .select("id");
 
   if (error) throw await saveError("update", error);
-  if (!updated || updated.length === 0) throw new Error((await actionT())("error_not_found"));
+  if (!updated || updated.length === 0) throw new ActionFailure((await actionT())("error_not_found"));
 
   revalidatePath(`/admin/leads/${leadId}`);
 }
@@ -134,9 +135,9 @@ export async function addAdminNote(leadId: string, noteText: string) {
  * Met à jour la date de prochain follow-up (format ISO date "YYYY-MM-DD").
  * Passer `null` pour effacer.
  */
-export async function setNextFollowUp(leadId: string, date: string | null) {
+async function setNextFollowUpImpl(leadId: string, date: string | null) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
+  if (!admin.ok) throw new ActionFailure((await actionT())("error_unauthorized"));
   const sb = supabaseService();
   const { data, error } = await sb
     .from("leads")
@@ -144,7 +145,7 @@ export async function setNextFollowUp(leadId: string, date: string | null) {
     .eq("id", leadId)
     .select("id");
   if (error) throw await saveError("update", error);
-  if (!data || data.length === 0) throw new Error((await actionT())("error_not_found"));
+  if (!data || data.length === 0) throw new ActionFailure((await actionT())("error_not_found"));
   revalidatePath(`/admin/leads/${leadId}`);
   revalidatePath("/admin/leads");
 }
@@ -162,13 +163,13 @@ export async function setNextFollowUp(leadId: string, date: string | null) {
  * Confirmation utilisateur portée côté UI (DeleteLeadButton). Redirige
  * vers /admin/leads après succès.
  */
-export async function deleteLead(id: string): Promise<void> {
+async function deleteLeadImpl(id: string) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
+  if (!admin.ok) throw new ActionFailure((await actionT())("error_unauthorized"));
   const sb = supabaseService();
   const { data, error } = await sb.from("leads").delete().eq("id", id).select("id");
   if (error) throw await saveError("update", error);
-  if (!data || data.length === 0) throw new Error((await actionT())("error_not_found"));
+  if (!data || data.length === 0) throw new ActionFailure((await actionT())("error_not_found"));
   revalidatePath("/admin/leads");
   redirect("/admin/leads");
 }
@@ -220,7 +221,7 @@ export async function convertLeadToMandat(
 
   if (leadError) {
     console.error("[admin/leads] convertLeadToMandat", leadError.message);
-    return { ok: false, error: "db_error" };
+    return { ok: false, error: (await dbFailure(leadError, "leads")).message };
   }
   if (!lead) return { ok: false, error: "lead_not_found" };
 
@@ -247,7 +248,7 @@ export async function convertLeadToMandat(
 
   if (existingError) {
     console.error("[admin/leads] convertLeadToMandat", existingError.message);
-    return { ok: false, error: "db_error" };
+    return { ok: false, error: (await dbFailure(existingError, "leads")).message };
   }
   if (existing) {
     return {
@@ -305,7 +306,7 @@ export async function convertLeadToMandat(
 
   if (insertError) {
     console.error("[admin/leads] convertLeadToMandat", insertError.message);
-    return { ok: false, error: "db_error" };
+    return { ok: false, error: (await dbFailure(insertError, "leads")).message };
   }
 
   revalidatePath("/admin/leads");
@@ -352,7 +353,7 @@ export async function exportLead(
       .from("mandats")
       .select("*")
       .eq("lead_id", id);
-    if (mandatsError) return { ok: false, error: "db_error" };
+    if (mandatsError) return { ok: false, error: (await dbFailure(mandatsError, "leads")).message };
     const mandat_associe =
       Array.isArray(mandats) && mandats.length > 0 ? mandats[0] : null;
 
@@ -370,6 +371,38 @@ export async function exportLead(
     return { ok: true, data, filename };
   } catch (e) {
     console.error("[exportLead]", (e as Error).message);
-    return { ok: false, error: "db_error" };
+    return { ok: false, error: (await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_notices" }))("err_unexpected", { detail: (e as Error)?.message ?? String(e) }) };
   }
+}
+
+// Actions exportees : resultat { ok, error } avec le motif reel, jamais une
+// exception (dont Next.js masque le texte en production).
+export async function updateLeadNotes(id: string, notes: string): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => updateLeadNotesImpl(id, notes));
+}
+
+export async function updateWorkflowStatus(leadId: string, newStatus: string, reason?: string): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => updateWorkflowStatusImpl(leadId, newStatus, reason));
+}
+
+export async function addAdminNote(leadId: string, noteText: string): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => addAdminNoteImpl(leadId, noteText));
+}
+
+export async function setNextFollowUp(leadId: string, date: string | null): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => setNextFollowUpImpl(leadId, date));
+}
+
+export async function deleteLead(id: string): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => deleteLeadImpl(id));
 }

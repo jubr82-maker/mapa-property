@@ -33,6 +33,7 @@ import { revalidatePublicPropertyPages } from "@/lib/revalidate-property";
 import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 import { assertAdminAction } from "@/lib/admin/require-admin";
+import { dbFailure } from "@/lib/admin/action-result";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 
@@ -116,7 +117,7 @@ export async function uploadPropertyPhoto(
       console.error("[admin/properties/photos] upload storage echoue", {
         code: errorCode(error),
       });
-      return { ok: false, error: (await tProps())("err_upload_storage") };
+      return { ok: false, error: (await tProps())("err_upload_storage", { reason: (await dbFailure(error, "photos")).message }) };
     }
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
     return { ok: true, url: data.publicUrl, path };
@@ -124,7 +125,7 @@ export async function uploadPropertyPhoto(
     console.error("[admin/properties/photos] upload exception", {
       code: errorCode(e),
     });
-    return { ok: false, error: (await tProps())("err_upload_unexpected") };
+    return { ok: false, error: (await tProps())("err_upload_unexpected", { reason: e instanceof Error ? e.message : String(e) }) };
   }
 }
 
@@ -145,7 +146,7 @@ export async function savePropertyPhotos(
       console.error("[admin/properties/photos] delete rows echoue", {
         code: errorCode(delErr),
       });
-      return { ok: false, error: (await tProps())("err_save_delete") };
+      return { ok: false, error: (await tProps())("err_save_delete", { reason: (await dbFailure(delErr, "photos")).message }) };
     }
     // Re-insert avec sort = order ; cover = order 0
     if (photos.length > 0) {
@@ -166,7 +167,7 @@ export async function savePropertyPhotos(
         console.error("[admin/properties/photos] insert rows echoue", {
           code: errorCode(insErr),
         });
-        return { ok: false, error: (await tProps())("err_save_insert") };
+        return { ok: false, error: (await tProps())("err_save_insert", { reason: (await dbFailure(insErr, "photos")).message }) };
       }
     }
     // La cover (fetchAllPropertiesWithCover) depend de property_images ,
@@ -188,7 +189,7 @@ export async function savePropertyPhotos(
     console.error("[admin/properties/photos] save exception", {
       code: errorCode(e),
     });
-    return { ok: false, error: (await tProps())("err_save_unexpected") };
+    return { ok: false, error: (await tProps())("err_save_unexpected", { reason: e instanceof Error ? e.message : String(e) }) };
   }
 }
 
@@ -206,13 +207,13 @@ export async function deletePropertyPhoto(
       console.error("[admin/properties/photos] delete storage echoue", {
         code: errorCode(error),
       });
-      return { ok: false, error: (await tProps())("err_delete") };
+      return { ok: false, error: (await tProps())("err_delete", { reason: (await dbFailure(error, "photos")).message }) };
     }
     return { ok: true };
   } catch (e) {
     console.error("[admin/properties/photos] delete exception", {
       code: errorCode(e),
     });
-    return { ok: false, error: (await tProps())("err_delete_unexpected") };
+    return { ok: false, error: (await tProps())("err_delete_unexpected", { reason: e instanceof Error ? e.message : String(e) }) };
   }
 }

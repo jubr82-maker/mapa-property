@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { dbFailure } from "@/lib/admin/action-result";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE, formatDateTime } from "@/lib/datetime";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
@@ -103,7 +104,7 @@ export default async function AdminPropertiesPage({
             {tArchive("list_hint")}
           </p>
           {error && (
-            <div className="mt-2"><AdminNotice kind="read_error" /></div>
+            <div className="mt-2"><AdminNotice kind="read_error" reason={(await dbFailure(error, "properties")).message} /></div>
           )}
         </div>
         <div className="flex gap-2">

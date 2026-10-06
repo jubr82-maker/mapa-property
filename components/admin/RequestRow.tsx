@@ -50,29 +50,48 @@ export function RequestRow({ request }: { request: Request }) {
   );
   const [notes, setNotes] = useState(request.notes_admin ?? "");
   const [busy, startTransition] = useTransition();
+  // Motif reel d'un echec (action { ok, error }), affiche dans la carte.
+  const [rowError, setRowError] = useState<string | null>(null);
+  const tn = useTranslations("admin_notices");
+  const run = (action: () => Promise<{ ok: boolean; error?: string }>, undo?: () => void) => {
+    setRowError(null);
+    startTransition(async () => {
+      try {
+        const r = await action();
+        if (!r.ok) {
+          undo?.();
+          setRowError(r.error ?? "");
+        }
+      } catch {
+        undo?.();
+        setRowError(tn("err_network"));
+      }
+    });
+  };
 
   const changeStatus = (next: RequestStatus) => {
+    const previous = status;
     setStatus(next);
-    startTransition(async () => {
-      await updateRequestStatus(request.id, next);
-    });
+    run(() => updateRequestStatus(request.id, next), () => setStatus(previous));
   };
 
   const changeWorkflowStatus = (next: WorkflowStatus) => {
+    const previous = workflowStatus;
     setWorkflowStatus(next);
-    startTransition(async () => {
-      await updateRequestWorkflowStatus(request.id, next);
-    });
+    run(() => updateRequestWorkflowStatus(request.id, next), () => setWorkflowStatus(previous));
   };
 
   const saveNotes = () => {
-    startTransition(async () => {
-      await updateRequestNotes(request.id, notes);
-    });
+    run(() => updateRequestNotes(request.id, notes));
   };
 
   return (
     <li className="rounded-2xl border border-[#3D4F63]/15 bg-white p-5">
+      {rowError && (
+        <p role="alert" className="mb-2 text-sm text-red-700">
+          {rowError}
+        </p>
+      )}
       <button
         type="button"
         onClick={() => setOpen(!open)}

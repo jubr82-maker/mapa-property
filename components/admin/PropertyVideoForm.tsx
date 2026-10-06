@@ -11,6 +11,7 @@ interface Props {
 
 export function PropertyVideoForm({ propertyId, initialVideoUrl }: Props) {
   const t = useTranslations("admin_properties");
+  const tn = useTranslations("admin_notices");
   const [value, setValue] = useState(initialVideoUrl);
   const [status, setStatus] = useState<"idle" | "ok" | "err">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -21,11 +22,15 @@ export function PropertyVideoForm({ propertyId, initialVideoUrl }: Props) {
     setErrorMsg(null);
     startTransition(async () => {
       try {
-        await updatePropertyVideoUrl(propertyId, value.trim() || null);
+        const r = await updatePropertyVideoUrl(propertyId, value.trim() || null);
+        if (!r.ok) {
+          setStatus("err");
+          return setErrorMsg(r.error);
+        }
         setStatus("ok");
-      } catch (e) {
+      } catch {
         setStatus("err");
-        setErrorMsg(e instanceof Error ? e.message : t("err_unknown"));
+        setErrorMsg(tn("err_network"));
       }
     });
   };
@@ -36,11 +41,15 @@ export function PropertyVideoForm({ propertyId, initialVideoUrl }: Props) {
     setErrorMsg(null);
     startTransition(async () => {
       try {
-        await updatePropertyVideoUrl(propertyId, null);
+        const r = await updatePropertyVideoUrl(propertyId, null);
+        if (!r.ok) {
+          setStatus("err");
+          return setErrorMsg(r.error);
+        }
         setStatus("ok");
-      } catch (e) {
+      } catch {
         setStatus("err");
-        setErrorMsg(e instanceof Error ? e.message : t("err_unknown"));
+        setErrorMsg(tn("err_network"));
       }
     });
   };
@@ -97,7 +106,7 @@ export function PropertyVideoForm({ propertyId, initialVideoUrl }: Props) {
         )}
         {status === "err" && (
           <span className="font-mono text-xs uppercase tracking-[0.2em] text-red-700">
-            {errorMsg ?? t("error_generic")}
+            {errorMsg}
           </span>
         )}
       </div>

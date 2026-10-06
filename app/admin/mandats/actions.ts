@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabaseService } from "@/lib/supabase-service";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { ActionFailure, dbFailure, runAction, sessionFailure, type ActionResult } from "@/lib/admin/action-result";
+import type { DbError } from "@/lib/admin/db-error";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 
@@ -12,10 +14,9 @@ function actionT() {
   return getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_mandats" });
 }
 
-// Erreur Supabase : detail dans les journaux serveur, message traduit a l'ecran.
-async function saveError(scope: string, error: { message: string }): Promise<Error> {
-  console.error(`[admin/mandats] ${scope}`, error.message);
-  return new Error((await actionT())("error_save"));
+// Erreur Supabase : motif reel a l'ecran (lib/admin/action-result.ts).
+async function saveError(scope: string, error: DbError): Promise<ActionFailure> {
+  return dbFailure(error, scope);
 }
 
 // ============================================================================
@@ -42,13 +43,13 @@ type HistoryEntry = {
   note?: string;
 };
 
-export async function updateWorkflowStatus(
+async function updateWorkflowStatusImpl(
   id: string,
   newStatus: string,
   reason?: string,
 ) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
+  if (!admin.ok) throw new ActionFailure((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   const { data: current } = await sb
@@ -83,12 +84,12 @@ export async function updateWorkflowStatus(
   revalidatePath(`${ROUTE}/${id}`);
 }
 
-export async function addAdminNote(id: string, noteText: string) {
+async function addAdminNoteImpl(id: string, noteText: string) {
   const trimmed = noteText.trim();
   if (!trimmed) return;
 
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
+  if (!admin.ok) throw new ActionFailure((await actionT())("error_unauthorized"));
   const sb = supabaseService();
 
   const { data: current } = await sb
@@ -115,9 +116,9 @@ export async function addAdminNote(id: string, noteText: string) {
   revalidatePath(`${ROUTE}/${id}`);
 }
 
-export async function setNextFollowUp(id: string, date: string | null) {
+async function setNextFollowUpImpl(id: string, date: string | null) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
+  if (!admin.ok) throw new ActionFailure((await actionT())("error_unauthorized"));
   const sb = supabaseService();
   const { error } = await sb
     .from(TABLE)
@@ -203,7 +204,7 @@ export async function updateMandat(
   const { error } = await sb.from(TABLE).update(cleaned).eq("id", id);
   if (error) {
     console.error("[admin/mandats] updateMandat", error.message);
-    return { ok: false, error: "db_error" };
+    return { ok: false, error: (await dbFailure(error, "mandats")).message };
   }
 
   revalidatePath(`${ROUTE}/${id}`);
@@ -215,9 +216,9 @@ export async function updateMandat(
  * Suppression RGPD : DELETE definitif. Redirige vers la liste.
  * La confirmation utilisateur est portee cote UI (composant client).
  */
-export async function deleteMandat(id: string): Promise<void> {
+async function deleteMandatImpl(id: string) {
   const admin = await requireAdmin();
-  if (!admin.ok) throw new Error((await actionT())("error_unauthorized"));
+  if (!admin.ok) throw new ActionFailure((await actionT())("error_unauthorized"));
   const sb = supabaseService();
   const { error } = await sb.from(TABLE).delete().eq("id", id);
   if (error) throw await saveError("update", error);
@@ -265,6 +266,32 @@ export async function exportMandat(
     return { ok: true, data, filename };
   } catch (e) {
     console.error("[exportMandat]", (e as Error).message);
-    return { ok: false, error: "db_error" };
+    return { ok: false, error: (await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_notices" }))("err_unexpected", { detail: (e as Error)?.message ?? String(e) }) };
   }
+}
+
+// Actions exportees : resultat { ok, error } avec le motif reel, jamais une
+// exception (dont Next.js masque le texte en production).
+export async function updateWorkflowStatus(id: string, newStatus: string, reason?: string): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => updateWorkflowStatusImpl(id, newStatus, reason));
+}
+
+export async function addAdminNote(id: string, noteText: string): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => addAdminNoteImpl(id, noteText));
+}
+
+export async function setNextFollowUp(id: string, date: string | null): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => setNextFollowUpImpl(id, date));
+}
+
+export async function deleteMandat(id: string): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  return runAction(() => deleteMandatImpl(id));
 }

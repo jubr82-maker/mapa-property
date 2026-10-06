@@ -187,14 +187,38 @@ function LeadRow({
   );
   const [notes, setNotes] = useState("");
   const [busy, startTransition] = useTransition();
+  // Motif reel d'un echec (action { ok, error }), affiche sous la ligne.
+  const [rowError, setRowError] = useState<string | null>(null);
+  const tn = useTranslations("admin_notices");
 
   const changeStatus = (next: WorkflowStatus) => {
+    const previous = status;
     setStatus(next);
-    startTransition(() => updateWorkflowStatus(lead.id, next));
+    setRowError(null);
+    startTransition(async () => {
+      try {
+        const r = await updateWorkflowStatus(lead.id, next);
+        if (!r.ok) {
+          setStatus(previous);
+          setRowError(r.error);
+        }
+      } catch {
+        setStatus(previous);
+        setRowError(tn("err_network"));
+      }
+    });
   };
 
   const saveNotes = () => {
-    startTransition(() => updateLeadNotes(lead.id, notes));
+    setRowError(null);
+    startTransition(async () => {
+      try {
+        const r = await updateLeadNotes(lead.id, notes);
+        if (!r.ok) setRowError(r.error);
+      } catch {
+        setRowError(tn("err_network"));
+      }
+    });
   };
 
   const fullName = [lead.first_name, lead.last_name].filter(Boolean).join(" ");
@@ -301,6 +325,11 @@ function LeadRow({
                   >
                     {busy ? tw("busy") : t("notes_save")}
                   </button>
+                  {rowError && (
+                    <p role="alert" className="mt-2 text-sm text-red-700">
+                      {rowError}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -321,6 +350,7 @@ function LeadRow({
  */
 function LeadCard({ lead }: { lead: Lead }) {
   const t = useTranslations("admin_leads");
+  const tn = useTranslations("admin_notices");
   const tw = useTranslations("admin_workflow");
   const [status, setStatus] = useState<WorkflowStatus>(
     lead.workflow_status && WORKFLOW_STATUSES.includes(lead.workflow_status as WorkflowStatus)
@@ -340,11 +370,12 @@ function LeadCard({ lead }: { lead: Lead }) {
     setFeedback(null);
     startTransition(async () => {
       try {
-        await action();
+        const r = (await action()) as { ok?: boolean; error?: string } | undefined;
+        if (r && r.ok === false) return setFeedback({ ok: false, text: r.error ?? "" });
         after?.();
         setFeedback({ ok: true, text: ok });
-      } catch (e) {
-        setFeedback({ ok: false, text: e instanceof Error && e.message ? e.message : t("quick_error") });
+      } catch {
+        setFeedback({ ok: false, text: tn("err_network") });
       }
     });
   };
@@ -355,11 +386,15 @@ function LeadCard({ lead }: { lead: Lead }) {
     setFeedback(null);
     startTransition(async () => {
       try {
-        await updateWorkflowStatus(lead.id, next);
+        const r = await updateWorkflowStatus(lead.id, next);
+        if (!r.ok) {
+          setStatus(previous);
+          return setFeedback({ ok: false, text: r.error });
+        }
         setFeedback({ ok: true, text: t("quick_status_saved") });
-      } catch (e) {
+      } catch {
         setStatus(previous);
-        setFeedback({ ok: false, text: e instanceof Error && e.message ? e.message : t("quick_error") });
+        setFeedback({ ok: false, text: tn("err_network") });
       }
     });
   };

@@ -16,6 +16,7 @@ const labelCls =
 
 export function NewEstimationForm() {
   const t = useTranslations("admin_estimations");
+  const tn = useTranslations("admin_notices");
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -67,11 +68,12 @@ export function NewEstimationForm() {
         }),
       });
       if (!res.ok) {
-        const code = await res
-          .json()
-          .then((j: { error?: string }) => j?.error ?? "")
-          .catch(() => "");
-        setErr(code === "missing_price_mid" ? t("new.priceMidRequired") : t("errors.saveFailed"));
+        const body = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
+        setErr(
+          body?.error === "missing_price_mid"
+            ? t("new.priceMidRequired")
+            : body?.message || tn("err_http", { status: res.status }),
+        );
         return;
       }
       router.push("/admin/estimations");

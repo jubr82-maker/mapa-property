@@ -10,6 +10,7 @@ import { sanitizeArticleHtml } from "@/lib/security/sanitize";
 import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 import { dbErrorReason, type DbError } from "@/lib/admin/db-error";
+import { dbFailure } from "@/lib/admin/action-result";
 
 /** Bucket public des couvertures du blog (cree par le site v28). */
 const COVER_BUCKET = "blog-covers";
@@ -151,12 +152,11 @@ export async function uploadBlogImage(formData: FormData): Promise<UploadCoverRe
       .from(COVER_BUCKET)
       .upload(path, processed.buffer, { cacheControl: "31536000", upsert: false, contentType: processed.contentType });
     if (error) {
-      console.error("[admin/blog] envoi d'image refuse", { code: (error as { statusCode?: string }).statusCode ?? error.name });
-      return { ok: false, error: t("err_upload_failed") };
+      return { ok: false, error: t("err_upload_failed", { reason: (await dbFailure(error, "blog-covers")).message }) };
     }
     const { data } = supabase.storage.from(COVER_BUCKET).getPublicUrl(path);
     return { ok: true, url: data.publicUrl };
-  } catch {
-    return { ok: false, error: t("err_upload_failed") };
+  } catch (e) {
+    return { ok: false, error: t("err_upload_failed", { reason: e instanceof Error ? e.message : String(e) }) };
   }
 }

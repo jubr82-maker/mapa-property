@@ -11,6 +11,7 @@ import { downloadJson } from "@/lib/admin/download";
 
 export function ExportMandatButton({ id }: { id: string }) {
   const t = useTranslations("admin_mandats");
+  const tn = useTranslations("admin_notices");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -21,14 +22,13 @@ export function ExportMandatButton({ id }: { id: string }) {
         const res = await exportMandat(id);
         if (!res.ok) {
           setError(
-            res.error === "not_found" ? t("export_not_found") : t("export_error"),
+            res.error === "not_found" ? t("export_not_found") : res.error === "unauthorized" ? tn("err_session") : res.error,
           );
           return;
         }
         downloadJson(res.filename, res.data);
-      } catch (e) {
-        console.error("[export]", e);
-        setError(t("error_unexpected"));
+      } catch {
+        setError(tn("err_network"));
       }
     });
   };

@@ -86,7 +86,8 @@ export function EditMandatForm({
     if (code === "unauthorized") return t("error_unauthorized");
     if (code === "invalid_type_mandat") return t("error_invalid_type_mandat");
     if (code === "invalid_status") return t("error_invalid_status");
-    return t("error_generic");
+    // Autres cas : le motif reel est deja renvoye en clair par l'action.
+    return code ?? "";
   }
 
   const isVente = data.type_transaction === "vente";

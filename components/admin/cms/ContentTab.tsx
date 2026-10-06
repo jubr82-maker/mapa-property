@@ -12,6 +12,9 @@ import {
 } from "@tanstack/react-table";
 import { formatDateTimeShort } from "@/lib/datetime";
 
+/** Motif renvoye par le serveur (distinct d'une coupure reseau). */
+class CmsError extends Error {}
+
 export type ContentRow = {
   id: string;
   key: string;
@@ -67,12 +70,12 @@ export function ContentTab({ initial }: { initial: ContentRow[] }) {
       });
       const json = await r.json().catch(() => ({}));
       if (!r.ok) {
-        throw new Error(
+        throw new CmsError(
           r.status === 401 || r.status === 403
             ? t("err_session")
             : typeof json.error === "string"
               ? json.error
-              : t("save_error"),
+              : notices("err_http", { status: r.status }),
         );
       }
       setRows((rs) =>
@@ -85,7 +88,7 @@ export function ContentTab({ initial }: { initial: ContentRow[] }) {
     } catch (e) {
       setRows((rs) =>
         rs.map((r) =>
-          r.id === id ? { ...r, _saving: false, _error: (e as Error).message } : r,
+          r.id === id ? { ...r, _saving: false, _error: e instanceof CmsError ? e.message : notices("err_network") } : r,
         ),
       );
     }

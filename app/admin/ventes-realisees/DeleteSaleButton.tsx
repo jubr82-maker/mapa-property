@@ -12,13 +12,12 @@ async function errorReason(
   res: Response,
   t: ReturnType<typeof useTranslations<"admin_sales">>,
 ): Promise<string> {
-  const code = await res
-    .json()
-    .then((j: { error?: string }) => j?.error ?? "")
-    .catch(() => "");
+  const body = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
+  const code = body?.error ?? "";
   if (res.status === 401 || res.status === 403) return t("errors.session");
   if (code === "missing_or_invalid_fields" || code === "invalid") return t("errors.invalidFields");
-  return t("errors.server");
+  // Motif reel renvoye par la route, sinon le code HTTP.
+  return body?.message || t("errors.http", { status: res.status });
 }
 
 export function DeleteSaleButton({ id, label }: { id: string; label: string }) {

@@ -1,4 +1,5 @@
 // POST /api/admin/estimations : création manuelle d'une estimation
+import { dbFailure } from "@/lib/admin/action-result";
 // par l'admin. Auth SSR obligatoire (même pattern que le PATCH
 // existant). N'exécute PAS le moteur EVS : c'est une saisie manuelle,
 // l'admin fournit lui-même la fourchette. Écrit dans estimation_requests
@@ -67,8 +68,7 @@ export async function POST(req: Request) {
   } as never);
 
   if (error) {
-    console.error("[api/admin/estimations] insert", { code: error.code });
-    return NextResponse.json({ error: "db_error" }, { status: 500 });
+    return NextResponse.json({ error: "db_error", message: (await dbFailure(error, "estimations")).message }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }

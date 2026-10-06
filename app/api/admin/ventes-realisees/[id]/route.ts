@@ -1,4 +1,5 @@
 // API admin /api/admin/ventes-realisees/[id]
+import { dbFailure } from "@/lib/admin/action-result";
 //   - PATCH  : edition complete d'une vente OU toggle use_as_comparable seul.
 //   - DELETE : suppression d'une vente.
 //
@@ -37,7 +38,7 @@ export async function PATCH(
       .eq("id", id);
     if (error) {
       console.error("[admin/ventes-realisees/[id]] override error", error.message);
-      return (console.error("[api/admin/ventes-realisees/id]", { code: error.code }), NextResponse.json({ error: "db_error" }, { status: 500 }));
+      return NextResponse.json({ error: "db_error", message: (await dbFailure(error, "ventes")).message }, { status: 500 });
     }
     return NextResponse.json({ ok: true });
   }
@@ -60,7 +61,7 @@ export async function PATCH(
 
   if (error) {
     console.error("[admin/ventes-realisees/[id]] update error", error.message);
-    return (console.error("[api/admin/ventes-realisees/id]", { code: error.code }), NextResponse.json({ error: "db_error" }, { status: 500 }));
+    return NextResponse.json({ error: "db_error", message: (await dbFailure(error, "ventes")).message }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
@@ -81,7 +82,7 @@ export async function DELETE(
 
   if (error) {
     console.error("[admin/ventes-realisees/[id]] delete error", error.message);
-    return (console.error("[api/admin/ventes-realisees/id]", { code: error.code }), NextResponse.json({ error: "db_error" }, { status: 500 }));
+    return NextResponse.json({ error: "db_error", message: (await dbFailure(error, "ventes")).message }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

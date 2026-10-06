@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import type { ActionResult } from "@/lib/admin/action-result";
 import { updateWorkflowStatus as updateLeadWorkflowStatus } from "@/app/admin/leads/actions";
 import {
   WORKFLOW_STATUSES,
@@ -15,7 +16,7 @@ type UpdateWorkflowAction = (
   id: string,
   newStatus: string,
   reason?: string,
-) => Promise<void>;
+) => Promise<ActionResult>;
 
 export function WorkflowSelect({
   leadId,
@@ -32,6 +33,7 @@ export function WorkflowSelect({
   action?: UpdateWorkflowAction;
 }) {
   const t = useTranslations("admin_workflow");
+  const tn = useTranslations("admin_notices");
   const updateWorkflowStatus = action ?? updateLeadWorkflowStatus;
   const [status, setStatus] = useState<WorkflowStatus>(
     (initialStatus && WORKFLOW_STATUSES.includes(initialStatus as WorkflowStatus)
@@ -49,12 +51,15 @@ export function WorkflowSelect({
     setStatus(next);
     startTransition(async () => {
       try {
-        await updateWorkflowStatus(leadId, next, reason || undefined);
+        const r = await updateWorkflowStatus(leadId, next, reason || undefined);
+        if (!r.ok) {
+          setStatus(prev);
+          return setError(r.error);
+        }
         setReason("");
-      } catch (e) {
-        console.error("[WorkflowSelect]", e);
+      } catch {
         setStatus(prev);
-        setError(t("error_generic"));
+        setError(tn("err_network"));
       }
     });
   };

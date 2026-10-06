@@ -5,6 +5,9 @@ import { useTranslations } from "next-intl";
 import { HexColorPicker } from "react-colorful";
 import type { TokenRow } from "./FontsTab";
 
+/** Motif renvoye par le serveur (distinct d'une coupure reseau). */
+class CmsError extends Error {}
+
 const COLOR_SLOTS = [
   { key: "gold", label: "color_gold", fallback: "#e0af6e" },
   { key: "ink", label: "color_ink", fallback: "#1A1F2A" },
@@ -46,6 +49,7 @@ function ColorCard({
 }) {
   const [value, setValue] = useState(initialValue);
   const t = useTranslations("admin_cms");
+  const tn = useTranslations("admin_notices");
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
   const dirty = value.toLowerCase() !== initialValue.toLowerCase();
@@ -66,17 +70,17 @@ function ColorCard({
       });
       const json = await r.json().catch(() => ({}));
       if (!r.ok) {
-        throw new Error(
+        throw new CmsError(
           r.status === 401 || r.status === 403
             ? t("err_session")
             : typeof json.error === "string"
               ? json.error
-              : t("save_error"),
+              : tn("err_http", { status: r.status }),
         );
       }
       setFlash(t("saved"));
     } catch (e) {
-      setFlash((e as Error).message);
+      setFlash(e instanceof CmsError ? e.message : tn("err_network"));
     } finally {
       setSaving(false);
       setTimeout(() => setFlash(null), 3000);
