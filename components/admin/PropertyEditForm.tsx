@@ -4,9 +4,12 @@
  * PropertyEditForm : formulaire complet de la fiche d'un bien.
  *
  * Édite l'intégralité des champs de contenu/caractéristiques d'un bien
- * classique (hors type/transaction/état, fixés à la création, cf.
+ * classique (hors transaction/état, fixés à la création, cf.
  * PropertyCreateForm, et hors vidéo/photos, gérées par leurs propres
- * sections sur la page d'édition). Sections/Field calqués sur
+ * sections sur la page d'édition). Le type de bien se choisit en premier
+ * (oct. 2026) : la fiche n'affiche ensuite que les champs utiles à sa
+ * famille (lib/listing/families.ts, fieldVisible) ; un champ masqué garde
+ * sa valeur. Sections/Field calqués sur
  * OffmarketForm.tsx / PropertyCreateForm.tsx pour une UI cohérente,
  * lisible par un utilisateur non technique.
  *
@@ -15,13 +18,23 @@
  * une fois (pas de sauvegarde partielle par section).
  */
 
-import { useState, useTransition, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useTransition, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { updateProperty } from "@/app/admin/properties/actions";
 import { translatePropertyFromFrench } from "@/app/admin/properties/translate-actions";
 import { parseDecimalInput } from "@/lib/format/numbers";
+import {
+  ENERGY_CLASSES,
+  LISTING_FAMILIES,
+  LISTING_TYPES,
+  MANDATE_TYPES,
+  familyOf,
+  fieldVisible,
+  isEnergyClass,
+  type ListingFamily,
+} from "@/lib/listing/families";
 
 // Valeurs enregistrees en base (inchangees, cf. allowlists de
 // app/admin/properties/actions.ts) ; libelles : cles admin_properties.
@@ -43,6 +56,8 @@ const BADGE_POSITION_OPTIONS = [
 const STATUS_OPTIONS = ["draft", "published", "sold", "withdrawn"] as const;
 
 interface PropertyEditFormInitial {
+  property_type: string | null;
+  mandate_type: string | null;
   title_fr: string | null;
   title_en: string | null;
   title_de: string | null;
@@ -91,6 +106,8 @@ interface PropertyEditFormInitial {
 }
 
 interface FormState {
+  property_type: string;
+  mandate_type: string;
   title_fr: string;
   title_en: string;
   title_de: string;
@@ -166,6 +183,8 @@ function toFormState(initial: PropertyEditFormInitial): FormState {
   const s = (v: string | null) => v ?? "";
   const n = (v: number | null) => (v == null ? "" : String(v));
   return {
+    property_type: s(initial.property_type),
+    mandate_type: s(initial.mandate_type),
     title_fr: s(initial.title_fr),
     title_en: s(initial.title_en),
     title_de: s(initial.title_de),
@@ -226,7 +245,12 @@ function isDirty(a: FormState, b: FormState): boolean {
 interface Props {
   propertyId: string;
   initial: PropertyEditFormInitial;
+  /** Colonne properties.mandate_type presente (SQL 16 execute). */
+  mandateAvailable: boolean;
 }
+
+// Famille du type choisi : Field et Section masquent les champs inutiles.
+const FamilyContext = createContext<ListingFamily | null>(null);
 
 const inputCls =
   "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none";
@@ -235,12 +259,17 @@ const textareaCls = `${inputCls} font-sans`;
 function Section({
   title,
   hint,
+  fields,
   children,
 }: {
   title: string;
   hint?: string;
+  /** Champs de la section : sans aucun champ visible, la section disparait. */
+  fields?: string[];
   children: React.ReactNode;
 }) {
+  const family = useContext(FamilyContext);
+  if (fields && !fields.some((f) => fieldVisible(f, family))) return null;
   // Section repliable (oct. 2026) : ouverte par defaut ; sur telephone,
   // l'admin ouvre seulement celle qu'il modifie. Une colonne sous 768 px.
   return (
@@ -261,13 +290,18 @@ function Field({
   label,
   hint,
   full,
+  field,
   children,
 }: {
   label: string;
   hint?: string;
   full?: boolean;
+  /** Colonne du champ, pour l'afficher seulement si la famille l'utilise. */
+  field?: string;
   children: React.ReactNode;
 }) {
+  const family = useContext(FamilyContext);
+  if (field && !fieldVisible(field, family)) return null;
   return (
     <label className={`block ${full ? "md:col-span-2" : ""}`}>
       <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
@@ -301,7 +335,24 @@ function CheckboxField({
   );
 }
 
-export function PropertyEditForm({ propertyId, initial }: Props) {
+// Classe du passeport : liste A+ a I ; une ancienne valeur hors liste reste
+// affichee (et n'est pas envoyee tant qu'elle n'est pas changee).
+function EnergySelect({ value, onChange, labelNone, labelLegacy }: { value: string; onChange: (v: string) => void; labelNone: string; labelLegacy: string }) {
+  const legacy = value !== "" && !isEnergyClass(value);
+  return (
+    <select value={value} onChange={(e) => onChange(e.target.value)} className={inputCls}>
+      <option value="">{labelNone}</option>
+      {legacy && <option value={value}>{labelLegacy}</option>}
+      {ENERGY_CLASSES.map((c) => (
+        <option key={c} value={c}>
+          {c}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+export function PropertyEditForm({ propertyId, initial, mandateAvailable }: Props) {
   const t = useTranslations("admin_properties");
   const tn = useTranslations("admin_notices");
   const [form, setForm] = useState<FormState>(() => toFormState(initial));
@@ -310,6 +361,11 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dirty = isDirty(form, baseline);
+  // Famille choisie avant le type ; un type hors liste (ancien import) n'a
+  // pas de famille : tous les champs restent affiches.
+  const [family, setFamily] = useState<ListingFamily | "">(() => familyOf(initial.property_type) ?? "");
+  const typeFamily = familyOf(form.property_type);
+  const legacyType = form.property_type !== "" && !typeFamily ? form.property_type : null;
 
   useEffect(() => {
     if (!dirty) return;
@@ -404,7 +460,13 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
     setError(null);
     startTransition(async () => {
       try {
+        // Type, mandat et classes : envoyes seulement s'ils changent (un
+        // ancien type ou une ancienne classe hors liste n'est pas rejete ; le
+        // mandat n'est jamais envoye tant que la colonne manque).
+        const changed = (k: keyof FormState) => form[k] !== baseline[k];
         const result = await updateProperty(propertyId, {
+          property_type: changed("property_type") ? form.property_type : undefined,
+          mandate_type: mandateAvailable && changed("mandate_type") ? form.mandate_type || null : undefined,
           title_fr: form.title_fr,
           title_en: form.title_en,
           title_de: form.title_de,
@@ -434,8 +496,8 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
           has_dressing: form.has_dressing,
           has_pool: form.has_pool,
           parking: numOrNull("parking"),
-          energy: form.energy,
-          thermal: form.thermal,
+          energy: changed("energy") ? form.energy : undefined,
+          thermal: changed("thermal") ? form.thermal : undefined,
           ges: form.ges,
           year: numOrNull("year"),
           year_built: numOrNull("year_built"),
@@ -464,12 +526,75 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
   };
 
   return (
+    <FamilyContext.Provider value={typeFamily}>
     <form ref={formRef} onSubmit={onSave} className="space-y-5">
       {dirty && (
         <div className="sticky top-16 z-10 md:top-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 shadow-sm">
           {t("unsaved_banner")}
         </div>
       )}
+
+      <Section title={t("sec_type")} hint={t("hint_type")}>
+        <Field label={t("f_family")}>
+          <select
+            value={family}
+            onChange={(e) => {
+              const f = e.target.value as ListingFamily | "";
+              setFamily(f);
+              const types = LISTING_TYPES.filter((x) => x.family === f);
+              // Famille a un seul type (villa, terrain) : choisi d'office.
+              if (types.length === 1) set("property_type", types[0].slug);
+              else if (familyOf(form.property_type) !== f) set("property_type", legacyType ?? "");
+            }}
+            className={inputCls}
+          >
+            <option value="">{t("choose_type")}</option>
+            {LISTING_FAMILIES.map((f) => (
+              <option key={f} value={f}>
+                {t(`family_${f}`)}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label={t("f_listing_type")}>
+          <select
+            value={form.property_type}
+            onChange={(e) => set("property_type", e.target.value)}
+            disabled={!family}
+            className={`${inputCls} disabled:opacity-50`}
+          >
+            <option value="">{t("choose_type")}</option>
+            {legacyType && <option value={legacyType}>{t("type_legacy", { value: legacyType })}</option>}
+            {LISTING_TYPES.filter((x) => x.family === family).map((x) => (
+              <option key={x.slug} value={x.slug}>
+                {t(`ptype_${x.slug}`)}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label={t("f_mandate")} hint={mandateAvailable ? t("hint_mandate") : t("mandate_unavailable")} full>
+          <div role="radiogroup" aria-label={t("f_mandate")} className="flex flex-wrap gap-2" data-mandate-buttons>
+            {MANDATE_TYPES.map((m) => {
+              const active = form.mandate_type === m;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  disabled={!mandateAvailable}
+                  onClick={() => set("mandate_type", active ? "" : m)}
+                  className={`rounded-full border px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors disabled:opacity-50 ${
+                    active ? "border-[#3D4F63] bg-[#3D4F63] text-[#F5EFE1]" : "border-[#3D4F63]/30 text-[#3D4F63] hover:border-[#e0af6e]"
+                  }`}
+                >
+                  {t(`mandate_${m}`)}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+      </Section>
 
       <Section title={t("sec_descriptions")}>
         <div className="md:col-span-2" data-admin-translate>
@@ -569,25 +694,25 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         <Field label={t("f_surface")}>
           <input type="text" inputMode="decimal" value={form.surface} onChange={(e) => setDecimal("surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_living_surface")}>
+        <Field field="living_surface" label={t("f_living_surface")}>
           <input type="text" inputMode="decimal" value={form.living_surface} onChange={(e) => setDecimal("living_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_usable_surface")}>
+        <Field field="usable_surface" label={t("f_usable_surface")}>
           <input type="text" inputMode="decimal" value={form.usable_surface} onChange={(e) => setDecimal("usable_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_land_surface")}>
+        <Field field="land_surface" label={t("f_land_surface")}>
           <input type="text" inputMode="decimal" value={form.land_surface} onChange={(e) => setDecimal("land_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_terrace")}>
+        <Field field="terrace_surface" label={t("f_terrace")}>
           <input type="text" inputMode="decimal" value={form.terrace_surface} onChange={(e) => setDecimal("terrace_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_balcony")}>
+        <Field field="balcony_surface" label={t("f_balcony")}>
           <input type="text" inputMode="decimal" value={form.balcony_surface} onChange={(e) => setDecimal("balcony_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_garden")}>
+        <Field field="garden_surface" label={t("f_garden")}>
           <input type="text" inputMode="decimal" value={form.garden_surface} onChange={(e) => setDecimal("garden_surface", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_kitchen")}>
+        <Field field="kitchen_surface" label={t("f_kitchen")}>
           <input type="text" inputMode="decimal" value={form.kitchen_surface} onChange={(e) => setDecimal("kitchen_surface", e.target.value)} className={inputCls} />
         </Field>
         <Field label={t("f_area_total")}>
@@ -595,56 +720,56 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         </Field>
       </Section>
 
-      <Section title={t("sec_rooms")}>
-        <Field label={t("f_bedrooms")}>
+      <Section title={t("sec_rooms")} fields={["bedrooms", "bathrooms", "douches", "wc", "bureaux", "locaux_stockage", "floor"]}>
+        <Field field="bedrooms" label={t("f_bedrooms")}>
           <input type="number" min="0" step="1" value={form.bedrooms} onChange={(e) => set("bedrooms", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_bathrooms")}>
+        <Field field="bathrooms" label={t("f_bathrooms")}>
           <input type="number" min="0" step="1" value={form.bathrooms} onChange={(e) => set("bathrooms", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_showers")}>
+        <Field field="douches" label={t("f_showers")}>
           <input type="number" min="0" step="1" value={form.douches} onChange={(e) => set("douches", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_wc")}>
+        <Field field="wc" label={t("f_wc")}>
           <input type="number" min="0" step="1" value={form.wc} onChange={(e) => set("wc", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_offices")}>
+        <Field field="bureaux" label={t("f_offices")}>
           <input type="number" min="0" step="1" value={form.bureaux} onChange={(e) => set("bureaux", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_storage")}>
+        <Field field="locaux_stockage" label={t("f_storage")}>
           <input type="number" min="0" step="1" value={form.locaux_stockage} onChange={(e) => set("locaux_stockage", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_floor")} hint={t("hint_floor")}>
+        <Field field="floor" label={t("f_floor")} hint={t("hint_floor")}>
           <input value={form.floor} onChange={(e) => set("floor", e.target.value)} className={inputCls} />
         </Field>
       </Section>
 
-      <Section title={t("sec_equipment")}>
-        <Field label={t("f_laundry")}>
+      <Section title={t("sec_equipment")} fields={["has_laundry", "has_dressing", "has_pool", "parking"]}>
+        <Field field="has_laundry" label={t("f_laundry")}>
           <CheckboxField label={t("present_f")} checked={form.has_laundry} onChange={(v) => set("has_laundry", v)} />
         </Field>
-        <Field label={t("f_dressing")}>
+        <Field field="has_dressing" label={t("f_dressing")}>
           <CheckboxField label={t("present_m")} checked={form.has_dressing} onChange={(v) => set("has_dressing", v)} />
         </Field>
-        <Field label={t("f_pool")}>
+        <Field field="has_pool" label={t("f_pool")}>
           <CheckboxField label={t("present_f")} checked={form.has_pool} onChange={(v) => set("has_pool", v)} />
         </Field>
-        <Field label={t("f_parking")}>
+        <Field field="parking" label={t("f_parking")}>
           <input type="number" min="0" step="1" value={form.parking} onChange={(e) => set("parking", e.target.value)} className={inputCls} />
         </Field>
       </Section>
 
-      <Section title={t("sec_energy")}>
-        <Field label={t("f_energy")} hint={t("hint_energy")}>
-          <input value={form.energy} onChange={(e) => set("energy", e.target.value)} className={inputCls} />
+      <Section title={t("sec_energy")} fields={["energy", "thermal", "ges", "year"]}>
+        <Field field="energy" label={t("f_energy")} hint={t("hint_energy")}>
+          <EnergySelect value={form.energy} onChange={(v) => set("energy", v)} labelNone={t("energy_none")} labelLegacy={t("energy_legacy", { value: form.energy })} />
         </Field>
-        <Field label={t("f_thermal")}>
-          <input value={form.thermal} onChange={(e) => set("thermal", e.target.value)} className={inputCls} />
+        <Field field="thermal" label={t("f_thermal")}>
+          <EnergySelect value={form.thermal} onChange={(v) => set("thermal", v)} labelNone={t("energy_none")} labelLegacy={t("energy_legacy", { value: form.thermal })} />
         </Field>
-        <Field label={t("f_ges")}>
+        <Field field="ges" label={t("f_ges")}>
           <input value={form.ges} onChange={(e) => set("ges", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_year")}>
+        <Field field="year" label={t("f_year")}>
           <input type="number" min="1800" max="2100" step="1" value={form.year} onChange={(e) => set("year", e.target.value)} className={inputCls} />
         </Field>
       </Section>
@@ -676,10 +801,10 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         <Field label={t("f_amenities")} hint={t("hint_amenities")} full>
           <textarea rows={4} value={form.amenities} onChange={(e) => set("amenities", e.target.value)} className={textareaCls} />
         </Field>
-        <Field label={t("f_current_use")}>
+        <Field field="current_use" label={t("f_current_use")}>
           <input value={form.current_use} onChange={(e) => set("current_use", e.target.value)} className={inputCls} />
         </Field>
-        <Field label={t("f_potential_use")}>
+        <Field field="potential_use" label={t("f_potential_use")}>
           <input value={form.potential_use} onChange={(e) => set("potential_use", e.target.value)} className={inputCls} />
         </Field>
       </Section>
@@ -757,5 +882,6 @@ export function PropertyEditForm({ propertyId, initial }: Props) {
         {error && <span className="text-sm text-red-700">{t("error_prefix", { message: error })}</span>}
       </div>
     </form>
+    </FamilyContext.Provider>
   );
 }

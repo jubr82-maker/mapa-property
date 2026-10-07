@@ -66,9 +66,11 @@ assert.equal(getTypeGroup(null), null); ok("null → null");
 // ─── expandType — hiérarchie parent/enfants ───
 assert.deepEqual(
   expandType("appartement").sort(),
-  ["appartement", "studio", "penthouse", "loft", "duplex", "triplex"].sort(),
+  ["appartement", "studio", "penthouse", "loft", "duplex", "triplex", "rez-de-jardin"].sort(),
 );
-ok("expandType(appartement) = lui-même + 5 enfants");
+ok("expandType(appartement) = lui-même + 6 enfants (rez-de-jardin ajoute, oct. 2026)");
+assert.equal(matchesTypeQuery("maison-plain-pied", "maison"), true); ok("maison-plain-pied matche la requete large 'maison'");
+assert.equal(matchesTypeQuery("rez-de-jardin", "appartement"), true); ok("rez-de-jardin matche la requete large 'appartement'");
 assert.equal(expandType("penthouse").length, 1);
 assert.deepEqual(expandType("penthouse"), ["penthouse"]);
 ok("expandType(penthouse) = lui-même seul (type précis)");

@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 import { supabaseServer } from "./supabase-server";
 import { getLocalizedField } from "./i18n-field";
 import { publicCoverUrl, selectPublicImages } from "./property-images";
+import { effectiveBadge } from "./listing/families";
 import type {
   BlogPost,
   InterestRates,
@@ -100,13 +101,15 @@ export async function fetchHomeFeatured(
     "id,reference,title,title_en,title_de,city_anonymized,country,price_label,price_display,surface_habitable,chambres,cover_image_url,created_at,is_coup_de_coeur,status";
 
   const [apimoRes, offmarketRes] = await Promise.all([
-    sb
-      .from("properties")
-      .select("id,slug,title_fr,title_en,title_de,city,country,price,surface,bedrooms,created_at,badge,badge_size,badge_position,property_images(url,sort)")
-      .eq("is_published", true)
-      .eq("is_featured", true)
-      .order("created_at", { ascending: false })
-      .limit(limit),
+    withMandateColumn((extra) =>
+      sb
+        .from("properties")
+        .select(`id,slug,title_fr,title_en,title_de,city,country,price,surface,bedrooms,created_at,badge,badge_size,badge_position${extra},property_images(url,sort)`)
+        .eq("is_published", true)
+        .eq("is_featured", true)
+        .order("created_at", { ascending: false })
+        .limit(limit),
+    ),
     sb
       .from("properties_offmarket_public")
       .select(offmarketColsView)
@@ -138,6 +141,7 @@ export async function fetchHomeFeatured(
       | "bottom-left"
       | "bottom-right"
       | null;
+    mandate_type?: string | null;
     property_images: { url: string; sort: number | null }[] | null;
   };
   type OffmarketRow = {
@@ -174,7 +178,7 @@ export async function fetchHomeFeatured(
       surface: row.surface,
       bedrooms: row.bedrooms,
       created_at: row.created_at,
-      badge: row.badge,
+      badge: effectiveBadge(row.badge, row.mandate_type),
       badge_size: row.badge_size,
       badge_position: row.badge_position,
     };
@@ -232,6 +236,16 @@ export const PROPERTIES_LIST_TAG = "properties";
 const PROPERTY_CARD_COLUMNS =
   "id, slug, transaction, property_type, country, city, title_fr, title_en, title_de, price, surface, bedrooms, bathrooms, energy, badge, badge_size, badge_position, updated_at";
 
+// Type de mandat (SQL 16) : demande en plus des colonnes de la liste ; tant
+// que la colonne manque (PGRST204 / 42703), nouvel essai sans elle plutot
+// qu'une liste vide.
+const MISSING_COLUMN_CODES = new Set(["PGRST204", "42703"]);
+async function withMandateColumn<R extends { error: { code?: string } | null }>(run: (extra: string) => PromiseLike<R>): Promise<R> {
+  const first = await run(",mandate_type");
+  if (first.error && MISSING_COLUMN_CODES.has(first.error.code ?? "")) return run("");
+  return first;
+}
+
 /**
  * Sprint OPTIM-BIENS-1 — mise en cache (tag-only invalidation, comme
  * lib/site-content.ts) : sans ça, chaque changement de filtre sur /biens
@@ -243,10 +257,12 @@ const PROPERTY_CARD_COLUMNS =
 const fetchPropertiesWithCoverCached = unstable_cache(
   async (): Promise<PropertyWithCover[]> => {
     const sb = supabaseServer();
-    const { data, error } = await sb
-      .from("properties")
-      .select(`${PROPERTY_CARD_COLUMNS}, property_images(url, sort)`)
-      .eq("is_published", true);
+    const { data, error } = await withMandateColumn((extra) =>
+      sb
+        .from("properties")
+        .select(`${PROPERTY_CARD_COLUMNS}${extra}, property_images(url, sort)`)
+        .eq("is_published", true),
+    );
     if (error) {
       console.error("[data] fetchAllPropertiesWithCover", error.message);
       return [];
@@ -274,11 +290,13 @@ const fetchPropertiesWithCoverCached = unstable_cache(
       | "badge"
       | "badge_size"
       | "badge_position"
+      | "mandate_type"
     > & { property_images: { url: string; sort: number | null }[] | null };
-    return ((data as Row[] | null) ?? []).map(
+    return ((data as unknown as Row[] | null) ?? []).map(
       (row) =>
         ({
           ...row,
+          badge: effectiveBadge(row.badge, row.mandate_type),
           cover_url: publicCoverUrl(row.property_images),
         }) as unknown as PropertyWithCover,
     );

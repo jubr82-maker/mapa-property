@@ -41,6 +41,7 @@ import { ExploreLinks } from "@/components/seo/ExploreLinks";
 import { cityForPlace, featuredCities } from "@/lib/internal-links";
 import { siteShareImage } from "@/lib/og";
 import { transactionDetailLabel } from "@/lib/taxonomy/property-types";
+import { effectiveBadge } from "@/lib/listing/families";
 
 // Sprint OPTIM-1A : ISR 30 min (vs 60s avant). Les fiches biens changent
 // rarement (titre/description/prix edites depuis admin invalident deja
@@ -386,7 +387,7 @@ export default async function PropertyPage({
           actions={<PropertyActions propertyId={property.id} />}
           eyebrow={{
             lead: [property.country ?? "", property.city ?? ""],
-            accent: property.badge,
+            accent: effectiveBadge(property.badge, property.mandate_type),
           }}
           title={title}
           price={formattedPrice}

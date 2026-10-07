@@ -18,6 +18,7 @@ import {
 import { assertAdminAction, requireAdmin } from "@/lib/admin/require-admin";
 import { dbFailure, runAction, sessionFailure, type ActionResult as AdminActionResult } from "@/lib/admin/action-result";
 import { logAdminAction } from "@/lib/pilotage/audit";
+import { isEnergyClass, isListingType, isMandateType } from "@/lib/listing/families";
 import { sendAdminAlert } from "@/lib/pilotage/alerts";
 
 /** Libelles des messages renvoyes a l'ecran (admin_properties). */
@@ -145,6 +146,8 @@ export type UpdatePropertyResult = { ok: true } | { ok: false; error: string };
 export async function updateProperty(
   id: string,
   data: {
+    property_type?: string;
+    mandate_type?: string | null;
     title_fr?: string | null;
     title_en?: string | null;
     title_de?: string | null;
@@ -206,6 +209,29 @@ export async function updateProperty(
       return { ok: false, error: (await tProps())("err_title_required") };
     }
     update.title_fr = t;
+  }
+
+  // --- Type de bien et mandat (oct. 2026) : listes fermees
+  // (lib/listing/families.ts). Le mandat n'est envoye par la fiche que si
+  // la colonne existe (SQL 16).
+  if (data.property_type !== undefined) {
+    if (!isListingType(data.property_type)) {
+      return { ok: false, error: (await tProps())("err_listing_type_invalid") };
+    }
+    update.property_type = data.property_type;
+  }
+  if (data.mandate_type !== undefined) {
+    if (data.mandate_type !== null && !isMandateType(data.mandate_type)) {
+      return { ok: false, error: (await tProps())("err_mandate_invalid") };
+    }
+    update.mandate_type = data.mandate_type;
+  }
+  // Passeport energetique : classe A+ a I ou vide.
+  for (const key of ["energy", "thermal"] as const) {
+    const v = (data[key] ?? "").trim();
+    if (data[key] !== undefined && v !== "" && !isEnergyClass(v)) {
+      return { ok: false, error: (await tProps())("err_energy_invalid") };
+    }
   }
 
   const setText = (key: string, value: string | null | undefined) => {

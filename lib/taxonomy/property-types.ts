@@ -29,10 +29,12 @@ export const PROPERTY_TYPE_FAMILIES: PropertyTypeFamily[] = [
       { slug: "loft", label: "Loft" },
       { slug: "duplex", label: "Duplex" },
       { slug: "triplex", label: "Triplex" },
+      { slug: "rez-de-jardin", label: "Rez-de-jardin" },
       { slug: "maison", label: "Maison" },
       { slug: "maison-individuelle", label: "Maison individuelle" },
       { slug: "maison-jumelee", label: "Maison jumelée" },
       { slug: "maison-mitoyenne", label: "Maison mitoyenne" },
+      { slug: "maison-plain-pied", label: "Maison de plain-pied" },
       { slug: "villa", label: "Villa" },
       { slug: "chalet", label: "Chalet" },
       { slug: "maison-de-maitre", label: "Maison de maître" },
@@ -203,11 +205,12 @@ export function transactionDetailLabel(
 // non rattachés à MAISON) n'ont pas de hiérarchie : chaque type y reste
 // autonome.
 export const PARENT_TO_CHILDREN: Record<string, string[]> = {
-  appartement: ["studio", "penthouse", "loft", "duplex", "triplex"],
+  appartement: ["studio", "penthouse", "loft", "duplex", "triplex", "rez-de-jardin"],
   maison: [
     "maison-individuelle",
     "maison-jumelee",
     "maison-mitoyenne",
+    "maison-plain-pied",
     "villa",
     "chalet",
     "maison-de-maitre",

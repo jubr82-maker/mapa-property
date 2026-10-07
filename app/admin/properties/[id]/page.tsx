@@ -28,7 +28,7 @@ export default async function AdminPropertyEditPage({
     // sélectionnées à partir du littéral exact passé à .select() : une
     // concaténation ou un .join() runtime dégrade le type en GenericStringError.
     .select(
-      "id, slug, title_fr, title_en, title_de, description_fr, description_en, description_de, short_description_fr, short_description_en, short_description_de, price, price_on_demand, price_min, price_max, city, country, transaction, video_url, badge, badge_size, badge_position, surface, living_surface, usable_surface, land_surface, terrace_surface, balcony_surface, garden_surface, kitchen_surface, area_total, bedrooms, bathrooms, douches, wc, bureaux, locaux_stockage, floor, has_laundry, has_dressing, has_pool, parking, energy, thermal, ges, year, year_built, amenities, current_use, potential_use, status",
+      "id, slug, property_type, title_fr, title_en, title_de, description_fr, description_en, description_de, short_description_fr, short_description_en, short_description_de, price, price_on_demand, price_min, price_max, city, country, transaction, video_url, badge, badge_size, badge_position, surface, living_surface, usable_surface, land_surface, terrace_surface, balcony_surface, garden_surface, kitchen_surface, area_total, bedrooms, bathrooms, douches, wc, bureaux, locaux_stockage, floor, has_laundry, has_dressing, has_pool, parking, energy, thermal, ges, year, year_built, amenities, current_use, potential_use, status",
     )
     .eq("id", id)
     .maybeSingle();
@@ -37,6 +37,13 @@ export default async function AdminPropertyEditPage({
     console.error("[admin/properties/[id]] query error:", error);
   }
   if (!data) notFound();
+
+  // Type de mandat (oct. 2026) : colonne ajoutee par le SQL 16. Lue a part
+  // pour que la fiche reste editable tant que ce SQL n'est pas execute
+  // (colonne absente : boutons desactives, rien n'est envoye).
+  const mandateRes = await supabase.from("properties").select("mandate_type").eq("id", id).maybeSingle();
+  const mandateAvailable = !mandateRes.error;
+  const mandateType = mandateAvailable ? ((mandateRes.data as { mandate_type?: string | null } | null)?.mandate_type ?? null) : null;
 
   // Photos depuis la table `property_images` (schema
   // réel = table jointe, pas colonne jsonb). cover = sort 0.
@@ -110,7 +117,10 @@ export default async function AdminPropertyEditPage({
         </header>
         <PropertyEditForm
           propertyId={data.id}
+          mandateAvailable={mandateAvailable}
           initial={{
+            property_type: data.property_type ?? null,
+            mandate_type: mandateType,
             title_fr: data.title_fr ?? null,
             title_en: data.title_en ?? null,
             title_de: data.title_de ?? null,

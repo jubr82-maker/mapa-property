@@ -25,6 +25,9 @@ export interface Property {
   bedrooms: number | null;
   bathrooms: number | null;
   badge: string | null;
+  // Type de mandat (SQL 16, oct. 2026) : exclusive, semi_exclusive, simple,
+  // autonomous. Absent tant que la colonne n'existe pas.
+  mandate_type?: string | null;
   // Sprint badges commerciaux : libellé admin-driven (allowlist 6 valeurs
   // côté server action) + taille (S/M/L) + position (4 coins). Couleur
   // dérivée du libellé via mapping côté code (PropertyCard).

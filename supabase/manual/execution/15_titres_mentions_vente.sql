@@ -1,4 +1,9 @@
 -- =====================================================================
+-- ABANDONNE LE 2026-10-07 : NE PAS EXECUTER.
+-- Julien garde "a vendre" et "a louer" dans les titres ; les modeles
+-- d'annonces les placent de facon coherente. Fichier conserve pour
+-- memoire uniquement.
+-- =====================================================================
 -- 15 TITRES DES BIENS : RETRAIT DES MENTIONS "A VENDRE" EN TETE
 -- MAPA Property, prepare le 2026-10-06. MODIFIE public.properties
 -- (colonnes title_fr, title_en, title_de uniquement).
