@@ -992,7 +992,8 @@ section = "P. Admin sur telephone";
   check("blog : couverture affichable (https ou chemin du site), hote non optimise charge directement",
     displayableImageSrc("assets/x.jpg") === null && displayableImageSrc("http://a/b.jpg") === null && displayableImageSrc("https://a/b.jpg") === "https://a/b.jpg" &&
     isOptimizedImageSrc("https://dutfkblygfvhhwpzxmfz.supabase.co/storage/v1/object/public/blog-covers/a.webp") && !isOptimizedImageSrc("https://example.com/a.jpg") &&
-    ["app/[locale]/blog/page.tsx", "components/blog/BookletReader.tsx", "components/home/BlogTeaser.tsx"].every((f) => /unoptimized=\{!isOptimizedImageSrc/.test(read(f))));
+    ["app/[locale]/blog/page.tsx", "components/blog/BookletReader.tsx", "components/home/BlogTeaser.tsx"].every((f) => /<CoverImage/.test(read(f))) &&
+    /useState\(!isOptimizedImageSrc\(src\)\)/.test(read("components/blog/CoverImage.tsx")) && /unoptimized=\{direct\}/.test(read("components/blog/CoverImage.tsx")));
   const cleaned = sanitizeArticleForTest('<img data-src="https://a/b.jpg" src="data:image/gif;base64,R0"><img src="assets/c.jpg"><script>x</script>');
   check("blog : image du texte a chargement differe recuperee, image relative retiree, script retire", /src="https:\/\/a\/b\.jpg"/.test(cleaned) && !/assets\/c/.test(cleaned) && !/script/.test(cleaned));
   const sqlRead = read("supabase/manual/execution/11_blog_images_lecture.sql").replace(/--.*$/gm, "");

@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import { displayableImageSrc, isOptimizedImageSrc } from "@/lib/image-hosts";
+import { displayableImageSrc } from "@/lib/image-hosts";
+import { CoverImage } from "@/components/blog/CoverImage";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -72,15 +72,7 @@ export function BookletReader({
               // Perf oct. 2026 : next/image (AVIF/WebP redimensionne) au lieu
               // du fichier source plein format. Memes hotes que BlogTeaser.
               <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
-                <Image
-                  src={coverSrc}
-                  unoptimized={!isOptimizedImageSrc(coverSrc)}
-                  alt={title}
-                  fill
-                  priority
-                  sizes="(min-width: 768px) 768px, 100vw"
-                  className="object-cover"
-                />
+                <CoverImage src={coverSrc} alt={title} priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
               </div>
             )}
             <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft sm:text-[11px]">

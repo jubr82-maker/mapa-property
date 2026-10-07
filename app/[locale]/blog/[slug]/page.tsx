@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { sanitizeArticleHtml } from "@/lib/security/sanitize";
 import { brandedTitle, htmlToPlainText, metaDescription } from "@/lib/meta-text";
 import { siteShareImage } from "@/lib/og";
+import { displayableImageSrc } from "@/lib/image-hosts";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { fetchBlogPostBySlug } from "@/lib/data";
@@ -26,7 +27,8 @@ export async function generateMetadata({
   const description = metaDescription(
     post.meta_description ?? pickLang(post, "excerpt", locale as Locale),
   );
-  const shareImage = post.cover_image || siteShareImage();
+  // og:image : la couverture de l'article (adresse verifiee), sinon l'image du site.
+  const shareImage = displayableImageSrc(post.cover_image) ?? siteShareImage();
   return {
     // SEO oct. 2026 : certains meta_title en base finissent deja par
     // "| Mapa Property" ; brandedTitle retire tout suffixe de marque avant
@@ -74,7 +76,7 @@ export default async function BlogPostPage({
     title,
     description: excerpt || title,
     url: `${SITE_URL}/${locale}/blog/${post.slug}`,
-    image: post.cover_image ?? undefined,
+    image: displayableImageSrc(post.cover_image) ?? undefined,
     publishedAt: post.published_at,
     author: post.author,
   });
