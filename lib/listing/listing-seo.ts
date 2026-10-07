@@ -135,25 +135,40 @@ export function splitCommonMentions(html: string, markers: string[]): { body: st
   return { body: src.slice(0, cut), common: src.slice(cut) };
 }
 
-// Mots qui ne terminent jamais une description coupee.
-const DANGLING = /\s+(le|la|les|l'|de|du|des|d'|à|au|aux|en|dans|et|ou|sur|par|pour|avec|un|une|the|of|in|a|an|and|or|with|for|at|on|der|die|das|des|dem|den|im|in|von|und|oder|mit|ein|eine|zu|am)$/i;
+// Mots qui ne terminent jamais une description coupee : prepositions,
+// articles, conjonctions et participes des modeles (situe, construit...).
+const DANGLING = /\s+(le|la|les|l'|de|du|des|d'|à|au|aux|en|dans|et|ou|sur|par|pour|avec|un|une|ce|cet|cette|son|sa|ses|leur|situé|située|situés|situées|construit|construite|rénové|rénovée|the|of|in|a|an|and|or|with|for|at|on|this|its|located|built|renovated|der|die|das|des|dem|den|im|in|von|und|oder|mit|ein|eine|zu|am|diese|dieses|diesen|sein|seine|seinem|seinen|gelegen|erbaut|renoviert)$/i;
 
-function cutOnWord(text: string, max: number): string {
+/** Coupe sur un mot entier, sans preposition ni participe en fin de texte. */
+export function cutOnWord(text: string, max: number): string {
   if (text.length <= max) return text;
   const cut = text.slice(0, max + 1);
   const space = cut.lastIndexOf(" ");
   let out = (space > 0 ? cut.slice(0, space) : text.slice(0, max)).replace(/[\s,;:]+$/, "");
-  while (DANGLING.test(out)) out = out.replace(DANGLING, "");
-  return out.replace(/[\s,;:]+$/, "");
+  while (DANGLING.test(out)) out = out.replace(DANGLING, "").replace(/[\s,;:]+$/, "");
+  return out;
+}
+
+/** Phrases d'un texte (fin sur ".", "?" ou fin de paragraphe). */
+function sentences(text: string): string[] {
+  return text
+    .split(/\n{2,}/)
+    .map((x) => x.replace(/\s*\n\s*/g, " ").trim())
+    .filter(Boolean)
+    .flatMap((p) => p.match(/[^.?]+(?:[.?]+|$)/g) ?? [p])
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .map((x) => (/[.?]$/.test(x) ? x : `${x}.`));
 }
 
 /**
  * Meta description : premier paragraphe du corps de l'annonce (jamais la
  * signature, la cloture ni les mentions communes), completee par la
- * surface, les chambres et le prix ; 150 a 160 caracteres, coupee sur un
- * mot entier. Paragraphe trop long : les faits deja cites sont omis, puis
- * les propositions d'introduction ("MAPA Property a le plaisir de vous
- * presenter, en vente exclusive,") tombent une a une.
+ * surface, les chambres et le prix. Ne coupe JAMAIS une phrase : la
+ * description finit toujours sur une phrase complete, 160 caracteres au
+ * plus, 150 vises et 120 acceptes. Seule exception : une premiere phrase
+ * de plus de 160 caracteres est coupee sur un mot entier, sans preposition
+ * ni participe en fin de texte.
  */
 export function seoDescription(
   bodyHtml: string,
@@ -161,44 +176,21 @@ export function seoDescription(
   lang: ListingLang,
   ctx: { seo: ListingSeoVocab },
 ): string {
-  const paragraphs = htmlToText(bodyHtml)
-    .split(/\n{2,}/)
-    .map((x) => x.replace(/\s*\n\s*/g, " ").trim())
-    .filter(Boolean);
+  const list = sentences(htmlToText(bodyHtml));
   const surface = pos(p.living_surface) ? p.living_surface : pos(p.surface) ? p.surface : null;
   const priceText = !p.price_on_demand && pos(p.price) ? formatMoney(p.price, lang) + (p.transaction === "rent" ? ctx.seo.rent_suffix : "") : "";
-  const allFacts = [surface ? formatArea(surface, lang) : "", pos(p.bedrooms) ? plural(ctx.seo.bedrooms, p.bedrooms, String) : "", priceText].filter(Boolean);
-  const join = (base: string, facts: string[]) => {
-    const b = base.replace(/[\s.]+$/, "");
-    const f = facts.join(", ");
-    return b ? (f ? `${b}. ${f}.` : `${b}.`) : f ? `${f}.` : "";
-  };
-  const first = paragraphs[0] ?? "";
-  let text = join(first, allFacts);
-  if (text.length > META_MAX) {
-    const facts = allFacts.filter((f) => !first.includes(f));
-    let base = first;
-    text = join(base, facts);
-    // Allemand : la premiere proposition porte le verbe final ("...
-    // vorzustellen"), jamais retiree.
-    const clauses = lang === "de" ? [first] : first.split(/,\s+/);
-    for (let i = 1; text.length > META_MAX && i < clauses.length; i++) {
-      base = clauses.slice(i).join(", ");
-      base = base.charAt(0).toLocaleUpperCase(lang) + base.slice(1);
-      text = join(base, facts);
-    }
-    if (text.length > META_MAX) {
-      const room = META_MAX - (facts.length ? facts.join(", ").length + 3 : 1);
-      text = join(cutOnWord(base, room), facts);
-    }
-  }
-  // Trop court : complete par le paragraphe suivant du corps (sa premiere
-  // phrase si elle tient, sinon coupee sur un mot), une seule fois.
-  if (text.length < META_MIN && paragraphs.length > 1) {
-    const next = paragraphs[1];
-    const sentence = next.match(/^.*?[.?](\s|$)/)?.[0]?.trim() ?? next;
-    const whole = `${text} ${sentence}`;
-    text = whole.length <= META_MAX ? whole : cutOnWord(`${text} ${next}`, META_MAX);
+  const first = list[0] ?? "";
+  const facts = [surface ? formatArea(surface, lang) : "", pos(p.bedrooms) ? plural(ctx.seo.bedrooms, p.bedrooms, String) : "", priceText]
+    .filter(Boolean)
+    .filter((f) => !first.includes(f));
+  const factsSentence = facts.length ? `${facts.join(", ")}.` : "";
+  if (!first) return factsSentence;
+  if (first.length > META_MAX) return cutOnWord(first.replace(/[.?]$/, ""), META_MAX);
+  // Phrases entieres ajoutees tant qu'elles tiennent : faits, puis suite.
+  let text = first;
+  for (const next of [factsSentence, ...list.slice(1)].filter(Boolean)) {
+    if (text.length >= META_MIN) break;
+    if (`${text} ${next}`.length <= META_MAX) text = `${text} ${next}`;
   }
   return text;
 }

@@ -65,19 +65,47 @@ test("title : modele sans qualificatif, 60 caracteres vises, surface puis marque
   expect(seoTitle(empty, "fr", ctx("fr"))).toBe("Terrain à vendre | MAPA Property");
 });
 
-test("meta description : premier paragraphe et faits, 150 a 160 caracteres, jamais les mentions communes", () => {
+test("meta description : phrases entieres, 120 a 160 caracteres, jamais les mentions communes", () => {
   for (const l of ["fr", "en", "de"] as const) {
     const c = ctx(l);
     const { body, common } = splitCommonMentions(steinfortHtml(l), c.seo.common_start);
     expect(common).toContain("Real Estate Director");
     expect(body).not.toContain("Real Estate Director");
     const d = seoDescription(body, steinfort, l, c);
-    expect(d.length, `${l} : ${d}`).toBeGreaterThanOrEqual(META_MIN);
+    expect(d.length, `${l} : ${d}`).toBeGreaterThanOrEqual(120);
     expect(d.length, `${l} : ${d}`).toBeLessThanOrEqual(META_MAX);
+    expect(d, `${l} : finit sur une phrase complete`).toMatch(/[.?]$/);
     for (const forbidden of ["Julien Brebion", "reproduction", "Reproduction", "Vervielfältigung", "multilingue", "Multilingual", "Mehrsprachig", "Pour toute demande", "For any enquiry", "Für Anfragen"]) expect(d).not.toContain(forbidden);
-    expect(d).not.toMatch(/\s(le|la|de|du|dans|et|the|of|in|der|die|das|im|und)\.?$/i);
-    console.log(l, d.length, d);
   }
+});
+
+test("meta description du duplex de Steinfort (3 langues) : premiere phrase complete", () => {
+  const want = {
+    fr: "MAPA Property a le plaisir de vous présenter, en vente exclusive, ce superbe appartement duplex de 2 chambres situé dans le charmant village de Steinfort.",
+    en: "MAPA Property is pleased to present, for sale on an exclusive basis, this superb duplex apartment with 2 bedrooms located in the charming village of Steinfort.",
+    de: "MAPA Property freut sich, Ihnen im Exklusivverkauf diese schöne Maisonette-Wohnung mit 2 Schlafzimmern im charmanten Dorf Steinfort vorzustellen.",
+  } as const;
+  for (const l of ["fr", "en", "de"] as const) {
+    const c = ctx(l);
+    const { body } = splitCommonMentions(steinfortHtml(l), c.seo.common_start);
+    const d = seoDescription(body, steinfort, l, c);
+    // La phrase entiere, faits ajoutes seulement s'ils tiennent en entier.
+    expect(d.startsWith(want[l]), `${l} : ${d}`).toBe(true);
+    expect(d.length).toBeLessThanOrEqual(META_MAX);
+    expect(d).toMatch(/\.$/);
+  }
+});
+
+test("meta description : premiere phrase trop longue coupee sur un mot, sans participe ni preposition finale", () => {
+  const long = (l: Lang, t: string) => seoDescription(`<p>${t}</p><p>Seconde phrase.</p>`, { ...steinfort, bedrooms: null, surface: null, living_surface: null, price: null }, l, ctx(l));
+  const fr = long("fr", "MAPA Property a le plaisir de vous présenter, en vente exclusive, cette remarquable maison de maître entièrement restaurée avec ses dépendances et son parc arboré situé dans le quartier historique de Luxembourg.");
+  expect(fr.length).toBeLessThanOrEqual(META_MAX);
+  expect(fr).not.toMatch(/\s(le|la|les|de|du|des|dans|à|au|en|et|avec|son|situé|située|construit|rénové)$/i);
+  const en = long("en", "MAPA Property is pleased to present, for sale on an exclusive basis, this remarkable mansion house fully restored with its outbuildings and its wooded park located in the historic district of Luxembourg.");
+  expect(en).not.toMatch(/\s(the|of|in|with|and|located|built|its)$/i);
+  const de = long("de", "MAPA Property freut sich, Ihnen im Exklusivverkauf dieses bemerkenswerte vollständig restaurierte Herrenhaus mit seinen Nebengebäuden und seinem Park im historischen Viertel von Luxemburg vorzustellen.");
+  expect(de).not.toMatch(/\s(im|von|mit|und|der|die|das|gelegen|erbaut)$/i);
+  for (const d of [fr, en, de]) expect(d.length).toBeLessThanOrEqual(META_MAX);
 });
 
 test("mentions communes : bloc distinct a l'affichage, texte complet conserve en base", () => {
