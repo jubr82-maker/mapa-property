@@ -502,7 +502,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
       lang: l,
       title: seoTitle(sp, l, { ...c, fallbackType }),
       url: `mapaproperty.lu/${l}${propertyPath(sp, l, c.types, c.seo, fallbackType)}`,
-      description: seoMetaDescription(listingCols, listingData, l, { vocab: listing.models[l].vocab, seo: c.seo, fallbackType }),
+      description: seoMetaDescription(JSON.parse(colsKey) as ListingColumns, listingData, l, { vocab: listing.models[l].vocab, seo: c.seo, fallbackType }),
       manual: listingData.written[l].seo_description.trim().length > 0,
       words,
     };
