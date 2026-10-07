@@ -99,6 +99,5 @@ LISTING WRITING RULES (mandatory, they override any stylistic habit):
 - No exclamation mark. No decorative capitals in titles (sentence case, proper nouns excepted).
 - Never use these phrases, nor their inflected forms: ${list}.
 - Never use ${bare} without a direct object.
-- Never chain three adjectives in a row (e.g. "bright, spacious and warm").
 - Keep the exact line structure: each "- " list line stays a "- " list line.${french}`;
 }

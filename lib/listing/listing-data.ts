@@ -17,6 +17,8 @@ export const CONSTRUCTION_TYPES = ["massive", "wood", "prefab", "passive", "low_
 export const ORIENTATIONS = ["n", "ne", "e", "se", "s", "sw", "w", "nw"] as const;
 export const HERITAGE_TYPES = ["national", "communal"] as const;
 export const SERVICING_TYPES = ["full", "partial", "none"] as const;
+/** Formule de situation de la premiere phrase ("custom" : saisie libre par langue). */
+export const LOCATION_FORMULAS = ["a", "village", "coeur", "quartier", "centre", "custom"] as const;
 
 /** Textes generes automatiquement tant que Julien ne les a pas modifies. */
 export const AUTO_KEYS = ["title_fr", "title_en", "title_de", "description_fr", "description_en", "description_de"] as const;
@@ -52,6 +54,7 @@ export type ListingFacts = {
   deposit_months?: number | null;
   available_now?: boolean;
   available_from?: string | null;
+  location_formula?: (typeof LOCATION_FORMULAS)[number] | null;
 };
 
 export type ListingWritten = {
@@ -61,6 +64,7 @@ export type ListingWritten = {
   history: string;
   view: string;
   affectation: string;
+  location_custom: string;
 };
 
 export type ListingData = {
@@ -71,9 +75,9 @@ export type ListingData = {
   auto: Partial<Record<AutoKey, boolean>>;
 };
 
-export const WRITTEN_KEYS = ["qualifier", "ambiance", "highlights", "history", "view", "affectation"] as const;
+export const WRITTEN_KEYS = ["qualifier", "ambiance", "highlights", "history", "view", "affectation", "location_custom"] as const;
 
-const emptyWritten = (): ListingWritten => ({ qualifier: "", ambiance: "", highlights: "", history: "", view: "", affectation: "" });
+const emptyWritten = (): ListingWritten => ({ qualifier: "", ambiance: "", highlights: "", history: "", view: "", affectation: "", location_custom: "" });
 
 export function emptyListingData(): ListingData {
   return { v: 1, written: { fr: emptyWritten(), en: emptyWritten(), de: emptyWritten() }, levels: [], facts: {}, auto: {} };
@@ -132,6 +136,7 @@ export function sanitizeListingData(input: unknown): ListingData {
       history: str(src.history, 1500),
       view: str(src.view, 200),
       affectation: str(src.affectation, 200),
+      location_custom: str(src.location_custom, 120),
     };
   }
   const levels = Array.isArray(o.levels) ? o.levels.slice(0, MAX_LEVELS) : [];
@@ -174,6 +179,7 @@ export function sanitizeListingData(input: unknown): ListingData {
     rent_charges: dec(f.rent_charges, 0, 1_000_000),
     deposit_months: int(f.deposit_months, 0, 24),
     available_now: bool(f.available_now),
+    location_formula: oneOf(f.location_formula, LOCATION_FORMULAS),
     available_from: typeof f.available_from === "string" && /^\d{4}-\d{2}-\d{2}$/.test(f.available_from) ? f.available_from : null,
   };
   out.facts = facts;

@@ -4024,7 +4024,7 @@
   },
   "listing_model": {
     "title": "{{titre_bien}}[[ {{chambres_titre}}]] {{a_vendre}}[[ à {{commune}}]]",
-    "tronc": "MAPA Property a le plaisir de vous présenter, {{formule}}, {{ce_bien}}[[ de {{chambres}}]][[ {{situe}} à {{commune}}]].\n\n[[[[{{construit}} en {{annee_construction}}[[ et {{renove}} en {{annee_renovation}}]], ]]{{ce_type}} {{ambiance}}.]]\n\n[[{{histoire}}]]\n\n[[[[Avec une surface habitable de {{surface_habitable}}, ]]{{il}} se compose comme suit :\n{{pieces}}]]\n\n[[{{prestations}}]]\n\n[[Les atouts de ce bien :\n{{atouts}}]]\n{{#location}}\n[[Conditions de location :\n[[- Loyer mensuel : {{loyer}}]]\n[[- Charges mensuelles : {{charges_location}}]]\n[[- Garantie locative : {{garantie}}]]\n[[- Disponibilité : {{disponibilite}}]]]]{{/location}}\n\n{{#exclusif}}Une exclusivité MAPA Property.{{/exclusif}}\n\nPour toute demande, contactez-nous depuis le bouton ci-dessous.\n\nJulien Brebion, Real Estate Director & Exclusive Sourcing Specialist\nMAPA Property, une marque de MAPA Synergy Sàrl\n\nVous souhaitez vendre ou louer votre bien ? Profitez de notre estimation gratuite et de l'expertise de MAPA Property pour un accompagnement personnalisé. Contactez-nous dès aujourd'hui pour concrétiser vos projets immobiliers en toute confiance.\n\nService multilingue : luxembourgeois, français, anglais, allemand et italien.\n{{#exclusif}}\nAnnonce diffusée {{diffusion}} par MAPA Property.{{/exclusif}}\n\nToute reproduction ou diffusion, totale ou partielle, sans autorisation est interdite.",
+    "tronc": "MAPA Property a le plaisir de vous présenter, {{formule}}, {{ce_bien}}[[ de {{chambres}}]][[ {{situe}} {{lieu}}]].\n\n[[[[{{construit}} en {{annee_construction}}[[ et {{renove}} en {{annee_renovation}}]], ]]{{ce_type}} {{ambiance}}.]]\n\n[[{{histoire}}]]\n\n[[[[Avec une surface habitable de {{surface_habitable}}, ]]{{il}} se compose comme suit :\n{{pieces}}]]\n\n[[{{prestations}}]]\n\n[[Les atouts de ce bien :\n{{atouts}}]]\n{{#location}}\n[[Conditions de location :\n[[- Loyer mensuel : {{loyer}}]]\n[[- Charges mensuelles : {{charges_location}}]]\n[[- Garantie locative : {{garantie}}]]\n[[- Disponibilité : {{disponibilite}}]]]]{{/location}}\n\n{{#exclusif}}Une exclusivité MAPA Property.{{/exclusif}}\n\nPour toute demande, contactez-nous depuis le bouton ci-dessous.\n\nJulien Brebion, Real Estate Director & Exclusive Sourcing Specialist\nMAPA Property, une marque de MAPA Synergy Sàrl\n\nVous souhaitez vendre ou louer votre bien ? Profitez de notre estimation gratuite et de l'expertise de MAPA Property pour un accompagnement personnalisé. Contactez-nous dès aujourd'hui pour concrétiser vos projets immobiliers en toute confiance.\n\nService multilingue : luxembourgeois, français, anglais, allemand et italien.\n{{#exclusif}}\nAnnonce diffusée {{diffusion}} par MAPA Property.{{/exclusif}}\n\nToute reproduction ou diffusion, totale ou partielle, sans autorisation est interdite.",
     "blocks": {
       "appartement": "[[Les prestations complémentaires :\n[[- {{etage}}]]\n[[- Immeuble de {{niveaux_immeuble}}]]\n[[- {{ascenseur}}]]\n[[- Terrasse de {{surface_terrasse}}]]\n[[- Balcon de {{surface_balcon}}]]\n[[- Jardin privatif de {{surface_jardin}}]]\n[[- {{cave}}]]\n[[- {{stationnement_interieur}}]]\n[[- {{stationnement_exterieur}}]]\n[[- {{stationnement}}]]\n[[- Charges de copropriété mensuelles actuelles : {{charges}}]]]]",
       "penthouse": "[[Les prestations complémentaires :\n[[- {{dernier_etage}}]]\n{{^dernier_etage}}[[- {{etage}}]]{{/dernier_etage}}\n[[- Terrasse panoramique de {{surface_terrasse}}]]\n[[- {{vue}}]]\n[[- {{ascenseur_privatif}}]]\n{{^ascenseur_privatif}}[[- {{ascenseur}}]]{{/ascenseur_privatif}}\n[[- Immeuble de {{niveaux_immeuble}}]]\n[[- {{cave}}]]\n[[- {{stationnement_interieur}}]]\n[[- {{stationnement_exterieur}}]]\n[[- {{stationnement}}]]\n[[- Charges de copropriété mensuelles actuelles : {{charges}}]]]]",
@@ -4161,6 +4161,13 @@
         "full": "Terrain viabilisé",
         "partial": "Terrain partiellement viabilisé",
         "none": "Terrain non viabilisé"
+      },
+      "location": {
+        "a": "à {commune}",
+        "village": "dans le charmant village de {commune}",
+        "coeur": "au cœur de {commune}",
+        "quartier": "dans le quartier de {commune}",
+        "centre": "en plein centre de {commune}"
       }
     },
     "sample": {
@@ -4239,7 +4246,7 @@
     "lang_de": "Allemand",
     "written_title": "Champs rédigés ({lang})",
     "f_qualifier": "Qualificatif",
-    "hint_qualifier_fr": "Au masculin singulier, par exemple « superbe », « beau » ou « élégant » : l'accord se fait selon le type (cette élégante villa, ce bel appartement).",
+    "hint_qualifier_fr": "Au masculin singulier. Superbe, beau, élégant, rare, charmant, magnifique, joli, grand, petit et vaste se placent avant le nom (ce bel appartement) ; les autres après (cette villa lumineuse). L'accord se fait selon le type.",
     "hint_qualifier_en": "Par exemple « superb » ou « elegant ».",
     "hint_qualifier_de": "Forme de base, par exemple « schön » ou « elegant » : la terminaison se fait selon le type (diese schöne Villa, dieses schöne Haus).",
     "f_ambiance": "Phrase d'ambiance",
@@ -4432,7 +4439,6 @@
     "chk_title_case": "majuscules décoratives dans le titre ({excerpt}) : seules la première lettre et les noms propres prennent une majuscule.",
     "chk_forbidden": "formule interdite « {excerpt} » : reformulez sans elle.",
     "chk_bare_verb": "« {excerpt} » sans complément : dites ce qu'il y a à découvrir, ou retirez le verbe.",
-    "chk_three_adjectives": "trois adjectifs à la suite « {excerpt} » : gardez-en deux au plus.",
     "chk_apostrophes": "deux types d'apostrophe (droite et typographique) près de « {excerpt} » : n'en gardez qu'un dans tout le texte.",
     "chk_space_before": "espace manquante avant « : », « ; » ou « ? » dans « {excerpt} ».",
     "chk_amount": "montant mal écrit dans « {excerpt} » : écrivez par exemple « 1 200 000 € » (espaces entre les milliers, espace avant €).",
@@ -4454,7 +4460,18 @@
     "key_search_delai": "Délai souhaité",
     "key_search_criteres": "Critères rédigés, en liste",
     "tpl_part_search_title": "Recherches : titre",
-    "tpl_part_search": "Recherches : texte"
+    "tpl_part_search": "Recherches : texte",
+    "f_location_formula": "Formule de situation",
+    "hint_location_formula": "Utilisée dans la première phrase, devant la commune, et traduite dans les trois langues.",
+    "location_a": "à (commune)",
+    "location_village": "dans le charmant village de",
+    "location_coeur": "au cœur de",
+    "location_quartier": "dans le quartier de",
+    "location_centre": "en plein centre de",
+    "location_custom": "Saisie libre",
+    "f_location_custom": "Formule libre ({lang})",
+    "hint_location_custom": "Texte placé devant le nom de la commune, par exemple « à deux pas du centre de ». Vide : « à ».",
+    "key_lieu": "Formule de situation et commune (dans le charmant village de Steinfort)"
   },
   "searches_page": {
     "eyebrow": "Acheter avec MAPA Property",

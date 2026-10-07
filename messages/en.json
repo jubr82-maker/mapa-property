@@ -4024,7 +4024,7 @@
   },
   "listing_model": {
     "title": "{{qualificatif}}[[ {{chambres_titre}}]] {{bien}} {{a_vendre}}[[ in {{commune}}]]",
-    "tronc": "MAPA Property is pleased to present, {{formule}}, {{ce_bien}}[[ with {{chambres}}]][[ {{situe}} in {{commune}}]].\n\n[[[[{{construit}} in {{annee_construction}}[[ and {{renove}} in {{annee_renovation}}]], ]]{{ce_type}} {{ambiance}}.]]\n\n[[{{histoire}}]]\n\n[[[[With a living area of {{surface_habitable}}, ]]{{il}} comprises the following:\n{{pieces}}]]\n\n[[{{prestations}}]]\n\n[[Key strengths of this property:\n{{atouts}}]]\n{{#location}}\n[[Rental terms:\n[[- Monthly rent: {{loyer}}]]\n[[- Monthly charges: {{charges_location}}]]\n[[- Rental deposit: {{garantie}}]]\n[[- Availability: {{disponibilite}}]]]]{{/location}}\n\n{{#exclusif}}A MAPA Property exclusive.{{/exclusif}}\n\nFor any enquiry, contact us using the button below.\n\nJulien Brebion, Real Estate Director & Exclusive Sourcing Specialist\nMAPA Property, a brand of MAPA Synergy Sàrl\n\nWould you like to sell or rent your property? Take advantage of our free valuation and MAPA Property's expertise for personalised support. Contact us today to bring your property plans to life with complete confidence.\n\nMultilingual service: Luxembourgish, French, English, German and Italian.\n{{#exclusif}}\nListing published {{diffusion}} by MAPA Property.{{/exclusif}}\n\nAny reproduction or distribution, in whole or in part, without authorisation is prohibited.",
+    "tronc": "MAPA Property is pleased to present, {{formule}}, {{ce_bien}}[[ with {{chambres}}]][[ {{situe}} {{lieu}}]].\n\n[[[[{{construit}} in {{annee_construction}}[[ and {{renove}} in {{annee_renovation}}]], ]]{{ce_type}} {{ambiance}}.]]\n\n[[{{histoire}}]]\n\n[[[[With a living area of {{surface_habitable}}, ]]{{il}} comprises the following:\n{{pieces}}]]\n\n[[{{prestations}}]]\n\n[[Key strengths of this property:\n{{atouts}}]]\n{{#location}}\n[[Rental terms:\n[[- Monthly rent: {{loyer}}]]\n[[- Monthly charges: {{charges_location}}]]\n[[- Rental deposit: {{garantie}}]]\n[[- Availability: {{disponibilite}}]]]]{{/location}}\n\n{{#exclusif}}A MAPA Property exclusive.{{/exclusif}}\n\nFor any enquiry, contact us using the button below.\n\nJulien Brebion, Real Estate Director & Exclusive Sourcing Specialist\nMAPA Property, a brand of MAPA Synergy Sàrl\n\nWould you like to sell or rent your property? Take advantage of our free valuation and MAPA Property's expertise for personalised support. Contact us today to bring your property plans to life with complete confidence.\n\nMultilingual service: Luxembourgish, French, English, German and Italian.\n{{#exclusif}}\nListing published {{diffusion}} by MAPA Property.{{/exclusif}}\n\nAny reproduction or distribution, in whole or in part, without authorisation is prohibited.",
     "blocks": {
       "appartement": "[[Additional features:\n[[- {{etage}}]]\n[[- Building with {{niveaux_immeuble}}]]\n[[- {{ascenseur}}]]\n[[- {{surface_terrasse}} terrace]]\n[[- {{surface_balcon}} balcony]]\n[[- {{surface_jardin}} private garden]]\n[[- {{cave}}]]\n[[- {{stationnement_interieur}}]]\n[[- {{stationnement_exterieur}}]]\n[[- {{stationnement}}]]\n[[- Current monthly service charges: {{charges}}]]]]",
       "penthouse": "[[Additional features:\n[[- {{dernier_etage}}]]\n{{^dernier_etage}}[[- {{etage}}]]{{/dernier_etage}}\n[[- {{surface_terrasse}} panoramic terrace]]\n[[- {{vue}}]]\n[[- {{ascenseur_privatif}}]]\n{{^ascenseur_privatif}}[[- {{ascenseur}}]]{{/ascenseur_privatif}}\n[[- Building with {{niveaux_immeuble}}]]\n[[- {{cave}}]]\n[[- {{stationnement_interieur}}]]\n[[- {{stationnement_exterieur}}]]\n[[- {{stationnement}}]]\n[[- Current monthly service charges: {{charges}}]]]]",
@@ -4161,6 +4161,13 @@
         "full": "Fully serviced plot",
         "partial": "Partially serviced plot",
         "none": "Unserviced plot"
+      },
+      "location": {
+        "a": "in {commune}",
+        "village": "in the charming village of {commune}",
+        "coeur": "in the heart of {commune}",
+        "quartier": "in the {commune} district",
+        "centre": "right in the centre of {commune}"
       }
     },
     "sample": {
@@ -4239,7 +4246,7 @@
     "lang_de": "German",
     "written_title": "Written fields ({lang})",
     "f_qualifier": "Qualifier",
-    "hint_qualifier_fr": "Masculine singular, e.g. \"superbe\", \"beau\" or \"élégant\".",
+    "hint_qualifier_fr": "Masculine singular. Superbe, beau, élégant, rare, charmant, magnifique, joli, grand, petit and vaste go before the noun; all others after it. Agreement follows the type.",
     "hint_qualifier_en": "For example \"superb\" or \"elegant\".",
     "hint_qualifier_de": "Base form, e.g. \"schön\" or \"elegant\": the ending follows the type.",
     "f_ambiance": "Ambiance sentence",
@@ -4432,7 +4439,6 @@
     "chk_title_case": "decorative capitals in the title ({excerpt}): only the first letter and proper nouns take a capital.",
     "chk_forbidden": "forbidden phrase \"{excerpt}\": rephrase without it.",
     "chk_bare_verb": "\"{excerpt}\" without an object: say what there is to discover, or remove the verb.",
-    "chk_three_adjectives": "three adjectives in a row \"{excerpt}\": keep two at most.",
     "chk_apostrophes": "two apostrophe types (straight and curly) near \"{excerpt}\": keep only one in the whole text.",
     "chk_space_before": "missing space before \":\", \";\" or \"?\" in \"{excerpt}\" (French typography).",
     "chk_amount": "amount written incorrectly in \"{excerpt}\": write e.g. \"1 200 000 €\" (French typography).",
@@ -4454,7 +4460,18 @@
     "key_search_delai": "Preferred timing",
     "key_search_criteres": "Written criteria, as a list",
     "tpl_part_search_title": "Searches: title",
-    "tpl_part_search": "Searches: text"
+    "tpl_part_search": "Searches: text",
+    "f_location_formula": "Location wording",
+    "hint_location_formula": "Used in the first sentence, before the municipality, and translated into the three languages.",
+    "location_a": "in (municipality)",
+    "location_village": "in the charming village of",
+    "location_coeur": "in the heart of",
+    "location_quartier": "in the district of",
+    "location_centre": "right in the centre of",
+    "location_custom": "Free text",
+    "f_location_custom": "Free wording ({lang})",
+    "hint_location_custom": "Text placed before the municipality name, e.g. \"a short walk from the centre of\". Empty: \"in\".",
+    "key_lieu": "Location wording and municipality"
   },
   "searches_page": {
     "eyebrow": "Buy with MAPA Property",

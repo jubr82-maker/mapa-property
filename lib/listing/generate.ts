@@ -16,6 +16,7 @@ import {
   formatMoney,
   formatNumber,
   frDemonstrative,
+  frIsPrenominal,
   frQualifier,
   ordinal,
   parseTypeNoun,
@@ -43,6 +44,7 @@ export type ListingVocab = {
   orientation: Record<string, string>;
   heritage: Record<string, string>;
   servicing: Record<string, string>;
+  location: Record<string, string>;
 };
 
 /** Modele d'une langue : titre, tronc commun et blocs par famille. */
@@ -126,8 +128,11 @@ function nounPhrase(type: TypeNoun, lang: ListingLang, qualifier: string, mode: 
     return parts.filter(Boolean).join(" ");
   }
   if (lang === "fr") {
-    const q = qualifier && mode !== "bare" ? frQualifier(qualifier, type.gender, type.noun) : "";
-    return [q, type.noun].filter(Boolean).join(" ");
+    if (!qualifier || mode === "bare") return type.noun;
+    // Usage francais : superbe, beau, elegant... avant le nom ; les autres
+    // (lumineux, spacieux, renove...) apres ("cet appartement lumineux").
+    if (frIsPrenominal(qualifier)) return `${frQualifier(qualifier, type.gender, type.noun)} ${type.noun}`;
+    return `${type.noun} ${frQualifier(qualifier, type.gender, "")}`;
   }
   const q = qualifier && mode !== "bare" ? qualifier.trim().toLocaleLowerCase("en") : "";
   return [q, type.noun].filter(Boolean).join(" ");
@@ -136,6 +141,19 @@ function nounPhrase(type: TypeNoun, lang: ListingLang, qualifier: string, mode: 
 function demonstrative(type: TypeNoun, lang: ListingLang, phrase: string, forms: ListingVocab["det"]): string {
   if (lang === "fr") return frDemonstrative(type.gender, phrase.split(/\s+/)[0] ?? "", forms);
   return forms[type.gender];
+}
+
+/**
+ * Formule de situation et commune : "a Steinfort", "dans le charmant
+ * village de Steinfort", "au coeur d'Esch" (elision), ou saisie libre.
+ */
+export function situation(city: string, formula: string | null, custom: string, lang: ListingLang, vocab: ListingVocab): string {
+  if (!city) return "";
+  const free = custom.trim();
+  const pattern = formula === "custom" ? (free ? `${free} {commune}` : vocab.location.a) : vocab.location[formula ?? "a"] ?? vocab.location.a;
+  let out = (pattern ?? "").replace("{commune}", city);
+  if (lang === "fr") out = out.replace(/(^|\s)de (?=[aeiouyàâäéèêëîïôöùûüh])/giu, "$1d'");
+  return out;
 }
 
 /** Valeurs et drapeaux du modele pour une langue. */
@@ -183,6 +201,7 @@ export function listingValues(
     diffusion: rent ? vocab.diffusion.rent : vocab.diffusion.sale,
     a_vendre: rent ? vocab.title_tx.rent : vocab.title_tx.sale,
     commune: (cols.city ?? "").trim(),
+    lieu: situation((cols.city ?? "").trim(), f.location_formula ?? null, w.location_custom, lang, vocab),
     // Chiffres du tronc
     chambres: bedrooms ? plural(vocab.count.bedrooms, bedrooms, num) : "",
     chambres_titre: bedrooms ? plural(vocab.count.bedrooms_title, bedrooms, num) : "",

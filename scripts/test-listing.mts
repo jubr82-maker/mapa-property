@@ -285,6 +285,82 @@ test("accords francais : ce, cet, cette, bel, situe, construite", () => {
   assert.equal(frFeminine("exceptionnel"), "exceptionnelle");
   assert.equal(frQualifier("très beau", "m", "appartement"), "très bel");
 });
+test("place du qualificatif : usage francais (avant ou apres le nom)", () => {
+  const q = (qualifier: string, property_type: string) => {
+    const d = emptyListingData();
+    d.written.fr = { ...d.written.fr, qualifier, ambiance: "offre de beaux volumes" };
+    return gen("fr", { property_type, mandate_type: "simple" }, d);
+  };
+  // Avant le nom.
+  assert.ok(q("superbe", "villa").text.includes("cette superbe villa de 2 chambres"));
+  assert.ok(q("beau", "appartement").text.includes("ce bel appartement"));
+  assert.ok(q("beau", "chateau").text.includes("ce beau château"));
+  assert.ok(q("beau", "villa").text.includes("cette belle villa"));
+  assert.ok(q("élégant", "maison-de-maitre").text.includes("cette élégante maison de maître"));
+  assert.ok(q("rare", "propriete-domaine").text.includes("ce rare domaine"));
+  assert.ok(q("charmant", "maison-mitoyenne").text.includes("cette charmante maison mitoyenne"));
+  assert.ok(q("magnifique", "penthouse").text.includes("ce magnifique penthouse"));
+  assert.ok(q("joli", "studio").text.includes("ce joli studio"));
+  assert.ok(q("grand", "appartement").text.includes("ce grand appartement"));
+  assert.ok(q("petit", "maison-individuelle").text.includes("cette petite maison individuelle"));
+  assert.ok(q("vaste", "terrain").text.includes("ce vaste terrain"));
+  assert.ok(q("très beau", "appartement").text.includes("ce très bel appartement"));
+  // Apres le nom, accorde.
+  assert.ok(q("lumineux", "appartement").text.includes("cet appartement lumineux de 2 chambres"));
+  assert.ok(q("lumineux", "villa").text.includes("cette villa lumineuse de 2 chambres"));
+  assert.ok(q("spacieux", "maison-jumelee").text.includes("cette maison jumelée spacieuse"));
+  assert.ok(q("rénové", "duplex").text.includes("cet appartement duplex rénové"));
+  assert.ok(q("contemporain", "villa").text.includes("cette villa contemporaine"));
+  assert.ok(q("moderne", "bureau").text.includes("ce bureau moderne"));
+  assert.ok(q("entièrement rénové", "maison-individuelle").text.includes("cette maison individuelle entièrement rénovée"));
+  // Titres.
+  assert.equal(q("lumineux", "appartement").title, "Appartement lumineux 2 chambres à vendre à Steinfort");
+  assert.equal(q("contemporain", "villa").title, "Villa contemporaine 2 chambres à vendre à Steinfort");
+  assert.equal(q("superbe", "duplex").title, "Superbe appartement duplex 2 chambres à vendre à Steinfort");
+});
+test("place du qualificatif : anglais et allemand toujours avant le nom", () => {
+  const d = emptyListingData();
+  d.written.en = { ...d.written.en, qualifier: "bright", ambiance: "offers good volumes" };
+  d.written.de = { ...d.written.de, qualifier: "hell", ambiance: "bietet viel Platz" };
+  assert.ok(gen("en", { property_type: "appartement" }, d).text.includes("this bright apartment with 2 bedrooms"));
+  assert.equal(gen("en", { property_type: "appartement" }, d).title, "Bright 2-bedroom apartment for sale in Steinfort");
+  d.written.en.qualifier = "renovated";
+  assert.ok(gen("en", { property_type: "villa" }, d).text.includes("this renovated villa"));
+  assert.ok(gen("de", { property_type: "appartement" }, d).text.includes("diese helle Wohnung mit 2 Schlafzimmern"));
+  assert.ok(gen("de", { property_type: "maison-plain-pied" }, d).text.includes("diesen hellen Bungalow"));
+  d.written.de.qualifier = "modern";
+  assert.ok(gen("de", { property_type: "maison-individuelle" }, d).text.includes("dieses moderne freistehende Haus"));
+  assert.equal(gen("de", { property_type: "maison-individuelle" }, d).title, "Modernes freistehendes Haus mit 2 Schlafzimmern zu verkaufen in Steinfort");
+});
+test("formule de situation : choix, saisie libre, 3 langues, elision", () => {
+  const with_ = (formula: string, custom: Record<string, string> = {}, city = "Steinfort") => {
+    const d = emptyListingData();
+    d.facts = { location_formula: formula as never };
+    for (const l of ["fr", "en", "de"] as const) d.written[l].location_custom = custom[l] ?? "";
+    return { fr: gen("fr", { city }, d).text.split("\n")[0], en: gen("en", { city }, d).text.split("\n")[0], de: gen("de", { city }, d).text.split("\n")[0] };
+  };
+  const v = with_("village");
+  assert.ok(v.fr.endsWith("de 2 chambres situé dans le charmant village de Steinfort."), v.fr);
+  assert.ok(v.en.endsWith("with 2 bedrooms located in the charming village of Steinfort."), v.en);
+  assert.ok(v.de.includes("mit 2 Schlafzimmern im charmanten Dorf Steinfort vorzustellen."), v.de);
+  assert.ok(with_("a").fr.endsWith("situé à Steinfort."));
+  assert.ok(with_("coeur", {}, "Esch-sur-Alzette").fr.endsWith("situé au cœur d'Esch-sur-Alzette."), "elision");
+  assert.ok(with_("quartier", {}, "Belair").fr.endsWith("situé dans le quartier de Belair."));
+  assert.ok(with_("quartier", {}, "Belair").en.endsWith("located in the Belair district."));
+  assert.ok(with_("centre", {}, "Luxembourg").de.includes("mitten im Zentrum von Luxembourg vorzustellen."));
+  const c = with_("custom", { fr: "à deux pas du centre de", en: "a short walk from the centre of", de: "wenige Schritte vom Zentrum von" });
+  assert.ok(c.fr.endsWith("situé à deux pas du centre de Steinfort."), c.fr);
+  assert.ok(c.en.endsWith("located a short walk from the centre of Steinfort."));
+  assert.ok(c.de.includes("wenige Schritte vom Zentrum von Steinfort vorzustellen."));
+  assert.ok(with_("custom").fr.endsWith("situé à Steinfort."), "saisie libre vide : à");
+  assert.ok(!with_("village", {}, "").fr.includes("village"), "sans commune : formule retiree");
+  for (const l of ["fr", "en", "de"] as const) {
+    const voc = model(l).vocab as unknown as { location: Record<string, string> };
+    for (const k of ["a", "village", "coeur", "quartier", "centre"]) assert.ok(voc.location[k]?.includes("{commune}"), `${l} ${k}`);
+    const a = messages[l].admin_listing as Record<string, string>;
+    for (const k of ["a", "village", "coeur", "quartier", "centre", "custom"]) assert.ok(a[`location_${k}`], `${l} location_${k}`);
+  }
+});
 test("accords francais en nombre : 1 chambre, 2 chambres, emplacements", () => {
   const d = emptyListingData();
   d.facts = { parking_indoor: 1, parking_outdoor: 3 };
@@ -438,14 +514,11 @@ test("formules interdites proposees (anglais, allemand)", () => {
   clean("A bright apartment close to the station.", "en");
   clean("Eine helle Wohnung in Bahnhofsnähe.", "de");
 });
-test("trois adjectifs a la suite", () => {
-  has("Un cadre de vie spacieux, lumineux et chaleureux.", "three_adjectives");
-  has("Un séjour clair, calme, agréable.", "three_adjectives");
-  has("A bright, spacious and welcoming home.", "three_adjectives", "en");
-  has("Eine helle, geräumige und moderne Wohnung.", "three_adjectives", "de");
-  clean("Un cadre de vie spacieux et lumineux.");
-  clean("Séjour, cuisine et salle de bain au même niveau.");
-  clean("Mehrsprachiger Service: Luxemburgisch, Französisch, Englisch, Deutsch und Italienisch.", "de");
+test("trois adjectifs a la suite : regle supprimee (ecriture naturelle permise)", () => {
+  clean("Un cadre de vie spacieux, lumineux et chaleureux.");
+  clean("A bright, spacious and welcoming home.", "en");
+  clean("Eine helle, geräumige und moderne Wohnung.", "de");
+  assert.ok(!readFileSync(join(root, "lib/listing/writing-rules.ts"), "utf8").includes("three adjectives"), "consigne Mistral sans la regle");
 });
 test("typographie francaise : apostrophes, espaces, montants, surfaces", () => {
   has("L'entrée et l’escalier", "apostrophes");
@@ -492,11 +565,12 @@ test("modeles par defaut et annonces generees : aucun point a corriger", () => {
     }
   }
 });
-test("ambiance de la reference : la regle des trois adjectifs la signale", () => {
+test("ambiance de la reference acceptee telle quelle", () => {
   const d = sanitizeListingData(JSON.parse(JSON.stringify(steinfort)));
   d.written.fr.ambiance = "offre un cadre de vie spacieux, lumineux et chaleureux, alliant confort moderne et authenticité";
   const g = gen("fr", {}, d);
-  assert.ok(codes(g.text).includes("three_adjectives"));
+  assert.deepEqual(checkWriting(g.text, "fr"), []);
+  assert.ok(g.text.includes("offre un cadre de vie spacieux, lumineux et chaleureux, alliant confort moderne et authenticité."));
 });
 test("enregistrement bloque : action serveur et ecran, motif detaille", () => {
   const act = readFileSync(join(root, "app/admin/properties/actions.ts"), "utf8");
@@ -508,7 +582,7 @@ test("enregistrement bloque : action serveur et ecran, motif detaille", () => {
   assert.ok(tpl.includes("checkFields([{ field: target.part, lang: target.lang, text: templateLiteral(text)"));
   for (const l of ["fr", "en", "de"]) {
     const a = messages[l].admin_listing as Record<string, string>;
-    for (const c of ["dash", "spaced_hyphen", "bullet", "emoji", "symbol", "exclamation", "caps_word", "title_case", "forbidden", "bare_verb", "three_adjectives", "apostrophes", "space_before", "amount", "area"]) assert.ok(a[`chk_${c}`]?.includes("{excerpt}"), `${l} chk_${c}`);
+    for (const c of ["dash", "spaced_hyphen", "bullet", "emoji", "symbol", "exclamation", "caps_word", "title_case", "forbidden", "bare_verb", "apostrophes", "space_before", "amount", "area"]) assert.ok(a[`chk_${c}`]?.includes("{excerpt}"), `${l} chk_${c}`);
   }
 });
 

@@ -150,6 +150,19 @@ export function frFeminine(adj: string): string {
 // Mots invariables d'un qualificatif compose ("tres beau").
 const FR_ADVERBS = new Set(["très", "si", "plus", "bien", "fort", "tout", "particulièrement", "vraiment", "remarquablement", "parfaitement", "entièrement", "nouvellement"]);
 
+// Adjectifs places avant le nom (usage courant des annonces), toutes formes.
+const FR_PRENOMINAL = new Set([
+  "superbe", "superbes", "beau", "bel", "belle", "beaux", "belles", "élégant", "élégante", "rare", "rares",
+  "charmant", "charmante", "magnifique", "magnifiques", "joli", "jolie", "grand", "grande", "petit", "petite",
+  "vaste", "vastes",
+]);
+
+/** Le qualificatif se place-t-il avant le nom ? (son dernier mot decide) */
+export function frIsPrenominal(qualifier: string): boolean {
+  const words = qualifier.trim().toLocaleLowerCase("fr").split(/\s+/).filter(Boolean);
+  return words.length > 0 && FR_PRENOMINAL.has(words[words.length - 1]);
+}
+
 /** Qualificatif francais accorde au nom qui le suit. */
 export function frQualifier(qualifier: string, g: Gender, nextWord: string): string {
   const words = qualifier.trim().split(/\s+/).filter(Boolean);

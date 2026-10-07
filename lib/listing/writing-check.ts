@@ -16,7 +16,6 @@ export type WritingIssueCode =
   | "title_case"
   | "forbidden"
   | "bare_verb"
-  | "three_adjectives"
   | "apostrophes"
   | "space_before"
   | "amount"
@@ -45,71 +44,6 @@ function firstMatch(text: string, re: RegExp): RegExpExecArray | null {
 }
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-// --- Trois adjectifs a la suite ---------------------------------------------
-
-// Adjectifs usuels des annonces (formes de base) ; les terminaisons et
-// accords sont pris en compte par adjectiveLike().
-const ADJ: Record<ListingLang, string[]> = {
-  fr: [
-    "beau", "bel", "belle", "grand", "petit", "joli", "vaste", "calme", "moderne", "neuf", "lumineux", "spacieux", "chaleureux", "agréable",
-    "confortable", "élégant", "charmant", "superbe", "magnifique", "splendide", "unique", "rare", "exceptionnel", "contemporain", "fonctionnel",
-    "pratique", "soigné", "raffiné", "authentique", "verdoyant", "ensoleillé", "paisible", "accueillant", "cosy", "idéal", "parfait", "généreux",
-    "prestigieux", "luxueux", "somptueux", "intime", "convivial", "harmonieux", "clair", "sain", "solide", "récent", "rénové", "équipé",
-    "aménagé", "traversant", "dégagé", "ouvert", "privatif", "sécurisé", "isolé", "familial", "chic", "sobre", "noble", "lumineuse",
-  ],
-  en: [
-    "beautiful", "bright", "spacious", "warm", "modern", "elegant", "charming", "superb", "stunning", "unique", "rare", "exceptional",
-    "contemporary", "functional", "practical", "refined", "authentic", "green", "sunny", "peaceful", "quiet", "welcoming", "cosy", "cozy",
-    "ideal", "perfect", "generous", "prestigious", "luxurious", "sumptuous", "intimate", "friendly", "harmonious", "light", "airy", "large",
-    "small", "new", "renovated", "equipped", "open", "private", "secure", "comfortable", "pleasant", "lovely", "stylish", "calm",
-  ],
-  de: [
-    "schön", "hell", "geräumig", "warm", "modern", "elegant", "charmant", "einzigartig", "selten", "außergewöhnlich", "zeitgemäß",
-    "funktional", "praktisch", "edel", "authentisch", "grün", "sonnig", "ruhig", "einladend", "gemütlich", "ideal", "perfekt", "großzügig",
-    "luxuriös", "freundlich", "harmonisch", "licht", "groß", "klein", "neu", "renoviert", "offen", "privat", "sicher", "komfortabel",
-    "angenehm", "stilvoll", "hochwertig", "exklusiv", "großartig", "wunderschön", "lichtdurchflutet",
-  ],
-};
-
-const ADJ_SUFFIX: Record<ListingLang, RegExp> = {
-  fr: /(eux|euse|euses|if|ive|ives|able|ables|ible|ibles|el|elle|elles|eux)$/,
-  en: /(ous|ful|ive|able|ible|ic)$/,
-  de: /(ig|lich|isch|bar|sam|voll|haft)(e|en|er|es|em)?$/,
-};
-
-// Noms courants qui ressemblent a des adjectifs (jamais comptes).
-const NOT_ADJ = new Set(["table", "cable", "câble", "meuble", "immeuble", "hôtel", "tunnel", "niveau", "sous-sol", "jeux", "lieux", "cheveux", "feux", "vœux", "creux", "cive", "olive", "massive", "music", "traffic", "attic", "office", "honig", "käfig", "essig", "könig",
-  // Noms de langues (service multilingue) : jamais une suite d'adjectifs decoratifs.
-  "luxemburgisch", "französisch", "englisch", "deutsch", "italienisch", "portugiesisch", "spanisch", "niederländisch", "russisch", "arabisch", "chinesisch"]);
-
-function adjectiveLike(word: string, lang: ListingLang): boolean {
-  const w = word.toLocaleLowerCase(lang);
-  if (w.length < 3 || NOT_ADJ.has(w)) return false;
-  const bases = ADJ[lang];
-  if (bases.includes(w)) return true;
-  if (lang === "fr") {
-    for (const b of bases) if (w === b + "e" || w === b + "s" || w === b + "es" || w === b.replace(/eux$/, "euse") || w === b.replace(/eux$/, "euses")) return true;
-  } else if (lang === "de") {
-    for (const b of bases) if (w.startsWith(b) && /^(e|en|er|es|em)?$/.test(w.slice(b.length))) return true;
-  }
-  return ADJ_SUFFIX[lang].test(w);
-}
-
-const AND: Record<ListingLang, string> = { fr: "et", en: "and", de: "und" };
-
-function threeAdjectives(text: string, lang: ListingLang): string | null {
-  // "A, B et C" ou "A, B, C" : trois adjectifs separes par virgule ou "et".
-  const word = "([\\p{L}'-]+)";
-  const sep = `(?:\\s*,\\s*|\\s+${AND[lang]}\\s+)`;
-  const re = new RegExp(`${word}${sep}${word}${sep}${word}`, "giu");
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text))) {
-    if (adjectiveLike(m[1], lang) && adjectiveLike(m[2], lang) && adjectiveLike(m[3], lang)) return m[0];
-    re.lastIndex = m.index + m[1].length + 1;
-  }
-  return null;
-}
 
 // --- Controle ----------------------------------------------------------------
 
@@ -171,8 +105,6 @@ export function checkWriting(input: string, lang: ListingLang, opts: CheckOption
     const m = re.exec(lower);
     if (m) issues.push({ code: "bare_verb", excerpt: excerptAt(text, m.index, m[0].length) });
   }
-  const three = threeAdjectives(text, lang);
-  if (three) issues.push({ code: "three_adjectives", excerpt: three });
 
   if (lang === "fr") {
     if (/'/.test(text) && /’/.test(text)) {

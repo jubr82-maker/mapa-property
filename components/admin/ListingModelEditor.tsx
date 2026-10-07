@@ -18,6 +18,7 @@ import {
   HERITAGE_TYPES,
   LEVEL_KINDS,
   LISTING_LANGS,
+  LOCATION_FORMULAS,
   ORIENTATIONS,
   SERVICING_TYPES,
   type ListingData,
@@ -150,6 +151,29 @@ export function ListingModelEditor({ data, onChange, family, block, rent, lang, 
           <input value={w.qualifier} onChange={(e) => setWritten("qualifier", e.target.value)} className={`mt-1 ${inputCls}`} />
           <span className="mt-1 block text-xs text-[#3D4F63]/60">{t(`hint_qualifier_${lang}`)}</span>
         </label>
+        <label className="block">
+          <span className={labelCls}>{t("f_location_formula")}</span>
+          <select
+            value={data.facts.location_formula ?? "a"}
+            onChange={(e) => setFact("location_formula", e.target.value as (typeof LOCATION_FORMULAS)[number])}
+            className={`mt-1 ${inputCls}`}
+            data-location-formula
+          >
+            {LOCATION_FORMULAS.map((f) => (
+              <option key={f} value={f}>
+                {t(`location_${f}`)}
+              </option>
+            ))}
+          </select>
+          <span className="mt-1 block text-xs text-[#3D4F63]/60">{t("hint_location_formula")}</span>
+        </label>
+        {data.facts.location_formula === "custom" && (
+          <label className="block md:col-span-2">
+            <span className={labelCls}>{t("f_location_custom", { lang: lang.toUpperCase() })}</span>
+            <input value={w.location_custom} onChange={(e) => setWritten("location_custom", e.target.value)} className={`mt-1 ${inputCls}`} />
+            <span className="mt-1 block text-xs text-[#3D4F63]/60">{t("hint_location_custom")}</span>
+          </label>
+        )}
         <label className="block md:col-span-2">
           <span className={labelCls}>{t("f_ambiance")}</span>
           <textarea rows={2} value={w.ambiance} onChange={(e) => setWritten("ambiance", e.target.value)} className={`mt-1 ${inputCls}`} />

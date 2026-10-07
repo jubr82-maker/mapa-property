@@ -4024,7 +4024,7 @@
   },
   "listing_model": {
     "title": "{{titre_bien}}[[ mit {{chambres_titre}}]] {{a_vendre}}[[ in {{commune}}]]",
-    "tronc": "MAPA Property freut sich, Ihnen {{formule}} {{ce_bien}}[[ mit {{chambres}}]][[ in {{commune}}]] vorzustellen.\n\n{{#annee_construction}}[[{{ce_type}} wurde {{annee_construction}} erbaut[[ und {{annee_renovation}} renoviert]].]][[ {{il}} {{ambiance}}.]]{{/annee_construction}}{{^annee_construction}}[[{{ce_type}} {{ambiance}}.]]{{/annee_construction}}\n\n[[{{histoire}}]]\n\n[[Die Raumaufteilung[[ bei einer Wohnfläche von {{surface_habitable}}]] gestaltet sich wie folgt:\n{{pieces}}]]\n\n[[{{prestations}}]]\n\n[[Die Vorzüge dieser Immobilie:\n{{atouts}}]]\n{{#location}}\n[[Mietbedingungen:\n[[- Monatliche Miete: {{loyer}}]]\n[[- Monatliche Nebenkosten: {{charges_location}}]]\n[[- Mietkaution: {{garantie}}]]\n[[- Verfügbarkeit: {{disponibilite}}]]]]{{/location}}\n\n{{#exclusif}}Ein Exklusivangebot von MAPA Property.{{/exclusif}}\n\nFür Anfragen kontaktieren Sie uns über die Schaltfläche unten.\n\nJulien Brebion, Real Estate Director & Exclusive Sourcing Specialist\nMAPA Property, eine Marke der MAPA Synergy Sàrl\n\nSie möchten Ihre Immobilie verkaufen oder vermieten? Nutzen Sie unsere kostenlose Bewertung und die Expertise von MAPA Property für eine persönliche Begleitung. Kontaktieren Sie uns noch heute, um Ihre Immobilienprojekte mit vollem Vertrauen zu verwirklichen.\n\nMehrsprachiger Service: Luxemburgisch, Französisch, Englisch, Deutsch und Italienisch.\n{{#exclusif}}\nAnzeige {{diffusion}} von MAPA Property veröffentlicht.{{/exclusif}}\n\nJede vollständige oder teilweise Vervielfältigung oder Verbreitung ohne Genehmigung ist untersagt.",
+    "tronc": "MAPA Property freut sich, Ihnen {{formule}} {{ce_bien}}[[ mit {{chambres}}]][[ {{lieu}}]] vorzustellen.\n\n{{#annee_construction}}[[{{ce_type}} wurde {{annee_construction}} erbaut[[ und {{annee_renovation}} renoviert]].]][[ {{il}} {{ambiance}}.]]{{/annee_construction}}{{^annee_construction}}[[{{ce_type}} {{ambiance}}.]]{{/annee_construction}}\n\n[[{{histoire}}]]\n\n[[Die Raumaufteilung[[ bei einer Wohnfläche von {{surface_habitable}}]] gestaltet sich wie folgt:\n{{pieces}}]]\n\n[[{{prestations}}]]\n\n[[Die Vorzüge dieser Immobilie:\n{{atouts}}]]\n{{#location}}\n[[Mietbedingungen:\n[[- Monatliche Miete: {{loyer}}]]\n[[- Monatliche Nebenkosten: {{charges_location}}]]\n[[- Mietkaution: {{garantie}}]]\n[[- Verfügbarkeit: {{disponibilite}}]]]]{{/location}}\n\n{{#exclusif}}Ein Exklusivangebot von MAPA Property.{{/exclusif}}\n\nFür Anfragen kontaktieren Sie uns über die Schaltfläche unten.\n\nJulien Brebion, Real Estate Director & Exclusive Sourcing Specialist\nMAPA Property, eine Marke der MAPA Synergy Sàrl\n\nSie möchten Ihre Immobilie verkaufen oder vermieten? Nutzen Sie unsere kostenlose Bewertung und die Expertise von MAPA Property für eine persönliche Begleitung. Kontaktieren Sie uns noch heute, um Ihre Immobilienprojekte mit vollem Vertrauen zu verwirklichen.\n\nMehrsprachiger Service: Luxemburgisch, Französisch, Englisch, Deutsch und Italienisch.\n{{#exclusif}}\nAnzeige {{diffusion}} von MAPA Property veröffentlicht.{{/exclusif}}\n\nJede vollständige oder teilweise Vervielfältigung oder Verbreitung ohne Genehmigung ist untersagt.",
     "blocks": {
       "appartement": "[[Weitere Ausstattung:\n[[- {{etage}}]]\n[[- Gebäude mit {{niveaux_immeuble}}]]\n[[- {{ascenseur}}]]\n[[- Terrasse von {{surface_terrasse}}]]\n[[- Balkon von {{surface_balcon}}]]\n[[- Privatgarten von {{surface_jardin}}]]\n[[- {{cave}}]]\n[[- {{stationnement_interieur}}]]\n[[- {{stationnement_exterieur}}]]\n[[- {{stationnement}}]]\n[[- Aktuelle monatliche Nebenkosten: {{charges}}]]]]",
       "penthouse": "[[Weitere Ausstattung:\n[[- {{dernier_etage}}]]\n{{^dernier_etage}}[[- {{etage}}]]{{/dernier_etage}}\n[[- Panoramaterrasse von {{surface_terrasse}}]]\n[[- {{vue}}]]\n[[- {{ascenseur_privatif}}]]\n{{^ascenseur_privatif}}[[- {{ascenseur}}]]{{/ascenseur_privatif}}\n[[- Gebäude mit {{niveaux_immeuble}}]]\n[[- {{cave}}]]\n[[- {{stationnement_interieur}}]]\n[[- {{stationnement_exterieur}}]]\n[[- {{stationnement}}]]\n[[- Aktuelle monatliche Nebenkosten: {{charges}}]]]]",
@@ -4161,6 +4161,13 @@
         "full": "Erschlossenes Grundstück",
         "partial": "Teilweise erschlossenes Grundstück",
         "none": "Nicht erschlossenes Grundstück"
+      },
+      "location": {
+        "a": "in {commune}",
+        "village": "im charmanten Dorf {commune}",
+        "coeur": "im Herzen von {commune}",
+        "quartier": "im Viertel {commune}",
+        "centre": "mitten im Zentrum von {commune}"
       }
     },
     "sample": {
@@ -4239,7 +4246,7 @@
     "lang_de": "Deutsch",
     "written_title": "Verfasste Felder ({lang})",
     "f_qualifier": "Eigenschaftswort",
-    "hint_qualifier_fr": "Männlich Singular, z. B. \"superbe\", \"beau\" oder \"élégant\".",
+    "hint_qualifier_fr": "Männlich Singular. Superbe, beau, élégant, rare, charmant, magnifique, joli, grand, petit und vaste stehen vor dem Nomen, alle anderen danach. Die Angleichung folgt der Objektart.",
     "hint_qualifier_en": "Zum Beispiel \"superb\" oder \"elegant\".",
     "hint_qualifier_de": "Grundform, z. B. \"schön\" oder \"elegant\": Die Endung richtet sich nach der Objektart (diese schöne Villa, dieses schöne Haus).",
     "f_ambiance": "Stimmungssatz",
@@ -4432,7 +4439,6 @@
     "chk_title_case": "Zier-Großschreibung im Titel ({excerpt}): nur der erste Buchstabe und Eigennamen werden großgeschrieben.",
     "chk_forbidden": "verbotene Formulierung \"{excerpt}\": ohne sie umformulieren.",
     "chk_bare_verb": "\"{excerpt}\" ohne Ergänzung: sagen, was es zu entdecken gibt, oder das Verb streichen.",
-    "chk_three_adjectives": "drei Adjektive hintereinander \"{excerpt}\": höchstens zwei behalten.",
     "chk_apostrophes": "zwei Apostroph-Arten (gerade und typografisch) bei \"{excerpt}\": im ganzen Text nur eine verwenden.",
     "chk_space_before": "fehlendes Leerzeichen vor \":\", \";\" oder \"?\" in \"{excerpt}\" (französische Typografie).",
     "chk_amount": "Betrag falsch geschrieben in \"{excerpt}\": z. B. \"1 200 000 €\" schreiben (französische Typografie).",
@@ -4454,7 +4460,18 @@
     "key_search_delai": "Gewünschter Zeitrahmen",
     "key_search_criteres": "Verfasste Kriterien, als Liste",
     "tpl_part_search_title": "Suchen: Titel",
-    "tpl_part_search": "Suchen: Text"
+    "tpl_part_search": "Suchen: Text",
+    "f_location_formula": "Lageformulierung",
+    "hint_location_formula": "Im ersten Satz vor der Gemeinde verwendet und in die drei Sprachen übersetzt.",
+    "location_a": "in (Gemeinde)",
+    "location_village": "im charmanten Dorf",
+    "location_coeur": "im Herzen von",
+    "location_quartier": "im Viertel",
+    "location_centre": "mitten im Zentrum von",
+    "location_custom": "Freie Eingabe",
+    "f_location_custom": "Freie Formulierung ({lang})",
+    "hint_location_custom": "Text vor dem Gemeindenamen, z. B. \"wenige Schritte vom Zentrum von\". Leer: \"in\".",
+    "key_lieu": "Lageformulierung und Gemeinde"
   },
   "searches_page": {
     "eyebrow": "Kaufen mit MAPA Property",
