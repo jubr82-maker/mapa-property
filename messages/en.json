@@ -3543,7 +3543,7 @@
     "backup_not_configured": "reading not configured",
     "backup_error": "unreadable",
     "backup_none": "none",
-    "backup_note": "The backup is run from Julien's computer; it is flagged as overdue after 8 days.",
+    "backup_note": "Encrypted database backup every night around 03:00, 30 kept; flagged late after 2 days.",
     "perf_title": "Performance (PageSpeed Insights)",
     "perf_intro": "Measured once a day by the scheduled task, and on demand (at most once every {minutes} minutes). Never when this page opens.",
     "perf_thresholds": "Current Google thresholds",
@@ -4693,5 +4693,26 @@
     "err_status": "Unknown status.",
     "err_transition": "Cannot go from \"{from}\" to \"{to}\".",
     "err_consent": "Cannot publish: the client has not agreed to anonymous publication (tick the box, then Save)."
+  },
+  "backup_report": {
+    "subject_success": "Database backup succeeded, {date}",
+    "subject_failure": "Backup failure, {date}",
+    "success_intro": "Last night's encrypted database backup ({date}) succeeded.",
+    "failure_intro": "Last night's database backup ({date}) failed.",
+    "failure_cause": "Cause: {cause}",
+    "failure_action": "The previous successful backup remains available. Check Site health in the admin.",
+    "cause_unknown": "unknown",
+    "cause_not_run": "no backup was started last night (scheduled task not run).",
+    "cause_r2_not_configured": "backup storage (R2) is not configured.",
+    "cause_summary_missing": "the backup summary cannot be found in R2.",
+    "size": "Encrypted file size: {size} MB",
+    "total_rows": "Rows saved: {count} in {tables} tables",
+    "kept": "Backups kept: {count} (30 at most)",
+    "rows_title": "Rows per table, change since the previous day:",
+    "rows_title_first": "Rows per table (first backup, no comparison):",
+    "row_line_new": "- {table}: {count}",
+    "row_line_same": "- {table}: {count} (unchanged)",
+    "row_line_delta": "- {table}: {count} ({delta})",
+    "not_included": "Not included: photos and documents in Supabase and R2 storage."
   }
 }

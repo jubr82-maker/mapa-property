@@ -14,13 +14,15 @@ export type BackupStatus =
   | { status: "none" }
   | { status: "ok" | "late"; lastAt: string; sizeBytes: number | null; count: number };
 
-/** Prefixe du script scripts/backup-supabase-to-r2.mjs (PREFIX = "backups/"). */
+/** Prefixe des sauvegardes : manuelles (backups/) et nocturnes (backups/nightly/). */
 const BACKUP_PREFIX = "backups/";
 
 export async function loadBackupStatus(): Promise<BackupStatus> {
   if (!isBackupR2Configured()) return { status: "not_configured" };
   try {
-    const objects = (await listBackupR2Objects(BACKUP_PREFIX)).filter((o) => o.lastModified);
+    // Fichiers de sauvegarde seulement (nocturnes chiffrees et manuelles),
+    // sans les resumes .counts.json.
+    const objects = (await listBackupR2Objects(BACKUP_PREFIX)).filter((o) => o.lastModified && /\.(json\.gz\.enc|sql\.gz)$/.test(o.key));
     if (objects.length === 0) return { status: "none" };
     objects.sort((a, b) => b.lastModified!.getTime() - a.lastModified!.getTime());
     const last = objects[0];

@@ -483,7 +483,10 @@ section = "K. Pilotage";
   check("mesure a la demande : garde admin en tete", /export async function runPerformanceNowAction\(\)[^{]*\{\s*const \{ user \} = await assertAdminAction\(\)/.test(pa));
   check("mesure a la demande : delai minimal entre deux mesures", /PSI_MANUAL_COOLDOWN_MINUTES/.test(pa));
   const vercel = JSON.parse(read("vercel.json")) as { crons?: { path: string; schedule: string }[] };
-  check("une seule tache planifiee, quotidienne", vercel.crons?.length === 1 && vercel.crons[0].path === "/api/cron/daily" && /^\d+ \d+ \* \* \*$/.test(vercel.crons[0].schedule), JSON.stringify(vercel.crons));
+  // Oct. 2026 : tache quotidienne et sauvegarde nocturne, une fois par jour
+  // chacune (limite de la formule Hobby).
+  check("deux taches planifiees seulement (quotidienne et sauvegarde), une fois par jour", vercel.crons?.length === 2 && vercel.crons.map((c) => c.path).sort().join(",") === "/api/cron/backup,/api/cron/daily" && vercel.crons.every((c) => /^\d+ \d+ \* \* \*$/.test(c.schedule)), JSON.stringify(vercel.crons));
+  check("sauvegarde nocturne : secret obligatoire", /isAuthorizedCron\(req\)/.test(read("app/api/cron/backup/route.ts")));
   check("tache quotidienne : secret obligatoire", /isAuthorizedCron\(req\)/.test(read("app/api/cron/daily/route.ts")));
   // PageSpeed : jamais a l'ouverture d'une page ni par une lecture.
   const measurers = [...walk("app", (p) => /\.(ts|tsx)$/.test(p)), ...walk("lib", (p) => /\.(ts|tsx)$/.test(p)), ...walk("components", (p) => /\.(ts|tsx)$/.test(p))]

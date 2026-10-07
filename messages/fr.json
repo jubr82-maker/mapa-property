@@ -3543,7 +3543,7 @@
     "backup_not_configured": "lecture non configurée",
     "backup_error": "illisible",
     "backup_none": "aucune",
-    "backup_note": "La sauvegarde se lance depuis l'ordinateur de Julien ; elle est signalée en retard après 8 jours.",
+    "backup_note": "Sauvegarde chiffrée de la base chaque nuit vers 03 h (02 h en hiver), 30 conservées ; signalée en retard après 2 jours. Compte rendu par e-mail chaque matin.",
     "perf_title": "Performance (PageSpeed Insights)",
     "perf_intro": "Mesurée une fois par jour par la tâche planifiée, et à la demande (au plus une fois toutes les {minutes} minutes). Jamais à l'ouverture de cette page.",
     "perf_thresholds": "Seuils Google en vigueur",
@@ -4693,5 +4693,26 @@
     "err_status": "Statut inconnu.",
     "err_transition": "Passage impossible de « {from} » à « {to} ».",
     "err_consent": "Publication impossible : le client n'a pas donné son accord pour une publication anonyme (case à cocher, puis Enregistrer)."
+  },
+  "backup_report": {
+    "subject_success": "Sauvegarde de la base réussie, {date}",
+    "subject_failure": "Échec de la sauvegarde, {date}",
+    "success_intro": "La sauvegarde chiffrée de la base de la nuit du {date} est réussie.",
+    "failure_intro": "La sauvegarde de la base de la nuit du {date} a échoué.",
+    "failure_cause": "Cause : {cause}",
+    "failure_action": "La précédente sauvegarde réussie reste disponible. Consultez Santé du site dans l'admin, puis relancez la tâche si besoin.",
+    "cause_unknown": "inconnue",
+    "cause_not_run": "aucune sauvegarde n'a été lancée cette nuit (tâche planifiée non exécutée).",
+    "cause_r2_not_configured": "le stockage des sauvegardes (R2) n'est pas configuré.",
+    "cause_summary_missing": "le résumé de la sauvegarde est introuvable dans R2.",
+    "size": "Taille du fichier chiffré : {size} Mo",
+    "total_rows": "Lignes sauvegardées : {count} dans {tables} tables",
+    "kept": "Sauvegardes conservées : {count} (30 au plus)",
+    "rows_title": "Lignes par table, évolution depuis la veille :",
+    "rows_title_first": "Lignes par table (première sauvegarde, pas de comparaison) :",
+    "row_line_new": "- {table} : {count}",
+    "row_line_same": "- {table} : {count} (inchangé)",
+    "row_line_delta": "- {table} : {count} ({delta})",
+    "not_included": "Non compris dans cette sauvegarde : photos et documents des stockages Supabase et R2."
   }
 }

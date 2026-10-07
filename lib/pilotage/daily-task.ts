@@ -2,7 +2,8 @@
 // limites du plan Vercel Hobby. Chaque traitement est isole : l'echec de
 // l'un n'empeche pas les autres. Chaque execution est journalisee dans
 // public.cron_runs.
-//   tous les jours   : mesures PageSpeed, releve des positions Google
+//   tous les jours   : compte rendu de la sauvegarde de la nuit (e-mail),
+//                      mesures PageSpeed, releve des positions Google
 //                      (idempotent : une fois par semaine de reference)
 //   le lundi         : resume hebdomadaire (une seule fois par semaine)
 //   le 1er du mois   : taux BCE (ancienne tache bce-rates)
@@ -15,6 +16,7 @@ import { sendWeeklySummary } from "@/lib/pilotage/weekly-summary";
 import { refreshBceRate } from "@/lib/pilotage/bce";
 import { loadCronRuns, recordCronRun } from "@/lib/pilotage/health";
 import { WEEKLY_SUMMARY_WEEKDAY } from "@/lib/pilotage/config";
+import { sendBackupReport } from "@/lib/backup/report-step";
 
 type StepResult = { task: string; ok: boolean; detail: string };
 
@@ -38,6 +40,8 @@ function luxWeekday(now: Date): number {
 
 export async function runDailyTask(now = new Date()): Promise<StepResult[]> {
   const results: StepResult[] = [];
+  // Compte rendu de la sauvegarde de la nuit (e-mail de controle du matin).
+  results.push(await step("backup_report", () => sendBackupReport(now)));
   results.push(await step("psi", () => runPsiMeasurements("cron")));
   results.push(await step("seo_positions", () => snapshotWeeklyPositions()));
 

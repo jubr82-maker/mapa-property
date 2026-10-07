@@ -12,6 +12,7 @@
 import {
   S3Client,
   DeleteObjectCommand,
+  GetObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
@@ -222,6 +223,14 @@ export async function listBackupR2Objects(prefix: string): Promise<
     continuationToken = res.IsTruncated ? res.NextContinuationToken : undefined;
   } while (continuationToken);
   return results;
+}
+
+/** Lit un objet du bucket backups (resume de la sauvegarde, restauration). */
+export async function getBackupFromR2(key: string): Promise<Buffer> {
+  requireBackupR2();
+  const res = await backupR2Client.send(new GetObjectCommand({ Bucket: R2_BACKUP_BUCKET, Key: key }));
+  const bytes = await res.Body?.transformToByteArray();
+  return Buffer.from(bytes ?? []);
 }
 
 export async function deleteBackupFromR2(key: string): Promise<void> {

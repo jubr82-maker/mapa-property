@@ -3543,7 +3543,7 @@
     "backup_not_configured": "Auslesen nicht eingerichtet",
     "backup_error": "nicht lesbar",
     "backup_none": "keine",
-    "backup_note": "Die Sicherung wird von Juliens Computer gestartet; nach 8 Tagen gilt sie als überfällig.",
+    "backup_note": "Verschlüsselte Datenbanksicherung jede Nacht gegen 03:00, 30 aufbewahrt; nach 2 Tagen als verspätet markiert.",
     "perf_title": "Leistung (PageSpeed Insights)",
     "perf_intro": "Einmal täglich durch die geplante Aufgabe gemessen und auf Anfrage (höchstens alle {minutes} Minuten). Nie beim Öffnen dieser Seite.",
     "perf_thresholds": "Aktuelle Google-Schwellenwerte",
@@ -4693,5 +4693,26 @@
     "err_status": "Unbekannter Status.",
     "err_transition": "Wechsel von \"{from}\" zu \"{to}\" nicht möglich.",
     "err_consent": "Veröffentlichung unmöglich: Der Kunde hat der anonymen Veröffentlichung nicht zugestimmt (Häkchen setzen, dann Speichern)."
+  },
+  "backup_report": {
+    "subject_success": "Datenbanksicherung erfolgreich, {date}",
+    "subject_failure": "Fehler bei der Sicherung, {date}",
+    "success_intro": "Die verschlüsselte Datenbanksicherung der Nacht ({date}) war erfolgreich.",
+    "failure_intro": "Die Datenbanksicherung der Nacht ({date}) ist fehlgeschlagen.",
+    "failure_cause": "Ursache: {cause}",
+    "failure_action": "Die letzte erfolgreiche Sicherung bleibt verfügbar. Prüfen Sie die Website-Gesundheit im Admin.",
+    "cause_unknown": "unbekannt",
+    "cause_not_run": "in der Nacht wurde keine Sicherung gestartet (geplante Aufgabe nicht ausgeführt).",
+    "cause_r2_not_configured": "der Sicherungsspeicher (R2) ist nicht konfiguriert.",
+    "cause_summary_missing": "die Zusammenfassung der Sicherung ist in R2 nicht auffindbar.",
+    "size": "Größe der verschlüsselten Datei: {size} MB",
+    "total_rows": "Gesicherte Zeilen: {count} in {tables} Tabellen",
+    "kept": "Aufbewahrte Sicherungen: {count} (höchstens 30)",
+    "rows_title": "Zeilen pro Tabelle, Veränderung seit dem Vortag:",
+    "rows_title_first": "Zeilen pro Tabelle (erste Sicherung, kein Vergleich):",
+    "row_line_new": "- {table}: {count}",
+    "row_line_same": "- {table}: {count} (unverändert)",
+    "row_line_delta": "- {table}: {count} ({delta})",
+    "not_included": "Nicht enthalten: Fotos und Dokumente aus den Speichern Supabase und R2."
   }
 }

@@ -15,7 +15,10 @@ export const DOMAIN_EXPIRY_DATE = "2027-06-13";
 export const DOMAIN_ALERT_MONTHS = 3;
 
 /** Sauvegarde R2 consideree en retard au-dela de ce nombre de jours. */
-export const BACKUP_MAX_AGE_DAYS = 8;
+// Sauvegarde nocturne (oct. 2026) : en retard apres 2 jours sans fichier.
+export const BACKUP_MAX_AGE_DAYS = 2;
+/** Destinataire du compte rendu quotidien de la sauvegarde (aucune donnee personnelle). */
+export const BACKUP_REPORT_RECIPIENT = "site@mapagroup.org";
 
 /** Biens en ligne depuis plus de ce nombre de jours : a retravailler. */
 export const LISTING_STALE_DAYS = 90;
