@@ -1,0 +1,49 @@
+# Fichiers envoyes par "vercel deploy" (oct. 2026). La CLI Vercel ne lit
+# PAS .gitignore : sans ce fichier, elle envoyait tout le dossier sauf sa
+# courte liste par defaut (.git, .next, node_modules, .env.local...), soit
+# environ 940 Mo par deploiement, dont des captures d'ecran de QA, une
+# sauvegarde de base avec des coordonnees de clients et des PDF d'essai.
+# Seul ce qui sert au build part : app, components, hooks, i18n, lib,
+# messages, public, types, et les fichiers de configuration de la racine.
+
+# Documentation, rapports, captures et notes internes
+/docs
+/qa-reports
+/*.md
+!/README.md
+
+# Sauvegardes, exports, donnees brutes, essais
+/backups-db
+/data
+/essais-pdf
+/scripts
+/._*
+
+# Sources de marque (le site utilise les copies de public/)
+/brand-source
+/brand-sources
+
+# SQL et configuration locale de Supabase (aucun fichier lu par le build)
+/supabase
+
+# Tests et artefacts locaux
+/tests
+/coverage
+/test-results
+/playwright-report
+/.next
+/out
+/build
+node_modules
+*.tsbuildinfo
+.DS_Store
+
+# Outils locaux (assistant de code, copies de travail)
+/.claude
+/.claudeignore
+/.remember
+/.vercel
+
+# Variables d'environnement locales (les valeurs viennent de Vercel)
+.env
+.env.*
