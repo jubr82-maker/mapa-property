@@ -16,7 +16,7 @@ import {
   propertyPath,
   propertyRefToken,
   refTokenFromParam,
-  seoDescription,
+  seoMetaDescription,
   seoTitle,
   splitCommonMentions,
   typeName,
@@ -65,47 +65,70 @@ test("title : modele sans qualificatif, 60 caracteres vises, surface puis marque
   expect(seoTitle(empty, "fr", ctx("fr"))).toBe("Terrain à vendre | MAPA Property");
 });
 
-test("meta description : phrases entieres, 120 a 160 caracteres, jamais les mentions communes", () => {
+// Donnees de modele du duplex (atout saisi, annees, mandat exclusif).
+function steinfortData() {
+  const d = emptyListingData();
+  d.written.fr.highlights = "Localisation recherchée à Steinfort";
+  d.written.en.highlights = "Sought-after location in Steinfort";
+  d.written.de.highlights = "Gefragte Lage in Steinfort";
+  d.facts = { renovation_year: 2020 };
+  return d;
+}
+const steinfortCols = { ...steinfort, mandate_type: "exclusive", year_built: 2004, usable_surface: null, land_surface: null, terrace_surface: null, balcony_surface: null, garden_surface: null, parking: null, has_pool: false, floor: null, price_on_demand: false, current_use: null };
+const meta = (l: Lang, cols: Record<string, unknown> = {}, d = steinfortData()) => {
+  const c = ctx(l);
+  return seoMetaDescription({ ...steinfortCols, ...cols } as never, d, l, { vocab: c.model.vocab, seo: c.seo });
+};
+
+test("meta description du duplex de Steinfort, construite depuis les faits (3 langues)", () => {
+  expect(meta("fr")).toBe("Appartement duplex de 115 m² avec 2 chambres à vendre à Steinfort, construit en 2004 et rénové en 2020. Vente exclusive MAPA Property, 720 000 €.");
+  expect(meta("en")).toBe("Duplex apartment of 115 m² with 2 bedrooms for sale in Steinfort, built in 2004 and renovated in 2020. Exclusive sale by MAPA Property, €720,000.");
+  expect(meta("de")).toBe("Maisonette-Wohnung mit 115 m² und 2 Schlafzimmern zu verkaufen in Steinfort, erbaut 2004 und renoviert 2020. Exklusivverkauf von MAPA Property, 720.000 €.");
   for (const l of ["fr", "en", "de"] as const) {
-    const c = ctx(l);
-    const { body, common } = splitCommonMentions(steinfortHtml(l), c.seo.common_start);
-    expect(common).toContain("Real Estate Director");
-    expect(body).not.toContain("Real Estate Director");
-    const d = seoDescription(body, steinfort, l, c);
+    const d = meta(l);
     expect(d.length, `${l} : ${d}`).toBeGreaterThanOrEqual(120);
-    expect(d.length, `${l} : ${d}`).toBeLessThanOrEqual(META_MAX);
-    expect(d, `${l} : finit sur une phrase complete`).toMatch(/[.?]$/);
-    for (const forbidden of ["Julien Brebion", "reproduction", "Reproduction", "Vervielfältigung", "multilingue", "Multilingual", "Mehrsprachig", "Pour toute demande", "For any enquiry", "Für Anfragen"]) expect(d).not.toContain(forbidden);
-  }
-});
-
-test("meta description du duplex de Steinfort (3 langues) : premiere phrase complete", () => {
-  const want = {
-    fr: "MAPA Property a le plaisir de vous présenter, en vente exclusive, ce superbe appartement duplex de 2 chambres situé dans le charmant village de Steinfort.",
-    en: "MAPA Property is pleased to present, for sale on an exclusive basis, this superb duplex apartment with 2 bedrooms located in the charming village of Steinfort.",
-    de: "MAPA Property freut sich, Ihnen im Exklusivverkauf diese schöne Maisonette-Wohnung mit 2 Schlafzimmern im charmanten Dorf Steinfort vorzustellen.",
-  } as const;
-  for (const l of ["fr", "en", "de"] as const) {
-    const c = ctx(l);
-    const { body } = splitCommonMentions(steinfortHtml(l), c.seo.common_start);
-    const d = seoDescription(body, steinfort, l, c);
-    // La phrase entiere, faits ajoutes seulement s'ils tiennent en entier.
-    expect(d.startsWith(want[l]), `${l} : ${d}`).toBe(true);
     expect(d.length).toBeLessThanOrEqual(META_MAX);
-    expect(d).toMatch(/\.$/);
+    expect(d).not.toMatch(/le plaisir|pleased to present|freut sich/);
   }
 });
 
-test("meta description : premiere phrase trop longue coupee sur un mot, sans participe ni preposition finale", () => {
-  const long = (l: Lang, t: string) => seoDescription(`<p>${t}</p><p>Seconde phrase.</p>`, { ...steinfort, bedrooms: null, surface: null, living_surface: null, price: null }, l, ctx(l));
-  const fr = long("fr", "MAPA Property a le plaisir de vous présenter, en vente exclusive, cette remarquable maison de maître entièrement restaurée avec ses dépendances et son parc arboré situé dans le quartier historique de Luxembourg.");
-  expect(fr.length).toBeLessThanOrEqual(META_MAX);
-  expect(fr).not.toMatch(/\s(le|la|les|de|du|des|dans|à|au|en|et|avec|son|situé|située|construit|rénové)$/i);
-  const en = long("en", "MAPA Property is pleased to present, for sale on an exclusive basis, this remarkable mansion house fully restored with its outbuildings and its wooded park located in the historic district of Luxembourg.");
-  expect(en).not.toMatch(/\s(the|of|in|with|and|located|built|its)$/i);
-  const de = long("de", "MAPA Property freut sich, Ihnen im Exklusivverkauf dieses bemerkenswerte vollständig restaurierte Herrenhaus mit seinen Nebengebäuden und seinem Park im historischen Viertel von Luxemburg vorzustellen.");
-  expect(de).not.toMatch(/\s(im|von|mit|und|der|die|das|gelegen|erbaut)$/i);
-  for (const d of [fr, en, de]) expect(d.length).toBeLessThanOrEqual(META_MAX);
+test("meta description : atout retire d'abord, puis l'exclusivite ; phrases completes", () => {
+  const d1 = steinfortData();
+  d1.written.fr.highlights = "Calme";
+  expect(meta("fr", {}, d1)).toBe("Appartement duplex de 115 m² avec 2 chambres à vendre à Steinfort, construit en 2004 et rénové en 2020. Calme. Vente exclusive MAPA Property, 720 000 €.");
+  const long = meta("fr", { property_type: "maison-de-maitre", city: "Esch-sur-Alzette", bedrooms: 12, living_surface: 1250, surface: 1250, price: 12500000 });
+  expect(long.length).toBeLessThanOrEqual(META_MAX);
+  expect(long).toMatch(/12 500 000 €\.$/);
+  expect(long).not.toContain("Localisation");
+  for (const l of ["fr", "en", "de"] as const) expect(meta(l)).toMatch(/[.?]$/);
+});
+
+test("meta description : accords, segments vides, location, terrain, commercial", () => {
+  expect(meta("fr", { property_type: "villa", mandate_type: "simple" }, emptyListingData())).toBe("Villa de 115 m² avec 2 chambres à vendre à Steinfort, construite en 2004. 720 000 €.");
+  expect(meta("fr", { property_type: "appartement", bedrooms: 1, year_built: null, mandate_type: "simple" }, emptyListingData())).toBe("Appartement de 115 m² avec 1 chambre à vendre à Steinfort. 720 000 €.");
+  expect(meta("fr", { property_type: "appartement", transaction: "rent", price: 2400, mandate_type: "exclusive", year_built: null }, emptyListingData())).toBe(
+    "Appartement de 115 m² avec 2 chambres à louer à Steinfort. Location exclusive MAPA Property, 2 400 € par mois.",
+  );
+  const land = steinfortData();
+  land.facts = { zone_pag: "HAB-1", servicing: "full" };
+  expect(meta("fr", { property_type: "terrain", land_surface: 850, bedrooms: null, living_surface: null, surface: null, mandate_type: "simple", price: 450000 }, land)).toBe(
+    "Terrain de 8,5 ares (850 m²) à vendre à Steinfort, zone HAB-1 du PAG, terrain viabilisé. Localisation recherchée à Steinfort. 450 000 €.",
+  );
+  const shop = emptyListingData();
+  shop.facts = { yield_percent: 5.2 };
+  expect(meta("fr", { property_type: "local-commercial", usable_surface: 140, mandate_type: "simple" }, shop)).toBe("Local commercial de 140 m² à vendre à Steinfort, rendement de 5,2 %. 720 000 €.");
+  expect(meta("fr", { price: null, mandate_type: "simple" }, emptyListingData())).toBe("Appartement duplex de 115 m² avec 2 chambres à vendre à Steinfort, construit en 2004.");
+});
+
+test("Description Google saisie : remplace la version construite, controlee comme l'annonce", () => {
+  const d = steinfortData();
+  d.written.fr.seo_description = "Duplex de 115 m² à Steinfort, deux chambres, cave et double parking intérieur, à deux pas des commerces et de la gare de Kleinbettingen.";
+  expect(meta("fr", {}, d)).toBe(d.written.fr.seo_description);
+  expect(meta("en", {}, d)).toBe(meta("en"));
+  const form = read("components/admin/PropertyEditForm.tsx");
+  expect(form).toContain("data-seo-meta-field");
+  expect(form).toContain("seo_description_${l}");
+  expect(read("app/admin/properties/actions.ts")).toContain("seo_description_${l}");
 });
 
 test("mentions communes : bloc distinct a l'affichage, texte complet conserve en base", () => {

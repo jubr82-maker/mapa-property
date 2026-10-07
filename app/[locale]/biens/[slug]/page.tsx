@@ -42,7 +42,8 @@ import { cityForPlace, featuredCities } from "@/lib/internal-links";
 import { siteShareImage } from "@/lib/og";
 import { transactionDetailLabel } from "@/lib/taxonomy/property-types";
 import { effectiveBadge } from "@/lib/listing/families";
-import { photoAlt, seoDescription, seoTitle, splitCommonMentions, typeName, type SeoProperty } from "@/lib/listing/listing-seo";
+import { photoAlt, seoMetaDescription, seoTitle, splitCommonMentions, typeName, type SeoProperty } from "@/lib/listing/listing-seo";
+import type { ListingColumns } from "@/lib/listing/generate";
 import { propertyPathFor, propertyPaths, seoContext } from "@/lib/listing/property-paths";
 import { sanitizeListingData, type ListingLang } from "@/lib/listing/listing-data";
 import { fetchSearchesForCity } from "@/lib/searches/data";
@@ -62,6 +63,33 @@ function seoProperty(p: Property): SeoProperty {
     city: p.city ?? null,
     price: p.price ?? null,
     price_on_demand: (p as { price_on_demand?: boolean }).price_on_demand ?? false,
+  };
+}
+
+/** Colonnes du bien lues par le modele (meta description). */
+function listingColumnsOf(p: Property): ListingColumns {
+  const x = p as Property & Record<string, unknown>;
+  const num = (v: unknown) => (typeof v === "number" ? v : null);
+  return {
+    property_type: (x.property_type as string | null) ?? null,
+    transaction: p.transaction,
+    mandate_type: p.mandate_type ?? null,
+    city: p.city ?? null,
+    year_built: num(x.year) ?? num(x.year_built),
+    surface: p.surface ?? null,
+    living_surface: p.living_surface ?? null,
+    usable_surface: num(x.usable_surface),
+    land_surface: p.land_surface ?? null,
+    terrace_surface: p.terrace_surface ?? null,
+    balcony_surface: num(x.balcony_surface),
+    garden_surface: num(x.garden_surface),
+    bedrooms: p.bedrooms ?? null,
+    parking: p.parking ?? null,
+    has_pool: x.has_pool === true,
+    floor: (x.floor as string | null) ?? null,
+    price: p.price ?? null,
+    price_on_demand: x.price_on_demand === true,
+    current_use: (x.current_use as string | null) ?? null,
   };
 }
 
@@ -148,11 +176,12 @@ export async function generateMetadata({
   const lang = langOf(locale);
   const ctx = seoContext(lang);
   // Oct. 2026 : title construite par le modele (mots recherches d'abord,
-  // sans qualificatif) ; meta tiree du premier paragraphe du corps de
-  // l'annonce, jamais des mentions communes. Repli : ancienne meta.
-  const { body } = splitCommonMentions(pickLang(property, "description", locale as Locale) ?? "", ctx.seo.common_start);
+  // sans qualificatif) ; meta construite depuis les faits du bien, ou
+  // "Description Google" saisie dans l'admin. Repli : ancienne meta.
   const sp = seoProperty(property);
-  const description = seoDescription(body, sp, lang, ctx) || metaDescription(pickLang(property, "description", locale as Locale));
+  const description =
+    seoMetaDescription(listingColumnsOf(property), sanitizeListingData(property.listing_data ?? null), lang, { vocab: ctx.vocab, seo: ctx.seo, fallbackType: ctx.subtypes[sp.property_type ?? ""] }) ||
+    metaDescription(pickLang(property, "description", locale as Locale));
   const pageTitle = seoTitle(sp, lang, { ...ctx, fallbackType: ctx.subtypes[sp.property_type ?? ""] });
   const images = await fetchPropertyImages(property.id);
   // Carte de partage : photo principale de l'admin, sinon image du site.

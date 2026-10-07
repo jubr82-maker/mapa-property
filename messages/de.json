@@ -4263,7 +4263,14 @@
       "alt_room": "{room}, {place}",
       "alt_place": "{type} in {city}",
       "alt_photo": "{place}, Foto {n}",
-      "rent_suffix": " pro Monat"
+      "rent_suffix": " pro Monat",
+      "meta_head": "{{type}}{{#surface}}[[ mit {{surface}}]][[ und {{chambres}}]]{{/surface}}{{^surface}}[[ mit {{chambres}}]]{{/surface}} {{a_vendre}}[[ in {{commune}}]][[, {{construit}} {{annee_construction}}]][[ und {{renove}} {{annee_renovation}}]].",
+      "meta_head_terrain": "{{type}}[[ mit {{surface_terrain}}]] {{a_vendre}}[[ in {{commune}}]][[, PAG-Zone {{zone_pag}}]][[, {{viabilisation}}]].",
+      "meta_head_commercial": "{{type}}[[ mit {{surface_commerciale}}]] {{a_vendre}}[[ in {{commune}}]][[, laufende Mieteinnahmen von {{loyers_en_cours}} pro Monat]][[, Rendite {{rendement}}]].",
+      "meta_head_parking": "{{type}} {{a_vendre}}[[ in {{commune}}]][[, {{stationnement_interieur}}]][[, {{garage}}]].",
+      "meta_exclusive_sale": "Exklusivverkauf von MAPA Property",
+      "meta_exclusive_rent": "Exklusivvermietung von MAPA Property",
+      "meta_rent_price": "{prix} pro Monat"
     }
   },
   "admin_listing": {
@@ -4513,7 +4520,14 @@
     "alt_text": "Alternativtext ({lang})",
     "alt_save": "Alternativtexte speichern",
     "alt_saved": "Alternativtexte gespeichert.",
-    "alt_err_input": "Ungültige Fotoliste."
+    "alt_err_input": "Ungültige Fotoliste.",
+    "seo_meta_field": "Google-Beschreibung ({lang}), optional",
+    "seo_meta_placeholder": "Leer: aus den Objektdaten erstellte Beschreibung.",
+    "seo_meta_manual": "Eingegebene Beschreibung: Sie ersetzt die erstellte Fassung.",
+    "seo_meta_built": "Aus den Objektdaten erstellte Beschreibung.",
+    "seo_meta_label_fr": "Google-Beschreibung (FR)",
+    "seo_meta_label_en": "Google-Beschreibung (EN)",
+    "seo_meta_label_de": "Google-Beschreibung (DE)"
   },
   "searches_page": {
     "eyebrow": "Kaufen mit MAPA Property",

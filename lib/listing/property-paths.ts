@@ -7,16 +7,17 @@ import en from "@/messages/en.json";
 import de from "@/messages/de.json";
 import type { ListingLang } from "@/lib/listing/listing-data";
 import { propertyPath, type ListingSeoVocab, type SeoProperty } from "@/lib/listing/listing-seo";
+import type { ListingVocab } from "@/lib/listing/generate";
 
 type Msgs = {
-  listing_model: { vocab: { types: Record<string, string>; title_tx: { sale: string; rent: string } }; seo: ListingSeoVocab };
+  listing_model: { vocab: ListingVocab; seo: ListingSeoVocab };
   search: { type_subtype: Record<string, string> };
 };
 const ALL = { fr, en, de } as unknown as Record<ListingLang, Msgs>;
 
 export function seoContext(lang: ListingLang) {
   const m = ALL[lang];
-  return { types: m.listing_model.vocab.types, titleTx: m.listing_model.vocab.title_tx, seo: m.listing_model.seo, subtypes: m.search.type_subtype };
+  return { types: m.listing_model.vocab.types, titleTx: m.listing_model.vocab.title_tx, seo: m.listing_model.seo, subtypes: m.search.type_subtype, vocab: m.listing_model.vocab };
 }
 
 /** Adresse de la fiche dans une langue ("/biens/appartement-duplex-2-chambres-steinfort-86388715"). */

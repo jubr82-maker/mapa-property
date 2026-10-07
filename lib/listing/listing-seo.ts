@@ -10,6 +10,8 @@
 import { formatArea, formatMoney, parseTypeNoun, plural } from "@/lib/listing/language";
 import type { ListingLang } from "@/lib/listing/listing-data";
 import { htmlToText, renderTemplate } from "@/lib/listing/template-engine";
+import { listingValues, type ListingColumns, type ListingVocab } from "@/lib/listing/generate";
+import type { ListingData } from "@/lib/listing/listing-data";
 
 export type ListingSeoVocab = {
   title: string;
@@ -21,6 +23,13 @@ export type ListingSeoVocab = {
   alt_place: string;
   alt_photo: string;
   rent_suffix: string;
+  meta_head: string;
+  meta_head_terrain: string;
+  meta_head_commercial: string;
+  meta_head_parking: string;
+  meta_exclusive_sale: string;
+  meta_exclusive_rent: string;
+  meta_rent_price: string;
 };
 
 export type SeoProperty = {
@@ -149,50 +158,52 @@ export function cutOnWord(text: string, max: number): string {
   return out;
 }
 
-/** Phrases d'un texte (fin sur ".", "?" ou fin de paragraphe). */
-function sentences(text: string): string[] {
-  return text
-    .split(/\n{2,}/)
-    .map((x) => x.replace(/\s*\n\s*/g, " ").trim())
-    .filter(Boolean)
-    .flatMap((p) => p.match(/[^.?]+(?:[.?]+|$)/g) ?? [p])
-    .map((x) => x.trim())
-    .filter(Boolean)
-    .map((x) => (/[.?]$/.test(x) ? x : `${x}.`));
+/**
+ * Meta description construite depuis les faits du bien (oct. 2026), sur le
+ * modele "{Type} de {surface} avec {chambres} a vendre a {localite},
+ * construit en {annee} et renove en {annee}. {Premier atout}. Vente
+ * exclusive MAPA Property, {prix}." Accords du modele d'annonce, segments
+ * vides retires. Toujours des phrases completes, 160 caracteres au plus :
+ * l'atout tombe d'abord, puis la mention d'exclusivite.
+ */
+export function seoFactsDescription(
+  cols: ListingColumns,
+  data: ListingData,
+  lang: ListingLang,
+  ctx: { vocab: ListingVocab; seo: ListingSeoVocab; fallbackType?: string },
+): string {
+  const { values, family } = listingValues(cols, data, lang, ctx.vocab);
+  const surface = values.surface_habitable || (pos(cols.surface) ? formatArea(cols.surface, lang) : "");
+  const rent = cols.transaction === "rent";
+  const head =
+    family === "terrain" ? ctx.seo.meta_head_terrain : family === "commercial" ? ctx.seo.meta_head_commercial : family === "parking" ? ctx.seo.meta_head_parking : ctx.seo.meta_head;
+  // "Terrain viabilise" au fil de la phrase (l'allemand garde ses majuscules).
+  const lower = (v: string | null | undefined) => (v && lang !== "de" ? v.charAt(0).toLocaleLowerCase(lang) + v.slice(1) : v ?? "");
+  const first = renderTemplate(head, { ...values, viabilisation: lower(values.viabilisation), stationnement_interieur: lower(values.stationnement_interieur), garage: lower(values.garage), type: typeName(cols.property_type, lang, ctx.vocab.types, ctx.fallbackType), surface }).replace(/\s*\n\s*/g, " ").trim();
+  const highlight = (data.written[lang].highlights.split(/\n+/).map((x) => x.trim().replace(/^[-•*]\s*/, "")).find(Boolean) ?? "").replace(/[.\s]+$/, "");
+  const atout = highlight ? `${highlight}.` : "";
+  const price = !cols.price_on_demand && pos(cols.price) ? (rent ? ctx.seo.meta_rent_price.replace("{prix}", formatMoney(cols.price, lang)) : formatMoney(cols.price, lang)) : "";
+  const exclusive = cols.mandate_type === "exclusive" ? (rent ? ctx.seo.meta_exclusive_rent : ctx.seo.meta_exclusive_sale) : "";
+  const end = (withExclusive: boolean) => {
+    const parts = [withExclusive ? exclusive : "", price].filter(Boolean);
+    return parts.length ? `${parts.join(", ")}.` : "";
+  };
+  const join = (xs: string[]) => xs.filter(Boolean).join(" ");
+  for (const candidate of [join([first, atout, end(true)]), join([first, end(true)]), join([first, end(false)]), first]) {
+    if (candidate && candidate.length <= META_MAX) return candidate;
+  }
+  return cutOnWord(first.replace(/[.?]$/, ""), META_MAX);
 }
 
-/**
- * Meta description : premier paragraphe du corps de l'annonce (jamais la
- * signature, la cloture ni les mentions communes), completee par la
- * surface, les chambres et le prix. Ne coupe JAMAIS une phrase : la
- * description finit toujours sur une phrase complete, 160 caracteres au
- * plus, 150 vises et 120 acceptes. Seule exception : une premiere phrase
- * de plus de 160 caracteres est coupee sur un mot entier, sans preposition
- * ni participe en fin de texte.
- */
-export function seoDescription(
-  bodyHtml: string,
-  p: SeoProperty,
+/** Description Google : saisie a la main si remplie, sinon construite. */
+export function seoMetaDescription(
+  cols: ListingColumns,
+  data: ListingData,
   lang: ListingLang,
-  ctx: { seo: ListingSeoVocab },
+  ctx: { vocab: ListingVocab; seo: ListingSeoVocab; fallbackType?: string },
 ): string {
-  const list = sentences(htmlToText(bodyHtml));
-  const surface = pos(p.living_surface) ? p.living_surface : pos(p.surface) ? p.surface : null;
-  const priceText = !p.price_on_demand && pos(p.price) ? formatMoney(p.price, lang) + (p.transaction === "rent" ? ctx.seo.rent_suffix : "") : "";
-  const first = list[0] ?? "";
-  const facts = [surface ? formatArea(surface, lang) : "", pos(p.bedrooms) ? plural(ctx.seo.bedrooms, p.bedrooms, String) : "", priceText]
-    .filter(Boolean)
-    .filter((f) => !first.includes(f));
-  const factsSentence = facts.length ? `${facts.join(", ")}.` : "";
-  if (!first) return factsSentence;
-  if (first.length > META_MAX) return cutOnWord(first.replace(/[.?]$/, ""), META_MAX);
-  // Phrases entieres ajoutees tant qu'elles tiennent : faits, puis suite.
-  let text = first;
-  for (const next of [factsSentence, ...list.slice(1)].filter(Boolean)) {
-    if (text.length >= META_MIN) break;
-    if (`${text} ${next}`.length <= META_MAX) text = `${text} ${next}`;
-  }
-  return text;
+  const manual = data.written[lang].seo_description.trim();
+  return manual || seoFactsDescription(cols, data, lang, ctx);
 }
 
 /** Texte alternatif d'une photo : piece saisie, puis type et localite. */

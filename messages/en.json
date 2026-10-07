@@ -4263,7 +4263,14 @@
       "alt_room": "{room}, {place}",
       "alt_place": "{type} in {city}",
       "alt_photo": "{place}, photo {n}",
-      "rent_suffix": " per month"
+      "rent_suffix": " per month",
+      "meta_head": "{{type}}[[ of {{surface}}]][[ with {{chambres}}]] {{a_vendre}}[[ in {{commune}}]][[, {{construit}} in {{annee_construction}}]][[ and {{renove}} in {{annee_renovation}}]].",
+      "meta_head_terrain": "{{type}}[[ of {{surface_terrain}}]] {{a_vendre}}[[ in {{commune}}]][[, PAG zone {{zone_pag}}]][[, {{viabilisation}}]].",
+      "meta_head_commercial": "{{type}}[[ of {{surface_commerciale}}]] {{a_vendre}}[[ in {{commune}}]][[, current rental income of {{loyers_en_cours}} per month]][[, yield of {{rendement}}]].",
+      "meta_head_parking": "{{type}} {{a_vendre}}[[ in {{commune}}]][[, {{stationnement_interieur}}]][[, {{garage}}]].",
+      "meta_exclusive_sale": "Exclusive sale by MAPA Property",
+      "meta_exclusive_rent": "Exclusive rental by MAPA Property",
+      "meta_rent_price": "{prix} per month"
     }
   },
   "admin_listing": {
@@ -4513,7 +4520,14 @@
     "alt_text": "Alt text ({lang})",
     "alt_save": "Save alt texts",
     "alt_saved": "Alt texts saved.",
-    "alt_err_input": "Invalid photo list."
+    "alt_err_input": "Invalid photo list.",
+    "seo_meta_field": "Google description ({lang}), optional",
+    "seo_meta_placeholder": "Empty: description built from the property facts.",
+    "seo_meta_manual": "Entered description: it replaces the built version.",
+    "seo_meta_built": "Description built from the property facts.",
+    "seo_meta_label_fr": "Google description (FR)",
+    "seo_meta_label_en": "Google description (EN)",
+    "seo_meta_label_de": "Google description (DE)"
   },
   "searches_page": {
     "eyebrow": "Buy with MAPA Property",

@@ -279,7 +279,16 @@ export async function updateProperty(
     update.mandate_type = data.mandate_type;
   }
   // Modele d'annonce (SQL 17) : assaini (forme fermee, longueurs bornees).
-  if (data.listing_data !== undefined) update.listing_data = sanitizeListingData(data.listing_data);
+  if (data.listing_data !== undefined) {
+    const ld = sanitizeListingData(data.listing_data);
+    // Description Google saisie : memes regles de redaction que l'annonce.
+    const metaIssues = checkFields((["fr", "en", "de"] as const).map((l) => ({ field: `seo_description_${l}`, lang: l, text: ld.written[l].seo_description })));
+    if (metaIssues.length) {
+      const tl = await tListing();
+      return { ok: false, error: [tl("chk_blocked"), ...describeIssues(metaIssues, (k, v) => tl(k, v), (f) => tl(`seo_meta_label_${f.slice(-2)}`))].join("\n") };
+    }
+    update.listing_data = ld;
+  }
   // Passeport energetique : classe A+ a I ou vide.
   for (const key of ["energy", "thermal"] as const) {
     const v = (data[key] ?? "").trim();

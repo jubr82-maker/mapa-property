@@ -65,6 +65,8 @@ export type ListingWritten = {
   view: string;
   affectation: string;
   location_custom: string;
+  /** Description Google saisie (remplace la description construite). */
+  seo_description: string;
 };
 
 export type ListingData = {
@@ -77,7 +79,7 @@ export type ListingData = {
 
 export const WRITTEN_KEYS = ["qualifier", "ambiance", "highlights", "history", "view", "affectation", "location_custom"] as const;
 
-const emptyWritten = (): ListingWritten => ({ qualifier: "", ambiance: "", highlights: "", history: "", view: "", affectation: "", location_custom: "" });
+const emptyWritten = (): ListingWritten => ({ qualifier: "", ambiance: "", highlights: "", history: "", view: "", affectation: "", location_custom: "", seo_description: "" });
 
 export function emptyListingData(): ListingData {
   return { v: 1, written: { fr: emptyWritten(), en: emptyWritten(), de: emptyWritten() }, levels: [], facts: {}, auto: {} };
@@ -137,6 +139,7 @@ export function sanitizeListingData(input: unknown): ListingData {
       view: str(src.view, 200),
       affectation: str(src.affectation, 200),
       location_custom: str(src.location_custom, 120),
+      seo_description: str(src.seo_description, 300),
     };
   }
   const levels = Array.isArray(o.levels) ? o.levels.slice(0, MAX_LEVELS) : [];

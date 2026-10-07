@@ -39,7 +39,7 @@ import {
 import { ListingModelEditor } from "@/components/admin/ListingModelEditor";
 import { checkFields, describeIssues, type FieldIssues } from "@/lib/listing/writing-check";
 import { htmlToText } from "@/lib/listing/template-engine";
-import { ownTextWords, propertyPath, seoDescription, seoTitle, splitCommonMentions, type ListingSeoVocab } from "@/lib/listing/listing-seo";
+import { ownTextWords, propertyPath, seoMetaDescription, seoTitle, type ListingSeoVocab } from "@/lib/listing/listing-seo";
 import { generateListing, type GeneratedListing, type ListingColumns, type ListingTemplates, type ListingVocab } from "@/lib/listing/generate";
 import {
   AUTO_KEYS,
@@ -257,6 +257,8 @@ function isDirty(a: FormState, b: FormState): boolean {
   return (Object.keys(a) as (keyof FormState)[]).some((k) => a[k] !== b[k]);
 }
 
+const SEO_META_LABEL: Record<string, string> = { seo_description_fr: "seo_meta_label_fr", seo_description_en: "seo_meta_label_en", seo_description_de: "seo_meta_label_de" };
+
 const TEXT_FIELDS: { field: "title_fr" | "title_en" | "title_de" | "description_fr" | "description_en" | "description_de" | "short_description_fr" | "short_description_en" | "short_description_de"; lang: ListingLang; title: boolean; label: string }[] = [
   { field: "title_fr", lang: "fr", title: true, label: "f_title_fr" },
   { field: "title_en", lang: "en", title: true, label: "f_title_en" },
@@ -472,8 +474,10 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
       title: f.title,
       text: f.field.startsWith("description_") ? htmlToText(form[f.field]) : form[f.field],
     }));
-    return checkFields(items, listing.city ? [listing.city] : []);
-  }, [form, listing.city]);
+    // Description Google saisie (facultative) : memes regles de redaction.
+    const metaItems = LISTING_LANGS.map((l) => ({ field: `seo_description_${l}`, lang: l, title: false, text: listingData.written[l].seo_description }));
+    return checkFields([...items, ...metaItems], listing.city ? [listing.city] : []);
+  }, [form, listing.city, listingData.written]);
   // Apercu Google et indicateurs de referencement, en direct.
   const seoPreview = LISTING_LANGS.map((l) => {
     const c = seo.ctx[l];
@@ -498,13 +502,14 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
       lang: l,
       title: seoTitle(sp, l, { ...c, fallbackType }),
       url: `mapaproperty.lu/${l}${propertyPath(sp, l, c.types, c.seo, fallbackType)}`,
-      description: seoDescription(splitCommonMentions(form[`description_${l}`], c.seo.common_start).body, sp, l, c),
+      description: seoMetaDescription(listingCols, listingData, l, { vocab: listing.models[l].vocab, seo: c.seo, fallbackType }),
+      manual: listingData.written[l].seo_description.trim().length > 0,
       words,
     };
   });
 
   const describe = (list: FieldIssues[]) =>
-    describeIssues(list, (k, v) => tl(k, v), (field) => t(TEXT_FIELDS.find((f) => f.field === field)?.label ?? "f_title_fr"), 50);
+    describeIssues(list, (k, v) => tl(k, v), (field) => (SEO_META_LABEL[field] ? tl(SEO_META_LABEL[field]) : t(TEXT_FIELDS.find((f) => f.field === field)?.label ?? "f_title_fr")), 50);
 
   function markManual(k: AutoKey) {
     setListingData((d) => (d.auto[k] === false ? d : { ...d, auto: { ...d.auto, [k]: false } }));
@@ -608,7 +613,12 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
     e.preventDefault();
     setFeedback(null);
     setError(null);
-    const blocking = textChecks.filter((c) => form[c.field as keyof FormState] !== baseline[c.field as keyof FormState]);
+    const savedListing = JSON.parse(listingBaseline) as ListingData;
+    const blocking = textChecks.filter((c) =>
+      c.field.startsWith("seo_description_")
+        ? listingData.written[c.lang].seo_description !== (savedListing.written?.[c.lang]?.seo_description ?? "")
+        : form[c.field as keyof FormState] !== baseline[c.field as keyof FormState],
+    );
     if (blocking.length) {
       setError([tl("chk_blocked"), ...describe(blocking)].join("\n"));
       return;
@@ -801,6 +811,21 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
                   <p className="text-base text-[#1a0dab]">{p.title}</p>
                   <p className="text-xs text-[#3D4F63]/80">{p.description}</p>
                   <p className="text-[11px] text-[#3D4F63]/60">{tl("seo_lengths", { title: p.title.length, desc: p.description.length })}</p>
+                  {listing.available && (
+                    <label className="mt-1 block">
+                      <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">{tl("seo_meta_field", { lang: p.lang.toUpperCase() })}</span>
+                      <textarea
+                        rows={2}
+                        maxLength={300}
+                        value={listingData.written[p.lang].seo_description}
+                        placeholder={tl("seo_meta_placeholder")}
+                        onChange={(e) => setListingData((d) => ({ ...d, written: { ...d.written, [p.lang]: { ...d.written[p.lang], seo_description: e.target.value } } }))}
+                        className="mt-1 block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none"
+                        data-seo-meta-field
+                      />
+                      <span className="mt-1 block text-[11px] text-[#3D4F63]/60">{p.manual ? tl("seo_meta_manual") : tl("seo_meta_built")}</span>
+                    </label>
+                  )}
                   {listing.available && p.words < 150 && <p className="text-xs text-amber-800">{tl("seo_words_low", { count: p.words })}</p>}
                 </li>
               ))}
