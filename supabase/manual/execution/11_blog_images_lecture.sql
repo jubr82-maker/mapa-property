@@ -31,7 +31,7 @@ WITH images AS (
   CROSS JOIN LATERAL (VALUES ('fr', p.content_fr), ('en', p.content_en), ('de', p.content_de)) AS l(langue, html)
   CROSS JOIN LATERAL regexp_matches(coalesce(l.html, ''), '<img[^>]*?\s(src|data-src)\s*=\s*["'']([^"'']*)["'']', 'gi') AS m
 ),
-analyse AS (
+diag_images AS (
   SELECT i.*,
          substring(i.adresse from '^https?://([^/:?#]+)') AS hote,
          substring(i.adresse from '/storage/v1/object/public/([^/]+)/') AS bucket,
@@ -49,7 +49,7 @@ decode AS (
                     'UTF8')
            FROM regexp_matches(a.chemin_encode, '(%[0-9A-Fa-f]{2}|[^%]+|%)', 'g') WITH ORDINALITY AS t(tok, n)
          ) END AS chemin
-  FROM analyse a
+  FROM diag_images a
 )
 SELECT ('Article / ' || coalesce(d.slug, '(sans adresse)'))::text AS article,
        (CASE WHEN d.is_published THEN 'publie' ELSE 'brouillon' END)::text AS statut,
