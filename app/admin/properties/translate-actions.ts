@@ -13,6 +13,7 @@ import { sessionFailure } from "@/lib/admin/action-result";
 import { actionRateLimit } from "@/lib/admin/action-rate-limit";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { translateBatch } from "@/lib/translate";
+import { listingWritingPrompt } from "@/lib/listing/writing-rules";
 
 export type TranslatedFields = { title: string; description: string; short: string };
 export type TranslateResult =
@@ -51,7 +52,8 @@ export async function translatePropertyFromFrench(input: { title: string; descri
   }
 
   try {
-    const [en, de] = await Promise.all([translateBatch(source, "EN"), translateBatch(source, "DE")]);
+    // Regles de redaction des annonces imposees a la traduction.
+    const [en, de] = await Promise.all([translateBatch(source, "EN", listingWritingPrompt("en")), translateBatch(source, "DE", listingWritingPrompt("de"))]);
     return { ok: true, en: en as Partial<TranslatedFields>, de: de as Partial<TranslatedFields> };
   } catch (e) {
     const r = mistralReason(e);

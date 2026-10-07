@@ -49,6 +49,7 @@ export async function translateText(
   text: string,
   targetLang: TargetLang,
   sourceLang: SourceLang = "FR",
+  extraRules = "",
 ): Promise<string> {
   // Garde-fous : entrees vides / triviales -> pas d'appel API.
   if (!text || typeof text !== "string") return "";
@@ -89,7 +90,7 @@ HTML PRESERVATION (if input contains HTML tags):
 10. Translate ONLY the text content between tags.
 
 OUTPUT:
-11. Return ONLY the translation. No preamble, no quotes, no markdown, no explanations, no 'Here is the translation' prefix.`;
+11. Return ONLY the translation. No preamble, no quotes, no markdown, no explanations, no 'Here is the translation' prefix.${extraRules}`;
 
   const res = await fetch(MISTRAL_ENDPOINT, {
     method: "POST",
@@ -148,6 +149,8 @@ OUTPUT:
 export async function translateBatch(
   texts: Record<string, string | null | undefined>,
   targetLang: TargetLang,
+  // Consigne supplementaire (regles de redaction des annonces, oct. 2026).
+  extraRules = "",
 ): Promise<Record<string, string>> {
   const entries = Object.entries(texts).filter(
     ([, v]) => typeof v === "string" && v.trim().length > 0,
@@ -156,7 +159,7 @@ export async function translateBatch(
   if (entries.length === 0) return {};
 
   const translations = await Promise.all(
-    entries.map(([, text]) => translateText(text, targetLang)),
+    entries.map(([, text]) => translateText(text, targetLang, "FR", extraRules)),
   );
 
   const out: Record<string, string> = {};

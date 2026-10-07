@@ -18,7 +18,7 @@
  * une fois (pas de sauvegarde partielle par section).
  */
 
-import { createContext, useContext, useState, useTransition, useEffect, useRef } from "react";
+import { createContext, useContext, useMemo, useState, useTransition, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
@@ -33,8 +33,20 @@ import {
   familyOf,
   fieldVisible,
   isEnergyClass,
+  templateBlockOf,
   type ListingFamily,
 } from "@/lib/listing/families";
+import { ListingModelEditor } from "@/components/admin/ListingModelEditor";
+import { generateListing, type GeneratedListing, type ListingColumns, type ListingTemplates, type ListingVocab } from "@/lib/listing/generate";
+import {
+  AUTO_KEYS,
+  LISTING_LANGS,
+  listingEngaged,
+  sanitizeListingData,
+  type AutoKey,
+  type ListingData,
+  type ListingLang,
+} from "@/lib/listing/listing-data";
 
 // Valeurs enregistrees en base (inchangees, cf. allowlists de
 // app/admin/properties/actions.ts) ; libelles : cles admin_properties.
@@ -247,6 +259,21 @@ interface Props {
   initial: PropertyEditFormInitial;
   /** Colonne properties.mandate_type presente (SQL 16 execute). */
   mandateAvailable: boolean;
+  /** Modele d'annonce : colonne listing_data (SQL 17), modeles des 3 langues. */
+  listing: {
+    available: boolean;
+    initialData: unknown;
+    models: Record<ListingLang, { templates: ListingTemplates; vocab: ListingVocab }>;
+    transaction: string | null;
+    city: string | null;
+  };
+}
+
+/** Donnees du modele a l'ouverture : textes deja ecrits jamais remplaces. */
+function initialListing(raw: unknown, form: FormState): ListingData {
+  const d = sanitizeListingData(raw);
+  if (raw == null) for (const k of AUTO_KEYS) d.auto[k] = form[k].trim() === "";
+  return d;
 }
 
 // Famille du type choisi : Field et Section masquent les champs inutiles.
@@ -352,20 +379,79 @@ function EnergySelect({ value, onChange, labelNone, labelLegacy }: { value: stri
   );
 }
 
-export function PropertyEditForm({ propertyId, initial, mandateAvailable }: Props) {
+export function PropertyEditForm({ propertyId, initial, mandateAvailable, listing }: Props) {
   const t = useTranslations("admin_properties");
   const tn = useTranslations("admin_notices");
-  const [form, setForm] = useState<FormState>(() => toFormState(initial));
+  // Saisie brute ; "form" (plus bas) y ajoute les textes tires du modele.
+  const [rawForm, setForm] = useState<FormState>(() => toFormState(initial));
   const [baseline, setBaseline] = useState<FormState>(() => toFormState(initial));
+  const [listingData, setListingData] = useState<ListingData>(() => initialListing(listing.initialData, toFormState(initial)));
+  const [listingBaseline, setListingBaseline] = useState<string>(() => JSON.stringify(listingData));
+  const [listingLang, setListingLang] = useState<ListingLang>("fr");
   const [busy, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const dirty = isDirty(form, baseline);
   // Famille choisie avant le type ; un type hors liste (ancien import) n'a
   // pas de famille : tous les champs restent affiches.
   const [family, setFamily] = useState<ListingFamily | "">(() => familyOf(initial.property_type) ?? "");
-  const typeFamily = familyOf(form.property_type);
-  const legacyType = form.property_type !== "" && !typeFamily ? form.property_type : null;
+  const typeFamily = familyOf(rawForm.property_type);
+  const legacyType = rawForm.property_type !== "" && !typeFamily ? rawForm.property_type : null;
+
+  // Annonce tiree du modele, en direct, pour les trois langues.
+  const listingCols: ListingColumns = {
+    property_type: rawForm.property_type || null,
+    transaction: listing.transaction,
+    mandate_type: rawForm.mandate_type || null,
+    city: listing.city,
+    year_built: parseDecimalInput(rawForm.year) ?? parseDecimalInput(rawForm.year_built),
+    surface: parseDecimalInput(rawForm.surface),
+    living_surface: parseDecimalInput(rawForm.living_surface),
+    usable_surface: parseDecimalInput(rawForm.usable_surface),
+    land_surface: parseDecimalInput(rawForm.land_surface),
+    terrace_surface: parseDecimalInput(rawForm.terrace_surface),
+    balcony_surface: parseDecimalInput(rawForm.balcony_surface),
+    garden_surface: parseDecimalInput(rawForm.garden_surface),
+    bedrooms: parseDecimalInput(rawForm.bedrooms),
+    parking: parseDecimalInput(rawForm.parking),
+    has_pool: rawForm.has_pool,
+    floor: rawForm.floor || null,
+    price: parseDecimalInput(rawForm.price),
+    price_on_demand: rawForm.price_on_demand,
+    current_use: rawForm.current_use || null,
+  };
+  const colsKey = JSON.stringify(listingCols);
+  const generated = useMemo(() => {
+    const out = {} as Record<ListingLang, GeneratedListing>;
+    for (const l of LISTING_LANGS) out[l] = generateListing(JSON.parse(colsKey) as ListingColumns, listingData, l, listing.models[l].templates, listing.models[l].vocab);
+    return out;
+  }, [colsKey, listingData, listing.models]);
+  const engaged = listing.available && listingEngaged(listingData);
+
+  // Tant qu'un texte n'a pas ete modifie a la main, il suit le modele :
+  // la valeur affichee et enregistree est celle du modele.
+  const form = useMemo<FormState>(() => {
+    if (!engaged) return rawForm;
+    let next = rawForm;
+    for (const l of LISTING_LANGS) {
+      const pairs: [AutoKey, string][] = [
+        [`title_${l}` as AutoKey, generated[l].title],
+        [`description_${l}` as AutoKey, generated[l].html],
+      ];
+      for (const [k, v] of pairs) if (listingData.auto[k] && next[k] !== v) next = { ...next, [k]: v };
+    }
+    return next;
+  }, [engaged, generated, listingData.auto, rawForm]);
+  const dirty = isDirty(form, baseline) || (listing.available && JSON.stringify(listingData) !== listingBaseline);
+
+  function markManual(k: AutoKey) {
+    setListingData((d) => (d.auto[k] === false ? d : { ...d, auto: { ...d.auto, [k]: false } }));
+  }
+  function regenerate(l: ListingLang) {
+    if (!window.confirm(t("regen_confirm", { lang: l.toUpperCase() }))) return;
+    set(`title_${l}` as keyof FormState, generated[l].title as never);
+    set(`description_${l}` as keyof FormState, generated[l].html as never);
+    setListingData((d) => ({ ...d, auto: { ...d.auto, [`title_${l}`]: true, [`description_${l}`]: true } }));
+  }
 
   useEffect(() => {
     if (!dirty) return;
@@ -403,6 +489,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable }: Prop
       for (const [k, v] of proposals) {
         if (!overwrite && String(form[k] ?? "").trim()) continue;
         set(k, v as FormState[typeof k]);
+        if ((AUTO_KEYS as readonly string[]).includes(k)) markManual(k as AutoKey);
         applied++;
       }
       setTranslateMsg({ ok: true, text: t("translate_done", { count: applied }) });
@@ -467,6 +554,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable }: Prop
         const result = await updateProperty(propertyId, {
           property_type: changed("property_type") ? form.property_type : undefined,
           mandate_type: mandateAvailable && changed("mandate_type") ? form.mandate_type || null : undefined,
+          listing_data: listing.available ? listingData : undefined,
           title_fr: form.title_fr,
           title_en: form.title_en,
           title_de: form.title_de,
@@ -515,7 +603,9 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable }: Prop
         });
         if (result.ok) {
           setFeedback(t("saved"));
+          setForm(form);
           setBaseline(form);
+          setListingBaseline(JSON.stringify(listingData));
         } else {
           setError(result.error);
         }
@@ -596,6 +686,20 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable }: Prop
         </Field>
       </Section>
 
+      <Section title={t("sec_listing")} hint={listing.available ? t("hint_listing") : t("listing_unavailable")}>
+        {listing.available && (
+          <ListingModelEditor
+            data={listingData}
+            onChange={setListingData}
+            family={typeFamily}
+            block={templateBlockOf(form.property_type)}
+            rent={listing.transaction === "rent"}
+            lang={listingLang}
+            onLang={setListingLang}
+          />
+        )}
+      </Section>
+
       <Section title={t("sec_descriptions")}>
         <div className="md:col-span-2" data-admin-translate>
           <button
@@ -607,6 +711,24 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable }: Prop
             {translating ? t("translate_running") : t("translate_button")}
           </button>
           <p className="mt-1 text-xs text-[#3D4F63]/70">{t("translate_hint")}</p>
+          {listing.available && (
+            <div className="mt-3 flex flex-wrap items-center gap-2" data-listing-regen>
+              {LISTING_LANGS.map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => regenerate(l)}
+                  disabled={!engaged}
+                  className="rounded-full border border-[#3D4F63]/30 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e] disabled:opacity-50"
+                >
+                  {t("regen_button", { lang: l.toUpperCase() })}
+                </button>
+              ))}
+              <span className="text-xs text-[#3D4F63]/70">
+                {LISTING_LANGS.map((l) => t(listingData.auto[`description_${l}`] ? "auto_live" : "auto_manual", { lang: l.toUpperCase() })).join(" ")}
+              </span>
+            </div>
+          )}
           {translateMsg && (
             <p role={translateMsg.ok ? "status" : "alert"} className={`mt-1 text-sm ${translateMsg.ok ? "text-emerald-800" : "text-red-700"}`}>
               {translateMsg.text}
@@ -616,21 +738,30 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable }: Prop
         <Field label={t("f_title_fr")}>
           <input
             value={form.title_fr}
-            onChange={(e) => set("title_fr", e.target.value)}
+            onChange={(e) => {
+              set("title_fr", e.target.value);
+              markManual("title_fr");
+            }}
             className={inputCls}
           />
         </Field>
         <Field label={t("f_title_en")}>
           <input
             value={form.title_en}
-            onChange={(e) => set("title_en", e.target.value)}
+            onChange={(e) => {
+              set("title_en", e.target.value);
+              markManual("title_en");
+            }}
             className={inputCls}
           />
         </Field>
         <Field label={t("f_title_de")} full>
           <input
             value={form.title_de}
-            onChange={(e) => set("title_de", e.target.value)}
+            onChange={(e) => {
+              set("title_de", e.target.value);
+              markManual("title_de");
+            }}
             className={inputCls}
           />
         </Field>
@@ -642,21 +773,30 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable }: Prop
         >
           <RichTextEditor
             value={form.description_fr}
-            onChange={(v) => set("description_fr", v)}
+            onChange={(v) => {
+              set("description_fr", v);
+              markManual("description_fr");
+            }}
             placeholder={t("ph_description_fr")}
           />
         </Field>
         <Field label={t("f_description_en")} full>
           <RichTextEditor
             value={form.description_en}
-            onChange={(v) => set("description_en", v)}
+            onChange={(v) => {
+              set("description_en", v);
+              markManual("description_en");
+            }}
             placeholder={t("ph_description_en")}
           />
         </Field>
         <Field label={t("f_description_de")} full>
           <RichTextEditor
             value={form.description_de}
-            onChange={(v) => set("description_de", v)}
+            onChange={(v) => {
+              set("description_de", v);
+              markManual("description_de");
+            }}
             placeholder={t("ph_description_de")}
           />
         </Field>

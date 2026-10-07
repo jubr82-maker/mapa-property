@@ -118,3 +118,11 @@ export function effectiveBadge(badge: string | null | undefined, mandateType: st
   if (mandateType === "exclusive") return EXCLUSIVE_BADGE;
   return badge ?? null;
 }
+
+/** Pieces d'un modele modifiables dans Parametres > Modeles d'annonces. */
+export const TEMPLATE_PARTS = ["title", "tronc", ...LISTING_FAMILIES, "penthouse"] as const;
+export type TemplatePart = (typeof TEMPLATE_PARTS)[number];
+
+export function isTemplatePart(v: unknown): v is TemplatePart {
+  return typeof v === "string" && (TEMPLATE_PARTS as readonly string[]).includes(v);
+}

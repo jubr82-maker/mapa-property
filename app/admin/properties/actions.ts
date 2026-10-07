@@ -19,6 +19,7 @@ import { assertAdminAction, requireAdmin } from "@/lib/admin/require-admin";
 import { dbFailure, runAction, sessionFailure, type ActionResult as AdminActionResult } from "@/lib/admin/action-result";
 import { logAdminAction } from "@/lib/pilotage/audit";
 import { isEnergyClass, isListingType, isMandateType } from "@/lib/listing/families";
+import { sanitizeListingData } from "@/lib/listing/listing-data";
 import { sendAdminAlert } from "@/lib/pilotage/alerts";
 
 /** Libelles des messages renvoyes a l'ecran (admin_properties). */
@@ -148,6 +149,7 @@ export async function updateProperty(
   data: {
     property_type?: string;
     mandate_type?: string | null;
+    listing_data?: unknown;
     title_fr?: string | null;
     title_en?: string | null;
     title_de?: string | null;
@@ -226,6 +228,8 @@ export async function updateProperty(
     }
     update.mandate_type = data.mandate_type;
   }
+  // Modele d'annonce (SQL 17) : assaini (forme fermee, longueurs bornees).
+  if (data.listing_data !== undefined) update.listing_data = sanitizeListingData(data.listing_data);
   // Passeport energetique : classe A+ a I ou vide.
   for (const key of ["energy", "thermal"] as const) {
     const v = (data[key] ?? "").trim();

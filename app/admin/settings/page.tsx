@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { SettingsClient } from "@/components/admin/SettingsClient";
@@ -35,6 +36,17 @@ export default async function AdminSettingsPage() {
       </header>
 
       <SettingsClient userEmail={user?.email ?? null} />
+
+      <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6" data-settings-listing-templates>
+        <h2 className="font-display text-xl font-bold text-[#3D4F63]">{t("listing_templates_title")}</h2>
+        <p className="mt-2 text-sm text-[#3D4F63]/70">{t("listing_templates_hint")}</p>
+        <Link
+          href="/admin/settings/modeles"
+          className="mt-4 inline-block rounded-full border border-[#3D4F63]/30 px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:border-[#e0af6e]"
+        >
+          {t("listing_templates_open")}
+        </Link>
+      </section>
 
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
         <h2 className="font-display text-xl font-bold text-[#3D4F63]">

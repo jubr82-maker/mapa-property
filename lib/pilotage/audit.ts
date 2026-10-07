@@ -21,7 +21,8 @@ export type AdminAuditAction =
   | "settings_content_changed"
   | "settings_design_changed"
   | "performance_measured"
-  | "estimation_value_opinion";
+  | "estimation_value_opinion"
+  | "listing_template_changed";
 
 export async function logAdminAction(entry: {
   actorEmail: string | null | undefined;

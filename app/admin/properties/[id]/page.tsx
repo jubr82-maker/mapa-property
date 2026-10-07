@@ -5,6 +5,7 @@ import { ADMIN_LOCALE } from "@/lib/datetime";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PropertyVideoForm } from "@/components/admin/PropertyVideoForm";
 import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
+import { loadListingModels } from "@/lib/listing/model-server";
 import { PropertyPhotosSection } from "@/components/admin/PropertyPhotosSection";
 import { RevalidateButton } from "@/components/admin/RevalidateButton";
 import type { PhotoData } from "@/components/admin/PhotoManager";
@@ -44,6 +45,11 @@ export default async function AdminPropertyEditPage({
   const mandateRes = await supabase.from("properties").select("mandate_type").eq("id", id).maybeSingle();
   const mandateAvailable = !mandateRes.error;
   const mandateType = mandateAvailable ? ((mandateRes.data as { mandate_type?: string | null } | null)?.mandate_type ?? null) : null;
+  // Modele d'annonce (SQL 17) : meme principe, colonne listing_data.
+  const listingRes = await supabase.from("properties").select("listing_data").eq("id", id).maybeSingle();
+  const listingAvailable = !listingRes.error;
+  const listingData = listingAvailable ? ((listingRes.data as { listing_data?: unknown } | null)?.listing_data ?? null) : null;
+  const models = await loadListingModels();
 
   // Photos depuis la table `property_images` (schema
   // réel = table jointe, pas colonne jsonb). cover = sort 0.
@@ -118,6 +124,17 @@ export default async function AdminPropertyEditPage({
         <PropertyEditForm
           propertyId={data.id}
           mandateAvailable={mandateAvailable}
+          listing={{
+            available: listingAvailable,
+            initialData: listingData,
+            models: {
+              fr: { templates: models.fr.templates, vocab: models.fr.vocab },
+              en: { templates: models.en.templates, vocab: models.en.vocab },
+              de: { templates: models.de.templates, vocab: models.de.vocab },
+            },
+            transaction: data.transaction ?? null,
+            city: data.city ?? null,
+          }}
           initial={{
             property_type: data.property_type ?? null,
             mandate_type: mandateType,

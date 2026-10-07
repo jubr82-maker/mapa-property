@@ -33,6 +33,7 @@ export const SERVER_ONLY_NAMESPACES: ReadonlySet<string> = new Set([
   "not_found",
   "intent_pages",
   "value_opinion",
+  "listing_model",
 ]);
 
 export function clientMessages(all: Record<string, unknown>): Record<string, unknown> {
