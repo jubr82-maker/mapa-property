@@ -39,6 +39,7 @@ import {
 import { ListingModelEditor } from "@/components/admin/ListingModelEditor";
 import { checkFields, describeIssues, type FieldIssues } from "@/lib/listing/writing-check";
 import { htmlToText } from "@/lib/listing/template-engine";
+import { ownTextWords, propertyPath, seoDescription, seoTitle, splitCommonMentions, type ListingSeoVocab } from "@/lib/listing/listing-seo";
 import { generateListing, type GeneratedListing, type ListingColumns, type ListingTemplates, type ListingVocab } from "@/lib/listing/generate";
 import {
   AUTO_KEYS,
@@ -281,7 +282,11 @@ interface Props {
     transaction: string | null;
     city: string | null;
   };
+  /** Referencement : apercu Google en direct et indicateurs (jamais bloquants). */
+  seo: { slug: string; ctx: Record<ListingLang, SeoLangCtx>; photosWithoutAlt: number | null };
 }
+
+type SeoLangCtx = { types: Record<string, string>; titleTx: { sale: string; rent: string }; seo: ListingSeoVocab; subtypes: Record<string, string> };
 
 /** Donnees du modele a l'ouverture : textes deja ecrits jamais remplaces. */
 function initialListing(raw: unknown, form: FormState): ListingData {
@@ -393,7 +398,7 @@ function EnergySelect({ value, onChange, labelNone, labelLegacy }: { value: stri
   );
 }
 
-export function PropertyEditForm({ propertyId, initial, mandateAvailable, listing }: Props) {
+export function PropertyEditForm({ propertyId, initial, mandateAvailable, listing, seo }: Props) {
   const t = useTranslations("admin_properties");
   const tn = useTranslations("admin_notices");
   // Saisie brute ; "form" (plus bas) y ajoute les textes tires du modele.
@@ -469,6 +474,35 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
     }));
     return checkFields(items, listing.city ? [listing.city] : []);
   }, [form, listing.city]);
+  // Apercu Google et indicateurs de referencement, en direct.
+  const seoPreview = LISTING_LANGS.map((l) => {
+    const c = seo.ctx[l];
+    const sp = {
+      slug: seo.slug,
+      property_type: form.property_type || null,
+      transaction: listing.transaction,
+      bedrooms: parseDecimalInput(form.bedrooms),
+      surface: parseDecimalInput(form.surface),
+      living_surface: parseDecimalInput(form.living_surface),
+      city: listing.city,
+      price: parseDecimalInput(form.price),
+      price_on_demand: form.price_on_demand,
+    };
+    const fallbackType = c.subtypes[sp.property_type ?? ""];
+    const words = ownTextWords([
+      listingData.written[l].ambiance,
+      listingData.written[l].highlights,
+      ...listingData.levels.flatMap((lv) => lv.rooms.map((r) => r.text[l])),
+    ]);
+    return {
+      lang: l,
+      title: seoTitle(sp, l, { ...c, fallbackType }),
+      url: `mapaproperty.lu/${l}${propertyPath(sp, l, c.types, c.seo, fallbackType)}`,
+      description: seoDescription(splitCommonMentions(form[`description_${l}`], c.seo.common_start).body, sp, l, c),
+      words,
+    };
+  });
+
   const describe = (list: FieldIssues[]) =>
     describeIssues(list, (k, v) => tl(k, v), (field) => t(TEXT_FIELDS.find((f) => f.field === field)?.label ?? "f_title_fr"), 50);
 
@@ -756,6 +790,23 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
                 ))}
               </ul>
             )}
+          </div>
+          <div className="mt-3 rounded-md border border-[#3D4F63]/15 bg-white px-3 py-2" data-seo-preview>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">{tl("seo_preview_title")}</p>
+            <ul className="mt-2 space-y-3">
+              {seoPreview.map((p) => (
+                <li key={p.lang} className="text-sm">
+                  <span className="font-mono text-[10px] text-[#3D4F63]/60">{p.lang.toUpperCase()}</span>
+                  <p className="break-all text-xs text-emerald-800">{p.url}</p>
+                  <p className="text-base text-[#1a0dab]">{p.title}</p>
+                  <p className="text-xs text-[#3D4F63]/80">{p.description}</p>
+                  <p className="text-[11px] text-[#3D4F63]/60">{tl("seo_lengths", { title: p.title.length, desc: p.description.length })}</p>
+                  {listing.available && p.words < 150 && <p className="text-xs text-amber-800">{tl("seo_words_low", { count: p.words })}</p>}
+                </li>
+              ))}
+            </ul>
+            {seo.photosWithoutAlt !== null && seo.photosWithoutAlt > 0 && <p className="mt-2 text-xs text-amber-800">{tl("seo_photos_no_alt", { count: seo.photosWithoutAlt })}</p>}
+            <p className="mt-2 text-[11px] text-[#3D4F63]/60">{tl("seo_never_blocks")}</p>
           </div>
           {listing.available && (
             <div className="mt-3 flex flex-wrap items-center gap-2" data-listing-regen>

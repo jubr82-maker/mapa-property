@@ -3834,7 +3834,8 @@
     "sim_yield": "Rental yield",
     "section_title": "Explore the markets and simulate your project",
     "city_market": "The {city} market",
-    "fiche_title": "Go further"
+    "fiche_title": "Go further",
+    "fiche_searches_title": "Our current searches in {city}"
   },
   "intent_pages": {
     "faq_title": "Frequently asked questions",
@@ -4249,6 +4250,20 @@
         "type_title": "{type}",
         "bedrooms_title": "at least 1 bedroom|at least {n} bedrooms"
       }
+    },
+    "seo": {
+      "title": "{{type}}[[ {{chambres}}]][[ {{surface}}]] {{a_vendre}}[[ in {{commune}}]]",
+      "brand": " | MAPA Property",
+      "bedrooms": "1 bedroom|{n} bedrooms",
+      "path_bedrooms": "{n} bedroom|{n} bedrooms",
+      "common_start": [
+        "For any enquiry",
+        "Julien Brebion, Real Estate Director"
+      ],
+      "alt_room": "{room}, {place}",
+      "alt_place": "{type} in {city}",
+      "alt_photo": "{place}, photo {n}",
+      "rent_suffix": " per month"
     }
   },
   "admin_listing": {
@@ -4483,7 +4498,22 @@
     "location_custom": "Free text",
     "f_location_custom": "Free wording ({lang})",
     "hint_location_custom": "Text placed before the municipality name, e.g. \"a short walk from the centre of\". Empty: \"in\".",
-    "key_lieu": "Location wording and municipality"
+    "key_lieu": "Location wording and municipality",
+    "seo_preview_title": "Google result preview",
+    "seo_lengths": "Title: {title} characters (aim 60); description: {desc} characters (150 to 160).",
+    "seo_words_low": "Listing's own text (ambiance, rooms, strengths): {count} words, fewer than 150.",
+    "seo_photos_no_alt": "{count, plural, one {# photo has} other {# photos have}} no custom alt text in all three languages.",
+    "seo_never_blocks": "Guidance only: saving is never blocked.",
+    "alt_title": "Photo alt texts",
+    "alt_hint": "For each photo, choose the room shown; the text is built from the room, then the property type and location. You can also write it yourself.",
+    "alt_unavailable": "Alt texts can be saved once SQL file 20 has been run.",
+    "alt_no_photos": "No photo for this property.",
+    "alt_room": "Room shown",
+    "alt_room_none": "None (type and location)",
+    "alt_text": "Alt text ({lang})",
+    "alt_save": "Save alt texts",
+    "alt_saved": "Alt texts saved.",
+    "alt_err_input": "Invalid photo list."
   },
   "searches_page": {
     "eyebrow": "Buy with MAPA Property",
@@ -4554,7 +4584,8 @@
       "immeuble-de-rapport": "Investment building",
       "fonds-de-commerce": "Business for sale",
       "garage": "Garage"
-    }
+    },
+    "city_properties_title": "Our properties in {city}"
   },
   "admin_searches": {
     "eyebrow": "Management",

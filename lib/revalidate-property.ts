@@ -13,6 +13,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { PROPERTIES_LIST_TAG } from "@/lib/data";
 import { localizedUrls, scheduleIndexNow } from "@/lib/indexnow";
 import { supabaseService } from "@/lib/supabase-service";
+import { propertyPaths } from "@/lib/listing/property-paths";
 
 /**
  * `propertyId` (facultatif) : bien publie ou modifie, signale a IndexNow
@@ -23,12 +24,27 @@ export function revalidatePublicPropertyPages(propertyId?: string | null): void 
     scheduleIndexNow(async () => {
       const { data } = await supabaseService()
         .from("properties")
-        .select("slug,is_published")
+        .select("slug,is_published,property_type,transaction,bedrooms,surface,city,price")
         .eq("id", propertyId)
         .maybeSingle();
-      const row = data as { slug: string | null; is_published: boolean | null } | null;
+      const row = data as ({ slug: string | null; is_published: boolean | null } & Record<string, unknown>) | null;
       const urls = localizedUrls("/biens");
-      if (row?.slug) urls.push(...localizedUrls(`/biens/${row.slug}`));
+      if (row?.slug) {
+        // Adresse lisible de chaque langue (lib/listing/property-paths.ts).
+        const paths = propertyPaths({
+          slug: row.slug,
+          property_type: (row.property_type as string | null) ?? null,
+          transaction: (row.transaction as string | null) ?? null,
+          bedrooms: (row.bedrooms as number | null) ?? null,
+          surface: (row.surface as number | null) ?? null,
+          city: (row.city as string | null) ?? null,
+          price: (row.price as number | null) ?? null,
+        });
+        for (const l of ["fr", "en", "de"] as const) {
+          const u = localizedUrls(paths[l]).find((x) => x.includes(`/${l}/`));
+          if (u) urls.push(u);
+        }
+      }
       return urls;
     });
   }

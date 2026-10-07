@@ -163,20 +163,20 @@ export const breadcrumb = (items: BreadcrumbItem[]) => ({
   })),
 });
 
-// Type schema.org le plus proche du type de bien (vérifié sur schema.org :
-// Accommodation existe, sous-types confirmés Apartment/House/Room/Suite/
-// CampingPitch — "SingleFamilyResidence" n'est pas un sous-type confirmé,
-// on ne l'utilise pas). Fallback générique "Accommodation" si le type
-// précis ne se range ni sous la famille appartement ni maison (terrain,
-// local professionnel, immeuble, etc. — pas de sous-type Accommodation
-// pertinent pour ceux-là).
+// Type schema.org du logement (oct. 2026, verifie sur schema.org :
+// Apartment, House et SingleFamilyResidence sont des sous-types
+// d'Accommodation ; Place pour un terrain ou un emplacement). Jamais
+// Product.
 function accommodationTypeFor(
   propertyType: string | null | undefined,
-): "House" | "Apartment" | "Accommodation" {
+): "House" | "Apartment" | "SingleFamilyResidence" | "Accommodation" | "Place" {
   if (!propertyType) return "Accommodation";
+  if (["maison-individuelle", "maison-plain-pied", "villa"].includes(propertyType)) return "SingleFamilyResidence";
+  if (["terrain", "parking", "garage"].includes(propertyType)) return "Place";
   const parent = CHILD_TO_PARENT[propertyType] ?? propertyType;
   if (parent === "appartement") return "Apartment";
-  if (parent === "maison") return "House";
+  if (parent === "maison" || ["chateau", "propriete-domaine", "propriete-de-prestige", "maison-de-maitre"].includes(propertyType)) return "House";
+  if (parent === "terrain") return "Place";
   return "Accommodation";
 }
 
@@ -215,6 +215,8 @@ interface RealEstateListingInput {
   bathrooms?: number | null;
   /** Slug taxonomie MAPA (lib/taxonomy/property-types.ts). */
   propertyType?: string | null;
+  /** sale ou rent : un loyer est declare par mois. */
+  transaction?: string | null;
 }
 
 /**
@@ -243,6 +245,10 @@ export const realEstateListing = (p: RealEstateListingInput) => {
     offers: {
       "@type": "Offer",
       ...(p.price ? { price: p.price, priceCurrency: "EUR" } : {}),
+      // Loyer : prix par mois (UnitPriceSpecification, code MON).
+      ...(p.price && p.transaction === "rent"
+        ? { priceSpecification: { "@type": "UnitPriceSpecification", price: p.price, priceCurrency: "EUR", unitCode: "MON" } }
+        : {}),
       availability: "https://schema.org/InStock",
       url: p.url,
       itemOffered: {
@@ -255,11 +261,12 @@ export const realEstateListing = (p: RealEstateListingInput) => {
               ],
             }
           : {}),
-        ...(p.surface
+        // Surface et pieces : proprietes d'Accommodation, pas d'un terrain.
+        ...(p.surface && accommodationType !== "Place"
           ? { floorSize: { "@type": "QuantitativeValue", value: p.surface, unitCode: "MTK" } }
           : {}),
-        ...(p.bedrooms != null ? { numberOfBedrooms: p.bedrooms } : {}),
-        ...(p.bathrooms != null ? { numberOfBathroomsTotal: p.bathrooms } : {}),
+        ...(p.bedrooms != null && accommodationType !== "Place" ? { numberOfBedrooms: p.bedrooms } : {}),
+        ...(p.bathrooms != null && accommodationType !== "Place" ? { numberOfBathroomsTotal: p.bathrooms } : {}),
         ...(p.city || p.country
           ? {
               address: {

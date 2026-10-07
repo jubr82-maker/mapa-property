@@ -3834,7 +3834,8 @@
     "sim_yield": "Rendement locatif",
     "section_title": "Explorer les marchés et simuler votre projet",
     "city_market": "Le marché à {city}",
-    "fiche_title": "Pour aller plus loin"
+    "fiche_title": "Pour aller plus loin",
+    "fiche_searches_title": "Nos recherches en cours à {city}"
   },
   "intent_pages": {
     "faq_title": "Questions fréquentes",
@@ -4249,6 +4250,20 @@
         "type_title": "{type}",
         "bedrooms_title": "1 chambre|{n} chambres"
       }
+    },
+    "seo": {
+      "title": "{{type}}[[ {{chambres}}]][[ {{surface}}]] {{a_vendre}}[[ à {{commune}}]]",
+      "brand": " | MAPA Property",
+      "bedrooms": "1 chambre|{n} chambres",
+      "path_bedrooms": "{n} chambre|{n} chambres",
+      "common_start": [
+        "Pour toute demande",
+        "Julien Brebion, Real Estate Director"
+      ],
+      "alt_room": "{room}, {place}",
+      "alt_place": "{type} à {city}",
+      "alt_photo": "{place}, photo {n}",
+      "rent_suffix": " par mois"
     }
   },
   "admin_listing": {
@@ -4483,7 +4498,22 @@
     "location_custom": "Saisie libre",
     "f_location_custom": "Formule libre ({lang})",
     "hint_location_custom": "Texte placé devant le nom de la commune, par exemple « à deux pas du centre de ». Vide : « à ».",
-    "key_lieu": "Formule de situation et commune (dans le charmant village de Steinfort)"
+    "key_lieu": "Formule de situation et commune (dans le charmant village de Steinfort)",
+    "seo_preview_title": "Aperçu du résultat Google",
+    "seo_lengths": "Titre : {title} caractères (60 visés) ; description : {desc} caractères (150 à 160).",
+    "seo_words_low": "Texte propre à l'annonce (ambiance, pièces, atouts) : {count} mots, moins de 150. Un texte plus fourni aide le référencement.",
+    "seo_photos_no_alt": "{count, plural, one {# photo n'a pas} other {# photos n'ont pas}} de texte alternatif personnalisé dans les trois langues (section Textes alternatifs des photos).",
+    "seo_never_blocks": "Indications seulement : l'enregistrement n'est jamais bloqué.",
+    "alt_title": "Textes alternatifs des photos",
+    "alt_hint": "Pour chaque photo, choisissez la pièce montrée : le texte est construit depuis la pièce et sa description, puis le type de bien et la localité. Vous pouvez aussi l'écrire vous-même dans chaque langue.",
+    "alt_unavailable": "Les textes alternatifs seront enregistrables après exécution du fichier SQL 20.",
+    "alt_no_photos": "Aucune photo pour ce bien.",
+    "alt_room": "Pièce montrée",
+    "alt_room_none": "Aucune (type de bien et localité)",
+    "alt_text": "Texte alternatif ({lang})",
+    "alt_save": "Enregistrer les textes alternatifs",
+    "alt_saved": "Textes alternatifs enregistrés.",
+    "alt_err_input": "Liste de photos invalide."
   },
   "searches_page": {
     "eyebrow": "Acheter avec MAPA Property",
@@ -4554,7 +4584,8 @@
       "immeuble-de-rapport": "Immeuble de rapport",
       "fonds-de-commerce": "Fonds de commerce",
       "garage": "Garage"
-    }
+    },
+    "city_properties_title": "Nos biens à {city}"
   },
   "admin_searches": {
     "eyebrow": "Gestion",

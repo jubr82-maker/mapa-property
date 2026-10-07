@@ -35,13 +35,44 @@ import {
   ALL_SECTION_TITLE_KEYS,
 } from "@/lib/property-description-parser";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { realEstateListing, pageAlternates } from "@/lib/seo";
+import { realEstateListing } from "@/lib/seo";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { ExploreLinks } from "@/components/seo/ExploreLinks";
 import { cityForPlace, featuredCities } from "@/lib/internal-links";
 import { siteShareImage } from "@/lib/og";
 import { transactionDetailLabel } from "@/lib/taxonomy/property-types";
 import { effectiveBadge } from "@/lib/listing/families";
+import { photoAlt, seoDescription, seoTitle, splitCommonMentions, typeName, type SeoProperty } from "@/lib/listing/listing-seo";
+import { propertyPathFor, propertyPaths, seoContext } from "@/lib/listing/property-paths";
+import { sanitizeListingData, type ListingLang } from "@/lib/listing/listing-data";
+import { fetchSearchesForCity } from "@/lib/searches/data";
+import { SearchCard } from "@/components/searches/SearchCard";
+import type { Property } from "@/lib/types";
+
+const langOf = (locale: string): ListingLang => (locale === "en" || locale === "de" ? locale : "fr");
+
+function seoProperty(p: Property): SeoProperty {
+  return {
+    slug: p.slug,
+    property_type: (p as { property_type?: string | null }).property_type ?? null,
+    transaction: p.transaction,
+    bedrooms: p.bedrooms ?? null,
+    surface: p.surface ?? null,
+    living_surface: p.living_surface ?? null,
+    city: p.city ?? null,
+    price: p.price ?? null,
+    price_on_demand: (p as { price_on_demand?: boolean }).price_on_demand ?? false,
+  };
+}
+
+/** Canonique et hreflang : l'adresse lisible de chaque langue. */
+function propertyAlternates(p: Property, locale: string) {
+  const paths = propertyPaths(seoProperty(p));
+  return {
+    canonical: `/${locale}${paths[langOf(locale)]}`,
+    languages: { fr: `/fr${paths.fr}`, en: `/en${paths.en}`, de: `/de${paths.de}`, "x-default": `/fr${paths.fr}` },
+  };
+}
 
 // Sprint OPTIM-1A : ISR 30 min (vs 60s avant). Les fiches biens changent
 // rarement (titre/description/prix edites depuis admin invalident deja
@@ -75,11 +106,11 @@ export const revalidate = 86400;
 export async function generateStaticParams() {
   try {
     const properties = await fetchPublishedProperties();
-    const slugs = properties
-      .map((p) => p.slug)
-      .filter((s): s is string => typeof s === "string" && s.length > 0);
+    // Adresse lisible de chaque langue (la fiche redirige les autres).
     return routing.locales.flatMap((locale) =>
-      slugs.map((slug) => ({ locale, slug })),
+      properties
+        .filter((p) => typeof p.slug === "string" && p.slug.length > 0)
+        .map((p) => ({ locale, slug: propertyPathFor(seoProperty(p), langOf(locale)).replace(/^\/biens\//, "") })),
     );
   } catch (e) {
     console.warn("[biens/[slug]] generateStaticParams failed:", e);
@@ -114,28 +145,31 @@ export async function generateMetadata({
   if (!property) return {};
 
   const title = pickLang(property, "title", locale as Locale);
-  // SEO oct. 2026 : la description est du HTML (editeur TipTap) ; la meta
-  // et og:description recoivent un texte sans balise ni entite, coupe
-  // proprement a 155 caracteres.
-  const description = metaDescription(
-    pickLang(property, "description", locale as Locale),
-  );
+  const lang = langOf(locale);
+  const ctx = seoContext(lang);
+  // Oct. 2026 : title construite par le modele (mots recherches d'abord,
+  // sans qualificatif) ; meta tiree du premier paragraphe du corps de
+  // l'annonce, jamais des mentions communes. Repli : ancienne meta.
+  const { body } = splitCommonMentions(pickLang(property, "description", locale as Locale) ?? "", ctx.seo.common_start);
+  const sp = seoProperty(property);
+  const description = seoDescription(body, sp, lang, ctx) || metaDescription(pickLang(property, "description", locale as Locale));
+  const pageTitle = seoTitle(sp, lang, { ...ctx, fallbackType: ctx.subtypes[sp.property_type ?? ""] });
   const images = await fetchPropertyImages(property.id);
   // Carte de partage : photo principale de l'admin, sinon image du site.
   const shareImage = images[0]?.url ?? siteShareImage();
-  const path = `/biens/${property.slug}`;
+  const alternates = propertyAlternates(property, locale);
   const shareTitle = htmlToPlainText(title);
 
   // Open Graph et carte X identiques (meme titre, description et image) :
   // sans champ twitter, la fiche heritait de la carte generique du layout.
   return {
-    title: brandedTitle(title),
+    title: { absolute: pageTitle || brandedTitle(title) },
     description: description || undefined,
-    alternates: pageAlternates(locale, path),
+    alternates,
     openGraph: {
       title: shareTitle,
       description: description || undefined,
-      url: `/${locale}${path}`,
+      url: alternates.canonical,
       siteName: "MAPA Property",
       type: "website",
       images: [{ url: shareImage }],
@@ -173,6 +207,13 @@ export default async function PropertyPage({
     notFound();
   }
 
+  // Adresse lisible et stable (oct. 2026) : toute autre adresse du bien
+  // (slug, identifiant, ancien titre) redirige de facon permanente (308).
+  const lang = langOf(locale);
+  const canonicalPath = propertyPathFor(seoProperty(property), lang);
+  if (decodeURIComponent(slug) !== canonicalPath.replace(/^\/biens\//, "")) permanentRedirect(`/${locale}${canonicalPath}`);
+  const seoCtx = seoContext(lang);
+
   const [images, allProperties] = await Promise.all([
     fetchPropertyImages(property.id),
     fetchAllPropertiesWithCover(),
@@ -182,7 +223,11 @@ export default async function PropertyPage({
   const tf = await getTranslations({ locale, namespace: "fiche" });
   const tEx = await getTranslations({ locale, namespace: "explore" });
   const title = pickLang(property, "title", locale as Locale);
-  const description = pickLang(property, "description", locale as Locale);
+  // Mentions communes (cloture, signature, service multilingue, copyright)
+  // affichees dans un bloc distinct, hors du corps de la description. Le
+  // texte complet reste en base pour les exports vers les portails.
+  const split = splitCommonMentions(pickLang(property, "description", locale as Locale) ?? "", seoCtx.seo.common_start);
+  const description = split.body;
   // Sprint UI-I18N : on construit le dict { titleKey -> label localise }
   // depuis le namespace fiche.section_* et on le passe au parser pour
   // que les titres H3/H4 detectes (FR/EN/DE) soient rendus dans la
@@ -196,11 +241,22 @@ export default async function PropertyPage({
 
   type GalleryItem = { type: "image" | "video"; url: string; alt?: string };
   // Galerie photos uniquement — la vidéo est isolée en pleine largeur (cf. <section> ci-dessous).
-  const galleryItems: GalleryItem[] = images.map((img) => ({
+  // Textes alternatifs (oct. 2026) : saisi photo par photo, sinon la piece
+  // associee et sa description, puis le type de bien et la localite.
+  const listingRooms = new Map(
+    sanitizeListingData(property.listing_data ?? null).levels.flatMap((lv) => lv.rooms.map((r) => [r.id, r.text[lang]] as const)),
+  );
+  const typeLabel = typeName(seoProperty(property).property_type, lang, seoCtx.types, seoCtx.subtypes[seoProperty(property).property_type ?? ""]);
+  const galleryItems: GalleryItem[] = images.map((img, i) => ({
     type: "image",
     url: img.url,
-    alt: title,
+    alt: photoAlt(
+      { custom: img[`alt_${lang}` as const] ?? null, room: img.room_id ? listingRooms.get(img.room_id) ?? null : null, index: i, typeLabel, city: property.city, title: htmlToPlainText(title) },
+      seoCtx.seo,
+    ),
   }));
+  const citySlug = cityForPlace(property.city)?.slug ?? null;
+  const citySearches = citySlug ? await fetchSearchesForCity(citySlug) : [];
 
   // Biens similaires — logique stricte V3 : même type + prix ±15% +
   // même pays (idéalement même ville), excluant le bien actuel.
@@ -236,7 +292,7 @@ export default async function PropertyPage({
   const propertyJsonLd = realEstateListing({
     name: title,
     description: htmlToPlainText(description).slice(0, 500),
-    url: `${SITE_URL}/${locale}/biens/${property.slug}`,
+    url: `${SITE_URL}/${locale}${canonicalPath}`,
     images: galleryItems.map((g) => g.url).slice(0, 12),
     datePosted: (property as { created_at?: string | null }).created_at ?? null,
     dateModified: (property as { updated_at?: string | null }).updated_at ?? null,
@@ -249,6 +305,7 @@ export default async function PropertyPage({
     bedrooms: property.bedrooms,
     bathrooms: property.bathrooms,
     propertyType,
+    transaction: property.transaction,
   });
 
 
@@ -305,10 +362,17 @@ export default async function PropertyPage({
       id: "description",
       label: tf("tab_description"),
       content: hasDescription ? (
-        <PropertyMagazineDescription
-          description={description}
-          parsed={parsedDescription}
-        />
+        <>
+          <PropertyMagazineDescription
+            description={description}
+            parsed={parsedDescription}
+          />
+          {split.common ? (
+            <section data-listing-mentions className="mt-8 border-t border-line pt-6">
+              <PropertyMagazineDescription description={split.common} parsed={parseApimoDescription(split.common, { titles: sectionTitles })} />
+            </section>
+          ) : null}
+        </>
       ) : (
         <p className="text-sm leading-relaxed text-ink-mid">
           {tf("overview_intro")}
@@ -363,7 +427,7 @@ export default async function PropertyPage({
   // URL print-only : domaine final hardcode (SITE_URL peut resoudre
   // beta.mapaproperty.lu ou *.vercel.app en staging — inadapte pour un
   // document imprime distribue aux clients).
-  const canonicalUrl = `https://mapaproperty.lu/${locale}/biens/${property.slug}`;
+  const canonicalUrl = `https://mapaproperty.lu/${locale}${canonicalPath}`;
 
   return (
     <article className="pt-24 lg:pt-32">
@@ -374,7 +438,7 @@ export default async function PropertyPage({
         offmarket={false}
       />
       <JsonLd data={propertyJsonLd} />
-      <PageBreadcrumb locale={locale} path={`/biens/${property.slug}`} current={htmlToPlainText(title)} />
+      <PageBreadcrumb locale={locale} path={canonicalPath} current={htmlToPlainText(title)} />
       {/* Print-only : entete avec le logo officiel sur fond clair (SVG) + URL
           canonique. Invisible a l'ecran. */}
       <div data-fiche-print-header className="hidden print:block">
@@ -501,6 +565,20 @@ export default async function PropertyPage({
             />
           </div>
         </section>
+
+        {/* Recherches en cours dans la commune du bien (oct. 2026). */}
+        {citySearches.length > 0 && (
+          <section className="mt-16 print:hidden" data-fiche-city-searches>
+            <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">{tEx("fiche_searches_title", { city: property.city ?? "" })}</h2>
+            <ul className="mt-6 grid gap-5 md:grid-cols-2">
+              {citySearches.slice(0, 2).map((s) => (
+                <li key={s.id}>
+                  <SearchCard search={s} locale={locale} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Biens similaires */}
         {similar.length > 0 && (

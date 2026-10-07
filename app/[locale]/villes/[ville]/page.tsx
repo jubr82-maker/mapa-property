@@ -11,6 +11,9 @@ import { getCityBySlug, getCitySlugs, getNearbyCities, type City } from "@/lib/c
 import { routing } from "@/i18n/routing";
 import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
+import { PropertyCard } from "@/components/property/PropertyCard";
+import { fetchAllPropertiesWithCover } from "@/lib/data";
+import { cityForPlace } from "@/lib/internal-links";
 
 type Locale = "fr" | "en" | "de";
 
@@ -129,6 +132,8 @@ export default async function VillePage({
   const nearby = getNearbyCities(city.slug, 4);
   // Recherches en cours qui visent cette commune (oct. 2026).
   const searches = await fetchSearchesForCity(city.slug);
+  // Biens publies de la commune (oct. 2026).
+  const cityProperties = (await fetchAllPropertiesWithCover()).filter((p) => cityForPlace(p.city)?.slug === city.slug);
   const ts = await getTranslations({ locale, namespace: "searches_page" });
 
   return (
@@ -222,6 +227,19 @@ export default async function VillePage({
             {t.cta_estimate}
           </Link>
         </section>
+
+        {cityProperties.length > 0 ? (
+          <section className="mt-16" data-city-properties>
+            <h2 className="t-h2">{ts("city_properties_title", { city: city.name[loc] })}</h2>
+            <ul className="mt-6 grid gap-5 sm:grid-cols-2">
+              {cityProperties.slice(0, 6).map((p) => (
+                <li key={p.id}>
+                  <PropertyCard property={p} locale={loc} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {searches.length > 0 ? (
           <section className="mt-16" data-city-searches>

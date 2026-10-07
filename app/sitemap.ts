@@ -99,11 +99,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     properties
       .filter((p) => Boolean(p.slug))
       .map((p) => ({
-        url: `${SITE_URL}/${locale}/biens/${p.slug}`,
+        url: `${SITE_URL}/${locale}${p.paths?.[locale] ?? `/biens/${p.slug}`}`,
         lastModified: validDate((p as { updated_at?: string | null }).updated_at),
         changeFrequency: "weekly" as const,
         priority: 0.8,
-        alternates: { languages: buildAlternates(`/biens/${p.slug}`) },
+        alternates: {
+          languages: p.paths
+            ? { fr: `${SITE_URL}/fr${p.paths.fr}`, en: `${SITE_URL}/en${p.paths.en}`, de: `${SITE_URL}/de${p.paths.de}`, "x-default": `${SITE_URL}/fr${p.paths.fr}` }
+            : buildAlternates(`/biens/${p.slug}`),
+        },
       })),
   );
 

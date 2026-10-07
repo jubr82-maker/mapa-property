@@ -3834,7 +3834,8 @@
     "sim_yield": "Mietrendite",
     "section_title": "Märkte entdecken und Ihr Projekt berechnen",
     "city_market": "Der Markt in {city}",
-    "fiche_title": "Weiterführend"
+    "fiche_title": "Weiterführend",
+    "fiche_searches_title": "Unsere aktuellen Suchen in {city}"
   },
   "intent_pages": {
     "faq_title": "Häufige Fragen",
@@ -4249,6 +4250,20 @@
         "type_title": "{type}",
         "bedrooms_title": "mindestens 1 Schlafzimmer|mindestens {n} Schlafzimmern"
       }
+    },
+    "seo": {
+      "title": "{{type}}[[ {{chambres}}]][[ {{surface}}]] {{a_vendre}}[[ in {{commune}}]]",
+      "brand": " | MAPA Property",
+      "bedrooms": "1 Schlafzimmer|{n} Schlafzimmer",
+      "path_bedrooms": "{n} Schlafzimmer|{n} Schlafzimmer",
+      "common_start": [
+        "Für Anfragen",
+        "Julien Brebion, Real Estate Director"
+      ],
+      "alt_room": "{room}, {place}",
+      "alt_place": "{type} in {city}",
+      "alt_photo": "{place}, Foto {n}",
+      "rent_suffix": " pro Monat"
     }
   },
   "admin_listing": {
@@ -4483,7 +4498,22 @@
     "location_custom": "Freie Eingabe",
     "f_location_custom": "Freie Formulierung ({lang})",
     "hint_location_custom": "Text vor dem Gemeindenamen, z. B. \"wenige Schritte vom Zentrum von\". Leer: \"in\".",
-    "key_lieu": "Lageformulierung und Gemeinde"
+    "key_lieu": "Lageformulierung und Gemeinde",
+    "seo_preview_title": "Vorschau des Google-Ergebnisses",
+    "seo_lengths": "Titel: {title} Zeichen (Ziel 60); Beschreibung: {desc} Zeichen (150 bis 160).",
+    "seo_words_low": "Eigener Anzeigentext (Stimmung, Räume, Vorzüge): {count} Wörter, weniger als 150.",
+    "seo_photos_no_alt": "{count, plural, one {# Foto hat} other {# Fotos haben}} keinen eigenen Alternativtext in allen drei Sprachen.",
+    "seo_never_blocks": "Nur Hinweise: Das Speichern wird nie blockiert.",
+    "alt_title": "Alternativtexte der Fotos",
+    "alt_hint": "Wählen Sie für jedes Foto den gezeigten Raum; der Text entsteht aus dem Raum, dann Objektart und Ort. Sie können ihn auch selbst schreiben.",
+    "alt_unavailable": "Alternativtexte sind nach Ausführung der SQL-Datei 20 speicherbar.",
+    "alt_no_photos": "Kein Foto für dieses Objekt.",
+    "alt_room": "Gezeigter Raum",
+    "alt_room_none": "Keiner (Art und Ort)",
+    "alt_text": "Alternativtext ({lang})",
+    "alt_save": "Alternativtexte speichern",
+    "alt_saved": "Alternativtexte gespeichert.",
+    "alt_err_input": "Ungültige Fotoliste."
   },
   "searches_page": {
     "eyebrow": "Kaufen mit MAPA Property",
@@ -4554,7 +4584,8 @@
       "immeuble-de-rapport": "Renditeobjekt",
       "fonds-de-commerce": "Geschäftsübernahme",
       "garage": "Garage"
-    }
+    },
+    "city_properties_title": "Unsere Immobilien in {city}"
   },
   "admin_searches": {
     "eyebrow": "Verwaltung",

@@ -28,6 +28,8 @@ export interface Property {
   // Type de mandat (SQL 16, oct. 2026) : exclusive, semi_exclusive, simple,
   // autonomous. Absent tant que la colonne n'existe pas.
   mandate_type?: string | null;
+  // Modele d'annonce (SQL 17) : pieces par niveau (textes alternatifs).
+  listing_data?: unknown;
   // Sprint badges commerciaux : libellé admin-driven (allowlist 6 valeurs
   // côté server action) + taille (S/M/L) + position (4 coins). Couleur
   // dérivée du libellé via mapping côté code (PropertyCard).
@@ -61,6 +63,11 @@ export interface PropertyImage {
   property_id: string;
   url: string;
   sort: number | null;
+  // Textes alternatifs et piece de la photo (SQL 20, oct. 2026), absents avant.
+  alt_fr?: string | null;
+  alt_en?: string | null;
+  alt_de?: string | null;
+  room_id?: string | null;
 }
 
 export interface PropertyOffmarket {

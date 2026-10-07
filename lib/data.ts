@@ -4,6 +4,8 @@ import { supabaseServer } from "./supabase-server";
 import { getLocalizedField } from "./i18n-field";
 import { publicCoverUrl, selectPublicImages } from "./property-images";
 import { effectiveBadge } from "./listing/families";
+import { refTokenFromParam } from "./listing/listing-seo";
+import { propertyPaths } from "./listing/property-paths";
 import type {
   BlogPost,
   InterestRates,
@@ -31,7 +33,21 @@ export async function fetchFeaturedProperties(limit = 6): Promise<Property[]> {
   return safeArray<Property>(data as Property[] | null);
 }
 
-export type PropertyWithCover = Property & { cover_url: string | null };
+// paths : adresse lisible de la fiche par langue (lib/listing/property-paths.ts).
+export type PropertyWithCover = Property & { cover_url: string | null; paths?: Record<string, string> };
+
+function pathsOf(row: { slug: string | null; property_type?: string | null; transaction?: string | null; bedrooms?: number | null; surface?: number | null; city?: string | null; price?: number | null }) {
+  if (!row.slug) return undefined;
+  return propertyPaths({
+    slug: row.slug,
+    property_type: row.property_type ?? null,
+    transaction: row.transaction ?? null,
+    bedrooms: row.bedrooms ?? null,
+    surface: row.surface ?? null,
+    city: row.city ?? null,
+    price: row.price ?? null,
+  });
+}
 
 export async function fetchFeaturedPropertiesWithCover(
   limit = 6,
@@ -52,6 +68,7 @@ export async function fetchFeaturedPropertiesWithCover(
   return ((data as Row[] | null) ?? []).map((row) => ({
     ...row,
     cover_url: publicCoverUrl(row.property_images),
+    paths: pathsOf(row),
   }));
 }
 
@@ -72,6 +89,8 @@ export type HomeFeatured = {
   surface: number | null;
   bedrooms: number | null;
   created_at: string | null;
+  /** Adresse lisible par langue (biens Apimo), absente pour l'off-market. */
+  paths?: Record<string, string>;
   // Sprint badges commerciaux : badge admin-driven sur biens apimo. Pour
   // offmarket : toujours null (offmarket conserve sa pilule cuivre dédiée
   // côté FeaturedCarousel, géré séparément).
@@ -104,7 +123,7 @@ export async function fetchHomeFeatured(
     withMandateColumn((extra) =>
       sb
         .from("properties")
-        .select(`id,slug,title_fr,title_en,title_de,city,country,price,surface,bedrooms,created_at,badge,badge_size,badge_position${extra},property_images(url,sort)`)
+        .select(`id,slug,property_type,transaction,title_fr,title_en,title_de,city,country,price,surface,bedrooms,created_at,badge,badge_size,badge_position${extra},property_images(url,sort)`)
         .eq("is_published", true)
         .eq("is_featured", true)
         .order("created_at", { ascending: false })
@@ -142,6 +161,8 @@ export async function fetchHomeFeatured(
       | "bottom-right"
       | null;
     mandate_type?: string | null;
+    property_type?: string | null;
+    transaction?: string | null;
     property_images: { url: string; sort: number | null }[] | null;
   };
   type OffmarketRow = {
@@ -178,6 +199,7 @@ export async function fetchHomeFeatured(
       surface: row.surface,
       bedrooms: row.bedrooms,
       created_at: row.created_at,
+      paths: pathsOf(row),
       badge: effectiveBadge(row.badge, row.mandate_type),
       badge_size: row.badge_size,
       badge_position: row.badge_position,
@@ -298,6 +320,7 @@ const fetchPropertiesWithCoverCached = unstable_cache(
           ...row,
           badge: effectiveBadge(row.badge, row.mandate_type),
           cover_url: publicCoverUrl(row.property_images),
+          paths: pathsOf(row),
         }) as unknown as PropertyWithCover,
     );
   },
@@ -408,6 +431,17 @@ async function resolvePropertyOnce(
       if (!error && data) return { data: data as Property, transient: false };
       if (error) note(col, error);
     }
+  }
+
+  // 4) Adresse lisible (oct. 2026) : "appartement-duplex-2-chambres-
+  //    steinfort-86388715". La reference est le dernier segment : slug
+  //    numerique Apimo, ou suffixe de 8 caracteres du slug cree dans l'admin.
+  const token = refTokenFromParam(identifier);
+  if (token !== identifier.toLowerCase()) {
+    const q = sb.from("properties").select("*").eq("is_published", true);
+    const { data, error } = await (/^\d+$/.test(token) ? q.eq("slug", token) : q.like("slug", `%-${token}`)).limit(2);
+    if (!error && data && data.length === 1) return { data: data[0] as Property, transient: false };
+    if (error) note("token", error);
   }
 
   return { data: null, transient };

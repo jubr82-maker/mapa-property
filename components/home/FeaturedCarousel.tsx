@@ -341,9 +341,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
   const isOffmarket = item.kind === "offmarket";
   const href = isOffmarket
     ? `/off-market/${item.id}`
-    : item.slug
-      ? `/biens/${item.slug}`
-      : "/biens";
+    : item.paths?.[locale] ?? (item.slug ? `/biens/${item.slug}` : "/biens");
 
   return (
     <Link

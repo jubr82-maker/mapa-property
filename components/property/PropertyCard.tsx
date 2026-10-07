@@ -53,10 +53,13 @@ export function PropertyCard({
   // Fallback sur id si slug manquant : la route /biens/[slug] sait résoudre
   // un UUID via fetchPropertyByIdOrSlug, donc on évite un lien cassé.
   const target = property.slug || property.id;
+  // Adresse lisible (oct. 2026) quand elle est connue ; sinon le slug, que
+  // la fiche redirige vers l'adresse lisible.
+  const href = property.paths?.[locale] ?? `/biens/${target}`;
 
   return (
     <Link
-      href={`/biens/${target}`}
+      href={href}
       onClick={onClick}
       className="group flex h-full flex-col overflow-hidden rounded-xl border border-border-subtle bg-bg transition-all hover:border-gold hover:shadow-lg hover:shadow-gold/10"
     >

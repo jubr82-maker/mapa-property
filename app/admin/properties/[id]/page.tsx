@@ -6,6 +6,10 @@ import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PropertyVideoForm } from "@/components/admin/PropertyVideoForm";
 import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
 import { loadListingModels } from "@/lib/listing/model-server";
+import { PhotoAltEditor } from "@/components/admin/PhotoAltEditor";
+import { seoContext } from "@/lib/listing/property-paths";
+import { typeName } from "@/lib/listing/listing-seo";
+import { sanitizeListingData } from "@/lib/listing/listing-data";
 import { PropertyPhotosSection } from "@/components/admin/PropertyPhotosSection";
 import { RevalidateButton } from "@/components/admin/RevalidateButton";
 import type { PhotoData } from "@/components/admin/PhotoManager";
@@ -19,6 +23,7 @@ export default async function AdminPropertyEditPage({
 }) {
   const { id } = await params;
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
+  const tl = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_listing" });
   const supabase = await createSupabaseServerClient();
 
   // Select elargi a toutes les colonnes de contenu de `properties` :
@@ -50,6 +55,25 @@ export default async function AdminPropertyEditPage({
   const listingAvailable = !listingRes.error;
   const listingData = listingAvailable ? ((listingRes.data as { listing_data?: unknown } | null)?.listing_data ?? null) : null;
   const models = await loadListingModels();
+
+  // Referencement (oct. 2026) : textes alternatifs des photos (SQL 20) et
+  // apercu Google de la fiche.
+  const altRes = await supabase.from("property_images").select("url, sort, alt_fr, alt_en, alt_de, room_id").eq("property_id", id).order("sort", { ascending: true });
+  const altAvailable = !altRes.error;
+  const altRows = ((altRes.data as { url: string; alt_fr: string | null; alt_en: string | null; alt_de: string | null; room_id: string | null }[] | null) ?? []).map((r) => ({
+    url: r.url,
+    room_id: r.room_id,
+    alt_fr: r.alt_fr ?? "",
+    alt_en: r.alt_en ?? "",
+    alt_de: r.alt_de ?? "",
+  }));
+  const photosWithoutAlt = altAvailable ? altRows.filter((r) => !r.alt_fr || !r.alt_en || !r.alt_de).length : null;
+  const listingRooms = sanitizeListingData(listingData).levels.flatMap((lv) => lv.rooms);
+  const seoCtx = { fr: seoContext("fr"), en: seoContext("en"), de: seoContext("de") };
+  const pType = (data as { property_type?: string | null }).property_type ?? null;
+  const altCtx = Object.fromEntries(
+    (["fr", "en", "de"] as const).map((l) => [l, { seo: seoCtx[l].seo, typeLabel: typeName(pType, l, seoCtx[l].types, seoCtx[l].subtypes[pType ?? ""]) }]),
+  ) as Record<"fr" | "en" | "de", { seo: (typeof seoCtx)["fr"]["seo"]; typeLabel: string }>;
 
   // Photos depuis la table `property_images` (schema
   // réel = table jointe, pas colonne jsonb). cover = sort 0.
@@ -135,6 +159,7 @@ export default async function AdminPropertyEditPage({
             transaction: data.transaction ?? null,
             city: data.city ?? null,
           }}
+          seo={{ slug: data.slug, ctx: seoCtx, photosWithoutAlt }}
           initial={{
             property_type: data.property_type ?? null,
             mandate_type: mandateType,
@@ -222,6 +247,22 @@ export default async function AdminPropertyEditPage({
         <PropertyPhotosSection
           propertyId={data.id}
           initialPhotos={initialPhotos}
+        />
+      </section>
+
+      <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6" data-admin-photo-alts>
+        <header className="mb-4">
+          <h2 className="font-display text-xl font-bold text-[#3D4F63]">{tl("alt_title")}</h2>
+          <p className="mt-2 text-sm text-[#3D4F63]/70">{tl("alt_hint")}</p>
+        </header>
+        <PhotoAltEditor
+          propertyId={data.id}
+          available={altAvailable}
+          photos={altRows}
+          rooms={listingRooms}
+          ctx={altCtx}
+          city={data.city ?? null}
+          title={data.title_fr ?? ""}
         />
       </section>
 

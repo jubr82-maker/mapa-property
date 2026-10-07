@@ -137,6 +137,15 @@ export async function savePropertyPhotos(
   await assertAdminAction();
   try {
     const supabase = await createSupabaseServerClient();
+    // Textes alternatifs et pieces (SQL 20, oct. 2026) conserves photo par
+    // photo a travers la reecriture des lignes ; colonnes absentes : rien.
+    const { data: prevAlts, error: altErr } = await supabase
+      .from("property_images")
+      .select("url, alt_fr, alt_en, alt_de, room_id")
+      .eq("property_id", propertyId);
+    const altByUrl = new Map(
+      altErr ? [] : ((prevAlts as { url: string; alt_fr: string | null; alt_en: string | null; alt_de: string | null; room_id: string | null }[] | null) ?? []).map((r) => [r.url, r] as const),
+    );
     // Wipe existing rows pour ce property_id
     const { error: delErr } = await supabase
       .from("property_images")
@@ -157,11 +166,15 @@ export async function savePropertyPhotos(
         if (!a.isCover && b.isCover) return 1;
         return a.order - b.order;
       });
-      const rows = sorted.map((p, idx) => ({
-        property_id: propertyId,
-        url: p.url,
-        sort: idx,
-      }));
+      const rows = sorted.map((p, idx) => {
+        const prev = altByUrl.get(p.url);
+        return {
+          property_id: propertyId,
+          url: p.url,
+          sort: idx,
+          ...(prev ? { alt_fr: prev.alt_fr, alt_en: prev.alt_en, alt_de: prev.alt_de, room_id: prev.room_id } : {}),
+        };
+      });
       const { error: insErr } = await supabase.from("property_images").insert(rows);
       if (insErr) {
         console.error("[admin/properties/photos] insert rows echoue", {
