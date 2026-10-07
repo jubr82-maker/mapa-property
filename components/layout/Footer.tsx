@@ -12,6 +12,7 @@ const colServices = [
   { href: "/off-market", key: "off_market" },
   { href: "/services/estimer", key: "estimate" },
   { href: "/mandats/recherche", key: "search_mandate" },
+  { href: "/recherches", key: "our_searches" },
   { href: "/services/simulateurs", key: "simulators" },
 ] as const;
 

@@ -66,6 +66,7 @@ const LEAD_TYPES = [
   "mandate_simple",
   "mandate_autonomous",
   "offmarket_request",
+  "owner_search",
 ] as const;
 
 export function LeadsTable({

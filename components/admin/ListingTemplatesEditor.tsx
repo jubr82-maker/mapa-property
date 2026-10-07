@@ -13,9 +13,19 @@ import { LISTING_TYPES, MANDATE_TYPES, TEMPLATE_PARTS, type TemplatePart } from 
 import { generateListing, listingValues, type ListingTemplates, type ListingVocab } from "@/lib/listing/generate";
 import { LISTING_LANGS, type ListingLang } from "@/lib/listing/listing-data";
 import { sampleColumns, sampleListing, type SampleTexts } from "@/lib/listing/sample";
+import { generateSearch, publicBudgetRange, searchValues, type SearchTemplates, type SearchVocab } from "@/lib/searches/search";
 import { saveListingTemplate, resetListingTemplate } from "@/app/admin/settings/modeles/actions";
 
-type LangModel = { templates: ListingTemplates; defaults: ListingTemplates; vocab: ListingVocab; sample: SampleTexts; overridden: TemplatePart[] };
+type LangModel = {
+  templates: ListingTemplates;
+  defaults: ListingTemplates;
+  vocab: ListingVocab;
+  sample: SampleTexts & { search_communes: string; search_criteria: string };
+  search: { templates: SearchTemplates; defaults: SearchTemplates; vocab: SearchVocab };
+  overridden: TemplatePart[];
+};
+type Tpl = { listing: ListingTemplates; search: SearchTemplates };
+const isSearchPart = (p: TemplatePart) => p === "search_title" || p === "search";
 
 const inputCls =
   "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none";
@@ -24,15 +34,19 @@ const pill = (on: boolean) =>
     on ? "border-[#3D4F63] bg-[#3D4F63] text-[#F5EFE1]" : "border-[#3D4F63]/30 text-[#3D4F63] hover:border-[#e0af6e]"
   }`;
 
-function partOf(tpl: ListingTemplates, part: TemplatePart): string {
-  if (part === "title") return tpl.title;
-  if (part === "tronc") return tpl.tronc;
-  return tpl.blocks[part] ?? "";
+function partOf(tpl: Tpl, part: TemplatePart): string {
+  if (part === "search_title") return tpl.search.title;
+  if (part === "search") return tpl.search.body;
+  if (part === "title") return tpl.listing.title;
+  if (part === "tronc") return tpl.listing.tronc;
+  return tpl.listing.blocks[part] ?? "";
 }
-function withPart(tpl: ListingTemplates, part: TemplatePart, body: string): ListingTemplates {
-  if (part === "title") return { ...tpl, title: body };
-  if (part === "tronc") return { ...tpl, tronc: body };
-  return { ...tpl, blocks: { ...tpl.blocks, [part]: body } };
+function withPart(tpl: Tpl, part: TemplatePart, body: string): Tpl {
+  if (part === "search_title") return { ...tpl, search: { ...tpl.search, title: body } };
+  if (part === "search") return { ...tpl, search: { ...tpl.search, body } };
+  if (part === "title") return { ...tpl, listing: { ...tpl.listing, title: body } };
+  if (part === "tronc") return { ...tpl, listing: { ...tpl.listing, tronc: body } };
+  return { ...tpl, listing: { ...tpl.listing, blocks: { ...tpl.listing.blocks, [part]: body } } };
 }
 
 export function ListingTemplatesEditor({ models }: { models: Record<ListingLang, LangModel> }) {
@@ -40,12 +54,12 @@ export function ListingTemplatesEditor({ models }: { models: Record<ListingLang,
   const tp = useTranslations("admin_properties");
   const [lang, setLang] = useState<ListingLang>("fr");
   const [part, setPart] = useState<TemplatePart>("tronc");
-  const [drafts, setDrafts] = useState<Record<ListingLang, ListingTemplates>>(() => ({
-    fr: models.fr.templates,
-    en: models.en.templates,
-    de: models.de.templates,
+  const [drafts, setDrafts] = useState<Record<ListingLang, Tpl>>(() => ({
+    fr: { listing: models.fr.templates, search: models.fr.search.templates },
+    en: { listing: models.en.templates, search: models.en.search.templates },
+    de: { listing: models.de.templates, search: models.de.search.templates },
   }));
-  const [saved, setSaved] = useState<Record<ListingLang, ListingTemplates>>(drafts);
+  const [saved, setSaved] = useState<Record<ListingLang, Tpl>>(drafts);
   const [overridden, setOverridden] = useState<Record<ListingLang, TemplatePart[]>>(() => ({
     fr: models.fr.overridden,
     en: models.en.overridden,
@@ -64,13 +78,28 @@ export function ListingTemplatesEditor({ models }: { models: Record<ListingLang,
 
   const sample = useMemo(() => sampleListing({ fr: models.fr.sample, en: models.en.sample, de: models.de.sample }), [models]);
   const cols = sampleColumns(previewType, previewTx, previewMandate || null, models[lang].sample.city);
-  const preview = generateListing(cols, sample, lang, drafts[lang], models[lang].vocab);
-  const keys = useMemo(() => {
-    const { values } = listingValues(cols, sample, lang, models[lang].vocab);
-    return [...Object.keys(values), "prestations"];
-    // Les reperes ne dependent pas des valeurs : calcul unique par langue.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang]);
+  const searchPart = isSearchPart(part);
+  // Recherche fictive de l'apercu : maison, 4 chambres, budget exact fictif.
+  const range = publicBudgetRange(previewTx === "rent" ? 2600 : 950000, previewTx);
+  const sampleSearch = {
+    reference: "R-2026-001",
+    transaction: previewTx,
+    property_type: previewType,
+    communes: models[lang].sample.search_communes.split(",").map((c) => c.trim()),
+    budget_min: range?.min ?? null,
+    budget_max: range?.max ?? null,
+    bedrooms_min: 4,
+    surface_min: 160,
+    land_min: 500,
+    delay: "6_months" as const,
+    criteria: models[lang].sample.search_criteria,
+  };
+  const preview = searchPart
+    ? generateSearch(sampleSearch, lang, drafts[lang].search, models[lang].search.vocab)
+    : generateListing(cols, sample, lang, drafts[lang].listing, models[lang].vocab);
+  const keys = searchPart
+    ? Object.keys(searchValues(sampleSearch, lang, models[lang].search.vocab)).map((k) => `search_${k}`)
+    : [...Object.keys(listingValues(cols, sample, lang, models[lang].vocab).values), "prestations"];
 
   function save() {
     setMsg(null);
@@ -88,7 +117,7 @@ export function ListingTemplatesEditor({ models }: { models: Record<ListingLang,
     startTransition(async () => {
       const r = await resetListingTemplate(lang, part);
       if (!r.ok) return setMsg({ ok: false, text: r.error });
-      const def = partOf(models[lang].defaults, part);
+      const def = partOf({ listing: models[lang].defaults, search: models[lang].search.defaults }, part);
       setDrafts((d) => ({ ...d, [lang]: withPart(d[lang], part, def) }));
       setSaved((s) => ({ ...s, [lang]: withPart(s[lang], part, def) }));
       setOverridden((o) => ({ ...o, [lang]: o[lang].filter((p) => p !== part) }));
@@ -166,7 +195,7 @@ export function ListingTemplatesEditor({ models }: { models: Record<ListingLang,
             <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-1 text-xs sm:grid-cols-[auto_1fr]">
               {keys.map((k) => (
                 <div key={k} className="contents">
-                  <dt className="font-mono text-[#3D4F63]">{`{{${k}}}`}</dt>
+                  <dt className="font-mono text-[#3D4F63]">{`{{${k.replace(/^search_/, "")}}}`}</dt>
                   <dd className="text-[#3D4F63]/80">{t(`key_${k}`)}</dd>
                 </div>
               ))}
@@ -177,7 +206,7 @@ export function ListingTemplatesEditor({ models }: { models: Record<ListingLang,
         <section className="space-y-3 rounded-2xl border border-[#3D4F63]/15 bg-white p-5" data-listing-preview>
           <h2 className="font-display text-lg font-bold text-[#3D4F63]">{t("tpl_preview_title")}</h2>
           <p className="text-xs text-[#3D4F63]/70">{t("tpl_preview_hint")}</p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-preview-controls>
             <select value={previewType} onChange={(e) => setPreviewType(e.target.value)} aria-label={tp("f_listing_type")} className={inputCls}>
               {LISTING_TYPES.map((x) => (
                 <option key={x.slug} value={x.slug}>

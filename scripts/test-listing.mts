@@ -512,5 +512,143 @@ test("enregistrement bloque : action serveur et ecran, motif detaille", () => {
   }
 });
 
+// ---------------------------------------------------------------------------
+console.log("\nPartie 4 : rubrique Nos recherches en cours");
+const S = await import("../lib/searches/search");
+const D = await import("../lib/searches/display");
+const { formatMoney } = await import("../lib/listing/language");
+const searchModel = (l: Lang) => (messages[l].listing_model as unknown as { search: { title: string; body: string; vocab: never } }).search;
+const CLIENT = { name: "Marie Exemple", email: "marie.exemple@example.org", phone: "+352 621 000 000", address: "12 rue Fictive, L-1234 Luxembourg", budget: 873000 };
+const baseSearch = {
+  reference: "R-2026-001", transaction: "sale" as "sale" | "rent", property_type: "maison", communes: ["Bertrange", "Strassen"],
+  budget_min: null as number | null, budget_max: null as number | null, bedrooms_min: 4, surface_min: 180, land_min: 500, delay: "6_months" as const,
+  criteria: "Jardin orienté sud\nGarage double",
+};
+const sr = S.publicBudgetRange(CLIENT.budget, "sale")!;
+const searchGen = (l: Lang, over: Partial<typeof baseSearch> = {}) => S.generateSearch({ ...baseSearch, budget_min: sr.min, budget_max: sr.max, ...over }, l, searchModel(l), searchModel(l).vocab);
+
+test("budget publie : fourchette qui encadre le budget exact sans le reveler", () => {
+  for (const exact of [180000, 349000, 499999, 500000, 873000, 1200000, 1499999, 2350000, 7800000]) {
+    const r = S.publicBudgetRange(exact, "sale")!;
+    assert.ok(r.min < exact && exact < r.max, `${exact} dans [${r.min}, ${r.max}]`);
+    assert.ok(r.min % 25000 === 0 && r.max % 25000 === 0, "bornes arrondies");
+  }
+  const rent = S.publicBudgetRange(2600, "rent")!;
+  assert.ok(rent.min < 2600 && 2600 < rent.max && rent.min % 250 === 0);
+  assert.equal(S.publicBudgetRange(null, "sale"), null);
+});
+test("texte d'une recherche dans les 3 langues, accords et formules", () => {
+  const fr = searchGen("fr");
+  assert.equal(fr.title, "Recherche maison 4 chambres à Bertrange ou Strassen");
+  assert.ok(fr.text.includes("MAPA Property recherche, pour l'un de ses clients, une maison à acheter à Bertrange ou Strassen."));
+  assert.ok(fr.text.includes(`Budget : entre ${formatMoney(sr.min, "fr")} et ${formatMoney(sr.max, "fr")}`), "budget en fourchette");
+  assert.ok(fr.text.includes("- 4 chambres au moins\n- Surface habitable de 180 m² au moins\n- Terrain de 5 ares au moins\n- Jardin orienté sud\n- Garage double"));
+  assert.ok(fr.text.includes("Référence de la recherche : R-2026-001"));
+  assert.ok(searchGen("fr", { property_type: "appartement" }).text.includes("un appartement à acheter"));
+  assert.ok(searchGen("fr", { transaction: "rent" }).text.includes("une maison à louer"));
+  const en = searchGen("en", { property_type: "appartement", criteria: "" });
+  assert.ok(en.text.includes("for an apartment to buy in Bertrange or Strassen."));
+  assert.equal(searchGen("en").title, "Wanted: house with at least 4 bedrooms in Bertrange or Strassen");
+  const de = searchGen("de", { property_type: "maison-plain-pied", criteria: "" });
+  assert.ok(de.text.includes("sucht im Auftrag eines Kunden einen Bungalow zum Kauf in Bertrange oder Strassen."));
+  assert.ok(searchGen("de", { property_type: "villa" }).text.includes("eine Villa zum Kauf"));
+  assert.ok(searchGen("de", { property_type: "maison-individuelle" }).text.includes("ein freistehendes Haus zum Kauf"));
+  assert.ok(searchGen("de").text.includes("- Mindestens 4 Schlafzimmer\n"));
+  assert.equal(searchGen("de").title, "Gesucht: Haus mit mindestens 4 Schlafzimmern in Bertrange oder Strassen");
+});
+test("donnees partielles : segments retires (terrain sans chambres, sans budget)", () => {
+  const g = searchGen("fr", { property_type: "terrain", bedrooms_min: 3, surface_min: 200, budget_min: null, budget_max: null, delay: null as never, criteria: "" });
+  assert.ok(!g.text.includes("chambre") && !g.text.includes("Surface habitable") && !g.text.includes("Budget") && !g.text.includes("Délai"), g.text);
+  assert.ok(g.text.includes("- Terrain de 5 ares au moins"));
+});
+test("recherches : modele par defaut et textes conformes au controle de redaction", () => {
+  for (const l of ["fr", "en", "de"] as const) {
+    const m = searchModel(l);
+    assert.deepEqual(checkWriting(templateLiteral(m.title), l, { title: true }), []);
+    assert.deepEqual(checkWriting(templateLiteral(m.body), l), []);
+    for (const t of S.SEARCH_TYPES) {
+      const g = searchGen(l, { property_type: t, criteria: "" });
+      assert.deepEqual(checkFields([{ field: "t", lang: l, text: g.title, title: true }, { field: "d", lang: l, text: g.text }], baseSearch.communes), [], `${l} ${t}`);
+    }
+  }
+});
+test("aucune donnee client publiee : textes, colonnes publiques, pages, donnees structurees", () => {
+  // Le texte d'une recherche n'a aucun repere pour les donnees du client.
+  const keys = Object.keys(S.searchValues({ ...baseSearch, budget_min: sr.min, budget_max: sr.max }, "fr", searchModel("fr").vocab));
+  for (const k of keys) assert.ok(!/client|email|phone|telephone|address|adresse|budget_exact|notes|name/i.test(k), `repere ${k}`);
+  for (const l of ["fr", "en", "de"] as const) {
+    const g = searchGen(l);
+    for (const secret of [CLIENT.name, CLIENT.email, CLIENT.phone, CLIENT.address, "873 000", "873,000", "873.000"]) assert.ok(!g.text.includes(secret) && !g.title.includes(secret), `${l} : ${secret}`);
+  }
+  // Colonnes lues par le site.
+  const cols = S.PUBLIC_SEARCH_COLUMNS.split(",").map((c) => c.trim());
+  for (const c of cols) assert.ok(!/client|email|phone|address|budget_exact|notes|search_data|consent_at|created_by/.test(c), `colonne publique ${c}`);
+  // Le site ne lit jamais la table privee ni les champs du client.
+  const publicFiles = ["lib/searches/data.ts", "lib/searches/display.ts", "components/searches/SearchCard.tsx", "app/[locale]/recherches/page.tsx", "app/[locale]/recherches/[reference]/page.tsx", "app/[locale]/villes/[ville]/page.tsx", "app/sitemap.ts"];
+  for (const f of publicFiles) {
+    const src = readFileSync(join(root, f), "utf8");
+    assert.ok(!/property_search_private|client_name|client_email|client_phone|budget_exact|current_address/.test(src), f);
+  }
+  assert.ok(readFileSync(join(root, "lib/searches/data.ts"), "utf8").includes(".select(PUBLIC_SEARCH_COLUMNS)"));
+  // Donnees structurees : rien que des champs publics.
+  const pub = { id: "x", reference: "R-2026-001", status: "published", transaction: "sale", property_type: "maison", communes: ["Bertrange"], budget_min: sr.min, budget_max: sr.max, bedrooms_min: 4, surface_min: 180, land_min: null, delay: null, criteria_fr: null, criteria_en: null, criteria_de: null, title_fr: "t", title_en: null, title_de: null, description_fr: null, description_en: null, description_de: null, published_at: "2026-10-07T10:00:00Z", found_at: null, updated_at: null } as never;
+  const ld = D.searchJsonLd(pub, "fr", "Recherche maison 4 chambres à Bertrange", "Texte");
+  const json = JSON.stringify(ld);
+  assert.equal((ld as { "@type": string })["@type"], "Demand");
+  assert.ok(json.includes('"minPrice":' + sr.min) && json.includes('"maxPrice":' + sr.max) && json.includes('"sku":"R-2026-001"'));
+  assert.ok(!json.includes("873000"), "jamais le budget exact");
+  // Donnees du client : seulement dans property_search_private (action admin).
+  const act = readFileSync(join(root, "app/admin/recherches/actions.ts"), "utf8");
+  const rowBlock = act.slice(act.indexOf("const row: Record<string, unknown> = {"), act.indexOf("// Controle de redaction"));
+  assert.ok(!/client|budget_exact|address|email|phone/.test(rowBlock.replace(/budgetExact|range\?/g, "")), "ligne publique sans donnee du client");
+  assert.ok(/from\("property_search_private"\)\.upsert\(/.test(act));
+});
+test("publication impossible sans accord du client (ecran, action, base)", () => {
+  const act = readFileSync(join(root, "app/admin/recherches/actions.ts"), "utf8");
+  assert.ok(/if \(\(PUBLIC_SEARCH_STATUSES as readonly string\[\]\)\.includes\(next\) && !row\.consent_anonymous\) throw new ActionFailure\(t\("err_consent"\)\);/.test(act));
+  assert.ok(act.includes('if (!row.consent_anonymous && (PUBLIC_SEARCH_STATUSES as readonly string[]).includes((cur as { status: string }).status)) row.status = "paused";'), "accord retire : pause");
+  assert.ok(/insert\(\{ \.\.\.row, reference, status: "draft"/.test(act), "creation toujours en brouillon");
+  const form = readFileSync(join(root, "components/admin/SearchForm.tsx"), "utf8");
+  assert.ok(form.includes('disabled={busy || ((n === "published" || n === "found") && !s.consent)}'));
+  const sql = readFileSync(join(root, "supabase/manual/execution/18_recherches_en_cours.sql"), "utf8");
+  assert.ok(sql.includes("CHECK (status NOT IN ('published', 'found') OR consent_anonymous)"));
+  assert.ok(sql.includes("USING (status IN ('published', 'found') AND consent_anonymous)"));
+  for (const l of ["fr", "en", "de"]) assert.ok((messages[l].admin_searches as Record<string, string>).consent_label);
+  assert.equal((messages.fr.admin_searches as Record<string, string>).consent_label, "Le client a donné son accord pour publier sa recherche de façon anonyme");
+});
+test("SQL 18 : RLS lecture publique des seules recherches visibles, colonnes publiques, ecriture admin", () => {
+  const sql = readFileSync(join(root, "supabase/manual/execution/18_recherches_en_cours.sql"), "utf8");
+  assert.ok(sql.includes("ALTER TABLE public.property_searches ENABLE ROW LEVEL SECURITY") && sql.includes("ALTER TABLE public.property_search_private ENABLE ROW LEVEL SECURITY"));
+  assert.ok(sql.includes("REVOKE ALL ON public.property_search_private FROM anon"));
+  assert.ok(sql.includes("REVOKE ALL ON public.property_searches FROM anon"));
+  const grant = sql.slice(sql.indexOf("GRANT SELECT (id"), sql.indexOf("ON public.property_searches TO anon"));
+  for (const c of ["search_data", "consent_at", "created_by", "client", "budget_exact"]) assert.ok(!grant.includes(c), `colonne ${c} non lisible par anon`);
+  for (const c of S.PUBLIC_SEARCH_COLUMNS.split(",").map((x) => x.trim())) assert.ok(grant.includes(c), `colonne publique ${c} lisible`);
+  assert.equal((sql.match(/USING \(public\.is_mapa_admin\(\)\)/g) ?? []).length, 2);
+  assert.ok(!/[–—]/.test(sql));
+});
+test("demandes : type Proprietaire suite a une recherche, avec la reference", () => {
+  const page = readFileSync(join(root, "app/[locale]/recherches/[reference]/page.tsx"), "utf8");
+  assert.ok(page.includes('type="owner_search"') && page.includes("propertyRef={s.reference}") && page.includes('id="contact-form"'));
+  assert.equal((messages.fr.admin_leads as Record<string, string>).type_owner_search, "Propriétaire suite à une recherche");
+  for (const l of ["en", "de"]) assert.ok((messages[l].admin_leads as Record<string, string>).type_owner_search);
+  assert.ok(readFileSync(join(root, "components/admin/LeadsTable.tsx"), "utf8").includes('"owner_search"'));
+  assert.ok((messages.fr.searches_page as Record<string, string>).cta === "Vous avez ce bien ? Contactez-nous");
+});
+test("site : menu, pied de page, communes, plan du site, 3 langues", () => {
+  for (const f of ["components/layout/Header.tsx", "components/layout/HeaderBurger.tsx", "components/layout/Footer.tsx"]) assert.ok(readFileSync(join(root, f), "utf8").includes('{ href: "/recherches", key: "our_searches" }'), f);
+  const ville = readFileSync(join(root, "app/[locale]/villes/[ville]/page.tsx"), "utf8");
+  assert.ok(ville.includes("fetchSearchesForCity(city.slug)") && ville.includes("<SearchCard"));
+  const sm = readFileSync(join(root, "app/sitemap.ts"), "utf8");
+  assert.ok(sm.includes('"/recherches",') && sm.includes("/recherches/${s.reference}"));
+  for (const l of ["fr", "en", "de"]) {
+    assert.ok((messages[l].nav as Record<string, string>).our_searches);
+    assert.ok((messages[l].seo_pages as Record<string, { title: string }>).searches.title);
+    const sp = messages[l].searches_page as Record<string, unknown>;
+    for (const t of S.SEARCH_TYPES) assert.ok((sp.type as Record<string, string>)[t], `${l} type ${t}`);
+  }
+  assert.ok(readFileSync(join(root, "lib/i18n-client-messages.ts"), "utf8").includes('"searches_page"'));
+});
+
 console.log(`\n${n} PASS, ${failed} FAIL`);
 if (failed) process.exit(1);

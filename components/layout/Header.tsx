@@ -15,6 +15,7 @@ const leftDropdowns = [
     items: [
       { href: "/biens", key: "all_properties" },
       { href: "/mandats/recherche", key: "search_mandate" },
+      { href: "/recherches", key: "our_searches" },
       // NAV1 : "Off-Market" retiré (doublon — désormais onglet principal).
     ],
   },

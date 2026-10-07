@@ -9,6 +9,8 @@ import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { pageAlternates } from "@/lib/seo";
 import { getCityBySlug, getCitySlugs, getNearbyCities, type City } from "@/lib/cities";
 import { routing } from "@/i18n/routing";
+import { fetchSearchesForCity } from "@/lib/searches/data";
+import { SearchCard } from "@/components/searches/SearchCard";
 
 type Locale = "fr" | "en" | "de";
 
@@ -125,6 +127,9 @@ export default async function VillePage({
   const loc = locale as Locale;
   const t = labels[loc];
   const nearby = getNearbyCities(city.slug, 4);
+  // Recherches en cours qui visent cette commune (oct. 2026).
+  const searches = await fetchSearchesForCity(city.slug);
+  const ts = await getTranslations({ locale, namespace: "searches_page" });
 
   return (
     <>
@@ -218,6 +223,23 @@ export default async function VillePage({
           </Link>
         </section>
 
+        {searches.length > 0 ? (
+          <section className="mt-16" data-city-searches>
+            <h2 className="t-h2">{ts("city_block_title", { city: city.name[loc] })}</h2>
+            <p className="mt-3 text-base leading-relaxed text-ink-mid">{ts("city_block_intro", { city: city.name[loc] })}</p>
+            <ul className="mt-6 grid gap-4">
+              {searches.slice(0, 4).map((s) => (
+                <li key={s.id}>
+                  <SearchCard search={s} locale={locale} />
+                </li>
+              ))}
+            </ul>
+            <Link href="/recherches" className="mt-4 inline-block font-mono text-[11px] uppercase tracking-[0.3em] text-gold-deep hover:text-gold">
+              {ts("city_block_all")}
+            </Link>
+          </section>
+        ) : null}
+
         {nearby.length > 0 ? (
           <section className="mt-16">
             <h2 className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">
@@ -248,3 +270,6 @@ export default async function VillePage({
 }
 
 export const dynamicParams = false;
+// Bloc des recherches en cours : mis a jour par l'admin (etiquette
+// property-searches) et au plus tard toutes les heures.
+export const revalidate = 3600;

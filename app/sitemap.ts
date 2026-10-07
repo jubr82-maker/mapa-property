@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { fetchPublicSearches } from "@/lib/searches/data";
 import {
   fetchAllBlogPosts,
   fetchAllPropertiesWithCover,
@@ -40,6 +41,7 @@ const STATIC_PATHS = [
   "/services/rendement-locatif",
   "/services/marches-actifs",
   "/qui-sommes-nous",
+  "/recherches",
   "/blog",
   "/contact",
   "/mentions-acquisition",
@@ -62,10 +64,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Beta / staging : sitemap vide (pas d'indexation souhaitée).
   if (isBeta) return [];
 
-  const [properties, offmarket, blogPosts] = await Promise.all([
+  const [properties, offmarket, blogPosts, searches] = await Promise.all([
     fetchAllPropertiesWithCover().catch(() => []),
     fetchOffmarketList().catch(() => []),
     fetchAllBlogPosts().catch(() => []),
+    fetchPublicSearches().catch(() => []),
   ]);
 
   const validDate = (v: unknown): Date | undefined => {
@@ -133,8 +136,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
+  // Recherches en cours (oct. 2026) : seulement celles encore ouvertes.
+  const searchEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
+    searches
+      .filter((s) => s.status === "published")
+      .map((s) => ({
+        url: `${SITE_URL}/${locale}/recherches/${s.reference}`,
+        lastModified: validDate(s.updated_at),
+        changeFrequency: "weekly" as const,
+        priority: 0.6,
+        alternates: { languages: buildAlternates(`/recherches/${s.reference}`) },
+      })),
+  );
+
   return [
     ...staticEntries,
+    ...searchEntries,
     ...mandateEntries,
     ...cityEntries,
     ...propertyEntries,

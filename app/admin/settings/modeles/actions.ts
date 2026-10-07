@@ -34,7 +34,7 @@ export async function saveListingTemplate(lang: string, part: string, body: stri
     if (!text.trim()) throw new ActionFailure((await tl())("tpl_err_empty"));
     if (text.length > MAX_BODY) throw new ActionFailure((await tl())("tpl_err_too_long", { max: MAX_BODY }));
     // Regles de redaction sur le texte fixe du modele (reperes retires).
-    const issues = checkFields([{ field: target.part, lang: target.lang, text: templateLiteral(text), title: target.part === "title" }]);
+    const issues = checkFields([{ field: target.part, lang: target.lang, text: templateLiteral(text), title: target.part === "title" || target.part === "search_title" }]);
     if (issues.length) {
       const t = await tl();
       throw new ActionFailure([t("chk_template_blocked"), ...describeIssues(issues, (k, v) => t(k, v), () => t("chk_template_field"))].join("\n"));

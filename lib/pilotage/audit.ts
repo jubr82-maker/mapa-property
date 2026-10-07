@@ -22,7 +22,11 @@ export type AdminAuditAction =
   | "settings_design_changed"
   | "performance_measured"
   | "estimation_value_opinion"
-  | "listing_template_changed";
+  | "listing_template_changed"
+  | "property_search_created"
+  | "property_search_updated"
+  | "property_search_status"
+  | "property_search_deleted";
 
 export async function logAdminAction(entry: {
   actorEmail: string | null | undefined;

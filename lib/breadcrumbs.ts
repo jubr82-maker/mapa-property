@@ -13,6 +13,7 @@ export const BREADCRUMB_KEYS: Record<string, string> = {
   "/off-market": "offmarket",
   "/off-market/arcova": "arcova",
   "/qui-sommes-nous": "about",
+  "/recherches": "searches",
   "/services": "services",
   "/services/acheter": "buy",
   "/services/broker-international": "broker",

@@ -21,6 +21,7 @@ import {
   Handshake,
   Radar,
   ScrollText,
+  SearchCheck,
 } from "lucide-react";
 
 export type AdminNavItem = { href: string; key: string; icon: typeof Lock; match: "exact" | "prefix" };
@@ -43,6 +44,7 @@ export const ADMIN_NAV_GROUPS: { key: string; items: AdminNavItem[] }[] = [
       { href: "/admin/estimations", key: "estimations", icon: Calculator, match: "prefix" },
       { href: "/admin/leads", key: "leads", icon: Mail, match: "prefix" },
       { href: "/admin/mandats", key: "mandats", icon: FileText, match: "prefix" },
+      { href: "/admin/recherches", key: "searches", icon: SearchCheck, match: "prefix" },
       { href: "/admin/ventes-realisees", key: "sales", icon: Handshake, match: "prefix" },
       { href: "/admin/liste-attente", key: "waitlist", icon: ClipboardList, match: "prefix" },
       { href: "/admin/arcova", key: "arcova", icon: Users, match: "prefix" },

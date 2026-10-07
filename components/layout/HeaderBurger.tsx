@@ -28,6 +28,7 @@ const groups: Group[] = [
     items: [
       { href: "/biens", key: "all_properties" },
       { href: "/mandats/recherche", key: "search_mandate" },
+      { href: "/recherches", key: "our_searches" },
     ],
   },
   {

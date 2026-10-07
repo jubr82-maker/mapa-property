@@ -8,15 +8,18 @@ import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { isTemplatePart, type TemplateBlock, type TemplatePart } from "@/lib/listing/families";
 import { LISTING_LANGS, type ListingLang } from "@/lib/listing/listing-data";
 import type { ListingTemplates, ListingVocab } from "@/lib/listing/generate";
+import type { SearchTemplates, SearchVocab } from "@/lib/searches/search";
 
 
-export type ListingSample = { city: string; qualifier: string; ambiance: string; highlights: string; rooms_ground: string; rooms_floor: string };
+export type ListingSample = { city: string; qualifier: string; ambiance: string; highlights: string; rooms_ground: string; rooms_floor: string; search_communes: string; search_criteria: string };
 
 export type LangModel = {
   templates: ListingTemplates;
   defaults: ListingTemplates;
   vocab: ListingVocab;
   sample: ListingSample;
+  /** Modele des recherches en cours (titre et texte). */
+  search: { templates: SearchTemplates; defaults: SearchTemplates; vocab: SearchVocab };
   /** Pieces modifiees par Julien (ecart au modele par defaut). */
   overridden: TemplatePart[];
 };
@@ -26,7 +29,10 @@ export type ListingModels = Record<ListingLang, LangModel>;
 async function defaultsFor(lang: ListingLang): Promise<Omit<LangModel, "templates" | "overridden">> {
   const t = await getTranslations({ locale: lang, namespace: "listing_model" });
   const blocks = t.raw("blocks") as Record<TemplateBlock, string>;
+  const search = t.raw("search") as { title: string; body: string; vocab: SearchVocab };
+  const searchDefaults = { title: search.title, body: search.body };
   return {
+    search: { templates: { ...searchDefaults }, defaults: searchDefaults, vocab: search.vocab },
     defaults: { title: t.raw("title") as string, tronc: t.raw("tronc") as string, blocks },
     vocab: t.raw("vocab") as ListingVocab,
     sample: t.raw("sample") as ListingSample,
@@ -50,14 +56,17 @@ export async function loadListingModels(): Promise<ListingModels> {
     const d = base[i];
     const templates: ListingTemplates = { title: d.defaults.title, tronc: d.defaults.tronc, blocks: { ...d.defaults.blocks } };
     const overridden: TemplatePart[] = [];
+    const search = { ...d.search, templates: { ...d.search.defaults } };
     for (const r of rows) {
       if (r.lang !== lang || !isTemplatePart(r.part) || typeof r.body !== "string" || !r.body.trim()) continue;
       overridden.push(r.part);
       if (r.part === "title") templates.title = r.body;
       else if (r.part === "tronc") templates.tronc = r.body;
+      else if (r.part === "search_title") search.templates.title = r.body;
+      else if (r.part === "search") search.templates.body = r.body;
       else templates.blocks[r.part] = r.body;
     }
-    out[lang] = { ...d, templates, overridden };
+    out[lang] = { ...d, templates, search, overridden };
   });
   return out;
 }

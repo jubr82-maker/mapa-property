@@ -32,7 +32,7 @@ const SKIP_PATH = /^\/(api|admin|_next|og)(\/|$)/;
 // listees comme NON VERIFIEES dans le rapport, jamais comptees comme OK.
 // Oct. 2026 : simulateurs de financement et de capacite d'emprunt rendus a
 // la demande avec les taux lus en base.
-const DATA_ROUTE = /^\/(fr|en|de)\/(biens(\/|$|\?)|biens$|blog\/[^/?]+|journal\/[^/?]+|off-market\/(?!arcova)[^/?]+|services\/simulateurs\/financement|services\/capacite-emprunt)/;
+const DATA_ROUTE = /^\/(fr|en|de)\/(biens(\/|$|\?)|biens$|blog\/[^/?]+|journal\/[^/?]+|off-market\/(?!arcova)[^/?]+|services\/simulateurs\/financement|services\/capacite-emprunt|recherches\/[^/?]+)/;
 
 interface PageFacts {
   url: string;
