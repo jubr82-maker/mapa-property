@@ -6,6 +6,7 @@
 // Google en dispose, sinon Total Blocking Time en laboratoire.
 import { supabaseService } from "@/lib/supabase-service";
 import { PSI_PATHS, PSI_STRATEGIES } from "@/lib/pilotage/config";
+import { extractLcpDiagnosis, type LcpDiagnosis } from "@/lib/pilotage/lcp-diagnosis";
 
 const PSI_ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
 
@@ -28,6 +29,8 @@ export type PsiRow = {
   field_lcp_ms: number | null;
   field_inp_ms: number | null;
   field_cls: number | null;
+  /** Cause du LCP (SQL 19 : colonne lcp_diagnosis), absente avant. */
+  lcp_diagnosis?: LcpDiagnosis | null;
   error: string | null;
 };
 
@@ -61,6 +64,8 @@ const field = (j: PsiJson, k: string) => {
 async function measure(url: string, strategy: string, trigger: PsiTrigger): Promise<Omit<PsiRow, "created_at">> {
   const params = new URLSearchParams({ url, strategy, key: process.env.PAGESPEED_API_KEY!.trim() });
   for (const c of ["performance", "accessibility", "seo", "best-practices"]) params.append("category", c);
+  // Titres des pistes d'amelioration en francais (affiches dans Sante du site).
+  params.append("locale", "fr");
   const base = { trigger, url, strategy };
   const empty = {
     performance: null, accessibility: null, seo: null, best_practices: null,
@@ -87,6 +92,7 @@ async function measure(url: string, strategy: string, trigger: PsiTrigger): Prom
       field_lcp_ms: field(j, "LARGEST_CONTENTFUL_PAINT_MS"),
       field_inp_ms: field(j, "INTERACTION_TO_NEXT_PAINT"),
       field_cls: fieldCls === null ? null : fieldCls / 100,
+      lcp_diagnosis: extractLcpDiagnosis(j),
       error: null,
     };
   } catch (e) {
@@ -101,7 +107,16 @@ export async function runPsiMeasurements(trigger: PsiTrigger): Promise<{ ok: boo
   const rows = await Promise.all(
     PSI_PATHS.flatMap((p) => PSI_STRATEGIES.map((s) => measure(`${root}${p}`, s, trigger))),
   );
-  const { error } = await supabaseService().from("psi_runs").insert(rows);
+  let { error } = await supabaseService().from("psi_runs").insert(rows);
+  // Colonne lcp_diagnosis absente (SQL 19 pas encore execute) : mesures
+  // enregistrees sans la cause du LCP plutot que perdues.
+  if (error && (error.code === "PGRST204" || error.code === "42703")) {
+    ({ error } = await supabaseService().from("psi_runs").insert(rows.map((r) => {
+      const copy: Omit<PsiRow, "created_at"> = { ...r };
+      delete copy.lcp_diagnosis;
+      return copy;
+    })));
+  }
   if (error) return { ok: false, detail: `db_${error.code ?? "error"}` };
   const failed = rows.filter((r) => r.error).length;
   return { ok: failed === 0, detail: `${rows.length - failed}/${rows.length}` };

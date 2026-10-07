@@ -4,7 +4,9 @@
 import { getTranslations } from "next-intl/server";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { ADMIN_LOCALE, formatDateOnly, formatDateTimeShort } from "@/lib/datetime";
+import { Fragment } from "react";
 import { loadPsiHistory, psiConfigured, type PsiRow } from "@/lib/pilotage/psi";
+import { LCP_PHASE_ORDER, type LcpDiagnosis } from "@/lib/pilotage/lcp-diagnosis";
 import { loadCronRuns, loadEmailLog, loadFormHealth } from "@/lib/pilotage/health";
 import { deployInfo, domainStatus, loadBackupStatus } from "@/lib/pilotage/site-facts";
 import { CWV_THRESHOLDS, PSI_MANUAL_COOLDOWN_MINUTES, PSI_PATHS, PSI_STRATEGIES } from "@/lib/pilotage/config";
@@ -99,7 +101,8 @@ export default async function SantePage() {
           <>
             <Table head={[t("col_page"), t("col_device"), t("col_score"), t("col_lcp"), t("col_inp"), t("col_cls"), t("col_measured")]}>
               {latest.map((r) => (
-                <tr key={`${r.url}-${r.strategy}`}>
+                <Fragment key={`${r.url}-${r.strategy}`}>
+                <tr>
                   <Td mono>{new URL(r.url).pathname}</Td>
                   <Td>{t(`device_${r.strategy}`)}</Td>
                   <Td>{r.error ? <Pill tone="critical">{t("psi_failed")}</Pill> : <Pill tone={tone(r.performance === null ? null : 100 - r.performance, 10, 50)}>{r.performance ?? ""}</Pill>}</Td>
@@ -118,6 +121,14 @@ export default async function SantePage() {
                   </Td>
                   <Td mono>{formatDateTimeShort(r.created_at)}</Td>
                 </tr>
+                {r.strategy === "mobile" && !r.error ? (
+                  <tr data-lcp-cause>
+                    <td colSpan={7} className="px-3 pb-3">
+                      <LcpCause d={r.lcp_diagnosis ?? null} t={t} />
+                    </td>
+                  </tr>
+                ) : null}
+                </Fragment>
               ))}
             </Table>
             <p className="text-xs text-ink-soft">{t("perf_field_note")}</p>
@@ -193,5 +204,57 @@ export default async function SantePage() {
         )}
       </Section>
     </div>
+  );
+}
+
+// Cause du LCP d'une mesure mobile (oct. 2026), repliable, en clair.
+function LcpCause({ d, t }: { d: LcpDiagnosis | null; t: (key: string, values?: Record<string, string | number>) => string }) {
+  if (!d) return <p className="text-xs text-ink-soft">{t("lcp_none")}</p>;
+  const total = LCP_PHASE_ORDER.reduce((n, k) => n + (d.phases[k] ?? 0), 0);
+  const main = LCP_PHASE_ORDER.filter((k) => d.phases[k] !== undefined).sort((a, b) => (d.phases[b] ?? 0) - (d.phases[a] ?? 0))[0];
+  const s = (msv: number) => (msv / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+  return (
+    <details className="rounded-xl border border-ink/10 bg-bg p-3 text-sm" data-lcp-details>
+      <summary className="cursor-pointer font-medium text-ink">
+        {t("lcp_cause_title")}
+        {main ? <span className="ml-2 text-xs text-ink-soft">{t("lcp_main_phase", { phase: t(`lcp_phase_${main}`), s: s(d.phases[main] ?? 0) })}</span> : null}
+      </summary>
+      <div className="mt-3 space-y-3">
+        {d.element ? (
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">{t("lcp_element")}</p>
+            {d.element.label ? <p className="mt-1 text-ink">{d.element.label}</p> : null}
+            {d.element.selector ? <p className="mt-1 break-all font-mono text-xs text-ink-mid">{d.element.selector}</p> : null}
+            {d.element.snippet ? <p className="mt-1 break-all font-mono text-xs text-ink-soft">{d.element.snippet}</p> : null}
+          </div>
+        ) : null}
+        {total > 0 ? (
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">{t("lcp_phases_title")}</p>
+            <ul className="mt-1 space-y-1">
+              {LCP_PHASE_ORDER.filter((k) => d.phases[k] !== undefined).map((k) => (
+                <li key={k} className="flex flex-wrap justify-between gap-2">
+                  <span>{t(`lcp_phase_${k}`)}</span>
+                  <span className="font-mono text-xs">{t("lcp_phase_value", { s: s(d.phases[k] ?? 0), pct: Math.round(((d.phases[k] ?? 0) / total) * 100) })}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {d.opportunities.length ? (
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">{t("lcp_opportunities")}</p>
+            <ol className="mt-1 space-y-1">
+              {d.opportunities.map((o) => (
+                <li key={o.id} className="flex flex-wrap justify-between gap-2">
+                  <span>{o.title}</span>
+                  <span className="font-mono text-xs">{t("lcp_gain", { s: s(o.savings_ms) })}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
+      </div>
+    </details>
   );
 }

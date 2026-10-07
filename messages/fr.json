@@ -3760,7 +3760,19 @@
     "event_admin_property_search_status": "Recherche : statut",
     "jshort_admin_property_search_status": "Recherche : statut",
     "event_admin_property_search_deleted": "Recherche supprimée",
-    "jshort_admin_property_search_deleted": "Recherche supprimée"
+    "jshort_admin_property_search_deleted": "Recherche supprimée",
+    "lcp_cause_title": "Cause du LCP",
+    "lcp_main_phase": "phase la plus longue : {phase} ({s} s)",
+    "lcp_element": "Élément principal affiché (LCP)",
+    "lcp_phases_title": "Décomposition du LCP",
+    "lcp_phase_ttfb": "Réponse du serveur",
+    "lcp_phase_load_delay": "Délai avant chargement de la ressource",
+    "lcp_phase_load_time": "Durée de chargement de la ressource",
+    "lcp_phase_render_delay": "Délai d'affichage après chargement",
+    "lcp_phase_value": "{s} s ({pct} %)",
+    "lcp_opportunities": "Trois principales pistes d'amélioration",
+    "lcp_gain": "environ {s} s gagnées",
+    "lcp_none": "Détail de la cause du LCP disponible à la prochaine mesure (après exécution du fichier SQL 19)."
   },
   "breadcrumb": {
     "home": "Accueil",

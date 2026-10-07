@@ -6,8 +6,7 @@ import type { InProcessResponse, RequestOptions } from "./in-process-server";
 
 const REQUEST_TIMEOUT_MS = Number(process.env.SEO_REQUEST_TIMEOUT_MS ?? 30000);
 
-export async function startServerProcess() {
-  const root = path.resolve(__dirname, "../..");
+export async function startServerProcess(root = path.resolve(__dirname, "../..")) {
   const child: ChildProcess = fork(path.join(__dirname, "server-process.mts"), [], {
     cwd: root,
     execArgv: ["--import", "tsx"],

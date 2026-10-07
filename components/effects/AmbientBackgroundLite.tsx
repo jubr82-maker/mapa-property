@@ -15,9 +15,9 @@
  *
  * Fixed inset 0, z 0, pointer-events-none, aria-hidden.
  *
- * Oct. 2026 : un calque <svg> par filament. Ordinateur : morphing SMIL et
- * reaction a la souris, inchanges. Telephone (768 px et moins) : SMIL en
- * pause (il redessine la forme a chaque image), remplace par une derive
+ * Oct. 2026 : un calque <svg> par filament. Ordinateur : morphing SMIL
+ * (lance apres l'hydratation) et reaction a la souris. Telephone (768 px
+ * et moins) : jamais de SMIL (il redessine la forme a chaque image), une derive
  * lente en CSS (transform uniquement : calcul et affichage par le
  * compositeur du navigateur, sans redessin de la page ni JavaScript par
  * image). Elle ne demarre qu'une fois la page chargee et le navigateur au
@@ -40,15 +40,14 @@ export function AmbientBackgroundLite() {
     const container = containerRef.current;
     if (!container) return;
     if (typeof window === "undefined") return;
-    const svgs = Array.from(container.querySelectorAll("svg"));
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      // Immobiles : ni SMIL, ni derive, ni souris.
-      svgs.forEach((svg) => svg.pauseAnimations());
-      return;
-    }
+    // Perf (oct. 2026) : le morphing SMIL ne demarre plus tout seul
+    // (begin="indefinite"). Avant, les quatre calques plein ecran
+    // redessinaient l'ecran a chaque image des l'analyse du HTML, jusqu'a
+    // l'hydratation, en concurrence avec l'affichage de l'element principal.
+    if (reduced) return; // Immobiles : ni SMIL, ni derive, ni souris.
     if (window.matchMedia("(max-width: 768px)").matches) {
-      svgs.forEach((svg) => svg.pauseAnimations());
+      // Telephone : jamais de SMIL ; derive CSS seulement.
       // Derive CSS demarree apres l'affichage de la page.
       let idleId = 0;
       let timerId = 0;
@@ -139,6 +138,8 @@ export function AmbientBackgroundLite() {
       rafId = requestAnimationFrame(tick);
     };
 
+    // Ordinateur : morphing SMIL lance apres l'hydratation.
+    container.querySelectorAll("animate").forEach((el) => (el as SVGAnimationElement).beginElement());
     window.addEventListener("mousemove", onMove);
     rafId = requestAnimationFrame(tick);
     return () => {
@@ -182,6 +183,7 @@ export function AmbientBackgroundLite() {
             attributeName="d"
             dur="38s"
             repeatCount="indefinite"
+            begin="indefinite"
             values="M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300;
                     M -100,260 C 350,170 770,330 1170,300 S 1770,380 1900,360;
                     M -100,160 C 250,40 630,470 1030,200 S 1630,520 1900,240;
@@ -211,6 +213,7 @@ export function AmbientBackgroundLite() {
             attributeName="d"
             dur="46s"
             repeatCount="indefinite"
+            begin="indefinite"
             values="M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650;
                     M -100,680 C 460,520 860,820 1360,660 S 1860,560 1900,720;
                     M -100,540 C 340,390 740,690 1240,540 S 1740,440 1900,580;
@@ -240,6 +243,7 @@ export function AmbientBackgroundLite() {
             attributeName="d"
             dur="52s"
             repeatCount="indefinite"
+            begin="indefinite"
             values="M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600;
                     M 240,-100 C 360,370 580,580 880,470 S 1180,770 1480,570 S 1780,870 1900,680;
                     M 160,-100 C 240,230 420,430 720,330 S 1020,630 1320,430 S 1620,730 1900,520;
@@ -269,6 +273,7 @@ export function AmbientBackgroundLite() {
             attributeName="d"
             dur="44s"
             repeatCount="indefinite"
+            begin="indefinite"
             values="M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850;
                     M -100,960 C 260,860 560,910 960,880 S 1460,920 1900,910;
                     M -100,840 C 140,740 440,990 840,760 S 1340,990 1900,790;

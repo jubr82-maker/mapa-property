@@ -57,6 +57,7 @@ import { selectPublicImages, isApimoImageUrl } from "../../lib/property-images";
 import { formatRateFraction } from "../../lib/format/numbers";
 import { evaluateAdminIdle, sessionStartFromClaims, parseActivityCookie } from "../../lib/admin/idle";
 import { SERVER_ONLY_NAMESPACES, clientMessages } from "../../lib/i18n-client-messages";
+import { extractLcpDiagnosis } from "../../lib/pilotage/lcp-diagnosis";
 
 const ROOT = path.resolve(__dirname, "../..");
 const read = (p: string) => fs.readFileSync(path.join(ROOT, p), "utf8");
@@ -1252,7 +1253,7 @@ async function valueOpinionChecks() {
     const svgPub = read("public/logos/mapa-logo-fond-clair.svg");
     check("logo mode clair : SVG officiel, dessin et couleurs inchanges (seul le cadre est resserre)",
       svgSrc.replace(/viewBox="[^"]*"/, "") === svgPub.replace(/viewBox="[^"]*"/, "") && /#03200A/i.test(svgPub) && /<linearGradient/.test(svgPub));
-    check("logo : SVG en mode clair, logo or conserve en mode sombre, ratio du SVG", /const LIGHT_SRC = "\/logos\/mapa-logo-fond-clair\.svg"/.test(logo) && /const DARK_SRC = "\/logo_mapa_nuit\.png"/.test(logo) && /LIGHT_RATIO = 1675\.25 \/ 350\.5/.test(logo) && /unoptimized=\{isLight\}/.test(logo));
+    check("logo : logo officiel en mode clair en PNG optimise et mis en cache (perf mobile), logo or en mode sombre", /const LIGHT_SRC = "\/logos\/mapa-logo-fond-clair-1600\.png"/.test(logo) && /const DARK_SRC = "\/logo_mapa_nuit\.png"/.test(logo) && /LIGHT_RATIO = 1600 \/ 336/.test(logo) && !/unoptimized/.test(logo));
     const oldLight = [...walk("app", (x) => /\.tsx?$/.test(x)), ...walk("components", (x) => /\.tsx?$/.test(x))].filter((f) => /logo_mapa_jour\.png/.test(read(f).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "")));
     check("logo : plus aucun ancien logo clair affiche (en-tete, pied de page, fiche imprimable)", oldLight.length === 0, oldLight.join(", "));
     // Contraste WCAG du texte des avis en mode clair (encre sur fond clair).
@@ -1270,8 +1271,8 @@ async function valueOpinionChecks() {
     check(`avis clients : texte en encre foncee sur fond clair (contraste ${contrast.toFixed(2)}:1 >= 4,5:1), or seulement en mode sombre`,
       contrast >= 4.5 && /data-review-text/.test(rc) && /text-ink[^"]*dark:text-gold/.test(rc) && !/style=\{\{ color: "#e0af6e" \}\}/.test(rc));
     const amb = read("components/effects/AmbientBackgroundLite.tsx");
-    check("filaments : derive CSS sur mobile apres chargement, pause onglet cache ou hors ecran, immobiles si animations reduites",
-      /setAttribute\("data-filaments", "on"\)/.test(amb) && /requestIdleCallback/.test(amb) && /addEventListener\("load", start/.test(amb) && /visibilitychange/.test(amb) && /IntersectionObserver/.test(amb) &&
+    check("filaments : aucun SMIL avant l'hydratation, derive CSS sur mobile apres chargement, pause onglet cache ou hors ecran, immobiles si animations reduites",
+      (amb.match(/^\s*begin="indefinite"$/gm) ?? []).length === 4 && /beginElement\(\)/.test(amb) && /setAttribute\("data-filaments", "on"\)/.test(amb) && /requestIdleCallback/.test(amb) && /addEventListener\("load", start/.test(amb) && /visibilitychange/.test(amb) && /IntersectionObserver/.test(amb) &&
       /prefers-reduced-motion: reduce/.test(amb) && /\[data-filaments="on"\] \.ambient-filament \{\s*will-change: transform;\s*animation: mapa-filament-drift/.test(css) && /\[data-paused\] \.ambient-filament \{\s*animation-play-state: paused;/.test(css) &&
       /@media \(prefers-reduced-motion: reduce\) \{\s*\.ambient-filament \{\s*animation: none !important;/.test(css) && !/@keyframes mapa-filament-drift[^}]*\{[^}]*(width|height|top|left|d:)/.test(css));
   }
@@ -1288,6 +1289,37 @@ async function valueOpinionChecks() {
 // Q. Performance mobile et diffusion (garde-fous)
 // ===========================================================================
 section = "Q. Performance mobile et diffusion";
+{
+  // Cause du LCP (oct. 2026) : deux formes de reponse Lighthouse.
+  const node = { type: "node", selector: "main > section > img.hero", snippet: '<img src="/images/hero/poster.jpg">', nodeLabel: "Image principale" };
+  const lh12 = { lighthouseResult: { audits: {
+    "largest-contentful-paint-element": { details: { type: "list", items: [
+      { type: "table", items: [{ node }] },
+      { type: "table", items: [{ phase: "TTFB", timing: 420 }, { phase: "Load Delay", timing: 1800 }, { phase: "Load Time", timing: 900 }, { phase: "Render Delay", timing: 2700 }] },
+    ] } },
+    "render-blocking-resources": { score: 0.2, title: "Eliminez les ressources qui bloquent le rendu", details: { type: "opportunity", overallSavingsMs: 650 } },
+    "unused-javascript": { score: 0.4, title: "Reduisez le JavaScript inutilise", metricSavings: { LCP: 1200 }, details: { type: "opportunity", overallSavingsMs: 300 } },
+    "uses-optimized-images": { score: 0.5, title: "Encodez les images", metricSavings: { LCP: 150 }, details: { type: "opportunity" } },
+    "modern-image-formats": { score: 0.5, title: "Formats recents", metricSavings: { LCP: 90 }, details: { type: "opportunity" } },
+    "server-response-time": { score: 1, title: "Reponse du serveur", metricSavings: { LCP: 0 } },
+  } } };
+  const d = extractLcpDiagnosis(lh12);
+  check("cause du LCP : element, quatre phases, trois pistes triees par gain",
+    d?.element?.selector === node.selector && d?.element?.snippet === node.snippet &&
+    JSON.stringify(d?.phases) === JSON.stringify({ ttfb: 420, load_delay: 1800, load_time: 900, render_delay: 2700 }) &&
+    d?.opportunities.map((o) => o.id).join(",") === "unused-javascript,render-blocking-resources,uses-optimized-images" && d?.opportunities[0].savings_ms === 1200);
+  const insight = { lighthouseResult: { audits: { "lcp-breakdown-insight": { details: { type: "list", items: [
+    { type: "table", items: [{ subpart: "timeToFirstByte", label: "Delai", duration: 300 }, { subpart: "elementRenderDelay", label: "Rendu", duration: 1500 }] },
+    { type: "node", selector: "h1.t-h1", snippet: "<h1>" },
+  ] } } } } };
+  const d2 = extractLcpDiagnosis(insight);
+  check("cause du LCP : forme insights (sous-parties nommees)", d2?.element?.selector === "h1.t-h1" && d2?.phases.ttfb === 300 && d2?.phases.render_delay === 1500);
+  check("cause du LCP : reponse vide, aucune invention", extractLcpDiagnosis({}) === null && extractLcpDiagnosis({ lighthouseResult: { audits: {} } }) === null);
+  const psi = read("lib/pilotage/psi.ts");
+  check("cause du LCP : enregistree avec la mesure, titres en francais, repli sans la colonne", /lcp_diagnosis: extractLcpDiagnosis\(j\)/.test(psi) && /params\.append\("locale", "fr"\)/.test(psi) && /PGRST204/.test(psi));
+  const sante = read("app/admin/sante/page.tsx");
+  check("cause du LCP : affichee sous chaque ligne mobile, repliable", /r\.strategy === "mobile" && !r\.error/.test(sante) && /<details[^>]*data-lcp-details/.test(sante));
+}
 {
   const src = [...walk("app", (x) => /\.(ts|tsx)$/.test(x)), ...walk("components", (x) => /\.(ts|tsx)$/.test(x)), ...walk("lib", (x) => /\.(ts|tsx)$/.test(x))];
   const misuse = src.filter((f) => [...read(f).matchAll(/useTranslations\(\s*["']([\w]+)/g)].some((m) => SERVER_ONLY_NAMESPACES.has(m[1])));

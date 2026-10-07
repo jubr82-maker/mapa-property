@@ -1,0 +1,16 @@
+{
+  "note": "Build corrige, perf mobile oct. 2026 (hors ligne : /fr/biens a enregistrer en ligne avec SEO_BUDGET_RECORD=1)",
+  "pages": {
+    "/fr": {
+      "html": 500326,
+      "js": 847789,
+      "css": 112236
+    },
+    "/fr/biens": null,
+    "/fr/services/estimer": {
+      "html": 467232,
+      "js": 1039101,
+      "css": 112236
+    }
+  }
+}

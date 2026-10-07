@@ -6,7 +6,7 @@ import { defineConfig } from "@playwright/test";
 // npx next build --webpack).
 export default defineConfig({
   testDir: ".",
-  testMatch: /(seo-onpage|redirects|robots)\.spec\.ts$/,
+  testMatch: /(seo-onpage|redirects|robots|budget)\.spec\.ts$/,
   timeout: 30 * 60 * 1000,
   workers: 1,
   reporter: [["list"]],
