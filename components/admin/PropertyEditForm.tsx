@@ -37,6 +37,8 @@ import {
   type ListingFamily,
 } from "@/lib/listing/families";
 import { ListingModelEditor } from "@/components/admin/ListingModelEditor";
+import { checkFields, describeIssues, type FieldIssues } from "@/lib/listing/writing-check";
+import { htmlToText } from "@/lib/listing/template-engine";
 import { generateListing, type GeneratedListing, type ListingColumns, type ListingTemplates, type ListingVocab } from "@/lib/listing/generate";
 import {
   AUTO_KEYS,
@@ -254,6 +256,18 @@ function isDirty(a: FormState, b: FormState): boolean {
   return (Object.keys(a) as (keyof FormState)[]).some((k) => a[k] !== b[k]);
 }
 
+const TEXT_FIELDS: { field: "title_fr" | "title_en" | "title_de" | "description_fr" | "description_en" | "description_de" | "short_description_fr" | "short_description_en" | "short_description_de"; lang: ListingLang; title: boolean; label: string }[] = [
+  { field: "title_fr", lang: "fr", title: true, label: "f_title_fr" },
+  { field: "title_en", lang: "en", title: true, label: "f_title_en" },
+  { field: "title_de", lang: "de", title: true, label: "f_title_de" },
+  { field: "description_fr", lang: "fr", title: false, label: "f_description_fr" },
+  { field: "description_en", lang: "en", title: false, label: "f_description_en" },
+  { field: "description_de", lang: "de", title: false, label: "f_description_de" },
+  { field: "short_description_fr", lang: "fr", title: false, label: "f_short_fr" },
+  { field: "short_description_en", lang: "en", title: false, label: "f_short_en" },
+  { field: "short_description_de", lang: "de", title: false, label: "f_short_de" },
+];
+
 interface Props {
   propertyId: string;
   initial: PropertyEditFormInitial;
@@ -443,6 +457,21 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
   }, [engaged, generated, listingData.auto, rawForm]);
   const dirty = isDirty(form, baseline) || (listing.available && JSON.stringify(listingData) !== listingBaseline);
 
+  // Controle de redaction (meme code que l'action serveur, qui bloque) :
+  // affiche en direct pour tous les textes, bloquant pour ceux modifies.
+  const tl = useTranslations("admin_listing");
+  const textChecks = useMemo(() => {
+    const items = TEXT_FIELDS.map((f) => ({
+      field: f.field,
+      lang: f.lang,
+      title: f.title,
+      text: f.field.startsWith("description_") ? htmlToText(form[f.field]) : form[f.field],
+    }));
+    return checkFields(items, listing.city ? [listing.city] : []);
+  }, [form, listing.city]);
+  const describe = (list: FieldIssues[]) =>
+    describeIssues(list, (k, v) => tl(k, v), (field) => t(TEXT_FIELDS.find((f) => f.field === field)?.label ?? "f_title_fr"), 50);
+
   function markManual(k: AutoKey) {
     setListingData((d) => (d.auto[k] === false ? d : { ...d, auto: { ...d.auto, [k]: false } }));
   }
@@ -545,6 +574,11 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
     e.preventDefault();
     setFeedback(null);
     setError(null);
+    const blocking = textChecks.filter((c) => form[c.field as keyof FormState] !== baseline[c.field as keyof FormState]);
+    if (blocking.length) {
+      setError([tl("chk_blocked"), ...describe(blocking)].join("\n"));
+      return;
+    }
     startTransition(async () => {
       try {
         // Type, mandat et classes : envoyes seulement s'ils changent (un
@@ -711,6 +745,18 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
             {translating ? t("translate_running") : t("translate_button")}
           </button>
           <p className="mt-1 text-xs text-[#3D4F63]/70">{t("translate_hint")}</p>
+          <div className="mt-3 rounded-md border border-[#3D4F63]/15 bg-white px-3 py-2" data-writing-check role="status">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">{tl("chk_live_title")}</p>
+            {textChecks.length === 0 ? (
+              <p className="mt-1 text-sm text-emerald-800">{tl("chk_live_ok")}</p>
+            ) : (
+              <ul className="mt-1 space-y-1 text-sm text-red-700">
+                {describe(textChecks).map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            )}
+          </div>
           {listing.available && (
             <div className="mt-3 flex flex-wrap items-center gap-2" data-listing-regen>
               {LISTING_LANGS.map((l) => (
@@ -1019,7 +1065,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
           {busy ? t("saving") : t("save")}
         </button>
         {feedback && <span className="text-sm text-emerald-700">{feedback}</span>}
-        {error && <span className="text-sm text-red-700">{t("error_prefix", { message: error })}</span>}
+        {error && <span role="alert" className="whitespace-pre-line text-sm text-red-700">{t("error_prefix", { message: error })}</span>}
       </div>
     </form>
     </FamilyContext.Provider>

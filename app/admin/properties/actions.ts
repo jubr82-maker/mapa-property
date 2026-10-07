@@ -19,11 +19,61 @@ import { assertAdminAction, requireAdmin } from "@/lib/admin/require-admin";
 import { dbFailure, runAction, sessionFailure, type ActionResult as AdminActionResult } from "@/lib/admin/action-result";
 import { logAdminAction } from "@/lib/pilotage/audit";
 import { isEnergyClass, isListingType, isMandateType } from "@/lib/listing/families";
-import { sanitizeListingData } from "@/lib/listing/listing-data";
+import { sanitizeListingData, type ListingLang } from "@/lib/listing/listing-data";
+import { checkFields, describeIssues } from "@/lib/listing/writing-check";
+import { htmlToText } from "@/lib/listing/template-engine";
 import { sendAdminAlert } from "@/lib/pilotage/alerts";
 
 /** Libelles des messages renvoyes a l'ecran (admin_properties). */
 const tProps = () => getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
+const tListing = () => getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_listing" });
+
+// Textes d'annonce soumis au controle de redaction (oct. 2026).
+const LISTING_TEXT_FIELDS: { field: string; lang: ListingLang; title: boolean; label: string }[] = [
+  { field: "title_fr", lang: "fr", title: true, label: "f_title_fr" },
+  { field: "title_en", lang: "en", title: true, label: "f_title_en" },
+  { field: "title_de", lang: "de", title: true, label: "f_title_de" },
+  { field: "description_fr", lang: "fr", title: false, label: "f_description_fr" },
+  { field: "description_en", lang: "en", title: false, label: "f_description_en" },
+  { field: "description_de", lang: "de", title: false, label: "f_description_de" },
+  { field: "short_description_fr", lang: "fr", title: false, label: "f_short_fr" },
+  { field: "short_description_en", lang: "en", title: false, label: "f_short_en" },
+  { field: "short_description_de", lang: "de", title: false, label: "f_short_de" },
+];
+
+/**
+ * Controle de redaction des textes MODIFIES (un texte deja en base n'est
+ * pas bloque tant qu'on n'y touche pas). Renvoie le motif detaille, ou
+ * null. Le texte n'est jamais corrige automatiquement.
+ */
+async function listingWritingFailure(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  id: string,
+  update: Record<string, unknown>,
+): Promise<string | null> {
+  const provided = LISTING_TEXT_FIELDS.filter((f) => typeof update[f.field] === "string");
+  if (!provided.length) return null;
+  const { data: current } = await supabase
+    .from("properties")
+    .select(`city, ${provided.map((f) => f.field).join(", ")}`)
+    .eq("id", id)
+    .maybeSingle();
+  const cur = (current ?? {}) as unknown as Record<string, unknown>;
+  const changed = provided.filter((f) => cur[f.field] !== update[f.field]);
+  const issues = checkFields(
+    changed.map((f) => ({
+      field: f.field,
+      lang: f.lang,
+      title: f.title,
+      text: f.field.startsWith("description_") ? htmlToText(String(update[f.field])) : String(update[f.field]),
+    })),
+    typeof cur.city === "string" ? [cur.city] : [],
+  );
+  if (!issues.length) return null;
+  const [tl, tp] = await Promise.all([tListing(), tProps()]);
+  const label = (field: string) => tp(LISTING_TEXT_FIELDS.find((f) => f.field === field)?.label ?? "f_title_fr");
+  return [tl("chk_blocked"), ...describeIssues(issues, (k, v) => tl(k, v), label)].join("\n");
+}
 
 /**
  * Lecture du slug d'un bien par id, pour le journal admin. L'invalidation
@@ -329,6 +379,8 @@ export async function updateProperty(
   }
 
   if (Object.keys(update).length === 0) return { ok: true };
+  const writing = await listingWritingFailure(supabase, id, update);
+  if (writing) return { ok: false, error: writing };
   const slug = await fetchPropertySlug(supabase, id);
   // Journal (oct. 2026) : ancien et nouveau prix si le prix change.
   const priceKeys = ["price", "price_on_demand", "price_min", "price_max"].filter((k) => k in update);

@@ -26,6 +26,7 @@ export const FORBIDDEN_PHRASES: Record<ListingLang, string[]> = {
     "laissez-vous séduire",
     "véritable joyau",
     "écrin",
+    "écrins",
   ],
   en: [
     "nestled",
@@ -52,7 +53,7 @@ export const FORBIDDEN_PHRASES: Record<ListingLang, string[]> = {
     "boasts",
   ],
   de: [
-    "eingebettet",
+    "eingebettet*",
     "oase der ruhe",
     "ruheoase",
     "wartet auf sie",
@@ -61,15 +62,15 @@ export const FORBIDDEN_PHRASES: Record<ListingLang, string[]> = {
     "perfekt für familien",
     "perfekte verbindung",
     "perfekt vereint",
-    "atemberaubend",
+    "atemberaubend*",
     "ein muss",
     "tauchen sie ein",
     "lassen sie sich verzaubern",
     "lassen sie sich begeistern",
     "wahres juwel",
-    "schmuckstück",
+    "schmuckstück*",
     "kleinod",
-    "traumhaft",
+    "traumhaft*",
   ],
 };
 
@@ -85,7 +86,7 @@ export const ALLOWED_CAPS = ["MAPA", "PAG", "PAP", "TVA", "RDC", "LU", "CPE", "W
 
 /** Consigne ajoutee a la traduction des annonces (Mistral). */
 export function listingWritingPrompt(target: ListingLang): string {
-  const list = FORBIDDEN_PHRASES[target].map((p) => `"${p}"`).join(", ");
+  const list = FORBIDDEN_PHRASES[target].map((p) => `"${p.replace(/\*$/, "")}"`).join(", ");
   const bare = BARE_VERBS[target].map((p) => `"${p}"`).join(", ");
   const french =
     target === "fr"
@@ -96,7 +97,7 @@ LISTING WRITING RULES (mandatory, they override any stylistic habit):
 - No em dash (U+2014) and no en dash (U+2013). The only dash allowed is "- " at the start of a list line.
 - No decorative bullets, no emoji, no arrows, no decorative symbols.
 - No exclamation mark. No decorative capitals in titles (sentence case, proper nouns excepted).
-- Never use these phrases: ${list}.
+- Never use these phrases, nor their inflected forms: ${list}.
 - Never use ${bare} without a direct object.
 - Never chain three adjectives in a row (e.g. "bright, spacious and warm").
 - Keep the exact line structure: each "- " list line stays a "- " list line.${french}`;

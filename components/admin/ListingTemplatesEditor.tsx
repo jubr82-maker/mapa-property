@@ -147,7 +147,7 @@ export function ListingTemplatesEditor({ models }: { models: Record<ListingLang,
             <span className="text-xs text-[#3D4F63]/70">{isDefault ? t("tpl_is_default") : t("tpl_is_modified")}</span>
           </div>
           {msg && (
-            <p role={msg.ok ? "status" : "alert"} className={`text-sm ${msg.ok ? "text-emerald-800" : "text-red-700"}`}>
+            <p role={msg.ok ? "status" : "alert"} className={`whitespace-pre-line text-sm ${msg.ok ? "text-emerald-800" : "text-red-700"}`}>
               {msg.text}
             </p>
           )}

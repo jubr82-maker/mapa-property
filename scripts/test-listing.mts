@@ -385,5 +385,132 @@ test("SQL 17 : colonne, table, RLS admin seulement", () => {
   assert.ok(!/[–—]/.test(s));
 });
 
+// ---------------------------------------------------------------------------
+console.log("\nPartie 3 : controle de redaction des annonces");
+const { checkWriting, checkFields, templateLiteral } = await import("../lib/listing/writing-check");
+const codes = (t: string, l: Lang = "fr", o = {}) => checkWriting(t, l, o).map((i) => i.code);
+const has = (t: string, code: string, l: Lang = "fr", o = {}) => assert.ok(codes(t, l, o).includes(code as never), `${code} attendu pour : ${t}`);
+const clean = (t: string, l: Lang = "fr", o = {}) => assert.deepEqual(checkWriting(t, l, o), [], `aucun point attendu pour : ${t}`);
+const EM = String.fromCharCode(0x2014), EN_DASH = String.fromCharCode(0x2013);
+
+test("tirets : long et moyen interdits, tiret de phrase interdit, liste et mots composes permis", () => {
+  has(`Bel appartement ${EM} lumineux`, "dash");
+  has(`Bel appartement ${EN_DASH} lumineux`, "dash");
+  has("Steinfort - Luxembourg", "spaced_hyphen");
+  has("Prix -- sur demande", "spaced_hyphen");
+  clean("Les prestations :\n- Cave privative\n- Rez-de-chaussée orienté sud-ouest");
+});
+test("puces, emoji, fleches, symboles", () => {
+  has("Atouts :\n• Cave", "bullet");
+  has("Atouts :\n* Cave", "bullet");
+  has("Atouts :\n-Cave", "bullet");
+  has("Vue imprenable \u{1F3E1}", "emoji");
+  has("Gare → 5 minutes", "symbol");
+  has("★ Coup de coeur", "symbol");
+  has("✔ Rénové", "symbol");
+});
+test("point d'exclamation interdit dans les 3 langues", () => {
+  has("Une affaire !", "exclamation");
+  has("A rare find!", "exclamation", "en");
+  has("Ein seltenes Angebot!", "exclamation", "de");
+});
+test("titres : capitales et majuscules decoratives", () => {
+  const o = { title: true, properNouns: ["Steinfort"] };
+  has("SUPERBE appartement à Steinfort", "caps_word", "fr", o);
+  has("Superbe Appartement Duplex à Vendre à Steinfort", "title_case", "fr", o);
+  has("Superb Duplex Apartment For Sale in Steinfort", "title_case", "en", o);
+  clean("Superbe appartement duplex 2 chambres à vendre à Steinfort", "fr", o);
+  clean("Superb 2-bedroom duplex apartment for sale in Steinfort", "en", o);
+  clean("Schöne Maisonette-Wohnung mit 2 Schlafzimmern zu verkaufen in Steinfort", "de", o);
+  clean("Appartement en zone HAB-1, MAPA Property", "fr", o);
+});
+test("formules interdites (francais, liste de Julien)", () => {
+  for (const f of ["Maison nichée au calme", "Un vrai havre de paix", "Cette villa n'attend que vous", "Idéal pour les familles", "Alliant à la perfection style et confort", "Une vue à couper le souffle", "Un must à Luxembourg", "Plongez dans le charme", "Laissez-vous séduire par ce bien", "Un véritable joyau", "Un écrin de verdure", "Un niché"]) has(f, "forbidden");
+  has("Cette villa n’attend que vous", "forbidden");
+  has("Découvrez.", "bare_verb");
+  has("Visite sur rendez-vous. Découvrez !", "bare_verb");
+  clean("Découvrez le séjour baigné de lumière.");
+  clean("Un bien rare au calme, près de la gare.");
+});
+test("formules interdites proposees (anglais, allemand)", () => {
+  for (const f of ["Nestled in a quiet street", "A haven of peace", "This villa awaits you", "Ideal for families", "A breathtaking view", "A true gem", "Discover."]) assert.ok(codes(f, "en").some((c) => c === "forbidden" || c === "bare_verb"), f);
+  for (const f of ["Eingebettet im Grünen", "Eine Oase der Ruhe", "Diese Villa wartet auf Sie", "Ideal für Familien", "Ein atemberaubender Blick", "Ein wahres Juwel", "Ein Schmuckstück", "Entdecken Sie."]) assert.ok(codes(f, "de").some((c) => c === "forbidden" || c === "bare_verb"), f);
+  clean("A bright apartment close to the station.", "en");
+  clean("Eine helle Wohnung in Bahnhofsnähe.", "de");
+});
+test("trois adjectifs a la suite", () => {
+  has("Un cadre de vie spacieux, lumineux et chaleureux.", "three_adjectives");
+  has("Un séjour clair, calme, agréable.", "three_adjectives");
+  has("A bright, spacious and welcoming home.", "three_adjectives", "en");
+  has("Eine helle, geräumige und moderne Wohnung.", "three_adjectives", "de");
+  clean("Un cadre de vie spacieux et lumineux.");
+  clean("Séjour, cuisine et salle de bain au même niveau.");
+  clean("Mehrsprachiger Service: Luxemburgisch, Französisch, Englisch, Deutsch und Italienisch.", "de");
+});
+test("typographie francaise : apostrophes, espaces, montants, surfaces", () => {
+  has("L'entrée et l’escalier", "apostrophes");
+  clean("L'entrée et l'escalier");
+  clean("L’entrée et l’escalier");
+  has("Charges: 280 €", "space_before");
+  has("Vous souhaitez vendre?", "space_before");
+  clean("Charges : 280 € ; visite à 10:30 sur https://mapaproperty.lu");
+  has("Prix : 1200000 €", "amount");
+  has("Prix : 1.200.000 €", "amount");
+  has("Prix : 1 200 000€", "amount");
+  has("Prix : €1 200 000", "amount");
+  has("Prix : 900 euros", "amount");
+  clean("Prix : 1 200 000 €, charges : 280 €.");
+  has("Surface de 115m2", "area");
+  has("Surface de 115 m2", "area");
+  has("Surface de 115m²", "area");
+  clean("Surface de 115 m², terrasse de 24 m².");
+  // Regles typographiques francaises seulement : l'anglais garde ses usages.
+  clean("Price: €1,200,000", "en");
+});
+test("le controle ne modifie jamais le texte", () => {
+  const t = `Bel appartement ${EM} SUPERBE !`;
+  const copy = String(t);
+  checkWriting(t, "fr", { title: true });
+  assert.equal(t, copy);
+  const src = readFileSync(join(root, "lib/listing/writing-check.ts"), "utf8");
+  assert.ok(!/\breplace\(.*text\)\s*;?\s*$/m.test(src.split("export function checkWriting")[1].split("return issues")[0]), "aucune reecriture dans checkWriting");
+});
+test("modeles par defaut et annonces generees : aucun point a corriger", () => {
+  for (const l of ["fr", "en", "de"] as const) {
+    const m = model(l);
+    for (const [k, v] of Object.entries({ title: m.title, tronc: m.tronc, ...m.blocks })) assert.deepEqual(checkWriting(templateLiteral(v), l, { title: k === "title" }), [], `${l} ${k}`);
+  }
+  for (const pt of LISTING_TYPES.map((x) => x.slug)) {
+    for (const l of ["fr", "en", "de"] as const) {
+      for (const [tx, mandate] of [["sale", "exclusive"], ["sale", "simple"], ["rent", "exclusive"]] as const) {
+        const d = sanitizeListingData(JSON.parse(JSON.stringify(steinfort)));
+        d.written[l] = { ...d.written[l], qualifier: l === "fr" ? "superbe" : l === "en" ? "superb" : "schön", ambiance: l === "fr" ? "offre de beaux volumes" : l === "en" ? "offers generous volumes" : "bietet großzügige Räume" };
+        const g = gen(l, { property_type: pt, transaction: tx, mandate_type: mandate, price: tx === "rent" ? 2400 : 720000 }, d);
+        const issues = checkFields([{ field: "t", lang: l, text: g.title, title: true }, { field: "d", lang: l, text: g.text }], ["Steinfort"]);
+        assert.deepEqual(issues, [], `${pt} ${l} ${tx} ${mandate} : ${JSON.stringify(issues)}`);
+      }
+    }
+  }
+});
+test("ambiance de la reference : la regle des trois adjectifs la signale", () => {
+  const d = sanitizeListingData(JSON.parse(JSON.stringify(steinfort)));
+  d.written.fr.ambiance = "offre un cadre de vie spacieux, lumineux et chaleureux, alliant confort moderne et authenticité";
+  const g = gen("fr", {}, d);
+  assert.ok(codes(g.text).includes("three_adjectives"));
+});
+test("enregistrement bloque : action serveur et ecran, motif detaille", () => {
+  const act = readFileSync(join(root, "app/admin/properties/actions.ts"), "utf8");
+  assert.ok(/const writing = await listingWritingFailure\(supabase, id, update\);\s*if \(writing\) return \{ ok: false, error: writing \};/.test(act));
+  assert.ok(act.indexOf("listingWritingFailure(supabase, id, update)") < act.indexOf('.from("properties")\n    .update(update)'), "controle avant l'ecriture");
+  const form = readFileSync(join(root, "components/admin/PropertyEditForm.tsx"), "utf8");
+  assert.ok(form.includes('setError([tl("chk_blocked"), ...describe(blocking)].join("\\n"))'));
+  const tpl = readFileSync(join(root, "app/admin/settings/modeles/actions.ts"), "utf8");
+  assert.ok(tpl.includes("checkFields([{ field: target.part, lang: target.lang, text: templateLiteral(text)"));
+  for (const l of ["fr", "en", "de"]) {
+    const a = messages[l].admin_listing as Record<string, string>;
+    for (const c of ["dash", "spaced_hyphen", "bullet", "emoji", "symbol", "exclamation", "caps_word", "title_case", "forbidden", "bare_verb", "three_adjectives", "apostrophes", "space_before", "amount", "area"]) assert.ok(a[`chk_${c}`]?.includes("{excerpt}"), `${l} chk_${c}`);
+  }
+});
+
 console.log(`\n${n} PASS, ${failed} FAIL`);
 if (failed) process.exit(1);

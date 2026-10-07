@@ -12,6 +12,7 @@ import { ADMIN_LOCALE } from "@/lib/datetime";
 import { logAdminAction } from "@/lib/pilotage/audit";
 import { LISTING_LANGS, type ListingLang } from "@/lib/listing/listing-data";
 import { isTemplatePart } from "@/lib/listing/families";
+import { checkFields, describeIssues, templateLiteral } from "@/lib/listing/writing-check";
 
 const MAX_BODY = 20000;
 
@@ -32,6 +33,12 @@ export async function saveListingTemplate(lang: string, part: string, body: stri
     const text = String(body ?? "").replace(/\r\n?/g, "\n");
     if (!text.trim()) throw new ActionFailure((await tl())("tpl_err_empty"));
     if (text.length > MAX_BODY) throw new ActionFailure((await tl())("tpl_err_too_long", { max: MAX_BODY }));
+    // Regles de redaction sur le texte fixe du modele (reperes retires).
+    const issues = checkFields([{ field: target.part, lang: target.lang, text: templateLiteral(text), title: target.part === "title" }]);
+    if (issues.length) {
+      const t = await tl();
+      throw new ActionFailure([t("chk_template_blocked"), ...describeIssues(issues, (k, v) => t(k, v), () => t("chk_template_field"))].join("\n"));
+    }
     const { error } = await admin.supabase
       .from("listing_templates")
       .upsert({ lang: target.lang, part: target.part, body: text, updated_by: admin.user.email ?? null, updated_at: new Date().toISOString() }, { onConflict: "lang,part" });
