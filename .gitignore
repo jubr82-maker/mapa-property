@@ -65,3 +65,13 @@ data/sources/
 
 # Rapports de tests QA / SEO (generes)
 qa-reports/
+
+# Fichiers internes jamais suivis (oct. 2026) : matrice de securite,
+# sauvegardes, essais, rapports, donnees brutes, scripts ad hoc.
+/docs/security/matrice.csv
+/AUDIT_CONFORMITE.md
+/backups-db/
+/essais-pdf/
+/qa-reports/
+/data/sources/
+/._*
