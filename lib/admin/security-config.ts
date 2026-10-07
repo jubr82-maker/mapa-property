@@ -5,14 +5,14 @@
 export const ADMIN_PASSWORD_MIN_LENGTH = 14;
 
 /**
- * Deconnexion automatique apres 30 minutes sans activite dans l'admin.
- * Justification : l'admin donne acces aux donnees personnelles des
- * prospects et aux biens ; 30 minutes est la duree d'inactivite maximale
- * retenue par l'OWASP ASVS (niveau 2) pour une application sensible
- * (SUPPOSE, reference a reverifier), et laisse le temps de rediger une
- * fiche sans etre interrompu.
+ * Deconnexion automatique apres 4 heures sans activite dans l'admin
+ * (decision de Julien, 7 oct. 2026 ; 30 minutes auparavant). Garanties
+ * inchangees : delai mesure sur la session EN COURS uniquement
+ * (lib/admin/idle.ts), double authentification exigee a chaque nouvelle
+ * connexion, aal2 toujours lu dans le jeton Supabase, jamais fabrique.
+ * Le cookie d'activite (12 h) dure plus longtemps que ce delai.
  */
-export const ADMIN_IDLE_TIMEOUT_MINUTES = 30;
+export const ADMIN_IDLE_TIMEOUT_MINUTES = 240;
 
 /**
  * Cookie d'activite : "<session_id>:<horodatage ms>" de la derniere requete

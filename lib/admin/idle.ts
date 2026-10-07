@@ -17,7 +17,7 @@
 //     valide par Supabase (plus ancien horodatage d'authentification du
 //     jeton). Une session qui vient de s'ouvrir n'est donc jamais inactive ;
 //     une session ancienne sans trace d'activite (cookie expire ou efface)
-//     l'est bien apres 30 minutes ;
+//     l'est bien apres ADMIN_IDLE_TIMEOUT_MINUTES (4 heures) ;
 //   - aucune deconnexion pendant un parcours de connexion en cours.
 // Ces informations ne servent qu'a DECONNECTER, jamais a accorder un acces
 // ni un niveau (aal2 reste lu par getAuthenticatorAssuranceLevel).

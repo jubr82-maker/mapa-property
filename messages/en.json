@@ -1757,7 +1757,7 @@
     "forgot_link": "Forgot your password?",
     "login_error": "Incorrect credentials or access denied.",
     "captcha_error": "Anti-bot check failed. Reload the page and try again.",
-    "idle_notice": "You were signed out after {minutes} minutes of inactivity.",
+    "idle_notice": "You were signed out after {hours, plural, one {# hour} other {# hours}} of inactivity. Sign in again with your second factor.",
     "mfa_title": "Two-factor authentication",
     "mfa_hint": "Enter the 6-digit code shown by your authenticator app.",
     "mfa_code": "Code",

@@ -771,14 +771,16 @@ section = "N. Cartes, visionneuse, Passkey, region";
 // ===========================================================================
 section = "O. Inactivite et nouvelle session";
 {
-  const TIMEOUT = 30 * 60_000;
+  // Delai porte a 4 heures (decision de Julien, 7 oct. 2026).
+  const TIMEOUT = 4 * 3600_000;
+  check("inactivite : delai de 4 heures, source unique (proxy et navigateur)", Number((read("lib/admin/security-config.ts").match(/ADMIN_IDLE_TIMEOUT_MINUTES = (\d+);/) ?? [])[1]) === 240 && /timeoutMs: ADMIN_IDLE_TIMEOUT_MINUTES \* 60_000/.test(read("proxy.ts")) && /ADMIN_IDLE_TIMEOUT_MINUTES \* 60_000/.test(read("components/admin/AdminIdleWatcher.tsx")));
   const at = (iso: string) => new Date(iso).getTime();
   const passkeyStart = at("2026-10-05T16:20:32.000Z");
   const claimsNew = { session_id: "session-nouvelle", amr: [{ method: "passkey", timestamp: Math.floor(passkeyStart / 1000) }] };
-  const oldActivity = at("2026-10-05T16:20:20.365Z") - 60 * 60_000; // ancienne activite vieille d'une heure
+  const oldActivity = at("2026-10-05T16:20:20.365Z") - 5 * 3600_000; // ancienne activite vieille de cinq heures (au-dela du delai)
   const base = { timeoutMs: TIMEOUT, loginInProgress: false };
   // Sequence du journal du 5 octobre (id 7 a 14).
-  // id 7 : ouverture de la page de connexion avec l'ANCIENNE session, inactive depuis 1 h : deconnexion legitime.
+  // id 7 : ouverture de la page de connexion avec l'ANCIENNE session, inactive depuis 5 h : deconnexion legitime.
   const id7 = evaluateAdminIdle({ ...base, now: at("2026-10-05T16:20:20.365Z"), cookieValue: `session-ancienne:${oldActivity}`, sessionId: "session-ancienne", sessionStartMs: oldActivity - 3600_000 });
   check("journal id 7 : ancienne session inactive deconnectee", id7.action === "logout");
   check("heure d'ouverture lue dans le jeton", sessionStartFromClaims(claimsNew) === passkeyStart);
@@ -792,12 +794,12 @@ section = "O. Inactivite et nouvelle session";
   // id 13 et 14 : fin de connexion puis ouverture de l'admin, toujours conservee.
   const id14 = evaluateAdminIdle({ ...base, now: at("2026-10-05T16:20:33.000Z"), cookieValue: `session-ancienne:${oldActivity}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart });
   check("journal id 13 et 14 : session Passkey jamais supprimee", id14.action === "keep");
-  // La regle des 30 minutes reste appliquee a la session en cours.
+  // La regle des 4 heures reste appliquee a la session en cours.
   const lastNew = at("2026-10-05T16:20:33.000Z");
-  check("29 minutes sans activite : session conservee", evaluateAdminIdle({ ...base, now: lastNew + 29 * 60_000, cookieValue: `session-nouvelle:${lastNew}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "keep");
-  check("31 minutes sans activite : deconnexion", evaluateAdminIdle({ ...base, now: lastNew + 31 * 60_000, cookieValue: `session-nouvelle:${lastNew}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "logout");
-  check("cookie expire sur une session ancienne : deconnexion", evaluateAdminIdle({ ...base, now: lastNew + 2 * 3600_000, cookieValue: undefined, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "logout");
-  check("parcours de connexion en cours : jamais de deconnexion", evaluateAdminIdle({ ...base, loginInProgress: true, now: lastNew + 5 * 3600_000, cookieValue: `session-nouvelle:${lastNew}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "keep");
+  check("3 h 59 sans activite : session conservee", evaluateAdminIdle({ ...base, now: lastNew + (3 * 60 + 59) * 60_000, cookieValue: `session-nouvelle:${lastNew}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "keep");
+  check("4 h 01 sans activite : deconnexion", evaluateAdminIdle({ ...base, now: lastNew + (4 * 60 + 1) * 60_000, cookieValue: `session-nouvelle:${lastNew}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "logout");
+  check("cookie expire sur une session ancienne : deconnexion", evaluateAdminIdle({ ...base, now: lastNew + 5 * 3600_000, cookieValue: undefined, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "logout");
+  check("parcours de connexion en cours : jamais de deconnexion", evaluateAdminIdle({ ...base, loginInProgress: true, now: lastNew + 6 * 3600_000, cookieValue: `session-nouvelle:${lastNew}`, sessionId: "session-nouvelle", sessionStartMs: passkeyStart }).action === "keep");
   // Branchement reel.
   const px = read("proxy.ts");
   check("proxy : decision d'inactivite partagee et testee", /evaluateAdminIdle\(\{/.test(px) && /supabase\.auth\.getClaims\(\)/.test(px) && /sessionStartFromClaims\(claims\)/.test(px));

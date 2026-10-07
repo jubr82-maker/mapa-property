@@ -1757,7 +1757,7 @@
     "forgot_link": "Passwort vergessen?",
     "login_error": "Falsche Zugangsdaten oder Zugriff verweigert.",
     "captcha_error": "Bot-Prüfung fehlgeschlagen. Laden Sie die Seite neu und versuchen Sie es erneut.",
-    "idle_notice": "Sie wurden nach {minutes} Minuten Inaktivität abgemeldet.",
+    "idle_notice": "Sie wurden nach {hours, plural, one {# Stunde} other {# Stunden}} Inaktivität abgemeldet. Melden Sie sich erneut mit Ihrem zweiten Faktor an.",
     "mfa_title": "Zwei-Faktor-Authentifizierung",
     "mfa_hint": "Geben Sie den 6-stelligen Code Ihrer Authentifizierungs-App ein.",
     "mfa_code": "Code",

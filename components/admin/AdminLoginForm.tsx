@@ -51,7 +51,7 @@ export function AdminLoginForm({
   return (
     <form onSubmit={submit} className="space-y-4">
       {searchParams.reason === "idle" && (
-        <p className={authOkCls}>{t("idle_notice", { minutes: ADMIN_IDLE_TIMEOUT_MINUTES })}</p>
+        <p className={authOkCls}>{t("idle_notice", { hours: ADMIN_IDLE_TIMEOUT_MINUTES / 60 })}</p>
       )}
       <div>
         <label htmlFor="email" className={authLabelCls}>{t("email")}</label>

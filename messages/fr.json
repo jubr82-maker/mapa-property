@@ -1757,7 +1757,7 @@
     "forgot_link": "Mot de passe oublié ?",
     "login_error": "Identifiants incorrects ou accès refusé.",
     "captcha_error": "Vérification anti-robot échouée. Rechargez la page et réessayez.",
-    "idle_notice": "Vous avez été déconnecté après {minutes} minutes d'inactivité.",
+    "idle_notice": "Vous avez été déconnecté après {hours, plural, one {# heure} other {# heures}} d'inactivité. Reconnectez-vous avec votre second facteur.",
     "mfa_title": "Double authentification",
     "mfa_hint": "Saisissez le code à 6 chiffres affiché par votre application d'authentification.",
     "mfa_code": "Code",
