@@ -3938,6 +3938,11 @@
     "annex_kind_energy_passport": "Energy performance certificate",
     "annex_kind_cadastre": "Land register extract",
     "annex_kind_other": "Document",
-    "annex_pages": "{count, plural, one {# page} other {# pages}}"
+    "annex_pages": "{count, plural, one {# page} other {# pages}}",
+    "not_expertise_short": "A value opinion, not a real estate expert appraisal.",
+    "legal_title": "Non-contractual information",
+    "legal_p1": "The estimates, market analyses and data presented in this document are provided for informational and indicative purposes. They rely on public sources (STATEC, Observatoire de l'Habitat, ABBL, Central Bank of Luxembourg) and on MAPA Property's proprietary algorithms.",
+    "legal_p2": "MAPA Property accepts no liability for any use that may be made of this document, for decisions taken on its basis, or for any discrepancies with market reality or the individual situation of its recipient.",
+    "legal_p3": "This document does not constitute financial, tax, legal or notarial advice. For any concrete transaction, consult the relevant professionals: notary (authentic deed, inheritance, matrimonial regime), bank or licensed credit broker (financing), tax adviser (taxation, capital gains), lawyer (legal advice)."
   }
 }

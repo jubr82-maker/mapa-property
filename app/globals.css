@@ -899,3 +899,44 @@ body {
 html.consent-decided [data-consent-banner] {
   display: none;
 }
+
+/* ============================================================
+   Filaments de l'arriere-plan (AmbientBackgroundLite), oct. 2026.
+   Un calque <svg> par filament. Telephone : derive lente en CSS sur
+   "transform" seulement (calcul et affichage par le compositeur du
+   navigateur, aucun redessin de la page, aucun JavaScript par image),
+   activee apres le chargement (data-filaments="on"), en pause si
+   l'onglet est cache ou le fond hors de l'ecran (data-paused).
+   "Reduire les animations" : immobiles partout.
+   ============================================================ */
+.ambient-filament {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 768px) {
+  [data-filaments="on"] .ambient-filament {
+    will-change: transform;
+    animation: mapa-filament-drift var(--drift-dur, 44s) ease-in-out infinite alternate;
+  }
+  [data-filaments="on"][data-paused] .ambient-filament {
+    animation-play-state: paused;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambient-filament {
+    animation: none !important;
+  }
+}
+@keyframes mapa-filament-drift {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--dx, 24px), var(--dy, 16px), 0);
+  }
+  100% {
+    transform: translate3d(calc(var(--dx, 24px) * -0.6), calc(var(--dy, 16px) * 0.4), 0);
+  }
+}

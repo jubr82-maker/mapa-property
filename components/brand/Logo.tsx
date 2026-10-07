@@ -20,12 +20,22 @@
  * setTheme() → Logo affichait toujours logo_mapa_nuit.png meme en jour.
  *
  * SSR + pré-mount → nuit (défaut premier visiteur). Ratio PNG 2000×458.
+ *
+ * Oct. 2026 : logo officiel sur fond clair fourni par Julien, en SVG
+ * (/logos/mapa-logo-fond-clair.svg : embleme en degrade or, texte
+ * #03200A, marges transparentes seules retirees). Vectoriel, donc net a
+ * toute taille, y compris 44 px de haut (en-tete mobile). Le mode sombre
+ * garde le logo or uni (/logo_mapa_nuit.png).
  */
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-const RATIO = 2000 / 458;
+const DARK_SRC = "/logo_mapa_nuit.png";
+const DARK_RATIO = 2000 / 458;
+const LIGHT_SRC = "/logos/mapa-logo-fond-clair.svg";
+// viewBox du SVG apres retrait des marges : 1675.25 x 350.5.
+const LIGHT_RATIO = 1675.25 / 350.5;
 
 type LogoProps = {
   /** Hauteur en px. Largeur dérivée du ratio natif 4.367. */
@@ -60,8 +70,8 @@ export function Logo({
 
   const isLight =
     tone === "light" || (tone === "auto" && !isDarkClass);
-  const src = isLight ? "/logo_mapa_jour.png" : "/logo_mapa_nuit.png";
-  const width = Math.round(height * RATIO);
+  const src = isLight ? LIGHT_SRC : DARK_SRC;
+  const width = Math.round(height * (isLight ? LIGHT_RATIO : DARK_RATIO));
 
   return (
     <Image
@@ -75,6 +85,8 @@ export function Logo({
       // du haut de page (logos mobile et ordinateur) en concurrence avec
       // l'image principale.
       fetchPriority={priority ? undefined : "low"}
+      // SVG servi tel quel (l'optimiseur de next/image ne traite pas le SVG).
+      unoptimized={isLight}
       className={className}
     />
   );

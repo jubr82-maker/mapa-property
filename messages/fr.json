@@ -3938,6 +3938,11 @@
     "annex_kind_energy_passport": "Passeport énergétique",
     "annex_kind_cadastre": "Extrait cadastral",
     "annex_kind_other": "Document",
-    "annex_pages": "{count, plural, one {# page} other {# pages}}"
+    "annex_pages": "{count, plural, one {# page} other {# pages}}",
+    "not_expertise_short": "Avis de valeur, et non une expertise immobilière.",
+    "legal_title": "Informations non contractuelles",
+    "legal_p1": "Les estimations, analyses de marché et données présentées dans ce document sont fournies à titre informatif et indicatif. Elles s'appuient sur des sources publiques (STATEC, Observatoire de l'Habitat, ABBL, Banque centrale du Luxembourg) et sur les algorithmes propriétaires de MAPA Property.",
+    "legal_p2": "MAPA Property décline toute responsabilité quant à l'usage qui pourrait être fait de ce document, aux décisions prises sur sa base, ou aux écarts éventuels avec la réalité du marché ou la situation individuelle de son destinataire.",
+    "legal_p3": "Ce document ne constitue pas un conseil financier, fiscal, juridique ou notarial. Pour toute opération concrète, consultez les professionnels compétents : notaire (acte authentique, succession, régime matrimonial), banque ou courtier en crédit agréé (financement), conseil fiscal (imposition, plus-values), avocat (conseil juridique)."
   }
 }

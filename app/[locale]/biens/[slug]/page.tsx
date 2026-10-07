@@ -374,10 +374,11 @@ export default async function PropertyPage({
       />
       <JsonLd data={propertyJsonLd} />
       <PageBreadcrumb locale={locale} path={`/biens/${property.slug}`} current={htmlToPlainText(title)} />
-      {/* Print-only : entete logo sombre + URL canonique. Invisible a l'ecran. */}
+      {/* Print-only : entete avec le logo officiel sur fond clair (SVG) + URL
+          canonique. Invisible a l'ecran. */}
       <div data-fiche-print-header className="hidden print:block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo_mapa_jour.png" alt="MAPA Property" />
+        <img src="/logos/mapa-logo-fond-clair.svg" alt="MAPA Property" />
       </div>
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <FicheHeader

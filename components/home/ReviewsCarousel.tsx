@@ -11,7 +11,8 @@
  * Cards palette Forêt :
  *  - bordure cuivre citron #e0af6e 1px
  *  - fond crème #F0E6CC (jour) / sapin #1F221A (nuit) via token bg-bg
- *  - commentaire italique cuivre citron
+ *  - commentaire italique : encre foncee en mode clair, cuivre citron en
+ *    mode sombre (contraste, oct. 2026)
  *  - nom client JetBrains Mono uppercase petit
  *
  * prefers-reduced-motion : autoplay desactive (loop fige, lecture
@@ -80,9 +81,12 @@ export function ReviewsCarousel({ reviews }: Props) {
                   style={{ border: "1px solid #e0af6e" }}
                 >
                   <Stars rating={r.rating ?? 5} />
+                  {/* Texte lisible (oct. 2026) : encre foncee sur fond clair
+                      (contraste 4,5:1 au moins, verifie par le test), or
+                      seulement en mode sombre ; les etoiles restent or. */}
                   <blockquote
-                    className="line-clamp-5 text-sm italic leading-relaxed md:line-clamp-none md:text-base"
-                    style={{ color: "#e0af6e" }}
+                    className="line-clamp-5 text-sm italic leading-relaxed text-ink md:line-clamp-none md:text-base dark:text-gold"
+                    data-review-text
                   >
                     “{reviewTextFor(r, locale)}”
                   </blockquote>

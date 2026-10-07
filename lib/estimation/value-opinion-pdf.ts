@@ -18,7 +18,7 @@
 // Intl.NumberFormat, dont l'espace fine insecable manque aux polices
 // standard PDF, cf. lib/admin/exports/format.ts).
 import PDFDocument from "pdfkit";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { createTranslator } from "next-intl";
 import { resolveFonts, type ResolvedFonts } from "@/lib/admin/exports/pdf";
@@ -128,23 +128,31 @@ const BOTTOM_MARGIN = 54;
 const BOTTOM = PAGE.h - BOTTOM_MARGIN;
 const SECTION_GAP = 18;
 const TITLE_MIN_FOLLOW = 58;
-const LOGO_PATH = path.join(process.cwd(), "public", "logo_mapa_jour.png");
-const LOGO_ASPECT = 2000 / 458;
+// Logo officiel sur fond clair (fourni par Julien, oct. 2026) : PNG rogne de
+// ses seules marges transparentes et reduit a 1600 px de large, sans autre
+// retouche (pdfkit ne lit pas le SVG). Couverture : 320 pt de large, soit
+// 360 points par pouce ; en-tete : 20 pt de haut. Reference par CHEMIN :
+// pdfkit ne l'embarque qu'une fois pour toutes les pages.
+const LOGO_PATH = path.join(process.cwd(), "public", "logos", "mapa-logo-fond-clair-1600.png");
+const LOGO_ASPECT = 1600 / 336;
+const COVER_LOGO_WIDTH = 320;
 
 /** Trace pour les tests : chaque texte ecrit, avec sa page et sa position. */
-export type TraceEvent = { page: number; y: number; bottom: number; kind: "title" | "text" | "footer" | "annex"; text: string };
+export type TraceEvent = { page: number; y: number; bottom: number; kind: "title" | "text" | "footer" | "annex" | "row"; text: string; group?: number };
 
 type Ctx = {
   doc: PDFKit.PDFDocument;
   fonts: ResolvedFonts;
-  logo: Buffer | null;
+  logo: string | null;
   page: number;
   kind: TraceEvent["kind"];
+  /** Numero du tableau en cours (trace des lignes). */
+  group: number;
 };
 
-function logoBuffer(): Buffer | null {
+function logoPath(): string | null {
   try {
-    return existsSync(LOGO_PATH) ? readFileSync(LOGO_PATH) : null;
+    return existsSync(LOGO_PATH) ? LOGO_PATH : null;
   } catch {
     return null;
   }
@@ -186,34 +194,51 @@ function paragraph(ctx: Ctx, text: string, opts: { size?: number; color?: string
   doc.moveDown(opts.gap ?? 0.55);
 }
 
+/**
+ * Tableau libelle / valeur. Ne se coupe jamais en laissant une seule ligne
+ * isolee en bas d'une page ou en haut de la suivante.
+ */
 function rows(ctx: Ctx, items: [string, string][]) {
   const { doc, fonts } = ctx;
   const labelW = 210;
   const valueX = PAGE.m + labelW + 12;
   const valueW = PAGE.w - PAGE.m - valueX;
-  for (const [label, value] of items) {
-    doc.font(fonts.body).fontSize(9.5);
-    const h = Math.max(doc.heightOfString(label, { width: labelW }), doc.heightOfString(value, { width: valueW })) + 8;
-    ensureSpace(ctx, h);
+  doc.font(fonts.body).fontSize(9.5);
+  const hs = items.map(([label, value]) => Math.max(doc.heightOfString(label, { width: labelW }), doc.heightOfString(value, { width: valueW })) + 8);
+  ctx.group += 1;
+  const drawRow = (i: number) => {
+    const [label, value] = items[i];
+    const h = hs[i];
     const y = doc.y;
+    ctx.kind = "row";
     doc.font(fonts.body).fontSize(9.5).fillColor(VO_GREY).text(label, PAGE.m, y + 4, { width: labelW });
     doc.font(fonts.bodyBold).fontSize(9.5).fillColor(VO_BLACK).text(value, valueX, y + 4, { width: valueW });
+    ctx.kind = "text";
     doc.moveTo(PAGE.m, y + h).lineTo(PAGE.w - PAGE.m, y + h).lineWidth(0.5).strokeColor(VO_LINE).stroke();
     doc.y = y + h;
+  };
+  const n = items.length;
+  let i = 0;
+  while (i < n) {
+    let y = doc.y;
+    let k = i;
+    while (k < n && y + hs[k] <= BOTTOM) {
+      y += hs[k];
+      k++;
+    }
+    if (k >= n) {
+      for (let j = i; j < n; j++) drawRow(j);
+      break;
+    }
+    let fit = k - i;
+    if (fit === 1 && n - i > 1) fit = 0; // une seule ligne en bas de page
+    else if (n - k === 1 && fit >= 2) fit -= 1; // une seule ligne en haut de la suivante
+    if (fit === 0 && doc.y <= TOP + 1) fit = 1; // ligne plus haute qu'une page
+    for (let j = i; j < i + fit; j++) drawRow(j);
+    i += fit;
+    doc.addPage();
   }
   doc.moveDown(0.5);
-}
-
-function notice(ctx: Ctx, text: string) {
-  const { doc, fonts } = ctx;
-  const w = PAGE.w - 2 * PAGE.m - 14;
-  doc.font(fonts.body).fontSize(9);
-  const h = doc.heightOfString(text, { width: w, lineGap: 2 }) + 14;
-  ensureSpace(ctx, h);
-  const y = doc.y;
-  doc.rect(PAGE.m, y, 3, h).fill(VO_GOLD);
-  doc.fillColor(VO_BLACK).text(text, PAGE.m + 14, y + 7, { width: w, lineGap: 2 });
-  doc.y = y + h + 8;
 }
 
 function footers(ctx: Ctx, footer: string, pageLabel: (n: number, total: number) => string, extraPages = 0) {
@@ -304,7 +329,6 @@ export function buildValueOpinionPdf(
 ): Promise<Buffer> {
   const vo = createTranslator({ locale: lang, messages, namespace: "value_opinion" as never }) as unknown as (k: string, v?: Record<string, string | number>) => string;
   const estT = createTranslator({ locale: lang, messages, namespace: "admin_estimations" as never }) as unknown as ((k: string, v?: Record<string, string | number>) => string) & { has: (k: string) => boolean };
-  const disc = createTranslator({ locale: lang, messages, namespace: "disclaimer" as never }) as unknown as (k: string) => string;
   const est = (k: string) => estT(k);
   const f = formatters(lang, est);
 
@@ -342,7 +366,7 @@ export function buildValueOpinionPdf(
     doc.on("data", (c: Buffer) => chunks.push(c));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
-    const ctx: Ctx = { doc, fonts: resolveFonts(doc), logo: logoBuffer(), page: 1, kind: "text" };
+    const ctx: Ctx = { doc, fonts: resolveFonts(doc), logo: logoPath(), page: 1, kind: "text", group: 0 };
     const { fonts } = ctx;
     if (collect || trace) {
       const original = doc.text.bind(doc) as (...a: unknown[]) => PDFKit.PDFDocument;
@@ -354,7 +378,7 @@ export function buildValueOpinionPdf(
         if (isText) {
           collect?.push(String(a[0]));
           // Page de fin d'ecriture (un texte long peut passer a la suivante).
-          trace?.push({ page: ctx.page, y: page === ctx.page ? y : TOP, bottom: doc.y, kind: ctx.kind, text: String(a[0]) });
+          trace?.push({ page: ctx.page, y: page === ctx.page ? y : TOP, bottom: doc.y, kind: ctx.kind, text: String(a[0]), group: ctx.kind === "row" ? ctx.group : undefined });
         }
         return res;
       };
@@ -368,7 +392,7 @@ export function buildValueOpinionPdf(
 
     // 1. Couverture.
     if (ctx.logo) {
-      const w = 300;
+      const w = COVER_LOGO_WIDTH;
       doc.image(ctx.logo, (PAGE.w - w) / 2, 150, { width: w, height: w / LOGO_ASPECT });
     }
     doc.moveTo(PAGE.m + 80, 260).lineTo(PAGE.w - PAGE.m - 80, 260).lineWidth(1.2).strokeColor(VO_GOLD).stroke();
@@ -382,8 +406,9 @@ export function buildValueOpinionPdf(
     if (e.contact_name) doc.text(vo("prepared_for", { name: e.contact_name }), { width: PAGE.w - 2 * PAGE.m, align: "center" });
     doc.text(vo("issued_on", { date: issued }), { width: PAGE.w - 2 * PAGE.m, align: "center" });
     doc.text(vo("reference", { ref: e.id.slice(0, 8).toUpperCase() }), { width: PAGE.w - 2 * PAGE.m, align: "center" });
-    doc.y = BOTTOM - 80;
-    notice(ctx, vo("not_expertise"));
+    // Mention "pas une expertise" : une seule ligne discrete.
+    doc.font(fonts.body).fontSize(8.5).fillColor(VO_GREY)
+      .text(vo("not_expertise_short"), PAGE.m, BOTTOM - 22, { width: PAGE.w - 2 * PAGE.m, align: "center", lineBreak: false });
 
     // Contenu : sections enchainees a partir de la page 2.
     doc.addPage();
@@ -391,7 +416,6 @@ export function buildValueOpinionPdf(
     // 2. Objet et limites.
     section(ctx, vo("s_scope"));
     for (const k of ["scope_p1", "scope_p2", "scope_p3", "scope_p4"]) paragraph(ctx, vo(k));
-    notice(ctx, vo("not_expertise"));
 
     // 3. Description.
     section(ctx, vo("s_description"));
@@ -469,9 +493,10 @@ export function buildValueOpinionPdf(
 
     // 8. Mentions legales (DisclaimerLegal, version complete).
     section(ctx, vo("s_legal"));
-    paragraph(ctx, disc("full.title"), { bold: true });
-    for (const k of ["full.p1", "full.p2", "full.p3"]) paragraph(ctx, disc(k));
-    notice(ctx, vo("not_expertise"));
+    // Texte de DisclaimerLegal adapte au document (et non au site).
+    paragraph(ctx, vo("legal_title"), { bold: true });
+    for (const k of ["legal_p1", "legal_p2", "legal_p3"]) paragraph(ctx, vo(k));
+    paragraph(ctx, vo("not_expertise"), { color: VO_GREY });
 
     // 9. Signature : Julien Brebion seul, avec telephone et e-mail
     // (document remis au client ; la regle anti-collecte vise le HTML du

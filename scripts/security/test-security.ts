@@ -1151,6 +1151,22 @@ async function valueOpinionChecks() {
     const vo = messages.value_opinion;
     check(`avis de valeur ${lang} : titre, sous-titre, mention "pas une expertise", signataire unique`,
       all.includes(vo.title) && all.includes(vo.subtitle) && all.includes(vo.not_expertise) && all.includes("Julien Brebion") && all.includes("Real Estate Director") && all.includes(vo.brand_line) && all.includes("26 Rue du Commerce, L-3450 Dudelange"));
+    // Mission logo (oct. 2026) : mention "pas une expertise" discrete,
+    // mentions legales du document, tableaux sans ligne isolee.
+    const firstPage = trace.filter((t) => t.page === 1 && t.kind !== "footer").map((t) => t.text);
+    check(`avis de valeur ${lang} : couverture avec une seule ligne "pas une expertise", mention complete une seule fois (mentions legales)`,
+      firstPage.filter((x) => x === vo.not_expertise_short).length === 1 && !firstPage.includes(vo.not_expertise) && texts.filter((x) => x === vo.not_expertise).length === 1);
+    check(`avis de valeur ${lang} : mentions legales redigees pour le document`, ["legal_p1", "legal_p2", "legal_p3"].every((k) => texts.includes(vo[k])) &&
+      !texts.some((x) => /sur ce site|on this site|auf dieser Website/i.test(x)) && /ce document|this document|diesem Dokument/.test(vo.legal_p1));
+    const rowGroups = new Map<number, Map<number, number>>();
+    for (const tr of trace.filter((x) => x.kind === "row" && x.group !== undefined)) {
+      const g = rowGroups.get(tr.group!) ?? new Map<number, number>();
+      g.set(tr.page, (g.get(tr.page) ?? 0) + 1);
+      rowGroups.set(tr.group!, g);
+    }
+    // Deux textes par ligne (libelle et valeur) : 2 = une ligne seule.
+    const isolated = [...rowGroups.entries()].filter(([, g]) => g.size > 1 && [...g.values()].some((c) => c === 2));
+    check(`avis de valeur ${lang} : aucun tableau coupe en laissant une ligne isolee`, rowGroups.size >= 3 && isolated.length === 0, isolated.map(([k]) => k).join(","));
     check(`avis de valeur ${lang} : contexte de marche titre "${vo.s_market.split(",")[0]}, [date]" seulement`, texts.some((x) => x === vo.s_market.replace("{date}", "") + x.slice(vo.s_market.indexOf("{date}"))) && !/STATEC|Observatoire/.test(texts.filter((x) => x.startsWith(vo.s_market.split(",")[0])).join("")));
     // Signature : telephone et e-mail de Julien (document remis au client ;
     // la regle anti-collecte vise le HTML du site). Aucune donnee du client.
@@ -1220,6 +1236,44 @@ async function valueOpinionChecks() {
         `${footerTotal[0]} ; vides ${empty.join(",")} ; orphelins ${orphans.length} ; debordements ${overflow.length}`);
       check(`annexes ${lang} : legendes et sommaire (type de document, nombre de pages)`, content.some((t) => t.text === "Sejour") && content.some((t) => t.text === "Plan du rez-de-chaussee") && content.some((t) => t.text.includes(vo.annex_kind_energy_passport) && t.text.includes("passeport-energetique.pdf")));
     }
+  }
+  // Logo du PDF : PNG officiel rogne, au moins 300 points par pouce sur la couverture.
+  {
+    const vp = read("lib/estimation/value-opinion-pdf.ts");
+    const coverPt = Number(vp.match(/COVER_LOGO_WIDTH = (\d+)/)?.[1]);
+    const sharpMod = (await import("sharp")).default;
+    const meta = await sharpMod(path.join(ROOT, "public/logos/mapa-logo-fond-clair-1600.png")).metadata();
+    check("avis de valeur : logo officiel fond clair (PNG rogne), net (>= 300 ppp en couverture), embarque une seule fois", /"mapa-logo-fond-clair-1600\.png"/.test(vp) && !!meta.width && meta.width / (coverPt / 72) >= 300 && meta.hasAlpha === true && /logo: string \| null/.test(vp));
+  }
+  // Mission logo (oct. 2026) : site en mode clair, avis lisibles, filaments.
+  {
+    const logo = read("components/brand/Logo.tsx");
+    const svgSrc = read("brand-sources/logo-mapa-fond-clair.svg");
+    const svgPub = read("public/logos/mapa-logo-fond-clair.svg");
+    check("logo mode clair : SVG officiel, dessin et couleurs inchanges (seul le cadre est resserre)",
+      svgSrc.replace(/viewBox="[^"]*"/, "") === svgPub.replace(/viewBox="[^"]*"/, "") && /#03200A/i.test(svgPub) && /<linearGradient/.test(svgPub));
+    check("logo : SVG en mode clair, logo or conserve en mode sombre, ratio du SVG", /const LIGHT_SRC = "\/logos\/mapa-logo-fond-clair\.svg"/.test(logo) && /const DARK_SRC = "\/logo_mapa_nuit\.png"/.test(logo) && /LIGHT_RATIO = 1675\.25 \/ 350\.5/.test(logo) && /unoptimized=\{isLight\}/.test(logo));
+    const oldLight = [...walk("app", (x) => /\.tsx?$/.test(x)), ...walk("components", (x) => /\.tsx?$/.test(x))].filter((f) => /logo_mapa_jour\.png/.test(read(f).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "")));
+    check("logo : plus aucun ancien logo clair affiche (en-tete, pied de page, fiche imprimable)", oldLight.length === 0, oldLight.join(", "));
+    // Contraste WCAG du texte des avis en mode clair (encre sur fond clair).
+    const css = read("app/globals.css");
+    const tok = (name: string) => css.match(new RegExp(`:root \\{[\\s\\S]*?--${name}:\\s*(#[0-9A-Fa-f]{6})`))?.[1] ?? "";
+    const lum = (hex: string) => {
+      const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    };
+    const ratio = (a: string, b: string) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+    const ink = tok("ink");
+    const bg = tok("bg");
+    const rc = read("components/home/ReviewsCarousel.tsx");
+    const contrast = ink && bg ? ratio(ink, bg) : 0;
+    check(`avis clients : texte en encre foncee sur fond clair (contraste ${contrast.toFixed(2)}:1 >= 4,5:1), or seulement en mode sombre`,
+      contrast >= 4.5 && /data-review-text/.test(rc) && /text-ink[^"]*dark:text-gold/.test(rc) && !/style=\{\{ color: "#e0af6e" \}\}/.test(rc));
+    const amb = read("components/effects/AmbientBackgroundLite.tsx");
+    check("filaments : derive CSS sur mobile apres chargement, pause onglet cache ou hors ecran, immobiles si animations reduites",
+      /setAttribute\("data-filaments", "on"\)/.test(amb) && /requestIdleCallback/.test(amb) && /addEventListener\("load", start/.test(amb) && /visibilitychange/.test(amb) && /IntersectionObserver/.test(amb) &&
+      /prefers-reduced-motion: reduce/.test(amb) && /\[data-filaments="on"\] \.ambient-filament \{\s*will-change: transform;\s*animation: mapa-filament-drift/.test(css) && /\[data-paused\] \.ambient-filament \{\s*animation-play-state: paused;/.test(css) &&
+      /@media \(prefers-reduced-motion: reduce\) \{\s*\.ambient-filament \{\s*animation: none !important;/.test(css) && !/@keyframes mapa-filament-drift[^}]*\{[^}]*(width|height|top|left|d:)/.test(css));
   }
   // Fiche de l'admin : memes corrections (alias et objets).
   const entries = estimationInputEntries({ terrace: 12, terraceSurface: 12, rentData: { rentPerM2Month: 31.2, yieldRate: 0.03 } });

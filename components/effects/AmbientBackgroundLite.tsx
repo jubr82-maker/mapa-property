@@ -13,8 +13,16 @@
  * amplitudes ±80-110 px (vs ±30-50 STEP2) — réaction plus
  * spectaculaire au survol large.
  *
- * Fixed inset 0, z 0, pointer-events-none, aria-hidden. Désactivé
- * sur mobile (<768) côté useEffect : pas d'écoute mousemove.
+ * Fixed inset 0, z 0, pointer-events-none, aria-hidden.
+ *
+ * Oct. 2026 : un calque <svg> par filament. Ordinateur : morphing SMIL et
+ * reaction a la souris, inchanges. Telephone (768 px et moins) : SMIL en
+ * pause (il redessine la forme a chaque image), remplace par une derive
+ * lente en CSS (transform uniquement : calcul et affichage par le
+ * compositeur du navigateur, sans redessin de la page ni JavaScript par
+ * image). Elle ne demarre qu'une fois la page chargee et le navigateur au
+ * repos, se met en pause quand l'onglet est cache ou le fond hors de
+ * l'ecran. "Reduire les animations" : tout reste immobile, partout.
  *
  * Cleanup au démontage : retire listener + cancelAnimationFrame.
  */
@@ -29,14 +37,50 @@ export function AmbientBackgroundLite() {
   const path4Ref = useRef<SVGPathElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
     if (typeof window === "undefined") return;
-    if (window.matchMedia("(max-width: 768px)").matches) {
-      // Perf mobile (oct. 2026) : les courbes SMIL animees en continu
-      // redessinaient tout l'ecran a chaque image. Sur telephone, elles
-      // restent affichees, immobiles.
-      containerRef.current.querySelector("svg")?.pauseAnimations();
+    const svgs = Array.from(container.querySelectorAll("svg"));
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      // Immobiles : ni SMIL, ni derive, ni souris.
+      svgs.forEach((svg) => svg.pauseAnimations());
       return;
+    }
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      svgs.forEach((svg) => svg.pauseAnimations());
+      // Derive CSS demarree apres l'affichage de la page.
+      let idleId = 0;
+      let timerId = 0;
+      const start = () => {
+        const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
+        if (w.requestIdleCallback) idleId = w.requestIdleCallback(() => container.setAttribute("data-filaments", "on"), { timeout: 3000 });
+        else timerId = window.setTimeout(() => container.setAttribute("data-filaments", "on"), 1500);
+      };
+      if (document.readyState === "complete") start();
+      else window.addEventListener("load", start, { once: true });
+      // Pause : onglet cache ou fond hors de l'ecran.
+      let visible = true;
+      let onScreen = true;
+      const sync = () => container.toggleAttribute("data-paused", !(visible && onScreen));
+      const onVisibility = () => {
+        visible = document.visibilityState === "visible";
+        sync();
+      };
+      document.addEventListener("visibilitychange", onVisibility);
+      const io = new IntersectionObserver((entries) => {
+        onScreen = entries.some((e) => e.isIntersecting);
+        sync();
+      });
+      io.observe(container);
+      return () => {
+        window.removeEventListener("load", start);
+        document.removeEventListener("visibilitychange", onVisibility);
+        io.disconnect();
+        const w = window as Window & { cancelIdleCallback?: (id: number) => void };
+        if (idleId && w.cancelIdleCallback) w.cancelIdleCallback(idleId);
+        if (timerId) window.clearTimeout(timerId);
+      };
     }
 
     let mouseX = window.innerWidth / 2;
@@ -118,9 +162,10 @@ export function AmbientBackgroundLite() {
       }}
     >
       <svg
+        className="ambient-filament"
         viewBox="0 0 1600 1000"
         preserveAspectRatio="xMidYMid slice"
-        style={{ width: "100%", height: "100%" }}
+        style={{ ["--dx" as string]: "-34px", ["--dy" as string]: "22px", ["--drift-dur" as string]: "41s" }}
       >
         <g
           fill="none"
@@ -129,62 +174,107 @@ export function AmbientBackgroundLite() {
           opacity="0.42"
           style={{ transition: "stroke 0.4s ease" }}
         >
-          <path
-            ref={path1Ref}
-            d="M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300"
-          >
-            <animate
-              attributeName="d"
-              dur="38s"
-              repeatCount="indefinite"
-              values="M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300;
-                      M -100,260 C 350,170 770,330 1170,300 S 1770,380 1900,360;
-                      M -100,160 C 250,40 630,470 1030,200 S 1630,520 1900,240;
-                      M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300"
-            />
-          </path>
-          <path
-            ref={path2Ref}
-            d="M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650"
-          >
-            <animate
-              attributeName="d"
-              dur="46s"
-              repeatCount="indefinite"
-              values="M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650;
-                      M -100,680 C 460,520 860,820 1360,660 S 1860,560 1900,720;
-                      M -100,540 C 340,390 740,690 1240,540 S 1740,440 1900,580;
-                      M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650"
-            />
-          </path>
-          <path
-            ref={path3Ref}
-            d="M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600"
-          >
-            <animate
-              attributeName="d"
-              dur="52s"
-              repeatCount="indefinite"
-              values="M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600;
-                      M 240,-100 C 360,370 580,580 880,470 S 1180,770 1480,570 S 1780,870 1900,680;
-                      M 160,-100 C 240,230 420,430 720,330 S 1020,630 1320,430 S 1620,730 1900,520;
-                      M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600"
-            />
-          </path>
-          <path
-            ref={path4Ref}
-            d="M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850"
-          >
-            <animate
-              attributeName="d"
-              dur="44s"
-              repeatCount="indefinite"
-              values="M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850;
-                      M -100,960 C 260,860 560,910 960,880 S 1460,920 1900,910;
-                      M -100,840 C 140,740 440,990 840,760 S 1340,990 1900,790;
-                      M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850"
-            />
-          </path>
+        <path
+          ref={path1Ref}
+          d="M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300"
+        >
+          <animate
+            attributeName="d"
+            dur="38s"
+            repeatCount="indefinite"
+            values="M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300;
+                    M -100,260 C 350,170 770,330 1170,300 S 1770,380 1900,360;
+                    M -100,160 C 250,40 630,470 1030,200 S 1630,520 1900,240;
+                    M -100,200 C 300,100 700,400 1100,250 S 1700,450 1900,300"
+          />
+        </path>
+        </g>
+      </svg>
+      <svg
+        className="ambient-filament"
+        viewBox="0 0 1600 1000"
+        preserveAspectRatio="xMidYMid slice"
+        style={{ ["--dx" as string]: "28px", ["--dy" as string]: "-26px", ["--drift-dur" as string]: "47s" }}
+      >
+        <g
+          fill="none"
+          stroke="var(--ambient-stroke)"
+          strokeWidth="0.6"
+          opacity="0.42"
+          style={{ transition: "stroke 0.4s ease" }}
+        >
+        <path
+          ref={path2Ref}
+          d="M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650"
+        >
+          <animate
+            attributeName="d"
+            dur="46s"
+            repeatCount="indefinite"
+            values="M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650;
+                    M -100,680 C 460,520 860,820 1360,660 S 1860,560 1900,720;
+                    M -100,540 C 340,390 740,690 1240,540 S 1740,440 1900,580;
+                    M -100,600 C 400,450 800,750 1300,600 S 1800,500 1900,650"
+          />
+        </path>
+        </g>
+      </svg>
+      <svg
+        className="ambient-filament"
+        viewBox="0 0 1600 1000"
+        preserveAspectRatio="xMidYMid slice"
+        style={{ ["--dx" as string]: "-22px", ["--dy" as string]: "-30px", ["--drift-dur" as string]: "53s" }}
+      >
+        <g
+          fill="none"
+          stroke="var(--ambient-stroke)"
+          strokeWidth="0.6"
+          opacity="0.42"
+          style={{ transition: "stroke 0.4s ease" }}
+        >
+        <path
+          ref={path3Ref}
+          d="M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600"
+        >
+          <animate
+            attributeName="d"
+            dur="52s"
+            repeatCount="indefinite"
+            values="M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600;
+                    M 240,-100 C 360,370 580,580 880,470 S 1180,770 1480,570 S 1780,870 1900,680;
+                    M 160,-100 C 240,230 420,430 720,330 S 1020,630 1320,430 S 1620,730 1900,520;
+                    M 200,-100 C 300,300 500,500 800,400 S 1100,700 1400,500 S 1700,800 1900,600"
+          />
+        </path>
+        </g>
+      </svg>
+      <svg
+        className="ambient-filament"
+        viewBox="0 0 1600 1000"
+        preserveAspectRatio="xMidYMid slice"
+        style={{ ["--dx" as string]: "30px", ["--dy" as string]: "18px", ["--drift-dur" as string]: "44s" }}
+      >
+        <g
+          fill="none"
+          stroke="var(--ambient-stroke)"
+          strokeWidth="0.6"
+          opacity="0.42"
+          style={{ transition: "stroke 0.4s ease" }}
+        >
+        <path
+          ref={path4Ref}
+          d="M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850"
+        >
+          <animate
+            attributeName="d"
+            dur="44s"
+            repeatCount="indefinite"
+            values="M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850;
+                    M -100,960 C 260,860 560,910 960,880 S 1460,920 1900,910;
+                    M -100,840 C 140,740 440,990 840,760 S 1340,990 1900,790;
+                    M -100,900 C 200,800 500,950 900,820 S 1400,950 1900,850"
+          />
+        </path>
         </g>
       </svg>
     </div>
