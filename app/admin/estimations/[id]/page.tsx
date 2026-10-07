@@ -5,6 +5,7 @@ import { supabaseService } from "@/lib/supabase-service";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { EstimationDetailClient } from "./EstimationDetailClient";
 import { PdfExportButton } from "@/components/admin/PdfExportButton";
+import { ValueOpinionGenerator } from "@/components/admin/ValueOpinionGenerator";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { estimationInputEntries, formatInputNumber, type NumberFormatters } from "@/lib/estimation/display";
@@ -334,34 +335,10 @@ export default async function EstimationDetailPage({
           {t("detail.avisTitle")}
         </p>
         <p className="mt-2 text-sm text-[#1A1F2A]/70">{t("detail.avisText")}</p>
-        <form
-          method="get"
-          action={`/api/admin/exports/estimations/${r.id}/avis-de-valeur`}
-          className="mt-3 flex flex-wrap items-end gap-3"
-        >
-          <label className="block">
-            <span className="block font-mono text-[10px] uppercase tracking-widest text-[#3D4F63]/60">
-              {t("detail.avisLanguage")}
-            </span>
-            <select
-              name="lang"
-              defaultValue={r.locale && KNOWN_LOCALES.includes(r.locale) ? r.locale : "fr"}
-              className="mt-1 rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 text-sm"
-            >
-              {KNOWN_LOCALES.map((l) => (
-                <option key={l} value={l}>
-                  {t(`language.${l}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="submit"
-            className="inline-flex items-center gap-2 rounded-md bg-[#9E7B2A] px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-white hover:bg-[#9E7B2A]/90"
-          >
-            {t("detail.avisButton")}
-          </button>
-        </form>
+        <ValueOpinionGenerator
+          estimationId={r.id}
+          defaultLang={(r.locale && KNOWN_LOCALES.includes(r.locale) ? r.locale : "fr") as "fr" | "en" | "de"}
+        />
       </section>
     </div>
   );

@@ -45,7 +45,10 @@ import { displayableImageSrc, isOptimizedImageSrc } from "../../lib/image-hosts"
 import { revealLines } from "../../lib/contact/reveal-lines";
 import { REVIEW_COLUMNS, buildReviewWrite, reviewTextFor } from "../../lib/reviews";
 import { dbErrorReason } from "../../lib/admin/db-error";
-import { buildValueOpinionPdf, VALUE_OPINION_LANGS, voPrice, voPercent } from "../../lib/estimation/value-opinion-pdf";
+import { VALUE_OPINION_LANGS, voPrice, voPercent, type TraceEvent } from "../../lib/estimation/value-opinion-pdf";
+import { generateValueOpinionPdf } from "../../lib/estimation/value-opinion-generate";
+import { annexMetaOf, assembleValueOpinion, inspectPdf, type AnnexInput } from "../../lib/estimation/value-opinion-assemble";
+import { VALUE_OPINION_SAMPLE } from "../../lib/estimation/value-opinion-sample";
 import { estimationInputEntries } from "../../lib/estimation/display";
 import { sanitizeArticleHtml as sanitizeArticleForTest } from "../../lib/security/sanitize";
 import { RETENTION_RULES } from "../../lib/pilotage/config";
@@ -1121,42 +1124,102 @@ section = "P. Admin sur telephone";
 // ===========================================================================
 async function valueOpinionChecks() {
   section = "R. Avis de valeur PDF";
-  const sample = {
-    id: "3f9a21c0-aaaa-bbbb-cccc-000000000000",
-    created_at: "2026-10-01T10:00:00Z",
-    contact_name: "Client Test",
-    inputs: { type: "appartement", commune: "Strassen", surfaceLiving: 92, terrace: 12, terraceSurface: 12, bedrooms: 2, state: "good", energy: "B", rentData: { rentPerM2Month: 31.2, yieldRate: 0.03 }, comparablesPpsqm: [7710.843, 8020.1], email: "client@example.com" },
-    client_output: { price_low: 690000, price_mid: 760000, price_high: 830000, confidence: "MEDIUM" },
-    internal_output: {
-      computed_at: "2026-10-01T10:00:00Z",
-      std_deviation_pct: 6.4,
-      weights_used: { observatoire: 0.5, sales_comparison: 0.3, income_capitalization: 0.2, depreciated_replacement: 0.1 },
-      methods: {
-        observatoire: { applicable: true, price: 770000, details: { base_per_m2: 8100 } },
-        sales_comparison: { applicable: true, price: 745000, details: { n_comparables_used: 6, median_ppsqm: 7710.843 } },
-        income_capitalization: { applicable: true, price: 760000, details: { rent_per_m2_month: 31.2, yield_used: 0.03 } },
-        depreciated_replacement: { applicable: false, price: null, details: {} },
-      },
-    },
-  };
+  // Meme estimation fictive et meme point d'entree que le bouton de l'admin
+  // et les PDF d'essai (lib/estimation/value-opinion-generate).
+  const sample = VALUE_OPINION_SAMPLE;
   const FORBIDDEN = /tegova|\bevs\b|[\u2013\u2014]|fr[eé]d[eé]ric|mannis/i;
   for (const lang of VALUE_OPINION_LANGS) {
     const messages = JSON.parse(read(`messages/${lang}.json`));
     const texts: string[] = [];
-    const pdf = await buildValueOpinionPdf(sample, lang, messages, new Date("2026-10-06T10:00:00Z"), texts);
+    const trace: TraceEvent[] = [];
+    const pdf = await generateValueOpinionPdf(sample, lang, { now: new Date("2026-10-06T10:00:00Z"), collect: texts, trace });
     const raw = pdf.toString("latin1");
     const pages = (raw.match(/\/Type \/Page\b/g) ?? []).length;
     const all = texts.join("\n");
     const bad = texts.filter((x) => FORBIDDEN.test(x));
-    check(`avis de valeur ${lang} : PDF valide de 9 pages`, raw.startsWith("%PDF-") && pages === 9, `${pages} pages`);
+    // Mise en page resserree : sections enchainees, nombre de pages variable.
+    const content = trace.filter((t) => t.kind !== "footer");
+    const lastPage = Math.max(...trace.map((t) => t.page));
+    const emptyPages = Array.from({ length: lastPage }, (_, i) => i + 1).filter((p) => !content.some((t) => t.page === p));
+    const orphans = content.filter((t, i) => t.kind === "title" && content[i + 1]?.page !== t.page).map((t) => t.text);
+    const overflow = content.filter((t) => t.bottom > 841.89 - 54 + 1).map((t) => t.text.slice(0, 30));
+    const coverAlone = content.filter((t) => t.page === 1).every((t) => t.kind !== "title");
+    check(`avis de valeur ${lang} : PDF valide, pages = trace (${pages})`, raw.startsWith("%PDF-") && pages === lastPage && pages >= 2 && pages < 9, `${pages} pages`);
+    check(`avis de valeur ${lang} : aucune page vide, aucun titre orphelin, aucun debordement, couverture a part`, emptyPages.length === 0 && orphans.length === 0 && overflow.length === 0 && coverAlone,
+      `vides ${emptyPages.join(",")} ; orphelins ${orphans.join(" | ")} ; debordements ${overflow.join(" | ")}`);
     check(`avis de valeur ${lang} : ni TEGoVA, ni EVS, ni tiret long ou moyen, ni Frederic Mannis`, bad.length === 0 && !/tegova|\(EVS|\bEVS\b/i.test(raw), bad.slice(0, 3).join(" | "));
     const vo = messages.value_opinion;
     check(`avis de valeur ${lang} : titre, sous-titre, mention "pas une expertise", signataire unique`,
       all.includes(vo.title) && all.includes(vo.subtitle) && all.includes(vo.not_expertise) && all.includes("Julien Brebion") && all.includes("Real Estate Director") && all.includes(vo.brand_line) && all.includes("26 Rue du Commerce, L-3450 Dudelange"));
     check(`avis de valeur ${lang} : contexte de marche titre "${vo.s_market.split(",")[0]}, [date]" seulement`, texts.some((x) => x === vo.s_market.replace("{date}", "") + x.slice(vo.s_market.indexOf("{date}"))) && !/STATEC|Observatoire/.test(texts.filter((x) => x.startsWith(vo.s_market.split(",")[0])).join("")));
-    check(`avis de valeur ${lang} : aucune coordonnee du client ni numero de telephone`, !/client@example\.com|\+352|@mapagroup/i.test(all));
+    // Signature : telephone et e-mail de Julien (document remis au client ;
+    // la regle anti-collecte vise le HTML du site). Aucune donnee du client.
+    const at = String.fromCharCode(64);
+    check(`avis de valeur ${lang} : signature avec telephone et e-mail de Julien, aucune coordonnee du client`, !/client@example\.com/i.test(all) &&
+      all.includes(vo.signer_phone.replace("{phone}", "+352 691 620 127")) && all.includes(vo.signer_email.replace("{email}", `j.brebion${at}mapagroup.org`)) && !/691[\s.]?113[\s.]?018|admin@|site@/i.test(all));
     check(`avis de valeur ${lang} : poids reels (50, 30, 20, 0) et valeur ponderee 760 500`, ["50", "30", "20", "0"].every((w) => all.includes(voPercent(Number(w) / 100, lang, 0))) && all.includes(voPrice(760500, lang)));
     check(`avis de valeur ${lang} : prix au m² formate, rendement en pourcentage, terrasse une fois`, all.includes(voPrice(7711, lang)) && all.includes(voPercent(0.03, lang, 2)) && !/7710[.,]84/.test(all) && !/\b0[.,]03\b/.test(all) && (texts.filter((x) => x === messages.admin_estimations.inputs.terrace).length === 1));
+  }
+  // Annexes (oct. 2026) : deux photos, un plan et un PDF fictifs, assembles
+  // comme dans le navigateur (pdf-lib), dans les trois langues.
+  {
+    const sharp = (await import("sharp")).default;
+    const { PDFDocument: PdfLibDoc } = await import("pdf-lib");
+    const PdfKit = (await import("pdfkit")).default;
+    const jpeg = async (w: number, h: number, r: number, g: number, b: number) => ({
+      bytes: new Uint8Array(await sharp({ create: { width: w, height: h, channels: 3, background: { r, g, b } } }).jpeg({ quality: 80 }).toBuffer()),
+      format: "jpg" as const,
+      width: w,
+      height: h,
+    });
+    const pdfkitBytes = (pages: number, opts: Record<string, unknown> = {}) =>
+      new Promise<Uint8Array>((resolve) => {
+        const d = new PdfKit({ size: "A4", ...opts });
+        const parts: Buffer[] = [];
+        d.on("data", (c: Buffer) => parts.push(c));
+        d.on("end", () => resolve(new Uint8Array(Buffer.concat(parts))));
+        for (let i = 0; i < pages; i++) {
+          if (i) d.addPage();
+          d.fontSize(20).text(`Document ${i + 1}`);
+        }
+        d.end();
+      });
+    const docPdf = await pdfkitBytes(2);
+    const locked = await pdfkitBytes(1, { userPassword: "secret", ownerPassword: "owner" });
+    const lockedInfo = await inspectPdf(locked);
+    const docInfo = await inspectPdf(docPdf);
+    check("annexes : PDF protege signale (non joint), PDF lisible compte", !lockedInfo.ok && lockedInfo.reason === "protected" && docInfo.ok && docInfo.pages === 2);
+    const input: AnnexInput = {
+      photos: [{ caption: "Sejour", image: await jpeg(800, 600, 210, 180, 140) }, { caption: "", image: await jpeg(600, 800, 120, 140, 160) }],
+      plans: [{ caption: "Plan du rez-de-chaussee", kind: "image", image: await jpeg(1200, 900, 240, 240, 240) }],
+      documents: [{ name: "passeport-energetique.pdf", kind: "energy_passport", pdf: docPdf, pages: 2 }],
+    };
+    const meta = annexMetaOf(input);
+    const metaKeys = new Set<string>();
+    const collectKeys = (o: unknown) => { if (o && typeof o === "object") for (const [k, v] of Object.entries(o)) { if (!Array.isArray(o)) metaKeys.add(k); collectKeys(v); } };
+    collectKeys(meta);
+    const allowedKeys = new Set(["photos", "plans", "documents", "caption", "ratio", "kind", "pages", "name"]);
+    check("annexes : seules des metadonnees partent au serveur (aucun octet de fichier)", [...metaKeys].every((k) => allowedKeys.has(k)) && JSON.stringify(meta).length < 1000, [...metaKeys].join(","));
+    for (const lang of VALUE_OPINION_LANGS) {
+      const trace: TraceEvent[] = [];
+      const base = await generateValueOpinionPdf(VALUE_OPINION_SAMPLE, lang, { now: new Date("2026-10-06T10:00:00Z"), trace, annexes: meta });
+      const finalBytes = await assembleValueOpinion(new Uint8Array(base), input);
+      const finalDoc = await PdfLibDoc.load(finalBytes);
+      const basePages = (await PdfLibDoc.load(new Uint8Array(base))).getPageCount();
+      const total = finalDoc.getPageCount();
+      const vo = JSON.parse(read(`messages/${lang}.json`)).value_opinion;
+      const content = trace.filter((t) => t.kind !== "footer");
+      const lastPage = Math.max(...trace.map((t) => t.page));
+      const empty = Array.from({ length: lastPage }, (_, i) => i + 1).filter((p) => !content.some((t) => t.page === p));
+      const orphans = content.filter((t, i) => t.kind === "title" && content[i + 1]?.page !== t.page);
+      const overflow = content.filter((t) => t.bottom > 841.89 - 54 + 1);
+      const footerTotal = trace.filter((t) => t.kind === "footer").map((t) => t.text).filter((x) => /\d/.test(x));
+      const expectedLabel = vo.page.replace("{n}", "1").replace("{total}", String(total));
+      check(`annexes ${lang} : avis + sommaire + 1 page de photos + 1 page de plan + 2 pages de document (${total} pages lues)`, total === basePages + 2 && basePages === lastPage && trace.some((t) => t.kind === "annex" && t.text === vo.annex_title));
+      check(`annexes ${lang} : numerotation sur le total final, aucune page vide, aucun titre orphelin, aucun debordement`, footerTotal.includes(expectedLabel) && empty.length === 0 && orphans.length === 0 && overflow.length === 0,
+        `${footerTotal[0]} ; vides ${empty.join(",")} ; orphelins ${orphans.length} ; debordements ${overflow.length}`);
+      check(`annexes ${lang} : legendes et sommaire (type de document, nombre de pages)`, content.some((t) => t.text === "Sejour") && content.some((t) => t.text === "Plan du rez-de-chaussee") && content.some((t) => t.text.includes(vo.annex_kind_energy_passport) && t.text.includes("passeport-energetique.pdf")));
+    }
   }
   // Fiche de l'admin : memes corrections (alias et objets).
   const entries = estimationInputEntries({ terrace: 12, terraceSurface: 12, rentData: { rentPerM2Month: 31.2, yieldRate: 0.03 } });
