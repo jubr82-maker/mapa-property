@@ -13,8 +13,12 @@ import { CWV_THRESHOLDS, PSI_MANUAL_COOLDOWN_MINUTES, PSI_PATHS, PSI_STRATEGIES 
 import { LineChart } from "@/components/admin/analytics/LineChart";
 import { Card, Empty, PageHeader, Pill, Section, Stat, Table, Td, type Tone } from "@/components/admin/pilotage/ui";
 import { RunPerformanceButton } from "@/components/admin/pilotage/RunPerformanceButton";
+import { RunBackupButton } from "@/components/admin/pilotage/RunBackupButton";
 
 export const dynamic = "force-dynamic";
+// Sauvegarde a la demande (action de cette page) : jusqu'a 300 s, comme la
+// tache nocturne (formule Hobby, Fluid Compute).
+export const maxDuration = 300;
 
 function tone(value: number | null, good: number, poor: number): Tone {
   if (value === null) return "neutral";
@@ -80,6 +84,7 @@ export default async function SantePage() {
           />
         </div>
         <p id="sauvegardes" className="text-xs text-ink-soft">{t("backup_note")}</p>
+        <RunBackupButton />
       </Section>
 
       <Section id="performance" title={t("perf_title")} intro={t("perf_intro", { minutes: PSI_MANUAL_COOLDOWN_MINUTES })}>

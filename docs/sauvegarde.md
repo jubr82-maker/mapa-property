@@ -39,7 +39,10 @@ copie chiffrée hors de Supabase, dans Cloudflare R2.
    la formule Hobby : 300 secondes), avec une cause en clair.
 3. Le résultat est écrit dans `cron_runs` (tâche `backup`) et visible dans
    l'admin, Santé du site.
-4. Chaque matin, la tâche quotidienne (05:00 UTC) envoie un compte rendu à
+4. Lancement à la demande : admin, Santé du site, « Lancer une sauvegarde
+   maintenant » (admin seulement, 5 minutes au moins entre deux
+   lancements). Même sauvegarde, notée « manuelle » dans le journal.
+5. Chaque matin, la tâche quotidienne (05:00 UTC) envoie un compte rendu à
    site@mapagroup.org : date, réussite ou échec, taille, lignes par table,
    évolution depuis la veille, nombre de sauvegardes conservées. Aucune
    donnée personnelle, aucune pièce jointe. En cas d'échec, l'objet commence
@@ -50,20 +53,38 @@ copie chiffrée hors de Supabase, dans Cloudflare R2.
 1. Exécuter dans Supabase le fichier
    `supabase/manual/execution/22_sauvegarde_catalogue.sql` (fonction en
    lecture seule qui décrit la structure du schéma `public`).
-2. Générer la clé dans Terminal.app :
+2. Format de la clé : 32 octets aléatoires, écrits en base64 (44 caractères,
+   sortie de `openssl rand -base64 32`). Sont aussi acceptés : la même
+   valeur avec espaces, retours à la ligne ou guillemets autour, sans le
+   `=` final, en variante URL, ou 64 caractères hexadécimaux
+   (`openssl rand -hex 32`). Toute autre valeur fait échouer la sauvegarde
+   avec `backup_key_invalid (...)` : longueur, familles de caractères et
+   octets décodés, jamais la clé elle-même.
+3. Générer et enregistrer la clé dans Terminal.app, sans passer par le
+   presse-papiers (une copie faite entre-temps remplacerait la clé) :
 
    ```
-   openssl rand -base64 32
+   cd ~/Projects-Claude/mapa-property-nextjs
+   umask 077
+   openssl rand -base64 32 | tr -d '\n' > ~/mapa-cle-sauvegarde.txt
+   node --import tsx scripts/check-backup-key.mts ~/mapa-cle-sauvegarde.txt
+   vercel env add BACKUP_ENCRYPTION_KEY production --force < ~/mapa-cle-sauvegarde.txt
    ```
 
-3. Copier la clé obtenue dans le gestionnaire de mots de passe (entrée
-   « MAPA, clé des sauvegardes »). Sans elle, aucune sauvegarde ne peut être
-   relue.
-4. Dans Vercel, projet mapa-property-nextjs, Settings, Environment
-   Variables : ajouter `BACKUP_ENCRYPTION_KEY` avec cette valeur, pour
-   Production. Vérifier que `R2_ACCOUNT_ID`, `R2_BACKUP_ACCESS_KEY_ID`,
-   `R2_BACKUP_SECRET_ACCESS_KEY`, `R2_BACKUP_BUCKET` et `CRON_SECRET` y sont.
-5. Pour restaurer depuis le Mac, ajouter aussi `BACKUP_ENCRYPTION_KEY` dans
+   La vérification doit afficher `cle valide : 32 octets`.
+4. Copier la clé dans le gestionnaire de mots de passe (entrée « MAPA, clé
+   des sauvegardes ») : `pbcopy < ~/mapa-cle-sauvegarde.txt`, coller dans le
+   gestionnaire, puis vider le presse-papiers (`pbcopy < /dev/null`) et
+   supprimer le fichier (`rm ~/mapa-cle-sauvegarde.txt`). Sans cette clé,
+   aucune sauvegarde ne peut être relue.
+5. Une variable modifiée dans Vercel ne s'applique qu'aux déploiements
+   suivants : redéployer, puis, dans l'admin, Santé du site, « Lancer une
+   sauvegarde maintenant ». Le résultat s'affiche sous le bouton et dans le
+   journal des tâches.
+6. Vérifier dans Vercel que `R2_ACCOUNT_ID`, `R2_BACKUP_ACCESS_KEY_ID`,
+   `R2_BACKUP_SECRET_ACCESS_KEY`, `R2_BACKUP_BUCKET` et `CRON_SECRET` sont
+   présentes pour Production.
+7. Pour restaurer depuis le Mac, ajouter aussi `BACKUP_ENCRYPTION_KEY` dans
    `.env.local` (jamais dans git), puis la retirer après usage si souhaité.
 
 Ne jamais écrire la clé dans un fichier du dépôt, un e-mail ou un message.

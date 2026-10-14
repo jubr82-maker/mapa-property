@@ -159,11 +159,61 @@ await test("restauration : SQL complet, apostrophes et balises de citation prote
 
 await test("tache planifiee : garde CRON_SECRET, duree bornee, 01:00 UTC, compte rendu du matin", () => {
   const route = readFileSync(join(root, "app/api/cron/backup/route.ts"), "utf8");
-  assert.ok(route.includes("if (!isAuthorizedCron(req))") && route.includes("export const maxDuration = 300") && route.includes("EXPORT_BUDGET_MS = 240_000"));
-  assert.ok(route.includes("process.env.BACKUP_ENCRYPTION_KEY") && !/console\.log\(.*KEY/.test(route));
+  const run = readFileSync(join(root, "lib/backup/run.ts"), "utf8");
+  assert.ok(route.includes("if (!isAuthorizedCron(req))") && route.includes("export const maxDuration = 300") && route.includes('runBackupNow("nuit")'));
+  assert.ok(run.includes("BACKUP_EXPORT_BUDGET_MS = 240_000") && run.includes("process.env.BACKUP_ENCRYPTION_KEY"));
+  for (const src of [route, run]) assert.ok(!/console\.(log|warn|error|info)\(/.test(src), "aucune journalisation");
   const vercel = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8"));
   assert.ok(vercel.crons.some((c: { path: string; schedule: string }) => c.path === "/api/cron/backup" && c.schedule === "0 1 * * *"));
   assert.ok(readFileSync(join(root, "lib/pilotage/daily-task.ts"), "utf8").includes('step("backup_report"'));
+});
+
+await test("cle : formats openssl acceptes (base64 avec ou sans retour a la ligne, espaces, guillemets, sans =, variante URL, hexadecimal)", () => {
+  const raw = randomBytes(32);
+  const b64 = raw.toString("base64");
+  const ok = [b64, `${b64}\n`, ` ${b64} \r\n`, `"${b64}"`, `'${b64}'`, `${b64.slice(0, 20)}\n${b64.slice(20)}`, `${b64}\\n`, `BACKUP_ENCRYPTION_KEY=${b64}`, b64.replace(/=+$/, ""), b64.replace(/\+/g, "-").replace(/\//g, "_"), raw.toString("hex"), raw.toString("hex").toUpperCase()];
+  for (const v of ok) assert.ok(parseBackupKey(v).equals(raw), JSON.stringify(v.length));
+});
+
+await test("cle : valeur fausse refusee avec un diagnostic qui ne contient jamais la cle", () => {
+  const raw = randomBytes(32);
+  const b64 = raw.toString("base64");
+  const bad = ["pbpaste | vercel env add BACKUP_ENCRYPTION_KEY production", randomBytes(16).toString("base64"), b64 + b64, b64.slice(0, 30), `${b64}!`, randomBytes(48).toString("hex").slice(0, 60)];
+  for (const v of bad) {
+    let msg = "";
+    try { parseBackupKey(v); } catch (e) { msg = (e as Error).message; }
+    assert.ok(/^backup_key_invalid \(longueur \d+, /.test(msg) && msg.includes("octets decodes"), msg);
+    for (let i = 0; i + 4 <= v.length; i++) {
+      const piece = v.slice(i, i + 4);
+      if (/^[A-Za-z0-9+/]{4}$/.test(piece) && /[0-9+/]/.test(piece)) assert.ok(!msg.includes(piece), "aucun extrait de la valeur");
+    }
+  }
+  assert.throws(() => parseBackupKey("   \n"), /^Error: backup_key_missing$/);
+  assert.throws(() => parseBackupKey(undefined), /^Error: backup_key_missing$/);
+});
+
+await test("nuit : cle mal formee, aucun fichier envoye, cause detaillee sans la cle dans cron_runs", async () => {
+  const wrong = "pbpaste | vercel env add BACKUP_ENCRYPTION_KEY production";
+  const { deps, store, records } = fakeDeps({ keyBase64: wrong });
+  const r = await runNightlyBackup(deps);
+  assert.ok(!r.ok && store.size === 0 && /^echec backup_key_invalid \(/.test(records[0].detail) && records[0].detail.length <= 300);
+});
+
+await test("Sante du site : bouton de sauvegarde reserve a l'admin, delai entre deux lancements, journal", () => {
+  const action = readFileSync(join(root, "app/admin/pilotage-actions.ts"), "utf8");
+  const body = action.slice(action.indexOf("export async function runBackupNowAction"));
+  assert.ok(action.startsWith('"use server";'));
+  assert.ok(/^export async function runBackupNowAction\(\): Promise<BackupRunResult> \{\n  const \{ user \} = await assertAdminAction\(\);/.test(body), "garde admin en premiere ligne");
+  assert.ok(body.includes("BACKUP_MANUAL_COOLDOWN_MINUTES") && body.includes('runBackupNow("manuelle")') && body.includes('action: "backup_run"'));
+  const page = readFileSync(join(root, "app/admin/sante/page.tsx"), "utf8");
+  assert.ok(page.includes("await requireAdminPage();") && page.includes("<RunBackupButton />") && page.includes("export const maxDuration = 300;"));
+  const button = readFileSync(join(root, "components/admin/pilotage/RunBackupButton.tsx"), "utf8");
+  assert.ok(button.includes("runBackupNowAction") && !/process\.env/.test(button));
+  for (const l of ["fr", "en", "de"]) {
+    const m = JSON.parse(readFileSync(join(root, `messages/${l}.json`), "utf8")).admin_pilotage;
+    for (const k of ["backup_run", "backup_running", "backup_run_done", "backup_run_failed", "backup_run_cooldown", "backup_run_intro", "event_admin_backup_run", "jshort_admin_backup_run"]) assert.ok(m[k], `${l} ${k}`);
+  }
+  assert.equal(JSON.parse(readFileSync(join(root, "messages/fr.json"), "utf8")).admin_pilotage.backup_run, "Lancer une sauvegarde maintenant");
 });
 
 console.log(`\n${n} PASS, ${failed} FAIL`);

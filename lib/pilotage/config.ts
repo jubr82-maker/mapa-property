@@ -28,6 +28,8 @@ export const PSI_PATHS = ["/fr", "/fr/biens", "/fr/services/estimer"] as const;
 export const PSI_STRATEGIES = ["mobile", "desktop"] as const;
 /** Delai minimal entre deux mesures lancees a la main. */
 export const PSI_MANUAL_COOLDOWN_MINUTES = 10;
+/** Delai minimal entre deux sauvegardes lancees a la main (Sante du site). */
+export const BACKUP_MANUAL_COOLDOWN_MINUTES = 5;
 
 /**
  * Seuils Core Web Vitals publies par Google (bon / a ameliorer / mauvais).
