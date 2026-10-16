@@ -27,8 +27,23 @@ test("redirection : toute adresse d'article avec majuscules vers sa forme en min
     assert.equal(blogLowercaseRedirect(`/${l}/blog/immobilier-steinfort`), null, "deja en minuscules : pas de boucle");
   }
   assert.equal(blogLowercaseRedirect("/fr/blog/%C3%89t%C3%A9-2026"), "/fr/blog/ete-2026");
-  for (const p of ["/fr/blog", "/fr/Blog", "/fr/biens/Maison", "/it/blog/Test", "/fr/blog/a/b"]) assert.equal(blogLowercaseRedirect(p), null, p);
+  for (const p of ["/fr/blog", "/fr/Blog", "/fr/biens/Maison", "/it/blog/Test", "/fr/blog/a/b", "/blog", "/blog/"]) assert.equal(blogLowercaseRedirect(p), null, p);
   assert.equal(blogSlugLower("Immobilier-Steinfort"), "immobilier-steinfort");
+});
+
+test("ancienne adresse sans langue : une seule 301 directe vers /fr/blog/<minuscules>, jamais de boucle", () => {
+  assert.equal(blogLowercaseRedirect("/blog/Immobilier-Steinfort"), "/fr/blog/immobilier-steinfort");
+  assert.equal(blogLowercaseRedirect("/blog/Immobilier-Steinfort/"), "/fr/blog/immobilier-steinfort");
+  assert.equal(blogLowercaseRedirect("/blog/immobilier-steinfort"), "/fr/blog/immobilier-steinfort");
+  // Une seule etape : la destination n'est jamais redirigee a son tour.
+  const samples = ["/blog/Immobilier-Steinfort", "/en/blog/Immobilier-Steinfort", "/de/blog/%C3%89t%C3%A9", "/blog/vendre-luxembourg-2026-prix-estimation"];
+  for (const s of samples) {
+    const to = blogLowercaseRedirect(s);
+    assert.ok(to, s);
+    assert.equal(blogLowercaseRedirect(to), null, `${to} ne doit pas rediriger a nouveau`);
+  }
+  // Adresses deja correctes : jamais redirigees.
+  for (const ok of ["/fr/blog/immobilier-steinfort", "/en/blog/vendre-luxembourg-2026-prix-estimation", "/de/blog/off-market-luxembourg-fin-modele-informel"]) assert.equal(blogLowercaseRedirect(ok), null, ok);
 });
 
 test("proxy : redirection 301 placee avant les autres traitements des pages publiques", () => {

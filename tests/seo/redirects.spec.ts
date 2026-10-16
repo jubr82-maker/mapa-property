@@ -76,6 +76,13 @@ test("redirections 308 : un controle par format d'adresse", async () => {
     const ok = r.status === 308 && (typeof to === "string" ? loc === to : to.test(loc));
     if (!ok) failures.push(`${from} -> ${r.status} ${loc} (attendu 308 ${to})`);
   };
+  // Articles du blog (oct. 2026) : 301 en une seule etape vers l'adresse en
+  // minuscules avec langue (lib/blog/slug.ts).
+  const expect301 = async (from: string, to: string) => {
+    const r = await server.request(from);
+    const loc = pathOf(r.headers["location"]);
+    if (!(r.status === 301 && loc === to)) failures.push(`${from} -> ${r.status} ${loc} (attendu 301 ${to})`);
+  };
   try {
     // B. Fiches de l'ancien site (identifiant final), meme langue. Hors
     // ligne, aucun bien n'est lu : la liste des biens de la langue.
@@ -95,7 +102,9 @@ test("redirections 308 : un controle par format d'adresse", async () => {
     await expect308("/fr/biens/", "/fr/biens");
     // A. Site v28 (sans langue).
     for (const [from, to] of Object.entries(V28_PAGES)) await expect308(from, `/fr${to}`);
-    await expect308("/blog/vendre-luxembourg-2026-prix-estimation", "/fr/blog/vendre-luxembourg-2026-prix-estimation");
+    await expect301("/blog/vendre-luxembourg-2026-prix-estimation", "/fr/blog/vendre-luxembourg-2026-prix-estimation");
+    await expect301("/blog/Immobilier-Steinfort", "/fr/blog/immobilier-steinfort");
+    for (const l of ["fr", "en", "de"]) await expect301(`/${l}/blog/Immobilier-Steinfort`, `/${l}/blog/immobilier-steinfort`);
     await expect308("/content/article-1-fr.html", "/fr/blog");
     await expect308("/content/article-2-en.html", "/en/blog");
     await expect308("/content/article-3-de.html", "/de/blog");

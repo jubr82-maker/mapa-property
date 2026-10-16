@@ -142,9 +142,10 @@ export default async function middleware(request: NextRequest) {
     return noStore(response);
   }
 
-  // Adresse d'article avec majuscules ou accents (oct. 2026) : 301
-  // permanente vers la meme adresse en minuscules, dans les trois langues
-  // (/fr/blog/Immobilier-Steinfort -> /fr/blog/immobilier-steinfort).
+  // Adresse d'article avec majuscules ou accents, ou ancienne adresse sans
+  // langue (oct. 2026) : 301 permanente, en une seule etape, vers
+  // l'adresse en minuscules (/blog/Immobilier-Steinfort et
+  // /fr/blog/Immobilier-Steinfort -> /fr/blog/immobilier-steinfort).
   const blogLower = blogLowercaseRedirect(pathname);
   if (blogLower) {
     const url = request.nextUrl.clone();

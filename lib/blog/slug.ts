@@ -8,12 +8,15 @@ export function blogSlugLower(slug: string): string {
 }
 
 /**
- * Ancienne adresse d'article avec majuscules ou accents
- * (/fr/blog/Immobilier-Steinfort) : chemin en minuscules vers lequel
- * rediriger en 301, sinon null.
+ * Chemin vers lequel rediriger en 301, en UNE seule etape, sinon null :
+ * - adresse d'article avec majuscules ou accents
+ *   (/fr/blog/Immobilier-Steinfort -> /fr/blog/immobilier-steinfort) ;
+ * - ancienne adresse sans langue du site v28, quelle que soit la casse
+ *   (/blog/Immobilier-Steinfort -> /fr/blog/immobilier-steinfort).
+ * Une adresse avec langue deja en minuscules n'est jamais redirigee.
  */
 export function blogLowercaseRedirect(pathname: string): string | null {
-  const m = /^\/(fr|en|de)\/blog\/([^/]+)\/?$/.exec(pathname);
+  const m = /^\/(?:(fr|en|de)\/)?blog\/([^/]+)\/?$/.exec(pathname);
   if (!m) return null;
   let slug: string;
   try {
@@ -22,5 +25,7 @@ export function blogLowercaseRedirect(pathname: string): string | null {
     return null;
   }
   const lower = blogSlugLower(slug);
-  return lower !== slug ? `/${m[1]}/blog/${encodeURIComponent(lower)}` : null;
+  const locale = m[1];
+  if (locale && lower === slug) return null;
+  return `/${locale ?? "fr"}/blog/${encodeURIComponent(lower)}`;
 }
