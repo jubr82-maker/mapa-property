@@ -29,5 +29,8 @@ assert.ok(read("app/[locale]/biens/[slug]/page.tsx").includes('<img src="/logos/
 assert.equal(fillEmptyImageAlts('<p><img src="a.webp" alt=""></p>', 'Vivre "au" Luxembourg'), '<p><img src="a.webp" alt="Vivre &quot;au&quot; Luxembourg"></p>');
 assert.equal(fillEmptyImageAlts('<img src="a.webp">', "Titre"), '<img alt="Titre" src="a.webp">');
 assert.equal(fillEmptyImageAlts('<img src="a.webp" alt="Vue">', "Titre"), '<img src="a.webp" alt="Vue">');
-assert.ok(read("app/[locale]/blog/[slug]/page.tsx").includes("fillEmptyImageAlts(sanitizeArticleHtml(content), title)"));
+{
+  const page = read("app/[locale]/blog/[slug]/page.tsx");
+  assert.ok(/contentHtml=\{fillEmptyImageAlts\(\s*sanitizeArticleHtml\(/.test(page) && page.includes("            title,\n          )}"));
+}
 console.log("  PASS textes alternatifs : photos de biens, cartes, vignettes, logo imprime, images d'article\n\n1 PASS, 0 FAIL");

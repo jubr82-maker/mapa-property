@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { sanitizeArticleHtml } from "@/lib/security/sanitize";
 import { blogSeoMeta } from "@/lib/blog/seo-meta";
 import { fillEmptyImageAlts } from "@/lib/blog/image-alts";
+import { applyStandardEnding } from "@/lib/blog/standard-ending";
+import { fetchStandardEnding } from "@/lib/blog/standard-ending-data";
 import { siteShareImage } from "@/lib/og";
 import { displayableImageSrc } from "@/lib/image-hosts";
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -50,6 +52,7 @@ export default async function BlogPostPage({
 
   const post = await fetchBlogPostBySlug(slug);
   if (!post) notFound();
+  const ending = await fetchStandardEnding();
 
   await getTranslations({ locale, namespace: "booklet" });
   const tAi = await getTranslations({ locale, namespace: "ai_transparency" });
@@ -82,7 +85,17 @@ export default async function BlogPostPage({
           publishedAt={post.published_at}
           primaryTag={post.primary_tag}
           // Assaini cote serveur (OWASP ASVS 5.2.1) avant injection.
-          contentHtml={fillEmptyImageAlts(sanitizeArticleHtml(content), title)}
+          contentHtml={fillEmptyImageAlts(
+            sanitizeArticleHtml(
+              // Fin d'article standard (rubrique et signature), admin Blog.
+              applyStandardEnding(content, ending, {
+                lang: locale === "en" || locale === "de" ? locale : "fr",
+                show: post.show_standard_ending !== false,
+                commune: post.commune,
+              }),
+            ),
+            title,
+          )}
         />
         <FaqSection pageKey={blogFaqKey(post.slug)} locale={locale} className="mx-auto mt-16 max-w-[65ch]" />
         <p className="mx-auto mt-8 max-w-[65ch] font-mono text-[10px] leading-snug text-ink-soft">

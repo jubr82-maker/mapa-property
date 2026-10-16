@@ -74,6 +74,10 @@ function buildPostPayload(formData: FormData) {
     seo_description_fr: seoText(formData.get("seo_description_fr"), 400),
     seo_description_en: seoText(formData.get("seo_description_en"), 400),
     seo_description_de: seoText(formData.get("seo_description_de"), 400),
+    // Fin d'article standard (oct. 2026, SQL 27) : commune optionnelle et
+    // affichage de la rubrique standard.
+    commune: seoText(formData.get("commune"), 80),
+    show_standard_ending: formData.get("show_standard_ending") === "on",
     cover_image: safeImageUrl(String(formData.get("cover_image") ?? "")),
     primary_tag: String(formData.get("primary_tag") ?? "").trim() || null,
     author: String(formData.get("author") ?? "").trim() || null,

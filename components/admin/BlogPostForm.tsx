@@ -36,6 +36,8 @@ type Post = {
   seo_description_fr?: string | null;
   seo_description_en?: string | null;
   seo_description_de?: string | null;
+  commune?: string | null;
+  show_standard_ending?: boolean | null;
 };
 
 type Lang = "fr" | "en" | "de";
@@ -187,6 +189,21 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
             }
             className={inputCls}
           />
+        </Field>
+        {/* Fin d'article standard (oct. 2026) : commune et affichage. */}
+        <Field label={t("field_commune")} hint={t("commune_hint", { commune: "{commune}" })}>
+          <input name="commune" defaultValue={post?.commune ?? ""} maxLength={80} className={inputCls} />
+        </Field>
+        <Field label={t("field_show_ending")}>
+          <label className="inline-flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="show_standard_ending"
+              defaultChecked={post?.show_standard_ending !== false}
+              className="size-4 rounded border-[#3D4F63]/30 accent-[#3D4F63]"
+            />
+            <span>{t("show_ending_hint")}</span>
+          </label>
         </Field>
         <Field label={t("field_published")}>
           <label className="inline-flex items-center gap-2 text-sm">

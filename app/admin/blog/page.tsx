@@ -81,12 +81,20 @@ export default async function AdminBlogPage() {
             {t("count", { count: rows.length })}
           </p>
         </div>
-        <Link
-          href="/admin/blog/new"
-          className="rounded-full bg-[#e0af6e] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-white hover:bg-[#9d6e44]"
-        >
-          {t("new_button")}
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/blog/fin-standard"
+            className="rounded-full border border-[#3D4F63]/30 px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#3D4F63] hover:bg-[#3D4F63]/5"
+          >
+            {t("ending_link")}
+          </Link>
+          <Link
+            href="/admin/blog/new"
+            className="rounded-full bg-[#e0af6e] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-white hover:bg-[#9d6e44]"
+          >
+            {t("new_button")}
+          </Link>
+        </div>
       </header>
 
       <SimpleTable

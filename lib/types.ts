@@ -149,6 +149,8 @@ export interface BlogPost {
   seo_description_fr?: string | null;
   seo_description_en?: string | null;
   seo_description_de?: string | null;
+  commune?: string | null;
+  show_standard_ending?: boolean | null;
 }
 
 export interface InterestRates {
