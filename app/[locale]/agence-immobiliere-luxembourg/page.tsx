@@ -27,7 +27,7 @@ export default async function AgencyPage({ params }: { params: Promise<{ locale:
             <h1 className="mt-2 t-h1">{t("agency.title")}</h1>
             <IntentAnswer locale={locale} intent="agency" />
           </header>
-          <IntentSections locale={locale} intent="agency" />
+          <IntentSections locale={locale} intent="agency" faqKey="agence" />
         </div>
       </div>
     </>

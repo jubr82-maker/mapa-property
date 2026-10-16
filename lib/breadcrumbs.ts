@@ -7,6 +7,7 @@ export const BREADCRUMB_KEYS: Record<string, string> = {
   "/agence-immobiliere-luxembourg": "agency",
   "/biens": "properties",
   "/blog": "blog",
+  "/faq": "faq",
   "/contact": "contact",
   "/liste-attente": "waitlist",
   "/mentions-acquisition": "acquisition_notice",

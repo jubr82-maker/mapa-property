@@ -5,6 +5,7 @@ import { EstimateForm } from "@/components/forms/EstimateForm";
 import { getLuxembourgPlaces } from "@/lib/estimation/coverage";
 
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+import { FaqSection } from "@/components/faq/FaqSection";
 export async function generateMetadata({
   params,
 }: {
@@ -49,6 +50,7 @@ export default async function EstimatePage({
             proposee, calcules cote serveur : le JSON GeoNames reste hors du
             bundle client. */}
         <EstimateForm places={getLuxembourgPlaces()} />
+        <FaqSection pageKey="estimer" locale={locale} className="mx-auto mt-16 max-w-3xl" />
       </div>
     </div>
     </>

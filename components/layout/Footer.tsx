@@ -24,6 +24,7 @@ const colAgency = [
   { href: "/mandats/exclusif", key: "mandates" },
   { href: "/legal/honoraires", key: "fees" },
   { href: "/blog", key: "blog" },
+  { href: "/faq", key: "faq" },
 ] as const;
 
 const colLegal = [

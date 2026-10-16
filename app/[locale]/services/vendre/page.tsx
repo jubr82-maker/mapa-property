@@ -124,7 +124,7 @@ export default async function SellPage({
         </section>
         </FadeInOnScroll>
 
-        <IntentSections locale={locale} intent="sell" />
+        <IntentSections locale={locale} intent="sell" faqKey="vendre" />
       </div>
     </div>
     </>

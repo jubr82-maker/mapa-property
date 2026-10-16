@@ -3,6 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { BlogPostForm } from "@/components/admin/BlogPostForm";
 import { ADMIN_LOCALE } from "@/lib/datetime";
+import { BlogFaqBlock } from "@/components/admin/faq/BlogFaqBlock";
+import { blogFaqKey } from "@/lib/faq/keys";
+import type { FaqRow } from "@/lib/faq/data";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +23,18 @@ export default async function EditBlogPostPage({
     .maybeSingle();
   if (!post) notFound();
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_blog" });
+  // Questions frequentes de l'article (oct. 2026), page "blog:<adresse>".
+  const faqKey = post.slug ? blogFaqKey(post.slug) : null;
+  const { data: faqData } = faqKey
+    ? await supabase.from("faqs").select("*").eq("page_key", faqKey).order("position").order("created_at")
+    : { data: [] };
+  const faqItems = ((faqData as (FaqRow & { published: boolean })[] | null) ?? []).map((r) => ({
+    id: r.id,
+    page_key: r.page_key,
+    question: { fr: r.question_fr ?? "", en: r.question_en ?? "", de: r.question_de ?? "" },
+    answer: { fr: r.answer_fr ?? "", en: r.answer_en ?? "", de: r.answer_de ?? "" },
+    published: r.published,
+  }));
 
   return (
     <div className="space-y-8">
@@ -32,6 +47,7 @@ export default async function EditBlogPostPage({
         </h1>
       </header>
       <BlogPostForm post={post} mode="edit" />
+      <BlogFaqBlock pageKey={faqKey} items={faqItems} />
     </div>
   );
 }

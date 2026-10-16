@@ -7,6 +7,7 @@ import type { PropertyOffmarket } from "@/lib/types";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 import { PropertyPrice } from "@/components/property/PropertyPrice";
 
+import { FaqSection } from "@/components/faq/FaqSection";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 // Sprint OPTIM-1B : ISR sur la page liste off-market — fetch
 // fetchOffmarketList(locale) via VIEW Supabase. Sans revalidate explicite,
@@ -151,6 +152,7 @@ export default async function OffMarketListPage({
             ))}
           </div>
         )}
+        <FaqSection pageKey="off-market" locale={locale} />
       </div>
     </div>
     </>

@@ -22,6 +22,7 @@ import {
   Radar,
   ScrollText,
   SearchCheck,
+  MessageCircleQuestion,
 } from "lucide-react";
 
 export type AdminNavItem = { href: string; key: string; icon: typeof Lock; match: "exact" | "prefix" };
@@ -50,6 +51,7 @@ export const ADMIN_NAV_GROUPS: { key: string; items: AdminNavItem[] }[] = [
       { href: "/admin/arcova", key: "arcova", icon: Users, match: "prefix" },
       { href: "/admin/reviews", key: "reviews", icon: Star, match: "prefix" },
       { href: "/admin/blog", key: "blog", icon: BookText, match: "prefix" },
+      { href: "/admin/faq", key: "faq", icon: MessageCircleQuestion, match: "prefix" },
       { href: "/admin/documents", key: "documents", icon: FolderArchive, match: "prefix" },
       { href: "/admin/properties", key: "properties", icon: Building2, match: "prefix" },
       { href: "/admin/contenu", key: "content", icon: LayoutTemplate, match: "prefix" },

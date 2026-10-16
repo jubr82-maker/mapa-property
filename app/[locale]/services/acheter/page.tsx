@@ -24,7 +24,7 @@ export default async function BuyPage({ params }: { params: Promise<{ locale: st
             <h1 className="mt-2 t-h1">{t("buy.title")}</h1>
             <IntentAnswer locale={locale} intent="buy" />
           </header>
-          <IntentSections locale={locale} intent="buy" />
+          <IntentSections locale={locale} intent="buy" faqKey="acheter" />
         </div>
       </div>
     </>

@@ -10,6 +10,7 @@ import { ExploreLinks } from "@/components/seo/ExploreLinks";
 import { INTENT_PAGES, type IntentKey } from "@/lib/intent-pages";
 import { buildPageMetadata } from "@/lib/seo-page-meta";
 import { faqPage, intentService } from "@/lib/seo";
+import { FaqSection } from "@/components/faq/FaqSection";
 
 export async function intentMetadata(locale: string, intent: IntentKey): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "intent_pages" });
@@ -47,10 +48,16 @@ export async function IntentAnswer({
   );
 }
 
-export async function IntentSections({ locale, intent }: { locale: string; intent: IntentKey }) {
+/**
+ * faqKey : questions lues dans la table faqs (admin, Questions frequentes)
+ * au lieu des questions ecrites dans les traductions (oct. 2026). Les
+ * questions d'origine ont ete reprises mot pour mot (SQL 24). Sans faqKey
+ * (broker international), la FAQ des traductions reste affichee.
+ */
+export async function IntentSections({ locale, intent, faqKey }: { locale: string; intent: IntentKey; faqKey?: string }) {
   const t = await getTranslations({ locale, namespace: "intent_pages" });
   const config = INTENT_PAGES[intent];
-  const faq = await intentFaq(locale, intent);
+  const faq = faqKey ? [] : await intentFaq(locale, intent);
 
   return (
     <>
@@ -63,10 +70,12 @@ export async function IntentSections({ locale, intent }: { locale: string; inten
             description: t(`${intent}.answer`),
             area: config.area,
           }),
-          faqPage(faq),
+          ...(faq.length ? [faqPage(faq)] : []),
         ]}
       />
 
+      {faqKey ? <FaqSection pageKey={faqKey} locale={locale} /> : null}
+      {faq.length ? (
       <section className="mt-16 max-w-3xl" aria-labelledby={`faq-${intent}`}>
         <h2 id={`faq-${intent}`} className="t-h2">
           {t("faq_title")}
@@ -85,6 +94,7 @@ export async function IntentSections({ locale, intent }: { locale: string; inten
           ))}
         </div>
       </section>
+      ) : null}
 
       <section className="mt-16" aria-labelledby={`links-${intent}`}>
         <h2 id={`links-${intent}`} className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep">

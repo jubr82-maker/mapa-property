@@ -11,6 +11,8 @@ import { BookletReader } from "@/components/blog/BookletReader";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { blogPosting, pageAlternates } from "@/lib/seo";
+import { FaqSection } from "@/components/faq/FaqSection";
+import { blogFaqKey } from "@/lib/faq/keys";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -96,6 +98,7 @@ export default async function BlogPostPage({
           // Assaini cote serveur (OWASP ASVS 5.2.1) avant injection.
           contentHtml={sanitizeArticleHtml(content)}
         />
+        <FaqSection pageKey={blogFaqKey(post.slug)} locale={locale} className="mx-auto mt-16 max-w-[65ch]" />
         <p className="mx-auto mt-8 max-w-[65ch] font-mono text-[10px] leading-snug text-ink-soft">
           <Link href="/legal/intelligence-artificielle" className="hover:underline">
             {tAi("note_journal")}

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { BlogPostForm } from "@/components/admin/BlogPostForm";
 import { ADMIN_LOCALE } from "@/lib/datetime";
+import { BlogFaqBlock } from "@/components/admin/faq/BlogFaqBlock";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function NewBlogPostPage() {
         </h1>
       </header>
       <BlogPostForm post={null} mode="create" />
+      <BlogFaqBlock pageKey={null} items={[]} />
     </div>
   );
 }

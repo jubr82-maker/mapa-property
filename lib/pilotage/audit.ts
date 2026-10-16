@@ -27,7 +27,10 @@ export type AdminAuditAction =
   | "property_search_created"
   | "property_search_updated"
   | "property_search_status"
-  | "property_search_deleted";
+  | "property_search_deleted"
+  | "faq_saved"
+  | "faq_deleted"
+  | "faq_reordered";
 
 export async function logAdminAction(entry: {
   actorEmail: string | null | undefined;

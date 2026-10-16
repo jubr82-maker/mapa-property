@@ -72,7 +72,7 @@ export default async function RentPage({
           {t("legal_notice")}
         </p>
 
-        <IntentSections locale={locale} intent="rent" />
+        <IntentSections locale={locale} intent="rent" faqKey="louer" />
       </div>
     </div>
     </>

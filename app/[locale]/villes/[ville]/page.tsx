@@ -13,6 +13,8 @@ import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { fetchAllPropertiesWithCover } from "@/lib/data";
+import { FaqSection } from "@/components/faq/FaqSection";
+import { cityFaqKey } from "@/lib/faq/keys";
 import { cityForPlace } from "@/lib/internal-links";
 
 type Locale = "fr" | "en" | "de";
@@ -282,6 +284,8 @@ export default async function VillePage({
             </ul>
           </section>
         ) : null}
+
+        <FaqSection pageKey={cityFaqKey(city.slug)} locale={locale} />
       </main>
     </>
   );

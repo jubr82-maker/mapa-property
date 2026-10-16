@@ -43,6 +43,7 @@ const STATIC_PATHS = [
   "/qui-sommes-nous",
   "/recherches",
   "/blog",
+  "/faq",
   "/contact",
   "/mentions-acquisition",
   "/legal/mentions-legales",

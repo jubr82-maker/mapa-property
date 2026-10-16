@@ -45,7 +45,8 @@
     "mandates": "Mandates",
     "agency_luxembourg": "Real estate agency in Luxembourg",
     "broker_international": "International broker",
-    "our_searches": "Our current searches"
+    "our_searches": "Our current searches",
+    "faq": "FAQ"
   },
   "footer": {
     "col_services": "Services",
@@ -3293,7 +3294,8 @@
     "thumb_properties": "Properties",
     "thumb_activity": "Activity",
     "thumb_menu": "Menu",
-    "searches": "Searches"
+    "searches": "Searches",
+    "faq": "FAQ"
   },
   "admin_alerts": {
     "login_burst_subject": "Alert: repeated failed admin sign-ins",
@@ -3780,7 +3782,13 @@
     "lcp_phase_value": "{s} s ({pct}%)",
     "lcp_opportunities": "Top three improvements",
     "lcp_gain": "about {s} s saved",
-    "lcp_none": "LCP cause details available at the next measurement (after SQL file 19 has been run)."
+    "lcp_none": "LCP cause details available at the next measurement (after SQL file 19 has been run).",
+    "event_admin_faq_saved": "FAQ question saved",
+    "jshort_admin_faq_saved": "Question saved",
+    "event_admin_faq_deleted": "FAQ question deleted",
+    "jshort_admin_faq_deleted": "Question deleted",
+    "event_admin_faq_reordered": "FAQ order changed",
+    "jshort_admin_faq_reordered": "Question order"
   },
   "breadcrumb": {
     "home": "Home",
@@ -3810,7 +3818,8 @@
     "agency": "Real estate agency in Luxembourg",
     "buy": "Buy",
     "broker": "International broker",
-    "searches": "Our current searches"
+    "searches": "Our current searches",
+    "faq": "Frequently asked questions"
   },
   "not_found": {
     "eyebrow": "Error 404",
@@ -4722,5 +4731,78 @@
     "row_line_same": "- {table}: {count} (unchanged)",
     "row_line_delta": "- {table}: {count} ({delta})",
     "not_included": "Not included: photos and documents in Supabase and R2 storage."
+  },
+  "faq": {
+    "eyebrow": "MAPA Property",
+    "title": "Frequently asked questions",
+    "page_title": "Frequently asked questions",
+    "page_intro": "Answers to the questions we hear most often. For a question about your own project, write to us.",
+    "contact": "Contact us",
+    "meta_title": "Frequently asked questions",
+    "meta_description": "Answers to common questions about selling, buying, renting and valuing a property in Luxembourg with MAPA Property."
+  },
+  "admin_faq": {
+    "eyebrow": "Management",
+    "title": "Frequently asked questions",
+    "intro": "Questions and answers shown on the site's pages. A question only appears in a language if it has been translated into it.",
+    "new_button": "New question",
+    "new_title": "New question",
+    "edit_title": "Edit question",
+    "back": "Back to the list",
+    "filter_label": "Page",
+    "filter_all": "All pages",
+    "filter_submit": "Filter",
+    "col_page": "Page",
+    "col_order": "Order",
+    "col_question": "Question (French)",
+    "col_langs": "Languages",
+    "col_visible": "Visible",
+    "visible_yes": "Visible",
+    "visible_no": "Hidden",
+    "empty": "No questions yet.",
+    "unavailable": "Questions table missing: run supabase/sql/23_faq.sql in Supabase.",
+    "move_up": "Move up",
+    "move_down": "Move down",
+    "edit": "Edit",
+    "field_page": "Site page",
+    "field_page_choose": "Choose a page",
+    "group_pages": "Pages",
+    "group_cities": "Cities",
+    "group_blog": "Blog articles",
+    "city_label": "City: {name}",
+    "blog_label": "Article: {title}",
+    "key_agence": "Real estate agency in Luxembourg",
+    "key_accueil": "Home",
+    "key_vendre": "Sell",
+    "key_acheter": "Buy",
+    "key_louer": "Rent",
+    "key_estimer": "Valuation",
+    "key_mandat_recherche": "Search mandate",
+    "key_off_market": "Off-market",
+    "key_faq_generale": "Frequently asked questions (general page)",
+    "lang_fr": "French",
+    "lang_en": "English",
+    "lang_de": "German",
+    "lang_missing": "to translate",
+    "field_question": "Question ({lang})",
+    "field_answer": "Answer ({lang})",
+    "answer_hint": "Plain text. A blank line separates two paragraphs.",
+    "field_published": "Visible on the site",
+    "submit_create": "Create question",
+    "submit_save": "Save",
+    "busy": "Saving",
+    "cancel": "Close",
+    "delete": "Delete",
+    "delete_confirm": "Delete this question in all three languages?",
+    "err_page": "Choose a page from the list.",
+    "err_fr": "The French question and answer are required.",
+    "err_pair": "{lang}: fill in both the question and the answer, or leave both empty.",
+    "err_dash": "{lang}: replace long or medium dashes with a comma, a colon or brackets.",
+    "err_not_found": "Question not found.",
+    "err_network": "Connection lost, please try again.",
+    "blog_block_title": "Article FAQ",
+    "blog_block_intro": "Shown below the article, in each language they are translated into.",
+    "blog_block_add": "Add a question",
+    "blog_block_need_slug": "Save the article first: its questions are linked to its page address."
   }
 }

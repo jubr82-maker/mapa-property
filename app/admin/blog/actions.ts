@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { revalidatePublicBlogPages } from "@/lib/revalidate-property";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin/require-admin";
@@ -11,6 +11,8 @@ import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 import { dbErrorReason, type DbError } from "@/lib/admin/db-error";
 import { dbFailure } from "@/lib/admin/action-result";
+import { FAQS_TAG } from "@/lib/faq/data";
+import { blogFaqKey } from "@/lib/faq/keys";
 
 /** Bucket public des couvertures du blog (cree par le site v28). */
 const COVER_BUCKET = "blog-covers";
@@ -97,12 +99,21 @@ export async function updateBlogPost(id: string, formData: FormData): Promise<Bl
   const admin = await requireAdmin();
   if (!admin.ok) return blogFailure("session");
   const supabase = admin.supabase;
+  const payload = buildPostPayload(formData);
+  const { data: before } = await supabase.from("blog_posts").select("slug").eq("id", id).maybeSingle();
   const { count, error } = await supabase
     .from("blog_posts")
-    .update(buildPostPayload(formData), { count: "exact" })
+    .update(payload, { count: "exact" })
     .eq("id", id);
   if (error) return blogFailure(error);
   if (!count) return blogFailure({ code: "PGRST116" });
+  // Adresse changee : les questions de l'article suivent (oct. 2026).
+  const oldSlug = (before as { slug: string | null } | null)?.slug;
+  if (oldSlug && payload.slug && blogFaqKey(oldSlug) !== blogFaqKey(payload.slug)) {
+    const { error: faqErr } = await supabase.from("faqs").update({ page_key: blogFaqKey(payload.slug) }).eq("page_key", blogFaqKey(oldSlug));
+    if (faqErr) console.error("[admin/blog] questions de l'article non deplacees", { code: faqErr.code ?? null });
+    revalidateTag(FAQS_TAG, { expire: 0 });
+  }
   revalidatePath("/admin/blog");
   // Toutes les langues, l'article et l'accueil ; IndexNow (oct. 2026).
   revalidatePublicBlogPages(id);

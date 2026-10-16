@@ -253,7 +253,7 @@ function MandateContent({ config, locale }: { config: (typeof MANDATES)[MandateT
         </section>
         {config.slug === "recherche" && (
           <div className="mb-20">
-            <IntentSections locale={locale} intent="search" />
+            <IntentSections locale={locale} intent="search" faqKey="mandat-recherche" />
           </div>
         )}
       </div>

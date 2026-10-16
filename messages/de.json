@@ -45,7 +45,8 @@
     "mandates": "Mandate",
     "agency_luxembourg": "Immobilienagentur in Luxemburg",
     "broker_international": "Internationaler Broker",
-    "our_searches": "Unsere aktuellen Suchaufträge"
+    "our_searches": "Unsere aktuellen Suchaufträge",
+    "faq": "Häufige Fragen"
   },
   "footer": {
     "col_services": "Leistungen",
@@ -3293,7 +3294,8 @@
     "thumb_properties": "Objekte",
     "thumb_activity": "Aktivität",
     "thumb_menu": "Menü",
-    "searches": "Suchen"
+    "searches": "Suchen",
+    "faq": "Häufige Fragen"
   },
   "admin_alerts": {
     "login_burst_subject": "Warnung: wiederholte fehlgeschlagene Admin-Anmeldungen",
@@ -3780,7 +3782,13 @@
     "lcp_phase_value": "{s} s ({pct} %)",
     "lcp_opportunities": "Drei wichtigste Verbesserungen",
     "lcp_gain": "etwa {s} s gewonnen",
-    "lcp_none": "Details zur LCP-Ursache ab der nächsten Messung (nach Ausführung der SQL-Datei 19)."
+    "lcp_none": "Details zur LCP-Ursache ab der nächsten Messung (nach Ausführung der SQL-Datei 19).",
+    "event_admin_faq_saved": "Häufige Frage gespeichert",
+    "jshort_admin_faq_saved": "Frage gespeichert",
+    "event_admin_faq_deleted": "Häufige Frage gelöscht",
+    "jshort_admin_faq_deleted": "Frage gelöscht",
+    "event_admin_faq_reordered": "Reihenfolge der Fragen geändert",
+    "jshort_admin_faq_reordered": "Reihenfolge"
   },
   "breadcrumb": {
     "home": "Startseite",
@@ -3810,7 +3818,8 @@
     "agency": "Immobilienagentur in Luxemburg",
     "buy": "Kaufen",
     "broker": "Internationaler Broker",
-    "searches": "Unsere aktuellen Suchaufträge"
+    "searches": "Unsere aktuellen Suchaufträge",
+    "faq": "Häufige Fragen"
   },
   "not_found": {
     "eyebrow": "Fehler 404",
@@ -4722,5 +4731,78 @@
     "row_line_same": "- {table}: {count} (unverändert)",
     "row_line_delta": "- {table}: {count} ({delta})",
     "not_included": "Nicht enthalten: Fotos und Dokumente aus den Speichern Supabase und R2."
+  },
+  "faq": {
+    "eyebrow": "MAPA Property",
+    "title": "Häufige Fragen",
+    "page_title": "Häufige Fragen",
+    "page_intro": "Antworten auf die Fragen, die uns am häufigsten gestellt werden. Bei einer Frage zu Ihrem eigenen Vorhaben schreiben Sie uns.",
+    "contact": "Kontakt aufnehmen",
+    "meta_title": "Häufige Fragen",
+    "meta_description": "Antworten auf häufige Fragen zu Verkauf, Kauf, Vermietung und Bewertung einer Immobilie in Luxemburg mit MAPA Property."
+  },
+  "admin_faq": {
+    "eyebrow": "Verwaltung",
+    "title": "Häufige Fragen",
+    "intro": "Fragen und Antworten auf den Seiten der Website. Eine Frage erscheint in einer Sprache nur, wenn sie übersetzt ist.",
+    "new_button": "Neue Frage",
+    "new_title": "Neue Frage",
+    "edit_title": "Frage bearbeiten",
+    "back": "Zurück zur Liste",
+    "filter_label": "Seite",
+    "filter_all": "Alle Seiten",
+    "filter_submit": "Filtern",
+    "col_page": "Seite",
+    "col_order": "Reihenfolge",
+    "col_question": "Frage (Französisch)",
+    "col_langs": "Sprachen",
+    "col_visible": "Sichtbar",
+    "visible_yes": "Sichtbar",
+    "visible_no": "Ausgeblendet",
+    "empty": "Noch keine Fragen.",
+    "unavailable": "Tabelle der Fragen fehlt: supabase/sql/23_faq.sql in Supabase ausführen.",
+    "move_up": "Nach oben",
+    "move_down": "Nach unten",
+    "edit": "Bearbeiten",
+    "field_page": "Seite der Website",
+    "field_page_choose": "Seite wählen",
+    "group_pages": "Seiten",
+    "group_cities": "Städte",
+    "group_blog": "Blogartikel",
+    "city_label": "Stadt: {name}",
+    "blog_label": "Artikel: {title}",
+    "key_agence": "Immobilienagentur in Luxemburg",
+    "key_accueil": "Startseite",
+    "key_vendre": "Verkaufen",
+    "key_acheter": "Kaufen",
+    "key_louer": "Mieten",
+    "key_estimer": "Bewertung",
+    "key_mandat_recherche": "Suchauftrag",
+    "key_off_market": "Off-Market",
+    "key_faq_generale": "Häufige Fragen (allgemeine Seite)",
+    "lang_fr": "Französisch",
+    "lang_en": "Englisch",
+    "lang_de": "Deutsch",
+    "lang_missing": "zu übersetzen",
+    "field_question": "Frage ({lang})",
+    "field_answer": "Antwort ({lang})",
+    "answer_hint": "Einfacher Text. Eine Leerzeile trennt zwei Absätze.",
+    "field_published": "Auf der Website sichtbar",
+    "submit_create": "Frage anlegen",
+    "submit_save": "Speichern",
+    "busy": "Wird gespeichert",
+    "cancel": "Schließen",
+    "delete": "Löschen",
+    "delete_confirm": "Diese Frage in allen drei Sprachen löschen?",
+    "err_page": "Bitte eine Seite aus der Liste wählen.",
+    "err_fr": "Frage und Antwort auf Französisch sind Pflicht.",
+    "err_pair": "{lang}: Frage und Antwort ausfüllen oder beide leer lassen.",
+    "err_dash": "{lang}: Gedankenstriche durch Komma, Doppelpunkt oder Klammern ersetzen.",
+    "err_not_found": "Frage nicht gefunden.",
+    "err_network": "Verbindung unterbrochen, bitte erneut versuchen.",
+    "blog_block_title": "Häufige Fragen zum Artikel",
+    "blog_block_intro": "Unter dem Artikel angezeigt, in jeder Sprache, in die sie übersetzt sind.",
+    "blog_block_add": "Frage hinzufügen",
+    "blog_block_need_slug": "Artikel zuerst speichern: Die Fragen hängen an seiner Seitenadresse."
   }
 }
