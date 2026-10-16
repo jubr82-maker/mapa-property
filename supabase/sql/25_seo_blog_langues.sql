@@ -15,7 +15,9 @@
 -- Les anciennes colonnes meta_title et meta_description (une seule langue)
 -- ne sont plus lues par le site ; elles restent en place, inchangees.
 --
--- Valeurs : fournies par Julien le 2026-10-16, reprises a l'identique.
+-- Valeurs : fournies par Julien le 2026-10-16, reprises a l'identique, sauf
+-- deux valeurs allemandes raccourcies a sa demande (titre off-market, 60
+-- caracteres au plus ; description Steinfort, 155 au plus).
 -- Steinfort : article trouve par son adresse en minuscules, avant comme
 -- apres le passage de "Immobilier-Steinfort" a "immobilier-steinfort"
 -- (etape 4).
@@ -56,7 +58,7 @@ UPDATE public.blog_posts SET
   seo_description_fr = 'L''off-market reste le canal privilégié des biens de prestige au Luxembourg, mais il doit se professionnaliser : dérives, risques et nouveaux standards.',
   seo_title_en = 'Off-market in Luxembourg 2026: the end of the informal model',
   seo_description_en = 'Off-market remains the preferred channel for prestige property in Luxembourg, but it must become more professional: pitfalls, risks and new standards.',
-  seo_title_de = 'Off-Market in Luxemburg 2026: das Ende des informellen Modells',
+  seo_title_de = 'Off-Market in Luxemburg 2026: Ende des informellen Modells',
   seo_description_de = 'Off-Market bleibt in Luxemburg der bevorzugte Kanal für Prestigeimmobilien, muss aber professioneller werden: Fehlentwicklungen, Risiken, neue Standards.'
 WHERE lower(slug) = 'off-market-luxembourg-fin-modele-informel';
 
@@ -75,7 +77,7 @@ UPDATE public.blog_posts SET
   seo_title_en = 'Steinfort 2026: house, apartment and building plot prices',
   seo_description_en = 'House, apartment and building plot prices in Steinfort, Hagen, Kleinbettingen and Grass in 2026, our recent sales and access to Luxembourg City.',
   seo_title_de = 'Steinfort 2026: Preise für Häuser, Wohnungen und Grundstücke',
-  seo_description_de = 'Preise für Häuser, Wohnungen und Baugrundstücke in Steinfort, Hagen, Kleinbettingen und Grass 2026, mit aktuellen Verkäufen und der Anbindung an Luxemburg-Stadt.'
+  seo_description_de = 'Preise für Häuser, Wohnungen und Baugrundstücke 2026 in Steinfort, Hagen, Kleinbettingen und Grass, aktuelle Verkäufe und Anbindung an Luxemburg-Stadt.'
 WHERE lower(slug) = 'immobilier-steinfort';
 
 COMMIT;
