@@ -121,5 +121,21 @@ test("admin : menu Gestion, garde admin sur chaque action, tirets longs refuses,
   assert.ok(existsSync(join(root, "components/admin/faq/FaqForm.tsx")));
 });
 
+test("lectures en cache (biens, contenu, jetons, recherches, FAQ) : une erreur n'est jamais mise en cache", () => {
+  const files = ["lib/data.ts", "lib/site-content.ts", "lib/searches/data.ts", "lib/faq/data.ts"];
+  let total = 0;
+  for (const f of files) {
+    const src = read(f);
+    for (const m of src.matchAll(/unstable_cache\(([\s\S]*?)\n\);/g)) {
+      total++;
+      const body = m[1];
+      assert.ok(/if \(error\) throw new Error\(/.test(body), `${f} : erreur levee dans la fonction mise en cache`);
+      assert.ok(!/console\.error|catch \(/.test(body), `${f} : aucune erreur avalee dans la fonction mise en cache`);
+      assert.ok(/\["[a-z-]+-v2"\]/.test(body), `${f} : nouvelle cle de cache`);
+    }
+  }
+  assert.equal(total, 5, "5 lectures en cache dans le depot");
+});
+
 console.log(`\n${n} PASS, ${failed} FAIL`);
 if (failed) process.exit(1);

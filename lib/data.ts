@@ -276,6 +276,9 @@ async function withMandateColumn<R extends { error: { code?: string } | null }>(
  * limite a 1 : la photo principale publique est la premiere photo de
  * l'admin, images Apimo ecartees, cf. lib/property-images.ts).
  */
+// Une erreur leve une exception DANS la fonction mise en cache : rien n'est
+// garde, la lecture suivante reessaie (oct. 2026, meme cause que la FAQ :
+// une liste vide mise en cache etait reutilisee par les builds suivants).
 const fetchPropertiesWithCoverCached = unstable_cache(
   async (): Promise<PropertyWithCover[]> => {
     const sb = supabaseServer();
@@ -285,10 +288,7 @@ const fetchPropertiesWithCoverCached = unstable_cache(
         .select(`${PROPERTY_CARD_COLUMNS}${extra}, property_images(url, sort)`)
         .eq("is_published", true),
     );
-    if (error) {
-      console.error("[data] fetchAllPropertiesWithCover", error.message);
-      return [];
-    }
+    if (error) throw new Error(error.message);
     // Row = forme réelle du select allégé (pas Property complet — cf.
     // commentaire PROPERTY_CARD_COLUMNS). Cast final assumé : les
     // consommateurs de PropertyWithCover issus de cette fonction ne
@@ -324,12 +324,17 @@ const fetchPropertiesWithCoverCached = unstable_cache(
         }) as unknown as PropertyWithCover,
     );
   },
-  ["properties-with-cover"],
+  ["properties-with-cover-v2"],
   { revalidate: false, tags: [PROPERTIES_LIST_TAG] },
 );
 
 export async function fetchAllPropertiesWithCover(): Promise<PropertyWithCover[]> {
-  return fetchPropertiesWithCoverCached();
+  try {
+    return await fetchPropertiesWithCoverCached();
+  } catch (e) {
+    console.error("[data] fetchAllPropertiesWithCover", e instanceof Error ? e.message : String(e));
+    return [];
+  }
 }
 
 export async function fetchPublishedProperties(): Promise<Property[]> {

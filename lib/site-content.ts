@@ -35,6 +35,9 @@ function getReadClient() {
  * Charge une row site_content (key + locale).
  * Mise en cache 60 s avec tag `site-content`.
  */
+// Une erreur leve une exception DANS la fonction mise en cache : rien n'est
+// garde, la lecture suivante reessaie (oct. 2026, meme cause que la FAQ :
+// une liste vide mise en cache etait reutilisee par les builds suivants).
 const fetchContent = unstable_cache(
   async (key: string, locale: string): Promise<string | null> => {
     const supabase = getReadClient();
@@ -45,14 +48,12 @@ const fetchContent = unstable_cache(
       .eq("key", key)
       .eq("locale", locale)
       .maybeSingle();
-    if (error) {
-      // Table absente / RLS bloque → on logge et on dégrade.
-      console.error("[site-content] fetch error", { key, locale, error: error.message });
-      return null;
-    }
+    // Table absente, regle d'acces ou reseau : exception, rien n'est mis en
+    // cache (siteContent renvoie le texte par defaut et logge).
+    if (error) throw new Error(`site_content ${key}/${locale} : ${error.message}`);
     return data?.content ?? null;
   },
-  ["site-content"],
+  ["site-content-v2"],
   // Sprint OPTIM-1A : revalidate: false (cache infini, tag-only invalidation).
   // Avant : revalidate: 60s -> propageait un TTL 60s a TOUTES les routes
   // [locale]/* via app/[locale]/layout.tsx (siteDesignTokens()), generant
@@ -89,6 +90,9 @@ export async function siteContent(
 
 export type DesignTokensMap = Record<string, Record<string, string>>;
 
+// Une erreur leve une exception DANS la fonction mise en cache : rien n'est
+// garde, la lecture suivante reessaie (oct. 2026, meme cause que la FAQ :
+// une liste vide mise en cache etait reutilisee par les builds suivants).
 const fetchDesignTokens = unstable_cache(
   async (): Promise<DesignTokensMap> => {
     const supabase = getReadClient();
@@ -96,10 +100,7 @@ const fetchDesignTokens = unstable_cache(
     const { data, error } = await supabase
       .from("site_design_tokens")
       .select("category,token_key,token_value");
-    if (error) {
-      console.error("[site-design-tokens] fetch error", error.message);
-      return {};
-    }
+    if (error) throw new Error(`site_design_tokens : ${error.message}`);
     const out: DesignTokensMap = {};
     for (const row of data ?? []) {
       const cat = row.category as string;
@@ -110,7 +111,7 @@ const fetchDesignTokens = unstable_cache(
     }
     return out;
   },
-  ["site-design-tokens"],
+  ["site-design-tokens-v2"],
   // Sprint OPTIM-1A : revalidate: false (cache infini, tag-only invalidation).
   // Identique a fetchContent — voir commentaire ci-dessus.
   { revalidate: false, tags: [SITE_DESIGN_TOKENS_TAG] },
