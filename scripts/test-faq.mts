@@ -87,6 +87,10 @@ test("site : une section par page, une seule FAQPage, rien sans question publiee
   assert.ok(!/FaqSection|faqKey/.test(read("app/[locale]/page.tsx")));
   assert.ok(!/<IntentSections locale=\{locale\} intent="[a-z]+" \/>/.test(pages.map(([f]) => read(f)).join("\n")), "plus aucune FAQ ecrite en dur");
   const data = read("lib/faq/data.ts");
+  // Une erreur de lecture n'est jamais mise en cache (cause du 2026-10-16).
+  const cached = data.slice(data.indexOf("unstable_cache("), data.indexOf("tags: [FAQS_TAG]"));
+  assert.ok(cached.includes("if (error) throw new Error(error.message);") && !/catch|return \[\];/.test(cached), "aucune liste vide mise en cache");
+  assert.ok(data.includes('["faqs-published-v2"]'));
   assert.ok(data.includes('.eq("published", true)') && data.includes(".filter((r) => r.question && r.answer)"), "jamais de repli sur une autre langue");
 });
 
