@@ -45,7 +45,9 @@ $f$;
 
 DO $steinfort$
 DECLARE
-  v_id uuid;
+  -- Meme type que la colonne id de blog_posts (un entier, pas un uuid :
+  -- premiere execution du 2026-10-16 en echec sur "6", rien modifie).
+  v_id public.blog_posts.id%TYPE;
   v_n integer;
   l text;
   html text;
