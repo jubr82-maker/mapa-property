@@ -12,6 +12,7 @@ export const FAQ_FIXED_KEYS = [
   "mandat-recherche",
   "off-market",
   "faq-generale",
+  "broker-international",
 ] as const;
 
 export type FaqFixedKey = (typeof FAQ_FIXED_KEYS)[number];
@@ -49,6 +50,7 @@ export function faqPagePaths(key: string): string[] {
     "mandat-recherche": ["/mandats/recherche"],
     "off-market": ["/off-market"],
     "faq-generale": ["/faq"],
+    "broker-international": ["/services/broker-international"],
   };
   if ((FAQ_FIXED_KEYS as readonly string[]).includes(key)) return fixed[key as FaqFixedKey];
   const [kind, slug] = key.split(":");

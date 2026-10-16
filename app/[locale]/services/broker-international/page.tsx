@@ -36,7 +36,7 @@ export default async function BrokerPage({ params }: { params: Promise<{ locale:
               ))}
             </div>
           </section>
-          <IntentSections locale={locale} intent="broker" />
+          <IntentSections locale={locale} intent="broker" faqKey="broker-international" />
         </div>
       </div>
     </>

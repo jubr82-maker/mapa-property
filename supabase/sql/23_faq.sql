@@ -10,10 +10,12 @@
 --
 -- page_key : valeurs fermees. "agence", "accueil", "vendre", "acheter",
 -- "louer", "estimer", "mandat-recherche", "off-market", "faq-generale",
+-- "broker-international",
 -- "ville:<adresse de la ville>", "blog:<adresse de l'article>" (adresse en
 -- minuscules, chiffres et tirets).
 --
--- Rejouable : IF NOT EXISTS, regles recreees a l'identique.
+-- Rejouable : IF NOT EXISTS, regles et contrainte de page recreees a
+-- l'identique (deja execute : la liste des pages est mise a jour).
 -- Retour arriere : DROP TABLE public.faqs;
 -- Mode d'emploi : coller le fichier ENTIER, Run. Un seul tableau.
 -- =====================================================================
@@ -34,7 +36,7 @@ CREATE TABLE IF NOT EXISTS public.faqs (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT faqs_page_key_check CHECK (
-    page_key IN ('agence', 'accueil', 'vendre', 'acheter', 'louer', 'estimer', 'mandat-recherche', 'off-market', 'faq-generale')
+    page_key IN ('agence', 'accueil', 'vendre', 'acheter', 'louer', 'estimer', 'mandat-recherche', 'off-market', 'faq-generale', 'broker-international')
     OR page_key ~ '^(ville|blog):[a-z0-9]+(-[a-z0-9]+)*$'
   ),
   CONSTRAINT faqs_pairs_complete CHECK (
@@ -42,6 +44,13 @@ CREATE TABLE IF NOT EXISTS public.faqs (
     AND (question_en IS NULL) = (answer_en IS NULL)
     AND (question_de IS NULL) = (answer_de IS NULL)
   )
+);
+
+-- Liste des pages : recreee pour qu'une nouvelle execution la mette a jour.
+ALTER TABLE public.faqs DROP CONSTRAINT IF EXISTS faqs_page_key_check;
+ALTER TABLE public.faqs ADD CONSTRAINT faqs_page_key_check CHECK (
+  page_key IN ('agence', 'accueil', 'vendre', 'acheter', 'louer', 'estimer', 'mandat-recherche', 'off-market', 'faq-generale', 'broker-international')
+  OR page_key ~ '^(ville|blog):[a-z0-9]+(-[a-z0-9]+)*$'
 );
 
 CREATE INDEX IF NOT EXISTS faqs_page_position_idx ON public.faqs (page_key, position);

@@ -4803,6 +4803,7 @@
     "blog_block_title": "Questions fréquentes de l'article",
     "blog_block_intro": "Affichées sous l'article, dans chaque langue où elles sont traduites.",
     "blog_block_add": "Ajouter une question",
-    "blog_block_need_slug": "Enregistrez d'abord l'article : ses questions se rattachent à son adresse de page."
+    "blog_block_need_slug": "Enregistrez d'abord l'article : ses questions se rattachent à son adresse de page.",
+    "key_broker_international": "Broker international"
   }
 }

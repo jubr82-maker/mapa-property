@@ -4803,6 +4803,7 @@
     "blog_block_title": "Häufige Fragen zum Artikel",
     "blog_block_intro": "Unter dem Artikel angezeigt, in jeder Sprache, in die sie übersetzt sind.",
     "blog_block_add": "Frage hinzufügen",
-    "blog_block_need_slug": "Artikel zuerst speichern: Die Fragen hängen an seiner Seitenadresse."
+    "blog_block_need_slug": "Artikel zuerst speichern: Die Fragen hängen an seiner Seitenadresse.",
+    "key_broker_international": "Internationaler Broker"
   }
 }

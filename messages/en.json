@@ -4803,6 +4803,7 @@
     "blog_block_title": "Article FAQ",
     "blog_block_intro": "Shown below the article, in each language they are translated into.",
     "blog_block_add": "Add a question",
-    "blog_block_need_slug": "Save the article first: its questions are linked to its page address."
+    "blog_block_need_slug": "Save the article first: its questions are linked to its page address.",
+    "key_broker_international": "International broker"
   }
 }

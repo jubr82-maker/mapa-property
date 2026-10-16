@@ -51,8 +51,8 @@ export async function IntentAnswer({
 /**
  * faqKey : questions lues dans la table faqs (admin, Questions frequentes)
  * au lieu des questions ecrites dans les traductions (oct. 2026). Les
- * questions d'origine ont ete reprises mot pour mot (SQL 24). Sans faqKey
- * (broker international), la FAQ des traductions reste affichee.
+ * questions d'origine ont ete reprises mot pour mot (SQL 24). Sans faqKey,
+ * la FAQ des traductions reste affichee.
  */
 export async function IntentSections({ locale, intent, faqKey }: { locale: string; intent: IntentKey; faqKey?: string }) {
   const t = await getTranslations({ locale, namespace: "intent_pages" });

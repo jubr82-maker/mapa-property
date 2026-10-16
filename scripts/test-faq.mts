@@ -43,7 +43,7 @@ test("SQL 23 : table, contrainte identique a la liste du code, lecture publique 
 
 test("SQL 24 : questions d'origine reprises mot pour mot (FR, EN, DE), Steinfort extrait avec garde-fous", () => {
   const sql = read("supabase/sql/24_faq_reprise.sql");
-  const sets: [string, string, number][] = [["agency", "agence", 5], ["sell", "vendre", 4], ["buy", "acheter", 4], ["rent", "louer", 4], ["search", "mandat-recherche", 4]];
+  const sets: [string, string, number][] = [["agency", "agence", 5], ["sell", "vendre", 4], ["buy", "acheter", 4], ["rent", "louer", 4], ["search", "mandat-recherche", 4], ["broker", "broker-international", 4]];
   for (const l of ["fr", "en", "de"]) {
     const m = JSON.parse(read(`messages/${l}.json`)).intent_pages;
     for (const [intent, key, count] of sets) {
@@ -55,9 +55,12 @@ test("SQL 24 : questions d'origine reprises mot pour mot (FR, EN, DE), Steinfort
       }
     }
   }
-  assert.ok(sql.includes("'blog:immobilier-steinfort'") && sql.includes("(attendu 4). Rien n''a ete modifie."));
-  assert.ok(sql.includes("real estate director") && sql.includes("(sources?|quellen)"), "fin d'article jamais prise dans une reponse");
+  assert.ok(!/blog_posts|steinfort/i.test(sql), "24 ne touche a aucun article");
   assert.ok(/BEGIN;[\s\S]*COMMIT;/.test(sql));
+  const b = read("supabase/sql/24b_faq_steinfort.sql");
+  assert.ok(b.includes("'blog:immobilier-steinfort'") && b.includes("(attendu 4). Rien n''a ete modifie."));
+  assert.ok(b.includes("real estate director") && b.includes("(sources?|quellen)"), "fin d'article jamais prise dans une reponse");
+  assert.ok(/BEGIN;[\s\S]*COMMIT;/.test(b) && b.includes("AU\n-- MOMENT DU DEPLOIEMENT"));
 });
 
 test("site : une section par page, une seule FAQPage, rien sans question publiee", () => {
@@ -72,6 +75,7 @@ test("site : une section par page, une seule FAQPage, rien sans question publiee
     ["app/[locale]/services/acheter/page.tsx", 'faqKey="acheter"'],
     ["app/[locale]/services/louer/page.tsx", 'faqKey="louer"'],
     ["app/[locale]/mandats/[type]/page.tsx", 'faqKey="mandat-recherche"'],
+    ["app/[locale]/services/broker-international/page.tsx", 'faqKey="broker-international"'],
     ["app/[locale]/services/estimer/page.tsx", 'pageKey="estimer"'],
     ["app/[locale]/off-market/page.tsx", 'pageKey="off-market"'],
     ["app/[locale]/villes/[ville]/page.tsx", "pageKey={cityFaqKey(city.slug)}"],
@@ -79,6 +83,9 @@ test("site : une section par page, une seule FAQPage, rien sans question publiee
     ["app/[locale]/faq/page.tsx", 'pageKey="faq-generale"'],
   ];
   for (const [f, needle] of pages) assert.ok(read(f).includes(needle), f);
+  // Accueil : valeur disponible, aucune section affichee (choix de Julien).
+  assert.ok(!/FaqSection|faqKey/.test(read("app/[locale]/page.tsx")));
+  assert.ok(!/<IntentSections locale=\{locale\} intent="[a-z]+" \/>/.test(pages.map(([f]) => read(f)).join("\n")), "plus aucune FAQ ecrite en dur");
   const data = read("lib/faq/data.ts");
   assert.ok(data.includes('.eq("published", true)') && data.includes(".filter((r) => r.question && r.answer)"), "jamais de repli sur une autre langue");
 });

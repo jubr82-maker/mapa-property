@@ -1,35 +1,19 @@
 -- =====================================================================
--- 24 QUESTIONS FREQUENTES : REPRISE DE L'EXISTANT
+-- 24 QUESTIONS FREQUENTES : REPRISE DES PAGES
 -- MAPA Property, prepare le 2026-10-16. A executer APRES 23_faq.sql.
+-- N'insere que des lignes dans public.faqs ; ne touche a AUCUN article ni
+-- a aucune autre table.
 --
--- 1. Questions ecrites en dur dans le site (fichiers de traduction,
---    intent_pages), reprises MOT POUR MOT en FR, EN et DE, publiees :
---    agence (5), vendre (4), acheter (4), louer (4), mandat-recherche (4).
---    Le site affiche desormais ces pages depuis la table faqs : sans ce
---    fichier, leurs questions ne s'afficheraient plus.
--- 2. Article Steinfort : les 4 questions de sa section "Questions
---    frequentes" sont extraites du HTML de l'article (FR, EN, DE), inserees
---    pour page_key 'blog:immobilier-steinfort', puis la section est retiree
---    du HTML des trois langues (pas de doublon). Questions et reponses en
---    texte simple (balises retirees, mots inchanges).
---    Garde-fous : un seul article, exactement 4 questions dans chaque
---    langue, la fin d'article (citation, signature, "Sources") jamais
---    prise dans une reponse. Sinon : ARRET avec la cause, RIEN n'est
---    modifie (transaction annulee).
+-- Questions ecrites en dur dans le site (fichiers de traduction,
+-- intent_pages), reprises MOT POUR MOT en FR, EN et DE, publiees :
+-- agence (5), vendre (4), acheter (4), louer (4), mandat-recherche (4),
+-- broker-international (4). Le site deploye ensuite lit ces pages dans la
+-- table faqs : sans ce fichier, leurs questions ne s'afficheraient plus.
+-- Sans effet sur le site actuellement en ligne (il ne lit pas cette table).
 --
--- Rejouable : une question deja presente n'est pas inseree deux fois ;
--- l'article Steinfort n'est traite que si sa page n'a encore aucune
--- question.
--- Retour arriere des insertions : DELETE FROM public.faqs WHERE page_key IN
---   ('agence','vendre','acheter','louer','mandat-recherche','blog:immobilier-steinfort');
--- (le HTML de l'article se restaure depuis la sauvegarde faite avant).
---
--- APERCU FACULTATIF, a lancer SEUL avant ce fichier (lecture seule) :
---   SELECT slug,
---          substring(content_fr from '(?i)(<h[23][^>]*>[^<]*(questions fr[eé]quentes|faq)[\s\S]*)') AS fr
---   FROM public.blog_posts WHERE lower(slug) = 'immobilier-steinfort';
---
--- Necessite PostgreSQL 15 ou plus (regexp_instr), cas de Supabase.
+-- Rejouable : une question deja presente n'est pas inseree deux fois.
+-- Retour arriere : DELETE FROM public.faqs WHERE page_key IN
+--   ('agence','vendre','acheter','louer','mandat-recherche','broker-international');
 -- Mode d'emploi : coller le fichier ENTIER, Run. Un seul tableau.
 -- =====================================================================
 
@@ -234,130 +218,48 @@ SELECT 'mandat-recherche', 'Peut-on chercher hors du Luxembourg ?',
   4, true
 WHERE NOT EXISTS (SELECT 1 FROM public.faqs WHERE page_key = 'mandat-recherche' AND question_fr = 'Peut-on chercher hors du Luxembourg ?');
 
--- ---------------------------------------------------------------------
--- Article Steinfort : extraction, insertion, retrait de la section.
--- ---------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION pg_temp.faq_texte(h text) RETURNS text
-LANGUAGE sql IMMUTABLE AS $f$
-  SELECT btrim(regexp_replace(
-    replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(
-      regexp_replace(regexp_replace(h, '<br\s*/?>', ' ', 'gi'), '<[^>]+>', '', 'g'),
-      '&nbsp;', ' '), '&#160;', ' '), '&amp;', '&'), '&#39;', ''''), '&apos;', ''''), '&rsquo;', '’'),
-      '&quot;', '"'), '&laquo;', '«'), '&raquo;', '»'), '&lt;', '<'), '&gt;', '>'),
-    '[ \t\r\n]+', ' ', 'g'))
-$f$;
-
-DO $steinfort$
-DECLARE
-  v_id uuid;
-  v_n integer;
-  l text;
-  html text;
-  head_re constant text := '<h([23])[^>]*>[[:space:]]*(questions[[:space:]]+fr(e|é|&eacute;)quentes|frequently[[:space:]]+asked[[:space:]]+questions|h(ä|a|&auml;)ufig[[:space:]]+gestellte[[:space:]]+fragen|h(ä|a|&auml;)ufige[[:space:]]+fragen|faq)[[:space:]]*:?[[:space:]]*</h\1>';
-  h_start integer;
-  h_end integer;
-  pos integer;
-  qs integer;
-  qe integer;
-  qtxt text;
-  ans text;
-  para text;
-  pe integer;
-  rest text;
-  removed_end integer;
-  qa jsonb;
-  all_qa jsonb := '{}'::jsonb;
-  i integer;
-BEGIN
-  SELECT count(*) INTO v_n FROM public.blog_posts WHERE lower(slug) = 'immobilier-steinfort';
-  IF v_n <> 1 THEN
-    RAISE EXCEPTION 'Steinfort : % article(s) trouve(s) pour l''adresse immobilier-steinfort (attendu 1). Rien n''a ete modifie.', v_n;
-  END IF;
-  IF EXISTS (SELECT 1 FROM public.faqs WHERE page_key = 'blog:immobilier-steinfort') THEN
-    RAISE NOTICE 'Steinfort : questions deja presentes, article non retraite.';
-    RETURN;
-  END IF;
-  SELECT id INTO v_id FROM public.blog_posts WHERE lower(slug) = 'immobilier-steinfort';
-
-  FOREACH l IN ARRAY ARRAY['fr', 'en', 'de'] LOOP
-    EXECUTE format('SELECT %I FROM public.blog_posts WHERE id = $1', 'content_' || l) INTO html USING v_id;
-    IF html IS NULL THEN
-      RAISE EXCEPTION 'Steinfort %, texte vide. Rien n''a ete modifie.', l;
-    END IF;
-    h_start := regexp_instr(html, head_re, 1, 1, 0, 'i');
-    IF h_start = 0 THEN
-      RAISE EXCEPTION 'Steinfort %, titre de la section "Questions frequentes" introuvable. Rien n''a ete modifie.', l;
-    END IF;
-    h_end := regexp_instr(html, head_re, 1, 1, 1, 'i');
-    pos := h_end;
-    removed_end := h_end;
-    qa := '[]'::jsonb;
-    LOOP
-      rest := substr(html, pos);
-      -- Question suivante : un <h3> avant tout autre titre <h1>/<h2>.
-      qs := regexp_instr(rest, '<h3[[:space:]>]', 1, 1, 0, 'i');
-      EXIT WHEN qs = 0;
-      IF regexp_instr(substr(rest, 1, qs - 1), '<h[12][[:space:]>]', 1, 1, 0, 'i') > 0 THEN EXIT; END IF;
-      -- Rien d'autre que des blancs entre deux questions.
-      IF btrim(substr(rest, 1, qs - 1), E' \t\r\n') <> '' THEN EXIT; END IF;
-      qe := strpos(lower(rest), '</h3>');
-      EXIT WHEN qe = 0 OR qe < qs;
-      qtxt := pg_temp.faq_texte(substr(rest, qs, qe - qs));
-      pos := pos + qe - 1 + length('</h3>');
-      ans := '';
-      -- Reponse : paragraphes <p> qui suivent, hors fin d'article.
-      LOOP
-        rest := substr(html, pos);
-        EXIT WHEN rest !~* '^[[:space:]]*<p[[:space:]>]';
-        pe := strpos(lower(rest), '</p>');
-        EXIT WHEN pe = 0;
-        para := pg_temp.faq_texte(substr(rest, 1, pe - 1));
-        EXIT WHEN para ~* '^(sources?|quellen)[[:space:]]*:' OR para ~* 'real estate director';
-        IF para <> '' THEN
-          ans := CASE WHEN ans = '' THEN para ELSE ans || E'\n\n' || para END;
-        END IF;
-        pos := pos + pe - 1 + length('</p>');
-      END LOOP;
-      IF qtxt = '' OR ans = '' THEN
-        RAISE EXCEPTION 'Steinfort %, question % sans texte ou sans reponse. Rien n''a ete modifie.', l, jsonb_array_length(qa) + 1;
-      END IF;
-      qa := qa || jsonb_build_array(jsonb_build_object('q', qtxt, 'a', ans));
-      removed_end := pos;
-    END LOOP;
-    IF jsonb_array_length(qa) <> 4 THEN
-      RAISE EXCEPTION 'Steinfort %, % question(s) trouvee(s) (attendu 4). Rien n''a ete modifie.', l, jsonb_array_length(qa);
-    END IF;
-    all_qa := all_qa || jsonb_build_object(l, qa);
-    -- Retrait de la section : du titre a la fin de la derniere reponse.
-    EXECUTE format('UPDATE public.blog_posts SET %I = $1 WHERE id = $2', 'content_' || l)
-      USING substr(html, 1, h_start - 1) || substr(html, removed_end), v_id;
-  END LOOP;
-
-  FOR i IN 0..3 LOOP
-    INSERT INTO public.faqs (page_key, question_fr, answer_fr, question_en, answer_en, question_de, answer_de, position, published)
-    VALUES ('blog:immobilier-steinfort',
-            all_qa->'fr'->i->>'q', all_qa->'fr'->i->>'a',
-            all_qa->'en'->i->>'q', all_qa->'en'->i->>'a',
-            all_qa->'de'->i->>'q', all_qa->'de'->i->>'a',
-            i + 1, true);
-  END LOOP;
-END
-$steinfort$;
+-- broker-international : 4 questions (messages/*.json, intent_pages.broker.faq_q1..4), mot pour mot.
+INSERT INTO public.faqs (page_key, question_fr, answer_fr, question_en, answer_en, question_de, answer_de, position, published)
+SELECT 'broker-international', 'Que fait un broker immobilier international ?',
+  'Il définit précisément le besoin, identifie les biens, choisit le bon partenaire local, pilote le dossier et reste l''interlocuteur unique du client jusqu''à la signature.',
+  'What does an international real estate broker do?',
+  'It defines the requirement precisely, identifies the properties, chooses the right local partner, oversees the file and remains the client''s single point of contact through to signing.',
+  'Was macht ein internationaler Immobilienbroker?',
+  'Er definiert den Bedarf präzise, identifiziert die Objekte, wählt den richtigen lokalen Partner, steuert den Vorgang und bleibt bis zur Unterzeichnung der einzige Ansprechpartner des Kunden.',
+  1, true
+WHERE NOT EXISTS (SELECT 1 FROM public.faqs WHERE page_key = 'broker-international' AND question_fr = 'Que fait un broker immobilier international ?');
+INSERT INTO public.faqs (page_key, question_fr, answer_fr, question_en, answer_en, question_de, answer_de, position, published)
+SELECT 'broker-international', 'Dans quels pays MAPA Property intervient-elle ?',
+  'Directement au Luxembourg, ainsi qu''en France, en Allemagne et en Italie grâce à la carte professionnelle européenne. Ailleurs, sur demande, avec des agences locales habilitées ; la page Marchés actifs présente la couverture régulière.',
+  'In which countries does MAPA Property operate?',
+  'Directly in Luxembourg, and in France, Germany and Italy under the European Professional Card. Elsewhere, on request, with licensed local agencies; the Active markets page shows the regular coverage.',
+  'In welchen Ländern ist MAPA Property tätig?',
+  'Direkt in Luxemburg sowie mit dem Europäischen Berufsausweis in Frankreich, Deutschland und Italien. Andernorts auf Anfrage mit zugelassenen lokalen Agenturen; die Seite Aktive Märkte zeigt die regelmäßige Abdeckung.',
+  2, true
+WHERE NOT EXISTS (SELECT 1 FROM public.faqs WHERE page_key = 'broker-international' AND question_fr = 'Dans quels pays MAPA Property intervient-elle ?');
+INSERT INTO public.faqs (page_key, question_fr, answer_fr, question_en, answer_en, question_de, answer_de, position, published)
+SELECT 'broker-international', 'Qui réalise la transaction à l''étranger ?',
+  'En France, en Allemagne et en Italie, MAPA Property peut la conduire elle-même. Dans les autres pays, la négociation et la transaction sont réalisées par une agence locale habilitée, qui représente le client sur place.',
+  'Who carries out the transaction abroad?',
+  'In France, Germany and Italy, MAPA Property can conduct it itself. In other countries, negotiation and the transaction are carried out by a licensed local agency that represents the client on the ground.',
+  'Wer führt die Transaktion im Ausland durch?',
+  'In Frankreich, Deutschland und Italien kann MAPA Property sie selbst durchführen. In anderen Ländern werden Verhandlung und Transaktion von einer zugelassenen lokalen Agentur durchgeführt, die den Kunden vor Ort vertritt.',
+  3, true
+WHERE NOT EXISTS (SELECT 1 FROM public.faqs WHERE page_key = 'broker-international' AND question_fr = 'Qui réalise la transaction à l''étranger ?');
+INSERT INTO public.faqs (page_key, question_fr, answer_fr, question_en, answer_en, question_de, answer_de, position, published)
+SELECT 'broker-international', 'Quels sont les honoraires à l''international ?',
+  'Pour une recherche en Europe, France comprise, 3 % à 8 % hors TVA du prix d''acquisition selon la complexité et le pays. Hors d''Europe, sur devis défini au mandat.',
+  'What are the fees abroad?',
+  'For a search in Europe, including France, 3% to 8% excluding VAT of the purchase price depending on complexity and country. Outside Europe, quoted in the mandate.',
+  'Wie hoch sind die Honorare im Ausland?',
+  'Für eine Suche in Europa, einschließlich Frankreich, 3 % bis 8 % zzgl. MwSt. des Kaufpreises je nach Komplexität und Land. Außerhalb Europas nach Angebot im Mandat.',
+  4, true
+WHERE NOT EXISTS (SELECT 1 FROM public.faqs WHERE page_key = 'broker-international' AND question_fr = 'Quels sont les honoraires à l''international ?');
 
 COMMIT;
 
--- Controle : nombre de questions par page, puis les questions de Steinfort.
+-- Controle : nombre de questions par page (attendu 5, puis 4 pour les autres).
 SELECT page_key AS controle, count(*)::text AS etat FROM public.faqs
-WHERE page_key IN ('agence', 'vendre', 'acheter', 'louer', 'mandat-recherche', 'blog:immobilier-steinfort')
+WHERE page_key IN ('agence', 'vendre', 'acheter', 'louer', 'mandat-recherche', 'broker-international')
 GROUP BY page_key
-UNION ALL
-SELECT 'steinfort ' || position || ' FR', left(question_fr, 120) FROM public.faqs WHERE page_key = 'blog:immobilier-steinfort'
-UNION ALL
-SELECT 'steinfort ' || position || ' EN', left(question_en, 120) FROM public.faqs WHERE page_key = 'blog:immobilier-steinfort'
-UNION ALL
-SELECT 'steinfort ' || position || ' DE', left(question_de, 120) FROM public.faqs WHERE page_key = 'blog:immobilier-steinfort'
-UNION ALL
-SELECT 'section FAQ restante dans l''article (attendu 0)',
-       (SELECT count(*)::text FROM public.blog_posts
-        WHERE lower(slug) = 'immobilier-steinfort'
-          AND (content_fr ~* 'questions[[:space:]]+fr(e|é)quentes</h' OR content_en ~* 'frequently[[:space:]]+asked[[:space:]]+questions</h' OR content_de ~* 'h(ä|a)ufig(e|[[:space:]]+gestellte)[[:space:]]+fragen</h'));
+ORDER BY 1;
