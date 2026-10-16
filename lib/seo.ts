@@ -39,6 +39,17 @@ export const AREA_SERVED = [
   { "@type": "Country", name: "United Arab Emirates" },
 ];
 
+// Lien de partage de la fiche Google Business Profile (hasMap et sameAs).
+// En attente de la valeur exacte fournie par Julien : null = rien publie.
+// Ne jamais y mettre une adresse devinee.
+export const GOOGLE_BUSINESS_MAP_URL: string | null = null;
+
+const OFFICIAL_PROFILES = [
+  "https://www.linkedin.com/showcase/mapa-property/",
+  "https://www.instagram.com/mapa_property",
+  "https://www.facebook.com/people/MAPA-Property/61559121213209/",
+];
+
 export const realEstateAgent = (locale: string) => ({
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
@@ -59,11 +70,8 @@ export const realEstateAgent = (locale: string) => ({
   address: ORGANIZATION_ADDRESS,
   knowsLanguage: ["fr", "en", "de"],
   areaServed: AREA_SERVED,
-  sameAs: [
-    "https://www.linkedin.com/showcase/mapa-property/",
-    "https://www.instagram.com/mapa_property",
-    "https://www.facebook.com/people/MAPA-Property/61559121213209/",
-  ],
+  ...(GOOGLE_BUSINESS_MAP_URL ? { hasMap: GOOGLE_BUSINESS_MAP_URL } : {}),
+  sameAs: GOOGLE_BUSINESS_MAP_URL ? [...OFFICIAL_PROFILES, GOOGLE_BUSINESS_MAP_URL] : OFFICIAL_PROFILES,
   founder: {
     "@type": "Person",
     name: "Julien Brebion",
