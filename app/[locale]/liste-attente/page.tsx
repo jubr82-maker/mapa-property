@@ -15,7 +15,9 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "waitlist_page" });
   return withSocial(locale, {
     title: `${t("title")}, MAPA Property`,
-    description: t("intro"),
+    // Meta description propre (oct. 2026), 155 caracteres au plus ; le
+    // paragraphe d'introduction affiche reste inchange.
+    description: t("meta_description"),
     alternates: pageAlternates(locale, "/liste-attente"),
   });
 }

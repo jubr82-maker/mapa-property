@@ -47,8 +47,8 @@ export async function generateMetadata({
   // meme titre aux trois langues.
   const tc = await getTranslations({ locale, namespace: "seo_pages" });
   return withSocial(locale, {
-    title: brandedTitle(tc("city.title", { city: cityName })),
-    description: city.metaDescription[loc],
+    title: brandedTitle(tc(city.country === "LU" ? "city.title" : "city.title_intl", { city: cityName })),
+    description: cityDescription(tc, city, cityName),
     alternates: pageAlternates(locale, `/villes/${city.slug}`),
   });
 }
@@ -103,14 +103,21 @@ function formatEuro(n: number): string {
 // etablissements (adresse fictive dans chaque commune). Desormais : une
 // page web qui parle d'un lieu, publiee par l'unique etablissement reel
 // (#organization, cf. lib/seo.ts).
-function buildJsonLd(city: City, locale: Locale) {
+// Titre et description Google d'une ville (oct. 2026) : agence immobiliere
+// au Luxembourg, broker immobilier a l'etranger. Rien d'invente sur la
+// ville (plus de "prestige" ni de prix dans la description).
+function cityDescription(tc: (k: string, v: Record<string, string>) => string, city: City, cityName: string): string {
+  return tc(city.country === "LU" ? "city.description" : "city.description_intl", { city: cityName });
+}
+
+function buildJsonLd(city: City, locale: Locale, description: string) {
   const url = `${SITE_URL}/${locale}/villes/${city.slug}`;
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
     url,
     name: city.name[locale],
-    description: city.metaDescription[locale],
+    description,
     inLanguage: locale,
     about: {
       "@type": "Place",
@@ -138,10 +145,11 @@ export default async function VillePage({
   // Biens publies de la commune (oct. 2026).
   const cityProperties = (await fetchAllPropertiesWithCover()).filter((p) => cityForPlace(p.city)?.slug === city.slug);
   const ts = await getTranslations({ locale, namespace: "searches_page" });
+  const tc = await getTranslations({ locale, namespace: "seo_pages" });
 
   return (
     <>
-      <JsonLd data={buildJsonLd(city, loc)} />
+      <JsonLd data={buildJsonLd(city, loc, cityDescription(tc, city, city.name[loc]))} />
       <PageBreadcrumb locale={locale} path={`/villes/${city.slug}`} current={city.name[loc]} />
       <main className="mx-auto max-w-3xl px-6 pt-32 pb-20 lg:px-10 lg:pt-40">
         <Link

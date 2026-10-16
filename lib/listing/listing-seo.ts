@@ -11,6 +11,7 @@ import { formatArea, formatMoney, parseTypeNoun, plural } from "@/lib/listing/la
 import type { ListingLang } from "@/lib/listing/listing-data";
 import { htmlToText, renderTemplate } from "@/lib/listing/template-engine";
 import { listingValues, type ListingColumns, type ListingVocab } from "@/lib/listing/generate";
+import { CHILD_TO_PARENT } from "@/lib/taxonomy/property-types";
 import type { ListingData } from "@/lib/listing/listing-data";
 
 export type ListingSeoVocab = {
@@ -105,14 +106,17 @@ export function propertyPath(p: SeoProperty, lang: ListingLang, types: Record<st
 }
 
 /**
- * Balise title : "{Type} {n} chambres {surface} m² a vendre a {localite} |
- * MAPA Property". Au-dela de 60 caracteres : la surface tombe d'abord,
- * puis la marque.
+ * Balise title : "{Type} {n} chambres {surface} m² a vendre a {localite},
+ * MAPA Property" (oct. 2026 : virgule comme partout sur le site). Au-dela
+ * de 60 caracteres : la surface tombe d'abord, puis les chambres ; la
+ * localite et la marque restent, puis le type general remplace le type
+ * precis. En dernier recours seulement, la marque tombe ; jamais la
+ * localite.
  */
 export function seoTitle(
   p: SeoProperty,
   lang: ListingLang,
-  ctx: { types: Record<string, string>; titleTx: { sale: string; rent: string }; seo: ListingSeoVocab; fallbackType?: string },
+  ctx: { types: Record<string, string>; titleTx: { sale: string; rent: string }; seo: ListingSeoVocab; fallbackType?: string; subtypes?: Record<string, string> },
 ): string {
   const surface = pos(p.living_surface) ? p.living_surface : pos(p.surface) ? p.surface : null;
   const values = {
@@ -123,11 +127,18 @@ export function seoTitle(
     commune: (p.city ?? "").trim(),
   };
   const render = (v: typeof values) => renderTemplate(ctx.seo.title, v).replace(/\s*\n\s*/g, " ").trim();
-  const full = render(values) + ctx.seo.brand;
-  if (full.length <= SEO_TITLE_MAX) return full;
-  const noSurface = render({ ...values, surface: "" });
-  if ((noSurface + ctx.seo.brand).length <= SEO_TITLE_MAX) return noSurface + ctx.seo.brand;
-  return noSurface;
+  // Dernier raccourci de la partie bien : type general (maison, appartement)
+  // au lieu du type precis (maison individuelle, duplex).
+  const parent = CHILD_TO_PARENT[p.property_type ?? ""];
+  const generalType = parent ? typeName(parent, lang, ctx.types, ctx.subtypes?.[parent]) : "";
+  const candidates = [
+    values,
+    { ...values, surface: "" },
+    { ...values, surface: "", chambres: "" },
+    ...(generalType ? [{ ...values, surface: "", chambres: "", type: generalType }] : []),
+  ].map(render);
+  for (const c of candidates) if ((c + ctx.seo.brand).length <= SEO_TITLE_MAX) return c + ctx.seo.brand;
+  return candidates[candidates.length - 1];
 }
 
 /** Corps de l'annonce et mentions communes, separes au premier paragraphe commun. */

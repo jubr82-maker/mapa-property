@@ -2,7 +2,7 @@
   "meta": {
     "site_name": "MAPA Property",
     "default_title": "MAPA Property, Luxembourg real estate agency & international broker",
-    "default_description": "Luxembourg real estate agency and international broker. Sales, rentals, off-market, trophy assets. Under mandate, within a framework, in your sole interest."
+    "default_description": "Luxembourg real estate agency and international broker. Sales, rentals, off-market, trophy assets. Under mandate, by the rules, in your sole interest."
   },
   "common": {
     "language": "Language",
@@ -573,7 +573,8 @@
     "success_text": "Your registration is confirmed. You will receive our new exclusive mandates 24 hours before they appear on listing portals.",
     "error": "An error occurred. Please check your information and try again.",
     "error_captcha": "Anti-spam verification failed. Please wait a few seconds and try again.",
-    "error_invalid": "The information provided is not valid. Please check all required fields."
+    "error_invalid": "The information provided is not valid. Please check all required fields.",
+    "meta_description": "Join the MAPA Property waiting list: new properties are presented to you 24 hours before they appear on listing portals, with the full details."
   },
   "offmarket": {
     "eyebrow": "Off-Market",
@@ -665,7 +666,8 @@
     "service_6": "Distribution on specialised property portals and international platforms",
     "excluded_1": "Professional Video Pack (paid option, deductible)",
     "when_title": "When to choose Exclusive",
-    "when_text": "You want to sell quickly, properly, and consistently. You appreciate having a single dedicated contact who defends your price and your privacy. Statistically the best-performing mandate, and the most cost-effective."
+    "when_text": "You want to sell quickly, properly, and consistently. You appreciate having a single dedicated contact who defends your price and your privacy. Statistically the best-performing mandate, and the most cost-effective.",
+    "meta_description": "MAPA Property's reference mandate. Maximum mutual commitment, full deployment of our commercial force and confidential channels, preferred rate."
   },
   "mandate_semi_exclusif": {
     "title": "Semi-Exclusive Mandate",
@@ -684,7 +686,8 @@
     "excluded_1": "Video Pack as standard (paid option)",
     "excluded_2": "Premium off-market distribution reserved for Exclusive",
     "when_title": "When to choose Semi-Exclusive",
-    "when_text": "You have a circle that may potentially present buyers (family, friends, neighbours, executives) and you want professional support without giving up that possibility. The balanced formula."
+    "when_text": "You have a circle that may potentially present buyers (family, friends, neighbours, executives) and you want professional support without giving up that possibility. The balanced formula.",
+    "meta_description": "You keep your private circle in hand, MAPA Property mobilises its channels. 4% excl. VAT (+ 17% VAT), renewable term from 2 months."
   },
   "mandate_simple": {
     "title": "Simple Mandate",
@@ -703,7 +706,8 @@
     "excluded_2": "Premium off-market distribution",
     "excluded_3": "Priority accompanied viewings",
     "when_title": "When to choose Simple",
-    "when_text": "Your property is highly sought-after and you want to maximise the number of channels active simultaneously, accepting that coordination will be less fluid. Statistically the least performing, but sometimes relevant."
+    "when_text": "Your property is highly sought-after and you want to maximise the number of channels active simultaneously, accepting that coordination will be less fluid. Statistically the least performing, but sometimes relevant.",
+    "meta_description": "For sought-after properties where multiple channels can run in parallel. 5% excl. VAT (+ 17% VAT), renewable term from 2 months."
   },
   "mandate_autonome": {
     "title": "Autonomous Mandate",
@@ -723,7 +727,8 @@
     "excluded_4": "Direct negotiation",
     "excluded_5": "Off-market distribution",
     "when_title": "When to choose Autonomous",
-    "when_text": "You want to handle the sale of your property yourself and keep control of every step? This mandate gives you that freedom. Our team remains available at any time should you wish to be supported."
+    "when_text": "You want to handle the sale of your property yourself and keep control of every step? This mandate gives you that freedom. Our team remains available at any time should you wish to be supported.",
+    "meta_description": "Autonomous mandate: you handle viewings and negotiation, MAPA Property provides legal and notarial backup. 1% excl. VAT (+ 17% VAT), from 2 months."
   },
   "mandate_recherche": {
     "title": "Search Mandate",
@@ -1099,7 +1104,8 @@
     "cta_button": "Book a meeting",
     "copyright": "Source: MAPA Property (https://www.mapaproperty.lu). © 2026. All rights reserved. Reproduction prohibited.",
     "coverage_eyebrow": "Where we operate",
-    "coverage_text": "MAPA Property is a Luxembourg real estate agency combined with an international broking practice. Within the Grand Duchy, we cover the whole territory, with a strong presence in the centre, the south and the west. Internationally, we support our clients on request, wherever their projects take them, working with partners we select one by one, to the same standards we hold ourselves to."
+    "coverage_text": "MAPA Property is a Luxembourg real estate agency combined with an international broking practice. Within the Grand Duchy, we cover the whole territory, with a strong presence in the centre, the south and the west. Internationally, we support our clients on request, wherever their projects take them, working with partners we select one by one, to the same standards we hold ourselves to.",
+    "meta_title": "Our real estate agency in Luxembourg, MAPA Property"
   },
   "contact_page": {
     "eyebrow": "Contact",
@@ -1171,7 +1177,7 @@
     "disclaimer": "This list reflects our regular coverage but is not restrictive: under mandate, we can operate in any city, region or country depending on the nature of your project and the availability of qualified, trusted local partners."
   },
   "mentions_acquisition": {
-    "meta_title": "Legal notice, real estate acquisition cost simulator | MAPA Property",
+    "meta_title": "Acquisition simulator notice, MAPA Property",
     "meta_description": "Legal information and limitations of the MAPA Property acquisition cost simulator.",
     "eyebrow": "Legal notice",
     "title": "Acquisition cost simulator, full legal notice",
@@ -1477,7 +1483,10 @@
       }
     },
     "city": {
-      "title": "{city}, prestige real estate"
+      "title": "Real estate agency in {city}",
+      "title_intl": "Property broker in {city}",
+      "description": "Real estate agency in {city}: selling, buying and renting houses and apartments, valuations and search mandates with MAPA Property.",
+      "description_intl": "Property in {city}: MAPA Property supports you as an international broker to buy or sell, with a single point of contact."
     },
     "yield": {
       "title": "Rental yield simulator",
@@ -3892,7 +3901,7 @@
       "eyebrow": "MAPA Property",
       "title": "Real estate agency in Luxembourg",
       "meta_title": "Real estate agency in Luxembourg",
-      "meta_description": "MAPA Property, a real estate agency in Luxembourg founded in 2023: sales, purchases, lettings and search mandates across the Grand Duchy, under signed mandate.",
+      "meta_description": "MAPA Property, a real estate agency in Luxembourg founded in 2023: sales, purchases, lettings and search mandates across the country, under signed mandate.",
       "service_name": "Real estate agency in Luxembourg",
       "answer": "MAPA Property is a Luxembourg real estate agency founded in 2023. It handles the sale, purchase and letting of properties across the whole Grand Duchy, with a strong presence in the centre, south and west of the country. The agency only works under a signed mandate, for a single interest at a time, and extends its work abroad as an international broker.",
       "faq_q1": "Where does MAPA Property operate in Luxembourg?",
@@ -4283,7 +4292,7 @@
     },
     "seo": {
       "title": "{{type}}[[ {{chambres}}]][[ {{surface}}]] {{a_vendre}}[[ in {{commune}}]]",
-      "brand": " | MAPA Property",
+      "brand": ", MAPA Property",
       "bedrooms": "1 bedroom|{n} bedrooms",
       "path_bedrooms": "{n} bedroom|{n} bedrooms",
       "common_start": [
@@ -4629,7 +4638,9 @@
       "fonds-de-commerce": "Business for sale",
       "garage": "Garage"
     },
-    "city_properties_title": "Our properties in {city}"
+    "city_properties_title": "Our properties in {city}",
+    "meta_description_short": "Wanted: {type} {communes}, budget {budget}. Reference {reference}. Contact MAPA Property in confidence.",
+    "meta_communes_more": "in {communes} and {n} other municipalities"
   },
   "admin_searches": {
     "eyebrow": "Management",

@@ -573,7 +573,8 @@
     "success_text": "Votre inscription est enregistrée. Vous recevrez nos nouveaux mandats exclusifs 24 heures avant leur publication sur les portails d'annonces.",
     "error": "Une erreur est survenue. Vérifiez vos informations et réessayez.",
     "error_captcha": "La vérification anti-spam a échoué. Patientez quelques secondes puis réessayez.",
-    "error_invalid": "Les informations saisies ne sont pas valides. Vérifiez tous les champs obligatoires."
+    "error_invalid": "Les informations saisies ne sont pas valides. Vérifiez tous les champs obligatoires.",
+    "meta_description": "Rejoignez la liste d'attente MAPA Property : les nouveaux biens vous sont présentés 24 heures avant leur diffusion sur les portails, en détail."
   },
   "offmarket": {
     "eyebrow": "Off-Market",
@@ -665,7 +666,8 @@
     "service_6": "Diffusion sur les portails immobiliers spécialisés et plateformes internationales",
     "excluded_1": "Pack Vidéo professionnel (option payante, déductible)",
     "when_title": "Quand choisir l'Exclusif",
-    "when_text": "Vous voulez vendre vite, bien, et dans la cohérence. Vous appréciez d'avoir un seul interlocuteur dédié, qui défend votre prix et votre confidentialité. C'est le mandat le plus performant statistiquement, et le plus avantageux financièrement."
+    "when_text": "Vous voulez vendre vite, bien, et dans la cohérence. Vous appréciez d'avoir un seul interlocuteur dédié, qui défend votre prix et votre confidentialité. C'est le mandat le plus performant statistiquement, et le plus avantageux financièrement.",
+    "meta_description": "Le mandat de référence MAPA Property : engagement réciproque, toute notre force commerciale et nos canaux confidentiels, au taux préférentiel."
   },
   "mandate_semi_exclusif": {
     "title": "Mandat Semi-Exclusif",
@@ -684,7 +686,8 @@
     "excluded_1": "Pack Vidéo en standard (option payante)",
     "excluded_2": "Diffusion off-market premium des biens exclusifs",
     "when_title": "Quand choisir le Semi-Exclusif",
-    "when_text": "Vous avez un cercle qui peut potentiellement présenter des acquéreurs (famille, amis, voisins, dirigeants), et vous souhaitez bénéficier d'un appui professionnel sans renoncer à cette possibilité. La formule équilibrée."
+    "when_text": "Vous avez un cercle qui peut potentiellement présenter des acquéreurs (famille, amis, voisins, dirigeants), et vous souhaitez bénéficier d'un appui professionnel sans renoncer à cette possibilité. La formule équilibrée.",
+    "meta_description": "Mandat semi-exclusif : vous gardez votre cercle privé, MAPA Property mobilise ses canaux. 4% HT (+ 17% TVA), durée à partir de 2 mois reconductibles."
   },
   "mandate_simple": {
     "title": "Mandat Simple",
@@ -703,7 +706,8 @@
     "excluded_2": "Diffusion off-market premium",
     "excluded_3": "Visites accompagnées prioritaires",
     "when_title": "Quand choisir le Simple",
-    "when_text": "Votre bien est très recherché et vous voulez maximiser le nombre de canaux actifs simultanément, en acceptant que la coordination soit moins fluide. Statistiquement le moins performant, mais parfois pertinent."
+    "when_text": "Votre bien est très recherché et vous voulez maximiser le nombre de canaux actifs simultanément, en acceptant que la coordination soit moins fluide. Statistiquement le moins performant, mais parfois pertinent.",
+    "meta_description": "Mandat simple : plusieurs agences peuvent vendre votre bien en parallèle. 5% HT (+ 17% TVA), durée à partir de 2 mois reconductibles."
   },
   "mandate_autonome": {
     "title": "Mandat Autonome",
@@ -723,7 +727,8 @@
     "excluded_4": "Négociation directe",
     "excluded_5": "Diffusion off-market",
     "when_title": "Quand choisir l'Autonome",
-    "when_text": "Vous souhaitez gérer vous-même la vente de votre bien et garder la main sur chaque étape ? Ce mandat vous en laisse la liberté. Nos équipes restent disponibles si vous souhaitez, à tout moment, être accompagné."
+    "when_text": "Vous souhaitez gérer vous-même la vente de votre bien et garder la main sur chaque étape ? Ce mandat vous en laisse la liberté. Nos équipes restent disponibles si vous souhaitez, à tout moment, être accompagné.",
+    "meta_description": "Mandat autonome : vous gérez visites et négociation, MAPA Property assure le suivi juridique et notarial. 1% HT (+ 17% TVA), dès 2 mois reconductibles."
   },
   "mandate_recherche": {
     "title": "Mandat de Recherche",
@@ -1099,7 +1104,8 @@
     "cta_button": "Prendre rendez-vous",
     "copyright": "Source : MAPA Property (https://www.mapaproperty.lu). © 2026. Tous droits réservés. Toute reproduction interdite.",
     "coverage_eyebrow": "Où nous intervenons",
-    "coverage_text": "MAPA Property est une agence immobilière luxembourgeoise doublée d'une activité de broker international. Au Grand-Duché, nous couvrons l'ensemble du territoire, avec une présence forte sur le centre, le sud et l'ouest. À l'international, nous accompagnons nos clients sur demande, partout où leurs projets l'exigent, en nous appuyant sur des partenaires choisis un par un, selon les exigences que nous nous imposons à nous-mêmes."
+    "coverage_text": "MAPA Property est une agence immobilière luxembourgeoise doublée d'une activité de broker international. Au Grand-Duché, nous couvrons l'ensemble du territoire, avec une présence forte sur le centre, le sud et l'ouest. À l'international, nous accompagnons nos clients sur demande, partout où leurs projets l'exigent, en nous appuyant sur des partenaires choisis un par un, selon les exigences que nous nous imposons à nous-mêmes.",
+    "meta_title": "Notre agence immobilière au Luxembourg, MAPA Property"
   },
   "contact_page": {
     "eyebrow": "Contact",
@@ -1171,7 +1177,7 @@
     "disclaimer": "Cette liste reflète notre couverture régulière mais elle n'est pas restrictive : sous mandat, nous pouvons intervenir sur toute ville, région ou pays selon la nature de votre projet et la disponibilité de partenaires locaux qualifiés et de confiance."
   },
   "mentions_acquisition": {
-    "meta_title": "Mentions légales, simulateur d'acquisition immobilière | MAPA Property",
+    "meta_title": "Mentions du simulateur d'acquisition, MAPA Property",
     "meta_description": "Informations légales et limites du simulateur de coûts d'acquisition MAPA Property.",
     "eyebrow": "Mentions légales",
     "title": "Simulateur de coûts d'acquisition, mentions légales complètes",
@@ -1477,15 +1483,18 @@
       }
     },
     "city": {
-      "title": "{city}, immobilier de prestige"
+      "title": "Agence immobilière à {city}",
+      "title_intl": "Broker immobilier à {city}",
+      "description": "Agence immobilière à {city} : vente, achat et location de maisons et d'appartements, estimation et mandat de recherche avec MAPA Property.",
+      "description_intl": "Immobilier à {city} : MAPA Property vous accompagne comme broker international pour acheter ou vendre, avec un seul interlocuteur."
     },
     "yield": {
       "title": "Simulateur de rendement locatif",
-      "description": "Calculez le rendement brut et net d'un investissement locatif au Luxembourg : prix, loyer, charges et frais d'acquisition, dans le respect du plafond légal des loyers."
+      "description": "Calculez le rendement brut et net d'un investissement locatif au Luxembourg : prix, loyer, charges, frais d'acquisition et plafond légal des loyers."
     },
     "searches": {
       "title": "Nos recherches en cours au Luxembourg, MAPA Property",
-      "description": "Les biens que recherchent les clients de MAPA Property au Luxembourg : type, communes, budget en fourchette et critères. Propriétaire d'un bien qui correspond ? Contactez-nous."
+      "description": "Les biens que recherchent les clients de MAPA Property au Luxembourg : type, communes, budget et critères. Votre bien correspond ? Contactez-nous."
     },
     "services": {
       "title": "Nos services immobiliers au Luxembourg, MAPA Property",
@@ -3924,7 +3933,7 @@
     },
     "sell": {
       "meta_title": "Vendre un bien immobilier au Luxembourg",
-      "meta_description": "Vendre au Luxembourg avec MAPA Property : estimation, quatre mandats de vente de 1 % à 5 % hors TVA, commercialisation, négociation et suivi jusqu'à l'acte.",
+      "meta_description": "Vendre au Luxembourg avec MAPA Property : estimation, quatre mandats de 1 % à 5 % hors TVA, commercialisation, négociation et suivi jusqu'à l'acte.",
       "service_name": "Vente de biens immobiliers au Luxembourg",
       "answer": "Pour vendre votre bien au Luxembourg avec MAPA Property, vous commencez par une estimation, puis vous choisissez l'un des quatre mandats de vente : exclusif (3 % hors TVA du prix net vendeur), semi-exclusif (4 %), simple (5 %) ou autonome (1 %). L'agence assure ensuite la commercialisation, la sélection des acquéreurs, la négociation et le suivi jusqu'à l'acte notarié.",
       "faq_q1": "Quel mandat de vente choisir ?",
@@ -3938,7 +3947,7 @@
     },
     "rent": {
       "meta_title": "Louer un bien immobilier au Luxembourg",
-      "meta_description": "Louer au Luxembourg avec MAPA Property : trouver une location, mettre votre bien en location ou confier sa gestion, dans le respect du plafond légal de 5 %.",
+      "meta_description": "Louer au Luxembourg avec MAPA Property : trouver une location, louer votre bien ou confier sa gestion, dans le respect du plafond légal de 5 %.",
       "service_name": "Location et gestion locative au Luxembourg",
       "answer": "MAPA Property vous accompagne pour louer au Luxembourg dans les deux sens : trouver une location parmi les biens publiés, ou mettre votre bien en location avec sélection des locataires et bail conforme, et une gestion locative en option. Le loyer respecte toujours le plafond légal luxembourgeois de 5 % du capital investi par an.",
       "faq_q1": "Quels sont les honoraires de mise en location ?",
@@ -3952,7 +3961,7 @@
     },
     "search": {
       "meta_title": "Mandat de recherche immobilière au Luxembourg",
-      "meta_description": "Mandat de recherche MAPA Property : l'agence trouve votre bien au Luxembourg ou à l'étranger et défend vos seuls intérêts. Honoraires de 3 % à 5 % hors TVA.",
+      "meta_description": "Mandat de recherche MAPA Property : l'agence trouve votre bien au Luxembourg ou à l'étranger et défend vos seuls intérêts. Honoraires 3 % à 5 % hors TVA.",
       "service_name": "Mandat de recherche immobilière",
       "answer": "Le mandat de recherche confie à MAPA Property la mission de trouver le bien que vous cherchez et de piloter son acquisition, au Luxembourg ou à l'étranger. L'agence ne défend que vos intérêts d'acquéreur. Au Luxembourg, ses honoraires sont de 3 % à 5 % hors TVA du prix d'acquisition, avec une avance sur frais de 250 euros hors TVA, déduite des honoraires si l'achat se conclut.",
       "faq_q1": "Combien coûte un mandat de recherche ?",
@@ -3968,7 +3977,7 @@
       "eyebrow": "International",
       "title": "Broker immobilier international",
       "meta_title": "Broker immobilier international depuis le Luxembourg",
-      "meta_description": "MAPA Property, broker immobilier international : carte professionnelle européenne pour la France, l'Allemagne et l'Italie, agences locales habilitées ailleurs.",
+      "meta_description": "MAPA Property, broker immobilier international : carte professionnelle européenne pour la France, l'Allemagne et l'Italie, agences habilitées ailleurs.",
       "service_name": "Broker immobilier international",
       "answer": "MAPA Property agit comme broker immobilier international pour les clients qui achètent ou vendent hors du Luxembourg. L'agence détient la carte professionnelle européenne d'agent immobilier, qui lui permet d'intervenir sur des biens situés en France, en Allemagne et en Italie. Ailleurs, les actes réglementés sont réalisés par une agence locale habilitée qu'elle sélectionne, et MAPA Property reste votre interlocuteur unique jusqu'à la signature.",
       "faq_q1": "Que fait un broker immobilier international ?",
@@ -4283,7 +4292,7 @@
     },
     "seo": {
       "title": "{{type}}[[ {{chambres}}]][[ {{surface}}]] {{a_vendre}}[[ à {{commune}}]]",
-      "brand": " | MAPA Property",
+      "brand": ", MAPA Property",
       "bedrooms": "1 chambre|{n} chambres",
       "path_bedrooms": "{n} chambre|{n} chambres",
       "common_start": [
@@ -4629,7 +4638,9 @@
       "fonds-de-commerce": "Fonds de commerce",
       "garage": "Garage"
     },
-    "city_properties_title": "Nos biens à {city}"
+    "city_properties_title": "Nos biens à {city}",
+    "meta_description_short": "Recherche : {type} {communes}, budget {budget}. Référence {reference}. Contactez MAPA Property en toute confidentialité.",
+    "meta_communes_more": "à {communes} et {n} autres communes"
   },
   "admin_searches": {
     "eyebrow": "Gestion",

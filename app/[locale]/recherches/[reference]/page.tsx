@@ -32,12 +32,28 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const t = await getTranslations({ locale, namespace: "searches_page" });
   const tr = (k: string, v?: Record<string, string | number>) => t(k, v);
   const title = localizedText(s, "title", locale) || s.reference;
-  const description = t("meta_description", {
-    type: t(`type.${s.property_type}`),
-    communes: s.communes.length ? t("meta_communes", { communes: s.communes.join(", ") }) : "",
-    budget: budgetLabel(s, locale, tr),
-    reference: s.reference,
-  }).replace(/\s+,/g, ",").replace(/\s{2,}/g, " ");
+  // 155 caracteres au plus (oct. 2026), sans "..." : phrase de fin plus
+  // courte, puis communes resumees ("et 3 autres communes").
+  const communesText = (k: number) =>
+    !s.communes.length
+      ? ""
+      : k >= s.communes.length
+        ? t("meta_communes", { communes: s.communes.join(", ") })
+        : t("meta_communes_more", { communes: s.communes.slice(0, k).join(", "), n: s.communes.length - k });
+  const build = (key: "meta_description" | "meta_description_short", k: number) =>
+    t(key, { type: t(`type.${s.property_type}`), communes: communesText(k), budget: budgetLabel(s, locale, tr), reference: s.reference })
+      .replace(/\s+,/g, ",")
+      .replace(/\s{2,}/g, " ");
+  let description = build("meta_description_short", 1);
+  search: for (const key of ["meta_description", "meta_description_short"] as const) {
+    for (let k = Math.max(s.communes.length, 1); k >= 1; k--) {
+      const d = build(key, k);
+      if (d.length <= 155) {
+        description = d;
+        break search;
+      }
+    }
+  }
   return buildPageMetadata(locale, `/recherches/${s.reference}`, brandedTitle(title), description);
 }
 

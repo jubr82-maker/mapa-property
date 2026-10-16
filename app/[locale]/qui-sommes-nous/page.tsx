@@ -19,7 +19,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "about_page" });
   return withSocial(locale, {
-    title: `${t("title")}, MAPA Property`,
+    // Titre Google descriptif (oct. 2026) ; le slogan reste le titre visible.
+    title: t("meta_title"),
     description: t("intro"),
     alternates: pageAlternates(locale, "/qui-sommes-nous"),
   });

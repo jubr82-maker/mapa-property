@@ -31,7 +31,9 @@ export async function generateMetadata({
   });
   return withSocial(locale, {
     title: `${t("title")}, MAPA Property`,
-    description: t("intro"),
+    // Meta description propre (oct. 2026), 155 caracteres au plus ; le
+    // texte d'introduction affiche reste inchange.
+    description: t("meta_description"),
     alternates: pageAlternates(locale, `/mandats/${type}`),
   });
 }

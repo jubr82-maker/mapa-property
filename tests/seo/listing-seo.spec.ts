@@ -46,23 +46,28 @@ function steinfortHtml(l: Lang) {
   return generateListing(cols as never, d, l, c.model, c.model.vocab).html;
 }
 
-test("title : modele sans qualificatif, 60 caracteres vises, surface puis marque retirees", () => {
+test("title : modele sans qualificatif, 60 caracteres au plus, \", MAPA Property\" garde, jamais la localite retiree", () => {
   for (const l of ["fr", "en", "de"] as const) {
     const c = ctx(l);
     const t = seoTitle(steinfort, l, c);
     expect(t.length).toBeLessThanOrEqual(SEO_TITLE_MAX);
     expect(t.toLowerCase()).not.toContain(l === "fr" ? "superbe" : l === "en" ? "superb" : "schön");
   }
-  expect(seoTitle(steinfort, "fr", ctx("fr"))).toBe("Appartement duplex 2 chambres à vendre à Steinfort");
+  expect(seoTitle(steinfort, "fr", ctx("fr"))).toBe("Appartement duplex à vendre à Steinfort, MAPA Property");
   const short = { ...steinfort, property_type: "villa", bedrooms: 4, city: "Mamer" };
-  expect(seoTitle(short, "fr", ctx("fr"))).toBe("Villa 4 chambres 115 m² à vendre à Mamer | MAPA Property");
+  expect(seoTitle(short, "fr", ctx("fr"))).toBe("Villa 4 chambres 115 m² à vendre à Mamer, MAPA Property");
   const mid = { ...steinfort, property_type: "maison-individuelle", bedrooms: 4, city: "Bertrange" };
-  // 66 caracteres avec la marque : surface retiree, puis marque retiree.
-  expect(seoTitle(mid, "fr", ctx("fr"))).toBe("Maison individuelle 4 chambres à vendre à Bertrange");
+  // Trop long avec la marque : surface puis chambres retirees, marque gardee.
+  expect(seoTitle(mid, "fr", ctx("fr"))).toBe("Maison individuelle à vendre à Bertrange, MAPA Property");
+  // Localite longue : type general (Maison) plutot que retirer la marque.
+  const long = { ...steinfort, property_type: "maison-individuelle", bedrooms: 5, city: "Esch-sur-Alzette" };
+  expect(seoTitle(long, "fr", ctx("fr"))).toBe("Maison à vendre à Esch-sur-Alzette, MAPA Property");
+  expect(seoTitle(long, "de", ctx("de"))).toBe("Haus zu verkaufen in Esch-sur-Alzette, MAPA Property");
   const rent = { ...steinfort, property_type: "appartement", transaction: "rent", bedrooms: 1, surface: 55, living_surface: 55, city: "Hesperange" };
-  expect(seoTitle(rent, "fr", ctx("fr"))).toBe("Appartement 1 chambre à louer à Hesperange | MAPA Property");
+  expect(seoTitle(rent, "fr", ctx("fr"))).toBe("Appartement 1 chambre à louer à Hesperange, MAPA Property");
   const empty = { ...steinfort, property_type: "terrain", bedrooms: null, surface: null, living_surface: null, city: null };
-  expect(seoTitle(empty, "fr", ctx("fr"))).toBe("Terrain à vendre | MAPA Property");
+  expect(seoTitle(empty, "fr", ctx("fr"))).toBe("Terrain à vendre, MAPA Property");
+  for (const l of ["fr", "en", "de"] as const) expect(ctx(l).seo.brand).toBe(", MAPA Property");
 });
 
 // Donnees de modele du duplex (atout saisi, annees, mandat exclusif).

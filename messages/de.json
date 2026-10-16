@@ -2,7 +2,7 @@
   "meta": {
     "site_name": "MAPA Property",
     "default_title": "MAPA Property, Luxemburger Immobilienagentur & internationaler Broker",
-    "default_description": "Luxemburger Immobilienagentur und internationaler Broker. Verkauf, Vermietung, Off-Market, Trophy Assets. Unter Mandat, im Rahmen, in Ihrem ausschließlichen Interesse."
+    "default_description": "Luxemburger Immobilienagentur und internationaler Broker. Verkauf, Vermietung, Off-Market, Trophy Assets. Unter Mandat, im Rahmen, in Ihrem Interesse."
   },
   "common": {
     "language": "Sprache",
@@ -573,7 +573,8 @@
     "success_text": "Ihre Registrierung ist bestätigt. Sie erhalten unsere neuen exklusiven Mandate 24 Stunden vor Veröffentlichung auf den Immobilienportalen.",
     "error": "Ein Fehler ist aufgetreten. Bitte überprüfen Sie Ihre Angaben und versuchen Sie es erneut.",
     "error_captcha": "Spam-Prüfung fehlgeschlagen. Bitte warten Sie einige Sekunden und versuchen Sie es erneut.",
-    "error_invalid": "Die eingegebenen Informationen sind ungültig. Bitte alle Pflichtfelder prüfen."
+    "error_invalid": "Die eingegebenen Informationen sind ungültig. Bitte alle Pflichtfelder prüfen.",
+    "meta_description": "Tragen Sie sich in die Warteliste von MAPA Property ein: Neue Objekte erhalten Sie 24 Stunden vor der Veröffentlichung auf den Portalen, mit allen Details."
   },
   "offmarket": {
     "eyebrow": "Off-Market",
@@ -665,7 +666,8 @@
     "service_6": "Verbreitung auf spezialisierten Immobilienportalen und internationalen Plattformen",
     "excluded_1": "Professionelles Video-Paket (kostenpflichtige Option, anrechenbar)",
     "when_title": "Wann das Exklusivmandat wählen",
-    "when_text": "Sie möchten schnell, ordentlich und konsistent verkaufen. Sie schätzen einen einzigen, dedizierten Ansprechpartner, der Ihren Preis und Ihre Diskretion verteidigt. Statistisch das leistungsfähigste Mandat, und das wirtschaftlichste."
+    "when_text": "Sie möchten schnell, ordentlich und konsistent verkaufen. Sie schätzen einen einzigen, dedizierten Ansprechpartner, der Ihren Preis und Ihre Diskretion verteidigt. Statistisch das leistungsfähigste Mandat, und das wirtschaftlichste.",
+    "meta_description": "Das Referenzmandat von MAPA Property: gegenseitiges Engagement, unsere gesamte Vermarktung und vertrauliche Kanäle, zu Vorzugskonditionen."
   },
   "mandate_semi_exclusif": {
     "title": "Halb-Exklusivmandat",
@@ -684,7 +686,8 @@
     "excluded_1": "Videopaket als Standard (kostenpflichtige Option)",
     "excluded_2": "Premium-Off-Market-Verteilung Exklusiv vorbehalten",
     "when_title": "Wann Halb-Exklusiv wählen",
-    "when_text": "Sie haben einen Kreis, der potentielle Käufer vorstellen kann (Familie, Freunde, Nachbarn, Führungskräfte), und möchten professionelle Unterstützung, ohne darauf zu verzichten. Die ausgewogene Formel."
+    "when_text": "Sie haben einen Kreis, der potentielle Käufer vorstellen kann (Familie, Freunde, Nachbarn, Führungskräfte), und möchten professionelle Unterstützung, ohne darauf zu verzichten. Die ausgewogene Formel.",
+    "meta_description": "Sie behalten Ihren privaten Kreis in der Hand, MAPA Property mobilisiert seine Kanäle. 4% zzgl. MwSt. (+ 17% MwSt.), Laufzeit ab 2 Monaten, verlängerbar."
   },
   "mandate_simple": {
     "title": "Einfaches Mandat",
@@ -703,7 +706,8 @@
     "excluded_2": "Premium-Off-Market-Verteilung",
     "excluded_3": "Vorrangige begleitete Besichtigungen",
     "when_title": "Wann Einfach wählen",
-    "when_text": "Ihr Objekt ist sehr gefragt und Sie möchten möglichst viele Kanäle gleichzeitig aktivieren, wobei die Koordination weniger fließend ist. Statistisch am wenigsten leistungsstark, aber manchmal sinnvoll."
+    "when_text": "Ihr Objekt ist sehr gefragt und Sie möchten möglichst viele Kanäle gleichzeitig aktivieren, wobei die Koordination weniger fließend ist. Statistisch am wenigsten leistungsstark, aber manchmal sinnvoll.",
+    "meta_description": "Für gefragte Objekte, bei denen mehrere Kanäle parallel laufen können. 5% zzgl. MwSt. (+ 17% MwSt.), Laufzeit ab 2 Monaten, verlängerbar."
   },
   "mandate_autonome": {
     "title": "Autonomes Mandat",
@@ -723,7 +727,8 @@
     "excluded_4": "Direkte Verhandlung",
     "excluded_5": "Off-Market-Verteilung",
     "when_title": "Wann Autonom wählen",
-    "when_text": "Sie möchten den Verkauf Ihres Objekts selbst in die Hand nehmen und jeden Schritt kontrollieren? Dieses Mandat lässt Ihnen diese Freiheit. Unser Team steht Ihnen jederzeit zur Verfügung, falls Sie Begleitung wünschen."
+    "when_text": "Sie möchten den Verkauf Ihres Objekts selbst in die Hand nehmen und jeden Schritt kontrollieren? Dieses Mandat lässt Ihnen diese Freiheit. Unser Team steht Ihnen jederzeit zur Verfügung, falls Sie Begleitung wünschen.",
+    "meta_description": "Autonomes Mandat: Sie führen Besichtigungen und Verhandlungen selbst, MAPA Property sichert Recht und Notar ab. 1% zzgl. MwSt. (+ 17% MwSt.), ab 2 Monaten."
   },
   "mandate_recherche": {
     "title": "Suchmandat",
@@ -1099,7 +1104,8 @@
     "cta_button": "Termin vereinbaren",
     "copyright": "Quelle: MAPA Property (https://www.mapaproperty.lu). © 2026. Alle Rechte vorbehalten. Vervielfältigung untersagt.",
     "coverage_eyebrow": "Wo wir tätig sind",
-    "coverage_text": "MAPA Property ist eine luxemburgische Immobilienagentur mit einer zusätzlichen Tätigkeit als internationaler Broker. Im Großherzogtum decken wir das gesamte Staatsgebiet ab, mit starker Präsenz im Zentrum, im Süden und im Westen. International begleiten wir unsere Kunden auf Anfrage, überall dort, wo ihre Vorhaben es erfordern, gestützt auf Partner, die wir einzeln auswählen, nach denselben Ansprüchen, die wir uns selbst auferlegen."
+    "coverage_text": "MAPA Property ist eine luxemburgische Immobilienagentur mit einer zusätzlichen Tätigkeit als internationaler Broker. Im Großherzogtum decken wir das gesamte Staatsgebiet ab, mit starker Präsenz im Zentrum, im Süden und im Westen. International begleiten wir unsere Kunden auf Anfrage, überall dort, wo ihre Vorhaben es erfordern, gestützt auf Partner, die wir einzeln auswählen, nach denselben Ansprüchen, die wir uns selbst auferlegen.",
+    "meta_title": "Unsere Immobilienagentur in Luxemburg, MAPA Property"
   },
   "contact_page": {
     "eyebrow": "Kontakt",
@@ -1171,7 +1177,7 @@
     "disclaimer": "Diese Liste spiegelt unsere regelmäßige Abdeckung wider, ist aber nicht abschließend: unter Mandat können wir in jeder Stadt, Region oder Land tätig werden, je nach Projekt und Verfügbarkeit qualifizierter und vertrauenswürdiger lokaler Partner."
   },
   "mentions_acquisition": {
-    "meta_title": "Rechtliche Hinweise, Immobilien-Erwerbskostenrechner | MAPA Property",
+    "meta_title": "Hinweise zum Erwerbskostenrechner, MAPA Property",
     "meta_description": "Rechtliche Informationen und Grenzen des Erwerbskostenrechners von MAPA Property.",
     "eyebrow": "Rechtliche Hinweise",
     "title": "Erwerbskostenrechner, vollständige rechtliche Hinweise",
@@ -1477,15 +1483,18 @@
       }
     },
     "city": {
-      "title": "{city}, Prestige-Immobilien"
+      "title": "Immobilienagentur in {city}",
+      "title_intl": "Immobilienbroker in {city}",
+      "description": "Immobilienagentur in {city}: Verkauf, Kauf und Vermietung von Häusern und Wohnungen, Bewertung und Suchauftrag mit MAPA Property.",
+      "description_intl": "Immobilien in {city}: MAPA Property begleitet Sie als internationaler Broker beim Kauf oder Verkauf, mit einem einzigen Ansprechpartner."
     },
     "yield": {
       "title": "Mietrendite-Rechner",
-      "description": "Berechnen Sie die Brutto- und Nettorendite einer Mietinvestition in Luxemburg: Preis, Miete, Nebenkosten und Erwerbskosten, unter Beachtung der gesetzlichen Mietobergrenze."
+      "description": "Berechnen Sie Brutto- und Nettorendite einer Mietinvestition in Luxemburg: Preis, Miete, Nebenkosten, Erwerbskosten und gesetzliche Mietobergrenze."
     },
     "searches": {
       "title": "Unsere aktuellen Immobiliensuchen in Luxemburg, MAPA Property",
-      "description": "Die Immobilien, die Kunden von MAPA Property in Luxemburg suchen: Art, Gemeinden, Budgetspanne und Kriterien. Sie besitzen eine passende Immobilie? Kontaktieren Sie uns."
+      "description": "Immobilien, die Kunden von MAPA Property in Luxemburg suchen: Art, Gemeinden, Budget und Kriterien. Ihre Immobilie passt? Kontaktieren Sie uns."
     },
     "services": {
       "title": "Unsere Immobilienleistungen in Luxemburg, MAPA Property",
@@ -3892,7 +3901,7 @@
       "eyebrow": "MAPA Property",
       "title": "Immobilienagentur in Luxemburg",
       "meta_title": "Immobilienagentur in Luxemburg",
-      "meta_description": "MAPA Property, Immobilienagentur in Luxemburg, gegründet 2023: Verkauf, Kauf, Vermietung und Suchauftrag im ganzen Großherzogtum, mit unterzeichnetem Mandat.",
+      "meta_description": "MAPA Property, Immobilienagentur in Luxemburg, gegründet 2023: Verkauf, Kauf, Vermietung und Suchauftrag im ganzen Land, mit unterzeichnetem Mandat.",
       "service_name": "Immobilienagentur in Luxemburg",
       "answer": "MAPA Property ist eine 2023 gegründete Luxemburger Immobilienagentur. Sie begleitet Verkauf, Kauf und Vermietung von Immobilien im ganzen Großherzogtum, mit starker Präsenz im Zentrum, im Süden und im Westen des Landes. Die Agentur arbeitet ausschließlich mit unterzeichnetem Mandat, für jeweils nur ein Interesse, und ist im Ausland als internationaler Broker tätig.",
       "faq_q1": "Wo ist MAPA Property in Luxemburg tätig?",
@@ -3924,7 +3933,7 @@
     },
     "sell": {
       "meta_title": "Immobilie in Luxemburg verkaufen",
-      "meta_description": "Verkaufen in Luxemburg mit MAPA Property: Bewertung, vier Verkaufsmandate von 1 % bis 5 % zzgl. MwSt., Vermarktung, Verhandlung und Begleitung bis zur Urkunde.",
+      "meta_description": "Verkaufen in Luxemburg mit MAPA Property: Bewertung, vier Mandate von 1 % bis 5 % zzgl. MwSt., Vermarktung, Verhandlung und Begleitung bis zur Urkunde.",
       "service_name": "Immobilienverkauf in Luxemburg",
       "answer": "Um Ihre Immobilie in Luxemburg mit MAPA Property zu verkaufen, beginnen Sie mit einer Bewertung und wählen dann eines der vier Verkaufsmandate: Alleinauftrag (3 % zzgl. MwSt. des Nettoverkaufspreises), halbexklusiv (4 %), einfach (5 %) oder autonom (1 %). Die Agentur übernimmt anschließend Vermarktung, Käuferauswahl, Verhandlung und Begleitung bis zur notariellen Urkunde.",
       "faq_q1": "Welches Verkaufsmandat soll ich wählen?",
@@ -3968,7 +3977,7 @@
       "eyebrow": "International",
       "title": "Internationaler Immobilienbroker",
       "meta_title": "Internationaler Immobilienbroker mit Sitz in Luxemburg",
-      "meta_description": "MAPA Property, internationaler Immobilienbroker: Europäischer Berufsausweis für Frankreich, Deutschland und Italien, zugelassene lokale Agenturen andernorts.",
+      "meta_description": "MAPA Property, internationaler Immobilienbroker: Europäischer Berufsausweis für Frankreich, Deutschland und Italien, zugelassene Agenturen andernorts.",
       "service_name": "Internationaler Immobilienbroker",
       "answer": "MAPA Property ist als internationaler Immobilienbroker für Kunden tätig, die außerhalb Luxemburgs kaufen oder verkaufen. Die Agentur besitzt den Europäischen Berufsausweis für Immobilienmakler, der es ihr erlaubt, bei Immobilien in Frankreich, Deutschland und Italien tätig zu werden. Andernorts werden die reglementierten Tätigkeiten von einer zugelassenen lokalen Agentur ausgeführt, die sie auswählt, und MAPA Property bleibt bis zur Unterzeichnung Ihr einziger Ansprechpartner.",
       "faq_q1": "Was macht ein internationaler Immobilienbroker?",
@@ -4283,7 +4292,7 @@
     },
     "seo": {
       "title": "{{type}}[[ {{chambres}}]][[ {{surface}}]] {{a_vendre}}[[ in {{commune}}]]",
-      "brand": " | MAPA Property",
+      "brand": ", MAPA Property",
       "bedrooms": "1 Schlafzimmer|{n} Schlafzimmer",
       "path_bedrooms": "{n} Schlafzimmer|{n} Schlafzimmer",
       "common_start": [
@@ -4629,7 +4638,9 @@
       "fonds-de-commerce": "Geschäftsübernahme",
       "garage": "Garage"
     },
-    "city_properties_title": "Unsere Immobilien in {city}"
+    "city_properties_title": "Unsere Immobilien in {city}",
+    "meta_description_short": "Gesucht: {type} {communes}, Budget {budget}. Referenz {reference}. Kontaktieren Sie MAPA Property vertraulich.",
+    "meta_communes_more": "in {communes} und {n} weiteren Gemeinden"
   },
   "admin_searches": {
     "eyebrow": "Verwaltung",
