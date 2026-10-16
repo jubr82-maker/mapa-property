@@ -1,7 +1,7 @@
 {
   "meta": {
     "site_name": "MAPA Property",
-    "default_title": "MAPA Property, Luxembourg real estate agency & international broker",
+    "default_title": "MAPA Property, real estate agency and broker in Luxembourg",
     "default_description": "Luxembourg real estate agency and international broker. Sales, rentals, off-market, trophy assets. Under mandate, by the rules, in your sole interest."
   },
   "common": {
@@ -1486,7 +1486,9 @@
       "title": "Real estate agency in {city}",
       "title_intl": "Property broker in {city}",
       "description": "Real estate agency in {city}: selling, buying and renting houses and apartments, valuations and search mandates with MAPA Property.",
-      "description_intl": "Property in {city}: MAPA Property supports you as an international broker to buy or sell, with a single point of contact."
+      "description_intl": "Property in {city}: MAPA Property supports you as an international broker to buy or sell, with a single point of contact.",
+      "h1_prefix": "Real estate agency in",
+      "h1_prefix_intl": "Property broker in"
     },
     "yield": {
       "title": "Rental yield simulator",

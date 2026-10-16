@@ -164,7 +164,13 @@ export default async function VillePage({
             {city.country === "LU" ? "Luxembourg" : city.country}
             {city.region ? ` · ${city.region}` : null}
           </p>
+          {/* Oct. 2026 : le H1 lu par Google est "Agence immobilière à
+              Dudelange" ; la petite ligne reprend exactement le style de
+              la ligne "LUXEMBOURG · SUD" ci-dessus, le nom garde son style. */}
           <h1 className="mt-3 t-h1">
+            <span className="mb-2 block font-mono text-[11px] font-normal uppercase leading-normal tracking-[0.3em] text-ink-soft">
+              {tc(city.country === "LU" ? "city.h1_prefix" : "city.h1_prefix_intl")}
+            </span>{" "}
             {city.name[loc]}
           </h1>
         </header>

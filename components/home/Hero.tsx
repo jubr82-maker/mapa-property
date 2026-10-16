@@ -176,39 +176,42 @@ export async function Hero({ locale }: { locale: string }) {
             editoriale copper #e0af6e italic regular, legerement plus petite
             (clamp 1.4→4.8rem ≈ 70%), meme alignement/tracking que le bloc
             titre. Conditionnel : rien si title_line_3 vide. */}
-        <h1
-          className="mapa-hero-fade-up font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]"
-          style={{ animationDelay: "150ms" }}
-        >
-          {/* Espaces explicites entre segments block : invisibles a
-              l'ecran, mais le texte du H1 se lit avec des espaces. */}
-          <span className="block text-white/90">{titleLine1}</span>{" "}
-          <span className="block text-white">{titleLine2}</span>{" "}
-          {titleLine3 && (
-            <span
-              className="mt-1 block font-normal italic text-[clamp(1.4rem,5.5vw,4.8rem)] md:mt-2"
-              style={{ color: "var(--copper-charte)" }}
-            >
-              {titleLine3}
-            </span>
-          )}
+        {/* Oct. 2026 : un seul H1 qui contient le titre, le filet et la
+            ligne "Agence immobilière au Luxembourg · Broker international"
+            (sous-titre, contenu du CMS). Aucun changement visuel : le H1
+            reprend la colonne flex et ses ecarts (gap-3, md:gap-8) ;
+            chaque partie garde ses classes, son animation et son
+            retour a la ligne d'origine (paragraphe : pretty). */}
+        <h1 className="flex flex-col items-start gap-3 md:gap-8">
+          <span
+            className="mapa-hero-fade-up block font-display font-black leading-[1.15] tracking-[0.02em] text-[clamp(1.9rem,7.65vw,6.8rem)]"
+            style={{ animationDelay: "150ms" }}
+          >
+            {/* Espaces explicites entre segments block : invisibles a
+                l'ecran, mais le texte du H1 se lit avec des espaces. */}
+            <span className="block text-white/90">{titleLine1}</span>{" "}
+            <span className="block text-white">{titleLine2}</span>{" "}
+            {titleLine3 && (
+              <span
+                className="mt-1 block font-normal italic text-[clamp(1.4rem,5.5vw,4.8rem)] md:mt-2"
+                style={{ color: "var(--copper-charte)" }}
+              >
+                {titleLine3}
+              </span>
+            )}
+          </span>{" "}
+          <span className="mapa-hero-fade-up block" style={{ animationDelay: "300ms" }}>
+            <SignatureLine />
+          </span>
+          {/* STEP3c-1-bis : subtitle multi-lignes (vertus rares). \n preserves
+              via whiteSpace pre-line, saut de ligne CSS sans <br/>. */}
+          <span
+            className="mapa-hero-fade-up block max-w-xl text-xs leading-relaxed text-white/80 [text-wrap:pretty] md:text-lg lg:text-xl"
+            style={{ whiteSpace: "pre-line", animationDelay: "450ms" }}
+          >
+            {subtitle}
+          </span>
         </h1>
-
-        <div
-          className="mapa-hero-fade-up"
-          style={{ animationDelay: "300ms" }}
-        >
-          <SignatureLine />
-        </div>
-
-        {/* STEP3c-1-bis : subtitle multi-lignes (vertus rares). \n preserves
-            via whiteSpace pre-line — saut de ligne CSS sans <br/>. */}
-        <p
-          className="mapa-hero-fade-up max-w-xl text-xs leading-relaxed text-white/80 md:text-lg lg:text-xl"
-          style={{ whiteSpace: "pre-line", animationDelay: "450ms" }}
-        >
-          {subtitle}
-        </p>
         {/* POL4 : chips meta (Catalogue · Segments · Couverture ·
             Open for mandates) retirés. */}
       </div>

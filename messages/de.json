@@ -1,7 +1,7 @@
 {
   "meta": {
     "site_name": "MAPA Property",
-    "default_title": "MAPA Property, Luxemburger Immobilienagentur & internationaler Broker",
+    "default_title": "MAPA Property, Immobilienagentur und Broker in Luxemburg",
     "default_description": "Luxemburger Immobilienagentur und internationaler Broker. Verkauf, Vermietung, Off-Market, Trophy Assets. Unter Mandat, im Rahmen, in Ihrem Interesse."
   },
   "common": {
@@ -1486,7 +1486,9 @@
       "title": "Immobilienagentur in {city}",
       "title_intl": "Immobilienbroker in {city}",
       "description": "Immobilienagentur in {city}: Verkauf, Kauf und Vermietung von Häusern und Wohnungen, Bewertung und Suchauftrag mit MAPA Property.",
-      "description_intl": "Immobilien in {city}: MAPA Property begleitet Sie als internationaler Broker beim Kauf oder Verkauf, mit einem einzigen Ansprechpartner."
+      "description_intl": "Immobilien in {city}: MAPA Property begleitet Sie als internationaler Broker beim Kauf oder Verkauf, mit einem einzigen Ansprechpartner.",
+      "h1_prefix": "Immobilienagentur in",
+      "h1_prefix_intl": "Immobilienbroker in"
     },
     "yield": {
       "title": "Mietrendite-Rechner",

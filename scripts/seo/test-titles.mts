@@ -33,4 +33,18 @@ assert.ok(/agence immobilière/i.test(msgs("fr").about_page.meta_title) && /Luxe
 assert.ok(/real estate agency/i.test(msgs("en").about_page.meta_title) && /Luxembourg/.test(msgs("en").about_page.meta_title));
 assert.ok(/Immobilienagentur/.test(msgs("de").about_page.meta_title) && /Luxemburg/.test(msgs("de").about_page.meta_title));
 assert.ok(read("app/[locale]/qui-sommes-nous/page.tsx").includes('title: t("meta_title"),'));
+// Accueil : un seul H1, qui contient la ligne "Agence immobilière au Luxembourg".
+const hero = read("components/home/Hero.tsx");
+assert.equal((hero.match(/<h1\b/g) ?? []).length, 1);
+const h1 = hero.slice(hero.indexOf("<h1"), hero.indexOf("</h1>"));
+assert.ok(h1.includes("{subtitle}") && h1.includes("<SignatureLine />") && h1.includes("{titleLine1}"));
+assert.ok(h1.includes('className="flex flex-col items-start gap-3 md:gap-8"'), "memes ecarts que la colonne du hero");
+for (const l of ["fr", "en", "de"] as const) {
+  const m = msgs(l);
+  assert.ok(m.meta.default_title.length <= 60 && /Luxemb/.test(m.meta.default_title), `${l} titre accueil`);
+  assert.ok(m.seo_pages.city.h1_prefix && m.seo_pages.city.h1_prefix_intl);
+}
+// Villes : petite ligne dans le style de la ligne "LUXEMBOURG · SUD".
+const ville = read("app/[locale]/villes/[ville]/page.tsx");
+assert.ok(ville.includes('font-mono text-[11px] font-normal uppercase leading-normal tracking-[0.3em] text-ink-soft">\n              {tc(city.country === "LU" ? "city.h1_prefix" : "city.h1_prefix_intl")}'));
 console.log("  PASS titres et descriptions : villes, Qui sommes-nous, Agence, mandats, liste d'attente, fiches (virgule)\n\n1 PASS, 0 FAIL");
