@@ -692,7 +692,13 @@ section = "M. Fiche de bien et coordonnees";
   check("metadonnees : image de partage presente dans public/", fs.existsSync(path.join(ROOT, "public/og-image.png")) && fs.existsSync(path.join(ROOT, "public/logo-mapa-property.png")));
   const fiche = read("app/[locale]/biens/[slug]/page.tsx");
   const meta = fiche.slice(fiche.indexOf("export async function generateMetadata"), fiche.indexOf("export default"));
-  check("metadonnees : carte X de la fiche = Open Graph (image et description)", /openGraph: \{[\s\S]*?images: \[\{ url: shareImage \}\]/.test(meta) && /twitter: \{[\s\S]*?description: description \|\| undefined,[\s\S]*?images: \[shareImage\]/.test(meta));
+  // Oct. 2026 : Open Graph et carte X construits ensemble par withSocial
+  // (meme titre, description, image et adresse que la page).
+  const social = read("lib/seo-page-meta.ts");
+  check("metadonnees : carte X de la fiche = Open Graph (image et description)",
+    /withSocial\([\s\S]*?\{ image: shareImage \}/.test(meta)
+    && /openGraph: \{[\s\S]*?title,[\s\S]*?description,[\s\S]*?url,[\s\S]*?images: \[sized\]/.test(social)
+    && /twitter: \{[\s\S]*?title,[\s\S]*?description,[\s\S]*?images: \[image\]/.test(social));
   // Coordonnees dans le code des pages publiques.
   const publicSources = [...walk("app/[locale]", (x) => /\.(ts|tsx)$/.test(x)), ...walk("components", (x) => /\.(ts|tsx)$/.test(x) && !x.startsWith("components/admin/")), "lib/seo.ts", ...walk("lib/legal", (x) => x.endsWith(".ts")), "messages/fr.json", "messages/en.json", "messages/de.json", "public/llms.txt", "lib/contact/reveal-lines.ts"];
   const leaks = publicSources.filter((f) => /admin@mapagroup\.org|j\.brebion@mapagroup\.org|site@mapagroup\.org|691[\s.]?620[\s.]?127|691[\s.]?113[\s.]?018|href=["'](tel|mailto):/i.test(read(f)));

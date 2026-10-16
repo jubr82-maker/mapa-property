@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { pageAlternates } from "@/lib/seo";
 
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/services") };
+  return seoPageMetadata(locale, "services", "/services");
 }
 
 // Page index Sprint A : grille des services MAPA Property. Replace l'ancien

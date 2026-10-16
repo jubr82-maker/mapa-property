@@ -1486,6 +1486,14 @@
     "searches": {
       "title": "Unsere aktuellen Immobiliensuchen in Luxemburg, MAPA Property",
       "description": "Die Immobilien, die Kunden von MAPA Property in Luxemburg suchen: Art, Gemeinden, Budgetspanne und Kriterien. Sie besitzen eine passende Immobilie? Kontaktieren Sie uns."
+    },
+    "services": {
+      "title": "Unsere Immobilienleistungen in Luxemburg, MAPA Property",
+      "description": "Verkauf, Kauf, Vermietung, Bewertung, Off-Market und Suchauftrag: alle Leistungen von MAPA Property in Luxemburg und im Ausland."
+    },
+    "financing": {
+      "title": "Immobilienfinanzierungsrechner, MAPA Property",
+      "description": "Berechnen Sie die Monatsrate eines Immobilienkredits in Luxemburg anhand von Kaufpreis, Eigenkapital und Laufzeit."
     }
   },
   "admin_datetime": {

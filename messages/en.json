@@ -1486,6 +1486,14 @@
     "searches": {
       "title": "Our current property searches in Luxembourg, MAPA Property",
       "description": "The properties MAPA Property clients are looking for in Luxembourg: type, municipalities, budget range and criteria. Own a matching property? Contact us."
+    },
+    "services": {
+      "title": "Our real estate services in Luxembourg, MAPA Property",
+      "description": "Selling, buying, renting, valuation, off-market and search mandates: every MAPA Property service in Luxembourg and abroad."
+    },
+    "financing": {
+      "title": "Property financing simulator, MAPA Property",
+      "description": "Work out the monthly payment on a property loan in Luxembourg from the price, your down payment and the loan term."
     }
   },
   "admin_datetime": {

@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactReveal } from "@/components/contact-reveal";
 import { pageAlternates } from "@/lib/seo";
 
+import { withSocial } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
@@ -14,7 +15,7 @@ export async function generateMetadata({
     locale,
     namespace: "mentions_acquisition",
   });
-  return {
+  return withSocial(locale, {
     title: t("meta_title"),
     description: t("meta_description"),
     robots: {
@@ -22,7 +23,7 @@ export async function generateMetadata({
       follow: true,
     },
     alternates: pageAlternates(locale, "/mentions-acquisition"),
-  };
+  });
 }
 
 export default async function MentionsAcquisitionPage({

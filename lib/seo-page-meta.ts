@@ -25,28 +25,51 @@ export type SeoPageKey =
   | "legal_notice"
   | "ai"
   | "yield"
-  | "searches";
+  | "searches"
+  | "services"
+  | "financing";
 
 
-export function buildPageMetadata(
+/** og:locale par langue (fr_LU, en_GB, de_LU). */
+export function ogLocale(locale: string): string {
+  return locale === "en" ? "en_GB" : locale === "de" ? "de_LU" : "fr_LU";
+}
+
+function titleText(t: Metadata["title"]): string {
+  if (typeof t === "string") return t;
+  if (t && typeof t === "object" && "absolute" in t && typeof t.absolute === "string") return t.absolute;
+  return "";
+}
+
+/**
+ * Balises de partage d'une page (oct. 2026) : og:url = son adresse canonique,
+ * og:title et twitter:title = son propre titre, og:description et
+ * twitter:description = sa propre description, og:locale selon la langue.
+ * Sans ces balises, Next.js reprenait l'Open Graph du layout : l'adresse,
+ * le titre et la description de l'accueil.
+ * meta doit porter alternates.canonical (pageAlternates ou propre).
+ */
+export function withSocial(
   locale: string,
-  path: string,
-  title: string,
-  description: string,
+  meta: Metadata,
+  opts: { type?: "website" | "article"; image?: string } = {},
 ): Metadata {
-  // Meme image de partage que le layout (non heritee si openGraph redefini).
-  const image = siteShareImage();
+  const canonical = meta.alternates?.canonical;
+  const url = typeof canonical === "string" ? canonical : canonical instanceof URL ? canonical.toString() : canonical?.url?.toString();
+  const title = titleText(meta.title);
+  const description = typeof meta.description === "string" ? meta.description : undefined;
+  const image = opts.image ?? siteShareImage();
+  const sized = opts.image ? { url: image } : { url: image, ...SITE_SHARE_IMAGE_SIZE };
   return {
-    title,
-    description,
-    alternates: pageAlternates(locale, path),
+    ...meta,
     openGraph: {
       title,
       description,
-      url: `/${locale}${path}`,
+      url,
       siteName: "MAPA Property",
-      type: "website",
-      images: [{ url: image, ...SITE_SHARE_IMAGE_SIZE }],
+      locale: ogLocale(locale),
+      type: opts.type ?? "website",
+      images: [sized],
     },
     twitter: {
       card: "summary_large_image",
@@ -57,6 +80,14 @@ export function buildPageMetadata(
   };
 }
 
+export function buildPageMetadata(
+  locale: string,
+  path: string,
+  title: string,
+  description: string,
+): Metadata {
+  return withSocial(locale, { title, description, alternates: pageAlternates(locale, path) });
+}
 export async function seoPageMetadata(
   locale: string,
   key: SeoPageKey,

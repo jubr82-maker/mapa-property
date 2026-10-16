@@ -19,6 +19,7 @@ import {
   haversineKm,
 } from "@/lib/geo/luxembourg-communes";
 
+import { withSocial } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 // Sprint OPTIM-BIENS-3 — chargé en lazy (chunk séparé, embla-carousel-react
 // inclus) : ne pèse sur le bundle client que sur les recherches où le
@@ -246,11 +247,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "property_list" });
-  return {
+  return withSocial(locale, {
     title: `${t("title")}, MAPA Property`,
     description: t("subtitle"),
     alternates: pageAlternates(locale, "/biens"),
-  };
+  });
 }
 
 export default async function PropertiesPage({

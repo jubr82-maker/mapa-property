@@ -15,6 +15,7 @@ import { PropertyCard } from "@/components/property/PropertyCard";
 import { fetchAllPropertiesWithCover } from "@/lib/data";
 import { FaqSection } from "@/components/faq/FaqSection";
 import { cityFaqKey } from "@/lib/faq/keys";
+import { withSocial } from "@/lib/seo-page-meta";
 import { cityForPlace } from "@/lib/internal-links";
 
 type Locale = "fr" | "en" | "de";
@@ -45,11 +46,11 @@ export async function generateMetadata({
   // Titre traduit (oct. 2026) : l'ancien suffixe francais fige donnait le
   // meme titre aux trois langues.
   const tc = await getTranslations({ locale, namespace: "seo_pages" });
-  return {
+  return withSocial(locale, {
     title: brandedTitle(tc("city.title", { city: cityName })),
     description: city.metaDescription[loc],
     alternates: pageAlternates(locale, `/villes/${city.slug}`),
-  };
+  });
 }
 
 const labels: Record<Locale, {

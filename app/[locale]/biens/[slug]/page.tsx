@@ -48,6 +48,7 @@ import { propertyPathFor, propertyPaths, seoContext } from "@/lib/listing/proper
 import { sanitizeListingData, type ListingLang } from "@/lib/listing/listing-data";
 import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
+import { withSocial } from "@/lib/seo-page-meta";
 import type { Property } from "@/lib/types";
 
 const langOf = (locale: string): ListingLang => (locale === "en" || locale === "de" ? locale : "fr");
@@ -187,29 +188,13 @@ export async function generateMetadata({
   // Carte de partage : photo principale de l'admin, sinon image du site.
   const shareImage = images[0]?.url ?? siteShareImage();
   const alternates = propertyAlternates(property, locale);
-  const shareTitle = htmlToPlainText(title);
 
-  // Open Graph et carte X identiques (meme titre, description et image) :
-  // sans champ twitter, la fiche heritait de la carte generique du layout.
-  return {
-    title: { absolute: pageTitle || brandedTitle(title) },
-    description: description || undefined,
-    alternates,
-    openGraph: {
-      title: shareTitle,
-      description: description || undefined,
-      url: alternates.canonical,
-      siteName: "MAPA Property",
-      type: "website",
-      images: [{ url: shareImage }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: shareTitle,
-      description: description || undefined,
-      images: [shareImage],
-    },
-  };
+  // Partage : titre, description et adresse de la page (oct. 2026).
+  return withSocial(
+    locale,
+    { title: { absolute: pageTitle || brandedTitle(title) }, description: description || undefined, alternates },
+    { image: shareImage },
+  );
 }
 
 export default async function PropertyPage({

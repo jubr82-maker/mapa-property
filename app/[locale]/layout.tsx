@@ -25,6 +25,7 @@ import { ScrollProgressBar } from "@/components/effects/ScrollProgressBar";
 import { homepageGraph } from "@/lib/seo";
 import { clientMessages } from "@/lib/i18n-client-messages";
 import { siteDesignTokens } from "@/lib/site-content";
+import { ogLocale } from "@/lib/seo-page-meta";
 import "../globals.css";
 
 const display = Big_Shoulders({
@@ -85,8 +86,7 @@ export async function generateMetadata({
       description: t("default_description"),
       url: `/${locale}`,
       siteName: "MAPA Property",
-      locale:
-        locale === "fr" ? "fr_LU" : locale === "de" ? "de_DE" : "en_US",
+      locale: ogLocale(locale),
       type: "website",
       images: [{ url: ogImage, ...SITE_SHARE_IMAGE_SIZE }],
     },

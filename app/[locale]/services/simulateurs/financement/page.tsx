@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { FinancingSimulator } from "@/components/simulators/FinancingSimulator";
-import { pageAlternates } from "@/lib/seo";
 
+import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: pageAlternates(locale, "/services/simulateurs/financement") };
+  return seoPageMetadata(locale, "financing", "/services/simulateurs/financement");
 }
 
 export default async function FinancingPage({

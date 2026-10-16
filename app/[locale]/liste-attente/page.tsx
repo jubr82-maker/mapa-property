@@ -4,6 +4,7 @@ import { WaitlistForm } from "@/components/forms/WaitlistForm";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { pageAlternates } from "@/lib/seo";
 
+import { withSocial } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
@@ -12,11 +13,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "waitlist_page" });
-  return {
+  return withSocial(locale, {
     title: `${t("title")}, MAPA Property`,
     description: t("intro"),
     alternates: pageAlternates(locale, "/liste-attente"),
-  };
+  });
 }
 
 export default async function WaitlistPage({

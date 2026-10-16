@@ -5,6 +5,7 @@ import { ContactReveal } from "@/components/contact-reveal";
 import { pageAlternates } from "@/lib/seo";
 import { BROKER_POSITION } from "@/lib/legal/broker-position";
 
+import { withSocial } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 // Sprint IA-TRANSPARENCE : portrait local optimise (webp, cadrage buste),
 // remplace l'ancienne photo distante sbUrl("photos","IMG_2461.jpg").
@@ -17,11 +18,11 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "about_page" });
-  return {
+  return withSocial(locale, {
     title: `${t("title")}, MAPA Property`,
     description: t("intro"),
     alternates: pageAlternates(locale, "/qui-sommes-nous"),
-  };
+  });
 }
 
 export default async function AboutPage({

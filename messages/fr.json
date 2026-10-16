@@ -1486,6 +1486,14 @@
     "searches": {
       "title": "Nos recherches en cours au Luxembourg, MAPA Property",
       "description": "Les biens que recherchent les clients de MAPA Property au Luxembourg : type, communes, budget en fourchette et critères. Propriétaire d'un bien qui correspond ? Contactez-nous."
+    },
+    "services": {
+      "title": "Nos services immobiliers au Luxembourg, MAPA Property",
+      "description": "Vente, achat, location, estimation, off-market et mandat de recherche : tous les services de MAPA Property au Luxembourg et à l'international."
+    },
+    "financing": {
+      "title": "Simulateur de financement immobilier, MAPA Property",
+      "description": "Calculez la mensualité d'un prêt immobilier au Luxembourg selon le prix du bien, votre apport et la durée du crédit."
     }
   },
   "admin_datetime": {

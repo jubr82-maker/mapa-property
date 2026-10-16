@@ -7,6 +7,7 @@ import { ALL_MANDATE_SLUGS, MANDATES, type MandateType } from "@/lib/mandates";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
 import { pageAlternates } from "@/lib/seo";
+import { withSocial } from "@/lib/seo-page-meta";
 import { IntentAnswer, IntentSections, intentMetadata } from "@/components/seo/IntentSections";
 
 export function generateStaticParams() {
@@ -28,11 +29,11 @@ export async function generateMetadata({
     locale,
     namespace: `mandate_${type.replace("-", "_")}`,
   });
-  return {
+  return withSocial(locale, {
     title: `${t("title")}, MAPA Property`,
     description: t("intro"),
     alternates: pageAlternates(locale, `/mandats/${type}`),
-  };
+  });
 }
 
 export default async function MandatePage({

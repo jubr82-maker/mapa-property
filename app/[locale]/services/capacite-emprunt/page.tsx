@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { BorrowingCapacitySimulator } from "@/components/simulators/BorrowingCapacitySimulator";
 import { pageAlternates } from "@/lib/seo";
 
+import { withSocial } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 export async function generateMetadata({
   params,
@@ -10,11 +11,11 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "borrowing_capacity" });
-  return {
+  return withSocial(locale, {
     title: t("meta_title"),
     description: t("meta_description"),
     alternates: pageAlternates(locale, "/services/capacite-emprunt"),
-  };
+  });
 }
 
 export default async function CapaciteEmpruntPage({

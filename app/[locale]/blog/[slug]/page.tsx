@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { sanitizeArticleHtml } from "@/lib/security/sanitize";
-import { brandedTitle, htmlToPlainText, metaDescription } from "@/lib/meta-text";
+import { brandedTitle, metaDescription } from "@/lib/meta-text";
 import { siteShareImage } from "@/lib/og";
 import { displayableImageSrc } from "@/lib/image-hosts";
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -12,6 +12,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { blogPosting, pageAlternates } from "@/lib/seo";
 import { FaqSection } from "@/components/faq/FaqSection";
+import { withSocial } from "@/lib/seo-page-meta";
 import { blogFaqKey } from "@/lib/faq/keys";
 
 const SITE_URL =
@@ -31,29 +32,15 @@ export async function generateMetadata({
   );
   // og:image : la couverture de l'article (adresse verifiee), sinon l'image du site.
   const shareImage = displayableImageSrc(post.cover_image) ?? siteShareImage();
-  return {
+  // Balises de partage = titre et description de la page (withSocial).
+  return withSocial(locale, {
     // SEO oct. 2026 : certains meta_title en base finissent deja par
     // "| Mapa Property" ; brandedTitle retire tout suffixe de marque avant
     // d'ajouter l'unique ", MAPA Property". La base n'est pas modifiee.
     title: brandedTitle(title),
     description: description || undefined,
     alternates: pageAlternates(locale, `/blog/${post.slug}`),
-    // Open Graph et carte X identiques (titre, description, image).
-    openGraph: {
-      title: htmlToPlainText(title),
-      description: description || undefined,
-      url: `/${locale}/blog/${post.slug}`,
-      siteName: "MAPA Property",
-      type: "article",
-      images: [{ url: shareImage }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: htmlToPlainText(title),
-      description: description || undefined,
-      images: [shareImage],
-    },
-  };
+  }, { type: "article", image: shareImage });
 }
 
 export default async function BlogPostPage({
