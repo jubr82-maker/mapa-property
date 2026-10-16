@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { sanitizeArticleHtml } from "@/lib/security/sanitize";
 import { blogSeoMeta } from "@/lib/blog/seo-meta";
+import { fillEmptyImageAlts } from "@/lib/blog/image-alts";
 import { siteShareImage } from "@/lib/og";
 import { displayableImageSrc } from "@/lib/image-hosts";
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -81,7 +82,7 @@ export default async function BlogPostPage({
           publishedAt={post.published_at}
           primaryTag={post.primary_tag}
           // Assaini cote serveur (OWASP ASVS 5.2.1) avant injection.
-          contentHtml={sanitizeArticleHtml(content)}
+          contentHtml={fillEmptyImageAlts(sanitizeArticleHtml(content), title)}
         />
         <FaqSection pageKey={blogFaqKey(post.slug)} locale={locale} className="mx-auto mt-16 max-w-[65ch]" />
         <p className="mx-auto mt-8 max-w-[65ch] font-mono text-[10px] leading-snug text-ink-soft">

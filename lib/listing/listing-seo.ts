@@ -223,7 +223,8 @@ export function photoAlt(
   seo: ListingSeoVocab,
 ): string {
   if (args.custom?.trim()) return args.custom.trim();
-  const type = args.typeLabel.toLocaleLowerCase();
+  // Allemand : les noms gardent leur majuscule (Haus, Wohnung).
+  const type = seo.alt_photo.includes("Foto") ? args.typeLabel : args.typeLabel.toLocaleLowerCase();
   const city = (args.city ?? "").trim();
   if (!type) return args.title;
   const place = city ? seo.alt_place.replace("{type}", type).replace("{city}", city) : type;

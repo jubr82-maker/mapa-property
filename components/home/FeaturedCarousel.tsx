@@ -359,7 +359,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
         ) : item.cover_url ? (
           <Image
             src={item.cover_url}
-            alt={item.title ?? ""}
+            alt={item.alts?.[locale] || item.title || ""}
             fill
             sizes="(min-width: 1024px) 400px, (min-width: 640px) 48vw, 92vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"

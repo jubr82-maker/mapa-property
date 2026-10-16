@@ -457,7 +457,7 @@ export default async function PropertyPage({
           canonique. Invisible a l'ecran. */}
       <div data-fiche-print-header className="hidden print:block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logos/mapa-logo-fond-clair.svg" alt="MAPA Property" />
+        <img src="/logos/mapa-logo-fond-clair.svg" alt="" aria-hidden="true" />
       </div>
       <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
         <FicheHeader

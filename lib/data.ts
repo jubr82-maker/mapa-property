@@ -5,7 +5,7 @@ import { getLocalizedField } from "./i18n-field";
 import { publicCoverUrl, selectPublicImages } from "./property-images";
 import { effectiveBadge } from "./listing/families";
 import { refTokenFromParam } from "./listing/listing-seo";
-import { propertyPaths } from "./listing/property-paths";
+import { coverAlts, propertyPaths } from "./listing/property-paths";
 import { blogSlugLower } from "./blog/slug";
 import type {
   BlogPost,
@@ -35,7 +35,8 @@ export async function fetchFeaturedProperties(limit = 6): Promise<Property[]> {
 }
 
 // paths : adresse lisible de la fiche par langue (lib/listing/property-paths.ts).
-export type PropertyWithCover = Property & { cover_url: string | null; paths?: Record<string, string> };
+// alts : texte alternatif de la photo principale par langue (type et localite).
+export type PropertyWithCover = Property & { cover_url: string | null; paths?: Record<string, string>; alts?: Record<string, string> };
 
 function pathsOf(row: { slug: string | null; property_type?: string | null; transaction?: string | null; bedrooms?: number | null; surface?: number | null; city?: string | null; price?: number | null }) {
   if (!row.slug) return undefined;
@@ -70,6 +71,7 @@ export async function fetchFeaturedPropertiesWithCover(
     ...row,
     cover_url: publicCoverUrl(row.property_images),
     paths: pathsOf(row),
+    alts: coverAlts(row),
   }));
 }
 
@@ -92,6 +94,8 @@ export type HomeFeatured = {
   created_at: string | null;
   /** Adresse lisible par langue (biens Apimo), absente pour l'off-market. */
   paths?: Record<string, string>;
+  /** Texte alternatif de la photo par langue (biens Apimo). */
+  alts?: Record<string, string>;
   // Sprint badges commerciaux : badge admin-driven sur biens apimo. Pour
   // offmarket : toujours null (offmarket conserve sa pilule cuivre dédiée
   // côté FeaturedCarousel, géré séparément).
@@ -201,6 +205,7 @@ export async function fetchHomeFeatured(
       bedrooms: row.bedrooms,
       created_at: row.created_at,
       paths: pathsOf(row),
+      alts: coverAlts(row),
       badge: effectiveBadge(row.badge, row.mandate_type),
       badge_size: row.badge_size,
       badge_position: row.badge_position,
@@ -322,6 +327,7 @@ const fetchPropertiesWithCoverCached = unstable_cache(
           badge: effectiveBadge(row.badge, row.mandate_type),
           cover_url: publicCoverUrl(row.property_images),
           paths: pathsOf(row),
+          alts: coverAlts(row),
         }) as unknown as PropertyWithCover,
     );
   },

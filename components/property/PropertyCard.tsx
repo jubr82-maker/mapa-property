@@ -67,7 +67,8 @@ export function PropertyCard({
         {cover ? (
           <Image
             src={cover}
-            alt={title}
+            // Type et localite du bien (oct. 2026), sinon le titre.
+            alt={property.alts?.[locale] || title}
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 90vw"
             priority={priority}

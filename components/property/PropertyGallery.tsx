@@ -117,7 +117,9 @@ export function PropertyGallery({ items, title }: Props) {
                 {it.type === "image" ? (
                   <Image
                     src={it.url}
-                    alt=""
+                    // Texte genere de la photo (type, localite, piece), pour
+                    // les moteurs ; le bouton garde son libelle "Photo n".
+                    alt={it.alt ?? title}
                     fill
                     sizes="96px"
                     unoptimized={direct.has(it.url)}

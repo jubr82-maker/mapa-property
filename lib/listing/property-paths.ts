@@ -6,7 +6,7 @@ import fr from "@/messages/fr.json";
 import en from "@/messages/en.json";
 import de from "@/messages/de.json";
 import type { ListingLang } from "@/lib/listing/listing-data";
-import { propertyPath, type ListingSeoVocab, type SeoProperty } from "@/lib/listing/listing-seo";
+import { photoAlt, propertyPath, typeName, type ListingSeoVocab, type SeoProperty } from "@/lib/listing/listing-seo";
 import type { ListingVocab } from "@/lib/listing/generate";
 
 type Msgs = {
@@ -28,4 +28,25 @@ export function propertyPathFor(p: SeoProperty, lang: ListingLang): string {
 
 export function propertyPaths(p: SeoProperty): Record<ListingLang, string> {
   return { fr: propertyPathFor(p, "fr"), en: propertyPathFor(p, "en"), de: propertyPathFor(p, "de") };
+}
+
+/**
+ * Texte alternatif de la photo principale d'un bien, par langue (oct. 2026) :
+ * type et localite seulement ("Maison a Steinfort"), jamais d'adresse.
+ * Vide si le type est inconnu (le titre de l'annonce sert alors de repli).
+ */
+export function coverAlts(p: { property_type?: string | null; city?: string | null }): Record<ListingLang, string> {
+  const out = {} as Record<ListingLang, string>;
+  for (const lang of ["fr", "en", "de"] as ListingLang[]) {
+    const c = seoContext(lang);
+    const typeLabel = typeName(p.property_type ?? null, lang, c.types, c.subtypes[p.property_type ?? ""]);
+    if (!typeLabel) {
+      out[lang] = "";
+      continue;
+    }
+    // Meme regle que les photos de la fiche, sans numero de photo.
+    const withPhoto = photoAlt({ index: 0, typeLabel, city: p.city ?? null, title: "" }, c.seo);
+    out[lang] = withPhoto.replace(/,\s*(photo|Foto)\s+1$/, "");
+  }
+  return out;
 }
