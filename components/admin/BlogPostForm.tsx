@@ -10,6 +10,7 @@ import {
 } from "@/app/admin/blog/actions";
 import { BlogBodyEditor } from "@/components/admin/BlogBodyEditor";
 import { compressImageFile } from "@/lib/image-compress";
+import { SEO_DESCRIPTION_ADVISED, SEO_TITLE_ADVISED } from "@/lib/blog/seo-meta";
 
 type Post = {
   id: string;
@@ -28,9 +29,16 @@ type Post = {
   author: string | null;
   is_published: boolean | null;
   published_at: string | null;
+  seo_title_fr?: string | null;
+  seo_title_en?: string | null;
+  seo_title_de?: string | null;
+  seo_description_fr?: string | null;
+  seo_description_en?: string | null;
+  seo_description_de?: string | null;
 };
 
 type Lang = "fr" | "en" | "de";
+type TextField = "title" | "excerpt" | "content" | "seo_title" | "seo_description";
 
 export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create" | "edit" }) {
   const t = useTranslations("admin_blog");
@@ -41,13 +49,15 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
   // Textes des trois langues en etat controle (seconde passe, oct. 2026) :
   // avant, changer de langue remontait les champs avec la valeur d'origine
   // et la saisie de la langue quittee etait perdue.
-  const pick = (f: "title" | "excerpt" | "content", l: Lang) => (post?.[`${f}_${l}`] as string | null | undefined) ?? "";
+  const pick = (f: TextField, l: Lang) => (post?.[`${f}_${l}`] as string | null | undefined) ?? "";
   const [texts, setTexts] = useState(() => ({
     title: { fr: pick("title", "fr"), en: pick("title", "en"), de: pick("title", "de") },
     excerpt: { fr: pick("excerpt", "fr"), en: pick("excerpt", "en"), de: pick("excerpt", "de") },
     content: { fr: pick("content", "fr"), en: pick("content", "en"), de: pick("content", "de") },
+    seo_title: { fr: pick("seo_title", "fr"), en: pick("seo_title", "en"), de: pick("seo_title", "de") },
+    seo_description: { fr: pick("seo_description", "fr"), en: pick("seo_description", "en"), de: pick("seo_description", "de") },
   }));
-  const setText = (f: "title" | "excerpt" | "content", l: Lang, v: string) =>
+  const setText = (f: TextField, l: Lang, v: string) =>
     setTexts((prev) => ({ ...prev, [f]: { ...prev[f], [l]: v } }));
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [cover, setCover] = useState(post?.cover_image ?? "");
@@ -224,6 +234,26 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
                 className={inputCls + " font-sans"}
               />
             </Field>
+            {/* Titre et description Google de cette langue (oct. 2026) : vides,
+                le titre et le resume de la meme langue sont utilises. */}
+            <SeoField
+              label={t("field_seo_title", { lang: langName })}
+              value={texts.seo_title[lang]}
+              onChange={(v) => setText("seo_title", lang, v)}
+              advised={SEO_TITLE_ADVISED}
+              counter={(n) => t("seo_counter", { count: n, max: SEO_TITLE_ADVISED })}
+              over={t("seo_over")}
+            />
+            <SeoField
+              label={t("field_seo_description", { lang: langName })}
+              value={texts.seo_description[lang]}
+              onChange={(v) => setText("seo_description", lang, v)}
+              advised={SEO_DESCRIPTION_ADVISED}
+              counter={(n) => t("seo_counter", { count: n, max: SEO_DESCRIPTION_ADVISED })}
+              over={t("seo_over")}
+              multiline
+            />
+            <p className="-mt-2 text-xs text-[#3D4F63]/70">{t("seo_hint")}</p>
             <div>
               <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
                 {t("field_body", { lang: langName })}
@@ -248,6 +278,8 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
           <input type="hidden" name={`title_${l}`} value={texts.title[l]} />
           <input type="hidden" name={`excerpt_${l}`} value={texts.excerpt[l]} />
           <input type="hidden" name={`content_${l}`} value={texts.content[l]} />
+          <input type="hidden" name={`seo_title_${l}`} value={texts.seo_title[l]} />
+          <input type="hidden" name={`seo_description_${l}`} value={texts.seo_description[l]} />
         </span>
       ))}
 
@@ -311,6 +343,42 @@ function Field({
       </span>
       <div className="mt-1">{children}</div>
       {hint && <span className="mt-1 block text-xs text-[#3D4F63]/60">{hint}</span>}
+    </label>
+  );
+}
+
+function SeoField({
+  label,
+  value,
+  onChange,
+  advised,
+  counter,
+  over,
+  multiline,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  advised: number;
+  counter: (n: number) => string;
+  over: string;
+  multiline?: boolean;
+}) {
+  const n = value.trim().length;
+  return (
+    <label className="block">
+      <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">{label}</span>
+      <div className="mt-1">
+        {multiline ? (
+          <textarea rows={2} value={value} onChange={(e) => onChange(e.target.value)} maxLength={400} className={inputCls + " font-sans"} />
+        ) : (
+          <input value={value} onChange={(e) => onChange(e.target.value)} maxLength={200} className={inputCls} />
+        )}
+      </div>
+      <span className={`mt-1 block text-xs ${n > advised ? "text-red-700" : "text-[#3D4F63]/70"}`} aria-live="polite">
+        {counter(n)}
+        {n > advised ? ` ${over}` : ""}
+      </span>
     </label>
   );
 }

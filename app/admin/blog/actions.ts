@@ -34,6 +34,11 @@ function cleanBody(v: FormDataEntryValue | null): string | null {
   return html.trim() ? html : null;
 }
 
+function seoText(v: FormDataEntryValue | null, max: number): string | null {
+  const s = String(v ?? "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim().slice(0, max);
+  return s || null;
+}
+
 function slugify(s: string): string {
   return s
     .toLowerCase()
@@ -59,6 +64,15 @@ function buildPostPayload(formData: FormData) {
     content_fr: cleanBody(formData.get("content_fr")),
     content_en: cleanBody(formData.get("content_en")),
     content_de: cleanBody(formData.get("content_de")),
+    // Titre et description Google par langue (oct. 2026, SQL 25). Texte
+    // simple, blancs normalises ; vides : null (le site prend alors le
+    // titre et le resume de la meme langue).
+    seo_title_fr: seoText(formData.get("seo_title_fr"), 200),
+    seo_title_en: seoText(formData.get("seo_title_en"), 200),
+    seo_title_de: seoText(formData.get("seo_title_de"), 200),
+    seo_description_fr: seoText(formData.get("seo_description_fr"), 400),
+    seo_description_en: seoText(formData.get("seo_description_en"), 400),
+    seo_description_de: seoText(formData.get("seo_description_de"), 400),
     cover_image: safeImageUrl(String(formData.get("cover_image") ?? "")),
     primary_tag: String(formData.get("primary_tag") ?? "").trim() || null,
     author: String(formData.get("author") ?? "").trim() || null,

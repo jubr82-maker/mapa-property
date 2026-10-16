@@ -2083,7 +2083,12 @@
     "tb_undo": "Rückgängig",
     "tb_redo": "Wiederholen",
     "link_prompt": "Linkadresse (leer lassen, um den Link zu entfernen)",
-    "err_network": "Der Server hat nicht geantwortet: Prüfen Sie die Internetverbindung und versuchen Sie es erneut."
+    "err_network": "Der Server hat nicht geantwortet: Prüfen Sie die Internetverbindung und versuchen Sie es erneut.",
+    "field_seo_title": "Google-Titel ({lang})",
+    "field_seo_description": "Google-Beschreibung ({lang})",
+    "seo_counter": "{count} von {max} empfohlenen Zeichen",
+    "seo_over": "(darüber kann Google den Text kürzen)",
+    "seo_hint": "Leer: Titel und Zusammenfassung des Artikels in dieser Sprache werden verwendet, nie eine andere Sprache."
   },
   "admin_documents": {
     "eyebrow": "MAPA Konsole",

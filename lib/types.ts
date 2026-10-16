@@ -143,6 +143,12 @@ export interface BlogPost {
   faq_de: unknown;
   meta_title: string | null;
   meta_description: string | null;
+  seo_title_fr?: string | null;
+  seo_title_en?: string | null;
+  seo_title_de?: string | null;
+  seo_description_fr?: string | null;
+  seo_description_en?: string | null;
+  seo_description_de?: string | null;
 }
 
 export interface InterestRates {

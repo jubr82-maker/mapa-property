@@ -2083,7 +2083,12 @@
     "tb_undo": "Undo",
     "tb_redo": "Redo",
     "link_prompt": "Link address (leave empty to remove the link)",
-    "err_network": "The server did not respond: check the internet connection, then retry."
+    "err_network": "The server did not respond: check the internet connection, then retry.",
+    "field_seo_title": "Google title ({lang})",
+    "field_seo_description": "Google description ({lang})",
+    "seo_counter": "{count} of {max} recommended characters",
+    "seo_over": "(beyond this, Google may cut the text)",
+    "seo_hint": "Empty: the article title and summary in this language are used, never another language."
   },
   "admin_documents": {
     "eyebrow": "MAPA Console",

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { sanitizeArticleHtml } from "@/lib/security/sanitize";
-import { brandedTitle, metaDescription } from "@/lib/meta-text";
+import { blogSeoMeta } from "@/lib/blog/seo-meta";
 import { siteShareImage } from "@/lib/og";
 import { displayableImageSrc } from "@/lib/image-hosts";
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -26,19 +26,15 @@ export async function generateMetadata({
   const { locale, slug } = await params;
   const post = await fetchBlogPostBySlug(slug);
   if (!post) return {};
-  const title = post.meta_title ?? pickLang(post, "title", locale as Locale);
-  const description = metaDescription(
-    post.meta_description ?? pickLang(post, "excerpt", locale as Locale),
-  );
+  // Titre et description Google de la langue de la page (lib/blog/seo-meta.ts).
+  const tBlog = await getTranslations({ locale, namespace: "seo_pages" });
+  const { title, description } = blogSeoMeta(post, locale, { title: tBlog("blog.title"), description: tBlog("blog.description") });
   // og:image : la couverture de l'article (adresse verifiee), sinon l'image du site.
   const shareImage = displayableImageSrc(post.cover_image) ?? siteShareImage();
   // Balises de partage = titre et description de la page (withSocial).
   return withSocial(locale, {
-    // SEO oct. 2026 : certains meta_title en base finissent deja par
-    // "| Mapa Property" ; brandedTitle retire tout suffixe de marque avant
-    // d'ajouter l'unique ", MAPA Property". La base n'est pas modifiee.
-    title: brandedTitle(title),
-    description: description || undefined,
+    title: { absolute: title },
+    description,
     alternates: pageAlternates(locale, `/blog/${post.slug}`),
   }, { type: "article", image: shareImage });
 }
@@ -61,9 +57,11 @@ export default async function BlogPostPage({
   const content = pickLang(post, "content", locale as Locale);
   const excerpt = pickLang(post, "excerpt", locale as Locale);
 
+  const tSeo = await getTranslations({ locale, namespace: "seo_pages" });
+  const seo = blogSeoMeta(post, locale, { title: tSeo("blog.title"), description: tSeo("blog.description") });
   const articleJsonLd = blogPosting({
     title,
-    description: excerpt || title,
+    description: seo.description || excerpt || title,
     url: `${SITE_URL}/${locale}/blog/${post.slug}`,
     image: displayableImageSrc(post.cover_image) ?? undefined,
     publishedAt: post.published_at,

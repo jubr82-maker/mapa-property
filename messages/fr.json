@@ -2083,7 +2083,12 @@
     "tb_undo": "Annuler",
     "tb_redo": "Rétablir",
     "link_prompt": "Adresse du lien (laisser vide pour retirer le lien)",
-    "err_network": "Le serveur n'a pas répondu : vérifiez la connexion internet, puis recommencez."
+    "err_network": "Le serveur n'a pas répondu : vérifiez la connexion internet, puis recommencez.",
+    "field_seo_title": "Titre Google ({lang})",
+    "field_seo_description": "Description Google ({lang})",
+    "seo_counter": "{count} caractères sur {max} conseillés",
+    "seo_over": "(au-delà, Google peut couper le texte)",
+    "seo_hint": "Vides : le titre et le résumé de l'article dans cette langue sont utilisés, jamais une autre langue."
   },
   "admin_documents": {
     "eyebrow": "Console MAPA",
