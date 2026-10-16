@@ -2031,7 +2031,7 @@
     "section_info": "General information",
     "section_content": "Content",
     "field_slug": "Page address",
-    "slug_hint": "Generated automatically from the French title if left empty.",
+    "slug_hint": "Lower case, no accents or spaces (corrected automatically). Created from the French title if the field is empty.",
     "field_category": "Main category",
     "category_placeholder": "news, market, taxation…",
     "field_author": "Author",

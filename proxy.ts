@@ -6,6 +6,7 @@ import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { getArchivedPropertyKeys } from "@/lib/archived-properties";
 import { getPublishedPropertySlugByKey } from "@/lib/published-property-keys";
 import { legacyPropertyDestination, resolveLegacyPath } from "@/lib/legacy-redirects";
+import { blogLowercaseRedirect } from "@/lib/blog/slug";
 import {
   ADMIN_ACTIVITY_COOKIE,
   ADMIN_ACTIVITY_COOKIE_MAX_AGE_SECONDS,
@@ -139,6 +140,16 @@ export default async function middleware(request: NextRequest) {
     if (target) return redirectTo(target.path, target.params);
 
     return noStore(response);
+  }
+
+  // Adresse d'article avec majuscules ou accents (oct. 2026) : 301
+  // permanente vers la meme adresse en minuscules, dans les trois langues
+  // (/fr/blog/Immobilier-Steinfort -> /fr/blog/immobilier-steinfort).
+  const blogLower = blogLowercaseRedirect(pathname);
+  if (blogLower) {
+    const url = request.nextUrl.clone();
+    url.pathname = blogLower;
+    return NextResponse.redirect(url, 301);
   }
 
   // Anciennes adresses (site v28 et site precedent) : 308 vers l'equivalent

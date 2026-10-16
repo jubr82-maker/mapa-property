@@ -6,6 +6,7 @@ import { publicCoverUrl, selectPublicImages } from "./property-images";
 import { effectiveBadge } from "./listing/families";
 import { refTokenFromParam } from "./listing/listing-seo";
 import { propertyPaths } from "./listing/property-paths";
+import { blogSlugLower } from "./blog/slug";
 import type {
   BlogPost,
   InterestRates,
@@ -681,7 +682,7 @@ export async function fetchLatestBlogPosts(limit = 3): Promise<BlogPost[]> {
     console.error("[data] fetchLatestBlogPosts", error.message);
     return [];
   }
-  return safeArray<BlogPost>(data as BlogPost[] | null);
+  return safeArray<BlogPost>(data as BlogPost[] | null).map(withLowerSlug);
 }
 
 export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
@@ -695,22 +696,41 @@ export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
     console.error("[data] fetchAllBlogPosts", error.message);
     return [];
   }
-  return safeArray<BlogPost>(data as BlogPost[] | null);
+  return safeArray<BlogPost>(data as BlogPost[] | null).map(withLowerSlug);
 }
 
+// Adresses d'articles en minuscules (oct. 2026) : liens, canonical,
+// sitemap et donnees structurees utilisent toujours la forme en minuscules,
+// meme si la base contient encore une ancienne adresse avec majuscules
+// (Immobilier-Steinfort avant le SQL 26). Les anciennes adresses sont
+// redirigees en 301 par le proxy.
+function withLowerSlug(p: BlogPost): BlogPost {
+  return p.slug ? { ...p, slug: blogSlugLower(p.slug) } : p;
+}
+
+/**
+ * Article par adresse, sans tenir compte des majuscules : /blog/immobilier-steinfort
+ * trouve aussi un article encore enregistre "Immobilier-Steinfort".
+ * Adresse renvoyee toujours en minuscules.
+ */
 export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  const wanted = blogSlugLower(slug);
+  const pattern = wanted.replace(/[\\%_]/g, (c) => `\\${c}`);
   const sb = supabaseServer();
   const { data, error } = await sb
     .from("blog_posts")
     .select("*")
-    .eq("slug", slug)
+    .ilike("slug", pattern)
     .eq("is_published", true)
-    .maybeSingle();
+    .limit(5);
   if (error) {
     console.error("[data] fetchBlogPostBySlug", error.message);
     return null;
   }
-  return (data as BlogPost | null) ?? null;
+  const rows = safeArray<BlogPost>(data as BlogPost[] | null).filter((p) => p.slug && blogSlugLower(p.slug) === wanted);
+  // Deux articles ne different que par les majuscules : l'adresse exacte gagne.
+  const post = rows.find((p) => p.slug === wanted) ?? rows[0];
+  return post ? withLowerSlug(post) : null;
 }
 
 export async function fetchLatestInterestRates(): Promise<InterestRates | null> {

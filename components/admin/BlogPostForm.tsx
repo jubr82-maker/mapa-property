@@ -11,6 +11,7 @@ import {
 import { BlogBodyEditor } from "@/components/admin/BlogBodyEditor";
 import { compressImageFile } from "@/lib/image-compress";
 import { SEO_DESCRIPTION_ADVISED, SEO_TITLE_ADVISED } from "@/lib/blog/seo-meta";
+import { slugKey } from "@/lib/faq/keys";
 
 type Post = {
   id: string;
@@ -115,7 +116,7 @@ export function BlogPostForm({ post, mode }: { post: Post | null; mode: "create"
     <form action={submit} className="space-y-6">
       <Section title={t("section_info")}>
         <Field label={t("field_slug")} hint={t("slug_hint")}>
-          <input name="slug" value={slug} onChange={(e) => setSlug(e.target.value)} className={inputCls} />
+          <input name="slug" value={slug} onChange={(e) => setSlug(e.target.value)} onBlur={() => setSlug((v) => slugKey(v))} className={inputCls} />
         </Field>
         <Field label={t("field_category")}>
           <input

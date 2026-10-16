@@ -2031,7 +2031,7 @@
     "section_info": "Allgemeine Angaben",
     "section_content": "Inhalt",
     "field_slug": "Seitenadresse",
-    "slug_hint": "Wird automatisch aus dem französischen Titel erstellt, wenn das Feld leer ist.",
+    "slug_hint": "Kleinbuchstaben, ohne Akzente und Leerzeichen (wird automatisch korrigiert). Wird aus dem französischen Titel erstellt, wenn das Feld leer ist.",
     "field_category": "Hauptkategorie",
     "category_placeholder": "Aktuelles, Markt, Steuern…",
     "field_author": "Autor",

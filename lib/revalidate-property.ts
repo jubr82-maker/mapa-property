@@ -13,6 +13,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { PROPERTIES_LIST_TAG } from "@/lib/data";
 import { localizedUrls, scheduleIndexNow } from "@/lib/indexnow";
 import { supabaseService } from "@/lib/supabase-service";
+import { blogSlugLower } from "@/lib/blog/slug";
 import { propertyPaths } from "@/lib/listing/property-paths";
 
 /**
@@ -60,6 +61,8 @@ export function revalidatePublicBlogPages(postId?: string | null): void {
   revalidatePath("/[locale]/blog", "page");
   revalidatePath("/[locale]/blog/[slug]", "page");
   revalidatePath("/[locale]", "page");
+  // Sitemap : un article publie ou modifie y apparait sans nouveau build.
+  revalidatePath("/sitemap.xml");
   if (postId) {
     scheduleIndexNow(async () => {
       const { data } = await supabaseService()
@@ -67,7 +70,8 @@ export function revalidatePublicBlogPages(postId?: string | null): void {
         .select("slug")
         .eq("id", postId)
         .maybeSingle();
-      const slug = (data as { slug: string | null } | null)?.slug;
+      const raw = (data as { slug: string | null } | null)?.slug;
+      const slug = raw ? blogSlugLower(raw) : null;
       return [...localizedUrls("/blog"), ...(slug ? localizedUrls(`/blog/${slug}`) : [])];
     });
   }

@@ -50,8 +50,9 @@ function slugify(s: string): string {
 
 function buildPostPayload(formData: FormData) {
   const titleFr = String(formData.get("title_fr") ?? "").trim();
-  let slug = String(formData.get("slug") ?? "").trim();
-  if (!slug && titleFr) slug = slugify(titleFr);
+  // Adresse toujours en minuscules, sans accents ni espaces (oct. 2026),
+  // a partir du champ saisi, sinon du titre en francais.
+  const slug = slugify(String(formData.get("slug") ?? "").trim() || titleFr);
 
   return {
     slug,

@@ -2031,7 +2031,7 @@
     "section_info": "Informations générales",
     "section_content": "Contenu",
     "field_slug": "Adresse de la page",
-    "slug_hint": "Créée automatiquement à partir du titre en français si le champ est vide.",
+    "slug_hint": "En minuscules, sans accents ni espaces (corrigée automatiquement). Créée à partir du titre en français si le champ est vide.",
     "field_category": "Catégorie principale",
     "category_placeholder": "actualité, marché, fiscalité…",
     "field_author": "Auteur",

@@ -13,6 +13,11 @@ const SITE_URL =
 const LOCALES = ["fr", "en", "de"] as const;
 const isBeta = SITE_URL.includes("beta.");
 
+// Regenere au plus tard toutes les heures, et a chaque enregistrement
+// d'article dans l'admin (revalidatePublicBlogPages) : un article publie
+// apparait sans nouveau build (oct. 2026, Steinfort etait absent).
+export const revalidate = 3600;
+
 // Oct. 2026 : exactement les pages publiees et indexables. Retirees : les
 // adresses qui ne font que rediriger (/services/mandat-exclusif,
 // /services/mandat-recherche, /journal). Oct. 2026 : pages de recherche
