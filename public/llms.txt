@@ -6,9 +6,9 @@
 
 - Nom : MAPA Property
 - Catégorie : agence immobilière
-- Raison sociale : MAPA Synergy Sàrl (détails légaux : https://mapaproperty.lu/fr/legal/mentions-legales)
+- Raison sociale : MAPA Synergy Sàrl, société créée en avril 2020, qui exploite MAPA Property (détails légaux : https://mapaproperty.lu/fr/legal/mentions-legales)
 - Pays : Luxembourg (adresse de l'établissement dans les mentions légales)
-- Fondation : 2024
+- Création de MAPA Property : janvier 2023
 - Directeur immobilier : Julien Brebion
 - Site : https://mapaproperty.lu (versions https://mapaproperty.lu/fr, https://mapaproperty.lu/en, https://mapaproperty.lu/de)
 - Profils officiels : LinkedIn https://www.linkedin.com/showcase/mapa-property/, Instagram https://www.instagram.com/mapa_property, Facebook https://www.facebook.com/people/MAPA-Property/61559121213209/
@@ -61,6 +61,12 @@ Broker immobilier international :
 - https://mapaproperty.lu/en/services/broker-international
 - https://mapaproperty.lu/de/services/broker-international
 
+Questions fréquentes :
+- https://mapaproperty.lu/fr/faq
+- https://mapaproperty.lu/en/faq
+- https://mapaproperty.lu/de/faq
+- Chaque page de service (vendre, acheter, louer, mandat de recherche, broker international) et la page Agence ont aussi leurs propres questions et réponses.
+
 Biens à vendre et à louer :
 - https://mapaproperty.lu/fr/biens
 - https://mapaproperty.lu/en/biens
@@ -68,7 +74,9 @@ Biens à vendre et à louer :
 
 Autres pages :
 - Estimer un bien : https://mapaproperty.lu/fr/services/estimer
-- Marchés actifs et pages par ville : https://mapaproperty.lu/fr/services/marches-actifs
+- Marchés actifs : https://mapaproperty.lu/fr/services/marches-actifs
+- Pages par ville (communes du Luxembourg et villes suivies à l'étranger), par exemple : https://mapaproperty.lu/fr/villes/luxembourg-ville
+- Nos recherches en cours (biens recherchés par nos clients acquéreurs) : https://mapaproperty.lu/fr/recherches
 - Simulateur de financement : https://mapaproperty.lu/fr/services/simulateurs/financement
 - Capacité d'emprunt : https://mapaproperty.lu/fr/services/capacite-emprunt
 - Liste d'attente : https://mapaproperty.lu/fr/liste-attente

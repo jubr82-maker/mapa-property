@@ -10,8 +10,10 @@ const SITE_URL =
 // Business Profile verifiee). Sur toutes les pages et dans les trois
 // langues : nom "MAPA Property" (regle de marque), nom legal "MAPA Synergy
 // Sarl", categorie agence immobiliere (RealEstateAgent), adresse de
-// Dudelange identique a la fiche Google, creation en 2024 (lancement de la
-// marque, indique sur la page Qui sommes-nous), profils publics officiels.
+// Dudelange identique a la fiche Google, creation de MAPA Property en
+// janvier 2023 (comme la fiche Google ; la societe MAPA Synergy Sarl qui
+// l'exploite date d'avril 2020 : ne jamais confondre les deux dates),
+// profils publics officiels.
 // JAMAIS : telephone, e-mail, coordonnees geographiques, adresse de
 // Luxembourg-Ville, note ou avis ; RCS, TVA et autorisation
 // d'etablissement restent sur les mentions legales (page dediee).
@@ -52,7 +54,8 @@ export const realEstateAgent = (locale: string) => ({
       : locale === "de"
         ? "Luxemburger Immobilienagentur und internationaler Broker."
         : "Agence immobilière luxembourgeoise et broker international.",
-  foundingDate: "2024",
+  // Creation de MAPA Property (et non de la societe, avril 2020).
+  foundingDate: "2023-01",
   address: ORGANIZATION_ADDRESS,
   knowsLanguage: ["fr", "en", "de"],
   areaServed: AREA_SERVED,

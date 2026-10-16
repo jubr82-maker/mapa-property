@@ -216,10 +216,12 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
         .flatMap((j) => (j && Array.isArray(j["@graph"]) ? j["@graph"] : [j]))
         .filter((j) => j && j["@type"] === "RealEstateAgent");
       if (orgs.length === 0) failures.push(`${p} : etablissement absent`);
+      // Un seul bloc RealEstateAgent par page (oct. 2026).
+      if (orgs.length > 1) failures.push(`${p} : ${orgs.length} blocs RealEstateAgent`);
       for (const o of orgs) {
         const a = o.address ?? {};
         const okAddress = a.streetAddress === "26 Rue du Commerce" && a.postalCode === "L-3450" && a.addressLocality === "Dudelange" && a.addressCountry === "LU";
-        if (o.name !== "MAPA Property" || o.legalName !== "MAPA Synergy Sàrl" || !okAddress || o.foundingDate !== "2024") {
+        if (o.name !== "MAPA Property" || o.legalName !== "MAPA Synergy Sàrl" || !okAddress || o.foundingDate !== "2023-01") {
           failures.push(`${p} : etablissement inexact (${o.name} / ${o.legalName} / ${JSON.stringify(a)} / ${o.foundingDate})`);
         }
         if (!p.includes("/legal/mentions-legales") && (o.vatID || o.identifier)) failures.push(`${p} : TVA ou RCS hors des mentions legales`);

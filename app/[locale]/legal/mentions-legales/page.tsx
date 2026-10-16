@@ -6,8 +6,6 @@ import { mentions } from "@/lib/legal/mentions";
 
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { siteLogo } from "@/lib/og";
-import { ORGANIZATION_ADDRESS } from "@/lib/seo";
 type Locale = keyof typeof mentions;
 
 const LEGAL_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -18,16 +16,12 @@ const LEGAL_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty
  * projet). Meme nom, nom legal et adresse que sur toutes les pages
  * (ORGANIZATION_ADDRESS). Valeurs recopiees de lib/legal/mentions.ts.
  */
+// Oct. 2026 : simple complement de l'etablissement (#organization) deja
+// publie par le layout sur chaque page, sans second bloc RealEstateAgent :
+// meme @id, seulement les identifiants legaux de la societe.
 const legalNoticeOrganization = () => ({
   "@context": "https://schema.org",
-  "@type": "RealEstateAgent",
   "@id": `${LEGAL_SITE_URL}#organization`,
-  name: "MAPA Property",
-  legalName: "MAPA Synergy Sàrl",
-  url: LEGAL_SITE_URL,
-  logo: siteLogo(),
-  foundingDate: "2024",
-  address: ORGANIZATION_ADDRESS,
   vatID: "LU31988923",
   identifier: [
     { "@type": "PropertyValue", propertyID: "RCS Luxembourg", value: "B241974" },

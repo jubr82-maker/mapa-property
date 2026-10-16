@@ -1,11 +1,10 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
-import { JsonLd } from "@/components/seo/JsonLd";
 import { IntentAnswer, IntentSections, intentMetadata } from "@/components/seo/IntentSections";
-import { realEstateAgent } from "@/lib/seo";
 
 // Page d'intention "agence immobiliere au Luxembourg" (oct. 2026,
-// lib/intent-pages.ts). Publie aussi l'etablissement unique (#organization).
+// lib/intent-pages.ts). L'etablissement unique (#organization) est publie
+// une seule fois par page, par le layout (homepageGraph).
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   return intentMetadata(locale, "agency");
@@ -19,7 +18,6 @@ export default async function AgencyPage({ params }: { params: Promise<{ locale:
   return (
     <>
       <PageBreadcrumb locale={locale} path="/agence-immobiliere-luxembourg" />
-      <JsonLd data={realEstateAgent(locale)} />
       <div className="px-6 pt-32 pb-20 lg:px-10 lg:pt-40 lg:pb-28">
         <div className="mx-auto max-w-[1400px]">
           <header className="max-w-3xl">
