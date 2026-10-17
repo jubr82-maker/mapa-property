@@ -12,8 +12,10 @@
  *   bannière cookies (cf. lib/consent/store.ts). Pas de décision ⇒ pas de
  *   tracking, jamais d'opt-out implicite.
  * - GA4 : generate_lead part de trackLead(), appele par chaque formulaire
- *   apres un envoi reussi (contact, demande sur un bien, estimation,
- *   mandat, off-market, liste d'attente), avec le seul type de formulaire.
+ *   apres un envoi reussi (reponse serveur OK), avec form_type (liste
+ *   fermee LEAD_FORM_TYPES, une valeur par formulaire) et page_language.
+ *   contact_click part de trackContactClick() au clic sur le telephone
+ *   revele, avec method seulement. Jamais de donnee personnelle.
  *   Meme garde hasStatsConsent(). Silencieux si GA4 n'est pas monte (pas de
  *   NEXT_PUBLIC_GA4_MEASUREMENT_ID, cf. ConsentGatedAnalytics.tsx).
  */
@@ -32,32 +34,68 @@ const GA4_EVENTS: Partial<Record<TrackingEventType, string>> = {
 
 /**
  * Type de formulaire envoye a GA4 avec generate_lead (oct. 2026). Liste
- * fermee : aucune donnee personnelle, aucun titre de bien, aucun montant.
+ * fermee, une valeur par formulaire du site, identique partout : aucune
+ * donnee personnelle, aucun titre de bien, aucun montant.
  */
-export type LeadFormType =
-  | "contact"
-  | "property_request"
-  | "estimation"
-  | "mandate"
-  | "offmarket"
-  | "waitlist";
+export const LEAD_FORM_TYPES = [
+  "contact", // page Contact
+  "property_request", // fiche d'un bien : demande d'information ou de visite
+  "estimation", // estimation en ligne
+  "search_mandate", // mandat de recherche
+  "mandate_exclusive", // mandat exclusif
+  "mandate_semi_exclusive", // mandat semi-exclusif
+  "mandate_simple", // mandat simple
+  "mandate_autonomous", // mandat autonome
+  "search_owner", // proposer son bien pour une recherche en cours
+  "waitlist", // liste d'attente
+  "offmarket_access", // acces a un bien off-market (accord de confidentialite)
+] as const;
+export type LeadFormType = (typeof LEAD_FORM_TYPES)[number];
 
 /** Type GA4 d'un formulaire ContactForm a partir de son type interne. */
 export function leadFormTypeOf(type: string): LeadFormType {
-  if (type.startsWith("mandate_") || type === "search_mandate") return "mandate";
-  if (type === "property_request") return "property_request";
-  return "contact";
+  const map: Record<string, LeadFormType> = {
+    general_contact: "contact",
+    property_request: "property_request",
+    owner_search: "search_owner",
+    search_mandate: "search_mandate",
+    mandate_exclusive: "mandate_exclusive",
+    mandate_semi: "mandate_semi_exclusive",
+    mandate_simple: "mandate_simple",
+    mandate_autonomous: "mandate_autonomous",
+  };
+  return map[type] ?? "contact";
+}
+
+/** Langue de la page (fr, en ou de), lue dans l'adresse. */
+function pageLanguage(locale?: string): string {
+  if (locale === "fr" || locale === "en" || locale === "de") return locale;
+  const seg = typeof window !== "undefined" ? window.location.pathname.split("/")[1] : "";
+  return seg === "en" || seg === "de" ? seg : "fr";
 }
 
 /**
  * generate_lead GA4 (evenement recommande par Google pour une demande
  * envoyee) : a appeler UNIQUEMENT apres une reponse positive du serveur.
- * Consentement "Statistiques" obligatoire ; sans GA4 monte, rien.
+ * Parametres : form_type et page_language, rien d'autre. Consentement
+ * "Statistiques" obligatoire ; sans GA4 monte, rien.
  */
-export function trackLead(formType: LeadFormType): void {
+export function trackLead(formType: LeadFormType, locale?: string): void {
   if (typeof window === "undefined") return;
   if (!hasStatsConsent()) return;
-  sendToGA4("generate_lead", { form_type: formType });
+  sendToGA4("generate_lead", { form_type: formType, page_language: pageLanguage(locale) });
+}
+
+/**
+ * contact_click GA4 : clic sur un numero de telephone revele (lien tel:).
+ * Parametre method seulement ("phone"), jamais le numero. Le site n'a pas
+ * de lien WhatsApp aujourd'hui ; "whatsapp" est prevu pour le jour ou il
+ * existera. Meme garde de consentement.
+ */
+export function trackContactClick(method: "phone" | "whatsapp", locale?: string): void {
+  if (typeof window === "undefined") return;
+  if (!hasStatsConsent()) return;
+  sendToGA4("contact_click", { method, page_language: pageLanguage(locale) });
 }
 
 function sendToGA4(gaEventName: string, eventData?: Record<string, unknown>): void {
@@ -89,7 +127,9 @@ export function track(
   if (!hasStatsConsent()) return;
 
   const ga4EventName = GA4_EVENTS[eventType];
-  if (ga4EventName) sendToGA4(ga4EventName, eventData);
+  // GA4 ne recoit que le nom de l'evenement et la langue (oct. 2026) :
+  // les montants saisis (revenus, charges...) restent dans notre base.
+  if (ga4EventName) sendToGA4(ga4EventName, { page_language: pageLanguage() });
 
   const sessionId = getOrCreateSessionId();
   const payload: TrackEventPayload & { session_id: string } = {

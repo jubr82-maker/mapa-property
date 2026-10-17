@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import { track } from "@/lib/tracking/track";
+import { track, trackContactClick } from "@/lib/tracking/track";
 import { advisorContactLines, revealLines } from "@/lib/contact/reveal-lines";
 
 type Variant = "compact" | "full" | "sidebar";
@@ -196,7 +196,11 @@ export function ContactReveal({
               href={line.href}
               ariaLabel={t(line.ariaKey)}
               icon={line.kind === "phone" ? <PhoneIcon /> : <MailIcon />}
-              onClick={() => trackReveal(line.trackTarget)}
+              onClick={() => {
+                trackReveal(line.trackTarget);
+                // GA4 (oct. 2026) : clic sur le telephone, sans le numero.
+                if (line.kind === "phone") trackContactClick("phone");
+              }}
               linkBase={linkBase}
               iconColor={iconColor}
               variant={variant}

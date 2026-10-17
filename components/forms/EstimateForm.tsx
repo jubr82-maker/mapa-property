@@ -489,6 +489,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
       setBasis(json.basis ?? null);
       setUsedComparables(json.usedComparables === true);
       setStep(4);
+      // Langue de la page lue dans l'adresse (trackLead).
       trackLead("estimation");
       track("estimation_compute", {
         country: "LU",

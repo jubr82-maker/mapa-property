@@ -97,7 +97,7 @@ export function NDAForm({ propertyRef, propertyTitle }: Props) {
       });
       if (!res.ok) throw new Error();
       setStatus("success");
-      trackLead("offmarket");
+      trackLead("offmarket_access", locale);
       track("form_submit", {
         form: "nda_request",
         property_id: propertyRef,

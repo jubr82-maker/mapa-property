@@ -60,7 +60,7 @@ export function WaitlistForm() {
         setStatus("success");
         form.reset();
         setBudgetValidated("non");
-        trackLead("waitlist");
+        trackLead("waitlist", locale);
         track("form_submit", { form: "waitlist" });
         return;
       }

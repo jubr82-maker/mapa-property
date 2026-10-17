@@ -102,7 +102,7 @@ export function ContactForm({
       if (res.ok) {
         setStatus("success");
         form.reset();
-        trackLead(leadFormTypeOf(type));
+        trackLead(leadFormTypeOf(type), locale);
         track("form_submit", {
           form: type,
           source,
