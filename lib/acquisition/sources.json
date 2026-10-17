@@ -3,11 +3,11 @@
   "countries": {
     "LU": [
       { "label": "Portail Logement Luxembourg", "url": "https://logement.public.lu/", "verifiedDate": "2026-05-12" },
-      { "label": "Guichet Public — Bëllegen Akt", "url": "https://guichet.public.lu/fr/citoyens/logement/achat-vente-location/achat-bien-immobilier.html", "verifiedDate": "2026-05-12" },
+      { "label": "Guichet Public : Bëllegen Akt", "url": "https://guichet.public.lu/fr/citoyens/logement/achat-vente-location/achat-bien-immobilier.html", "verifiedDate": "2026-05-12" },
       { "label": "Administration de l'Enregistrement et des Domaines (AED)", "url": "https://pfi.public.lu/", "verifiedDate": "2026-05-12" }
     ],
     "FR": [
-      { "label": "Service-Public.fr — Droits de mutation", "url": "https://www.service-public.fr/particuliers/vosdroits/F10871", "verifiedDate": "2026-05-12" },
+      { "label": "Service-Public.fr : droits de mutation", "url": "https://www.service-public.fr/particuliers/vosdroits/F10871", "verifiedDate": "2026-05-12" },
       { "label": "impots.gouv.fr", "url": "https://www.impots.gouv.fr/", "verifiedDate": "2026-05-12" },
       { "label": "HCSF", "url": "https://www.economie.gouv.fr/hcsf", "verifiedDate": "2026-05-12" },
       { "label": "Notaires de France", "url": "https://www.notaires.fr/", "verifiedDate": "2026-05-12" }
@@ -29,12 +29,12 @@
       { "label": "Chambre Immobilière Monégasque", "url": "https://www.cim.mc/", "verifiedDate": "2026-05-12" }
     ],
     "CH": [
-      { "label": "LFAIE (Lex Koller) — BJ", "url": "https://www.bj.admin.ch/", "verifiedDate": "2026-05-12" },
+      { "label": "LFAIE (Lex Koller), BJ", "url": "https://www.bj.admin.ch/", "verifiedDate": "2026-05-12" },
       { "label": "Confédération suisse", "url": "https://www.admin.ch/", "verifiedDate": "2026-05-12" },
       { "label": "État de Genève", "url": "https://www.ge.ch/", "verifiedDate": "2026-05-12" }
     ],
     "IT": [
-      { "label": "Agenzia delle Entrate — Guida Acquisto Casa", "url": "https://www.agenziaentrate.gov.it/", "verifiedDate": "2026-05-12" },
+      { "label": "Agenzia delle Entrate : Guida Acquisto Casa", "url": "https://www.agenziaentrate.gov.it/", "verifiedDate": "2026-05-12" },
       { "label": "Ministero dell'Economia e delle Finanze", "url": "https://www.mef.gov.it/", "verifiedDate": "2026-05-12" }
     ],
     "ES": [
@@ -42,7 +42,7 @@
       { "label": "BOE (Boletín Oficial del Estado)", "url": "https://www.boe.es/", "verifiedDate": "2026-05-12" }
     ],
     "PT": [
-      { "label": "Autoridade Tributária — Portal das Finanças", "url": "https://www.portaldasfinancas.gov.pt/", "verifiedDate": "2026-05-12" },
+      { "label": "Autoridade Tributária : Portal das Finanças", "url": "https://www.portaldasfinancas.gov.pt/", "verifiedDate": "2026-05-12" },
       { "label": "Banco de Portugal", "url": "https://www.bportugal.pt/", "verifiedDate": "2026-05-12" }
     ]
   }

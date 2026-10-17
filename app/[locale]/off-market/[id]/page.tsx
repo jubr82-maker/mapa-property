@@ -98,7 +98,7 @@ export default async function OffMarketDetailPage({
   const tProperty = await getTranslations({ locale, namespace: "property" });
   const tf = await getTranslations({ locale, namespace: "fiche" });
 
-  const title = property.title ?? "—";
+  const title = property.title ?? "";
   // AJOUT 2026-09-08 : badge meta bascule sur Vente/Location (tx_sale/
   // tx_rent, mêmes clés que le circuit classique) — "OFF-MARKET" reste
   // porté par l'eyebrow ci-dessous, pas de redondance. Fallback sur
@@ -108,29 +108,29 @@ export default async function OffMarketDetailPage({
     ? tProperty(`tx_${property.transaction}`)
     : tProperty("tx_offmarket");
 
-  // Specs — toutes les données Supabase préservées, "—" si absent.
+  // Specs : donnees Supabase ; une valeur absente n'est pas affichee.
   const specs = [
     {
       label: tProperty("living_surface"),
-      value: property.surface_hab ? `${property.surface_hab} m²` : "—",
+      value: property.surface_hab ? `${property.surface_hab} m²` : "",
     },
     {
       label: tProperty("land_surface"),
       value: property.surface_terrain
         ? `${property.surface_terrain} m²`
-        : "—",
+        : "",
     },
     {
       label: tProperty("bedrooms"),
-      value: property.bedrooms != null ? String(property.bedrooms) : "—",
+      value: property.bedrooms != null ? String(property.bedrooms) : "",
     },
     {
       label: tProperty("bathrooms"),
-      value: property.bathrooms != null ? String(property.bathrooms) : "—",
+      value: property.bathrooms != null ? String(property.bathrooms) : "",
     },
     {
       label: tProperty("energy"),
-      value: property.energy_class ?? "—",
+      value: property.energy_class ?? "",
     },
   ];
 

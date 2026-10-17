@@ -59,7 +59,7 @@ export const STATE_AIDS_LU: StateAid[] = [
       locatif: false,
     },
     stackable: ["lu_tva_3"],
-    legalRef: "Loi du 3 juillet 2025 — abattement droits d'enregistrement",
+    legalRef: "Loi du 3 juillet 2025 (abattement des droits d'enregistrement)",
     appliesTo: "registration_rights",
   },
   {
@@ -78,7 +78,7 @@ export const STATE_AIDS_LU: StateAid[] = [
       locatif: false,
     },
     stackable: ["lu_bellegen_akt"],
-    legalRef: "Code TVA, art. 39 bis — logement résidence principale",
+    legalRef: "Code TVA, art. 39 bis (logement, résidence principale)",
     appliesTo: "vat",
   },
 ];
@@ -102,7 +102,7 @@ export const STATE_AIDS_FR: StateAid[] = [
       locatif: false,
     },
     stackable: ["fr_maprimerenov"],
-    legalRef: "Décret 2025 — art. L31-10-1 CCH (extension PTZ 2026-2027)",
+    legalRef: "Décret 2025, art. L31-10-1 CCH (extension PTZ 2026-2027)",
     appliesTo: "capital",
   },
 ];

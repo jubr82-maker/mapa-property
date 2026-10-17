@@ -13,7 +13,7 @@ const SOURCES: AcquisitionSource[] = [
     verifiedDate: '2026-05-12',
   },
   {
-    label: "Guichet Public — Bëllegen Akt",
+    label: "Guichet Public : Bëllegen Akt",
     url: 'https://guichet.public.lu/fr/citoyens/logement/achat-vente-location/achat-bien-immobilier.html',
     verifiedDate: '2026-05-12',
   },
@@ -84,7 +84,7 @@ export function computeLuxembourg(input: AcquisitionInput): AcquisitionResult {
     bellegenAkt = Math.min(bellegenAkt, dueDuties);
 
     lineItems.push({
-      label: `Bëllegen Akt (crédit d'impôt droits — ${multiplier === 2 ? 'couple/famille' : 'acquéreur seul'})`,
+      label: `Bëllegen Akt (crédit d'impôt sur les droits, ${multiplier === 2 ? 'couple/famille' : 'acquéreur seul'})`,
       amount: -Math.round(bellegenAkt),
       isPercentage: false,
       notes: `Crédit ${BELLEGEN_AKT_PER_BUYER.toLocaleString('fr-FR')} €/acquéreur, sans condition primo-accédant ni d'âge. Résidence principale uniquement. Crédit plafonné aux droits dus.`,
@@ -98,7 +98,7 @@ export function computeLuxembourg(input: AcquisitionInput): AcquisitionResult {
     amount: Math.round(notaryFees),
     rate: NOTARY_AVG_RATE,
     isPercentage: true,
-    notes: 'Barème dégressif 0,8% à 1,2% selon montant — moyenne indicative 1%. À confirmer auprès du notaire.',
+    notes: 'Barème dégressif de 0,8% à 1,2% selon le montant (moyenne indicative : 1%). À confirmer auprès du notaire.',
   });
 
   // ── Warning si non résident

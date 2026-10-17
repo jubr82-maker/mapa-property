@@ -1256,7 +1256,8 @@
     "debt_acceptable": "Limite acceptable pour la plupart des banques luxembourgeoises.",
     "debt_high": "Au-delà de 40% : dossier difficile à présenter, à retravailler.",
     "disclaimer_eyebrow": "AVERTISSEMENT IMPORTANT",
-    "disclaimer_text": "Cette estimation est strictement indicative. L'octroi d'un crédit reste soumis à l'acceptation finale de la banque et à ses conditions propres (scoring, garanties, profil). L'ABBL recommande systématiquement la consultation d'un courtier agréé ou d'un conseiller bancaire avant tout engagement."
+    "disclaimer_text": "Cette estimation est strictement indicative. L'octroi d'un crédit reste soumis à l'acceptation finale de la banque et à ses conditions propres (scoring, garanties, profil). L'ABBL recommande systématiquement la consultation d'un courtier agréé ou d'un conseiller bancaire avant tout engagement.",
+    "capacity_bounds": "{low} à {high}"
   },
   "fiche": {
     "back": "Retour",
@@ -1346,7 +1347,8 @@
     "consent_error": "La transmission a échoué. Réessayez ou utilisez notre formulaire de contact."
   },
   "financing_simulator": {
-    "disclaimer": "Disclaimer : simulation indicative à titre d'information. Les montants ne constituent pas une offre de prêt. Les taux pratiqués par les banques varient selon le profil emprunteur, l'apport, la garantie, le type de bien et la conjoncture. Pour une étude personnalisée, contactez MAPA Property pour un rendez-vous avec un partenaire bancaire qualifié."
+    "disclaimer": "Disclaimer : simulation indicative à titre d'information. Les montants ne constituent pas une offre de prêt. Les taux pratiqués par les banques varient selon le profil emprunteur, l'apport, la garantie, le type de bien et la conjoncture. Pour une étude personnalisée, contactez MAPA Property pour un rendez-vous avec un partenaire bancaire qualifié.",
+    "aids_title": "Aides applicables : {country}"
   },
   "acquisition_simulator": {
     "eyebrow": "Plan de financement",
@@ -4659,6 +4661,7 @@
     },
     "city_properties_title": "Nos biens à {city}",
     "meta_description_short": "Recherche : {type} {communes}, budget {budget}. Référence {reference}. Contactez MAPA Property en toute confidentialité.",
+    "meta_description_min": "Recherche : {type} {communes}, budget {budget}. Référence {reference}. Contact confidentiel : MAPA Property.",
     "meta_communes_more": "à {communes} et {n} autres communes"
   },
   "admin_searches": {

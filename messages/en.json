@@ -1256,7 +1256,8 @@
     "debt_acceptable": "Within the acceptable limit for most Luxembourg banks.",
     "debt_high": "Above 40%: difficult file to present, needs rework.",
     "disclaimer_eyebrow": "IMPORTANT DISCLAIMER",
-    "disclaimer_text": "This estimate is strictly indicative. Credit approval remains subject to the bank's final decision and its own conditions (credit scoring, guarantees, profile). The ABBL systematically recommends consulting an accredited broker or bank advisor before any commitment."
+    "disclaimer_text": "This estimate is strictly indicative. Credit approval remains subject to the bank's final decision and its own conditions (credit scoring, guarantees, profile). The ABBL systematically recommends consulting an accredited broker or bank advisor before any commitment.",
+    "capacity_bounds": "{low} to {high}"
   },
   "fiche": {
     "section_caracteristiques_principales": "Key features",
@@ -1346,7 +1347,8 @@
     "consent_error": "Sending failed. Please try again or use our contact form."
   },
   "financing_simulator": {
-    "disclaimer": "Disclaimer: indicative simulation for information purposes only. The amounts shown do not constitute a loan offer. The rates applied by banks vary according to the borrower profile, down payment, collateral, property type and market conditions. For a personalised study, contact MAPA Property for an appointment with a qualified banking partner."
+    "disclaimer": "Disclaimer: indicative simulation for information purposes only. The amounts shown do not constitute a loan offer. The rates applied by banks vary according to the borrower profile, down payment, collateral, property type and market conditions. For a personalised study, contact MAPA Property for an appointment with a qualified banking partner.",
+    "aids_title": "Applicable aid: {country}"
   },
   "acquisition_simulator": {
     "eyebrow": "Financing plan",
@@ -4659,6 +4661,7 @@
     },
     "city_properties_title": "Our properties in {city}",
     "meta_description_short": "Wanted: {type} {communes}, budget {budget}. Reference {reference}. Contact MAPA Property in confidence.",
+    "meta_description_min": "Wanted: {type} {communes}, budget {budget}. Reference {reference}. Confidential contact: MAPA Property.",
     "meta_communes_more": "in {communes} and {n} other municipalities"
   },
   "admin_searches": {

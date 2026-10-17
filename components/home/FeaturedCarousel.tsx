@@ -407,10 +407,10 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5 md:gap-2 md:p-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
-          {[item.country, item.city].filter(Boolean).join(" · ") || "—"}
+          {[item.country, item.city].filter(Boolean).join(" · ")}
         </p>
         <h3 className="line-clamp-2 font-display text-xl font-bold leading-tight text-ink group-hover:text-gold-deep">
-          {item.title ?? "—"}
+          {item.title ?? ""}
         </h3>
         <div className="mt-auto flex items-baseline justify-between gap-3">
           <p className="font-display text-lg font-bold gold-text">

@@ -159,7 +159,7 @@ const formatPrice = (
   transaction: string,
   locale: string,
 ) => {
-  if (!price) return "—";
+  if (!price) return "";
   const value = formatPriceShared(price, locale);
   return transaction === "rent" ? `${value} / mois` : value;
 };
@@ -337,15 +337,15 @@ export default async function PropertyPage({
 
   // Specs — toutes les données Supabase préservées, "—" si absent.
   const specs = [
-    { label: t("living_surface"), value: property.living_surface ? formatSurface(property.living_surface, locale) : "—" },
-    { label: t("surface"), value: property.surface ? formatSurface(property.surface, locale) : "—" },
-    { label: t("bedrooms"), value: property.bedrooms != null ? String(property.bedrooms) : "—" },
-    { label: t("bathrooms"), value: property.bathrooms != null ? String(property.bathrooms) : "—" },
-    { label: t("energy"), value: property.energy ?? "—" },
-    { label: t("parking"), value: property.parking != null ? String(property.parking) : "—" },
-    { label: t("year"), value: property.year ? String(property.year) : "—" },
-    { label: t("land_surface"), value: property.land_surface ? formatSurface(property.land_surface, locale) : "—" },
-    { label: t("terrace_surface"), value: property.terrace_surface ? formatSurface(property.terrace_surface, locale) : "—" },
+    { label: t("living_surface"), value: property.living_surface ? formatSurface(property.living_surface, locale) : "" },
+    { label: t("surface"), value: property.surface ? formatSurface(property.surface, locale) : "" },
+    { label: t("bedrooms"), value: property.bedrooms != null ? String(property.bedrooms) : "" },
+    { label: t("bathrooms"), value: property.bathrooms != null ? String(property.bathrooms) : "" },
+    { label: t("energy"), value: property.energy ?? "" },
+    { label: t("parking"), value: property.parking != null ? String(property.parking) : "" },
+    { label: t("year"), value: property.year ? String(property.year) : "" },
+    { label: t("land_surface"), value: property.land_surface ? formatSurface(property.land_surface, locale) : "" },
+    { label: t("terrace_surface"), value: property.terrace_surface ? formatSurface(property.terrace_surface, locale) : "" },
   ];
 
   const hasDescription =

@@ -110,7 +110,7 @@ export function ChatbotPanel({
         intent?: NavigateIntent | null;
         contactDetected?: { email?: string; phone?: string } | null;
       };
-      const reply = json?.reply ?? "—";
+      const reply = json?.reply ?? "";
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: reply, contactDetected: json?.contactDetected },

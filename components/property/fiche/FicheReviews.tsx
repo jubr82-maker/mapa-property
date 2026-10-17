@@ -50,7 +50,7 @@ export function FicheReviews({
                 {extract ? `“${extract}”` : ""}
               </blockquote>
               <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-                {r.name ?? "—"}
+                {r.name ?? ""}
               </p>
             </li>
           );

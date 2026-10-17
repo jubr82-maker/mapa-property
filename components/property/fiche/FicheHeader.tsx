@@ -63,7 +63,7 @@ export function FicheHeader({
           )}
         </p>
 
-        <h1 className="mt-3 t-h1">{title || "—"}</h1>
+        <h1 className="mt-3 t-h1">{title}</h1>
 
         <SignatureLine width="w-8" />
 

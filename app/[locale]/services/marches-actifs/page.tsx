@@ -52,7 +52,7 @@ export default async function ActiveMarketsPage({
           <p>{t("found_p3")}</p>
           <p>{t("found_p4")}</p>
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">
-            — {t("found_source")}
+            {t("found_source")}
           </p>
         </section>
         </FadeInOnScroll>

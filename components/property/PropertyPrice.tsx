@@ -27,6 +27,7 @@
 // source unique dans lib/format/numbers.ts, reexportee ici pour compat
 // ascendante avec les imports existants depuis ce module.
 export { formatPrice, priceOnDemandLabel } from "@/lib/format/numbers";
+import { rangeText } from "@/lib/format/range";
 import { formatPrice, priceOnDemandLabel } from "@/lib/format/numbers";
 
 /** Convertit une valeur tolérante (number | string | null | undefined) en
@@ -97,7 +98,7 @@ export function PropertyPrice({
 
     if (priceMode === "range" && min != null && max != null) {
       // 3. Fourchette.
-      text = `${formatPrice(min, locale)} – ${formatPrice(max, locale)}${suffix}`;
+      text = rangeText(formatPrice(min, locale), formatPrice(max, locale), locale) + suffix;
     } else if (priceMode === "exact" && estimate != null) {
       // 4. Prix exact.
       text = formatPrice(estimate, locale) + suffix;

@@ -31,7 +31,7 @@ interface PropertyCardProps {
 // dupliquait components/property/PropertyPrice.tsx. Remplacee par la
 // fonction partagee, sensible a la locale reelle de la carte.
 const formatPrice = (price: number | null, transaction: string, locale: string) => {
-  if (!price) return "—";
+  if (!price) return "";
   const value = formatPriceShared(price, locale);
   return transaction === "rent" ? `${value} / mois` : value;
 };
@@ -44,7 +44,7 @@ export function PropertyCard({
   compact = false,
   onClick,
 }: PropertyCardProps) {
-  const title = pickLang(property, "title", locale) || "—";
+  const title = pickLang(property, "title", locale) || "";
   const price = formatPrice(property.price, property.transaction, locale);
   // La table properties n'a pas de cover_image_url ; on s'appuie uniquement
   // sur cover_url (calculé depuis property_images via les fetchers data.ts).
@@ -112,7 +112,7 @@ export function PropertyCard({
               : "font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft"
           }
         >
-          {[property.country, property.city].filter(Boolean).join(" · ") || "—"}
+          {[property.country, property.city].filter(Boolean).join(" · ")}
         </p>
         <h3
           className={

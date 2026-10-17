@@ -10,11 +10,11 @@ interface LegalContent {
 }
 
 const COPYRIGHT_FR =
-  "© 2026 MAPA Synergy Sàrl — MAPA Property. Page d'information sur l'usage de l'intelligence artificielle.";
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Page d'information sur l'usage de l'intelligence artificielle.";
 const COPYRIGHT_EN =
-  "© 2026 MAPA Synergy Sàrl — MAPA Property. Information page on the use of artificial intelligence.";
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Information page on the use of artificial intelligence.";
 const COPYRIGHT_DE =
-  "© 2026 MAPA Synergy Sàrl — MAPA Property. Informationsseite zum Einsatz künstlicher Intelligenz.";
+  "© 2026 MAPA Synergy Sàrl, MAPA Property. Informationsseite zum Einsatz künstlicher Intelligenz.";
 
 export const intelligenceArtificielle: Record<"fr" | "en" | "de", LegalContent> = {
   fr: {

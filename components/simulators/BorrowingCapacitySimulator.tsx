@@ -30,7 +30,7 @@ const MAX_DEBT_RATIO = 0.4; // Limite haute usuelle
 const SAFE_DEBT_RATIO = 0.33; // Zone confort recommandee
 
 function fmtEur(n: number) {
-  if (!isFinite(n) || isNaN(n)) return "—";
+  if (!isFinite(n) || isNaN(n)) return "";
   return (
     new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(
       Math.round(n),
@@ -201,7 +201,7 @@ export function BorrowingCapacitySimulator() {
                 {fmtEur(computed.capacity)}
               </p>
               <p className="font-mono text-[11px] text-ink-soft">
-                {fmtEur(computed.lowCapacity)} – {fmtEur(computed.highCapacity)}
+                {t("capacity_bounds", { low: fmtEur(computed.lowCapacity), high: fmtEur(computed.highCapacity) })}
               </p>
             </div>
 

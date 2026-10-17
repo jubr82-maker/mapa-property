@@ -158,7 +158,7 @@ export function FinancingSimulator({ initial }: Props) {
       {/* Aides */}
       <section className="lg:col-span-2 rounded-2xl border border-line bg-bg p-6 sm:p-8">
         <h2 className="font-display text-xl font-bold text-ink">
-          Aides applicables — {fees.name}
+          {t("aids_title", { country: fees.name })}
         </h2>
         <ul className="mt-5 grid gap-4 sm:grid-cols-2">
           {fees.aids.map((aid) => (

@@ -13,7 +13,7 @@ export function QuoteBand() {
           {t("text")}
         </blockquote>
         <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:mt-6 md:text-xs">
-          — {t("attribution")}
+          {t("attribution")}
         </p>
       </div>
     </section>

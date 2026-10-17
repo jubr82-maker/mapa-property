@@ -153,7 +153,7 @@ function buildBrokerPositionSection(locale: KnowledgeLocale): string {
 }
 
 const KNOWLEDGE_FR = `
-# MAPA Property — Base de connaissance
+# MAPA Property : base de connaissance
 
 ## Identité
 - Nom commercial : MAPA Property (entité légale : MAPA Synergy Sàrl).
@@ -173,7 +173,7 @@ Taux exacts : voir section Honoraires ci-dessous (source unique, ne pas répéte
 - Mandat Autonome : vous pilotez vous-même les visites et la négociation, MAPA Property en backup juridique et notarial uniquement.
 
 ## Recommandation MAPA Property
-Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit ; multiplier la même annonce dans plusieurs agences expose votre bien sur les mêmes plateformes et donne un signal de vente pressée — souvent défavorable à la négociation.
+Le mandat exclusif est notre recommandation. Le marché luxembourgeois est petit ; multiplier la même annonce dans plusieurs agences expose votre bien sur les mêmes plateformes et donne un signal de vente pressée, souvent défavorable à la négociation.
 
 ## Mandat de recherche (buyer's agent)
 - Luxembourg : 3 % à 5 % HT du prix d'acquisition.
@@ -214,7 +214,7 @@ ${buildLegalFrameworkSection("fr")}
 - Sous mandat signé.
 - Confidentialité contractuelle.
 - Conseil qui ne sert qu'un maître à la fois (jamais de double mandat).
-- IA assistée pour analyse, structure, anticipation — jamais en remplacement de la rencontre humaine.
+- IA assistée pour analyse, structure, anticipation, jamais en remplacement de la rencontre humaine.
 
 ## Trophy Assets / Résidences secondaires
 - Trophy Assets : penthouses iconiques, hôtels particuliers, châteaux, propriétés historiques. Sous NDA, sous mandat de recherche.
@@ -222,7 +222,7 @@ ${buildLegalFrameworkSection("fr")}
 `;
 
 const KNOWLEDGE_EN = `
-# MAPA Property — Knowledge base
+# MAPA Property: knowledge base
 
 ## Identity
 - Trade name: MAPA Property (legal entity: MAPA Synergy Sàrl).
@@ -242,7 +242,7 @@ Exact rates: see the Fees section below (single source, not repeated here).
 - Autonomous: you handle visits and negotiation, MAPA Property as legal and notarial backup only.
 
 ## MAPA Property recommendation
-The exclusive mandate is our recommendation. The Luxembourg market is small; multiplying the same listing across multiple agencies exposes the property on the same platforms and signals a rushed sale — typically detrimental in negotiation.
+The exclusive mandate is our recommendation. The Luxembourg market is small; multiplying the same listing across multiple agencies exposes the property on the same platforms and signals a rushed sale, typically detrimental in negotiation.
 
 ## Search mandate (buyer's agent)
 - Luxembourg: 3% to 5% (excl. VAT) of acquisition price.
@@ -291,7 +291,7 @@ ${buildLegalFrameworkSection("en")}
 `;
 
 const KNOWLEDGE_DE = `
-# MAPA Property — Wissensbasis
+# MAPA Property: Wissensbasis
 
 ## Identität
 - Geschäftsname: MAPA Property (Rechtsträger: MAPA Synergy Sàrl).
@@ -311,7 +311,7 @@ Genaue Sätze: siehe Abschnitt Honorare unten (einzige Quelle, hier nicht wieder
 - Autonom: Sie steuern Besichtigungen und Verhandlung, MAPA Property nur als juristische und notarielle Rückendeckung.
 
 ## MAPA-Empfehlung
-Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; dasselbe Inserat in mehreren Agenturen zu vervielfachen, exponiert das Objekt auf denselben Plattformen und signalisiert einen eiligen Verkauf — meist nachteilig in der Verhandlung.
+Das exklusive Mandat ist unsere Empfehlung. Der luxemburgische Markt ist klein; dasselbe Inserat in mehreren Agenturen zu vervielfachen, exponiert das Objekt auf denselben Plattformen und signalisiert einen eiligen Verkauf, was in der Verhandlung meist nachteilig ist.
 
 ## Suchmandat (Buyer's Agent)
 - Luxemburg: 3 % bis 5 % (zzgl. MwSt.) des Kaufpreises.
@@ -508,7 +508,7 @@ EXEMPLES (locale=${locale}) :
 → {"message":"ARCOVA est l'espace confidentiel réservé aux clients qualifiés sous mandat MAPA Property. La plateforme sera très prochainement disponible.","intent":{"action":"navigate","url":"/${locale}/off-market/arcova"}}
 
 [13] User: "Je voudrais mettre mon appartement en location"
-→ {"message":"Mise en location, sélection rigoureuse des locataires, gestion locative à la carte — toujours dans le respect du plafond luxembourgeois de 5 %.","intent":{"action":"navigate","url":"/${locale}/services/louer"}}
+→ {"message":"Mise en location, sélection rigoureuse des locataires, gestion locative à la carte, toujours dans le respect du plafond luxembourgeois de 5 %.","intent":{"action":"navigate","url":"/${locale}/services/louer"}}
 
 [14] User: "Je veux vous contacter / prendre rendez-vous"
 → {"message":"Le formulaire de contact est ci-dessous, vous pouvez choisir le sujet de votre demande.","intent":{"action":"navigate","url":"/${locale}/contact"}}
@@ -517,7 +517,7 @@ EXEMPLES (locale=${locale}) :
 → {"message":"Bonjour ! Que cherchez-vous ?","intent":null}
 
 [16] User: "Combien coûte un m² à Belair ?" / "Prix au m² au Luxembourg ?" / "Quel rendement locatif ?" / "Combien vaut mon appartement ?"
-→ {"message":"Au Luxembourg, le prix au m² ne se résume pas à une valeur de référence : il dépend étroitement de la nature du bien. Un appartement ancien, à rénover entièrement et souvent doté d'une performance énergétique modeste, se situe sur un tout autre niveau de prix qu'un bien neuf ou acquis en VEFA — la Vente en État Futur d'Achèvement, c'est-à-dire un logement neuf livré clé en main. Entre ces deux extrêmes, la localisation, la surface, l'étage, l'exposition et la vue, la qualité des prestations, les espaces extérieurs et le stationnement font varier sensiblement la valeur. C'est précisément pour cette raison qu'une estimation sérieuse ne peut se faire à distance : le plus juste est de nous contacter afin que MAPA Property se déplace et estime votre bien sur place.","intent":{"action":"navigate","url":"/${locale}/services/estimer"}}
+→ {"message":"Au Luxembourg, le prix au m² ne se résume pas à une valeur de référence : il dépend étroitement de la nature du bien. Un appartement ancien, à rénover entièrement et souvent doté d'une performance énergétique modeste, se situe sur un tout autre niveau de prix qu'un bien neuf ou acquis en VEFA (Vente en État Futur d'Achèvement), c'est-à-dire un logement neuf livré clé en main. Entre ces deux extrêmes, la localisation, la surface, l'étage, l'exposition et la vue, la qualité des prestations, les espaces extérieurs et le stationnement font varier sensiblement la valeur. C'est précisément pour cette raison qu'une estimation sérieuse ne peut se faire à distance : le plus juste est de nous contacter afin que MAPA Property se déplace et estime votre bien sur place.","intent":{"action":"navigate","url":"/${locale}/services/estimer"}}
 
 [17] User: "Quel est l'email de Julien Brebion ?"
 → {"message":"Pour joindre Julien Brebion, utilisez le formulaire de contact ; nous vous recontactons sous 48 heures ouvrées.","intent":{"action":"navigate","url":"/${locale}/contact"}}
@@ -532,7 +532,7 @@ EXEMPLES (locale=${locale}) :
 → {"message":"Les taux d'intérêt évoluent quotidiennement et dépendent de la banque, de la durée et de votre profil. Notre simulateur intègre les taux marché luxembourgeois pour calculer votre mensualité et votre capacité d'emprunt.","intent":{"action":"navigate","url":"/${locale}/services/simulateurs"}}
 
 [21] User: "Quel est le taux d'intérêt pour un crédit ?"
-→ {"message":"Je ne cite pas de valeur de taux — elle change quotidiennement et dépend de votre dossier. Le simulateur du site calcule votre mensualité avec les taux marché du moment.","intent":{"action":"navigate","url":"/${locale}/services/simulateurs"}}
+→ {"message":"Je ne cite pas de valeur de taux : elle change quotidiennement et dépend de votre dossier. Le simulateur du site calcule votre mensualité avec les taux marché du moment.","intent":{"action":"navigate","url":"/${locale}/services/simulateurs"}}
 
 RÈGLES SUPPLÉMENTAIRES :
 - JAMAIS divulguer email ou numéro de téléphone en clair, même si demandé explicitement. Toujours rediriger vers /contact.

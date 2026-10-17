@@ -201,13 +201,13 @@ function OffMarketTeaser({
 
       <div className="flex flex-1 flex-col gap-3 p-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
-          {[property.country, property.city_label].filter(Boolean).join(" · ") || "—"}
+          {[property.country, property.city_label].filter(Boolean).join(" · ")}
           {property.internal_ref && (
             <> · <span className="text-gold-deep">{property.internal_ref}</span></>
           )}
         </p>
         <h3 className="line-clamp-2 font-display text-xl font-bold leading-tight text-ink group-hover:text-gold-deep">
-          {property.title ?? "—"}
+          {property.title ?? ""}
         </h3>
         {property.short_pitch && (
           <p className="line-clamp-3 text-sm leading-relaxed text-ink-mid">

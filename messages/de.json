@@ -1256,7 +1256,8 @@
     "debt_acceptable": "Innerhalb der akzeptablen Grenze für die meisten luxemburgischen Banken.",
     "debt_high": "Über 40 %: schwer einzureichendes Dossier, zu überarbeiten.",
     "disclaimer_eyebrow": "WICHTIGER HINWEIS",
-    "disclaimer_text": "Diese Schätzung ist rein indikativ. Die Kreditgewährung bleibt der finalen Entscheidung der Bank sowie deren eigenen Bedingungen vorbehalten (Bonität, Sicherheiten, Profil). Die ABBL empfiehlt grundsätzlich, vor jeder Verpflichtung einen zugelassenen Makler oder Bankberater zu konsultieren."
+    "disclaimer_text": "Diese Schätzung ist rein indikativ. Die Kreditgewährung bleibt der finalen Entscheidung der Bank sowie deren eigenen Bedingungen vorbehalten (Bonität, Sicherheiten, Profil). Die ABBL empfiehlt grundsätzlich, vor jeder Verpflichtung einen zugelassenen Makler oder Bankberater zu konsultieren.",
+    "capacity_bounds": "{low} bis {high}"
   },
   "fiche": {
     "section_caracteristiques_principales": "Hauptmerkmale",
@@ -1346,7 +1347,8 @@
     "consent_error": "Die Übermittlung ist fehlgeschlagen. Versuchen Sie es erneut oder nutzen Sie unser Kontaktformular."
   },
   "financing_simulator": {
-    "disclaimer": "Haftungsausschluss: indikative Simulation zu Informationszwecken. Die angegebenen Beträge stellen kein Kreditangebot dar. Die von den Banken angewandten Zinssätze variieren je nach Kreditnehmerprofil, Eigenkapital, Sicherheiten, Immobilientyp und Marktlage. Für eine persönliche Analyse kontaktieren Sie MAPA Property für einen Termin mit einem qualifizierten Bankpartner."
+    "disclaimer": "Haftungsausschluss: indikative Simulation zu Informationszwecken. Die angegebenen Beträge stellen kein Kreditangebot dar. Die von den Banken angewandten Zinssätze variieren je nach Kreditnehmerprofil, Eigenkapital, Sicherheiten, Immobilientyp und Marktlage. Für eine persönliche Analyse kontaktieren Sie MAPA Property für einen Termin mit einem qualifizierten Bankpartner.",
+    "aids_title": "Anwendbare Förderungen: {country}"
   },
   "acquisition_simulator": {
     "eyebrow": "Finanzierungsplan",
@@ -4659,6 +4661,7 @@
     },
     "city_properties_title": "Unsere Immobilien in {city}",
     "meta_description_short": "Gesucht: {type} {communes}, Budget {budget}. Referenz {reference}. Kontaktieren Sie MAPA Property vertraulich.",
+    "meta_description_min": "Gesucht: {type} {communes}, Budget {budget}. Referenz {reference}. Vertraulicher Kontakt: MAPA Property.",
     "meta_communes_more": "in {communes} und {n} weiteren Gemeinden"
   },
   "admin_searches": {

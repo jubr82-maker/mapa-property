@@ -37,18 +37,18 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "2. Données collectées",
         paragraphs: [
-          "Données d'identification (nom, prénom, email, téléphone), données patrimoniales (sur sollicitation explicite — capacité financière, projet d'acquisition), données de connexion (IP anonymisée, timestamp, user-agent, pages consultées), préférences (langue, mode jour/nuit, favoris), historique des échanges avec le chatbot Eléna.",
+          "Données d'identification (nom, prénom, email, téléphone), données patrimoniales (sur sollicitation explicite : capacité financière, projet d'acquisition), données de connexion (IP anonymisée, timestamp, user-agent, pages consultées), préférences (langue, mode jour/nuit, favoris), historique des échanges avec le chatbot Eléna.",
         ],
       },
       {
         heading: "3. Finalités et bases légales",
         paragraphs: [
-          "Gestion des demandes de contact et leads — base légale : exécution précontractuelle / consentement.",
-          "Réponse aux demandes off-market sous NDA — base légale : exécution précontractuelle.",
-          "Conformité AML/KYC (loi du 12 novembre 2004) — base légale : obligation légale.",
-          "Sécurité, prévention de la fraude et lutte contre les abus — base légale : intérêt légitime.",
-          "Mesure d'audience anonyme et amélioration du site — base légale : intérêt légitime.",
-          "Communication marketing personnelle (occasionnellement) — base légale : consentement.",
+          "Gestion des demandes de contact et leads (base légale : exécution précontractuelle / consentement).",
+          "Réponse aux demandes off-market sous NDA (base légale : exécution précontractuelle).",
+          "Conformité AML/KYC, selon la loi du 12 novembre 2004 (base légale : obligation légale).",
+          "Sécurité, prévention de la fraude et lutte contre les abus (base légale : intérêt légitime).",
+          "Mesure d'audience anonyme et amélioration du site (base légale : intérêt légitime).",
+          "Communication marketing personnelle, occasionnelle (base légale : consentement).",
         ],
       },
       {
@@ -84,7 +84,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
         ],
         bullets: [
           "Droit d'accès et de rectification.",
-          "Droit à l'effacement (« droit à l'oubli ») dans les conditions de l'article 17 RGPD — délai de réponse 30 jours.",
+          "Droit à l'effacement (« droit à l'oubli ») dans les conditions de l'article 17 RGPD, avec un délai de réponse de 30 jours.",
           "Droit à la limitation du traitement.",
           "Droit à la portabilité de vos données dans un format structuré, lisible par machine.",
           "Droit d'opposition au traitement fondé sur l'intérêt légitime.",
@@ -108,13 +108,13 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "10. Cookies",
         paragraphs: [
-          "Le site utilise des cookies strictement nécessaires à son fonctionnement (préférence de langue, mode jour/nuit, favoris) — toujours actifs, non désactivables. Les cookies de mesure d'audience (statistiques internes, Vercel Analytics, Google Analytics) et, à terme, les cookies marketing (Meta Pixel, Google Ads) ne sont déposés qu'après votre consentement explicite, recueilli via la bannière affichée dès votre première visite. Vous pouvez modifier votre choix à tout moment via le lien « Gérer les cookies » en pied de page.",
+          "Le site utilise des cookies strictement nécessaires à son fonctionnement (préférence de langue, mode jour/nuit, favoris). Ils sont toujours actifs et ne peuvent pas être désactivés. Les cookies de mesure d'audience (statistiques internes, Vercel Analytics, Google Analytics) et, à terme, les cookies marketing (Meta Pixel, Google Ads) ne sont déposés qu'après votre consentement explicite, recueilli via la bannière affichée dès votre première visite. Vous pouvez modifier votre choix à tout moment via le lien « Gérer les cookies » en pied de page.",
         ],
       },
       {
         heading: "11. Recours",
         paragraphs: [
-          "Si vous estimez que vos droits ne sont pas respectés, vous pouvez introduire une réclamation auprès de la Commission nationale pour la protection des données (CNPD) du Luxembourg : 15, boulevard du Jazz, L-4370 Belvaux — www.cnpd.lu.",
+          "Si vous estimez que vos droits ne sont pas respectés, vous pouvez introduire une réclamation auprès de la Commission nationale pour la protection des données (CNPD) du Luxembourg : 15, boulevard du Jazz, L-4370 Belvaux (www.cnpd.lu).",
         ],
       },
       {
@@ -193,13 +193,13 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "10. Cookies",
         paragraphs: [
-          "The site uses strictly necessary cookies (language preference, dark/light mode, favourites) — always active, cannot be disabled. Audience-measurement cookies (internal statistics, Vercel Analytics, Google Analytics) and, in the future, marketing cookies (Meta Pixel, Google Ads) are only set after your explicit consent, collected via the banner shown on your first visit. You can change your choice at any time via the \"Manage cookies\" link in the footer.",
+          "The site uses strictly necessary cookies (language preference, dark/light mode, favourites). They are always active and cannot be disabled. Audience-measurement cookies (internal statistics, Vercel Analytics, Google Analytics) and, in the future, marketing cookies (Meta Pixel, Google Ads) are only set after your explicit consent, collected via the banner shown on your first visit. You can change your choice at any time via the \"Manage cookies\" link in the footer.",
         ],
       },
       {
         heading: "11. Complaints",
         paragraphs: [
-          "Luxembourg Data Protection Commission (CNPD): www.cnpd.lu — 15, boulevard du Jazz, L-4370 Belvaux.",
+          "Luxembourg Data Protection Commission (CNPD): www.cnpd.lu, 15, boulevard du Jazz, L-4370 Belvaux.",
         ],
       },
       {
@@ -278,7 +278,7 @@ export const rgpd: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "10. Cookies",
         paragraphs: [
-          "Die Website verwendet unbedingt erforderliche Cookies (Sprachpräferenz, Hell/Dunkel-Modus, Favoriten) — immer aktiv, nicht deaktivierbar. Statistik-Cookies (interne Statistik, Vercel Analytics, Google Analytics) und künftig Marketing-Cookies (Meta Pixel, Google Ads) werden erst nach Ihrer ausdrücklichen Einwilligung gesetzt, die über das beim ersten Besuch angezeigte Banner eingeholt wird. Sie können Ihre Wahl jederzeit über den Link „Cookies verwalten“ im Footer ändern.",
+          "Die Website verwendet unbedingt erforderliche Cookies (Sprachpräferenz, Hell/Dunkel-Modus, Favoriten). Sie sind immer aktiv und können nicht deaktiviert werden. Statistik-Cookies (interne Statistik, Vercel Analytics, Google Analytics) und künftig Marketing-Cookies (Meta Pixel, Google Ads) werden erst nach Ihrer ausdrücklichen Einwilligung gesetzt, die über das beim ersten Besuch angezeigte Banner eingeholt wird. Sie können Ihre Wahl jederzeit über den Link „Cookies verwalten“ im Footer ändern.",
         ],
       },
       {
