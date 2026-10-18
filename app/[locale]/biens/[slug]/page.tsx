@@ -30,10 +30,7 @@ import { FicheLocation } from "@/components/property/fiche/FicheLocation";
 import { FicheAdvisorColumn } from "@/components/property/fiche/FicheAdvisorColumn";
 import { PrintAdvisorContact } from "@/components/property/fiche/PrintAdvisorContact";
 import { SignatureLine } from "@/components/ui/SignatureLine";
-import {
-  parseApimoDescription,
-  ALL_SECTION_TITLE_KEYS,
-} from "@/lib/property-description-parser";
+import { clipText, descriptionBlocks, descriptionPlainText, descriptionSummary } from "@/lib/listing/description-text";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { realEstateListing } from "@/lib/seo";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
@@ -182,7 +179,7 @@ export async function generateMetadata({
   const sp = seoProperty(property);
   const description =
     seoMetaDescription(listingColumnsOf(property), sanitizeListingData(property.listing_data ?? null), lang, { vocab: ctx.vocab, seo: ctx.seo, fallbackType: ctx.subtypes[sp.property_type ?? ""] }) ||
-    metaDescription(pickLang(property, "description", locale as Locale));
+    metaDescription(descriptionPlainText(pickLang(property, "description", locale as Locale)));
   const pageTitle = seoTitle(sp, lang, { ...ctx, fallbackType: ctx.subtypes[sp.property_type ?? ""] });
   const images = await fetchPropertyImages(property.id);
   // Carte de partage : photo principale de l'admin, sinon image du site.
@@ -242,16 +239,9 @@ export default async function PropertyPage({
   // texte complet reste en base pour les exports vers les portails.
   const split = splitCommonMentions(pickLang(property, "description", locale as Locale) ?? "", seoCtx.seo.common_start);
   const description = split.body;
-  // Sprint UI-I18N : on construit le dict { titleKey -> label localise }
-  // depuis le namespace fiche.section_* et on le passe au parser pour
-  // que les titres H3/H4 detectes (FR/EN/DE) soient rendus dans la
-  // locale courante au lieu d'etre hardcodes en FR.
-  const sectionTitles = Object.fromEntries(
-    ALL_SECTION_TITLE_KEYS.map((k) => [k, tf(`section_${k}`)]),
-  );
-  const parsedDescription = parseApimoDescription(description, {
-    titles: sectionTitles,
-  });
+  // Oct. 2026 : description structuree a l'affichage (paragraphes, listes,
+  // gras, sans hashtags) ; resume et donnees structurees en texte court.
+  const summary = clipText(descriptionSummary(description), 280);
 
   type GalleryItem = { type: "image" | "video"; url: string; alt?: string };
   // Galerie photos uniquement — la vidéo est isolée en pleine largeur (cf. <section> ci-dessous).
@@ -305,7 +295,7 @@ export default async function PropertyPage({
 
   const propertyJsonLd = realEstateListing({
     name: title,
-    description: htmlToPlainText(description).slice(0, 500),
+    description: clipText(descriptionPlainText(description), 500),
     url: `${SITE_URL}/${locale}${canonicalPath}`,
     images: galleryItems.map((g) => g.url).slice(0, 12),
     datePosted: (property as { created_at?: string | null }).created_at ?? null,
@@ -348,9 +338,7 @@ export default async function PropertyPage({
     { label: t("terrace_surface"), value: property.terrace_surface ? formatSurface(property.terrace_surface, locale) : "" },
   ];
 
-  const hasDescription =
-    !!description &&
-    (parsedDescription.intro || parsedDescription.chapters.length > 0);
+  const hasDescription = descriptionBlocks(description).length > 0;
 
   const panels = [
     {
@@ -365,9 +353,7 @@ export default async function PropertyPage({
             {title}
           </p>
           <p className="text-sm leading-relaxed text-ink-mid">
-            {parsedDescription.intro
-              ? parsedDescription.intro.slice(0, 280)
-              : tf("overview_intro")}
+            {summary || tf("overview_intro")}
           </p>
         </div>
       ),
@@ -377,13 +363,10 @@ export default async function PropertyPage({
       label: tf("tab_description"),
       content: hasDescription ? (
         <>
-          <PropertyMagazineDescription
-            description={description}
-            parsed={parsedDescription}
-          />
+          <PropertyMagazineDescription description={description} />
           {split.common ? (
             <section data-listing-mentions className="mt-8 border-t border-line pt-6">
-              <PropertyMagazineDescription description={split.common} parsed={parseApimoDescription(split.common, { titles: sectionTitles })} />
+              <PropertyMagazineDescription description={split.common} />
             </section>
           ) : null}
         </>

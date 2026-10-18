@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { descriptionPlainText } from "@/lib/listing/description-text";
 import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -211,7 +212,7 @@ function OffMarketTeaser({
         </h3>
         {property.short_pitch && (
           <p className="line-clamp-3 text-sm leading-relaxed text-ink-mid">
-            {property.short_pitch}
+            {descriptionPlainText(property.short_pitch)}
           </p>
         )}
         <PropertyPrice

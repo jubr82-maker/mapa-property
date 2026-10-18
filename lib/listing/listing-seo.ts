@@ -10,6 +10,7 @@
 import { formatArea, formatMoney, parseTypeNoun, plural } from "@/lib/listing/language";
 import type { ListingLang } from "@/lib/listing/listing-data";
 import { htmlToText, renderTemplate } from "@/lib/listing/template-engine";
+import { cleanInline } from "@/lib/listing/description-text";
 import { listingValues, type ListingColumns, type ListingVocab } from "@/lib/listing/generate";
 import { CHILD_TO_PARENT } from "@/lib/taxonomy/property-types";
 import type { ListingData } from "@/lib/listing/listing-data";
@@ -191,7 +192,7 @@ export function seoFactsDescription(
   // "Terrain viabilise" au fil de la phrase (l'allemand garde ses majuscules).
   const lower = (v: string | null | undefined) => (v && lang !== "de" ? v.charAt(0).toLocaleLowerCase(lang) + v.slice(1) : v ?? "");
   const first = renderTemplate(head, { ...values, viabilisation: lower(values.viabilisation), stationnement_interieur: lower(values.stationnement_interieur), garage: lower(values.garage), type: typeName(cols.property_type, lang, ctx.vocab.types, ctx.fallbackType), surface }).replace(/\s*\n\s*/g, " ").trim();
-  const highlight = (data.written[lang].highlights.split(/\n+/).map((x) => x.trim().replace(/^[-•*]\s*/, "")).find(Boolean) ?? "").replace(/[.\s]+$/, "");
+  const highlight = cleanInline(data.written[lang].highlights.split(/\n+/).map((x) => cleanInline(x.trim().replace(/^[-–—•*]\s*/, ""))).find(Boolean) ?? "").replace(/[.\s]+$/, "");
   const atout = highlight ? `${highlight}.` : "";
   const price = !cols.price_on_demand && pos(cols.price) ? (rent ? ctx.seo.meta_rent_price.replace("{prix}", formatMoney(cols.price, lang)) : formatMoney(cols.price, lang)) : "";
   const exclusive = cols.mandate_type === "exclusive" ? (rent ? ctx.seo.meta_exclusive_rent : ctx.seo.meta_exclusive_sale) : "";
@@ -213,7 +214,7 @@ export function seoMetaDescription(
   lang: ListingLang,
   ctx: { vocab: ListingVocab; seo: ListingSeoVocab; fallbackType?: string },
 ): string {
-  const manual = data.written[lang].seo_description.trim();
+  const manual = cleanInline(data.written[lang].seo_description);
   return manual || seoFactsDescription(cols, data, lang, ctx);
 }
 

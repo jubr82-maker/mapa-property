@@ -37,17 +37,24 @@ const NAMED_ENTITIES: Record<string, string> = {
   sup2: "²",
 };
 
+/** Decode les entites HTML (numeriques et nommees courantes). */
+export function decodeEntities(s: string): string {
+  return s
+    .replace(/&#(\d+);/g, (_, d: string) => String.fromCodePoint(Number(d)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h: string) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&([a-z0-9]+);/gi, (m, name: string) => NAMED_ENTITIES[name.toLowerCase()] ?? " ");
+}
+
 /** Retire balises et entites HTML, normalise les espaces. */
 export function htmlToPlainText(html: string | null | undefined): string {
   if (!html) return "";
   return (
-    html
-      // Fin de bloc = separation de mots ("</p><p>" ne colle pas deux phrases).
-      .replace(/<(br|\/p|\/div|\/li|\/h[1-6])\b[^>]*>/gi, " ")
-      .replace(/<[^>]*>/g, "")
-      .replace(/&#(\d+);/g, (_, d: string) => String.fromCodePoint(Number(d)))
-      .replace(/&#x([0-9a-f]+);/gi, (_, h: string) => String.fromCodePoint(parseInt(h, 16)))
-      .replace(/&([a-z0-9]+);/gi, (m, name: string) => NAMED_ENTITIES[name.toLowerCase()] ?? " ")
+    decodeEntities(
+      html
+        // Fin de bloc = separation de mots ("</p><p>" ne colle pas deux phrases).
+        .replace(/<(br|\/p|\/div|\/li|\/h[1-6])\b[^>]*>/gi, " ")
+        .replace(/<[^>]*>/g, ""),
+    )
       // Chevrons issus du decodage (&lt;) : jamais dans une meta.
       .replace(/[<>]/g, " ")
       .replace(/\s+/g, " ")

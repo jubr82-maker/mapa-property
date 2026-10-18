@@ -1,69 +1,51 @@
 /**
- * highlightTitles — POL3-P1-FIX + POL4-A4 (MARC)
+ * highlightTitles : rendu des descriptions de biens et d'off-market.
  *
- * Deux modes selon le contenu entrant :
- *  1. HTML formaté (commence par `<`) — descriptions saisies via TipTap
- *     dans l'admin (off-market ELISE / Apimo CAMILLE). On sanitize
- *     strictement (whitelist p/strong/em/br) et on rend tel quel.
- *     Pas de re-détection de titres : l'admin a déjà mis en gras ce
- *     qu'il voulait via Cmd+B.
- *  2. Texte brut Apimo (legacy) — détecte les "titres internes"
- *     (pattern `^Mot/groupe :` en début de ligne) et les wrappe en
- *     <strong> font-semibold. Logique POL3-P1-FIX préservée intacte.
+ * Oct. 2026 : un seul chemin pour le texte brut Apimo et le HTML de
+ * l'editeur admin, via lib/listing/description-text.ts (intertitres,
+ * paragraphes, listes a puces, gras, italique ; hashtags retires). Tout
+ * est rendu comme du texte par React : aucun HTML de la base n'est injecte.
+ * Le label "Mot/groupe :" en debut de paragraphe reste en gras (ancien
+ * rendu POL3-P1-FIX).
  *
- * Aucune police hardcodée ici : <strong>/<em> héritent de la police du
- * wrapper parent (PropertyMagazineDescription → Archivo sans-serif).
+ * Aucune police ici : <strong>/<em> heritent du conteneur parent
+ * (PropertyMagazineDescription, pitch off-market).
  */
-import sanitizeHtml from "sanitize-html";
 import type { ReactNode } from "react";
+import { descriptionBlocks, type Run } from "@/lib/listing/description-text";
 
-// "<mot/groupe d'au plus 60 chars en lettres/espaces/apostrophes/tirets> :
-//   (reste optionnel)". Accepte l'apostrophe typographique U+2019.
-const TITLE_REGEX = /^([A-Za-zÀ-ÿ'’\- ]{3,60})\s*:\s*(.*)$/;
+function runs(list: Run[]): ReactNode {
+  return list.map((r, i) => {
+    let node: ReactNode = r.text;
+    if (r.italic) node = <em>{node}</em>;
+    if (r.bold) node = <strong className="font-semibold">{node}</strong>;
+    return <span key={i}>{node}</span>;
+  });
+}
 
 export function highlightTitles(text: string | null | undefined): ReactNode {
-  if (!text) return null;
-  // POL4-A4 (MARC) : HTML formaté (TipTap) → sanitize strict, pas de
-  // re-détection regex (l'admin a déjà mis en gras manuellement).
-  // Sprint HTML-RENDERING C2 : whitelist elargie aux listes (ul/ol/li)
-  // + tags alternatifs (b/i, alias de strong/em utilises par certains
-  // editeurs WYSIWYG et par Apimo). Aucun attribut. Tout le reste stripe.
-  if (text.trim().startsWith("<")) {
-    const clean = sanitizeHtml(text, {
-      allowedTags: ["p", "strong", "em", "b", "i", "br", "ul", "ol", "li"],
-      allowedAttributes: {},
-    });
-    return <div dangerouslySetInnerHTML={{ __html: clean }} />;
-  }
-  // Texte brut Apimo (legacy) — logique POL3-P1-FIX préservée.
-  // Sprint HTML-RENDERING C3 : normalise <br><br> en \n\n avant le
-  // split pour reconnaitre les sauts de paragraphes en pseudo-HTML.
-  // Apimo livre parfois EN/DE en texte plat avec <br><br> intercales
-  // (cas mixte). Sans normalisation, tout finit dans 1 seul <p>.
-  const normalized = text
-    .replace(/<br\s*\/?>\s*<br\s*\/?>/gi, "\n\n")
-    .replace(/<br\s*\/?>/gi, "\n");
-  const paragraphs = normalized
-    .split(/\n\s*\n|\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-  return paragraphs.map((para, i) => {
-    const m = para.match(TITLE_REGEX);
-    if (m) {
-      const title = m[1].trim();
-      const rest = m[2]?.trim();
-      if (title.length <= 60 && /^[A-ZÀ-Ý]/.test(title)) {
-        return (
-          <p key={i} className="mb-4">
-            <strong className="font-semibold">{title} :</strong>
-            {rest ? <> {rest}</> : null}
-          </p>
-        );
-      }
+  const blocks = descriptionBlocks(text);
+  if (!blocks.length) return null;
+  return blocks.map((b, i) => {
+    if (b.kind === "heading") {
+      return (
+        <h3 key={i} className="mb-2 font-semibold">
+          {b.text}
+        </h3>
+      );
+    }
+    if (b.kind === "ul") {
+      return (
+        <ul key={i} className="mb-4 list-disc space-y-1 pl-5">
+          {b.items.map((it, j) => (
+            <li key={j}>{runs(it)}</li>
+          ))}
+        </ul>
+      );
     }
     return (
       <p key={i} className="mb-4">
-        {para}
+        {runs(b.runs)}
       </p>
     );
   });
