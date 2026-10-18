@@ -25,6 +25,7 @@ import {
   type TypeNoun,
 } from "@/lib/listing/language";
 import { renderTemplate, textToHtml, type TemplateFlags, type TemplateValues } from "@/lib/listing/template-engine";
+import { templateEnding } from "@/lib/listing/common-mentions";
 
 /** Vocabulaire d'une langue (messages listing_model.vocab, lus en brut). */
 export type ListingVocab = {
@@ -282,6 +283,24 @@ export function generateListing(
   const text = renderTemplate(templates.tronc, all, flags);
   const title = renderTemplate(templates.title, all, flags).replace(/\s*\n\s*/g, " ").trim();
   return { title, text, html: textToHtml(text) };
+}
+
+/**
+ * Fin standard d'une annonce (oct. 2026) : la partie fin du tronc, telle que
+ * generateListing la produit pour ce bien (exclusif ou non, vente ou
+ * location), depuis la premiere ligne qui commence par un repere des
+ * mentions communes. HTML de l'editeur ; vide si le tronc n'a pas de fin.
+ */
+export function generateEnding(
+  cols: ListingColumns,
+  data: ListingData,
+  lang: ListingLang,
+  templates: ListingTemplates,
+  vocab: ListingVocab,
+  markers: string[],
+): string {
+  const ending = templateEnding(generateListing(cols, data, lang, templates, vocab).text, markers);
+  return ending ? textToHtml(ending) : "";
 }
 
 export const LEVEL_KIND_ORDER: LevelKind[] = ["basement", "ground", "garden", "floor", "mezzanine", "attic"];

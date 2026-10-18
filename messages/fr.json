@@ -4317,8 +4317,17 @@
       "bedrooms": "1 chambre|{n} chambres",
       "path_bedrooms": "{n} chambre|{n} chambres",
       "common_start": [
+        "Une exclusivité MAPA Property",
+        "Une co-exclusivité MAPA Property",
         "Pour toute demande",
-        "Julien Brebion, Real Estate Director"
+        "Pour tout renseignement",
+        "Julien Brebion, Real Estate Director",
+        "Vous souhaitez vendre ou louer",
+        "Pour une estimation immobilière",
+        "Service multilingue",
+        "Annonce diffusée",
+        "Toute reproduction",
+        "Vente exclusive MAPA Property"
       ],
       "alt_room": "{room}, {place}",
       "alt_place": "{type} à {city}",

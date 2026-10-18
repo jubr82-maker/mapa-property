@@ -142,19 +142,8 @@ export function seoTitle(
   return candidates[candidates.length - 1];
 }
 
-/** Corps de l'annonce et mentions communes, separes au premier paragraphe commun. */
-export function splitCommonMentions(html: string, markers: string[]): { body: string; common: string } {
-  const src = String(html ?? "");
-  const paragraphs = src.match(/<p[^>]*>[\s\S]*?<\/p>/gi);
-  if (!paragraphs || !markers.length) return { body: src, common: "" };
-  const idx = paragraphs.findIndex((p) => {
-    const text = htmlToText(p);
-    return markers.some((m) => m && text.startsWith(m));
-  });
-  if (idx <= 0) return { body: src, common: "" };
-  const cut = src.indexOf(paragraphs[idx]);
-  return { body: src.slice(0, cut), common: src.slice(cut) };
-}
+// Corps de l'annonce et fin ecrite a la main (oct. 2026) : lib/listing/common-mentions.ts.
+export { splitCommonMentions } from "@/lib/listing/common-mentions";
 
 // Mots qui ne terminent jamais une description coupee : prepositions,
 // articles, conjonctions et participes des modeles (situe, construit...).

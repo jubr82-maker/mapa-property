@@ -4,7 +4,7 @@
 // defaut d'une piece (titre, tronc commun ou bloc d'une famille) dans une
 // langue. Table listing_templates (SQL 17), ecriture admin seulement (RLS
 // is_mapa_admin). Chaque changement est inscrit au journal.
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { ActionFailure, dbFailure, runAction, sessionFailure, type ActionResult } from "@/lib/admin/action-result";
@@ -13,6 +13,16 @@ import { logAdminAction } from "@/lib/pilotage/audit";
 import { LISTING_LANGS, type ListingLang } from "@/lib/listing/listing-data";
 import { isTemplatePart } from "@/lib/listing/families";
 import { checkFields, describeIssues, templateLiteral } from "@/lib/listing/writing-check";
+import { LISTING_TEMPLATES_TAG } from "@/lib/listing/public-templates";
+import { revalidatePublicPropertyPages } from "@/lib/revalidate-property";
+
+// Le tronc donne la fin standard des fiches publiques : elles sont
+// regenerees a leur prochaine visite.
+function revalidatePublicEnding(part: string): void {
+  if (part !== "tronc") return;
+  revalidateTag(LISTING_TEMPLATES_TAG, { expire: 0 });
+  revalidatePublicPropertyPages();
+}
 
 const MAX_BODY = 20000;
 
@@ -44,6 +54,7 @@ export async function saveListingTemplate(lang: string, part: string, body: stri
       .upsert({ lang: target.lang, part: target.part, body: text, updated_by: admin.user.email ?? null, updated_at: new Date().toISOString() }, { onConflict: "lang,part" });
     if (error) throw await dbFailure(error, "saveListingTemplate");
     await logAdminAction({ actorEmail: admin.user.email, action: "listing_template_changed", targetTable: "listing_templates", targetId: `${target.lang}:${target.part}`, diff: { op: "save", length: text.length } });
+    revalidatePublicEnding(target.part);
     revalidatePath("/admin/settings/modeles");
   });
 }
@@ -56,6 +67,7 @@ export async function resetListingTemplate(lang: string, part: string): Promise<
     const { error } = await admin.supabase.from("listing_templates").delete().eq("lang", target.lang).eq("part", target.part);
     if (error) throw await dbFailure(error, "resetListingTemplate");
     await logAdminAction({ actorEmail: admin.user.email, action: "listing_template_changed", targetTable: "listing_templates", targetId: `${target.lang}:${target.part}`, diff: { op: "reset" } });
+    revalidatePublicEnding(target.part);
     revalidatePath("/admin/settings/modeles");
   });
 }

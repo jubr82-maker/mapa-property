@@ -40,7 +40,8 @@ import { siteShareImage } from "@/lib/og";
 import { transactionDetailLabel } from "@/lib/taxonomy/property-types";
 import { effectiveBadge } from "@/lib/listing/families";
 import { photoAlt, seoMetaDescription, seoTitle, splitCommonMentions, typeName, type SeoProperty } from "@/lib/listing/listing-seo";
-import type { ListingColumns } from "@/lib/listing/generate";
+import { generateEnding, type ListingColumns } from "@/lib/listing/generate";
+import { publicListingTemplates } from "@/lib/listing/public-templates";
 import { propertyPathFor, propertyPaths, seoContext } from "@/lib/listing/property-paths";
 import { sanitizeListingData, type ListingLang } from "@/lib/listing/listing-data";
 import { fetchSearchesForCity } from "@/lib/searches/data";
@@ -63,6 +64,9 @@ function seoProperty(p: Property): SeoProperty {
     price_on_demand: (p as { price_on_demand?: boolean }).price_on_demand ?? false,
   };
 }
+
+/** Reperes de la fin ecrite a la main, des trois langues (texte non traduit compris). */
+const ALL_COMMON_MARKERS = (["fr", "en", "de"] as const).flatMap((l) => seoContext(l).seo.common_start);
 
 /** Colonnes du bien lues par le modele (meta description). */
 function listingColumnsOf(p: Property): ListingColumns {
@@ -179,7 +183,7 @@ export async function generateMetadata({
   const sp = seoProperty(property);
   const description =
     seoMetaDescription(listingColumnsOf(property), sanitizeListingData(property.listing_data ?? null), lang, { vocab: ctx.vocab, seo: ctx.seo, fallbackType: ctx.subtypes[sp.property_type ?? ""] }) ||
-    metaDescription(descriptionPlainText(pickLang(property, "description", locale as Locale)));
+    metaDescription(descriptionPlainText(splitCommonMentions(pickLang(property, "description", locale as Locale) ?? "", ALL_COMMON_MARKERS).body));
   const pageTitle = seoTitle(sp, lang, { ...ctx, fallbackType: ctx.subtypes[sp.property_type ?? ""] });
   const images = await fetchPropertyImages(property.id);
   // Carte de partage : photo principale de l'admin, sinon image du site.
@@ -237,8 +241,15 @@ export default async function PropertyPage({
   // Mentions communes (cloture, signature, service multilingue, copyright)
   // affichees dans un bloc distinct, hors du corps de la description. Le
   // texte complet reste en base pour les exports vers les portails.
-  const split = splitCommonMentions(pickLang(property, "description", locale as Locale) ?? "", seoCtx.seo.common_start);
+  // Oct. 2026 : la fin affichee est celle du modele (Parametres > Modeles
+  // d'annonces), remplie avec les donnees du bien ; la fin ecrite a la main
+  // dans la description n'est pas affichee (jamais deux fins). Sans fin
+  // dans le tronc, l'ancienne fin reste affichee.
+  const split = splitCommonMentions(pickLang(property, "description", locale as Locale) ?? "", ALL_COMMON_MARKERS);
   const description = split.body;
+  const ending =
+    generateEnding(listingColumnsOf(property), sanitizeListingData(property.listing_data ?? null), lang, await publicListingTemplates(lang), seoCtx.vocab, seoCtx.seo.common_start) ||
+    split.common;
   // Oct. 2026 : description structuree a l'affichage (paragraphes, listes,
   // gras, sans hashtags) ; resume et donnees structurees en texte court.
   const summary = clipText(descriptionSummary(description), 280);
@@ -361,19 +372,21 @@ export default async function PropertyPage({
     {
       id: "description",
       label: tf("tab_description"),
-      content: hasDescription ? (
+      content: (
         <>
-          <PropertyMagazineDescription description={description} />
-          {split.common ? (
+          {hasDescription ? (
+            <PropertyMagazineDescription description={description} />
+          ) : (
+            <p className="text-sm leading-relaxed text-ink-mid">
+              {tf("overview_intro")}
+            </p>
+          )}
+          {ending ? (
             <section data-listing-mentions className="mt-8 border-t border-line pt-6">
-              <PropertyMagazineDescription description={split.common} />
+              <PropertyMagazineDescription description={ending} />
             </section>
           ) : null}
         </>
-      ) : (
-        <p className="text-sm leading-relaxed text-ink-mid">
-          {tf("overview_intro")}
-        </p>
       ),
     },
     {

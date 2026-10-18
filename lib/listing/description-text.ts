@@ -185,7 +185,9 @@ function paragraphRuns(s: string): Run[] {
   if (!s.includes("**")) {
     const m = s.match(LABEL_LINE);
     if (m && m[2] && /^[A-ZÀ-Ý]/.test(m[1].trim())) {
-      return [{ text: `${m[1].trim()} :`, bold: true }, ...toRuns(` ${m[2]}`).map((r, i) => (i === 0 ? { ...r, text: ` ${r.text}` } : r))];
+      // Label en gras avec ses deux-points tels qu'ecrits ("Surface :", "Price:").
+      const label = s.slice(0, s.indexOf(":") + 1).trim();
+      return [{ text: label, bold: true }, ...toRuns(` ${m[2]}`).map((r, i) => (i === 0 ? { ...r, text: ` ${r.text}` } : r))];
     }
   }
   return toRuns(s);

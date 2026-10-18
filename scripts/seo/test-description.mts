@@ -7,6 +7,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createElement, Fragment } from "react";
 import { descriptionBlocks, descriptionPlainText, descriptionSummary, clipText } from "../../lib/listing/description-text";
 import { highlightTitles } from "../../lib/formatting/highlightTitles";
+import { splitCommonMentions } from "../../lib/listing/common-mentions";
+import { generateEnding, type ListingColumns } from "../../lib/listing/generate";
+import { emptyListingData } from "../../lib/listing/listing-data";
+import { htmlToText } from "../../lib/listing/template-engine";
 
 const root = join(import.meta.dirname, "..", "..");
 const read = (f: string) => readFileSync(join(root, f), "utf8");
@@ -66,7 +70,7 @@ test("texte brut a retours a la ligne et puces variees", () => {
 test("phrase d'introduction, tiret colle, element isole, separateur", () => {
   const b = descriptionBlocks("Il se compose aujourd’hui de :\n– Trois chambres,\n– Une salle de bain.\n⸻\nCinq niveaux :\n-sous-sol\n- rez-de-chaussée\n\n— Source: MAPA Property, © 2026.");
   assert.deepEqual(b.map((x) => x.kind), ["p", "ul", "heading", "ul", "p"]);
-  assert.equal(descriptionPlainText("— Source: MAPA Property, © 2026."), "Source : MAPA Property, © 2026.");
+  assert.equal(descriptionPlainText("— Source: MAPA Property, © 2026."), "Source: MAPA Property, © 2026.");
   assert.equal((descriptionBlocks("Détails de l'Appartement :\n- A\n- B")[0] as { kind: string }).kind, "heading");
   // Liste aeree (ligne vide entre chaque element) : une seule liste.
   assert.deepEqual(descriptionBlocks("- A\n\n- B\n\n- C").map((x) => x.kind), ["ul"]);
@@ -86,9 +90,61 @@ test("long bloc d'un seul tenant decoupe en paragraphes", () => {
 
 test("pages branchees sur le rendu commun", () => {
   const fiche = read("app/[locale]/biens/[slug]/page.tsx");
-  assert.ok(fiche.includes("descriptionPlainText(pickLang(property, \"description\"") && fiche.includes("clipText(descriptionPlainText(description), 500)") && fiche.includes("descriptionSummary(description)"));
+  assert.ok(fiche.includes("descriptionPlainText(splitCommonMentions(pickLang(property, \"description\"") && fiche.includes("clipText(descriptionPlainText(description), 500)") && fiche.includes("descriptionSummary(description)"));
   assert.ok(!read("lib/formatting/highlightTitles.tsx").includes("dangerouslySetInnerHTML"));
   assert.ok(read("app/[locale]/off-market/page.tsx").includes("descriptionPlainText(property.short_pitch)"));
+});
+
+// --- Fin standard des annonces (oct. 2026) ---------------------------------
+const msgs = (l: "fr" | "en" | "de") => JSON.parse(read(`messages/${l}.json`)).listing_model;
+const ALL = (["fr", "en", "de"] as const).flatMap((l) => msgs(l).seo.common_start as string[]);
+const cols = (transaction: string, mandate: string | null) =>
+  ({ property_type: "maison", transaction, mandate_type: mandate, city: "Steinfort", year_built: null, surface: null, living_surface: null, usable_surface: null, land_surface: null, terrace_surface: null, balcony_surface: null, garden_surface: null, bedrooms: null, parking: null, has_pool: false, floor: null, price: null, price_on_demand: false, current_use: null }) as ListingColumns;
+const endingText = (l: "fr" | "en" | "de", transaction: string, mandate: string | null) => {
+  const m = msgs(l);
+  return htmlToText(generateEnding(cols(transaction, mandate), emptyListingData(), l, { title: m.title, tronc: m.tronc, blocks: m.blocks }, m.vocab, m.seo.common_start)).replace(/\n{3,}/g, "\n\n").trim();
+};
+
+test("fin du modele : vente exclusive, location, non exclusif", () => {
+  const fr = endingText("fr", "sale", "exclusive");
+  assert.ok(fr.startsWith("Une exclusivité MAPA Property.\n\nPour toute demande, contactez-nous depuis le bouton ci-dessous."), fr);
+  assert.ok(fr.includes("Annonce diffusée en vente exclusive par MAPA Property.") && fr.endsWith("Toute reproduction ou diffusion, totale ou partielle, sans autorisation est interdite."), fr);
+  assert.ok(endingText("fr", "rent", "exclusive").includes("Annonce diffusée en location exclusive par MAPA Property."));
+  const simple = endingText("fr", "sale", null);
+  assert.ok(simple.startsWith("Pour toute demande") && !simple.includes("exclusiv") && !simple.includes("Annonce diffusée"), simple);
+  assert.ok(endingText("en", "sale", "exclusive").includes("Listing published as an exclusive sale by MAPA Property."));
+  assert.ok(endingText("de", "sale", "exclusive").includes("Anzeige im Exklusivverkauf von MAPA Property veröffentlicht."));
+  for (const l of ["fr", "en", "de"] as const) for (const tx of ["sale", "rent"]) for (const md of ["exclusive", "simple", null]) {
+    const e = endingText(l, tx, md);
+    assert.ok(e && !/[–—]/.test(e) && !/\{\{|\[\[/.test(e), `${l} ${tx} ${md}: ${e}`);
+  }
+  // Ponctuation du modele par defaut : espace avant "?", virgules entre les langues.
+  assert.ok(endingText("fr", "sale", null).includes("votre bien ? Profitez") && endingText("fr", "sale", null).includes("luxembourgeois, français, anglais, allemand et italien."));
+});
+
+test("ancienne fin ecrite a la main : reperee, jamais affichee en double", () => {
+  // Fin dans un seul paragraphe, separee par des <br> (cas Apimo).
+  const body = "<p>" + "Belle maison familiale avec jardin. ".repeat(12) + "<br><br><strong>Une exclusivité MAPA Property.</strong><br><br>Pour toute demande, contactez-nous.<br>Toute reproduction interdite.</p>";
+  const s = splitCommonMentions(body, ALL);
+  assert.equal(s.body + s.common, body);
+  assert.ok(s.body.endsWith("jardin. <br><br>") && s.common.startsWith("<strong>Une exclusivité"), s.common.slice(0, 40));
+  // Fin collee dans une phrase (cas Dubai) et repere d'une autre langue.
+  const dubai = "Appartement de prestige avec vue. ".repeat(10) + "Ne manquez pas cette opportunité. Pour une estimation immobilière gratuite, contactez-nous: #mapaproperty";
+  assert.ok(splitCommonMentions(dubai, ALL).body.trim().endsWith("Ne manquez pas cette opportunité."));
+  // Repere en debut d'annonce (30 % premiers) : pas une fin.
+  const early = "<p>Pour toute demande de visite, appelez-nous.</p><p>" + "Maison lumineuse. ".repeat(20) + "</p>";
+  assert.equal(splitCommonMentions(early, ALL).common, "");
+  assert.equal(splitCommonMentions("<p>Texte Apimo sans mentions.</p>", ALL).common, "");
+});
+
+test("fiche : fin du modele affichee, corps sans ancienne fin, meta et donnees structurees sans mentions", () => {
+  const fiche = read("app/[locale]/biens/[slug]/page.tsx");
+  assert.ok(fiche.includes("generateEnding(listingColumnsOf(property)") && fiche.includes("await publicListingTemplates(lang)"));
+  assert.ok(fiche.includes("<PropertyMagazineDescription description={ending} />") && fiche.includes("const description = split.body;"));
+  assert.ok(fiche.includes("clipText(descriptionPlainText(description), 500)"));
+  const actions = read("app/admin/settings/modeles/actions.ts");
+  assert.equal((actions.match(/revalidatePublicEnding\(target\.part\)/g) ?? []).length, 2);
+  assert.ok(read("supabase/sql/29_tronc_annonces_lecture_publique.sql").includes("USING (part = 'tronc')"));
 });
 
 console.log(`${pass} PASS, 0 FAIL`);
