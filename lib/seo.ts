@@ -39,10 +39,12 @@ export const AREA_SERVED = [
   { "@type": "Country", name: "United Arab Emirates" },
 ];
 
-// Lien de partage de la fiche Google Business Profile (hasMap et sameAs).
-// En attente de la valeur exacte fournie par Julien : null = rien publie.
-// Ne jamais y mettre une adresse devinee.
-export const GOOGLE_BUSINESS_MAP_URL: string | null = null;
+// Fiche Google Business Profile "MAPA Property", 26 Rue du Commerce,
+// Dudelange (identifiants verifies le 2026-10-22 : CID 3582051223520001281,
+// Knowledge Graph /g/11m5ysphb_). Seul endroit du code ou figurent ces
+// adresses : hasMap et sameAs de l'etablissement.
+export const GOOGLE_BUSINESS_MAP_URL = "https://www.google.com/maps?cid=3582051223520001281";
+export const GOOGLE_KNOWLEDGE_GRAPH_URL = "https://www.google.com/search?kgmid=/g/11m5ysphb_";
 
 const OFFICIAL_PROFILES = [
   "https://www.linkedin.com/showcase/mapa-property/",
@@ -70,8 +72,8 @@ export const realEstateAgent = (locale: string) => ({
   address: ORGANIZATION_ADDRESS,
   knowsLanguage: ["fr", "en", "de"],
   areaServed: AREA_SERVED,
-  ...(GOOGLE_BUSINESS_MAP_URL ? { hasMap: GOOGLE_BUSINESS_MAP_URL } : {}),
-  sameAs: GOOGLE_BUSINESS_MAP_URL ? [...OFFICIAL_PROFILES, GOOGLE_BUSINESS_MAP_URL] : OFFICIAL_PROFILES,
+  hasMap: GOOGLE_BUSINESS_MAP_URL,
+  sameAs: [...OFFICIAL_PROFILES, GOOGLE_BUSINESS_MAP_URL, GOOGLE_KNOWLEDGE_GRAPH_URL],
   founder: {
     "@type": "Person",
     name: "Julien Brebion",
