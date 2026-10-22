@@ -38,6 +38,12 @@ export function cityForPlace(place: string | null | undefined): City | undefined
   if (!place) return undefined;
   const key = norm(place);
   return cities.find(
-    (c) => c.slug === key || norm(c.name.fr) === key || norm(c.name.en) === key || norm(c.name.de) === key,
+    (c) =>
+      c.slug === key ||
+      norm(c.name.fr) === key ||
+      norm(c.name.en) === key ||
+      norm(c.name.de) === key ||
+      // Localites de la commune (Hagen, Kleinbettingen, Grass -> Steinfort).
+      (c.localities ?? []).some((l) => norm(l) === key),
   );
 }

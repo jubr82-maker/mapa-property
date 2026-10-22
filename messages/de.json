@@ -3898,7 +3898,9 @@
     "section_title": "Märkte entdecken und Ihr Projekt berechnen",
     "city_market": "Der Markt in {city}",
     "fiche_title": "Weiterführend",
-    "fiche_searches_title": "Unsere aktuellen Suchen in {city}"
+    "fiche_searches_title": "Unsere aktuellen Suchen in {city}",
+    "city_articles_title": "Zum Weiterlesen",
+    "article_city_link": "Der Immobilienmarkt in {city}"
   },
   "intent_pages": {
     "faq_title": "Häufige Fragen",

@@ -12,7 +12,8 @@ import { routing } from "@/i18n/routing";
 import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
 import { PropertyCard } from "@/components/property/PropertyCard";
-import { fetchAllPropertiesWithCover } from "@/lib/data";
+import { fetchAllBlogPosts, fetchAllPropertiesWithCover } from "@/lib/data";
+import { pickLang } from "@/lib/types";
 import { FaqSection } from "@/components/faq/FaqSection";
 import { cityFaqKey } from "@/lib/faq/keys";
 import { withSocial } from "@/lib/seo-page-meta";
@@ -146,6 +147,9 @@ export default async function VillePage({
   const cityProperties = (await fetchAllPropertiesWithCover()).filter((p) => cityForPlace(p.city)?.slug === city.slug);
   const ts = await getTranslations({ locale, namespace: "searches_page" });
   const tc = await getTranslations({ locale, namespace: "seo_pages" });
+  // Articles du blog rattaches a la commune (champ commune, admin Blog).
+  const cityArticles = (await fetchAllBlogPosts()).filter((b) => b.slug && cityForPlace(b.commune)?.slug === city.slug);
+  const tx = await getTranslations({ locale, namespace: "explore" });
 
   return (
     <>
@@ -221,7 +225,7 @@ export default async function VillePage({
         <section className="mt-12">
           <h2 className="t-h2">{t.highlights}</h2>
           <ul className="mt-4 space-y-2">
-            {city.highlights.map((h) => (
+            {(city.highlightsByLang?.[loc] ?? city.highlights).map((h) => (
               <li key={h} className="text-base leading-relaxed text-ink-mid">
                 · {h}
               </li>
@@ -272,6 +276,28 @@ export default async function VillePage({
             <Link href="/recherches" className="mt-4 inline-block font-mono text-[11px] uppercase tracking-[0.3em] text-gold-deep hover:text-gold">
               {ts("city_block_all")}
             </Link>
+          </section>
+        ) : null}
+
+        {cityArticles.length > 0 ? (
+          <section className="mt-16" data-city-articles>
+            <h2 className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">
+              {tx("city_articles_title")}
+            </h2>
+            <ul className="mt-4 grid gap-3">
+              {cityArticles.map((b) => (
+                <li key={b.slug}>
+                  <Link
+                    href={`/blog/${b.slug}`}
+                    className="block rounded-md border border-line bg-bg p-4 transition-colors hover:border-gold hover:text-gold"
+                  >
+                    <p className="font-display text-lg font-bold text-ink">
+                      {pickLang(b, "title", loc)}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </section>
         ) : null}
 

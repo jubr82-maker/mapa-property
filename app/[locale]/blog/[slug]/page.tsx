@@ -17,6 +17,7 @@ import { blogPosting, pageAlternates } from "@/lib/seo";
 import { FaqSection } from "@/components/faq/FaqSection";
 import { withSocial } from "@/lib/seo-page-meta";
 import { blogFaqKey } from "@/lib/faq/keys";
+import { cityForPlace } from "@/lib/internal-links";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -56,6 +57,9 @@ export default async function BlogPostPage({
 
   await getTranslations({ locale, namespace: "booklet" });
   const tAi = await getTranslations({ locale, namespace: "ai_transparency" });
+  // Page de la commune de l'article (champ commune, admin Blog), si elle existe.
+  const city = cityForPlace(post.commune);
+  const tx = await getTranslations({ locale, namespace: "explore" });
 
   const title = pickLang(post, "title", locale as Locale);
   const content = pickLang(post, "content", locale as Locale);
@@ -97,6 +101,16 @@ export default async function BlogPostPage({
             title,
           )}
         />
+        {city ? (
+          <p className="mx-auto mt-12 max-w-[65ch]" data-article-city>
+            <Link
+              href={`/villes/${city.slug}`}
+              className="inline-flex min-h-11 items-center text-base text-ink underline decoration-line underline-offset-4 transition-colors hover:text-gold-deep"
+            >
+              {tx("article_city_link", { city: city.name[locale as Locale] })}
+            </Link>
+          </p>
+        ) : null}
         <FaqSection pageKey={blogFaqKey(post.slug)} locale={locale} className="mx-auto mt-16 max-w-[65ch]" />
         <p className="mx-auto mt-8 max-w-[65ch] font-mono text-[10px] leading-snug text-ink-soft">
           <Link href="/legal/intelligence-artificielle" className="hover:underline">

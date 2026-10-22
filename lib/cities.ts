@@ -15,6 +15,10 @@ export type City = {
   schools?: string[];
   highlights: string[];
   metaDescription: CityMeta;
+  /** Points cles traduits (sinon `highlights`, en francais, dans les trois langues). */
+  highlightsByLang?: { fr: string[]; en: string[]; de: string[] };
+  /** Autres localites de la commune (biens, recherches et liens rattaches a la page). */
+  localities?: string[];
 };
 
 const M = "MAPA Property";
@@ -443,6 +447,32 @@ const walferdange: City = {
   },
 };
 
+// Commune Ouest (oct. 2026) : quatre localites, une seule page.
+const steinfort: City = {
+  slug: "steinfort",
+  name: { fr: "Steinfort", en: "Steinfort", de: "Steinfort" },
+  country: "LU",
+  region: "Ouest",
+  priceRange: { floor: 6000, ceiling: 8500 },
+  localities: ["Hagen", "Kleinbettingen", "Grass"],
+  highlights: ["Quatre localités, un seul marché", "À 17 km de Luxembourg-Ville", "Gare de Kleinbettingen, ligne CFL 50", "Nouveau centre sportif avec piscine"],
+  highlightsByLang: {
+    fr: ["Quatre localités, un seul marché", "À 17 km de Luxembourg-Ville", "Gare de Kleinbettingen, ligne CFL 50", "Nouveau centre sportif avec piscine"],
+    en: ["Four villages, one market", "17 km from Luxembourg City", "Kleinbettingen station, CFL line 50", "New sports centre with swimming pool"],
+    de: ["Vier Ortschaften, ein Markt", "17 km von Luxemburg-Stadt", "Bahnhof Kleinbettingen, CFL-Linie 50", "Neues Sportzentrum mit Schwimmbad"],
+  },
+  intro: {
+    fr: "Steinfort, dans le canton de Capellen, regroupe quatre localités : Steinfort, Hagen, Kleinbettingen et Grass, pour un peu plus de 6 000 habitants. À la frontière belge et à environ 17 km de Luxembourg-Ville par la route d'Arlon ou par l'autoroute A6, la commune attire surtout les familles à la recherche d'une maison. La gare de Kleinbettingen, sur la ligne CFL 50, et le nouveau centre sportif avec piscine renforcent son attrait. Le marché se situe en moyenne entre 6 000 et 8 500 €/m², avec de forts écarts entre l'ancien non rénové et le neuf. MAPA Property y accompagne vendeurs et acquéreurs, en vente comme en mandat de recherche.",
+    en: "Steinfort, in the canton of Capellen, is made up of four villages: Steinfort, Hagen, Kleinbettingen and Grass, with just over 6,000 residents. On the Belgian border and about 17 km from Luxembourg City via the Route d'Arlon or the A6 motorway, the commune mainly attracts families looking for a house. Kleinbettingen station, on CFL line 50, and the new sports centre with its swimming pool add to its appeal. Prices average between €6,000 and €8,500 per m², with wide gaps between unrenovated older properties and new builds. MAPA Property supports sellers and buyers there, for sales as well as search mandates.",
+    de: "Steinfort im Kanton Capellen umfasst vier Ortschaften: Steinfort, Hagen, Kleinbettingen und Grass, mit etwas über 6.000 Einwohnern. An der belgischen Grenze und rund 17 km von Luxemburg-Stadt entfernt, über die Route d'Arlon oder die Autobahn A6, zieht die Gemeinde vor allem Familien an, die ein Haus suchen. Der Bahnhof Kleinbettingen an der CFL-Linie 50 und das neue Sportzentrum mit Schwimmbad steigern ihre Attraktivität. Die Preise liegen im Durchschnitt zwischen 6.000 und 8.500 €/m², mit großen Unterschieden zwischen nicht renovierten Altbauten und Neubauten. MAPA Property begleitet dort Verkäufer und Käufer, beim Verkauf wie beim Suchauftrag.",
+  },
+  metaDescription: {
+    fr: "Steinfort : quatre localités à la frontière belge, à 17 km de Luxembourg-Ville. 6000 à 8500 €/m². MAPA Property.",
+    en: "Steinfort: four villages on the Belgian border, 17 km from Luxembourg City. €6000 to €8500/sqm. MAPA Property.",
+    de: "Steinfort: vier Ortschaften an der belgischen Grenze, 17 km von Luxemburg-Stadt. 6000 bis 8500 €/m². MAPA Property.",
+  },
+};
+
 // ============================================================================
 // 28 VILLES INTERNATIONALES
 // ============================================================================
@@ -821,10 +851,11 @@ const saintBarthelemy = buildIntlCity({
 // ============================================================================
 
 export const cities: City[] = [
-  // 24 Luxembourg
+  // 25 Luxembourg
   luxembourgVille, belair, limpertsberg, bonnevoie, cents, cessange, clausen, eich,
   gasperich, grund, hamm, hollerich, kirchberg, merl, neudorf, pfaffenthal,
   weimerskirch, eschSurAlzette, differdange, dudelange, mamer, strassen, bertrange, walferdange,
+  steinfort,
   // 28 international
   paris, cannes, nice, saintTropez, monaco, geneve, lausanne, zurich,
   bruxelles, anvers, amsterdam, londres, madrid, barcelone, lisbonne, porto,

@@ -60,6 +60,8 @@ export function revalidatePublicPropertyPages(propertyId?: string | null): void 
 export function revalidatePublicBlogPages(postId?: string | null): void {
   revalidatePath("/[locale]/blog", "page");
   revalidatePath("/[locale]/blog/[slug]", "page");
+  // Pages des villes : liens vers les articles de leur commune.
+  revalidatePath("/[locale]/villes/[ville]", "page");
   revalidatePath("/[locale]", "page");
   // Sitemap : un article publie ou modifie y apparait sans nouveau build.
   revalidatePath("/sitemap.xml");

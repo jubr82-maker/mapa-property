@@ -3898,7 +3898,9 @@
     "section_title": "Explorer les marchés et simuler votre projet",
     "city_market": "Le marché à {city}",
     "fiche_title": "Pour aller plus loin",
-    "fiche_searches_title": "Nos recherches en cours à {city}"
+    "fiche_searches_title": "Nos recherches en cours à {city}",
+    "city_articles_title": "À lire",
+    "article_city_link": "Le marché immobilier à {city}"
   },
   "intent_pages": {
     "faq_title": "Questions fréquentes",
