@@ -83,7 +83,7 @@ export function CookieConsentBanner() {
   return (
     <div data-consent-banner className="fixed inset-0 z-[9997] flex items-end justify-center">
       <div
-        className="absolute inset-0 bg-bg-contrast/25 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-bg-contrast/25"
         aria-hidden="true"
         onClick={dismissable ? close : undefined}
       />
