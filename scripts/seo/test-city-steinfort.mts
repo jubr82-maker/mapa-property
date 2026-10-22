@@ -67,7 +67,7 @@ test("liens : ville vers articles de la commune, article vers la ville, dans la 
 });
 
 test("sitemap et Marches par ville : liste des villes", () => {
-  assert.ok(read("app/sitemap.ts").includes("cities.map((city)"));
+  assert.ok(read("app/sitemap.ts").includes("indexableCities.map((city)"));
   assert.ok(read("app/[locale]/services/marches-actifs/page.tsx").includes("<ExploreLinks cities={cities}"));
 });
 

@@ -54,6 +54,9 @@ export function revalidatePublicPropertyPages(propertyId?: string | null): void 
   revalidatePath("/[locale]/biens", "page");
   revalidatePath("/[locale]/villes/[ville]", "page");
   revalidatePath("/[locale]", "page");
+  // Sitemap : une ville etrangere qui recoit son premier bien publie y
+  // revient aussitot (lib/city-indexing.ts).
+  revalidatePath("/sitemap.xml");
 }
 
 /** Articles du blog : liste, articles, accueil (apercu) ; IndexNow si `postId`. */

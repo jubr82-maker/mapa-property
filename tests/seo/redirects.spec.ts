@@ -243,9 +243,12 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
         }
         if (!p.includes("/legal/mentions-legales") && (o.vatID || o.identifier)) failures.push(`${p} : TVA ou RCS hors des mentions legales`);
         if (o["@type"] === "RealEstateAgent" && !p.includes("/legal/mentions-legales")) {
+          // Profils officiels et fiche Google Business Profile (oct. 2026).
           const hosts = (o.sameAs ?? []).map((u: string) => new URL(u).hostname.replace(/^www\./, "")).sort();
-          if (JSON.stringify(hosts) !== JSON.stringify(["facebook.com", "instagram.com", "linkedin.com"])) {
-            failures.push(`${p} : sameAs different de LinkedIn, Instagram et Facebook (${hosts.join(", ")})`);
+          const google = (o.sameAs ?? []).filter((u: string) => u.includes("google.com")).sort();
+          const GOOGLE = ["https://www.google.com/maps?cid=3582051223520001281", "https://www.google.com/search?kgmid=/g/11m5ysphb_"];
+          if (JSON.stringify(hosts) !== JSON.stringify(["facebook.com", "google.com", "google.com", "instagram.com", "linkedin.com"]) || JSON.stringify(google) !== JSON.stringify(GOOGLE) || o.hasMap !== GOOGLE[0]) {
+            failures.push(`${p} : sameAs ou hasMap differents de LinkedIn, Instagram, Facebook et la fiche Google (${hosts.join(", ")})`);
           }
         }
       }

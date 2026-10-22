@@ -7,6 +7,7 @@ import {
 } from "@/lib/data";
 import { ALL_MANDATE_SLUGS } from "@/lib/mandates";
 import { cities } from "@/lib/cities";
+import { isCityIndexable, publishedCountByCity } from "@/lib/city-indexing";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -137,8 +138,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
+  // Villes (oct. 2026) : seulement les pages indexables (lib/city-indexing.ts) ;
+  // une ville etrangere sans bien publie ni contenu propre est exclue.
+  const cityCounts = publishedCountByCity(properties);
+  const indexableCities = cities.filter((city) => isCityIndexable(city, cityCounts.get(city.slug) ?? 0));
   const cityEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
-    cities.map((city) => ({
+    indexableCities.map((city) => ({
       url: `${SITE_URL}/${locale}/villes/${city.slug}`,
       changeFrequency: "weekly" as const,
       priority: 0.6,

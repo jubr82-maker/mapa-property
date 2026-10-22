@@ -18,6 +18,7 @@ import { FaqSection } from "@/components/faq/FaqSection";
 import { cityFaqKey } from "@/lib/faq/keys";
 import { withSocial } from "@/lib/seo-page-meta";
 import { cityForPlace } from "@/lib/internal-links";
+import { isCityIndexable, publishedCountByCity } from "@/lib/city-indexing";
 
 type Locale = "fr" | "en" | "de";
 
@@ -47,10 +48,17 @@ export async function generateMetadata({
   // Titre traduit (oct. 2026) : l'ancien suffixe francais fige donnait le
   // meme titre aux trois langues.
   const tc = await getTranslations({ locale, namespace: "seo_pages" });
+  // Oct. 2026 : ville etrangere sans bien publie ni contenu propre ->
+  // "noindex, follow" et aucune autre langue declaree (hreflang) ; la page
+  // reste accessible (lib/city-indexing.ts).
+  const published = publishedCountByCity(await fetchAllPropertiesWithCover()).get(city.slug) ?? 0;
+  const indexable = isCityIndexable(city, published);
+  const alternates = pageAlternates(locale, `/villes/${city.slug}`);
   return withSocial(locale, {
     title: brandedTitle(tc(city.country === "LU" ? "city.title" : "city.title_intl", { city: cityName })),
     description: cityDescription(tc, city, cityName),
-    alternates: pageAlternates(locale, `/villes/${city.slug}`),
+    alternates: indexable ? alternates : { canonical: alternates.canonical },
+    ...(indexable ? {} : { robots: { index: false, follow: true } }),
   });
 }
 
