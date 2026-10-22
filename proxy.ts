@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { routing } from "./i18n/routing";
 import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { getArchivedPropertyKeys } from "@/lib/archived-properties";
-import { getPublishedPropertySlugByKey } from "@/lib/published-property-keys";
+import { getPublishedPropertyPathsByKey } from "@/lib/published-property-keys";
 import { legacyPropertyDestination, resolveLegacyPath } from "@/lib/legacy-redirects";
 import { blogLowercaseRedirect } from "@/lib/blog/slug";
 import {
@@ -153,18 +153,22 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 301);
   }
 
-  // Anciennes adresses (site v28 et site precedent) : 308 vers l'equivalent
-  // exact (lib/legacy-redirects.ts). Les pages sans equivalent connu
+  // Anciennes adresses (site v28 et anciens sites Apimo) : 301 vers
+  // l'equivalent exact, en une seule etape (lib/legacy-redirects.ts) ;
+  // une ancienne fiche mene a l'adresse actuelle de la fiche dans la meme
+  // langue, ou a la liste des biens. Les pages sans equivalent connu
   // suivent le flux normal (page 404 utile).
   const legacy = resolveLegacyPath(pathname);
   if (legacy) {
     const dest =
       legacy.kind === "path"
         ? legacy.to
-        : legacyPropertyDestination(legacy, await getPublishedPropertySlugByKey());
+        : legacyPropertyDestination(legacy, await getPublishedPropertyPathsByKey());
     const url = new URL(dest, request.url);
-    if (legacy.kind === "path" && !dest.includes("?")) url.search = request.nextUrl.search;
-    return NextResponse.redirect(url, 308);
+    // Page : parametres de l'adresse gardes, sauf si la destination a les
+    // siens (?transaction=sale). Fiche : aucun parametre de l'ancien site.
+    if (!dest.includes("?")) url.search = legacy.kind === "path" ? request.nextUrl.search : "";
+    return NextResponse.redirect(url, 301);
   }
 
   // Adresse sans langue (hors accueil) : 308 vers la version francaise,
@@ -193,5 +197,9 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  matcher: [
+    "/((?!api|_next|_vercel|.*\\..*).*)",
+    // Anciennes fiches dont l'adresse contient un point (exclues ci-dessus).
+    "/:locale(fr|en|de)/:seg(propriete|proprietes|property|properties|immobilie|immobilien|objekt|eigenschaft|bien)/:rest*",
+  ],
 };

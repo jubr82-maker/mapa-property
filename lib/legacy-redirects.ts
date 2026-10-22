@@ -1,4 +1,4 @@
-// Redirections permanentes (308) des adresses des anciens sites (oct. 2026).
+// Redirections permanentes (301) des adresses des anciens sites (oct. 2026).
 // Module pur : utilise par proxy.ts et next.config.ts, teste par
 // tests/seo/redirects.spec.ts.
 //
@@ -12,6 +12,14 @@
 //      dans le depot : les equivalents anglais et allemands des segments
 //      (property, immobilie...) sont SUPPOSES, ajoutes par prudence.
 //   C. Doublon interne : /journal -> /blog.
+//   D. Pages de l'ancien site Apimo signalees en 404 par la Search Console
+//      (2026-10-17) : /fr/recherche, /fr/mentions-legales/honoraires,
+//      /en/our-agency, /en/contact-us (PROUVE). Leurs equivalents dans les
+//      autres langues et les pages du meme modele Apimo (notre-agence,
+//      contactez-nous, honoraires...) sont SUPPOSES, ajoutes par prudence :
+//      l'ancien site n'est pas dans le depot.
+// Chaque destination est une adresse finale du site : une seule
+// redirection, jamais en chaine.
 // Le dernier nombre d'une ancienne fiche est l'identifiant du bien
 // (identique a apimo_id, que resout aussi /biens/<identifiant>).
 
@@ -74,6 +82,41 @@ export const OLD_SITE_PAGES: Record<string, string> = {
   "legal-notice": "/legal/mentions-legales",
   impressum: "/legal/mentions-legales",
   journal: "/blog",
+  // D. Recherche de biens de l'ancien site : la liste des biens (et non
+  // /recherches, qui presente les recherches de nos clients).
+  recherche: "/biens",
+  rechercher: "/biens",
+  search: "/biens",
+  suche: "/biens",
+  // D. Agence, contact, honoraires (modele Apimo).
+  "notre-agence": "/qui-sommes-nous",
+  "l-agence": "/qui-sommes-nous",
+  "our-agency": "/qui-sommes-nous",
+  "unsere-agentur": "/qui-sommes-nous",
+  "contactez-nous": "/contact",
+  "nous-contacter": "/contact",
+  "contact-us": "/contact",
+  kontakt: "/contact",
+  "kontaktieren-sie-uns": "/contact",
+  honoraires: "/legal/honoraires",
+  fees: "/legal/honoraires",
+  honorare: "/legal/honoraires",
+  "politique-de-confidentialite": "/legal/rgpd",
+  "privacy-policy": "/legal/rgpd",
+  datenschutz: "/legal/rgpd",
+};
+
+/** D. Pages legales de l'ancien site (/<langue>/mentions-legales/<page>). */
+export const OLD_LEGAL_PARENTS = new Set(["mentions-legales", "legal-notice", "legal-notices", "impressum"]);
+export const OLD_LEGAL_SUBPAGES: Record<string, string> = {
+  honoraires: "/legal/honoraires",
+  fees: "/legal/honoraires",
+  honorare: "/legal/honoraires",
+  "politique-de-confidentialite": "/legal/rgpd",
+  "privacy-policy": "/legal/rgpd",
+  datenschutz: "/legal/rgpd",
+  cgu: "/legal/cgu",
+  cgv: "/legal/cgv",
 };
 
 /** B. Segments des anciennes fiches de biens (suivis de <...>+<identifiant>). */
@@ -85,6 +128,7 @@ export const OLD_PROPERTY_SEGMENTS = new Set([
   "immobilie",
   "immobilien",
   "objekt",
+  "eigenschaft",
   "bien",
 ]);
 
@@ -96,10 +140,22 @@ function isLocale(s: string | undefined): s is LegacyLocale {
   return !!s && (LOCALES as readonly string[]).includes(s);
 }
 
-/** Identifiant d'une ancienne fiche : dernier nombre (5 chiffres et plus). */
-export function legacyPropertyId(segment: string): string | null {
-  const m = decodeURIComponent(segment).match(/(?:^|[+\-_ ])(\d{5,})\/?$/);
-  return m ? m[1] : null;
+function safeDecode(s: string): string {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+}
+
+/**
+ * Identifiant d'une ancienne fiche : le dernier nombre de 5 chiffres et plus
+ * de l'adresse (numero Apimo, 8 chiffres), quels que soient les separateurs
+ * (espaces, %20, +, tirets ou barres obliques).
+ */
+export function legacyPropertyId(rest: string): string | null {
+  const nums = safeDecode(rest).match(/(?<!\d)\d{5,}(?!\d)/g);
+  return nums ? nums[nums.length - 1] : null;
 }
 
 /**
@@ -126,28 +182,34 @@ export function resolveLegacyPath(pathname: string): LegacyTarget | null {
   // C. /journal (doublon de /blog).
   if (seg === "journal" && parts.length === 2) return { kind: "path", to: `/${locale}/blog` };
 
-  // B. Fiches de l'ancien site.
+  // B. Fiches de l'ancien site : tout ce qui suit le segment (une ou
+  // plusieurs parties).
   if (OLD_PROPERTY_SEGMENTS.has(seg)) {
-    const last = parts[parts.length - 1];
-    return { kind: "property", locale, id: parts.length > 2 ? legacyPropertyId(last) : null };
+    return { kind: "property", locale, id: parts.length > 2 ? legacyPropertyId(parts.slice(2).join("/")) : null };
   }
 
-  // B. Pages de l'ancien site (un seul segment apres la langue).
-  if (parts.length === 2 && OLD_SITE_PAGES[seg]) {
+  // B et D. Pages de l'ancien site (un seul segment apres la langue).
+  if (parts.length === 2 && Object.hasOwn(OLD_SITE_PAGES, seg)) {
     return { kind: "path", to: `/${locale}${OLD_SITE_PAGES[seg]}` };
+  }
+  // D. Pages legales de l'ancien site : page equivalente, sinon mentions legales.
+  if (parts.length === 3 && OLD_LEGAL_PARENTS.has(seg)) {
+    const sub = parts[2];
+    return { kind: "path", to: `/${locale}${Object.hasOwn(OLD_LEGAL_SUBPAGES, sub) ? OLD_LEGAL_SUBPAGES[sub] : "/legal/mentions-legales"}` };
   }
   return null;
 }
 
 /**
- * Adresse finale d'une ancienne fiche : la fiche du bien dans la meme
- * langue s'il est publie (adresse canonique par son slug), sinon la liste
- * des biens de la langue. Jamais une erreur.
+ * Adresse finale d'une ancienne fiche : l'adresse actuelle de la fiche dans
+ * la meme langue si le bien est publie (celle que la fiche garde, sans
+ * nouvelle redirection), sinon la liste des biens de la langue. Jamais une
+ * erreur.
  */
 export function legacyPropertyDestination(
   target: { locale: LegacyLocale; id: string | null },
-  publishedSlugByKey: ReadonlyMap<string, string>,
+  publishedPathsByKey: ReadonlyMap<string, Record<LegacyLocale, string>>,
 ): string {
-  const slug = target.id ? publishedSlugByKey.get(target.id) : undefined;
-  return slug ? `/${target.locale}/biens/${encodeURIComponent(slug)}` : `/${target.locale}/biens`;
+  const path = target.id ? publishedPathsByKey.get(target.id)?.[target.locale] : undefined;
+  return path ? `/${target.locale}${path}` : `/${target.locale}/biens`;
 }

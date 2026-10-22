@@ -1,7 +1,7 @@
 // Suite redirections, donnees structurees et diffusion (oct. 2026). Echoue
 // si, sur le build de production local servi en memoire :
-//  - un format d'adresse de l'ancien site ne redirige pas en 308 vers son
-//    equivalent exact (un controle par format) ;
+//  - un format d'adresse de l'ancien site ne redirige pas en 301 (proxy) ou
+//    308 (next.config) vers son equivalent exact (un controle par format) ;
 //  - une redirection publique repond 307 (hors accueil "/", qui choisit la
 //    langue du visiteur et reste volontairement temporaire) ;
 //  - la page 404 n'est pas utile (recherche, liens) ou ne repond pas 404 ;
@@ -46,9 +46,15 @@ test("logique des anciennes adresses (sans serveur)", () => {
   expect(legacyPropertyId("vente+maison+hagen+87109262")).toBe("87109262");
   expect(legacyPropertyId("vente+commerce+fentange+86747780")).toBe("86747780");
   expect(legacyPropertyId("vente+appartement+steinfort+superbe-appartement-duplex-2-chambres-a")).toBeNull();
-  // Bien publie : fiche canonique (slug) dans la meme langue.
-  const map = new Map([["87109262", "maison-hagen-87109262"]]);
-  expect(legacyPropertyDestination({ locale: "de", id: "87109262" }, map)).toBe("/de/biens/maison-hagen-87109262");
+  // Separateurs : espaces, %20, + ou barres obliques ; dernier nombre.
+  expect(legacyPropertyId("rental office luxembourg 86682133")).toBe("86682133");
+  expect(legacyPropertyId("rental%20office%20luxembourg%2086682133")).toBe("86682133");
+  expect(legacyPropertyId("rental/office/luxembourg/86682133")).toBe("86682133");
+  expect(legacyPropertyId("vente%20immeuble%20hesperange%20investissement-a-hesperange-4-unites-garages%2085878623")).toBe("85878623");
+  expect(legacyPropertyId("%E9%ZZ+86682133")).toBe("86682133");
+  // Bien publie : adresse actuelle de la fiche dans la meme langue.
+  const map = new Map([["87109262", { fr: "/biens/maison-hagen-87109262", en: "/biens/house-hagen-87109262", de: "/biens/haus-hagen-87109262" }]]);
+  expect(legacyPropertyDestination({ locale: "de", id: "87109262" }, map)).toBe("/de/biens/haus-hagen-87109262");
   // Bien absent : liste des biens de la langue, jamais une erreur.
   expect(legacyPropertyDestination({ locale: "en", id: "11111111" }, map)).toBe("/en/biens");
   expect(legacyPropertyDestination({ locale: "fr", id: null }, map)).toBe("/fr/biens");
@@ -78,30 +84,41 @@ test("redirections 308 : un controle par format d'adresse", async () => {
   };
   // Articles du blog (oct. 2026) : 301 en une seule etape vers l'adresse en
   // minuscules avec langue (lib/blog/slug.ts).
-  const expect301 = async (from: string, to: string) => {
+  const expect301 = async (from: string, to: RegExp | string) => {
     const r = await server.request(from);
     const loc = pathOf(r.headers["location"]);
-    if (!(r.status === 301 && loc === to)) failures.push(`${from} -> ${r.status} ${loc} (attendu 301 ${to})`);
+    const ok = r.status === 301 && (typeof to === "string" ? loc === to : to.test(loc));
+    if (!ok) failures.push(`${from} -> ${r.status} ${loc} (attendu 301 ${to})`);
   };
   try {
     // B. Fiches de l'ancien site (identifiant final), meme langue. Hors
     // ligne, aucun bien n'est lu : la liste des biens de la langue.
-    await expect308("/fr/propriete/vente+maison+hagen+87109262", /^\/fr\/biens(\/[^/?]+)?$/);
-    await expect308("/fr/propriete/vente+immeuble+luxembourg+85866347", /^\/fr\/biens(\/[^/?]+)?$/);
-    await expect308("/fr/propriete/vente+appartement+steinfort+superbe-appartement-duplex-2-chambres-a", "/fr/biens");
-    await expect308("/en/property/sale+house+hagen+87109262", /^\/en\/biens(\/[^/?]+)?$/);
-    await expect308("/de/immobilie/verkauf+haus+hagen+87109262", /^\/de\/biens(\/[^/?]+)?$/);
-    await expect308("/de/immobilien/verkauf+haus+hagen+87109262", /^\/de\/biens(\/[^/?]+)?$/);
-    // B. Pages de l'ancien site.
+    await expect301("/fr/propriete/vente+maison+hagen+87109262", /^\/fr\/biens(\/[^/?]+)?$/);
+    await expect301("/fr/propriete/vente+immeuble+luxembourg+85866347", /^\/fr\/biens(\/[^/?]+)?$/);
+    await expect301("/fr/propriete/vente+appartement+steinfort+superbe-appartement-duplex-2-chambres-a", "/fr/biens");
+    await expect301("/en/property/sale+house+hagen+87109262", /^\/en\/biens(\/[^/?]+)?$/);
+    await expect301("/de/immobilie/verkauf+haus+hagen+87109262", /^\/de\/biens(\/[^/?]+)?$/);
+    await expect301("/de/immobilien/verkauf+haus+hagen+87109262", /^\/de\/biens(\/[^/?]+)?$/);
+    // D. Adresses signalees en 404 par la Search Console (2026-10-17).
+    await expect301("/en/property/rental%20office%20luxembourg%2086682133", "/en/biens");
+    await expect301("/en/property/rental/office/luxembourg/86682093", "/en/biens");
+    await expect301("/fr/propriete/vente%20immeuble%20hesperange%20investissement-a-hesperange-4-unites-garages%2085878623", "/fr/biens");
+    await expect301("/fr/recherche", "/fr/biens");
+    await expect301("/fr/mentions-legales/honoraires", "/fr/legal/honoraires");
+    await expect301("/en/our-agency", "/en/qui-sommes-nous");
+    await expect301("/en/contact-us", "/en/contact");
+    // B et D. Pages de l'ancien site (journal : 308 de next.config.ts,
+    // controle plus bas).
     for (const [seg, to] of Object.entries(OLD_SITE_PAGES)) {
-      for (const l of ["fr", "en", "de"]) await expect308(`/${l}/${seg}`, `/${l}${to}`);
+      if (seg === "journal") continue;
+      for (const l of ["fr", "en", "de"]) await expect301(`/${l}/${seg}`, `/${l}${to}`);
     }
     // Barres finales -> sans barre.
     await expect308("/en/", "/en");
     await expect308("/fr/", "/fr");
     await expect308("/fr/biens/", "/fr/biens");
     // A. Site v28 (sans langue).
-    for (const [from, to] of Object.entries(V28_PAGES)) await expect308(from, `/fr${to}`);
+    for (const [from, to] of Object.entries(V28_PAGES)) await expect301(from, `/fr${to}`);
     await expect301("/blog/vendre-luxembourg-2026-prix-estimation", "/fr/blog/vendre-luxembourg-2026-prix-estimation");
     await expect301("/blog/Immobilier-Steinfort", "/fr/blog/immobilier-steinfort");
     for (const l of ["fr", "en", "de"]) await expect301(`/${l}/blog/Immobilier-Steinfort`, `/${l}/blog/immobilier-steinfort`);
