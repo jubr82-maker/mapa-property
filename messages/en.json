@@ -1816,6 +1816,8 @@
     "ptype_bureau": "Office",
     "ptype_immeuble-de-rapport": "Investment building",
     "ptype_fonds-de-commerce": "Business for sale",
+    "ptype_commerce": "Retail shop",
+    "ptype_entrepot": "Warehouse",
     "ptype_parking": "Parking space",
     "ptype_garage": "Garage",
     "sec_listing": "Listing",
@@ -3270,6 +3272,7 @@
     "form": {
       "type": "Type *",
       "livingSurface": "Living area * (m²)",
+      "usableSurface": "Usable area (m²)",
       "landSurface": "Plot area (m²)",
       "bedrooms": "Bedrooms",
       "energy": "Energy class",
@@ -4130,6 +4133,8 @@
         "bureau": "n||office",
         "immeuble-de-rapport": "n||investment building",
         "fonds-de-commerce": "n||business",
+        "commerce": "n||shop",
+        "entrepot": "n||warehouse",
         "parking": "n||parking space",
         "garage": "n||garage"
       },
@@ -4282,6 +4287,8 @@
           "bureau": "n||office",
           "immeuble-de-rapport": "n||investment building",
           "fonds-de-commerce": "n||business",
+          "commerce": "n||shop",
+          "entrepot": "n||warehouse",
           "garage": "n||garage"
         },
         "indef": {
@@ -4673,6 +4680,8 @@
       "bureau": "Office",
       "immeuble-de-rapport": "Investment building",
       "fonds-de-commerce": "Business for sale",
+      "commerce": "Retail shop",
+      "entrepot": "Warehouse",
       "garage": "Garage"
     },
     "city_properties_title": "Our properties in {city}",

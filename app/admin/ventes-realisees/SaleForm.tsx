@@ -3,10 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { LISTING_FAMILIES, LISTING_TYPES } from "@/lib/listing/families";
+import { LEGACY_SALE_TYPES, saleFieldRules, surfaceLabelKey } from "@/lib/admin/sale-fields";
 
 // Formulaire vente realisee : modes "create" (POST /api/admin/ventes-realisees)
 // et "edit" (PATCH /api/admin/ventes-realisees/[id]). En edition, les champs
 // sont pre-remplis via `initial` et on redirige vers la liste apres succes.
+// Oct. 2026 : types de la liste fermee des fiches de biens, champs sans
+// objet masques et surfaces facultatives selon le type
+// (lib/admin/sale-fields.ts, memes regles que le serveur).
 
 // Julien Brebion est le seul agent (oct. 2026).
 type Agent = "julien";
@@ -43,16 +48,6 @@ const emptyState: State = {
   notes: "",
 };
 
-const PROPERTY_TYPES = [
-  "appartement",
-  "maison",
-  "penthouse",
-  "duplex",
-  "villa",
-  "immeuble",
-  "terrain",
-];
-
 const ENERGIES = ["A+", "A", "B", "C", "D", "E", "F", "G", "H", "I"];
 
 const ETATS = ["neuf", "renove", "bon", "a_renover"];
@@ -67,6 +62,7 @@ export function SaleForm({
   initial?: Partial<State>;
 }) {
   const t = useTranslations("admin_sales");
+  const tp = useTranslations("admin_properties");
   const tn = useTranslations("admin_notices");
   const router = useRouter();
   const [data, setData] = useState<State>({ ...emptyState, ...initial });
@@ -76,6 +72,10 @@ export function SaleForm({
 
   const set = <K extends keyof State>(key: K, value: State[K]) =>
     setData((d) => ({ ...d, [key]: value }));
+
+  const rules = saleFieldRules(data.property_type);
+  // Ancienne valeur d'une vente deja enregistree : gardee telle quelle.
+  const legacyType = (LEGACY_SALE_TYPES as readonly string[]).includes(data.property_type) ? data.property_type : null;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,19 +88,19 @@ export function SaleForm({
           ? `/api/admin/ventes-realisees/${saleId}`
           : "/api/admin/ventes-realisees";
       const method = mode === "edit" ? "PATCH" : "POST";
+      // Champ sans objet pour le type : envoye vide.
+      const shown = (f: keyof typeof rules, v: string) => (rules[f] === "hidden" ? "" : v);
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          surface_habitable: Number(data.surface_habitable) || 0,
-          surface_terrain: data.surface_terrain
-            ? Number(data.surface_terrain)
-            : null,
-          chambres: data.chambres ? Number(data.chambres) : null,
-          annee_construction: data.annee_construction
-            ? Number(data.annee_construction)
-            : null,
+          surface_habitable: shown("surface_habitable", data.surface_habitable) ? Number(data.surface_habitable) : null,
+          surface_terrain: shown("surface_terrain", data.surface_terrain) ? Number(data.surface_terrain) : null,
+          chambres: shown("chambres", data.chambres) ? Number(data.chambres) : null,
+          classe_energie: shown("classe_energie", data.classe_energie),
+          annee_construction: shown("annee_construction", data.annee_construction) ? Number(data.annee_construction) : null,
+          etat: shown("etat", data.etat),
           prix_vente: Number(data.prix_vente) || 0,
         }),
       });
@@ -142,33 +142,45 @@ export function SaleForm({
             value={data.property_type}
             onChange={(e) => set("property_type", e.target.value)}
             className={inputCls}
+            required
           >
-            {PROPERTY_TYPES.map((pt) => (
-              <option key={pt} value={pt}>
-                {t(`propertyType.${pt}`)}
-              </option>
+            {legacyType ? <option value={legacyType}>{t(`propertyType.${legacyType}`)}</option> : null}
+            {LISTING_FAMILIES.map((f) => (
+              <optgroup key={f} label={tp(`family_${f}`)}>
+                {LISTING_TYPES.filter((x) => x.family === f).map((x) => (
+                  <option key={x.slug} value={x.slug}>
+                    {tp(`ptype_${x.slug}`)}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </Field>
-        <Field label={t("form.livingSurface")}>
+        {rules.surface_habitable !== "hidden" ? (
+        <Field label={t(surfaceLabelKey(data.property_type))}>
           <input
             type="number"
             min="1"
-            required
+            required={rules.surface_habitable === "required"}
             value={data.surface_habitable}
             onChange={(e) => set("surface_habitable", e.target.value)}
             className={inputCls}
           />
         </Field>
+        ) : null}
+        {rules.surface_terrain !== "hidden" ? (
         <Field label={t("form.landSurface")}>
           <input
             type="number"
-            min="0"
+            min="1"
+            required={rules.surface_terrain === "required"}
             value={data.surface_terrain}
             onChange={(e) => set("surface_terrain", e.target.value)}
             className={inputCls}
           />
         </Field>
+        ) : null}
+        {rules.chambres !== "hidden" ? (
         <Field label={t("form.bedrooms")}>
           <input
             type="number"
@@ -178,6 +190,8 @@ export function SaleForm({
             className={inputCls}
           />
         </Field>
+        ) : null}
+        {rules.classe_energie !== "hidden" ? (
         <Field label={t("form.energy")}>
           <select
             value={data.classe_energie}
@@ -192,6 +206,8 @@ export function SaleForm({
             ))}
           </select>
         </Field>
+        ) : null}
+        {rules.annee_construction !== "hidden" ? (
         <Field label={t("form.yearBuilt")}>
           <input
             type="number"
@@ -202,6 +218,8 @@ export function SaleForm({
             className={inputCls}
           />
         </Field>
+        ) : null}
+        {rules.etat !== "hidden" ? (
         <Field label={t("form.state")}>
           <select
             value={data.etat}
@@ -216,6 +234,7 @@ export function SaleForm({
             ))}
           </select>
         </Field>
+        ) : null}
         <Field label={t("form.commune")}>
           <input
             type="text"

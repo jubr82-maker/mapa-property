@@ -49,7 +49,7 @@ test("types par famille conformes a la demande", () => {
   assert.deepEqual(by("villa"), ["villa"]);
   assert.deepEqual(by("prestige"), ["chateau", "propriete-domaine", "propriete-de-prestige"]);
   assert.deepEqual(by("terrain"), ["terrain"]);
-  assert.deepEqual(by("commercial"), ["local-commercial", "bureau", "immeuble-de-rapport", "fonds-de-commerce"]);
+  assert.deepEqual(by("commercial"), ["local-commercial", "bureau", "immeuble-de-rapport", "fonds-de-commerce", "commerce", "entrepot"]);
   assert.deepEqual(by("parking"), ["parking", "garage"]);
 });
 test("chaque type existe dans la taxonomie du site", () => {

@@ -20,6 +20,7 @@ import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { ADMIN_EMAIL_JULIEN, ADMIN_EMAIL_JBREBION } from "@/lib/admin/admin-emails";
+import { isSaleType, saleFieldRules, type SaleField } from "@/lib/admin/sale-fields";
 
 export const SALES_ALLOWED_EMAILS = new Set([
   ADMIN_EMAIL_JULIEN,
@@ -58,7 +59,7 @@ export async function requireSalesAdmin(): Promise<RequireOk | RequireErr> {
 
 export interface SaleInput {
   property_type: string;
-  surface_habitable: number;
+  surface_habitable: number | null;
   surface_terrain: number | null;
   chambres: number | null;
   classe_energie: string | null;
@@ -84,9 +85,11 @@ function numOrNull(v: unknown): number | null {
 }
 
 /**
- * Valide le corps d'une vente (creation OU edition complete). Memes regles
- * que le POST historique (champs obligatoires, prix>0, surface>0, agent
- * valide). Retourne { insert } si OK, sinon { error }.
+ * Valide le corps d'une vente (creation OU edition complete) : type de la
+ * liste fermee des fiches (lib/admin/sale-fields.ts), champs obligatoires,
+ * prix > 0, agent valide. Selon le type, un champ sans objet est ignore
+ * (enregistre vide) et la surface n'est obligatoire que pour un logement
+ * (surface du terrain pour un terrain). Retourne { insert } ou { error }.
  */
 export function parseSaleInput(body: Record<string, unknown>): { insert?: SaleInput; error?: string } {
   const property_type = strOrNull(body.property_type);
@@ -94,33 +97,34 @@ export function parseSaleInput(body: Record<string, unknown>): { insert?: SaleIn
   const commune = strOrNull(body.commune);
   const date_acte = strOrNull(body.date_acte);
   const agent = strOrNull(body.agent);
-  const surface_habitable = numOrNull(body.surface_habitable);
   const prix_vente = numOrNull(body.prix_vente);
 
-  if (
-    !property_type ||
-    !adresse ||
-    !commune ||
-    !date_acte ||
-    !agent ||
-    !ALLOWED_AGENTS.has(agent) ||
-    !surface_habitable ||
-    surface_habitable <= 0 ||
-    !prix_vente ||
-    prix_vente <= 0
-  ) {
+  if (!property_type || !isSaleType(property_type) || !adresse || !commune || !date_acte || !agent || !ALLOWED_AGENTS.has(agent) || !prix_vente || prix_vente <= 0) {
+    return { error: "missing_or_invalid_fields" };
+  }
+
+  const rules = saleFieldRules(property_type);
+  const kept = (f: SaleField, v: unknown) => (rules[f] === "hidden" ? null : v);
+  // Surfaces et chambres : nombre positif (0 refuse pour une surface), ou vide.
+  const surface = (f: SaleField) => {
+    const n = numOrNull(kept(f, body[f]));
+    return n !== null && n > 0 ? Math.round(n) : null;
+  };
+  const surface_habitable = surface("surface_habitable");
+  const surface_terrain = surface("surface_terrain");
+  if ((rules.surface_habitable === "required" && surface_habitable === null) || (rules.surface_terrain === "required" && surface_terrain === null)) {
     return { error: "missing_or_invalid_fields" };
   }
 
   return {
     insert: {
       property_type,
-      surface_habitable: Math.round(surface_habitable),
-      surface_terrain: numOrNull(body.surface_terrain),
-      chambres: numOrNull(body.chambres),
-      classe_energie: strOrNull(body.classe_energie),
-      annee_construction: numOrNull(body.annee_construction),
-      etat: strOrNull(body.etat),
+      surface_habitable,
+      surface_terrain,
+      chambres: numOrNull(kept("chambres", body.chambres)),
+      classe_energie: strOrNull(kept("classe_energie", body.classe_energie)),
+      annee_construction: numOrNull(kept("annee_construction", body.annee_construction)),
+      etat: strOrNull(kept("etat", body.etat)),
       adresse,
       commune,
       prix_vente: Math.round(prix_vente),

@@ -36,6 +36,8 @@ export const LISTING_TYPES: { slug: string; family: ListingFamily }[] = [
   { slug: "bureau", family: "commercial" },
   { slug: "immeuble-de-rapport", family: "commercial" },
   { slug: "fonds-de-commerce", family: "commercial" },
+  { slug: "commerce", family: "commercial" },
+  { slug: "entrepot", family: "commercial" },
   { slug: "parking", family: "parking" },
   { slug: "garage", family: "parking" },
 ];

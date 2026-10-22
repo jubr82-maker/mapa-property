@@ -1816,6 +1816,8 @@
     "ptype_bureau": "Büro",
     "ptype_immeuble-de-rapport": "Renditeobjekt",
     "ptype_fonds-de-commerce": "Geschäftsübernahme",
+    "ptype_commerce": "Geschäft",
+    "ptype_entrepot": "Lagerhalle",
     "ptype_parking": "Stellplatz",
     "ptype_garage": "Garage",
     "sec_listing": "Anzeige",
@@ -3270,6 +3272,7 @@
     "form": {
       "type": "Typ *",
       "livingSurface": "Wohnfläche * (m²)",
+      "usableSurface": "Nutzfläche (m²)",
       "landSurface": "Grundstücksfläche (m²)",
       "bedrooms": "Schlafzimmer",
       "energy": "Energieklasse",
@@ -4130,6 +4133,8 @@
         "bureau": "f||Bürofläche",
         "immeuble-de-rapport": "n||Renditeobjekt",
         "fonds-de-commerce": "m||Gewerbebetrieb",
+        "commerce": "n||Geschäft",
+        "entrepot": "f||Lagerhalle",
         "parking": "m||Stellplatz",
         "garage": "f||Garage"
       },
@@ -4163,7 +4168,7 @@
       },
       "diffusion": {
         "sale": "im Exklusivverkauf",
-        "rent": "in Exklusivvermietung"
+        "rent": "zur Exklusivvermietung"
       },
       "title_tx": {
         "sale": "zu verkaufen",
@@ -4282,6 +4287,8 @@
           "bureau": "f||Bürofläche",
           "immeuble-de-rapport": "n||Renditeobjekt",
           "fonds-de-commerce": "m||Gewerbebetrieb",
+          "commerce": "n||Geschäft",
+          "entrepot": "f||Lagerhalle",
           "garage": "f||Garage"
         },
         "indef": {
@@ -4328,6 +4335,7 @@
         "Mehrsprachiger Service",
         "Anzeige im",
         "Anzeige exklusiv",
+        "Anzeige zur",
         "Diese Anzeige wird",
         "Jede vollständige",
         "Jede teilweise",
@@ -4670,6 +4678,8 @@
       "bureau": "Büro",
       "immeuble-de-rapport": "Renditeobjekt",
       "fonds-de-commerce": "Geschäftsübernahme",
+      "commerce": "Geschäft",
+      "entrepot": "Lagerhalle",
       "garage": "Garage"
     },
     "city_properties_title": "Unsere Immobilien in {city}",

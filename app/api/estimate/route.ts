@@ -1,4 +1,5 @@
 import { sanitizeAttribution } from "@/lib/pilotage/attribution";
+import { isComparableSale } from "@/lib/estimation/comparable-type";
 import { recordFormEvent } from "@/lib/pilotage/form-events";
 import { recordEstimationRefusal } from "@/lib/pilotage/estimation-demand";
 import { withFormEvents } from "@/lib/pilotage/form-events";
@@ -147,14 +148,8 @@ async function fetchRentDataForCommune(
   }
 }
 
-// Familles de type pour le matching des comparables (appartement vs maison).
-const APARTMENT_FAMILY = new Set(["appartement", "penthouse", "duplex", "loft"]);
-const HOUSE_FAMILY = new Set(["maison", "villa"]);
-
-function sameFamily(estimType: PropertyType, saleType: string): boolean {
-  const s = (saleType ?? "").toLowerCase().trim();
-  return HOUSE_FAMILY.has(estimType) ? HOUSE_FAMILY.has(s) : APARTMENT_FAMILY.has(s);
-}
+// Comparables : meme groupe de type, jamais une vente non residentielle
+// pour un logement (lib/estimation/comparable-type.ts).
 
 /**
  * Sprint Comparaison Directe — charge les prix/m² des ventes MAPA comparables
@@ -204,7 +199,7 @@ async function fetchComparablesForCommune(
       property_type: string;
     }>) {
       if (norm(r.commune) !== target) continue;
-      if (!sameFamily(estimType, r.property_type)) continue;
+      if (!isComparableSale(estimType, r.property_type)) continue;
       if (!r.surface_habitable || r.surface_habitable <= 0) continue;
       const ppsqm = Number(r.prix_vente) / Number(r.surface_habitable);
       if (Number.isFinite(ppsqm) && ppsqm > 0) out.push(ppsqm);

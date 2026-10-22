@@ -1816,6 +1816,8 @@
     "ptype_bureau": "Bureau",
     "ptype_immeuble-de-rapport": "Immeuble de rapport",
     "ptype_fonds-de-commerce": "Fonds de commerce",
+    "ptype_commerce": "Commerce",
+    "ptype_entrepot": "Entrepôt",
     "ptype_parking": "Parking",
     "ptype_garage": "Garage",
     "sec_listing": "Annonce",
@@ -3270,6 +3272,7 @@
     "form": {
       "type": "Type *",
       "livingSurface": "Surface habitable * (m²)",
+      "usableSurface": "Surface utile (m²)",
       "landSurface": "Surface du terrain (m²)",
       "bedrooms": "Chambres",
       "energy": "Classe énergétique",
@@ -4130,6 +4133,8 @@
         "bureau": "m||bureau",
         "immeuble-de-rapport": "m||immeuble de rapport",
         "fonds-de-commerce": "m||fonds de commerce",
+        "commerce": "m||commerce",
+        "entrepot": "m||entrepôt",
         "parking": "m||emplacement de parking",
         "garage": "m||garage"
       },
@@ -4282,6 +4287,8 @@
           "bureau": "m||bureau",
           "immeuble-de-rapport": "m||immeuble de rapport",
           "fonds-de-commerce": "m||fonds de commerce",
+          "commerce": "m||commerce",
+          "entrepot": "m||entrepôt",
           "garage": "m||garage"
         },
         "indef": {
@@ -4666,6 +4673,8 @@
       "bureau": "Bureau",
       "immeuble-de-rapport": "Immeuble de rapport",
       "fonds-de-commerce": "Fonds de commerce",
+      "commerce": "Commerce",
+      "entrepot": "Entrepôt",
       "garage": "Garage"
     },
     "city_properties_title": "Nos biens à {city}",

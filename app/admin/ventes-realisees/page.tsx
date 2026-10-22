@@ -13,6 +13,8 @@
 //   La colonne comparable_override (migration 20260701d) est lue en
 //   best-effort : si absente, on degrade (mode auto par defaut) + banniere.
 
+import { LISTING_TYPES } from "@/lib/listing/families";
+import { LEGACY_SALE_TYPES } from "@/lib/admin/sale-fields";
 import { AdminFilterPanel } from "@/components/admin/AdminFilterPanel";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -24,7 +26,8 @@ import { AdminNotice } from "@/components/admin/AdminNotice";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE, formatDateOnly } from "@/lib/datetime";
 
-const KNOWN_TYPES = ["appartement", "maison", "penthouse", "duplex", "villa", "immeuble", "terrain"];
+// Types : liste fermee des fiches de biens (libelles admin_properties.ptype_*),
+// anciennes valeurs des ventes (maison, immeuble) avec leur libelle propre.
 // Julien Brebion est le seul agent (oct. 2026) : toute vente est affichee
 // a son nom, y compris une vente encore enregistree sous une ancienne
 // valeur (a reattribuer en base par
@@ -35,7 +38,7 @@ const displayAgent = (_v: string) => "julien";
 interface SaleRow {
   id: string;
   property_type: string;
-  surface_habitable: number;
+  surface_habitable: number | null;
   surface_terrain: number | null;
   chambres: number | null;
   classe_energie: string | null;
@@ -85,7 +88,9 @@ export default async function AdminVentesRealiseesPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/admin/login?from=/admin/ventes-realisees");
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_sales" });
-  const typeLabel = (v: string) => (KNOWN_TYPES.includes(v) ? t(`propertyType.${v}`) : v);
+  const tp = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
+  const typeLabel = (v: string) =>
+    LISTING_TYPES.some((x) => x.slug === v) ? tp(`ptype_${v}`) : (LEGACY_SALE_TYPES as readonly string[]).includes(v) ? t(`propertyType.${v}`) : v;
   const agentLabel = (v: string) => (KNOWN_AGENTS.includes(displayAgent(v)) ? t(`agent.${displayAgent(v)}`) : v);
 
   const params = await searchParams;
