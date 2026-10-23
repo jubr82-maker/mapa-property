@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactReveal } from "@/components/contact-reveal";
 import { pageAlternates } from "@/lib/seo";
@@ -26,7 +27,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function MentionsAcquisitionPage({
+async function MentionsAcquisitionPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -131,3 +132,6 @@ export default async function MentionsAcquisitionPage({
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(MentionsAcquisitionPage, ["contact"]);

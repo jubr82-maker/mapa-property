@@ -55,6 +55,7 @@ export function FicheAdvisorColumn({
               alt={labels.advisorPhotoAlt}
               fill
               sizes="56px"
+              unoptimized
               className="object-cover"
             />
           </div>

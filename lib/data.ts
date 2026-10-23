@@ -5,6 +5,8 @@ import { getLocalizedField } from "./i18n-field";
 import { publicCoverUrl, selectPublicImages } from "./property-images";
 import { effectiveBadge } from "./listing/families";
 import { refTokenFromParam } from "./listing/listing-seo";
+import { cityForProperty } from "./internal-links";
+import { pickSimilar, type SimilarCandidate } from "./similar-properties";
 import { coverAlts, propertyPaths } from "./listing/property-paths";
 import { blogSlugLower } from "./blog/slug";
 import type {
@@ -285,8 +287,7 @@ async function withMandateColumn<R extends { error: { code?: string } | null }>(
 // Une erreur leve une exception DANS la fonction mise en cache : rien n'est
 // garde, la lecture suivante reessaie (oct. 2026, meme cause que la FAQ :
 // une liste vide mise en cache etait reutilisee par les builds suivants).
-const fetchPropertiesWithCoverCached = unstable_cache(
-  async (): Promise<PropertyWithCover[]> => {
+async function queryPropertiesWithCover(): Promise<PropertyWithCover[]> {
     const sb = supabaseServer();
     const { data, error } = await withMandateColumn((extra) =>
       sb
@@ -330,10 +331,81 @@ const fetchPropertiesWithCoverCached = unstable_cache(
           alts: coverAlts(row),
         }) as unknown as PropertyWithCover,
     );
-  },
-  ["properties-with-cover-v2"],
-  { revalidate: false, tags: [PROPERTIES_LIST_TAG] },
-);
+}
+
+// Trois caches de la meme liste (oct. 2026, quotas Vercel), pour que la
+// modification d'un bien ne regenere que les pages qui l'affichent :
+//   - liste complete (etiquette "properties") : liste /biens et sitemap ;
+//   - biens similaires des fiches (etiquette "properties-similar") :
+//     rafraichie seulement si un champ affiche sur les cartes change ;
+//   - biens d'une page de ville (etiquette city-properties:<ville>) :
+//     seulement la ville du bien, et l'ancienne si elle change.
+const fetchPropertiesWithCoverCached = unstable_cache(queryPropertiesWithCover, ["properties-with-cover-v2"], {
+  revalidate: false,
+  tags: [PROPERTIES_LIST_TAG],
+});
+
+export const PROPERTIES_SIMILAR_TAG = "properties-similar";
+const fetchSimilarPoolCached = unstable_cache(queryPropertiesWithCover, ["properties-similar-v1"], {
+  revalidate: false,
+  tags: [PROPERTIES_SIMILAR_TAG],
+});
+
+/** Biens publies pour le bloc "biens similaires" d'une fiche ; erreur : liste vide. */
+export async function fetchSimilarPool(): Promise<PropertyWithCover[]> {
+  try {
+    return await fetchSimilarPoolCached();
+  } catch (e) {
+    console.error("[data] fetchSimilarPool", e instanceof Error ? e.message : String(e));
+    return [];
+  }
+}
+
+/** Etiquette du bloc "biens similaires" d'une fiche. */
+export function similarTag(propertyId: string): string {
+  return `similar-of:${propertyId}`;
+}
+
+/**
+ * Biens similaires d'une fiche, mis en cache PAR FICHE (oct. 2026, quotas
+ * Vercel) : modifier un bien ne regenere que les fiches dont le bloc le
+ * contient (avant ou apres), plus jamais toutes les fiches. Erreur : vide.
+ */
+export async function fetchSimilarFor(target: SimilarCandidate): Promise<PropertyWithCover[]> {
+  try {
+    return await unstable_cache(
+      async () => pickSimilar(target, await queryPropertiesWithCover()),
+      ["similar-of-v1", target.id, String(target.price ?? ""), target.transaction ?? "", target.country ?? "", target.property_type ?? target.badge ?? "", target.city ?? ""],
+      { revalidate: false, tags: [PROPERTIES_SIMILAR_TAG, similarTag(target.id)] },
+    )();
+  } catch (e) {
+    console.error("[data] fetchSimilarFor", e instanceof Error ? e.message : String(e));
+    return [];
+  }
+}
+
+/** Biens publies sans cache (admin : calcul des fiches a regenerer). */
+export function fetchPublishedPropertiesFresh(): Promise<PropertyWithCover[]> {
+  return queryPropertiesWithCover();
+}
+
+/** Etiquette des biens d'une page de ville. */
+export function cityPropertiesTag(citySlug: string): string {
+  return `city-properties:${citySlug}`;
+}
+
+/**
+ * Biens publies rattaches a une page de ville (cityForProperty), sans
+ * repli : une erreur de lecture leve une exception, la page garde alors son
+ * etat precedent (jamais de noindex faute de biens lus).
+ */
+export function fetchCityPropertiesStrict(citySlug: string): Promise<PropertyWithCover[]> {
+  return unstable_cache(
+    async () => (await queryPropertiesWithCover()).filter((p) => cityForProperty(p)?.slug === citySlug),
+    ["city-properties-v1", citySlug],
+    { revalidate: false, tags: [cityPropertiesTag(citySlug)] },
+  )();
+}
 
 /**
  * Biens publies, sans repli : une erreur de lecture leve une exception.

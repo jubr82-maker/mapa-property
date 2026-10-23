@@ -7,7 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { ActionFailure, dbFailure, runAction, sessionFailure, type ActionResult } from "@/lib/admin/action-result";
 import { ADMIN_LOCALE } from "@/lib/datetime";
-import { revalidatePublicPropertyPages } from "@/lib/revalidate-property";
+import { readPropertyRevalRow, revalidatePropertyChange } from "@/lib/revalidate-property";
 
 export type PhotoAltInput = { url: string; room_id: string | null; alt_fr: string; alt_en: string; alt_de: string };
 
@@ -35,6 +35,7 @@ export async function savePhotoAlts(propertyId: string, photos: PhotoAltInput[])
         .eq("url", url);
       if (error) throw await dbFailure(error, "savePhotoAlts");
     }
-    revalidatePublicPropertyPages(propertyId);
+    // Textes alternatifs : la fiche du bien seule (et sa ville, liste, sitemap).
+    await revalidatePropertyChange([await readPropertyRevalRow(admin.supabase, propertyId)]);
   });
 }

@@ -143,6 +143,7 @@ export function ChatbotBubble() {
             alt={t("avatar_alt")}
             fill
             sizes="(min-width: 640px) 64px, 56px"
+            unoptimized
             className="object-cover"
             // Perf mobile (oct. 2026) : pastille du chatbot sans preload
             // (elle concurrencait l'image principale de chaque page).

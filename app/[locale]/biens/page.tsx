@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import dynamic from "next/dynamic";
 import { fetchAllPropertiesWithCover, type PropertyWithCover } from "@/lib/data";
@@ -254,7 +255,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function PropertiesPage({
+async function PropertiesPage({
   params,
   searchParams,
 }: {
@@ -355,3 +356,6 @@ export default async function PropertiesPage({
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(PropertiesPage, ["property_list", "search"]);

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -16,7 +17,9 @@ import { isSearchReference } from "@/lib/searches/search";
 // liste, les pages des communes, le menu et le pied de page. Donnees
 // publiques seulement ; le formulaire arrive dans Leads avec le type
 // "owner_search" et la reference de la recherche.
-export const revalidate = 3600;
+// Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : revalidation a la
+// demande quand le contenu change ; minuterie de secours de 30 jours seulement.
+export const revalidate = 2592000;
 
 type Params = Promise<{ locale: string; reference: string }>;
 
@@ -58,7 +61,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return buildPageMetadata(locale, `/recherches/${s.reference}`, brandedTitle(title), description);
 }
 
-export default async function SearchPage({ params }: { params: Params }) {
+async function SearchPage({ params }: { params: Params }) {
   const { locale, reference } = await params;
   setRequestLocale(locale);
   const s = await load(reference);
@@ -169,3 +172,6 @@ export default async function SearchPage({ params }: { params: Params }) {
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(SearchPage, ["common", "form", "rgpd"]);

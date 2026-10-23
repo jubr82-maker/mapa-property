@@ -35,6 +35,16 @@ export const REQUIRED_ALLOWED_CRAWLERS = SEARCH_AND_AI_CRAWLERS.slice(0, 10);
  */
 export const PRIVATE_PATHS = ["/admin", "/api/", "/*/test-scroll"] as const;
 
+/**
+ * Adresses avec parametres (oct. 2026, quotas Vercel) : suivi publicitaire
+ * (utm, gclid, fbclid, msclkid) sur toute page, et liste des biens filtree.
+ * Chaque variante est une page a rendre pour rien : les robots ne les
+ * explorent plus. La liste sans parametre reste autorisee, ainsi que
+ * /biens?transaction= (cible des anciennes adresses du site v28).
+ */
+export const QUERY_DISALLOW = ["/*?*utm_", "/*?*gclid=", "/*?*fbclid=", "/*?*msclkid=", "/*/biens?"] as const;
+export const QUERY_ALLOW = ["/*/biens?transaction="] as const;
+
 /** Aspirateurs de contenu sans usage pour la visibilite du site. */
 export const BLOCKED_SCRAPERS = [
   "SemrushBot",
@@ -69,9 +79,9 @@ export function robotsConfig(siteUrl: string): MetadataRoute.Robots {
   }
   return {
     rules: [
-      { userAgent: [...SEARCH_AND_AI_CRAWLERS], allow: "/", disallow: [...PRIVATE_PATHS] },
+      { userAgent: [...SEARCH_AND_AI_CRAWLERS], allow: ["/", ...QUERY_ALLOW], disallow: [...PRIVATE_PATHS, ...QUERY_DISALLOW] },
       { userAgent: [...BLOCKED_SCRAPERS], disallow: "/" },
-      { userAgent: "*", allow: "/", disallow: [...PRIVATE_PATHS] },
+      { userAgent: "*", allow: ["/", ...QUERY_ALLOW], disallow: [...PRIVATE_PATHS, ...QUERY_DISALLOW] },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
   };

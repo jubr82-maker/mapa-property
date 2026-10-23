@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -18,7 +19,7 @@ export async function generateMetadata({
   return seoPageMetadata(locale, "markets", "/services/marches-actifs");
 }
 
-export default async function ActiveMarketsPage({
+async function ActiveMarketsPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -123,3 +124,6 @@ export default async function ActiveMarketsPage({
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(ActiveMarketsPage, ["disclaimer"]);

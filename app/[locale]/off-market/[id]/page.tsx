@@ -1,4 +1,5 @@
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import type { Metadata } from "next";
 import { offmarketFicheMetadata } from "@/lib/offmarket-seo";
 import { notFound } from "next/navigation";
@@ -42,7 +43,9 @@ import { highlightTitles } from "@/lib/formatting/highlightTitles";
 //
 // OPTIM-1B C5 : 86400s (24h) au lieu de 1800s (30 min) pour reduire la
 // pression crawlers (cf. justification dans biens/[slug]/page.tsx).
-export const revalidate = 86400;
+// Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : revalidation a la
+// demande quand le contenu change ; minuterie de secours de 30 jours seulement.
+export const revalidate = 2592000;
 
 /**
  * Sprint OPTIM-1B : pre-build des fiches off-market publiees pour les 3
@@ -83,7 +86,7 @@ export async function generateMetadata({
   return offmarketFicheMetadata(locale, property, all);
 }
 
-export default async function OffMarketDetailPage({
+async function OffMarketDetailPage({
   params,
 }: {
   params: Promise<{ locale: string; id: string }>;
@@ -313,3 +316,6 @@ export default async function OffMarketDetailPage({
     </article>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(OffMarketDetailPage, ["common", "contact", "form", "nda", "property", "rgpd"]);

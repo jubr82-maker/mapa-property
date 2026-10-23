@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchLatestInterestRates } from "@/lib/data";
@@ -15,7 +16,7 @@ export async function generateMetadata({
   return seoPageMetadata(locale, "simulators", "/services/simulateurs");
 }
 
-export default async function SimulatorsPage({
+async function SimulatorsPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -53,3 +54,6 @@ export default async function SimulatorsPage({
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(SimulatorsPage, ["disclaimer", "simulators"]);

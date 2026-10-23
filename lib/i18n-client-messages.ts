@@ -37,10 +37,41 @@ export const SERVER_ONLY_NAMESPACES: ReadonlySet<string> = new Set([
   "searches_page",
   "backup_report",
   "faq",
+  // Quotas Vercel (oct. 2026) : lus seulement par des composants serveur
+  // (analyse des imports des fichiers "use client", directive placee apres
+  // les commentaires comprise) ; environ 18 Ko de
+  // moins dans chaque page et chaque fichier de donnees React.
+  "footer",
+  "services_home",
+  "offmarket_band",
+  "markets_home",
+  "process",
+  "quote_band",
+  "blog_teaser",
+  "mandate_common",
+  "mandate_exclusif",
+  "mandate_semi_exclusif",
+  "mandate_simple",
+  "mandate_autonome",
+  "mandate_recherche",
+  "arcova",
+  "explore",
 ]);
 
 export function clientMessages(all: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(all).filter(([ns]) => !ns.startsWith("admin_") && !SERVER_ONLY_NAMESPACES.has(ns)),
   );
+}
+
+/**
+ * Namespaces du fournisseur du layout (oct. 2026, quotas Vercel) : seulement
+ * ceux des composants client du layout (menu, pied de page, chatbot,
+ * bandeau cookies). Les pages ajoutent les leurs (withPageMessages).
+ */
+export const LAYOUT_CLIENT_NAMESPACES = ["chatbot", "contact", "cookies", "nav", "rgpd"] as const;
+
+/** Messages des seuls namespaces demandes. */
+export function pickMessages(all: Record<string, unknown>, namespaces: readonly string[]): Record<string, unknown> {
+  return Object.fromEntries(namespaces.filter((ns) => ns in all).map((ns) => [ns, all[ns]]));
 }

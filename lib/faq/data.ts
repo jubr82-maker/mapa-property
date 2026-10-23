@@ -21,32 +21,41 @@ export type FaqRow = {
 
 const COLUMNS = "id, page_key, question_fr, answer_fr, question_en, answer_en, question_de, answer_de, position";
 
-// Lecture mise en cache (etiquette "faqs", revalidee a chaque enregistrement
-// de l'admin). Une ERREUR leve une exception DANS la fonction cachee : rien
-// n'est mis en cache, la lecture suivante reessaie. Avant (cause prouvee le
-// 2026-10-16) : l'erreur renvoyait [] et unstable_cache gardait ce [] une
-// heure dans .next/cache/fetch-cache, reutilise par les builds suivants ;
-// les pages statiques se construisaient alors sans aucune question.
-// Cle "v2" : l'ancienne entree vide n'est plus jamais relue.
-const fetchPublishedCached = unstable_cache(
-  async (): Promise<FaqRow[]> => {
-    const { data, error } = await supabaseServer()
-      .from("faqs")
-      .select(COLUMNS)
-      .eq("published", true)
-      .order("position", { ascending: true })
-      .order("created_at", { ascending: true });
-    if (error) throw new Error(error.message);
-    return (data as FaqRow[] | null) ?? [];
-  },
-  ["faqs-published-v2"],
-  { revalidate: 3600, tags: [FAQS_TAG] },
-);
+/** Etiquette des questions d'une page (oct. 2026, quotas Vercel). */
+export function faqTag(pageKey: string): string {
+  return `faqs:${pageKey}`;
+}
 
-/** Questions publiees ; table absente ou erreur : liste vide (non mise en cache). */
-async function fetchPublished(): Promise<FaqRow[]> {
+// Lecture mise en cache PAR PAGE (oct. 2026, quotas Vercel) : enregistrer
+// une question ne rafraichit que les pages de sa page_key (etiquette
+// faqs:<page_key>), plus jamais toutes les pages qui affichent une FAQ.
+// L'etiquette "faqs" reste posee sur toutes, pour un rafraichissement
+// general exceptionnel. Une ERREUR leve une exception DANS la fonction
+// cachee : rien n'est mis en cache, la lecture suivante reessaie (cause
+// prouvee le 2026-10-16 : un [] mis en cache etait reutilise par les
+// builds suivants).
+function fetchPageCached(pageKey: string): Promise<FaqRow[]> {
+  return unstable_cache(
+    async (): Promise<FaqRow[]> => {
+      const { data, error } = await supabaseServer()
+        .from("faqs")
+        .select(COLUMNS)
+        .eq("published", true)
+        .eq("page_key", pageKey)
+        .order("position", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (error) throw new Error(error.message);
+      return (data as FaqRow[] | null) ?? [];
+    },
+    ["faqs-page-v3", pageKey],
+    { revalidate: 2592000, tags: [FAQS_TAG, faqTag(pageKey)] }, // secours 30 jours ; etiquette revalidee a chaque enregistrement
+  )();
+}
+
+/** Questions publiees d'une page ; table absente ou erreur : liste vide (non mise en cache). */
+async function fetchPublished(pageKey: string): Promise<FaqRow[]> {
   try {
-    return await fetchPublishedCached();
+    return await fetchPageCached(pageKey);
   } catch (e) {
     console.error("[faq] lecture publique", e instanceof Error ? e.message : String(e));
     return [];
@@ -61,7 +70,7 @@ export type FaqItem = { id: string; question: string; answer: string };
  * sur une autre langue).
  */
 export async function fetchFaqItems(pageKey: string, lang: FaqLang): Promise<FaqItem[]> {
-  const rows = (await fetchPublished()).filter((r) => r.page_key === pageKey);
+  const rows = await fetchPublished(pageKey);
   return rows
     .map((r) => ({ id: r.id, question: (r[`question_${lang}`] ?? "").trim(), answer: (r[`answer_${lang}`] ?? "").trim() }))
     .filter((r) => r.question && r.answer);

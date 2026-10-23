@@ -25,6 +25,7 @@
 //      fichiers inutilises supprimes, purge automatique
 //   M. fiche de bien : photos de l'admin, coordonnees protegees, taux,
 //      metadonnees de partage
+import { clientNamespaces, publicEntries } from "../seo/client-namespaces.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -660,11 +661,13 @@ section = "M. Fiche de bien et coordonnees";
   check("photos : sans photo admin, les images Apimo restent affichees", selectPublicImages([{ url: X, sort: 0 }]).length === 1);
   const data = read("lib/data.ts");
   check("photos : fiche, cartes et accueil filtres par selectPublicImages", /return selectPublicImages\(/.test(data) && (data.match(/publicCoverUrl\(row\.property_images\)/g) ?? []).length === 3 && !/limit\(1, \{ referencedTable: "property_images" \}\)/.test(data));
-  // Cache : toutes les fiches (3 langues, slug ou identifiant Apimo).
-  check("cache : invalidation de toutes les fiches publiques", /revalidatePath\("\/\[locale\]\/biens\/\[slug\]", "page"\)/.test(read("lib/revalidate-property.ts")));
+  // Cache (oct. 2026, quotas Vercel) : la fiche du bien dans les trois
+  // langues et sa ville, jamais toutes les fiches ni toutes les villes.
+  const rvp = read("lib/revalidate-property.ts");
+  check("cache : fiche du bien dans les 3 langues, sans motif de route", /for \(const l of LOCALES\) fichePaths\.add\(`\/\$\{l\}\$\{paths\[l\]\}`\)/.test(rvp) && !/revalidatePath\("\/\[locale\]/.test(rvp));
   for (const f of ["app/admin/properties/[id]/photos/actions.ts", "app/admin/properties/actions.ts"]) {
     const src = read(f);
-    check(`cache : ${f} invalide toutes les fiches`, /revalidatePublicPropertyPages\(/.test(src) && !/revalidatePath\(`\/fr\/biens\/\$\{/.test(src));
+    check(`cache : ${f} regenere seulement les pages du bien`, /await revalidatePropertyChange\(/.test(src) && !/revalidatePath\(`\/fr\/biens\/\$\{/.test(src) && !/revalidatePath\("\/\[locale\]/.test(src));
   }
   // Admin : chaque changement de photos est enregistre (table lue par la fiche).
   const pm = read("components/admin/PhotoManager.tsx");
@@ -1263,7 +1266,9 @@ async function valueOpinionChecks() {
     const svgPub = read("public/logos/mapa-logo-fond-clair.svg");
     check("logo mode clair : SVG officiel, dessin et couleurs inchanges (seul le cadre est resserre)",
       svgSrc.replace(/viewBox="[^"]*"/, "") === svgPub.replace(/viewBox="[^"]*"/, "") && /#03200A/i.test(svgPub) && /<linearGradient/.test(svgPub));
-    check("logo : logo officiel en mode clair en PNG optimise et mis en cache (perf mobile), logo or en mode sombre", /const LIGHT_SRC = "\/logos\/mapa-logo-fond-clair-1600\.png"/.test(logo) && /const DARK_SRC = "\/logo_mapa_nuit\.png"/.test(logo) && /LIGHT_RATIO = 1600 \/ 336/.test(logo) && !/unoptimized/.test(logo));
+    // Quotas Vercel (oct. 2026) : logo du dossier public servi tel quel
+    // (aucune transformation d'image), cache immuable d'un an.
+    check("logo : logo officiel en mode clair en PNG servi tel quel et mis en cache un an, logo or en mode sombre", /const LIGHT_SRC = "\/logos\/mapa-logo-fond-clair-1600\.png"/.test(logo) && /const DARK_SRC = "\/logo_mapa_nuit\.png"/.test(logo) && /LIGHT_RATIO = 1600 \/ 336/.test(logo) && /\n\s*unoptimized\n/.test(logo) && /max-age=31536000, immutable/.test(read("next.config.ts")));
     const oldLight = [...walk("app", (x) => /\.tsx?$/.test(x)), ...walk("components", (x) => /\.tsx?$/.test(x))].filter((f) => /logo_mapa_jour\.png/.test(read(f).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "")));
     check("logo : plus aucun ancien logo clair affiche (en-tete, pied de page, fiche imprimable)", oldLight.length === 0, oldLight.join(", "));
     // Contraste WCAG du texte des avis en mode clair (encre sur fond clair).
@@ -1332,12 +1337,14 @@ section = "Q. Performance mobile et diffusion";
 }
 {
   const src = [...walk("app", (x) => /\.(ts|tsx)$/.test(x)), ...walk("components", (x) => /\.(ts|tsx)$/.test(x)), ...walk("lib", (x) => /\.(ts|tsx)$/.test(x))];
-  const misuse = src.filter((f) => [...read(f).matchAll(/useTranslations\(\s*["']([\w]+)/g)].some((m) => SERVER_ONLY_NAMESPACES.has(m[1])));
-  check("messages : aucun namespace serveur lu par useTranslations", misuse.length === 0, misuse.join(", "));
+  // Composants client seulement (oct. 2026) : un composant serveur peut lire
+  // un namespace serveur avec useTranslations (rendu cote serveur).
+  const misuse = publicEntries().flatMap((e: string) => clientNamespaces(e).filter((ns: string) => SERVER_ONLY_NAMESPACES.has(ns)).map((ns: string) => `${e} : ${ns}`));
+  check("messages : aucun namespace serveur lu par un composant client", misuse.length === 0 && src.length > 0, misuse.join(", "));
   const sample = clientMessages({ admin_leads: {}, hero: {}, nav: {} });
   check("messages : admin et namespaces serveur jamais envoyes au navigateur", Object.keys(sample).join(",") === "nav");
   const layout = read("app/[locale]/layout.tsx");
-  check("layout public : messages filtres", /clientMessages\(\(await getMessages\(\)\)/.test(layout));
+  check("layout public : messages filtres", /pickMessages\(\(await getMessages\(\)\) as Record<string, unknown>, LAYOUT_CLIENT_NAMESPACES\)/.test(layout));
   check("layout public : aucun preconnect vers Apimo, Supabase ou Cloudflare", !/rel="preconnect"/.test(layout));
   check("layout public : police des etiquettes non prechargee", /preload: false/.test(layout));
   const banner = read("components/consent/CookieConsentBanner.tsx");
@@ -1361,7 +1368,7 @@ section = "Q. Performance mobile et diffusion";
   check("chatbot : adresse publique de Dudelange dans les trois langues", (kb.match(/26 Rue du Commerce, L-3450 Dudelange/g) ?? []).length === 3);
   check("chatbot : adresse de Luxembourg-Ville jamais communiquee", /dont l'adresse n'est JAMAIS communiquée/.test(kb) && /NEVER disclosed/.test(kb) && /NIE mitgeteilt/.test(kb) && !/n'apparaît que dans les pages légales|only appears on legal pages|nur im Impressum/.test(kb));
   check("accueil : image principale servie par le site, pas par r2.dev", !/r2\.dev/.test(read("components/home/Hero.tsx").replace(/\/\*[\s\S]*?\*\/|^\s*\/\/.*$/gm, "")) && /HeroPoster/.test(read("components/home/Hero.tsx")) && /\/images\/hero\/mapa-showcase-poster/.test(read("components/home/HeroPoster.tsx")));
-  check("IndexNow : biens et articles signales", /revalidatePublicBlogPages\(id\)/.test(read("app/admin/blog/actions.ts")) && /scheduleIndexNow/.test(read("lib/revalidate-property.ts")));
+  check("IndexNow : biens et articles signales", /revalidateBlogChange\(\{ slugs: \[prev\?\.slug, next\.slug\]/.test(read("app/admin/blog/actions.ts")) && (read("lib/revalidate-property.ts").match(/scheduleIndexNow\(/g) ?? []).length === 2);
 }
 
 // ===========================================================================

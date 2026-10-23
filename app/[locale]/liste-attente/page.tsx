@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { WaitlistForm } from "@/components/forms/WaitlistForm";
 import { SignatureLine } from "@/components/ui/SignatureLine";
@@ -22,7 +23,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function WaitlistPage({
+async function WaitlistPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -52,3 +53,6 @@ export default async function WaitlistPage({
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(WaitlistPage, ["form", "waitlist_page"]);

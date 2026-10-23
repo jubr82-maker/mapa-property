@@ -16,7 +16,7 @@ const fetchEndingCached = unstable_cache(
     return (data as StandardEnding | null) ?? null;
   },
   ["blog-standard-ending-v2"],
-  { revalidate: 3600, tags: [BLOG_ENDING_TAG] },
+  { revalidate: 2592000, tags: [BLOG_ENDING_TAG] }, // secours 30 jours ; etiquette revalidee a chaque enregistrement
 );
 
 export async function fetchStandardEnding(): Promise<StandardEnding | null> {

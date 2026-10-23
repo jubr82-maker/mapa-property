@@ -63,7 +63,8 @@ test("liens : ville vers articles de la commune, article vers la ville, dans la 
     const x = JSON.parse(read(`messages/${l}.json`)).explore;
     assert.ok(x.city_articles_title && x.article_city_link.includes("{city}"), l);
   }
-  assert.ok(read("lib/revalidate-property.ts").includes('revalidatePath("/[locale]/villes/[ville]", "page");'));
+  // Article modifie : seulement les pages des communes de l'article (avant et apres).
+  assert.ok(read("lib/revalidate-property.ts").includes("for (const slug of cities) for (const l of LOCALES) revalidatePath(`/${l}/villes/${slug}`);"));
 });
 
 test("sitemap et Marches par ville : liste des villes", () => {

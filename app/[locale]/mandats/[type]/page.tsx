@@ -1,4 +1,5 @@
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { useTranslations } from "next-intl";
@@ -9,6 +10,10 @@ import { BackButton } from "@/components/ui/BackButton";
 import { pageAlternates } from "@/lib/seo";
 import { withSocial } from "@/lib/seo-page-meta";
 import { IntentAnswer, IntentSections, intentMetadata } from "@/components/seo/IntentSections";
+
+// Types fixes : une adresse inconnue repond 404 sans rendu ni cache ISR
+// (oct. 2026, quotas Vercel).
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return ALL_MANDATE_SLUGS.flatMap((type) =>
@@ -38,7 +43,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function MandatePage({
+async function MandatePage({
   params,
 }: {
   params: Promise<{ locale: string; type: string }>;
@@ -274,3 +279,6 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(MandatePage, ["common", "form", "rgpd"]);

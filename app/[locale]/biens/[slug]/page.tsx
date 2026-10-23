@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { brandedTitle, htmlToPlainText, metaDescription } from "@/lib/meta-text";
 import { notFound, permanentRedirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import {
-  fetchAllPropertiesWithCover,
+  fetchSimilarFor,
   fetchOffmarketById,
   fetchPropertyByIdOrSlug,
   fetchPropertyImages,
@@ -118,7 +119,9 @@ function propertyAlternates(p: Property, locale: string) {
 // immediatement sur save (admin/properties/actions.ts) et le re-import
 // Apimo invalide aussi. Defaut accepte : un bien edite hors flux admin
 // (ex. SQL direct) attendra 24h pour propager publiquement.
-export const revalidate = 86400;
+// Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : revalidation a la
+// demande quand le contenu change ; minuterie de secours de 30 jours seulement.
+export const revalidate = 2592000;
 
 /**
  * Sprint OPTIM-1A : pre-build des fiches biens publiees pour les 3 locales.
@@ -198,7 +201,7 @@ export async function generateMetadata({
   );
 }
 
-export default async function PropertyPage({
+async function PropertyPage({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
@@ -229,9 +232,14 @@ export default async function PropertyPage({
   if (decodeURIComponent(slug) !== canonicalPath.replace(/^\/biens\//, "")) permanentRedirect(`/${locale}${canonicalPath}`);
   const seoCtx = seoContext(lang);
 
-  const [images, allProperties] = await Promise.all([
+  type AnyProperty = typeof property & { property_type?: string | null };
+  const propertyType =
+    (property as AnyProperty).property_type ?? property.badge ?? null;
+  const [images, similar] = await Promise.all([
     fetchPropertyImages(property.id),
-    fetchAllPropertiesWithCover(),
+    // Biens similaires (logique : lib/similar-properties.ts), cache par fiche
+    // (oct. 2026, quotas Vercel).
+    fetchSimilarFor({ id: property.id, transaction: property.transaction, country: property.country, property_type: propertyType, badge: property.badge, price: property.price, city: property.city }),
   ]);
 
   const t = await getTranslations({ locale, namespace: "property" });
@@ -275,36 +283,9 @@ export default async function PropertyPage({
   const citySlug = propertyCity?.slug ?? null;
   const citySearches = citySlug ? await fetchSearchesForCity(citySlug) : [];
 
-  // Biens similaires — logique stricte V3 : même type + prix ±15% +
-  // même pays (idéalement même ville), excluant le bien actuel.
+  // Biens similaires : logique stricte V3 (meme type, prix a 15 % pres, meme
+  // pays, meme ville en tete), dans lib/similar-properties.ts.
   const price = property.price ?? 0;
-  const minPrice = price ? price * 0.85 : 0;
-  const maxPrice = price ? price * 1.15 : Number.POSITIVE_INFINITY;
-  type AnyProperty = (typeof allProperties)[number] & { property_type?: string | null };
-  const propertyType =
-    (property as AnyProperty).property_type ?? property.badge ?? null;
-
-  const similarAll = allProperties.filter((p) => {
-    if (p.id === property.id) return false;
-    if (p.transaction !== property.transaction) return false;
-    // Pays minimum, ville en bonus de match
-    if (p.country !== property.country) return false;
-    // Même type si disponible
-    const pt = (p as AnyProperty).property_type ?? p.badge ?? null;
-    if (propertyType && pt && pt !== propertyType) return false;
-    // Prix ±15% si on a un prix de référence
-    if (price && p.price) {
-      if (p.price < minPrice || p.price > maxPrice) return false;
-    }
-    return true;
-  });
-  // Priorise même ville en tête
-  similarAll.sort((a, b) => {
-    const sameCityA = a.city === property.city ? 1 : 0;
-    const sameCityB = b.city === property.city ? 1 : 0;
-    return sameCityB - sameCityA;
-  });
-  const similar = similarAll.slice(0, 4);
 
   const propertyJsonLd = realEstateListing({
     name: title,
@@ -621,3 +602,6 @@ export default async function PropertyPage({
     </article>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(PropertyPage, ["acquisition_simulator", "ai_transparency", "common", "contact", "form", "property", "rgpd"]);

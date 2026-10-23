@@ -88,9 +88,9 @@ test("site : une section par page, une seule FAQPage, rien sans question publiee
   assert.ok(!/<IntentSections locale=\{locale\} intent="[a-z]+" \/>/.test(pages.map(([f]) => read(f)).join("\n")), "plus aucune FAQ ecrite en dur");
   const data = read("lib/faq/data.ts");
   // Une erreur de lecture n'est jamais mise en cache (cause du 2026-10-16).
-  const cached = data.slice(data.indexOf("unstable_cache("), data.indexOf("tags: [FAQS_TAG]"));
+  const cached = data.slice(data.indexOf("unstable_cache("), data.indexOf("tags: [FAQS_TAG, faqTag(pageKey)]"));
   assert.ok(cached.includes("if (error) throw new Error(error.message);") && !/catch|return \[\];/.test(cached), "aucune liste vide mise en cache");
-  assert.ok(data.includes('["faqs-published-v2"]'));
+  assert.ok(data.includes('["faqs-page-v3", pageKey]'));
   assert.ok(data.includes('.eq("published", true)') && data.includes(".filter((r) => r.question && r.answer)"), "jamais de repli sur une autre langue");
 });
 
@@ -122,19 +122,39 @@ test("admin : menu Gestion, garde admin sur chaque action, tirets longs refuses,
 });
 
 test("lectures en cache (biens, contenu, jetons, recherches, FAQ, fin d'article) : une erreur n'est jamais mise en cache", () => {
-  const files = ["lib/data.ts", "lib/site-content.ts", "lib/searches/data.ts", "lib/faq/data.ts", "lib/blog/standard-ending-data.ts"];
+  // Chaque appel unstable_cache(...) (parentheses equilibrees) : la fonction
+  // mise en cache leve l'erreur (directement, ou via queryPropertiesWithCover
+  // qui la leve), n'avale rien, et sa cle est versionnee.
+  const files = ["lib/data.ts", "lib/site-content.ts", "lib/searches/data.ts", "lib/faq/data.ts", "lib/blog/standard-ending-data.ts", "lib/listing/public-templates.ts"];
+  const calls = (src: string) => {
+    const out: string[] = [];
+    let i = src.indexOf("unstable_cache(");
+    while (i >= 0) {
+      let depth = 0;
+      let j = i + "unstable_cache".length;
+      for (; j < src.length; j++) {
+        if (src[j] === "(") depth++;
+        else if (src[j] === ")" && --depth === 0) break;
+      }
+      out.push(src.slice(i, j + 1));
+      i = src.indexOf("unstable_cache(", j);
+    }
+    return out.filter((c) => !c.startsWith("unstable_cache(fn") );
+  };
+  const data = read("lib/data.ts");
+  const query = data.slice(data.indexOf("async function queryPropertiesWithCover"), data.indexOf("// Trois caches de la meme liste"));
+  assert.ok(/if \(error\) throw new Error\(/.test(query) && !/catch \(/.test(query), "queryPropertiesWithCover leve l'erreur");
   let total = 0;
   for (const f of files) {
-    const src = read(f);
-    for (const m of src.matchAll(/unstable_cache\(([\s\S]*?)\n\);/g)) {
+    for (const body of calls(read(f))) {
+      if (/^unstable_cache\(\s*[\s\S]*?\)$/.test(body) === false) continue;
       total++;
-      const body = m[1];
-      assert.ok(/if \(error\) throw new Error\(/.test(body), `${f} : erreur levee dans la fonction mise en cache`);
+      assert.ok(/throw new Error\(/.test(body) || /queryPropertiesWithCover/.test(body), `${f} : erreur levee dans la fonction mise en cache`);
       assert.ok(!/console\.error|catch \(/.test(body), `${f} : aucune erreur avalee dans la fonction mise en cache`);
-      assert.ok(/\["[a-z-]+-v2"\]/.test(body), `${f} : nouvelle cle de cache`);
+      assert.ok(/\["[a-z-]+-v\d"/.test(body), `${f} : cle de cache versionnee`);
     }
   }
-  assert.equal(total, 6, "6 lectures en cache dans le depot");
+  assert.equal(total, 11, "11 lectures en cache dans le depot");
 });
 
 console.log(`\n${n} PASS, ${failed} FAIL`);

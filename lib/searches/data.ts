@@ -24,7 +24,7 @@ const fetchSearchesCached = unstable_cache(
     return ((data as unknown as PublicSearch[] | null) ?? []).filter((s) => Array.isArray(s.communes));
   },
   ["property-searches-public-v2"],
-  { revalidate: 3600, tags: [SEARCHES_TAG] },
+  { revalidate: 2592000, tags: [SEARCHES_TAG] }, // secours 30 jours ; etiquette revalidee a chaque enregistrement
 );
 
 /** Recherches lisibles ; table absente ou erreur : liste vide (non mise en cache). */
@@ -47,7 +47,40 @@ export async function fetchPublicSearch(reference: string): Promise<PublicSearch
   return (await fetchSearches()).find((s) => s.reference === reference) ?? null;
 }
 
-/** Recherches qui visent une commune (page de la commune). */
+/** Etiquette des recherches d'une commune (oct. 2026, quotas Vercel). */
+export function searchesCityTag(citySlug: string): string {
+  return `searches-city:${citySlug}`;
+}
+
+/** Pages de villes visees par des communes (recherche avant et apres modification). */
+export function searchCitySlugs(communes: unknown): string[] {
+  const list = Array.isArray(communes) ? communes : [];
+  return [...new Set(list.map((c) => (typeof c === "string" ? cityForPlace(c)?.slug : undefined)).filter((s): s is string => Boolean(s)))];
+}
+
+/**
+ * Recherches qui visent une commune (page de la commune et fiches de ses
+ * biens). Cache PAR COMMUNE (oct. 2026, quotas Vercel) : modifier une
+ * recherche ne rafraichit que les communes qu'elle vise, plus jamais toutes
+ * les pages de villes et toutes les fiches.
+ */
 export async function fetchSearchesForCity(citySlug: string): Promise<PublicSearch[]> {
-  return (await fetchPublicSearches()).filter((s) => s.status === "published" && s.communes.some((c) => cityForPlace(c)?.slug === citySlug));
+  try {
+    return await unstable_cache(
+      async (): Promise<PublicSearch[]> => {
+        const { data, error } = await supabaseServer()
+          .from("property_searches")
+          .select(PUBLIC_SEARCH_COLUMNS)
+          .eq("status", "published")
+          .order("published_at", { ascending: false, nullsFirst: false });
+        if (error) throw new Error(error.message);
+        return ((data as unknown as PublicSearch[] | null) ?? []).filter((s) => Array.isArray(s.communes) && s.communes.some((c) => cityForPlace(c)?.slug === citySlug));
+      },
+      ["property-searches-city-v1", citySlug],
+      { revalidate: 2592000, tags: [searchesCityTag(citySlug)] }, // secours 30 jours ; etiquette revalidee a chaque enregistrement
+    )();
+  } catch (e) {
+    console.error("[searches] lecture publique (commune)", e instanceof Error ? e.message : String(e));
+    return [];
+  }
 }

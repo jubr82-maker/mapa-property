@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ContactForm } from "@/components/forms/ContactForm";
@@ -14,7 +15,7 @@ export async function generateMetadata({
   return seoPageMetadata(locale, "contact", "/contact");
 }
 
-export default async function ContactPage({
+async function ContactPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -81,3 +82,6 @@ export default async function ContactPage({
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(ContactPage, ["common", "contact", "form", "rgpd"]);

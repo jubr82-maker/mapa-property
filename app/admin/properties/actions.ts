@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { revalidatePublicPropertyPages } from "@/lib/revalidate-property";
+import { cardFieldsChanged, readPropertyRevalRow, revalidateHomePages, revalidatePropertyChange, type PropertyRevalRow } from "@/lib/revalidate-property";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
@@ -102,6 +102,7 @@ async function setPropertyPublishedImpl(id: string, isPublished: boolean) {
   const { user } = await assertAdminAction();
   const supabase = await createSupabaseServerClient();
   const slug = await fetchPropertySlug(supabase, id);
+  const revalBefore = await readPropertyRevalRow(supabase, id);
   const { error } = await supabase
     .from("properties")
     .update({ is_published: isPublished })
@@ -114,9 +115,10 @@ async function setPropertyPublishedImpl(id: string, isPublished: boolean) {
     targetId: id,
     diff: { slug },
   });
-  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePublicPropertyPages(id);
+  // Publication : fiche, sa ville (indexable des le premier bien), liste,
+  // sitemap, biens similaires (oct. 2026, quotas Vercel).
+  await revalidatePropertyChange([revalBefore, await readPropertyRevalRow(supabase, id)], { cards: true });
 }
 
 async function setPropertyFeaturedImpl(id: string, isFeatured: boolean) {
@@ -128,9 +130,9 @@ async function setPropertyFeaturedImpl(id: string, isFeatured: boolean) {
     .update({ is_featured: isFeatured })
     .eq("id", id);
   if (error) throw await dbFailure(error, "properties");
-  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePublicPropertyPages(id);
+  // Mise en avant : seulement l'accueil (oct. 2026, quotas Vercel).
+  revalidateHomePages();
 }
 
 /**
@@ -399,6 +401,7 @@ export async function updateProperty(
     const { data: prev } = await supabase.from("properties").select(priceKeys.join(",")).eq("id", id).maybeSingle();
     before = (prev as Record<string, unknown> | null) ?? null;
   }
+  const revalBefore = await readPropertyRevalRow(supabase, id);
   const { error } = await supabase
     .from("properties")
     .update(update)
@@ -423,10 +426,12 @@ export async function updateProperty(
       });
     }
   }
-  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
   revalidatePath(`/admin/properties/${id}`);
-  revalidatePublicPropertyPages(id);
+  // Seulement les pages du bien (oct. 2026, quotas Vercel) : fiche, ville
+  // (ancienne et nouvelle), liste, sitemap ; biens similaires si une carte change.
+  const revalAfter = await readPropertyRevalRow(supabase, id);
+  await revalidatePropertyChange([revalBefore, revalAfter], { cards: cardFieldsChanged(revalBefore, revalAfter) });
   return { ok: true };
 }
 
@@ -455,9 +460,9 @@ async function updatePropertyVideoUrlImpl(
   // héberge PropertyEditForm, dont la saisie en cours non enregistrée
   // serait effacée à l'affichage par le refresh RSC immédiat.
   // PropertyVideoForm reflète déjà l'URL sauvée localement.
-  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
   revalidatePath("/admin/properties");
-  revalidatePublicPropertyPages(propertyId);
+  // Video : la fiche seule (et sa ville, liste, sitemap ; oct. 2026).
+  await revalidatePropertyChange([await readPropertyRevalRow(supabase, propertyId)]);
 }
 
 // ============================================================================
@@ -661,10 +666,10 @@ export type PropertyLifecycleResult =
 
 const PHOTO_BUCKET = "property-images";
 
-function revalidatePropertyPaths(id: string) {
-  revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
+/** Archivage, restauration, suppression : pages du bien avant et apres, biens similaires. */
+async function revalidatePropertyPaths(rows: (PropertyRevalRow | null)[]) {
   revalidatePath("/admin/properties");
-  revalidatePublicPropertyPages(id);
+  await revalidatePropertyChange(rows, { cards: true });
   invalidateArchivedPropertyKeys();
 }
 
@@ -690,13 +695,14 @@ export async function archiveProperty(id: string): Promise<PropertyLifecycleResu
   const supabase = await createSupabaseServerClient();
   const { row, error } = await readLifecycleRow(supabase, id);
   if (error || !row) return { ok: false, error: error ?? "not_found" };
+  const revalBefore = await readPropertyRevalRow(supabase, id);
   const { error: upErr } = await supabase
     .from("properties")
     .update({ is_published: false, archived_at: new Date().toISOString() })
     .eq("id", id);
   if (upErr) return { ok: false, error: (await dbFailure(upErr, "properties")).message };
   await logAdminAction({ actorEmail: user.email, action: "property_archived", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
-  revalidatePropertyPaths(id);
+  await revalidatePropertyPaths([revalBefore, await readPropertyRevalRow(supabase, id)]);
   return { ok: true };
 }
 
@@ -706,13 +712,14 @@ export async function restoreProperty(id: string): Promise<PropertyLifecycleResu
   const supabase = await createSupabaseServerClient();
   const { row, error } = await readLifecycleRow(supabase, id);
   if (error || !row) return { ok: false, error: error ?? "not_found" };
+  const revalBefore = await readPropertyRevalRow(supabase, id);
   const { error: upErr } = await supabase
     .from("properties")
     .update({ is_published: true, archived_at: null })
     .eq("id", id);
   if (upErr) return { ok: false, error: (await dbFailure(upErr, "properties")).message };
   await logAdminAction({ actorEmail: user.email, action: "property_restored", targetTable: "properties", targetId: id, diff: { slug: row.slug } });
-  revalidatePropertyPaths(id);
+  await revalidatePropertyPaths([revalBefore, await readPropertyRevalRow(supabase, id)]);
   return { ok: true };
 }
 
@@ -741,6 +748,7 @@ export async function deleteProperty(
   if (!row.archived_at) return { ok: false, error: "not_archived" };
   const expected = row.slug || row.id;
   if (typedReference.trim() !== expected) return { ok: false, error: "reference_mismatch" };
+  const revalBefore = await readPropertyRevalRow(supabase, id);
 
   const media = await listPropertyMedia(supabase, id, row.video_url);
   const { error: imgErr } = await supabase.from("property_images").delete().eq("property_id", id);
@@ -750,7 +758,7 @@ export async function deleteProperty(
   console.info("[admin/properties] bien supprime, fichiers conserves", { id, files: media.length });
   await logAdminAction({ actorEmail: user.email, action: "property_deleted", targetTable: "properties", targetId: id, diff: { slug: row.slug, files: media.length } });
   await sendAdminAlert("property_deleted", { reference: row.slug || row.id, actor: user.email });
-  revalidatePropertyPaths(id);
+  await revalidatePropertyPaths([revalBefore]);
   return { ok: true, media };
 }
 

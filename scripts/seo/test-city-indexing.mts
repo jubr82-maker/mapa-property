@@ -48,8 +48,8 @@ test("page : noindex, follow et aucune autre langue declaree ; sitemap filtre ; 
   const sm = read("app/sitemap.ts");
   assert.ok(sm.includes("const sitemapCities = indexableCities(await fetchAllPropertiesWithCoverStrict());") && sm.includes("sitemapCities.map((city)"));
   const rv = read("lib/revalidate-property.ts");
-  const fn = rv.slice(rv.indexOf("export function revalidatePublicPropertyPages"), rv.indexOf("export function revalidatePublicBlogPages"));
-  assert.ok(fn.includes('revalidatePath("/[locale]/villes/[ville]", "page")') && fn.includes('revalidatePath("/sitemap.xml")') && fn.includes("revalidateTag(PROPERTIES_LIST_TAG"));
+  const fn = rv.slice(rv.indexOf("export async function revalidatePropertyChange"), rv.indexOf("async function revalidateSimilarContaining"));
+  assert.ok(fn.includes("revalidateTag(cityPropertiesTag(slug)") && fn.includes('revalidatePath("/sitemap.xml")') && fn.includes("revalidateTag(PROPERTIES_LIST_TAG"));
   // Menus et listes inchanges : la liste des villes n'est jamais filtree.
   assert.ok(read("app/[locale]/services/marches-actifs/page.tsx").includes("<ExploreLinks cities={cities}"));
 });

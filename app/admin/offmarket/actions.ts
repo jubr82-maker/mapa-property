@@ -546,7 +546,22 @@ export async function createOffmarket(formData: FormData): Promise<ActionResult>
 
   await audit(data.id, "offmarket.create", { reference, status });
   revalidatePath("/admin/offmarket");
+  revalidateOffmarketPublic(data.id);
   redirect(`/admin/offmarket/${data.id}/edit?created=1`);
+}
+
+/**
+ * Pages publiques d'un bien off-market (oct. 2026, quotas Vercel) : liste,
+ * page du bien et accueil (coups de coeur) dans les trois langues, sitemap.
+ * Seule source de rafraichissement : la minuterie de secours est de 30 jours.
+ */
+function revalidateOffmarketPublic(id: string): void {
+  for (const locale of ["fr", "en", "de"]) {
+    revalidatePath(`/${locale}/off-market`);
+    revalidatePath(`/${locale}/off-market/${id}`);
+    revalidatePath(`/${locale}`);
+  }
+  revalidatePath("/sitemap.xml");
 }
 
 export async function updateOffmarket(id: string, formData: FormData): Promise<ActionResult> {
@@ -634,13 +649,7 @@ export async function updateOffmarket(id: string, formData: FormData): Promise<A
   await audit(id, "offmarket.update", { reference, status });
   revalidatePath("/admin/offmarket");
   revalidatePath(`/admin/offmarket/${id}/edit`);
-  // Sprint OPTIM-1B C3 : invalidation cross-locale (faille notee dans
-  // l'audit OPTIM-1B : auparavant SEUL /fr etait invalide -> EN et DE
-  // restaient figes jusqu'a expiration revalidate 1800s).
-  for (const locale of ["fr", "en", "de"]) {
-    revalidatePath(`/${locale}/off-market`);
-    revalidatePath(`/${locale}/off-market/${id}`);
-  }
+  revalidateOffmarketPublic(id);
   return { ok: true, id };
 }
 
@@ -655,6 +664,7 @@ async function deleteOffmarketImpl(id: string) {
   if (error) throw await dbFailure(error, "deleteOffmarket");
   await audit(id, "offmarket.delete");
   revalidatePath("/admin/offmarket");
+  revalidateOffmarketPublic(id);
   redirect("/admin/offmarket");
 }
 
@@ -691,6 +701,7 @@ async function duplicateOffmarketImpl(id: string) {
   if (error) throw await dbFailure(error, "duplicateOffmarket");
   await audit(data.id, "offmarket.duplicate", { source_id: id });
   revalidatePath("/admin/offmarket");
+  revalidateOffmarketPublic(data.id);
   redirect(`/admin/offmarket/${data.id}/edit`);
 }
 

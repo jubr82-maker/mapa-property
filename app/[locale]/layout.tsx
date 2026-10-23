@@ -23,7 +23,7 @@ import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 import { AmbientBackgroundLite } from "@/components/effects/AmbientBackgroundLite";
 import { ScrollProgressBar } from "@/components/effects/ScrollProgressBar";
 import { homepageGraph } from "@/lib/seo";
-import { clientMessages } from "@/lib/i18n-client-messages";
+import { LAYOUT_CLIENT_NAMESPACES, pickMessages } from "@/lib/i18n-client-messages";
 import { siteDesignTokens } from "@/lib/site-content";
 import { ogLocale } from "@/lib/seo-page-meta";
 import "../globals.css";
@@ -138,7 +138,9 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
   // Seulement les messages utiles au navigateur (lib/i18n-client-messages.ts).
-  const messages = clientMessages((await getMessages()) as Record<string, unknown>);
+  // Quotas Vercel (oct. 2026) : seulement les namespaces des composants
+  // client du layout ; chaque page ajoute les siens (withPageMessages).
+  const messages = pickMessages((await getMessages()) as Record<string, unknown>, LAYOUT_CLIENT_NAMESPACES);
 
   // CMS design tokens — override les couleurs racine via :root inline.
   // Les fonts restent gérées par next/font/google (Big Shoulders / Archivo /

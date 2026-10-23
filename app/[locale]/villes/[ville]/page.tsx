@@ -12,13 +12,13 @@ import { routing } from "@/i18n/routing";
 import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
 import { PropertyCard } from "@/components/property/PropertyCard";
-import { fetchAllBlogPosts, fetchAllPropertiesWithCover, fetchAllPropertiesWithCoverStrict } from "@/lib/data";
+import { fetchAllBlogPosts, fetchCityPropertiesStrict } from "@/lib/data";
 import { pickLang } from "@/lib/types";
 import { FaqSection } from "@/components/faq/FaqSection";
 import { cityFaqKey } from "@/lib/faq/keys";
 import { withSocial } from "@/lib/seo-page-meta";
-import { cityForPlace, cityForProperty } from "@/lib/internal-links";
-import { isCityIndexable, publishedCountByCity } from "@/lib/city-indexing";
+import { cityForPlace } from "@/lib/internal-links";
+import { isCityIndexable } from "@/lib/city-indexing";
 
 type Locale = "fr" | "en" | "de";
 
@@ -54,7 +54,9 @@ export async function generateMetadata({
   // reste accessible (lib/city-indexing.ts).
   // Lecture sans repli : en cas d'erreur, la regeneration echoue et la page
   // garde son etat precedent (jamais de noindex faute de biens lus).
-  const published = publishedCountByCity(await fetchAllPropertiesWithCoverStrict()).get(city.slug) ?? 0;
+  // Cache de la ville seule (oct. 2026, quotas Vercel) : un bien modifie ne
+  // rafraichit que sa ville (etiquette city-properties:<ville>).
+  const published = (await fetchCityPropertiesStrict(city.slug)).length;
   const indexable = isCityIndexable(city, published);
   const alternates = pageAlternates(locale, `/villes/${city.slug}`);
   return withSocial(locale, {
@@ -168,7 +170,7 @@ export default async function VillePage({
   // Recherches en cours qui visent cette commune (oct. 2026).
   const searches = await fetchSearchesForCity(city.slug);
   // Biens publies de la commune (oct. 2026).
-  const cityProperties = (await fetchAllPropertiesWithCover()).filter((p) => cityForProperty(p)?.slug === city.slug);
+  const cityProperties = await fetchCityPropertiesStrict(city.slug);
   const ts = await getTranslations({ locale, namespace: "searches_page" });
   const tc = await getTranslations({ locale, namespace: "seo_pages" });
   // Articles du blog rattaches a la commune (champ commune, admin Blog).
@@ -359,4 +361,6 @@ export default async function VillePage({
 export const dynamicParams = false;
 // Bloc des recherches en cours : mis a jour par l'admin (etiquette
 // property-searches) et au plus tard toutes les heures.
-export const revalidate = 3600;
+// Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : revalidation a la
+// demande quand le contenu change ; minuterie de secours de 30 jours seulement.
+export const revalidate = 2592000;

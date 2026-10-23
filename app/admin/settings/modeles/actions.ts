@@ -14,14 +14,13 @@ import { LISTING_LANGS, type ListingLang } from "@/lib/listing/listing-data";
 import { isTemplatePart } from "@/lib/listing/families";
 import { checkFields, describeIssues, templateLiteral } from "@/lib/listing/writing-check";
 import { LISTING_TEMPLATES_TAG } from "@/lib/listing/public-templates";
-import { revalidatePublicPropertyPages } from "@/lib/revalidate-property";
 
-// Le tronc donne la fin standard des fiches publiques : elles sont
-// regenerees a leur prochaine visite.
+// Le tronc donne la fin standard des fiches publiques : l'etiquette suffit,
+// seules les fiches (qui lisent le tronc) sont regenerees a leur prochaine
+// visite ; plus de rafraichissement des villes ni de l'accueil (oct. 2026).
 function revalidatePublicEnding(part: string): void {
   if (part !== "tronc") return;
   revalidateTag(LISTING_TEMPLATES_TAG, { expire: 0 });
-  revalidatePublicPropertyPages();
 }
 
 const MAX_BODY = 20000;

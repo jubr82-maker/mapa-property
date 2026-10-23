@@ -48,9 +48,9 @@ const securityHeaders = [
 
 // Perf oct. 2026 (PageSpeed : ressources mal mises en cache). Next sert
 // public/ en "max-age=0" : chaque visite revalidait logos, avatars,
-// favicons. Noms non hashes -> 30 jours (pas immutable) + revalidation
-// en arriere-plan, pour qu'un fichier remplace se propage en douceur.
-const STATIC_ASSET_CACHE = "public, max-age=2592000, stale-while-revalidate=86400";
+// favicons. Quotas Vercel (oct. 2026) : cache immuable d'un an. Un fichier
+// remplace doit donc changer de nom (sinon l'ancien reste en cache).
+const STATIC_ASSET_CACHE = "public, max-age=31536000, immutable";
 const ROOT_STATIC_FILES = [
   "logo_mapa_jour.png",
   "logo_mapa_nuit.png",
@@ -83,24 +83,24 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "25mb",
     },
-    // Perf oct. 2026 (PageSpeed : 680 ms de blocage du rendu). Les feuilles
-    // CSS (Tailwind, atomique et compact) sont injectees en <style> dans le
-    // HTML au lieu de <link> bloquants : plus d'aller-retour avant le 1er
-    // rendu. Experimental Next 16 ; retour arriere = supprimer cette ligne.
-    inlineCss: true,
+    // Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : inlineCss retire.
+    // Il copiait la feuille de style (110 Ko) deux fois dans chaque page HTML
+    // et une fois dans chaque fichier de donnees React (pres de la moitie du
+    // poids servi depuis l'origine et de chaque ecriture ISR). La feuille est
+    // de nouveau un fichier /_next/static, mis en cache un an par le CDN.
   },
   images: {
-    // Perf oct. 2026 : AVIF (~20-30 % plus leger que WebP) en priorite.
-    formats: ["image/avif", "image/webp"],
-    // Defaut Next 16 = 4 h ; les images optimisees (/_next/image) etaient
-    // signalees "mal mises en cache". 30 jours : les photos de biens ont
-    // des URL uniques, les logos changent rarement.
-    minimumCacheTTL: 2592000,
-    // SEO oct. 2026 : les variantes 3840 px des photos Apimo repondaient 404
-    // et aucun affichage du site ne depasse 1920 px de large. Plafond a 1920 ;
-    // imageSizes (vignettes, < plus petite deviceSize) = defaut Next 16.
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [32, 48, 64, 96, 128, 256, 384],
+    // Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : chaque couple
+    // largeur x format x qualite est une transformation facturee. Un seul
+    // format (WebP), une seule qualite (75), 31 jours de cache.
+    formats: ["image/webp"],
+    qualities: [75],
+    minimumCacheTTL: 2678400,
+    // Largeurs reellement affichees : cartes (33 a 90 vw), galerie (100 vw
+    // sur telephone, 1100 px sur ordinateur, plafond 1920), vignettes et
+    // avatars (32 a 96 px, en 1x et 2x). Avant : 13 largeurs x 2 formats.
+    deviceSizes: [640, 828, 1080, 1200, 1920],
+    imageSizes: [64, 128, 256, 384],
     // Hotes autorises : lib/image-hosts.ts (source unique).
     remotePatterns: IMAGE_REMOTE_PATTERNS.map((p) => ({ ...p })),
   },

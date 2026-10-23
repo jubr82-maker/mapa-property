@@ -85,7 +85,9 @@ test("activation : un bien publie suffit, sa suppression la retire ; lecture en 
   assert.equal(isCityIndexable(dubai, publishedCountByCity([{ city: "Downtown Dubai" }]).get("dubai") ?? 0), true);
   assert.equal(isCityIndexable(dubai, publishedCountByCity([]).get("dubai") ?? 0), false);
   assert.ok(read("app/sitemap.ts").includes("indexableCities(await fetchAllPropertiesWithCoverStrict())"));
-  assert.ok(read("app/[locale]/villes/[ville]/page.tsx").includes("publishedCountByCity(await fetchAllPropertiesWithCoverStrict())"));
+  // Page de ville : ses biens seulement (cache par ville), lecture sans repli.
+  assert.ok(read("app/[locale]/villes/[ville]/page.tsx").includes("(await fetchCityPropertiesStrict(city.slug)).length"));
+  assert.ok(read("lib/data.ts").includes('["city-properties-v1", citySlug]') && read("lib/data.ts").includes("tags: [cityPropertiesTag(citySlug)]"));
   assert.ok(read("lib/data.ts").includes("city_page:listing_data->facts->>city_page"));
   // Fiche, page de ville et sitemap : meme rattachement.
   assert.ok(read("app/[locale]/biens/[slug]/page.tsx").includes("cityForProperty({ city: property.city"));
@@ -94,10 +96,12 @@ test("activation : un bien publie suffit, sa suppression la retire ; lecture en 
   for (const fn of ["setPropertyPublishedImpl", "updateProperty", "archiveProperty", "restoreProperty", "deleteProperty", "createProperty"]) {
     const body = actions.slice(actions.indexOf(`function ${fn}(`));
     const end = body.indexOf("\nexport async function", 10);
-    assert.ok(/revalidatePublicPropertyPages\(|revalidatePropertyPaths\(/.test(body.slice(0, end > 0 ? end : undefined)), fn);
+    assert.ok(/revalidatePropertyChange\(|revalidatePropertyPaths\(/.test(body.slice(0, end > 0 ? end : undefined)), fn);
   }
   const rv = read("lib/revalidate-property.ts");
-  assert.ok(rv.includes('revalidatePath("/[locale]/villes/[ville]", "page")') && rv.includes('revalidatePath("/sitemap.xml")'));
+  // Ville actuelle et ancienne seulement (lignes avant et apres), jamais toutes les villes.
+  assert.ok(rv.includes("revalidateTag(cityPropertiesTag(slug), { expire: 0 })") && rv.includes('revalidatePath("/sitemap.xml")'));
+  assert.ok(!rv.includes('"/[locale]/villes/[ville]"'));
 });
 
 const MU = ["Maurice", "Mauritius", "Ile Maurice", "Grand Baie", "Grand-Baie", "Tamarin", "Rivière Noire", "Riviere Noire", "Black River", "Flic en Flac", "Bel Ombre", "Port-Louis", "Moka", "Pereybere", "Trou aux Biches"];

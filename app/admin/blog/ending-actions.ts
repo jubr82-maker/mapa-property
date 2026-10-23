@@ -10,7 +10,6 @@ import { requireAdmin } from "@/lib/admin/require-admin";
 import { dbFailure, sessionFailure, ActionFailure } from "@/lib/admin/action-result";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { sanitizeArticleHtml } from "@/lib/security/sanitize";
-import { revalidatePublicBlogPages } from "@/lib/revalidate-property";
 import { BLOG_ENDING_TAG } from "@/lib/blog/standard-ending-data";
 
 type Lang = "fr" | "en" | "de";
@@ -43,8 +42,9 @@ export async function saveStandardEnding(input: EndingPayload): Promise<EndingRe
     }
     const { error } = await admin.supabase.from("blog_standard_ending").upsert(row, { onConflict: "id" });
     if (error) throw await dbFailure(error, "saveStandardEnding");
+    // Etiquette seule (oct. 2026, quotas Vercel) : la fin standard n'apparait
+    // que dans les articles, rendus a la demande.
     revalidateTag(BLOG_ENDING_TAG, { expire: 0 });
-    revalidatePublicBlogPages();
     revalidatePath("/admin/blog/fin-standard");
     return { ok: true };
   } catch (e) {

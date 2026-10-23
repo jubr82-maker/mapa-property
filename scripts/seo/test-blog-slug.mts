@@ -70,7 +70,7 @@ test("admin : adresse enregistree en minuscules, sans accents ni espaces", () =>
 });
 
 test("sitemap : chaque article publie, revalide toutes les heures et a chaque enregistrement", () => {
-  assert.ok(read("app/sitemap.ts").includes("export const revalidate = 3600;"));
+  assert.ok(read("app/sitemap.ts").includes("export const revalidate = 2592000;"));
   assert.ok(read("lib/revalidate-property.ts").includes('revalidatePath("/sitemap.xml");'));
   assert.ok(read("app/sitemap.ts").includes("fetchAllBlogPosts()"));
 });

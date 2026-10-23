@@ -15,7 +15,7 @@ import { logAdminAction } from "@/lib/pilotage/audit";
 import { checkFields, describeIssues } from "@/lib/listing/writing-check";
 import { htmlToText } from "@/lib/listing/template-engine";
 import type { ListingLang } from "@/lib/listing/listing-data";
-import { SEARCHES_TAG } from "@/lib/searches/data";
+import { SEARCHES_TAG, searchCitySlugs, searchesCityTag } from "@/lib/searches/data";
 import {
   PUBLIC_SEARCH_STATUSES,
   SEARCH_DELAYS,
@@ -63,8 +63,14 @@ const intOrNull = (v: unknown, max: number) => {
   return Number.isFinite(n) && n > 0 && n <= max ? Math.round(n) : null;
 };
 
-function revalidatePublic(reference?: string) {
+/**
+ * Pages publiques d'une recherche (oct. 2026, quotas Vercel) : liste et page
+ * de la recherche, et seulement les communes visees avant et apres la
+ * modification (pages de villes et fiches de leurs biens, par etiquette).
+ */
+function revalidatePublic(reference?: string, ...communeLists: unknown[]) {
   revalidateTag(SEARCHES_TAG, { expire: 0 });
+  for (const slug of new Set(communeLists.flatMap((c) => searchCitySlugs(c)))) revalidateTag(searchesCityTag(slug), { expire: 0 });
   for (const l of ["fr", "en", "de"]) {
     revalidatePath(`/${l}/recherches`);
     if (reference) revalidatePath(`/${l}/recherches/${reference}`);
@@ -122,11 +128,13 @@ export async function saveSearch(id: string | null, input: SearchFormPayload): P
 
     let searchId = id;
     let reference: string;
+    let previousCommunes: unknown = null;
     if (searchId) {
-      const { data: cur, error: curErr } = await supabase.from("property_searches").select("reference, status").eq("id", searchId).maybeSingle();
+      const { data: cur, error: curErr } = await supabase.from("property_searches").select("reference, status, communes").eq("id", searchId).maybeSingle();
       if (curErr) throw await dbFailure(curErr, "saveSearch:read");
       if (!cur) return { ok: false, error: t("err_not_found") };
       reference = (cur as { reference: string }).reference;
+      previousCommunes = (cur as { communes?: unknown }).communes;
       // Accord retire : une recherche visible repasse en pause.
       if (!row.consent_anonymous && (PUBLIC_SEARCH_STATUSES as readonly string[]).includes((cur as { status: string }).status)) row.status = "paused";
       if (row.consent_anonymous) row.consent_at = new Date().toISOString();
@@ -169,7 +177,7 @@ export async function saveSearch(id: string | null, input: SearchFormPayload): P
     if (privErr) throw await dbFailure(privErr, "saveSearch:private");
 
     await logAdminAction({ actorEmail: user.email, action: id ? "property_search_updated" : "property_search_created", targetTable: "property_searches", targetId: searchId, diff: { reference } });
-    revalidatePublic(reference);
+    revalidatePublic(reference, previousCommunes, communes);
     return { ok: true, id: searchId!, reference };
   } catch (e) {
     if (e instanceof ActionFailure) return { ok: false, error: e.message };
@@ -195,7 +203,7 @@ export async function setSearchStatus(id: string, status: string): Promise<Actio
   return runAction(async () => {
     const t = await tS();
     if (!(SEARCH_STATUSES as readonly string[]).includes(status)) throw new ActionFailure(t("err_status"));
-    const { data: cur, error } = await admin.supabase.from("property_searches").select("reference, status, consent_anonymous").eq("id", id).maybeSingle();
+    const { data: cur, error } = await admin.supabase.from("property_searches").select("reference, status, consent_anonymous, communes").eq("id", id).maybeSingle();
     if (error) throw await dbFailure(error, "setSearchStatus:read");
     if (!cur) throw new ActionFailure(t("err_not_found"));
     const row = cur as { reference: string; status: SearchStatus; consent_anonymous: boolean };
@@ -209,7 +217,7 @@ export async function setSearchStatus(id: string, status: string): Promise<Actio
     const { error: upErr } = await admin.supabase.from("property_searches").update(patch).eq("id", id);
     if (upErr) throw await dbFailure(upErr, "setSearchStatus");
     await logAdminAction({ actorEmail: admin.user.email, action: "property_search_status", targetTable: "property_searches", targetId: id, diff: { reference: row.reference, from: row.status, to: next } });
-    revalidatePublic(row.reference);
+    revalidatePublic(row.reference, (cur as { communes?: unknown }).communes);
   });
 }
 
@@ -218,13 +226,13 @@ export async function deleteSearch(id: string): Promise<ActionResult> {
   if (!admin.ok) return sessionFailure();
   return runAction(async () => {
     const t = await tS();
-    const { data: cur } = await admin.supabase.from("property_searches").select("reference").eq("id", id).maybeSingle();
+    const { data: cur } = await admin.supabase.from("property_searches").select("reference, communes").eq("id", id).maybeSingle();
     if (!cur) throw new ActionFailure(t("err_not_found"));
     // property_search_private suit (ON DELETE CASCADE).
     const { error } = await admin.supabase.from("property_searches").delete().eq("id", id);
     if (error) throw await dbFailure(error, "deleteSearch");
     const reference = (cur as { reference: string }).reference;
     await logAdminAction({ actorEmail: admin.user.email, action: "property_search_deleted", targetTable: "property_searches", targetId: id, diff: { reference } });
-    revalidatePublic(reference);
+    revalidatePublic(reference, (cur as { communes?: unknown }).communes);
   });
 }

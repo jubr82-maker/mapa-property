@@ -29,7 +29,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
-import { revalidatePublicPropertyPages } from "@/lib/revalidate-property";
+import { readPropertyRevalRow, revalidatePropertyChange } from "@/lib/revalidate-property";
 import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 import { assertAdminAction } from "@/lib/admin/require-admin";
@@ -193,9 +193,9 @@ export async function savePropertyPhotos(
     // sur la page actuellement affichée. PhotoManager reflète déjà l'état
     // des photos localement (state client), inutile de forcer un refresh
     // serveur de cette page pour ça.
-    // Toutes les fiches publiques (3 langues, slug ou identifiant Apimo),
-    // la liste, les villes et l'accueil : cf. lib/revalidate-property.ts.
-    revalidatePublicPropertyPages(propertyId);
+    // Pages du bien seulement (oct. 2026, quotas Vercel) : fiche, ville,
+    // liste, sitemap, et biens similaires (la photo de couverture y figure).
+    await revalidatePropertyChange([await readPropertyRevalRow(supabase, propertyId)], { cards: true });
     revalidatePath("/admin/properties");
     return { ok: true };
   } catch (e) {

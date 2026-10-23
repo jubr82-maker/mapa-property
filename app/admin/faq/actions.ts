@@ -11,7 +11,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { ActionFailure, dbFailure, sessionFailure } from "@/lib/admin/action-result";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { logAdminAction } from "@/lib/pilotage/audit";
-import { FAQS_TAG } from "@/lib/faq/data";
+import { faqTag } from "@/lib/faq/data";
 import { FAQ_LANGS, faqPagePaths, isFaqPageKey, type FaqLang } from "@/lib/faq/keys";
 
 export type FaqPayload = {
@@ -30,7 +30,8 @@ const DASHES = /[–—]/;
 
 /** Pages publiques d'une ou plusieurs page_key, trois langues, et l'admin. */
 function revalidateFaqPages(...keys: string[]) {
-  revalidateTag(FAQS_TAG, { expire: 0 });
+  // Seulement les pages des page_key concernees (oct. 2026, quotas Vercel).
+  for (const k of keys) revalidateTag(faqTag(k), { expire: 0 });
   for (const k of new Set(keys)) {
     for (const p of faqPagePaths(k)) for (const l of ["fr", "en", "de"]) revalidatePath(`/${l}${p}`);
   }

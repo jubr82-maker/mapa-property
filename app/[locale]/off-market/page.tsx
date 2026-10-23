@@ -18,7 +18,9 @@ import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 // OPTIM-1B C5 : 86400s (24h) au lieu de 1800s (cf. justification dans
 // biens/[slug]/page.tsx). Invalidation immediate apres save admin via
 // revalidatePath cross-locale dans app/admin/offmarket/actions.ts.
-export const revalidate = 86400;
+// Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : revalidation a la
+// demande quand le contenu change ; minuterie de secours de 30 jours seulement.
+export const revalidate = 2592000;
 
 export async function generateMetadata({
   params,

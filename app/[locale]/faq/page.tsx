@@ -41,4 +41,6 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
 }
 
 // Mise a jour par l'admin (etiquette faqs) et au plus tard toutes les heures.
-export const revalidate = 3600;
+// Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : revalidation a la
+// demande quand le contenu change ; minuterie de secours de 30 jours seulement.
+export const revalidate = 2592000;

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { revalidatePublicBlogPages } from "@/lib/revalidate-property";
+import { revalidateBlogChange } from "@/lib/revalidate-property";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { getTranslations } from "next-intl/server";
@@ -11,7 +11,7 @@ import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 import { dbErrorReason, type DbError } from "@/lib/admin/db-error";
 import { dbFailure } from "@/lib/admin/action-result";
-import { FAQS_TAG } from "@/lib/faq/data";
+import { faqTag } from "@/lib/faq/data";
 import { blogFaqKey } from "@/lib/faq/keys";
 
 /** Bucket public des couvertures du blog (cree par le site v28). */
@@ -109,7 +109,8 @@ export async function createBlogPost(formData: FormData): Promise<BlogActionResu
     .single();
   if (error) return blogFailure(error);
   revalidatePath("/admin/blog");
-  revalidatePublicBlogPages(data.id);
+  const created = buildPostPayload(formData) as { slug?: string | null; commune?: string | null };
+  revalidateBlogChange({ slugs: [created.slug], communes: [created.commune] });
   redirect(`/admin/blog/${data.id}/edit`);
 }
 
@@ -119,7 +120,7 @@ export async function updateBlogPost(id: string, formData: FormData): Promise<Bl
   if (!admin.ok) return blogFailure("session");
   const supabase = admin.supabase;
   const payload = buildPostPayload(formData);
-  const { data: before } = await supabase.from("blog_posts").select("slug").eq("id", id).maybeSingle();
+  const { data: before } = await supabase.from("blog_posts").select("slug, commune").eq("id", id).maybeSingle();
   const { count, error } = await supabase
     .from("blog_posts")
     .update(payload, { count: "exact" })
@@ -131,11 +132,15 @@ export async function updateBlogPost(id: string, formData: FormData): Promise<Bl
   if (oldSlug && payload.slug && blogFaqKey(oldSlug) !== blogFaqKey(payload.slug)) {
     const { error: faqErr } = await supabase.from("faqs").update({ page_key: blogFaqKey(payload.slug) }).eq("page_key", blogFaqKey(oldSlug));
     if (faqErr) console.error("[admin/blog] questions de l'article non deplacees", { code: faqErr.code ?? null });
-    revalidateTag(FAQS_TAG, { expire: 0 });
+    revalidateTag(faqTag(blogFaqKey(oldSlug)), { expire: 0 });
+    revalidateTag(faqTag(blogFaqKey(payload.slug)), { expire: 0 });
   }
   revalidatePath("/admin/blog");
-  // Toutes les langues, l'article et l'accueil ; IndexNow (oct. 2026).
-  revalidatePublicBlogPages(id);
+  // L'article (ancienne et nouvelle adresse), la liste, l'accueil, le
+  // sitemap et les communes avant et apres ; IndexNow (oct. 2026).
+  const prev = before as { slug: string | null; commune?: string | null } | null;
+  const next = payload as { slug?: string | null; commune?: string | null };
+  revalidateBlogChange({ slugs: [prev?.slug, next.slug], communes: [prev?.commune, next.commune] });
   return { ok: true };
 }
 
@@ -144,11 +149,13 @@ export async function deleteBlogPost(id: string): Promise<BlogActionResult> {
   const admin = await requireAdmin();
   if (!admin.ok) return blogFailure("session");
   const supabase = admin.supabase;
+  const { data: before } = await supabase.from("blog_posts").select("slug, commune").eq("id", id).maybeSingle();
   const { count, error } = await supabase.from("blog_posts").delete({ count: "exact" }).eq("id", id);
   if (error) return blogFailure(error);
   if (!count) return blogFailure({ code: "PGRST116" });
   revalidatePath("/admin/blog");
-  revalidatePublicBlogPages();
+  const prev = before as { slug: string | null; commune?: string | null } | null;
+  revalidateBlogChange({ slugs: [prev?.slug], communes: [prev?.commune] });
   redirect("/admin/blog");
 }
 

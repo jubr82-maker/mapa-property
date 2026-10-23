@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { BorrowingCapacitySimulator } from "@/components/simulators/BorrowingCapacitySimulator";
 import { pageAlternates } from "@/lib/seo";
 
@@ -18,7 +19,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function CapaciteEmpruntPage({
+async function CapaciteEmpruntPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -52,3 +53,6 @@ export default async function CapaciteEmpruntPage({
 }
 
 export const dynamic = "force-dynamic";
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(CapaciteEmpruntPage, ["borrowing_capacity"]);

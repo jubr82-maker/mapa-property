@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { setRequestLocale } from "next-intl/server";
 import { FinancingSimulator } from "@/components/simulators/FinancingSimulator";
 
@@ -15,7 +16,7 @@ export async function generateMetadata({
   return seoPageMetadata(locale, "financing", "/services/simulateurs/financement");
 }
 
-export default async function FinancingPage({
+async function FinancingPage({
   params,
   searchParams,
 }: {
@@ -59,3 +60,6 @@ export default async function FinancingPage({
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(FinancingPage, ["financing_simulator"]);

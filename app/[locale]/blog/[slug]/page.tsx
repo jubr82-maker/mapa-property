@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { sanitizeArticleHtml } from "@/lib/security/sanitize";
 import { blogSeoMeta } from "@/lib/blog/seo-meta";
 import { fillEmptyImageAlts } from "@/lib/blog/image-alts";
@@ -43,7 +44,7 @@ export async function generateMetadata({
   }, { type: "article", image: shareImage });
 }
 
-export default async function BlogPostPage({
+async function BlogPostPage({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
@@ -121,3 +122,6 @@ export default async function BlogPostPage({
     </div>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(BlogPostPage, ["booklet"]);

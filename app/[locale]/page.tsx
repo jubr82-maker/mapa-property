@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { Hero } from "@/components/home/Hero";
 import { SearchBar } from "@/components/home/SearchBar";
 import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
@@ -22,7 +23,7 @@ import {
 } from "@/lib/data";
 import type { Locale } from "@/lib/types";
 
-export default async function HomePage({
+async function HomePage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -151,3 +152,6 @@ export default async function HomePage({
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(HomePage, ["coverage", "featured", "mandates_home", "offmarket", "reviews_home", "search"]);

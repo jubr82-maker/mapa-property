@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
@@ -26,7 +27,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function AboutPage({
+async function AboutPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -73,6 +74,7 @@ export default async function AboutPage({
                   fill
                   sizes="(min-width: 1024px) 320px, 50vw"
                   priority
+                  unoptimized
                   className="object-cover"
                 />
               </div>
@@ -139,3 +141,6 @@ export default async function AboutPage({
     </>
   );
 }
+
+// Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
+export default withPageMessages(AboutPage, ["contact"]);

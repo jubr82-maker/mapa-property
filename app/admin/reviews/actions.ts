@@ -39,8 +39,9 @@ async function dbFailure(e: DbError): Promise<ReviewActionResult> {
 
 function revalidateReviews() {
   revalidatePath("/admin/reviews");
-  // Accueil public (carrousel des avis), trois langues.
-  revalidatePath("/[locale]", "page");
+  // Accueil public (carrousel des avis), trois langues : les trois adresses
+  // seules (oct. 2026, quotas Vercel).
+  for (const l of ["fr", "en", "de"]) revalidatePath(`/${l}`);
 }
 
 export async function createReview(formData: FormData): Promise<ReviewActionResult> {

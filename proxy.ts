@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { routing } from "./i18n/routing";
 import { isAdminEmail } from "@/lib/admin/admin-emails";
 import { getArchivedPropertyKeys } from "@/lib/archived-properties";
-import { getPublishedPropertyPathsByKey } from "@/lib/published-property-keys";
+import { getPublishedPropertyPathsByKey, isPublishedOffmarketId, lookupPublishedProperty } from "@/lib/published-property-keys";
 import { legacyPropertyDestination, resolveLegacyPath } from "@/lib/legacy-redirects";
 import { blogLowercaseRedirect } from "@/lib/blog/slug";
 import {
@@ -20,6 +20,17 @@ import { adminPageRedirect, evaluateAdminAccess } from "@/lib/admin/admin-access
 import { logAdminAuthEvent } from "@/lib/admin/auth-log";
 
 const intlMiddleware = createMiddleware(routing);
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * 404 rendue a la demande (oct. 2026, quotas Vercel) : la page attrape-tout
+ * [...rest] repond 404 avec la page "introuvable" de la langue, sans entree
+ * de cache ISR. L'adresse affichee reste celle demandee.
+ */
+function notFoundRewrite(request: NextRequest, locale: string) {
+  return NextResponse.rewrite(new URL(`/${locale}/adresse-introuvable`, request.url));
+}
 
 
 export default async function middleware(request: NextRequest) {
@@ -191,6 +202,22 @@ export default async function middleware(request: NextRequest) {
       const gone = new URL(`/api/property-gone?locale=${ficheMatch[1]}`, request.url);
       return NextResponse.rewrite(gone);
     }
+    // Quotas Vercel (oct. 2026) : une ancienne adresse de fiche (slug,
+    // numero Apimo, autre langue) part en 301 d'ici, une adresse inconnue
+    // recoit une 404 rendue a la demande ; ni l'une ni l'autre ne cree
+    // d'entree de cache ISR. Liste illisible ou identifiant interne (UUID,
+    // bien off-market) : la page decide, comme avant.
+    const seg = decodeURIComponent(ficheMatch[2]);
+    if (!UUID_RE.test(seg)) {
+      const found = await lookupPublishedProperty(ficheMatch[1] as "fr" | "en" | "de", seg);
+      if (found.kind === "alias") return NextResponse.redirect(new URL(`/${ficheMatch[1]}${found.paths[ficheMatch[1] as "fr" | "en" | "de"]}`, request.url), 301);
+      if (found.kind === "unknown") return notFoundRewrite(request, ficheMatch[1]);
+    }
+  }
+  const offMatch = pathname.match(/^\/(fr|en|de)\/off-market\/([^/]+)\/?$/);
+  if (offMatch && offMatch[2] !== "arcova") {
+    const published = UUID_RE.test(offMatch[2]) ? await isPublishedOffmarketId(offMatch[2]) : false;
+    if (published === false) return notFoundRewrite(request, offMatch[1]);
   }
 
   return intlMiddleware(request);

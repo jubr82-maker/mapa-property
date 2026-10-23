@@ -35,7 +35,7 @@ const fetchTroncCached = unstable_cache(
     return out;
   },
   ["listing-tronc-v1"],
-  { revalidate: 3600, tags: [LISTING_TEMPLATES_TAG] },
+  { revalidate: 2592000, tags: [LISTING_TEMPLATES_TAG] }, // secours 30 jours ; etiquette revalidee a chaque enregistrement
 );
 
 /** Modele d'une langue pour le site : tronc enregistre, sinon par defaut. */

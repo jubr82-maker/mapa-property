@@ -190,7 +190,7 @@ export function ChatbotPanel({
         <header className="flex items-center justify-between gap-3 border-b border-line bg-bg-soft px-5 py-4">
           <div className="flex items-center gap-3">
             <span className="relative block size-10 shrink-0 overflow-hidden rounded-full ring-2 ring-gold/60">
-              <Image src={AVATAR_SRC} alt={t("avatar_alt")} fill sizes="40px" className="object-cover" />
+              <Image src={AVATAR_SRC} alt={t("avatar_alt")} fill unoptimized sizes="40px" className="object-cover" />
             </span>
             <div>
               <p className="font-display text-base font-bold text-ink">Eléna</p>
@@ -218,7 +218,7 @@ export function ChatbotPanel({
               <div className={`flex items-start gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 {m.role === "assistant" && (
                   <span className="relative mt-0.5 block size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-gold/40">
-                    <Image src={AVATAR_SRC} alt={t("avatar_alt")} fill sizes="32px" className="object-cover" />
+                    <Image src={AVATAR_SRC} alt={t("avatar_alt")} fill unoptimized sizes="32px" className="object-cover" />
                   </span>
                 )}
                 <div
@@ -276,7 +276,7 @@ export function ChatbotPanel({
           {consentAnswered && consentFeedback && (
             <div className="flex items-start justify-start gap-2">
               <span className="relative mt-0.5 block size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-gold/40">
-                <Image src={AVATAR_SRC} alt={t("avatar_alt")} fill sizes="32px" className="object-cover" />
+                <Image src={AVATAR_SRC} alt={t("avatar_alt")} fill unoptimized sizes="32px" className="object-cover" />
               </span>
               <div className="max-w-[85%] rounded-2xl border border-line bg-bg-soft px-4 py-2.5 text-sm leading-relaxed text-ink-mid">
                 {consentFeedback === "accepted"
@@ -291,7 +291,7 @@ export function ChatbotPanel({
           {pending && (
             <div className="flex items-start justify-start gap-2">
               <span className="relative mt-0.5 block size-8 shrink-0 overflow-hidden rounded-full ring-1 ring-gold/40">
-                <Image src={AVATAR_SRC} alt={t("avatar_alt")} fill sizes="32px" className="object-cover" />
+                <Image src={AVATAR_SRC} alt={t("avatar_alt")} fill unoptimized sizes="32px" className="object-cover" />
               </span>
               <div className="rounded-2xl border border-line bg-bg-soft px-4 py-2.5 text-sm text-ink-soft">
                 <span className="inline-flex gap-1">

@@ -10,7 +10,9 @@ import { fetchPublicSearches } from "@/lib/searches/data";
 // des clients (anonymes, budget en fourchette). Mise a jour a chaque
 // changement dans l'admin (etiquette property-searches) et au plus tard
 // toutes les heures.
-export const revalidate = 3600;
+// Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : revalidation a la
+// demande quand le contenu change ; minuterie de secours de 30 jours seulement.
+export const revalidate = 2592000;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;

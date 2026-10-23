@@ -17,7 +17,9 @@ const isBeta = SITE_URL.includes("beta.");
 // Regenere au plus tard toutes les heures, et a chaque enregistrement
 // d'article dans l'admin (revalidatePublicBlogPages) : un article publie
 // apparait sans nouveau build (oct. 2026, Steinfort etait absent).
-export const revalidate = 3600;
+// Quotas Vercel (oct. 2026, docs/vercel-quotas.md) : revalidation a la
+// demande quand le contenu change ; minuterie de secours de 30 jours seulement.
+export const revalidate = 2592000;
 
 // Oct. 2026 : exactement les pages publiees et indexables. Retirees : les
 // adresses qui ne font que rediriger (/services/mandat-exclusif,

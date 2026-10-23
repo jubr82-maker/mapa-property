@@ -88,6 +88,9 @@ export function Logo({
       // du haut de page (logos mobile et ordinateur) en concurrence avec
       // l'image principale.
       fetchPriority={priority ? undefined : "low"}
+      // Quotas Vercel (oct. 2026) : logo du dossier public servi tel quel,
+      // sans transformation (cache immuable d'un an).
+      unoptimized
       className={className}
     />
   );
