@@ -19,7 +19,7 @@ export type PropertyPathsByLang = Record<ListingLang, string>;
 
 const TTL_MS = 5 * 60_000;
 const COLUMNS = "id,slug,apimo_id,property_type,transaction,bedrooms,surface,living_surface,city,price,price_on_demand";
-let cache: { at: number; map: Map<string, PropertyPathsByLang> } | null = null;
+let cache: { at: number; map: Map<string, PropertyPathsByLang>; slugs: string[] } | null = null;
 
 type Row = {
   id: string;
@@ -40,6 +40,7 @@ export async function getPublishedPropertyPathsByKey(): Promise<Map<string, Prop
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const map = new Map<string, PropertyPathsByLang>();
+  const slugs: string[] = [];
   let ok = false;
   if (url && key) {
     try {
@@ -62,7 +63,10 @@ export async function getPublishedPropertyPathsByKey(): Promise<Map<string, Prop
             price_on_demand: r.price_on_demand ?? false,
           });
           map.set(r.id, paths);
-          if (r.slug) map.set(r.slug, paths);
+          if (r.slug) {
+            map.set(r.slug, paths);
+            slugs.push(r.slug);
+          }
           if (r.apimo_id !== null && r.apimo_id !== undefined) map.set(String(r.apimo_id), paths);
           // Adresses actuelles des trois langues (oct. 2026) : le proxy
           // reconnait ainsi une fiche existante sans la rendre.
@@ -74,7 +78,7 @@ export async function getPublishedPropertyPathsByKey(): Promise<Map<string, Prop
     }
   }
   // Echec : pas de cache, nouvel essai a la requete suivante.
-  if (ok) cache = { at: Date.now(), map };
+  if (ok) cache = { at: Date.now(), map, slugs };
   return map;
 }
 
@@ -93,15 +97,38 @@ export type PropertyLookup =
   | { kind: "unknown" }
   | { kind: "unavailable" };
 
+/**
+ * Meme recherche que la fiche (lib/data.ts, fetchPropertyByIdOrSlug) :
+ * cle exacte, puis reference en fin d'adresse lisible (ancienne adresse
+ * apres un changement de type, de chambres ou de ville, ou en majuscules),
+ * comme refTokenFromParam (lib/listing/listing-seo.ts) : slug numerique
+ * Apimo, ou slug de l'admin finissant par le meme suffixe de 8 caracteres.
+ */
+export function matchPropertySegment(map: Map<string, PropertyPathsByLang>, slugs: string[], segment: string): PropertyPathsByLang | undefined {
+  const exact = map.get(segment);
+  if (exact) return exact;
+  const p = segment.toLowerCase();
+  const last = p.split("-").pop() ?? p;
+  const token = /^\d+$/.test(last) || /^[0-9a-f]{8}$/.test(last) ? last : p;
+  if (token === p) return undefined;
+  if (/^\d+$/.test(token)) return slugs.includes(token) ? map.get(token) : undefined;
+  const hits = slugs.filter((s) => s.endsWith(`-${token}`));
+  return hits.length === 1 ? map.get(hits[0]) : undefined;
+}
+
+function findPaths(segment: string): PropertyPathsByLang | undefined {
+  return cache ? matchPropertySegment(cache.map, cache.slugs, segment) : undefined;
+}
+
 /** Segment d'adresse /<langue>/biens/<segment> : adresse actuelle, ancienne adresse, inconnue. */
 export async function lookupPublishedProperty(locale: ListingLang, segment: string): Promise<PropertyLookup> {
-  let map = await getPublishedPropertyPathsByKey();
-  let paths = map.get(segment);
+  await getPublishedPropertyPathsByKey();
+  let paths = findPaths(segment);
   if (!paths && Date.now() - lastMissRefresh > MISS_REFRESH_MS) {
     lastMissRefresh = Date.now();
     cache = null;
-    map = await getPublishedPropertyPathsByKey();
-    paths = map.get(segment);
+    await getPublishedPropertyPathsByKey();
+    paths = findPaths(segment);
   }
   if (!cache) return { kind: "unavailable" };
   if (!paths) return { kind: "unknown" };

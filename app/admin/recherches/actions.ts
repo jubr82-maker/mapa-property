@@ -75,6 +75,8 @@ function revalidatePublic(reference?: string, ...communeLists: unknown[]) {
     revalidatePath(`/${l}/recherches`);
     if (reference) revalidatePath(`/${l}/recherches/${reference}`);
   }
+  // Le sitemap liste les recherches publiees.
+  revalidatePath("/sitemap.xml");
   revalidatePath("/admin/recherches");
 }
 

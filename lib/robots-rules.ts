@@ -43,7 +43,8 @@ export const PRIVATE_PATHS = ["/admin", "/api/", "/*/test-scroll"] as const;
  * /biens?transaction= (cible des anciennes adresses du site v28).
  */
 export const QUERY_DISALLOW = ["/*?*utm_", "/*?*gclid=", "/*?*fbclid=", "/*?*msclkid=", "/*/biens?"] as const;
-export const QUERY_ALLOW = ["/*/biens?transaction="] as const;
+// Ancrees ($) : une adresse qui ajoute un filtre ou un suivi reste bloquee.
+export const QUERY_ALLOW = ["/*/biens?transaction=sale$", "/*/biens?transaction=rent$"] as const;
 
 /** Aspirateurs de contenu sans usage pour la visibilite du site. */
 export const BLOCKED_SCRAPERS = [

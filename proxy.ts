@@ -205,13 +205,18 @@ export default async function middleware(request: NextRequest) {
     // Quotas Vercel (oct. 2026) : une ancienne adresse de fiche (slug,
     // numero Apimo, autre langue) part en 301 d'ici, une adresse inconnue
     // recoit une 404 rendue a la demande ; ni l'une ni l'autre ne cree
-    // d'entree de cache ISR. Liste illisible ou identifiant interne (UUID,
-    // bien off-market) : la page decide, comme avant.
+    // d'entree de cache ISR. Liste illisible : la page decide, comme avant.
+    // UUID inconnu des biens publies : la page s'il designe un bien
+    // off-market (redirection vers sa page), sinon 404 a la demande.
     const seg = decodeURIComponent(ficheMatch[2]);
-    if (!UUID_RE.test(seg)) {
-      const found = await lookupPublishedProperty(ficheMatch[1] as "fr" | "en" | "de", seg);
-      if (found.kind === "alias") return NextResponse.redirect(new URL(`/${ficheMatch[1]}${found.paths[ficheMatch[1] as "fr" | "en" | "de"]}`, request.url), 301);
-      if (found.kind === "unknown") return notFoundRewrite(request, ficheMatch[1]);
+    const found = await lookupPublishedProperty(ficheMatch[1] as "fr" | "en" | "de", seg);
+    if (found.kind === "alias") {
+      const to = new URL(`/${ficheMatch[1]}${found.paths[ficheMatch[1] as "fr" | "en" | "de"]}`, request.url);
+      to.search = request.nextUrl.search;
+      return NextResponse.redirect(to, 301);
+    }
+    if (found.kind === "unknown" && (!UUID_RE.test(seg) || (await isPublishedOffmarketId(seg)) === false)) {
+      return notFoundRewrite(request, ficheMatch[1]);
     }
   }
   const offMatch = pathname.match(/^\/(fr|en|de)\/off-market\/([^/]+)\/?$/);

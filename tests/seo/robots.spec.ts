@@ -33,9 +33,10 @@ const PUBLIC_PATHS = [
   "/sitemap.xml",
   // Oct. 2026 : parametres de suivi et filtres bloques, pas ces adresses.
   "/fr/biens?transaction=sale",
+  "/de/biens?transaction=rent",
   "/en/villes/mamer",
 ];
-const BLOCKED_PATHS = ["/admin", "/admin/leads", "/api/lead", "/api/chatbot", "/fr/test-scroll", "/de/test-scroll", "/fr?utm_source=x", "/fr/villes/mamer?gclid=1", "/en/biens/x?a=1&fbclid=2", "/fr/biens?city=Steinfort", "/de/biens?min_price=1"];
+const BLOCKED_PATHS = ["/admin", "/admin/leads", "/api/lead", "/api/chatbot", "/fr/test-scroll", "/de/test-scroll", "/fr?utm_source=x", "/fr/villes/mamer?gclid=1", "/en/biens/x?a=1&fbclid=2", "/fr/biens?city=Steinfort", "/de/biens?min_price=1", "/fr/biens?transaction=sale&city=x", "/fr/biens?transaction=rent&utm_source=x"];
 const PAGES_TO_CHECK = ["/fr", "/en", "/de", "/fr/services/vendre", "/en/services/louer", "/de/qui-sommes-nous", "/fr/contact"];
 const FORBIDDEN_DIRECTIVES = /\b(noindex|none|noai|noimageai|nofollow)\b/i;
 

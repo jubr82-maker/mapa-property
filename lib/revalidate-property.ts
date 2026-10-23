@@ -127,6 +127,13 @@ async function revalidateSimilarContaining(ids: string[]): Promise<void> {
   }
   for (const f of fresh) {
     if (changed.has(f.id)) continue;
+    // Sans type : la fiche calcule son bloc avec le badge brut, la liste
+    // des cartes porte le badge affiche ; cle de cache differente, donc
+    // regeneree par prudence.
+    if (!f.property_type) {
+      revalidateTag(similarTag(f.id), { expire: 0 });
+      continue;
+    }
     const after = pickSimilar(f, fresh).some((p) => changed.has(p.id));
     const before = after ? true : (await fetchSimilarFor(f)).some((p) => changed.has(p.id));
     if (after || before) revalidateTag(similarTag(f.id), { expire: 0 });
