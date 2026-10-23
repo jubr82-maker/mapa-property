@@ -99,4 +99,22 @@ test("activation : un bien publie suffit, sa suppression la retire ; lecture en 
   assert.ok(rv.includes('revalidatePath("/[locale]/villes/[ville]", "page")') && rv.includes('revalidatePath("/sitemap.xml")'));
 });
 
+const MU = ["Maurice", "Mauritius", "Ile Maurice", "Grand Baie", "Grand-Baie", "Tamarin", "Rivière Noire", "Riviere Noire", "Black River", "Flic en Flac", "Bel Ombre", "Port-Louis", "Moka", "Pereybere", "Trou aux Biches"];
+// Textes provisoires des nouvelles pages : aucun chiffre, prix, regle ou programme.
+const neutral = (slug: string) => {
+  const c = getCityBySlug(slug)!;
+  const all = JSON.stringify([c.intro, c.highlightsByLang]);
+  assert.ok(!/\d|€|IRS|RES\b|PDS|G\+2|[–—]/.test(all), `${slug} : texte provisoire non neutre`);
+};
+
+test("Ile Maurice : page, noms, pays, alias ; noindex et hors sitemap sans bien", () => {
+  const c = getCityBySlug("ile-maurice")!;
+  assert.deepEqual(c.name, { fr: "Île Maurice", en: "Mauritius", de: "Mauritius" });
+  assert.equal(c.country, "MU");
+  for (const a of MU) assert.equal(cityForPlace(a)?.slug, "ile-maurice", a);
+  assert.equal(isCityIndexable(c, 0), false);
+  assert.equal(isCityIndexable(c, publishedCountByCity([{ city: "Grand Baie" }]).get("ile-maurice") ?? 0), true);
+  neutral("ile-maurice");
+});
+
 console.log(`${pass} PASS, 0 FAIL`);

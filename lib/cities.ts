@@ -15,6 +15,8 @@ export type City = {
   schools?: string[];
   highlights: string[];
   metaDescription: CityMeta;
+  /** Nom dans une phrase ("a l'Ile Maurice"), si different du nom (titre, description, grand titre). */
+  nameInSentence?: Partial<CityName>;
   /** Points cles traduits (sinon `highlights`, en francais, dans les trois langues). */
   highlightsByLang?: { fr: string[]; en: string[]; de: string[] };
   /**
@@ -492,6 +494,7 @@ function buildIntlCity(args: {
   highlights: string[];
   highlightsByLang?: { fr: string[]; en: string[]; de: string[] };
   aliases?: string[];
+  nameInSentence?: Partial<CityName>;
   description: { fr: string; en: string; de: string };
 }): City {
   return {
@@ -504,6 +507,7 @@ function buildIntlCity(args: {
     highlights: args.highlights,
     ...(args.highlightsByLang ? { highlightsByLang: args.highlightsByLang } : {}),
     ...(args.aliases ? { aliases: args.aliases } : {}),
+    ...(args.nameInSentence ? { nameInSentence: args.nameInSentence } : {}),
     intro: args.description,
     metaDescription: {
       fr: `${args.name.fr}, broker international ${M}${args.priceRange ? `, ${args.priceRange.floor}-${args.priceRange.ceiling} €/m²` : ""}.`,
@@ -859,6 +863,28 @@ const saintBarthelemy = buildIntlCity({
   },
 });
 
+// Textes PROVISOIRES (oct. 2026) : structure en 3 langues, texte neutre sans
+// chiffre, prix, regle juridique ou fiscale. Textes definitifs a venir ;
+// pages non mises en ligne avant ces textes.
+const ileMaurice = buildIntlCity({
+  slug: "ile-maurice",
+  name: { fr: "Île Maurice", en: "Mauritius", de: "Mauritius" },
+  nameInSentence: { fr: "l'Île Maurice" },
+  country: "MU",
+  aliases: ["Maurice", "Mauritius", "Ile Maurice", "Grand Baie", "Grand-Baie", "Tamarin", "Rivière Noire", "Riviere Noire", "Black River", "Flic en Flac", "Bel Ombre", "Port-Louis", "Moka", "Pereybere", "Trou aux Biches"],
+  highlights: ["Broker international MAPA Property", "Partenaires locaux"],
+  highlightsByLang: {
+    fr: ["Broker international MAPA Property", "Partenaires locaux"],
+    en: ["MAPA Property international broker", "Local partners"],
+    de: ["Internationaler Broker MAPA Property", "Lokale Partner"],
+  },
+  description: {
+    fr: "Page en préparation. MAPA Property accompagne acquéreurs et vendeurs à l'Île Maurice en qualité de broker international, avec des partenaires locaux. Le contenu détaillé de cette page sera publié prochainement.",
+    en: "Page in preparation. MAPA Property supports buyers and sellers in Mauritius as an international broker, working with local partners. Detailed content for this page will be published soon.",
+    de: "Seite in Vorbereitung. MAPA Property begleitet Käufer und Verkäufer auf Mauritius als internationaler Broker, gemeinsam mit lokalen Partnern. Ausführliche Inhalte zu dieser Seite folgen in Kürze.",
+  },
+});
+
 // ============================================================================
 // EXPORT
 // ============================================================================
@@ -874,6 +900,7 @@ export const cities: City[] = [
   bruxelles, anvers, amsterdam, londres, madrid, barcelone, lisbonne, porto,
   rome, milan, florence, vienne, berlin, munich, francfort, hambourg,
   dubai, newYork, miami, saintBarthelemy,
+  ileMaurice,
 ];
 
 export const luxembourgCities = cities.filter((c) => c.country === "LU");

@@ -40,7 +40,7 @@ test("biens et recherches des quatre localites rattaches a la page", () => {
 test("autres villes inchangees : voisines, points cles, aucune localite", () => {
   for (const c of cities.filter((c) => c.slug !== "steinfort")) {
     assert.ok(!(c.aliases ?? []).some((a) => ["Hagen", "Kleinbettingen", "Grass"].includes(a)), c.slug);
-    assert.equal(c.highlightsByLang, undefined, c.slug);
+    if (c.country === "LU") assert.equal(c.highlightsByLang, undefined, c.slug);
     assert.ok(!getNearbyCities(c.slug, 4).some((n) => n.slug === "steinfort") || c.country !== "LU" || luxembourgCities.indexOf(c) >= 4, c.slug);
   }
   assert.equal(luxembourgCities[luxembourgCities.length - 1].slug, "steinfort");

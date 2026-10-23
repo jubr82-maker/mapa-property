@@ -44,7 +44,7 @@ export async function generateMetadata({
   const city = getCityBySlug(ville);
   if (!city) return {};
   const loc = locale as Locale;
-  const cityName = city.name[loc];
+  const cityName = city.nameInSentence?.[loc] ?? city.name[loc];
   // Titre traduit (oct. 2026) : l'ancien suffixe francais fige donnait le
   // meme titre aux trois langues.
   const tc = await getTranslations({ locale, namespace: "seo_pages" });
@@ -150,6 +150,8 @@ export default async function VillePage({
   if (!city) notFound();
   const loc = locale as Locale;
   const t = labels[loc];
+  // Nom dans une phrase ("a l'Ile Maurice") ; sinon le nom de la ville.
+  const inSentence = city.nameInSentence?.[loc] ?? city.name[loc];
   const nearby = getNearbyCities(city.slug, 4);
   // Recherches en cours qui visent cette commune (oct. 2026).
   const searches = await fetchSearchesForCity(city.slug);
@@ -163,7 +165,7 @@ export default async function VillePage({
 
   return (
     <>
-      <JsonLd data={buildJsonLd(city, loc, cityDescription(tc, city, city.name[loc]))} />
+      <JsonLd data={buildJsonLd(city, loc, cityDescription(tc, city, inSentence))} />
       <PageBreadcrumb locale={locale} path={`/villes/${city.slug}`} current={city.name[loc]} />
       <main className="mx-auto max-w-3xl px-6 pt-32 pb-20 lg:px-10 lg:pt-40">
         <Link
@@ -185,7 +187,7 @@ export default async function VillePage({
             <span className="mb-2 block font-mono text-[11px] font-normal uppercase leading-normal tracking-[0.3em] text-ink-soft">
               {tc(city.country === "LU" ? "city.h1_prefix" : "city.h1_prefix_intl")}
             </span>{" "}
-            {city.name[loc]}
+            {inSentence}
           </h1>
         </header>
 
@@ -261,7 +263,7 @@ export default async function VillePage({
 
         {cityProperties.length > 0 ? (
           <section className="mt-16" data-city-properties>
-            <h2 className="t-h2">{ts("city_properties_title", { city: city.name[loc] })}</h2>
+            <h2 className="t-h2">{ts("city_properties_title", { city: inSentence })}</h2>
             <ul className="mt-6 grid gap-5 sm:grid-cols-2">
               {cityProperties.slice(0, 6).map((p) => (
                 <li key={p.id}>
@@ -274,8 +276,8 @@ export default async function VillePage({
 
         {searches.length > 0 ? (
           <section className="mt-16" data-city-searches>
-            <h2 className="t-h2">{ts("city_block_title", { city: city.name[loc] })}</h2>
-            <p className="mt-3 text-base leading-relaxed text-ink-mid">{ts("city_block_intro", { city: city.name[loc] })}</p>
+            <h2 className="t-h2">{ts("city_block_title", { city: inSentence })}</h2>
+            <p className="mt-3 text-base leading-relaxed text-ink-mid">{ts("city_block_intro", { city: inSentence })}</p>
             <ul className="mt-6 grid gap-4">
               {searches.slice(0, 4).map((s) => (
                 <li key={s.id}>
