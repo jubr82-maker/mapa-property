@@ -4,7 +4,7 @@
 import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { cities, getCityBySlug, isAgencyCity } from "../../lib/cities";
+import { cities, getCityBySlug, getNearbyCities, isAgencyCity } from "../../lib/cities";
 
 const root = join(import.meta.dirname, "..", "..");
 const read = (f: string) => readFileSync(join(root, f), "utf8");
@@ -51,5 +51,9 @@ assert.ok(ville.includes('font-mono text-[11px] font-normal uppercase leading-no
 // "Agence immobiliere" comme le Luxembourg ; Monaco et les autres pays en broker.
 for (const s of ["steinfort", "metz", "paris", "cannes", "nice", "saint-tropez", "saint-barthelemy", "berlin", "munich", "francfort", "hambourg", "rome", "milan", "florence"]) assert.ok(isAgencyCity(getCityBySlug(s)!), `${s} agence`);
 for (const s of ["monaco", "geneve", "lausanne", "zurich", "bruxelles", "anvers", "amsterdam", "londres", "madrid", "barcelone", "lisbonne", "porto", "algarve", "vienne", "new-york", "miami", "dubai", "ile-maurice"]) assert.ok(!isAgencyCity(getCityBySlug(s)!), `${s} broker`);
-for (const c of cities) assert.equal(isAgencyCity(c), c.country === "LU" || (["FR", "DE", "IT"].includes(c.country) && c.slug !== "monaco"), c.slug);
+for (const c of cities) assert.equal(isAgencyCity(c), c.country === "LU" || ["FR", "DE", "IT"].includes(c.country), c.slug);
+assert.equal(getCityBySlug("monaco")!.country, "MC");
+// Marches voisins inchanges : Monaco reste groupe avec la Cote d'Azur.
+assert.equal(getNearbyCities("monaco").map((c) => c.slug).join(","), "paris,cannes,nice,saint-tropez");
+assert.ok(getNearbyCities("nice").some((c) => c.slug === "monaco"));
 console.log("  PASS titres et descriptions : villes, Qui sommes-nous, Agence, mandats, liste d'attente, fiches (virgule)\n\n1 PASS, 0 FAIL");

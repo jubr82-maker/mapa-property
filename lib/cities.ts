@@ -1,5 +1,5 @@
 export type CountryCode =
-  | "LU" | "FR" | "CH" | "BE" | "NL" | "GB" | "ES" | "PT" | "IT" | "AT" | "DE" | "AE" | "US" | "MU";
+  | "LU" | "FR" | "CH" | "BE" | "NL" | "GB" | "ES" | "PT" | "IT" | "AT" | "DE" | "AE" | "US" | "MU" | "MC";
 
 export type CityIntro = { fr: string; en: string; de: string };
 export type CityName = { fr: string; en: string; de: string };
@@ -577,7 +577,7 @@ const monaco = buildIntlCity({
   slug: "monaco",
   aliases: ["Monte-Carlo", "Monte Carlo"],
   name: { fr: "Monaco", en: "Monaco", de: "Monaco" },
-  country: "FR",
+  country: "MC",
   region: "Principauté",
   highlights: ["Marché immobilier le plus cher du monde au m²", "Carré d'Or, Larvotto, Monte-Carlo", "Stabilité fiscale (résidence)", "Penthouses, vues mer, sécurité"],
   description: {
@@ -950,15 +950,13 @@ export const internationalCities = cities.filter((c) => c.country !== "LU");
 
 // Carte professionnelle europeenne d'agent immobilier (oct. 2026) : France,
 // Allemagne et Italie. Pages de ces pays : "Agence immobiliere", comme au
-// Luxembourg ; ailleurs : "Broker immobilier". Monaco est code "FR" dans ce
-// referentiel mais reste un Etat distinct : broker.
+// Luxembourg ; ailleurs (Monaco compris, pays "MC") : "Broker immobilier".
 const AGENT_CARD_COUNTRIES: readonly CountryCode[] = ["FR", "DE", "IT"];
-const AGENT_CARD_EXCLUDED_SLUGS: readonly string[] = ["monaco"];
 
 /** Page de ville au titre "Agence immobiliere" (Luxembourg et pays de la carte europeenne). */
 export function isAgencyCity(city: City): boolean {
   if (city.country === "LU") return true;
-  return AGENT_CARD_COUNTRIES.includes(city.country) && !AGENT_CARD_EXCLUDED_SLUGS.includes(city.slug);
+  return AGENT_CARD_COUNTRIES.includes(city.country);
 }
 
 export function getCityBySlug(slug: string): City | undefined {
@@ -969,11 +967,15 @@ export function getCitySlugs(): string[] {
   return cities.map((c) => c.slug);
 }
 
+// Marches voisins : Monaco (pays "MC") reste groupe avec la Cote d'Azur
+// francaise, comme quand son pays etait code "FR".
+const nearbyGroup = (c: City): CountryCode => (c.country === "MC" ? "FR" : c.country);
+
 export function getNearbyCities(slug: string, count = 4): City[] {
   const target = getCityBySlug(slug);
   if (!target) return [];
-  const sameCountry = cities.filter((c) => c.country === target.country && c.slug !== slug);
+  const sameCountry = cities.filter((c) => nearbyGroup(c) === nearbyGroup(target) && c.slug !== slug);
   if (sameCountry.length >= count) return sameCountry.slice(0, count);
-  const others = cities.filter((c) => c.country !== target.country && c.slug !== slug);
+  const others = cities.filter((c) => nearbyGroup(c) !== nearbyGroup(target) && c.slug !== slug);
   return [...sameCountry, ...others].slice(0, count);
 }
