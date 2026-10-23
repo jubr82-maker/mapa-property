@@ -17,6 +17,8 @@ export type City = {
   metaDescription: CityMeta;
   /** Nom dans une phrase ("a l'Ile Maurice"), si different du nom (titre, description, grand titre). */
   nameInSentence?: Partial<CityName>;
+  /** Preposition francaise si ce n'est pas "a" ("en Algarve"). */
+  prepositionFr?: string;
   /** Points cles traduits (sinon `highlights`, en francais, dans les trois langues). */
   highlightsByLang?: { fr: string[]; en: string[]; de: string[] };
   /**
@@ -495,6 +497,7 @@ function buildIntlCity(args: {
   highlightsByLang?: { fr: string[]; en: string[]; de: string[] };
   aliases?: string[];
   nameInSentence?: Partial<CityName>;
+  prepositionFr?: string;
   description: { fr: string; en: string; de: string };
 }): City {
   return {
@@ -508,6 +511,7 @@ function buildIntlCity(args: {
     ...(args.highlightsByLang ? { highlightsByLang: args.highlightsByLang } : {}),
     ...(args.aliases ? { aliases: args.aliases } : {}),
     ...(args.nameInSentence ? { nameInSentence: args.nameInSentence } : {}),
+    ...(args.prepositionFr ? { prepositionFr: args.prepositionFr } : {}),
     intro: args.description,
     metaDescription: {
       fr: `${args.name.fr}, broker international ${M}${args.priceRange ? `, ${args.priceRange.floor}-${args.priceRange.ceiling} €/m²` : ""}.`,
@@ -885,6 +889,44 @@ const ileMaurice = buildIntlCity({
   },
 });
 
+const metz = buildIntlCity({
+  slug: "metz",
+  name: { fr: "Metz", en: "Metz", de: "Metz" },
+  country: "FR",
+  aliases: ["Metz", "Montigny-lès-Metz", "Montigny-les-Metz", "Woippy", "Marly", "Moulins-lès-Metz", "Thionville"],
+  highlights: ["Broker international MAPA Property", "Partenaires locaux"],
+  highlightsByLang: {
+    fr: ["Broker international MAPA Property", "Partenaires locaux"],
+    en: ["MAPA Property international broker", "Local partners"],
+    de: ["Internationaler Broker MAPA Property", "Lokale Partner"],
+  },
+  description: {
+    fr: "Page en préparation. MAPA Property accompagne acquéreurs et vendeurs à Metz et dans ses environs en qualité de broker international, avec des partenaires locaux. Le contenu détaillé de cette page sera publié prochainement.",
+    en: "Page in preparation. MAPA Property supports buyers and sellers in Metz and the surrounding area as an international broker, working with local partners. Detailed content for this page will be published soon.",
+    de: "Seite in Vorbereitung. MAPA Property begleitet Käufer und Verkäufer in Metz und Umgebung als internationaler Broker, gemeinsam mit lokalen Partnern. Ausführliche Inhalte zu dieser Seite folgen in Kürze.",
+  },
+});
+
+const algarve = buildIntlCity({
+  slug: "algarve",
+  name: { fr: "Algarve", en: "Algarve", de: "Algarve" },
+  nameInSentence: { en: "the Algarve", de: "der Algarve" },
+  prepositionFr: "en",
+  country: "PT",
+  aliases: ["Algarve", "Portimão", "Portimao", "Lagos", "Albufeira", "Vilamoura", "Faro", "Lagoa", "Carvoeiro", "Alvor", "Tavira", "Loulé", "Loule", "Quinta do Lago", "Vale do Lobo", "Praia da Rocha"],
+  highlights: ["Broker international MAPA Property", "Partenaires locaux"],
+  highlightsByLang: {
+    fr: ["Broker international MAPA Property", "Partenaires locaux"],
+    en: ["MAPA Property international broker", "Local partners"],
+    de: ["Internationaler Broker MAPA Property", "Lokale Partner"],
+  },
+  description: {
+    fr: "Page en préparation. MAPA Property accompagne acquéreurs et vendeurs en Algarve en qualité de broker international, avec des partenaires locaux. Le contenu détaillé de cette page sera publié prochainement.",
+    en: "Page in preparation. MAPA Property supports buyers and sellers in the Algarve as an international broker, working with local partners. Detailed content for this page will be published soon.",
+    de: "Seite in Vorbereitung. MAPA Property begleitet Käufer und Verkäufer an der Algarve als internationaler Broker, gemeinsam mit lokalen Partnern. Ausführliche Inhalte zu dieser Seite folgen in Kürze.",
+  },
+});
+
 // ============================================================================
 // EXPORT
 // ============================================================================
@@ -900,7 +942,7 @@ export const cities: City[] = [
   bruxelles, anvers, amsterdam, londres, madrid, barcelone, lisbonne, porto,
   rome, milan, florence, vienne, berlin, munich, francfort, hambourg,
   dubai, newYork, miami, saintBarthelemy,
-  ileMaurice,
+  ileMaurice, metz, algarve,
 ];
 
 export const luxembourgCities = cities.filter((c) => c.country === "LU");

@@ -117,4 +117,24 @@ test("Ile Maurice : page, noms, pays, alias ; noindex et hors sitemap sans bien"
   neutral("ile-maurice");
 });
 
+test("Metz et Algarve : pages, alias, biens 86430704 et 85603229 rattaches, indexables avec leur bien", () => {
+  const metz = getCityBySlug("metz")!, algarve = getCityBySlug("algarve")!;
+  assert.deepEqual(metz.name, { fr: "Metz", en: "Metz", de: "Metz" });
+  assert.deepEqual(algarve.name, { fr: "Algarve", en: "Algarve", de: "Algarve" });
+  assert.equal(metz.country, "FR");
+  assert.equal(algarve.country, "PT");
+  for (const a of ["Metz", "Montigny-lès-Metz", "Montigny-les-Metz", "Woippy", "Marly", "Moulins-lès-Metz", "Thionville"]) assert.equal(cityForPlace(a)?.slug, "metz", a);
+  for (const a of ["Algarve", "Portimão", "Portimao", "Lagos", "Albufeira", "Vilamoura", "Faro", "Lagoa", "Carvoeiro", "Alvor", "Tavira", "Loulé", "Loule", "Quinta do Lago", "Vale do Lobo", "Praia da Rocha"]) assert.equal(cityForPlace(a)?.slug, "algarve", a);
+  // Biens publies (ville saisie en base) : Metz 86430704, Portimão 85603229.
+  const counts = publishedCountByCity([{ city: "Metz" }, { city: "Portimão" }]);
+  assert.equal(isCityIndexable(metz, counts.get("metz") ?? 0), true);
+  assert.equal(isCityIndexable(algarve, counts.get("algarve") ?? 0), true);
+  assert.equal(isCityIndexable(metz, 0), false);
+  assert.equal(isCityIndexable(algarve, 0), false);
+  neutral("metz");
+  neutral("algarve");
+  // Francais : "en Algarve", jamais "a Algarve".
+  assert.equal(algarve.prepositionFr, "en");
+});
+
 console.log(`${pass} PASS, 0 FAIL`);

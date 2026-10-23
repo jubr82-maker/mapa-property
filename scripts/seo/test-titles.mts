@@ -46,5 +46,5 @@ for (const l of ["fr", "en", "de"] as const) {
 }
 // Villes : petite ligne dans le style de la ligne "LUXEMBOURG · SUD".
 const ville = read("app/[locale]/villes/[ville]/page.tsx");
-assert.ok(ville.includes('font-mono text-[11px] font-normal uppercase leading-normal tracking-[0.3em] text-ink-soft">\n              {tc(city.country === "LU" ? "city.h1_prefix" : "city.h1_prefix_intl")}'));
+assert.ok(ville.includes('font-mono text-[11px] font-normal uppercase leading-normal tracking-[0.3em] text-ink-soft">\n              {fr(`${tc(city.country === "LU" ? "city.h1_prefix" : "city.h1_prefix_intl")} `, "").trim()}'));
 console.log("  PASS titres et descriptions : villes, Qui sommes-nous, Agence, mandats, liste d'attente, fiches (virgule)\n\n1 PASS, 0 FAIL");

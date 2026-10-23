@@ -45,6 +45,7 @@ export async function generateMetadata({
   if (!city) return {};
   const loc = locale as Locale;
   const cityName = city.nameInSentence?.[loc] ?? city.name[loc];
+  const fr = frenchPreposition(city, loc);
   // Titre traduit (oct. 2026) : l'ancien suffixe francais fige donnait le
   // meme titre aux trois langues.
   const tc = await getTranslations({ locale, namespace: "seo_pages" });
@@ -57,8 +58,8 @@ export async function generateMetadata({
   const indexable = isCityIndexable(city, published);
   const alternates = pageAlternates(locale, `/villes/${city.slug}`);
   return withSocial(locale, {
-    title: brandedTitle(tc(city.country === "LU" ? "city.title" : "city.title_intl", { city: cityName })),
-    description: cityDescription(tc, city, cityName),
+    title: brandedTitle(fr(tc(city.country === "LU" ? "city.title" : "city.title_intl", { city: cityName }), cityName)),
+    description: fr(cityDescription(tc, city, cityName), cityName),
     alternates: indexable ? alternates : { canonical: alternates.canonical },
     ...(indexable ? {} : { robots: { index: false, follow: true } }),
   });
@@ -117,6 +118,16 @@ function formatEuro(n: number): string {
 // Titre et description Google d'une ville (oct. 2026) : agence immobiliere
 // au Luxembourg, broker immobilier a l'etranger. Rien d'invente sur la
 // ville (plus de "prestige" ni de prix dans la description).
+/**
+ * Preposition francaise d'une ville si ce n'est pas "a" ("en Algarve") :
+ * remplace "a <nom>" dans un texte des modeles (nom vide : "a" final du
+ * grand titre). Sans effet hors du francais et pour les autres villes.
+ */
+function frenchPreposition(city: City, loc: Locale) {
+  const prep = loc === "fr" ? city.prepositionFr : undefined;
+  return (text: string, name: string) => (prep ? text.replace(name ? `à ${name}` : /à $/, name ? `${prep} ${name}` : `${prep} `) : text);
+}
+
 function cityDescription(tc: (k: string, v: Record<string, string>) => string, city: City, cityName: string): string {
   return tc(city.country === "LU" ? "city.description" : "city.description_intl", { city: cityName });
 }
@@ -152,6 +163,7 @@ export default async function VillePage({
   const t = labels[loc];
   // Nom dans une phrase ("a l'Ile Maurice") ; sinon le nom de la ville.
   const inSentence = city.nameInSentence?.[loc] ?? city.name[loc];
+  const fr = frenchPreposition(city, loc);
   const nearby = getNearbyCities(city.slug, 4);
   // Recherches en cours qui visent cette commune (oct. 2026).
   const searches = await fetchSearchesForCity(city.slug);
@@ -165,7 +177,7 @@ export default async function VillePage({
 
   return (
     <>
-      <JsonLd data={buildJsonLd(city, loc, cityDescription(tc, city, inSentence))} />
+      <JsonLd data={buildJsonLd(city, loc, fr(cityDescription(tc, city, inSentence), inSentence))} />
       <PageBreadcrumb locale={locale} path={`/villes/${city.slug}`} current={city.name[loc]} />
       <main className="mx-auto max-w-3xl px-6 pt-32 pb-20 lg:px-10 lg:pt-40">
         <Link
@@ -185,7 +197,7 @@ export default async function VillePage({
               la ligne "LUXEMBOURG · SUD" ci-dessus, le nom garde son style. */}
           <h1 className="mt-3 t-h1">
             <span className="mb-2 block font-mono text-[11px] font-normal uppercase leading-normal tracking-[0.3em] text-ink-soft">
-              {tc(city.country === "LU" ? "city.h1_prefix" : "city.h1_prefix_intl")}
+              {fr(`${tc(city.country === "LU" ? "city.h1_prefix" : "city.h1_prefix_intl")} `, "").trim()}
             </span>{" "}
             {inSentence}
           </h1>
@@ -263,7 +275,7 @@ export default async function VillePage({
 
         {cityProperties.length > 0 ? (
           <section className="mt-16" data-city-properties>
-            <h2 className="t-h2">{ts("city_properties_title", { city: inSentence })}</h2>
+            <h2 className="t-h2">{fr(ts("city_properties_title", { city: inSentence }), inSentence)}</h2>
             <ul className="mt-6 grid gap-5 sm:grid-cols-2">
               {cityProperties.slice(0, 6).map((p) => (
                 <li key={p.id}>
@@ -276,8 +288,8 @@ export default async function VillePage({
 
         {searches.length > 0 ? (
           <section className="mt-16" data-city-searches>
-            <h2 className="t-h2">{ts("city_block_title", { city: inSentence })}</h2>
-            <p className="mt-3 text-base leading-relaxed text-ink-mid">{ts("city_block_intro", { city: inSentence })}</p>
+            <h2 className="t-h2">{fr(ts("city_block_title", { city: inSentence }), inSentence)}</h2>
+            <p className="mt-3 text-base leading-relaxed text-ink-mid">{fr(ts("city_block_intro", { city: inSentence }), inSentence)}</p>
             <ul className="mt-6 grid gap-4">
               {searches.slice(0, 4).map((s) => (
                 <li key={s.id}>
