@@ -867,25 +867,25 @@ const saintBarthelemy = buildIntlCity({
   },
 });
 
-// Textes PROVISOIRES (oct. 2026) : structure en 3 langues, texte neutre sans
-// chiffre, prix, regle juridique ou fiscale. Textes definitifs a venir ;
-// pages non mises en ligne avant ces textes.
+// Textes definitifs fournis par Julien (2026-10-23), repris a l'identique.
+// Sans fourchette de prix : indexables seulement avec un bien publie
+// rattache (lib/city-indexing.ts).
 const ileMaurice = buildIntlCity({
   slug: "ile-maurice",
   name: { fr: "Île Maurice", en: "Mauritius", de: "Mauritius" },
   nameInSentence: { fr: "l'Île Maurice" },
   country: "MU",
   aliases: ["Maurice", "Mauritius", "Ile Maurice", "Grand Baie", "Grand-Baie", "Tamarin", "Rivière Noire", "Riviere Noire", "Black River", "Flic en Flac", "Bel Ombre", "Port-Louis", "Moka", "Pereybere", "Trou aux Biches"],
-  highlights: ["Broker international MAPA Property", "Partenaires locaux"],
+  highlights: ["Programmes agréés par l'EDB", "Titre de résidence selon le programme", "De Grand Baie à Bel Ombre", "MAPA Property, interlocuteur unique"],
   highlightsByLang: {
-    fr: ["Broker international MAPA Property", "Partenaires locaux"],
-    en: ["MAPA Property international broker", "Local partners"],
-    de: ["Internationaler Broker MAPA Property", "Lokale Partner"],
+    fr: ["Programmes agréés par l'EDB", "Titre de résidence selon le programme", "De Grand Baie à Bel Ombre", "MAPA Property, interlocuteur unique"],
+    en: ["Schemes approved by the EDB", "Residence permit per scheme", "From Grand Baie to Bel Ombre", "MAPA Property, single contact"],
+    de: ["Vom EDB genehmigte Programme", "Aufenthaltstitel je nach Programm", "Von Grand Baie bis Bel Ombre", "MAPA Property, ein Ansprechpartner"],
   },
   description: {
-    fr: "Page en préparation. MAPA Property accompagne acquéreurs et vendeurs à l'Île Maurice en qualité de broker international, avec des partenaires locaux. Le contenu détaillé de cette page sera publié prochainement.",
-    en: "Page in preparation. MAPA Property supports buyers and sellers in Mauritius as an international broker, working with local partners. Detailed content for this page will be published soon.",
-    de: "Seite in Vorbereitung. MAPA Property begleitet Käufer und Verkäufer auf Mauritius als internationaler Broker, gemeinsam mit lokalen Partnern. Ausführliche Inhalte zu dieser Seite folgen in Kürze.",
+    fr: "Au cœur de l'océan Indien, l'île Maurice séduit par son climat, ses lagons et sa qualité de vie. Les non-citoyens peuvent y acquérir un bien dans le cadre de programmes agréés par l'Economic Development Board, dont certains peuvent ouvrir droit à un titre de résidence selon le montant investi. De Grand Baie à Tamarin et Bel Ombre, l'offre va de l'appartement à la villa. MAPA Property y accompagne ses clients en tant que broker, avec une agence locale habilitée, et reste leur interlocuteur unique du premier échange à la signature.",
+    en: "In the heart of the Indian Ocean, Mauritius appeals with its climate, lagoons and quality of life. Non-citizens may acquire property there under schemes approved by the Economic Development Board, some of which can lead to a residence permit depending on the amount invested. From Grand Baie to Tamarin and Bel Ombre, the offer ranges from apartments to villas. MAPA Property supports its clients there as a broker, alongside a licensed local agency, and remains their single point of contact from the first exchange to the signing.",
+    de: "Mitten im Indischen Ozean überzeugt Mauritius mit seinem Klima, seinen Lagunen und seiner Lebensqualität. Nicht-Staatsangehörige können dort Immobilien im Rahmen von Programmen erwerben, die vom Economic Development Board genehmigt sind, und einige davon können je nach Investitionsbetrag zu einer Aufenthaltsgenehmigung führen. Von Grand Baie bis Tamarin und Bel Ombre reicht das Angebot von der Wohnung bis zur Villa. MAPA Property begleitet ihre Kunden dort als Broker gemeinsam mit einer zugelassenen lokalen Agentur und bleibt vom ersten Gespräch bis zur Unterzeichnung ihr einziger Ansprechpartner.",
   },
 });
 
@@ -894,16 +894,16 @@ const metz = buildIntlCity({
   name: { fr: "Metz", en: "Metz", de: "Metz" },
   country: "FR",
   aliases: ["Metz", "Montigny-lès-Metz", "Montigny-les-Metz", "Woippy", "Marly", "Moulins-lès-Metz", "Thionville"],
-  highlights: ["Broker international MAPA Property", "Partenaires locaux"],
+  highlights: ["À environ 60 km de Luxembourg-Ville", "Trains directs en moins d'une heure", "Accès par l'autoroute A31", "MAPA Property intervient directement"],
   highlightsByLang: {
-    fr: ["Broker international MAPA Property", "Partenaires locaux"],
-    en: ["MAPA Property international broker", "Local partners"],
-    de: ["Internationaler Broker MAPA Property", "Lokale Partner"],
+    fr: ["À environ 60 km de Luxembourg-Ville", "Trains directs en moins d'une heure", "Accès par l'autoroute A31", "MAPA Property intervient directement"],
+    en: ["About 60 km from Luxembourg City", "Direct trains in under an hour", "Access via the A31 motorway", "MAPA Property acts directly"],
+    de: ["Rund 60 km von Luxemburg-Stadt", "Direkte Züge unter einer Stunde", "Anbindung über die Autobahn A31", "MAPA Property direkt vor Ort"],
   },
   description: {
-    fr: "Page en préparation. MAPA Property accompagne acquéreurs et vendeurs à Metz et dans ses environs en qualité de broker international, avec des partenaires locaux. Le contenu détaillé de cette page sera publié prochainement.",
-    en: "Page in preparation. MAPA Property supports buyers and sellers in Metz and the surrounding area as an international broker, working with local partners. Detailed content for this page will be published soon.",
-    de: "Seite in Vorbereitung. MAPA Property begleitet Käufer und Verkäufer in Metz und Umgebung als internationaler Broker, gemeinsam mit lokalen Partnern. Ausführliche Inhalte zu dieser Seite folgen in Kürze.",
+    fr: "À une soixantaine de kilomètres de Luxembourg-Ville, Metz attire de nombreux frontaliers qui travaillent au Grand-Duché et choisissent d'habiter en Lorraine. La ville est reliée à Luxembourg par l'autoroute A31 et par des trains TER directs, en moins d'une heure. Son centre historique, ses quartiers résidentiels et sa gare TGV en font un marché recherché par les familles comme par les investisseurs. Titulaire de la carte professionnelle européenne, MAPA Property y intervient directement, à la vente comme en recherche.",
+    en: "About sixty kilometres from Luxembourg City, Metz attracts many cross-border commuters who work in the Grand Duchy and choose to live in Lorraine. The city is linked to Luxembourg by the A31 motorway and by direct TER trains in under an hour. Its historic centre, residential districts and TGV station make it a sought-after market for families and investors alike. Holding the European professional card, MAPA Property acts there directly, for sales as well as property searches.",
+    de: "Rund sechzig Kilometer von Luxemburg-Stadt entfernt zieht Metz viele Grenzgänger an, die im Großherzogtum arbeiten und in Lothringen wohnen. Die Stadt ist über die Autobahn A31 und direkte TER-Züge in weniger als einer Stunde mit Luxemburg verbunden. Die historische Altstadt, die Wohnviertel und der TGV-Bahnhof machen sie zu einem gefragten Markt für Familien und Investoren. Als Inhaberin des Europäischen Berufsausweises ist MAPA Property dort direkt tätig, beim Verkauf wie bei der Immobiliensuche.",
   },
 });
 
@@ -914,16 +914,16 @@ const algarve = buildIntlCity({
   prepositionFr: "en",
   country: "PT",
   aliases: ["Algarve", "Portimão", "Portimao", "Lagos", "Albufeira", "Vilamoura", "Faro", "Lagoa", "Carvoeiro", "Alvor", "Tavira", "Loulé", "Loule", "Quinta do Lago", "Vale do Lobo", "Praia da Rocha"],
-  highlights: ["Broker international MAPA Property", "Partenaires locaux"],
+  highlights: ["Aéroport international de Faro", "Une côte de Lagos à Tavira", "Résidence secondaire et investissement", "MAPA Property, interlocuteur unique"],
   highlightsByLang: {
-    fr: ["Broker international MAPA Property", "Partenaires locaux"],
-    en: ["MAPA Property international broker", "Local partners"],
-    de: ["Internationaler Broker MAPA Property", "Lokale Partner"],
+    fr: ["Aéroport international de Faro", "Une côte de Lagos à Tavira", "Résidence secondaire et investissement", "MAPA Property, interlocuteur unique"],
+    en: ["Faro international airport", "A coastline from Lagos to Tavira", "Second homes and investment", "MAPA Property, single contact"],
+    de: ["Internationaler Flughafen Faro", "Küste von Lagos bis Tavira", "Zweitwohnsitz und Investition", "MAPA Property, ein Ansprechpartner"],
   },
   description: {
-    fr: "Page en préparation. MAPA Property accompagne acquéreurs et vendeurs en Algarve en qualité de broker international, avec des partenaires locaux. Le contenu détaillé de cette page sera publié prochainement.",
-    en: "Page in preparation. MAPA Property supports buyers and sellers in the Algarve as an international broker, working with local partners. Detailed content for this page will be published soon.",
-    de: "Seite in Vorbereitung. MAPA Property begleitet Käufer und Verkäufer an der Algarve als internationaler Broker, gemeinsam mit lokalen Partnern. Ausführliche Inhalte zu dieser Seite folgen in Kürze.",
+    fr: "Tout au sud du Portugal, l'Algarve aligne plages, falaises et marinas de Lagos à Tavira, en passant par Portimão, Albufeira et Vilamoura. L'aéroport international de Faro, à quelques kilomètres de la ville, la relie directement à de nombreuses villes d'Europe. Ensoleillement, golfs et qualité de vie y attirent les acheteurs de résidence secondaire comme les investisseurs. MAPA Property y accompagne ses clients en tant que broker : les actes réglementés sont réalisés par une agence locale habilitée qu'elle sélectionne, MAPA Property restant votre interlocuteur unique.",
+    en: "In the far south of Portugal, the Algarve lines up beaches, cliffs and marinas from Lagos to Tavira, by way of Portimão, Albufeira and Vilamoura. Faro international airport, a few kilometres from the city, offers direct flights to many European cities. Sunshine, golf courses and quality of life attract second home buyers and investors alike. MAPA Property supports its clients there as a broker: regulated acts are carried out by a licensed local agency it selects, while MAPA Property remains your single point of contact.",
+    de: "Im äußersten Süden Portugals reihen sich in der Algarve Strände, Klippen und Jachthäfen von Lagos bis Tavira, über Portimão, Albufeira und Vilamoura. Der internationale Flughafen Faro, wenige Kilometer von der Stadt entfernt, bietet Direktverbindungen in zahlreiche Städte Europas. Sonne, Golfplätze und Lebensqualität ziehen Käufer von Zweitwohnsitzen ebenso an wie Investoren. MAPA Property begleitet ihre Kunden dort als Broker: Die regulierten Tätigkeiten übernimmt eine zugelassene lokale Agentur, die MAPA Property auswählt, und MAPA Property bleibt Ihr einziger Ansprechpartner.",
   },
 });
 

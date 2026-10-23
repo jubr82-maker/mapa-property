@@ -105,11 +105,18 @@ test("activation : un bien publie suffit, sa suppression la retire ; lecture en 
 });
 
 const MU = ["Maurice", "Mauritius", "Ile Maurice", "Grand Baie", "Grand-Baie", "Tamarin", "Rivière Noire", "Riviere Noire", "Black River", "Flic en Flac", "Bel Ombre", "Port-Louis", "Moka", "Pereybere", "Trou aux Biches"];
-// Textes provisoires des nouvelles pages : aucun chiffre, prix, regle ou programme.
+// Textes definitifs (2026-10-23) : un paragraphe par langue, 4 points cles
+// par langue (highlights = points francais), sans tiret long ou moyen ni
+// fourchette de prix (indexation par bien publie seulement).
 const neutral = (slug: string) => {
   const c = getCityBySlug(slug)!;
-  const all = JSON.stringify([c.intro, c.highlightsByLang]);
-  assert.ok(!/\d|€|IRS|RES\b|PDS|G\+2|[–—]/.test(all), `${slug} : texte provisoire non neutre`);
+  for (const l of ["fr", "en", "de"] as const) {
+    assert.equal(c.highlightsByLang?.[l].length, 4, `${slug} ${l} : 4 points cles`);
+    assert.ok(c.intro[l].length > 300 && !c.intro[l].includes("\n"), `${slug} ${l} : un paragraphe`);
+  }
+  assert.deepEqual(c.highlights, c.highlightsByLang?.fr);
+  assert.ok(!/[\u2013\u2014]/.test(JSON.stringify([c.intro, c.highlightsByLang])), `${slug} : tiret long ou moyen`);
+  assert.equal(c.priceRange, undefined, `${slug} : pas de fourchette de prix`);
 };
 
 test("Ile Maurice : page, noms, pays, alias ; noindex et hors sitemap sans bien", () => {
