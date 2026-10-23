@@ -35,7 +35,15 @@ Mis en place le 23/10/2026 (tag `sauvegarde-avant-optim-vercel-2026-10-23` pour 
    - pas de polling ni de `setInterval` réseau ;
    - deux tâches par jour au plus (`vercel.json`), PageSpeed une fois par jour au plus ;
    - le bouton « Mesurer maintenant » reste manuel.
-9. **Fichiers statiques** : `Cache-Control: public, max-age=31536000, immutable`.
+9. **Fichiers statiques** : `Cache-Control: public, max-age=31536000, immutable`. Un fichier de `public/` que l'on remplace doit changer de nom, sinon l'ancien reste en cache un an.
+
+## Exceptions connues
+
+- **Pages rendues à chaque visite**, sans cache CDN, comme avant le 23/10/2026 :
+  - `/biens`, qui lit les filtres de l'adresse ;
+  - `blog/[slug]` et `recherches/[reference]`, qui n'ont pas de `generateStaticParams`.
+  - Pour les passer en ISR, il faudrait d'abord que `proxy.ts` refuse les adresses inconnues, sinon chaque 404 créerait une entrée ISR. Non fait : ce changement est à vérifier sur un déploiement de test.
+- **Contenu et couleurs du CMS** (étiquettes `site-content`, `site-design-tokens`) : un enregistrement régénère toutes les pages. C'est nécessaire, parce que ces textes et couleurs apparaissent partout. Il vaut donc mieux grouper ces modifications.
 
 ## Consommation estimée après correction
 
