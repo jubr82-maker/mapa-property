@@ -84,7 +84,8 @@ test("activation : un bien publie suffit, sa suppression la retire ; lecture en 
   const dubai = getCityBySlug("dubai")!;
   assert.equal(isCityIndexable(dubai, publishedCountByCity([{ city: "Downtown Dubai" }]).get("dubai") ?? 0), true);
   assert.equal(isCityIndexable(dubai, publishedCountByCity([]).get("dubai") ?? 0), false);
-  for (const f of ["app/sitemap.ts", "app/[locale]/villes/[ville]/page.tsx"]) assert.ok(read(f).includes("publishedCountByCity(await fetchAllPropertiesWithCoverStrict())"), f);
+  assert.ok(read("app/sitemap.ts").includes("indexableCities(await fetchAllPropertiesWithCoverStrict())"));
+  assert.ok(read("app/[locale]/villes/[ville]/page.tsx").includes("publishedCountByCity(await fetchAllPropertiesWithCoverStrict())"));
   assert.ok(read("lib/data.ts").includes("city_page:listing_data->facts->>city_page"));
   // Fiche, page de ville et sitemap : meme rattachement.
   assert.ok(read("app/[locale]/biens/[slug]/page.tsx").includes("cityForProperty({ city: property.city"));

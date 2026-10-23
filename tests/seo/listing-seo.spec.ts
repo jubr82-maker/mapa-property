@@ -220,7 +220,8 @@ test("textes alternatifs : piece et description, puis type et localite, 3 langue
 test("liens internes : fiche vers commune et recherches, commune vers biens et recherches", () => {
   const page = read("app/[locale]/biens/[slug]/page.tsx");
   expect(page).toContain("fetchSearchesForCity(citySlug)");
-  expect(page).toContain("cityForPlace(property.city)");
+  // Oct. 2026 : rattachement par la ville, ses alias ou le choix de l'admin.
+  expect(page).toContain("cityForProperty({ city: property.city");
   const ville = read("app/[locale]/villes/[ville]/page.tsx");
   expect(ville).toContain("data-city-properties");
   expect(ville).toContain("data-city-searches");

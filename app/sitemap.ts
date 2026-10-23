@@ -7,8 +7,7 @@ import {
   fetchOffmarketList,
 } from "@/lib/data";
 import { ALL_MANDATE_SLUGS } from "@/lib/mandates";
-import { cities } from "@/lib/cities";
-import { isCityIndexable, publishedCountByCity } from "@/lib/city-indexing";
+import { indexableCities } from "@/lib/city-indexing";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -143,10 +142,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // une ville etrangere sans bien publie ni contenu propre est exclue.
   // Lecture sans repli (oct. 2026) : en cas d'erreur, le sitemap n'est pas
   // regenere et garde son etat precedent (aucune ville retiree a tort).
-  const cityCounts = publishedCountByCity(await fetchAllPropertiesWithCoverStrict());
-  const indexableCities = cities.filter((city) => isCityIndexable(city, cityCounts.get(city.slug) ?? 0));
+  const sitemapCities = indexableCities(await fetchAllPropertiesWithCoverStrict());
   const cityEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
-    indexableCities.map((city) => ({
+    sitemapCities.map((city) => ({
       url: `${SITE_URL}/${locale}/villes/${city.slug}`,
       changeFrequency: "weekly" as const,
       priority: 0.6,

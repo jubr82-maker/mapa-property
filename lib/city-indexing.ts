@@ -12,7 +12,7 @@
 // accessible (balise "noindex, follow"), les menus et listes ne changent
 // pas. Calcule a chaque generation : des qu'un bien est publie dans la
 // ville, la page redevient indexable.
-import type { City } from "@/lib/cities";
+import { cities, type City } from "@/lib/cities";
 import { cityForProperty } from "@/lib/internal-links";
 
 /** Contenu propre : texte redige pour la ville (3 langues) et donnees de marche locales. */
@@ -33,4 +33,10 @@ export function publishedCountByCity(properties: { city?: string | null; city_pa
     if (c) out.set(c.slug, (out.get(c.slug) ?? 0) + 1);
   }
   return out;
+}
+
+/** Pages de villes du sitemap : les seules indexables, pour les biens publies donnes. */
+export function indexableCities(properties: { city?: string | null; city_page?: string | null }[]): City[] {
+  const counts = publishedCountByCity(properties);
+  return cities.filter((c) => isCityIndexable(c, counts.get(c.slug) ?? 0));
 }

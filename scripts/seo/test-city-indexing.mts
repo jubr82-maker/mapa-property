@@ -46,7 +46,7 @@ test("page : noindex, follow et aucune autre langue declaree ; sitemap filtre ; 
   const page = read("app/[locale]/villes/[ville]/page.tsx");
   assert.ok(page.includes("robots: { index: false, follow: true }") && page.includes("alternates: indexable ? alternates : { canonical: alternates.canonical }"));
   const sm = read("app/sitemap.ts");
-  assert.ok(sm.includes("const indexableCities = cities.filter((city) => isCityIndexable(city, cityCounts.get(city.slug) ?? 0));") && sm.includes("indexableCities.map((city)"));
+  assert.ok(sm.includes("const sitemapCities = indexableCities(await fetchAllPropertiesWithCoverStrict());") && sm.includes("sitemapCities.map((city)"));
   const rv = read("lib/revalidate-property.ts");
   const fn = rv.slice(rv.indexOf("export function revalidatePublicPropertyPages"), rv.indexOf("export function revalidatePublicBlogPages"));
   assert.ok(fn.includes('revalidatePath("/[locale]/villes/[ville]", "page")') && fn.includes('revalidatePath("/sitemap.xml")') && fn.includes("revalidateTag(PROPERTIES_LIST_TAG"));
