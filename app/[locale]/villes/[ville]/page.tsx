@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { pageAlternates } from "@/lib/seo";
-import { getCityBySlug, getCitySlugs, getNearbyCities, type City } from "@/lib/cities";
+import { getCityBySlug, getCitySlugs, getNearbyCities, isAgencyCity, type City } from "@/lib/cities";
 import { routing } from "@/i18n/routing";
 import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
@@ -60,7 +60,7 @@ export async function generateMetadata({
   const indexable = isCityIndexable(city, published);
   const alternates = pageAlternates(locale, `/villes/${city.slug}`);
   return withSocial(locale, {
-    title: brandedTitle(fr(tc(city.country === "LU" ? "city.title" : "city.title_intl", { city: cityName }), cityName)),
+    title: brandedTitle(fr(tc(isAgencyCity(city) ? "city.title" : "city.title_intl", { city: cityName }), cityName)),
     description: fr(cityDescription(tc, city, cityName), cityName),
     alternates: indexable ? alternates : { canonical: alternates.canonical },
     ...(indexable ? {} : { robots: { index: false, follow: true } }),
@@ -118,7 +118,8 @@ function formatEuro(n: number): string {
 // page web qui parle d'un lieu, publiee par l'unique etablissement reel
 // (#organization, cf. lib/seo.ts).
 // Titre et description Google d'une ville (oct. 2026) : agence immobiliere
-// au Luxembourg, broker immobilier a l'etranger. Rien d'invente sur la
+// au Luxembourg et dans les pays de la carte europeenne (isAgencyCity),
+// broker immobilier ailleurs. Rien d'invente sur la
 // ville (plus de "prestige" ni de prix dans la description).
 /**
  * Preposition francaise d'une ville si ce n'est pas "a" ("en Algarve") :
@@ -131,7 +132,7 @@ function frenchPreposition(city: City, loc: Locale) {
 }
 
 function cityDescription(tc: (k: string, v: Record<string, string>) => string, city: City, cityName: string): string {
-  return tc(city.country === "LU" ? "city.description" : "city.description_intl", { city: cityName });
+  return tc(isAgencyCity(city) ? "city.description" : "city.description_intl", { city: cityName });
 }
 
 function buildJsonLd(city: City, locale: Locale, description: string) {
@@ -199,7 +200,7 @@ export default async function VillePage({
               la ligne "LUXEMBOURG · SUD" ci-dessus, le nom garde son style. */}
           <h1 className="mt-3 t-h1">
             <span className="mb-2 block font-mono text-[11px] font-normal uppercase leading-normal tracking-[0.3em] text-ink-soft">
-              {fr(`${tc(city.country === "LU" ? "city.h1_prefix" : "city.h1_prefix_intl")} `, "").trim()}
+              {fr(`${tc(isAgencyCity(city) ? "city.h1_prefix" : "city.h1_prefix_intl")} `, "").trim()}
             </span>{" "}
             {inSentence}
           </h1>

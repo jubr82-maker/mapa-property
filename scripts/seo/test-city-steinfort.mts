@@ -48,7 +48,7 @@ test("autres villes inchangees : voisines, points cles, aucune localite", () => 
 
 test("page : titre, description et grand titre des modeles, points cles traduits", () => {
   const page = read("app/[locale]/villes/[ville]/page.tsx");
-  assert.ok(page.includes('tc(city.country === "LU" ? "city.title" : "city.title_intl"') && page.includes('"city.h1_prefix"'));
+  assert.ok(page.includes('tc(isAgencyCity(city) ? "city.title" : "city.title_intl"') && page.includes('"city.h1_prefix"'));
   assert.ok(page.includes("(city.highlightsByLang?.[loc] ?? city.highlights)"));
   const fr = JSON.parse(read("messages/fr.json")).seo_pages.city;
   assert.equal(fr.h1_prefix, "Agence immobilière à");

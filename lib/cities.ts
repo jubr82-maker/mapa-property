@@ -948,6 +948,19 @@ export const cities: City[] = [
 export const luxembourgCities = cities.filter((c) => c.country === "LU");
 export const internationalCities = cities.filter((c) => c.country !== "LU");
 
+// Carte professionnelle europeenne d'agent immobilier (oct. 2026) : France,
+// Allemagne et Italie. Pages de ces pays : "Agence immobiliere", comme au
+// Luxembourg ; ailleurs : "Broker immobilier". Monaco est code "FR" dans ce
+// referentiel mais reste un Etat distinct : broker.
+const AGENT_CARD_COUNTRIES: readonly CountryCode[] = ["FR", "DE", "IT"];
+const AGENT_CARD_EXCLUDED_SLUGS: readonly string[] = ["monaco"];
+
+/** Page de ville au titre "Agence immobiliere" (Luxembourg et pays de la carte europeenne). */
+export function isAgencyCity(city: City): boolean {
+  if (city.country === "LU") return true;
+  return AGENT_CARD_COUNTRIES.includes(city.country) && !AGENT_CARD_EXCLUDED_SLUGS.includes(city.slug);
+}
+
 export function getCityBySlug(slug: string): City | undefined {
   return cities.find((c) => c.slug === slug);
 }

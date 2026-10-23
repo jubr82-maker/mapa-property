@@ -4,7 +4,7 @@
 import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { cities } from "../../lib/cities";
+import { cities, getCityBySlug, isAgencyCity } from "../../lib/cities";
 
 const root = join(import.meta.dirname, "..", "..");
 const read = (f: string) => readFileSync(join(root, f), "utf8");
@@ -15,7 +15,7 @@ for (const l of ["fr", "en", "de"] as const) {
   const m = msgs(l);
   const c = m.seo_pages.city;
   for (const city of cities) {
-    const lu = city.country === "LU";
+    const lu = isAgencyCity(city);
     const title = `${fill(lu ? c.title : c.title_intl, { city: city.name[l] })}, MAPA Property`;
     const desc = fill(lu ? c.description : c.description_intl, { city: city.name[l] });
     assert.ok(title.length <= 60, `${l} ${city.slug} titre ${title.length}`);
@@ -46,5 +46,10 @@ for (const l of ["fr", "en", "de"] as const) {
 }
 // Villes : petite ligne dans le style de la ligne "LUXEMBOURG · SUD".
 const ville = read("app/[locale]/villes/[ville]/page.tsx");
-assert.ok(ville.includes('font-mono text-[11px] font-normal uppercase leading-normal tracking-[0.3em] text-ink-soft">\n              {fr(`${tc(city.country === "LU" ? "city.h1_prefix" : "city.h1_prefix_intl")} `, "").trim()}'));
+assert.ok(ville.includes('font-mono text-[11px] font-normal uppercase leading-normal tracking-[0.3em] text-ink-soft">\n              {fr(`${tc(isAgencyCity(city) ? "city.h1_prefix" : "city.h1_prefix_intl")} `, "").trim()}'));
+// Carte professionnelle europeenne (oct. 2026) : France, Allemagne, Italie en
+// "Agence immobiliere" comme le Luxembourg ; Monaco et les autres pays en broker.
+for (const s of ["steinfort", "metz", "paris", "cannes", "nice", "saint-tropez", "saint-barthelemy", "berlin", "munich", "francfort", "hambourg", "rome", "milan", "florence"]) assert.ok(isAgencyCity(getCityBySlug(s)!), `${s} agence`);
+for (const s of ["monaco", "geneve", "lausanne", "zurich", "bruxelles", "anvers", "amsterdam", "londres", "madrid", "barcelone", "lisbonne", "porto", "algarve", "vienne", "new-york", "miami", "dubai", "ile-maurice"]) assert.ok(!isAgencyCity(getCityBySlug(s)!), `${s} broker`);
+for (const c of cities) assert.equal(isAgencyCity(c), c.country === "LU" || (["FR", "DE", "IT"].includes(c.country) && c.slug !== "monaco"), c.slug);
 console.log("  PASS titres et descriptions : villes, Qui sommes-nous, Agence, mandats, liste d'attente, fiches (virgule)\n\n1 PASS, 0 FAIL");
