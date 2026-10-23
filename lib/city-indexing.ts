@@ -13,7 +13,7 @@
 // pas. Calcule a chaque generation : des qu'un bien est publie dans la
 // ville, la page redevient indexable.
 import type { City } from "@/lib/cities";
-import { cityForPlace } from "@/lib/internal-links";
+import { cityForProperty } from "@/lib/internal-links";
 
 /** Contenu propre : texte redige pour la ville (3 langues) et donnees de marche locales. */
 export function cityHasOwnContent(city: City): boolean {
@@ -25,11 +25,11 @@ export function isCityIndexable(city: City, publishedProperties: number): boolea
   return city.country === "LU" || publishedProperties > 0 || cityHasOwnContent(city);
 }
 
-/** Nombre de biens publies par page de ville (meme rattachement que la page : cityForPlace). */
-export function publishedCountByCity(properties: { city?: string | null }[]): Map<string, number> {
+/** Nombre de biens publies par page de ville (meme rattachement que la page : cityForProperty). */
+export function publishedCountByCity(properties: { city?: string | null; city_page?: string | null }[]): Map<string, number> {
   const out = new Map<string, number>();
   for (const p of properties) {
-    const c = cityForPlace(p.city);
+    const c = cityForProperty(p);
     if (c) out.set(c.slug, (out.get(c.slug) ?? 0) + 1);
   }
   return out;

@@ -2,6 +2,7 @@
 // sans lien entrant (pages villes accessibles seulement depuis d'autres
 // villes et le sitemap). Listes courtes, pour ne pas surcharger.
 import { cities, type City } from "@/lib/cities";
+import { cityMatchKeys, matchCitySlug, resolveCitySlug, type CityMatchEntry } from "@/lib/city-match";
 
 /** Villes mises en avant (pied de page, accueil). */
 export const FEATURED_CITY_SLUGS = [
@@ -25,25 +26,25 @@ export function featuredCities(): City[] {
   return FEATURED_CITY_SLUGS.map((s) => cities.find((c) => c.slug === s)).filter((c): c is City => Boolean(c));
 }
 
-const norm = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+// Rattachement d'une localite a sa page (oct. 2026) : lib/city-match.ts.
+const CITY_ENTRIES: CityMatchEntry[] = cities.map((c) => ({ slug: c.slug, keys: cityMatchKeys(c) }));
 
-/** Page ville correspondant a la ville d'un bien (nom ou slug), si elle existe. */
+/** Page ville correspondant a la ville d'un bien (slug, nom ou alias), si elle existe. */
 export function cityForPlace(place: string | null | undefined): City | undefined {
-  if (!place) return undefined;
-  const key = norm(place);
-  return cities.find(
-    (c) =>
-      c.slug === key ||
-      norm(c.name.fr) === key ||
-      norm(c.name.en) === key ||
-      norm(c.name.de) === key ||
-      // Localites de la commune (Hagen, Kleinbettingen, Grass -> Steinfort).
-      (c.localities ?? []).some((l) => norm(l) === key),
-  );
+  const slug = matchCitySlug(CITY_ENTRIES, place);
+  return slug ? cities.find((c) => c.slug === slug) : undefined;
+}
+
+/**
+ * Page ville d'un bien : choix "Page de ville" de l'admin s'il existe
+ * (listing_data.facts.city_page), sinon la ville saisie et ses alias.
+ */
+export function cityForProperty(p: { city?: string | null; city_page?: string | null }): City | undefined {
+  const slug = resolveCitySlug(CITY_ENTRIES, p.city, p.city_page);
+  return slug ? cities.find((c) => c.slug === slug) : undefined;
+}
+
+/** Pages de ville pour le choix de l'admin : identifiant, nom francais, cles de comparaison. */
+export function cityPageOptions(): { slug: string; label: string; lu: boolean; keys: string[] }[] {
+  return cities.map((c) => ({ slug: c.slug, label: c.name.fr, lu: c.country === "LU", keys: cityMatchKeys(c) }));
 }

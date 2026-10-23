@@ -1,5 +1,5 @@
 export type CountryCode =
-  | "LU" | "FR" | "CH" | "BE" | "NL" | "GB" | "ES" | "PT" | "IT" | "AT" | "DE" | "AE" | "US";
+  | "LU" | "FR" | "CH" | "BE" | "NL" | "GB" | "ES" | "PT" | "IT" | "AT" | "DE" | "AE" | "US" | "MU";
 
 export type CityIntro = { fr: string; en: string; de: string };
 export type CityName = { fr: string; en: string; de: string };
@@ -17,8 +17,13 @@ export type City = {
   metaDescription: CityMeta;
   /** Points cles traduits (sinon `highlights`, en francais, dans les trois langues). */
   highlightsByLang?: { fr: string[]; en: string[]; de: string[] };
-  /** Autres localites de la commune (biens, recherches et liens rattaches a la page). */
-  localities?: string[];
+  /**
+   * Alias (oct. 2026) : variantes d'ecriture, quartiers et localites
+   * rattaches a la page (biens, recherches, liens des fiches). Comparaison
+   * sans accents, majuscules, espaces ni traits d'union
+   * (lib/city-match.ts). Referentiel unique avec slug et noms.
+   */
+  aliases?: string[];
 };
 
 const M = "MAPA Property";
@@ -454,7 +459,7 @@ const steinfort: City = {
   country: "LU",
   region: "Ouest",
   priceRange: { floor: 6000, ceiling: 8500 },
-  localities: ["Hagen", "Kleinbettingen", "Grass"],
+  aliases: ["Hagen", "Kleinbettingen", "Grass"],
   highlights: ["Quatre localités, un seul marché", "À 17 km de Luxembourg-Ville", "Gare de Kleinbettingen, ligne CFL 50", "Nouveau centre sportif avec piscine"],
   highlightsByLang: {
     fr: ["Quatre localités, un seul marché", "À 17 km de Luxembourg-Ville", "Gare de Kleinbettingen, ligne CFL 50", "Nouveau centre sportif avec piscine"],
@@ -485,6 +490,8 @@ function buildIntlCity(args: {
   priceRange?: { floor: number; ceiling: number };
   schools?: string[];
   highlights: string[];
+  highlightsByLang?: { fr: string[]; en: string[]; de: string[] };
+  aliases?: string[];
   description: { fr: string; en: string; de: string };
 }): City {
   return {
@@ -495,6 +502,8 @@ function buildIntlCity(args: {
     priceRange: args.priceRange,
     schools: args.schools,
     highlights: args.highlights,
+    ...(args.highlightsByLang ? { highlightsByLang: args.highlightsByLang } : {}),
+    ...(args.aliases ? { aliases: args.aliases } : {}),
     intro: args.description,
     metaDescription: {
       fr: `${args.name.fr}, broker international ${M}${args.priceRange ? `, ${args.priceRange.floor}-${args.priceRange.ceiling} €/m²` : ""}.`,
@@ -545,6 +554,7 @@ const nice = buildIntlCity({
 const saintTropez = buildIntlCity({
   slug: "saint-tropez",
   name: { fr: "Saint-Tropez", en: "Saint-Tropez", de: "Saint-Tropez" },
+  aliases: ["Saint Tropez", "St-Tropez", "St Tropez"],
   country: "FR",
   region: "Côte d'Azur",
   highlights: ["Mythe Côte d'Azur, marché ultra-saisonnier", "Villas Capon, Pampelonne, Ramatuelle", "Sud-est St-Tropez = ceinture premium", "Trophy Assets quasi-systématiques"],
@@ -557,6 +567,7 @@ const saintTropez = buildIntlCity({
 
 const monaco = buildIntlCity({
   slug: "monaco",
+  aliases: ["Monte-Carlo", "Monte Carlo"],
   name: { fr: "Monaco", en: "Monaco", de: "Monaco" },
   country: "FR",
   region: "Principauté",
@@ -570,6 +581,7 @@ const monaco = buildIntlCity({
 
 const geneve = buildIntlCity({
   slug: "geneve",
+  aliases: ["Genf", "Geneva"],
   name: { fr: "Genève", en: "Geneva", de: "Genf" },
   country: "CH",
   highlights: ["Capitale onusienne, banking privé", "Cologny, Vandœuvres, Versoix premium", "Lex Koller régule l'accès non-résident", "Marché étroit, prix élevés"],
@@ -799,6 +811,7 @@ const hambourg = buildIntlCity({
 
 const dubai = buildIntlCity({
   slug: "dubai",
+  aliases: ["Dubai", "Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Business Bay"],
   name: { fr: "Dubaï", en: "Dubai", de: "Dubai" },
   country: "AE",
   highlights: ["Émirats Arabes Unis, hub global", "Palm Jumeirah, Downtown, DIFC, Emirates Hills", "Pas d'IR, fiscalité avantageuse résidence", "Marché ultra-international"],

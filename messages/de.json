@@ -1826,7 +1826,14 @@
     "regen_button": "Aus der Vorlage neu erstellen ({lang})",
     "regen_confirm": "Titel und Beschreibung {lang} durch den Vorlagentext ersetzen? Manuelle Änderungen in dieser Sprache gehen verloren.",
     "auto_live": "{lang}: folgt der Vorlage.",
-    "auto_manual": "{lang}: von Hand geändert."
+    "auto_manual": "{lang}: von Hand geändert.",
+    "f_city_page": "Stadtseite",
+    "city_page_auto": "Automatisch (nach Ort)",
+    "city_page_group_lu": "Luxemburg",
+    "city_page_group_intl": "International",
+    "city_page_none_option": "Keine Stadtseite",
+    "city_page_attached": "Zugeordnet zur Seite: {city}",
+    "city_page_missing": "Keine Stadtseite für diesen Ort"
   },
   "property_gone": {
     "title": "Diese Immobilie ist nicht mehr verfügbar",

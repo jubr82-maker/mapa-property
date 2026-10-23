@@ -19,7 +19,8 @@ import { assertAdminAction, requireAdmin } from "@/lib/admin/require-admin";
 import { dbFailure, runAction, sessionFailure, type ActionResult as AdminActionResult } from "@/lib/admin/action-result";
 import { logAdminAction } from "@/lib/pilotage/audit";
 import { isEnergyClass, isListingType, isMandateType } from "@/lib/listing/families";
-import { sanitizeListingData, type ListingLang } from "@/lib/listing/listing-data";
+import { emptyListingData, sanitizeListingData, type ListingLang } from "@/lib/listing/listing-data";
+import { cityPageOptions } from "@/lib/internal-links";
 import { checkFields, describeIssues } from "@/lib/listing/writing-check";
 import { htmlToText } from "@/lib/listing/template-engine";
 import { sendAdminAlert } from "@/lib/pilotage/alerts";
@@ -570,6 +571,8 @@ export async function createProperty(
   const price = priceOnDemand ? null : num(formData.get("price"));
 
   const slug = await generateUniquePropertySlug(supabase, titleFr);
+  const cityPageRaw = str(formData.get("city_page"));
+  const cityPage = cityPageRaw === "none" || (cityPageRaw && cityPageOptions().some((o) => o.slug === cityPageRaw)) ? cityPageRaw : null;
 
   // status='draft' fixe à la création (jamais choisi par l'utilisateur ici)
   // + is_published=false en miroir : le pont status<->is_published n'est
@@ -593,6 +596,26 @@ export async function createProperty(
     status: "draft",
     is_published: false,
     created_by: user!.id,
+    // Page de ville choisie a la main (oct. 2026) : enregistree dans
+    // listing_data.facts.city_page, avec les reperes "texte suivant le
+    // modele" que la fiche admin poserait elle-meme (texte vide = modele).
+    // Choix automatique : rien d'enregistre, rattachement par la ville.
+    ...(cityPage
+      ? {
+          listing_data: sanitizeListingData({
+            ...emptyListingData(),
+            facts: { city_page: cityPage },
+            auto: {
+              title_fr: !titleFr,
+              title_en: !str(formData.get("title_en")),
+              title_de: !str(formData.get("title_de")),
+              description_fr: true,
+              description_en: true,
+              description_de: true,
+            },
+          }),
+        }
+      : {}),
   };
 
   const { data, error } = await supabase

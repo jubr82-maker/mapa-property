@@ -1826,7 +1826,14 @@
     "regen_button": "Régénérer depuis le modèle ({lang})",
     "regen_confirm": "Remplacer le titre et la description {lang} par le texte du modèle ? Les modifications faites à la main dans cette langue seront perdues.",
     "auto_live": "{lang} : suit le modèle.",
-    "auto_manual": "{lang} : modifié à la main."
+    "auto_manual": "{lang} : modifié à la main.",
+    "f_city_page": "Page de ville",
+    "city_page_auto": "Automatique (selon la ville)",
+    "city_page_group_lu": "Luxembourg",
+    "city_page_group_intl": "International",
+    "city_page_none_option": "Aucune page de ville",
+    "city_page_attached": "Rattaché à la page : {city}",
+    "city_page_missing": "Aucune page de ville pour cette localité"
   },
   "property_gone": {
     "title": "Ce bien n'est plus disponible",

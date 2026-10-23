@@ -36,7 +36,7 @@ export async function fetchFeaturedProperties(limit = 6): Promise<Property[]> {
 
 // paths : adresse lisible de la fiche par langue (lib/listing/property-paths.ts).
 // alts : texte alternatif de la photo principale par langue (type et localite).
-export type PropertyWithCover = Property & { cover_url: string | null; paths?: Record<string, string>; alts?: Record<string, string> };
+export type PropertyWithCover = Property & { cover_url: string | null; paths?: Record<string, string>; alts?: Record<string, string>; city_page?: string | null };
 
 function pathsOf(row: { slug: string | null; property_type?: string | null; transaction?: string | null; bedrooms?: number | null; surface?: number | null; city?: string | null; price?: number | null }) {
   if (!row.slug) return undefined;
@@ -291,7 +291,7 @@ const fetchPropertiesWithCoverCached = unstable_cache(
     const { data, error } = await withMandateColumn((extra) =>
       sb
         .from("properties")
-        .select(`${PROPERTY_CARD_COLUMNS}${extra}, property_images(url, sort)`)
+        .select(`${PROPERTY_CARD_COLUMNS}${extra}, city_page:listing_data->facts->>city_page, property_images(url, sort)`)
         .eq("is_published", true),
     );
     if (error) throw new Error(error.message);
@@ -319,7 +319,7 @@ const fetchPropertiesWithCoverCached = unstable_cache(
       | "badge_size"
       | "badge_position"
       | "mandate_type"
-    > & { property_images: { url: string; sort: number | null }[] | null };
+    > & { city_page: string | null; property_images: { url: string; sort: number | null }[] | null };
     return ((data as unknown as Row[] | null) ?? []).map(
       (row) =>
         ({
@@ -334,6 +334,16 @@ const fetchPropertiesWithCoverCached = unstable_cache(
   ["properties-with-cover-v2"],
   { revalidate: false, tags: [PROPERTIES_LIST_TAG] },
 );
+
+/**
+ * Biens publies, sans repli : une erreur de lecture leve une exception.
+ * Pour l'indexation des pages de villes (oct. 2026) : en cas d'erreur, la
+ * page et le sitemap gardent leur etat precedent (regeneration abandonnee)
+ * au lieu de passer une ville en noindex faute de biens lus.
+ */
+export function fetchAllPropertiesWithCoverStrict(): Promise<PropertyWithCover[]> {
+  return fetchPropertiesWithCoverCached();
+}
 
 export async function fetchAllPropertiesWithCover(): Promise<PropertyWithCover[]> {
   try {

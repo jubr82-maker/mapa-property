@@ -40,6 +40,7 @@ import { ListingModelEditor } from "@/components/admin/ListingModelEditor";
 import { checkFields, describeIssues, type FieldIssues } from "@/lib/listing/writing-check";
 import { htmlToText } from "@/lib/listing/template-engine";
 import { ownTextWords, propertyPath, seoMetaDescription, seoTitle, type ListingSeoVocab } from "@/lib/listing/listing-seo";
+import { CityPageSelect, type CityPageOption } from "@/components/admin/CityPageSelect";
 import { generateListing, type GeneratedListing, type ListingColumns, type ListingTemplates, type ListingVocab } from "@/lib/listing/generate";
 import {
   AUTO_KEYS,
@@ -283,6 +284,8 @@ interface Props {
     models: Record<ListingLang, { templates: ListingTemplates; vocab: ListingVocab }>;
     transaction: string | null;
     city: string | null;
+    /** Pages de ville (referentiel lib/cities.ts) pour le choix "Page de ville". */
+    cityPages: CityPageOption[];
   };
   /** Referencement : apercu Google en direct et indicateurs (jamais bloquants). */
   seo: { slug: string; ctx: Record<ListingLang, SeoLangCtx>; photosWithoutAlt: number | null };
@@ -762,6 +765,17 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
             })}
           </div>
         </Field>
+        {listing.available ? (
+          <Field label={t("f_city_page")} full>
+            <CityPageSelect
+              options={listing.cityPages}
+              place={listing.city}
+              value={listingData.facts.city_page ?? ""}
+              onChange={(v) => setListingData((d) => ({ ...d, facts: { ...d.facts, city_page: v || null } }))}
+              className={inputCls}
+            />
+          </Field>
+        ) : null}
       </Section>
 
       <Section title={t("sec_listing")} hint={listing.available ? t("hint_listing") : t("listing_unavailable")}>

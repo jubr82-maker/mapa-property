@@ -34,8 +34,11 @@ export function CitySuggestInput({
   suggestions,
   className = "",
   placeholder,
+  onValueChange,
 }: {
   name: string;
+  /** Valeur saisie ou choisie, a chaque changement (facultatif). */
+  onValueChange?: (v: string) => void;
   defaultValue?: string;
   /** Liste de communes/localites proposees (deja deduplique, trie). */
   suggestions: string[];
@@ -58,6 +61,7 @@ export function CitySuggestInput({
 
   function choose(v: string) {
     setValue(v);
+    onValueChange?.(v);
     setOpen(false);
   }
 
@@ -74,6 +78,7 @@ export function CitySuggestInput({
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
+          onValueChange?.(e.target.value);
           setOpen(true);
           setHighlight(0);
         }}

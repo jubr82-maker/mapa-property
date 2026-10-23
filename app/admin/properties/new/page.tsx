@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { PropertyCreateForm } from "@/components/admin/PropertyCreateForm";
 import { getLuxembourgLocalityNames } from "@/lib/geo/luxembourg-communes";
+import { cityPageOptions } from "@/lib/internal-links";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,7 @@ export default async function NewPropertyPage() {
           {t("new_intro")}
         </p>
       </header>
-      <PropertyCreateForm citySuggestions={citySuggestions} />
+      <PropertyCreateForm citySuggestions={citySuggestions} cityPages={cityPageOptions()} />
     </div>
   );
 }

@@ -1826,7 +1826,14 @@
     "regen_button": "Regenerate from template ({lang})",
     "regen_confirm": "Replace the {lang} title and description with the template text? Manual edits in this language will be lost.",
     "auto_live": "{lang}: follows the template.",
-    "auto_manual": "{lang}: edited by hand."
+    "auto_manual": "{lang}: edited by hand.",
+    "f_city_page": "City page",
+    "city_page_auto": "Automatic (from the city)",
+    "city_page_group_lu": "Luxembourg",
+    "city_page_group_intl": "International",
+    "city_page_none_option": "No city page",
+    "city_page_attached": "Linked to the page: {city}",
+    "city_page_missing": "No city page for this locality"
   },
   "property_gone": {
     "title": "This property is no longer available",

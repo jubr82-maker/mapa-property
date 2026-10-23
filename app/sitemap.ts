@@ -3,6 +3,7 @@ import { fetchPublicSearches } from "@/lib/searches/data";
 import {
   fetchAllBlogPosts,
   fetchAllPropertiesWithCover,
+  fetchAllPropertiesWithCoverStrict,
   fetchOffmarketList,
 } from "@/lib/data";
 import { ALL_MANDATE_SLUGS } from "@/lib/mandates";
@@ -140,7 +141,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Villes (oct. 2026) : seulement les pages indexables (lib/city-indexing.ts) ;
   // une ville etrangere sans bien publie ni contenu propre est exclue.
-  const cityCounts = publishedCountByCity(properties);
+  // Lecture sans repli (oct. 2026) : en cas d'erreur, le sitemap n'est pas
+  // regenere et garde son etat precedent (aucune ville retiree a tort).
+  const cityCounts = publishedCountByCity(await fetchAllPropertiesWithCoverStrict());
   const indexableCities = cities.filter((city) => isCityIndexable(city, cityCounts.get(city.slug) ?? 0));
   const cityEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
     indexableCities.map((city) => ({

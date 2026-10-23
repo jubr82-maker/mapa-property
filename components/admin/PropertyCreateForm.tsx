@@ -15,6 +15,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { CityPageSelect, type CityPageOption } from "@/components/admin/CityPageSelect";
 import { createProperty } from "@/app/admin/properties/actions";
 import {
   PROPERTY_TYPE_FAMILIES,
@@ -75,11 +76,16 @@ const COUNTRIES = ["LU", "BE", "FR", "DE", "CH", "MC", "PT", "ES"] as const;
 
 export function PropertyCreateForm({
   citySuggestions,
+  cityPages,
 }: {
   /** Communes/localites luxembourgeoises proposees (cf. page parente). */
   citySuggestions: string[];
+  /** Pages de ville (referentiel lib/cities.ts) pour le choix "Page de ville". */
+  cityPages: CityPageOption[];
 }) {
   const t = useTranslations("admin_properties");
+  const [city, setCity] = useState("");
+  const [cityPage, setCityPage] = useState("");
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [priceOnDemand, setPriceOnDemand] = useState(false);
@@ -191,7 +197,11 @@ export function PropertyCreateForm({
             name="city"
             suggestions={citySuggestions}
             className={inputCls}
+            onValueChange={setCity}
           />
+        </Field>
+        <Field label={t("f_city_page")}>
+          <CityPageSelect options={cityPages} place={city} value={cityPage} onChange={setCityPage} name="city_page" className={inputCls} />
         </Field>
       </Section>
 

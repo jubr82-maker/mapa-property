@@ -36,9 +36,9 @@ test("une ville etrangere avec un bien publie, ou un contenu propre, l'est", () 
   assert.ok(isCityIndexable(city("dubai"), 1));
   assert.ok(isCityIndexable(city("amsterdam"), 2));
   assert.ok(isCityIndexable({ ...city("berlin"), priceRange: { floor: 5000, ceiling: 9000 } }, 0));
-  // Biens rattaches par la page (nom, slug, localites) : Dubai, Steinfort, Hagen.
+  // Biens rattaches par la page (nom, slug, alias) : Dubai, Steinfort, Hagen.
   const counts = publishedCountByCity([{ city: "Dubai" }, { city: "Steinfort" }, { city: "Hagen" }, { city: "Downtown Dubai" }, { city: null }]);
-  assert.equal(counts.get("dubai"), 1);
+  assert.equal(counts.get("dubai"), 2); // Dubai et Downtown Dubai (alias)
   assert.equal(counts.get("steinfort"), 2);
 });
 

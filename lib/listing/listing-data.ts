@@ -55,6 +55,8 @@ export type ListingFacts = {
   available_now?: boolean;
   available_from?: string | null;
   location_formula?: (typeof LOCATION_FORMULAS)[number] | null;
+  /** Page de ville choisie dans l'admin (oct. 2026) : absent = automatique, "none" = aucune. */
+  city_page?: string | null;
 };
 
 export type ListingWritten = {
@@ -184,6 +186,9 @@ export function sanitizeListingData(input: unknown): ListingData {
     available_now: bool(f.available_now),
     location_formula: oneOf(f.location_formula, LOCATION_FORMULAS),
     available_from: typeof f.available_from === "string" && /^\d{4}-\d{2}-\d{2}$/.test(f.available_from) ? f.available_from : null,
+    // Identifiant de page ("steinfort", "ile-maurice") ou "none" ; la page
+    // doit exister (lib/city-match.ts, resolveCitySlug), sinon automatique.
+    city_page: typeof f.city_page === "string" && /^[a-z0-9-]{1,60}$/.test(f.city_page) ? f.city_page : null,
   };
   out.facts = facts;
   const a = (o.auto && typeof o.auto === "object" ? o.auto : {}) as Record<string, unknown>;

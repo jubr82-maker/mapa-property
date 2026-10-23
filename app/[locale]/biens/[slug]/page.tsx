@@ -35,7 +35,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { realEstateListing } from "@/lib/seo";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { ExploreLinks } from "@/components/seo/ExploreLinks";
-import { cityForPlace, featuredCities } from "@/lib/internal-links";
+import { cityForProperty, featuredCities } from "@/lib/internal-links";
 import { siteShareImage } from "@/lib/og";
 import { transactionDetailLabel } from "@/lib/taxonomy/property-types";
 import { effectiveBadge } from "@/lib/listing/families";
@@ -270,7 +270,9 @@ export default async function PropertyPage({
       seoCtx.seo,
     ),
   }));
-  const citySlug = cityForPlace(property.city)?.slug ?? null;
+  // Page de ville du bien : choix de l'admin, sinon ville saisie et alias.
+  const propertyCity = cityForProperty({ city: property.city, city_page: sanitizeListingData(property.listing_data ?? null).facts.city_page });
+  const citySlug = propertyCity?.slug ?? null;
   const citySearches = citySlug ? await fetchSearchesForCity(citySlug) : [];
 
   // Biens similaires — logique stricte V3 : même type + prix ±15% +
@@ -569,7 +571,7 @@ export default async function PropertyPage({
           <div className="mt-6">
             <ExploreLinks
               cities={(() => {
-                const c = cityForPlace(property.city);
+                const c = propertyCity;
                 return c ? [c] : featuredCities().slice(0, 4);
               })()}
             />

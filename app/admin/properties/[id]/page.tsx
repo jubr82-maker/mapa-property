@@ -5,6 +5,7 @@ import { ADMIN_LOCALE } from "@/lib/datetime";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PropertyVideoForm } from "@/components/admin/PropertyVideoForm";
 import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
+import { cityPageOptions } from "@/lib/internal-links";
 import { loadListingModels } from "@/lib/listing/model-server";
 import { PhotoAltEditor } from "@/components/admin/PhotoAltEditor";
 import { seoContext } from "@/lib/listing/property-paths";
@@ -158,6 +159,7 @@ export default async function AdminPropertyEditPage({
             },
             transaction: data.transaction ?? null,
             city: data.city ?? null,
+            cityPages: cityPageOptions(),
           }}
           seo={{ slug: data.slug, ctx: seoCtx, photosWithoutAlt }}
           initial={{

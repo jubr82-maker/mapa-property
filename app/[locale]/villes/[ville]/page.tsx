@@ -12,12 +12,12 @@ import { routing } from "@/i18n/routing";
 import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
 import { PropertyCard } from "@/components/property/PropertyCard";
-import { fetchAllBlogPosts, fetchAllPropertiesWithCover } from "@/lib/data";
+import { fetchAllBlogPosts, fetchAllPropertiesWithCover, fetchAllPropertiesWithCoverStrict } from "@/lib/data";
 import { pickLang } from "@/lib/types";
 import { FaqSection } from "@/components/faq/FaqSection";
 import { cityFaqKey } from "@/lib/faq/keys";
 import { withSocial } from "@/lib/seo-page-meta";
-import { cityForPlace } from "@/lib/internal-links";
+import { cityForPlace, cityForProperty } from "@/lib/internal-links";
 import { isCityIndexable, publishedCountByCity } from "@/lib/city-indexing";
 
 type Locale = "fr" | "en" | "de";
@@ -51,7 +51,9 @@ export async function generateMetadata({
   // Oct. 2026 : ville etrangere sans bien publie ni contenu propre ->
   // "noindex, follow" et aucune autre langue declaree (hreflang) ; la page
   // reste accessible (lib/city-indexing.ts).
-  const published = publishedCountByCity(await fetchAllPropertiesWithCover()).get(city.slug) ?? 0;
+  // Lecture sans repli : en cas d'erreur, la regeneration echoue et la page
+  // garde son etat precedent (jamais de noindex faute de biens lus).
+  const published = publishedCountByCity(await fetchAllPropertiesWithCoverStrict()).get(city.slug) ?? 0;
   const indexable = isCityIndexable(city, published);
   const alternates = pageAlternates(locale, `/villes/${city.slug}`);
   return withSocial(locale, {
@@ -152,7 +154,7 @@ export default async function VillePage({
   // Recherches en cours qui visent cette commune (oct. 2026).
   const searches = await fetchSearchesForCity(city.slug);
   // Biens publies de la commune (oct. 2026).
-  const cityProperties = (await fetchAllPropertiesWithCover()).filter((p) => cityForPlace(p.city)?.slug === city.slug);
+  const cityProperties = (await fetchAllPropertiesWithCover()).filter((p) => cityForProperty(p)?.slug === city.slug);
   const ts = await getTranslations({ locale, namespace: "searches_page" });
   const tc = await getTranslations({ locale, namespace: "seo_pages" });
   // Articles du blog rattaches a la commune (champ commune, admin Blog).
