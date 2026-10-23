@@ -215,13 +215,13 @@ export default async function middleware(request: NextRequest) {
       to.search = request.nextUrl.search;
       return NextResponse.redirect(to, 301);
     }
-    if (found.kind === "unknown" && (!UUID_RE.test(seg) || (await isPublishedOffmarketId(seg)) === false)) {
+    if (found.kind === "unknown" && (!UUID_RE.test(seg) || (await isPublishedOffmarketId(seg.toLowerCase())) === false)) {
       return notFoundRewrite(request, ficheMatch[1]);
     }
   }
   const offMatch = pathname.match(/^\/(fr|en|de)\/off-market\/([^/]+)\/?$/);
   if (offMatch && offMatch[2] !== "arcova") {
-    const published = UUID_RE.test(offMatch[2]) ? await isPublishedOffmarketId(offMatch[2]) : false;
+    const published = UUID_RE.test(offMatch[2]) ? await isPublishedOffmarketId(offMatch[2].toLowerCase()) : false;
     if (published === false) return notFoundRewrite(request, offMatch[1]);
   }
 

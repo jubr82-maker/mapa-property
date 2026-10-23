@@ -108,6 +108,9 @@ export function matchPropertySegment(map: Map<string, PropertyPathsByLang>, slug
   const exact = map.get(segment);
   if (exact) return exact;
   const p = segment.toLowerCase();
+  // UUID ou slug en majuscules : 301 vers l'adresse actuelle.
+  const lower = map.get(p);
+  if (lower) return lower;
   const last = p.split("-").pop() ?? p;
   const token = /^\d+$/.test(last) || /^[0-9a-f]{8}$/.test(last) ? last : p;
   if (token === p) return undefined;

@@ -30,6 +30,9 @@ test("ancienne adresse lisible ou majuscules : retrouvee par la reference (301, 
   assert.equal(m("appartement-3-chambres-hagen-86388715"), apimo);
   assert.equal(m("APPARTEMENT-DUPLEX-2-CHAMBRES-STEINFORT-86388715"), apimo);
   assert.equal(m("maison-3-chambres-strassen-1A2B3C4D"), admin);
+  // UUID en majuscules.
+  const byId = new Map([["0f8c2d4e-1a2b-4c3d-9e8f-001122334455", admin]]);
+  assert.equal(matchPropertySegment(byId, [], "0F8C2D4E-1A2B-4C3D-9E8F-001122334455"), admin);
 });
 
 test("reference inconnue ou ambigue : inconnue", () => {
