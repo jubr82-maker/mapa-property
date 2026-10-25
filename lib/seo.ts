@@ -74,35 +74,40 @@ export const realEstateAgent = (locale: string) => ({
   areaServed: AREA_SERVED,
   hasMap: GOOGLE_BUSINESS_MAP_URL,
   sameAs: [...OFFICIAL_PROFILES, GOOGLE_BUSINESS_MAP_URL, GOOGLE_KNOWLEDGE_GRAPH_URL],
-  founder: {
-    "@type": "Person",
-    name: "Julien Brebion",
-    jobTitle: "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
-  },
+  // Julien Brebion (oct. 2026) : reference par identifiant seulement ; son
+  // entite Person est publiee sur la page "Qui sommes-nous" (personJulien).
+  founder: { "@id": JULIEN_PERSON_ID },
+  employee: { "@id": JULIEN_PERSON_ID },
 });
 
 export const homepageGraph = (locale: string) => ({
   "@context": "https://schema.org",
   "@graph": [
     realEstateAgent(locale),
-    personJulien(),
     website(locale),
   ],
 });
 
-export const personJulien = () => ({
+/**
+ * Julien Brebion (decision de Julien, oct. 2026) : publie UNIQUEMENT sur la
+ * page "Qui sommes-nous", dans les trois langues. Seul son profil LinkedIn
+ * est declare, jamais ses comptes Instagram ou Facebook personnels. Aucun
+ * telephone, e-mail, adresse ni autre donnee personnelle. `image` : son
+ * portrait, seulement la ou il est affiche (meme fichier).
+ */
+export const JULIEN_PERSON_ID = `${SITE_URL}/#julien-brebion`;
+export const JULIEN_LINKEDIN_URL = "https://www.linkedin.com/in/julien-brebion-re";
+
+export const personJulien = (locale: string, opts: { image?: string } = {}) => ({
   "@context": "https://schema.org",
   "@type": "Person",
-  "@id": `${SITE_URL}#julien`,
+  "@id": JULIEN_PERSON_ID,
   name: "Julien Brebion",
-  jobTitle: "Co-fondateur · Directeur Immobilier · Exclusive Sourcing Specialist",
+  jobTitle: "Real Estate Director & Exclusive Sourcing Specialist",
   worksFor: { "@id": `${SITE_URL}#organization` },
-  // Portable personnel volontairement exclu du JSON-LD (anti-scraping,
-  // aucun telephone ni e-mail dans les donnees structurees (cf.
-  // commentaire ORGANIZATION_ADDRESS).
-  sameAs: [
-    "https://www.linkedin.com/in/julien-brebion/",
-  ],
+  sameAs: [JULIEN_LINKEDIN_URL],
+  url: `${SITE_URL}/${locale}/qui-sommes-nous`,
+  ...(opts.image ? { image: opts.image.startsWith("http") ? opts.image : `${SITE_URL}${opts.image}` } : {}),
 });
 
 // ----------------------------------------------------------------------

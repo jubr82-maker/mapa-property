@@ -3,7 +3,8 @@ import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
-import { pageAlternates } from "@/lib/seo";
+import { pageAlternates, personJulien } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { BROKER_POSITION } from "@/lib/legal/broker-position";
 
 import { withSocial } from "@/lib/seo-page-meta";
@@ -41,6 +42,8 @@ async function AboutPage({
   return (
     <>
       <PageBreadcrumb locale={locale} path="/qui-sommes-nous" />
+      {/* Julien Brebion : entite Person (portrait affiche ci-dessous). */}
+      <JsonLd data={personJulien(locale, { image: JULIEN_PORTRAIT_SRC })} />
     <article className="pt-24 lg:pt-32">
       <div className="mx-auto max-w-[1100px] px-6 lg:px-10">
         <header className="mb-14">
