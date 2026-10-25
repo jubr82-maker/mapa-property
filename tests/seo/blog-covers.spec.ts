@@ -49,7 +49,9 @@ test("repli : couverture rechargee directement si l'optimiseur la refuse ; og:im
   }
   const article = fs.readFileSync(path.join(ROOT, "app/[locale]/blog/[slug]/page.tsx"), "utf8");
   expect(article).toContain("const shareImage = displayableImageSrc(post.cover_image) ?? siteShareImage();");
-  expect(article).toMatch(/images: \[\{ url: shareImage/);
+  // Balises de partage construites par withSocial (lib/seo-page-meta.ts) :
+  // une image propre (la couverture) est gardee telle quelle.
+  expect(article).toContain('{ type: "article", image: shareImage }');
   // Politique de securite et optimiseur : Supabase Storage public autorise.
   const config = fs.readFileSync(path.join(ROOT, "next.config.ts"), "utf8");
   expect(config).toContain("img-src 'self' data: https: blob:");

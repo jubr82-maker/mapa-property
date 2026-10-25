@@ -21,6 +21,7 @@ import {
   legacyPropertyId,
   resolveLegacyPath,
 } from "../../lib/legacy-redirects";
+import { ICON_VERSION } from "../../lib/icons";
 import { indexNowPayload, INDEXNOW_KEY_PATTERN } from "../../lib/indexnow";
 import { breadcrumbTrail } from "../../lib/breadcrumbs";
 import { INTENT_PAGES } from "../../lib/intent-pages";
@@ -350,8 +351,9 @@ test("pages de recherche immobiliere (build)", async () => {
   expect(failures, failures.join("\n")).toEqual([]);
 });
 
-// Icones (oct. 2026, scripts/generate-icons.mjs) : toutes les declarations
-// (site, admin, manifestes) visent public/icons/ ; fichiers presents,
+// Icones (oct. 2026, scripts/generate-icons-square.mjs) : toutes les
+// declarations (site, admin, manifestes) visent public/icons/, avec le
+// numero de version de lib/icons.ts (cache d'un an) ; fichiers presents,
 // carres, multiples de 48 px (Apple : 180 px) ; aucune ancienne icone
 // declaree ; favicon.ico multi-tailles identique dans app/ et public/.
 test("icones du site et de l'admin", async () => {
@@ -363,10 +365,13 @@ test("icones du site et de l'admin", async () => {
     const s = read(f);
     if (/favicon-(16|32|48)\.png|pwa-\d+|"\/apple-touch-icon\.png"|logo-mapa-property\.svg/.test(s)) failures.push(`${f} : ancienne icone declaree`);
     for (const m of s.matchAll(/["'](\/icons\/[^"']+)["']/g)) declared.add(m[1]);
+    // Adresses versionnees : iconUrl("icon-48.png") = /icons/icon-48.png?v=N.
+    for (const m of s.matchAll(/iconUrl\("([^"]+)"\)/g)) declared.add(`/icons/${m[1]}?v=${ICON_VERSION}`);
   }
+  for (const u of declared) if (!new RegExp(`\\?v=${ICON_VERSION}$`).test(u)) failures.push(`${u} : sans numero de version`);
   if (declared.size === 0) failures.push("aucune icone declaree dans public/icons/");
   for (const u of declared) {
-    const file = path.join(ROOT, "public", u);
+    const file = path.join(ROOT, "public", u.replace(/\?v=\d+$/, ""));
     if (!fs.existsSync(file)) { failures.push(`${u} absent`); continue; }
     const { width, height } = await sharp(file).metadata();
     // Exceptions : Apple (180 px) et 512 px, taille attendue par les
