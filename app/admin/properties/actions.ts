@@ -398,9 +398,12 @@ export async function updateProperty(
   // --- Pays et ville (oct. 2026) : modifiables apres la creation. Au
   // Luxembourg, seule une localite du registre officiel est acceptee.
   if (data.country !== undefined || data.city !== undefined) {
-    const { data: cur } = await supabase.from("properties").select("country, city").eq("id", id).maybeSingle();
-    const current = (cur as { country: string | null; city: string | null } | null) ?? { country: null, city: null };
-    const commune = update.listing_data ? (update.listing_data as ListingData).facts.city_commune ?? null : null;
+    // Commune d'une localite homonyme : celle envoyee avec le modele, sinon
+    // celle deja enregistree (listing_data absent ou non envoye).
+    const withCommune = await supabase.from("properties").select("country, city, city_commune:listing_data->facts->>city_commune").eq("id", id).maybeSingle();
+    const cur = withCommune.error ? (await supabase.from("properties").select("country, city").eq("id", id).maybeSingle()).data : withCommune.data;
+    const current = (cur as { country: string | null; city: string | null; city_commune?: string | null } | null) ?? { country: null, city: null };
+    const commune = update.listing_data ? (update.listing_data as ListingData).facts.city_commune ?? null : current.city_commune ?? null;
     const location = checkLocation({ country: data.country, city: data.city, commune, currentCountry: current.country, currentCity: current.city });
     if (!location.ok) return { ok: false, error: (await tProps())(`err_${location.code}`) };
     if (location.country !== undefined) update.country = location.country;

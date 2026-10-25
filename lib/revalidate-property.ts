@@ -30,7 +30,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
 
 /** Colonnes lues avant et apres une modification (fiche, ville, cartes). */
 export const PROPERTY_REVAL_COLUMNS =
-  "id, slug, transaction, property_type, country, city, title_fr, title_en, title_de, price, price_on_demand, surface, living_surface, bedrooms, bathrooms, energy, badge, badge_size, badge_position, mandate_type, is_published, is_featured, city_page:listing_data->facts->>city_page";
+  "id, slug, transaction, property_type, country, city, title_fr, title_en, title_de, price, price_on_demand, surface, living_surface, bedrooms, bathrooms, energy, badge, badge_size, badge_position, mandate_type, is_published, is_featured, city_page:listing_data->facts->>city_page, city_commune:listing_data->facts->>city_commune";
 
 export type PropertyRevalRow = {
   id: string;
@@ -46,6 +46,7 @@ export type PropertyRevalRow = {
   is_published?: boolean | null;
   is_featured?: boolean | null;
   city_page?: string | null;
+  city_commune?: string | null;
   [k: string]: unknown;
 };
 
@@ -93,7 +94,7 @@ export async function revalidatePropertyChange(
       });
       for (const l of LOCALES) fichePaths.add(`/${l}${paths[l]}`);
     }
-    const city = cityForProperty({ city: r.city, country: typeof r.country === "string" ? r.country : null, city_page: r.city_page ?? null });
+    const city = cityForProperty({ city: r.city, country: typeof r.country === "string" ? r.country : null, city_page: r.city_page ?? null, city_commune: r.city_commune ?? null });
     if (city) citySlugs.add(city.slug);
   }
   for (const p of fichePaths) revalidatePath(p);

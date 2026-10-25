@@ -44,9 +44,9 @@ export function cityForPlace(place: string | null | undefined): City | undefined
  * (bien au Luxembourg) la page de la commune ou du quartier de sa localite
  * officielle (registre CACLR, lib/geo/lu-localities.ts).
  */
-export function cityForProperty(p: { city?: string | null; city_page?: string | null; country?: string | null }): City | undefined {
+export function cityForProperty(p: { city?: string | null; city_page?: string | null; country?: string | null; city_commune?: string | null }): City | undefined {
   const lu = isLuCountry(p.country);
-  const slug = resolveCitySlug(CITY_ENTRIES, p.city, p.city_page, lu ? (place) => luCitySlug(LU_PLACES, LU_ENTRIES, place) : undefined);
+  const slug = resolveCitySlug(CITY_ENTRIES, p.city, p.city_page, lu ? (place) => luCitySlug(LU_PLACES, LU_ENTRIES, place, p.city_commune) : undefined);
   return slug ? cities.find((c) => c.slug === slug) : undefined;
 }
 

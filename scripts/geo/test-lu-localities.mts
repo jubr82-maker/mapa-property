@@ -119,6 +119,14 @@ test("admin : liste fermee au Luxembourg a la creation et en modification, contr
   assert.equal(JSON.parse(read("messages/fr.json")).admin_properties.city_lu_option, "{name}, commune de {commune}");
 });
 
+test("commune d'une localite homonyme : relue en base par le serveur, transmise au rattachement du site", () => {
+  const actions = read("app/admin/properties/actions.ts");
+  assert.ok(actions.includes("city_commune:listing_data->facts->>city_commune") && actions.includes(": current.city_commune ?? null"));
+  assert.ok(read("lib/internal-links.ts").includes("luCitySlug(LU_PLACES, LU_ENTRIES, place, p.city_commune)"));
+  for (const f of ["lib/data.ts", "lib/revalidate-property.ts"]) assert.ok(read(f).includes("city_commune:listing_data->facts->>city_commune"), f);
+  assert.ok(read("app/[locale]/biens/[slug]/page.tsx").includes("city_commune: propertyFacts.city_commune"));
+});
+
 test("site public : le referentiel n'entre dans aucun composant client", () => {
   const files: string[] = [];
   const walk = (d: string) => {
