@@ -16,6 +16,7 @@ import { AdminIdleWatcher } from "@/components/admin/AdminIdleWatcher";
 import { AdminMobileHeader, AdminMobileNav } from "@/components/admin/AdminMobileNav";
 import { AdminTableCards } from "@/components/admin/AdminTableCards";
 import type { Viewport } from "next";
+import { iconUrl } from "@/lib/icons";
 
 // Tous les namespaces admin (prefixe admin_), pour les composants clients.
 
@@ -55,13 +56,13 @@ export async function generateMetadata(): Promise<Metadata> {
     // donc rien n'est mis en cache hors ligne.
     manifest: "/admin/manifest.webmanifest",
     appleWebApp: { capable: true, title: t("app_name"), statusBarStyle: "default" },
-    // Memes icones que le site public (scripts/generate-icons.mjs).
+    // Memes icones que le site public (scripts/generate-icons-square.mjs).
     icons: {
       icon: [
-        { url: "/icons/icon-48.png", sizes: "48x48", type: "image/png" },
-        { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: iconUrl("icon-48.png"), sizes: "48x48", type: "image/png" },
+        { url: iconUrl("icon-192.png"), sizes: "192x192", type: "image/png" },
       ],
-      apple: { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
+      apple: { url: iconUrl("apple-touch-icon.png"), sizes: "180x180" },
     },
   };
 }

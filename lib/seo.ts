@@ -1,5 +1,5 @@
 import { CHILD_TO_PARENT, PROPERTY_TYPE_FAMILIES } from "./taxonomy/property-types";
-import { siteLogo, siteShareImage } from "./og";
+import { siteLogo, siteShareImage, SITE_LOGO_SIZE } from "./og";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -59,7 +59,7 @@ export const realEstateAgent = (locale: string) => ({
   name: "MAPA Property",
   legalName: "MAPA Synergy Sàrl",
   url: SITE_URL,
-  logo: siteLogo(),
+  logo: { "@type": "ImageObject", url: siteLogo(), ...SITE_LOGO_SIZE },
   image: siteShareImage(),
   description:
     locale === "en"

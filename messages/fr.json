@@ -2,7 +2,8 @@
   "meta": {
     "site_name": "MAPA Property",
     "default_title": "MAPA Property, agence immobilière et broker au Luxembourg",
-    "default_description": "Agence immobilière luxembourgeoise et broker international. Vente, location, off-market, trophy assets. Sous mandat, dans le cadre, dans votre intérêt."
+    "default_description": "Agence immobilière luxembourgeoise et broker international. Vente, location, off-market, trophy assets. Sous mandat, dans le cadre, dans votre intérêt.",
+    "share_image_alt": "MAPA Property, agence immobilière au Luxembourg"
   },
   "common": {
     "language": "Langue",

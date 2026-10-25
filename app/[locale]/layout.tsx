@@ -27,6 +27,7 @@ import { LAYOUT_CLIENT_NAMESPACES, pickMessages } from "@/lib/i18n-client-messag
 import { siteDesignTokens } from "@/lib/site-content";
 import { ogLocale } from "@/lib/seo-page-meta";
 import "../globals.css";
+import { iconUrl } from "@/lib/icons";
 
 const display = Big_Shoulders({
   variable: "--font-display",
@@ -88,13 +89,13 @@ export async function generateMetadata({
       siteName: "MAPA Property",
       locale: ogLocale(locale),
       type: "website",
-      images: [{ url: ogImage, ...SITE_SHARE_IMAGE_SIZE }],
+      images: [{ url: ogImage, ...SITE_SHARE_IMAGE_SIZE, alt: t("share_image_alt") }],
     },
     twitter: {
       card: "summary_large_image",
       title: t("default_title"),
       description: t("default_description"),
-      images: [ogImage],
+      images: [{ url: ogImage, alt: t("share_image_alt") }],
     },
     robots: {
       index: true,
@@ -103,17 +104,18 @@ export async function generateMetadata({
       "max-snippet": -1,
       "max-video-preview": -1,
     },
-    // Icones (oct. 2026, scripts/generate-icons.mjs) : adresses stables
-    // public/icons/, carres en multiples de 48 px. /favicon.ico (16, 32 et
+    // Icones (oct. 2026, scripts/generate-icons-square.mjs) : adresses
+    // stables public/icons/ avec numero de version (lib/icons.ts), carres en
+    // multiples de 48 px. /favicon.ico (16, 32 et
     // 48 px) est declare par la convention app/favicon.ico.
     icons: {
       icon: [
-        { url: "/icons/icon-48.png", sizes: "48x48", type: "image/png" },
-        { url: "/icons/icon-96.png", sizes: "96x96", type: "image/png" },
-        { url: "/icons/icon-144.png", sizes: "144x144", type: "image/png" },
-        { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: iconUrl("icon-48.png"), sizes: "48x48", type: "image/png" },
+        { url: iconUrl("icon-96.png"), sizes: "96x96", type: "image/png" },
+        { url: iconUrl("icon-144.png"), sizes: "144x144", type: "image/png" },
+        { url: iconUrl("icon-192.png"), sizes: "192x192", type: "image/png" },
       ],
-      apple: { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
+      apple: { url: iconUrl("apple-touch-icon.png"), sizes: "180x180" },
     },
     manifest: "/site.webmanifest",
     other: {

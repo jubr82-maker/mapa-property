@@ -701,7 +701,11 @@ section = "M. Fiche de bien et coordonnees";
   check("metadonnees : carte X de la fiche = Open Graph (image et description)",
     /withSocial\([\s\S]*?\{ image: shareImage \}/.test(meta)
     && /openGraph: \{[\s\S]*?title,[\s\S]*?description,[\s\S]*?url,[\s\S]*?images: \[sized\]/.test(social)
-    && /twitter: \{[\s\S]*?title,[\s\S]*?description,[\s\S]*?images: \[image\]/.test(social));
+    && /twitter: \{[\s\S]*?title,[\s\S]*?description,[\s\S]*?images: \[opts\.image \? image : \{ url: image, alt: shareImageAlt\(locale\) \}\]/.test(social));
+  // Oct. 2026 : images Google et partage de public/brand (anciens fichiers gardes).
+  check("metadonnees : logo et image de partage dans public/brand, anciens fichiers gardes",
+    ["public/brand/google-logo.png", "public/brand/partage.png", "public/og-image.png", "public/logo-mapa-property.png"].every((f) => fs.existsSync(path.join(ROOT, f)))
+    && read("lib/og.ts").includes('SITE_SHARE_IMAGE_PATH = "/brand/partage.png"') && read("lib/og.ts").includes('SITE_LOGO_PATH = "/brand/google-logo.png"'));
   // Coordonnees dans le code des pages publiques.
   const publicSources = [...walk("app/[locale]", (x) => /\.(ts|tsx)$/.test(x)), ...walk("components", (x) => /\.(ts|tsx)$/.test(x) && !x.startsWith("components/admin/")), "lib/seo.ts", ...walk("lib/legal", (x) => x.endsWith(".ts")), "messages/fr.json", "messages/en.json", "messages/de.json", "public/llms.txt", "lib/contact/reveal-lines.ts"];
   const leaks = publicSources.filter((f) => /admin@mapagroup\.org|j\.brebion@mapagroup\.org|site@mapagroup\.org|691[\s.]?620[\s.]?127|691[\s.]?113[\s.]?018|href=["'](tel|mailto):/i.test(read(f)));

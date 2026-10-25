@@ -8,6 +8,16 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { pageAlternates } from "@/lib/seo";
 import { siteShareImage, SITE_SHARE_IMAGE_SIZE } from "@/lib/og";
+import fr from "@/messages/fr.json";
+import en from "@/messages/en.json";
+import de from "@/messages/de.json";
+
+const SHARE_IMAGE_ALT: Record<string, string> = { fr: fr.meta.share_image_alt, en: en.meta.share_image_alt, de: de.meta.share_image_alt };
+
+/** Texte alternatif de l'image de partage par defaut (meta.share_image_alt). */
+export function shareImageAlt(locale: string): string {
+  return SHARE_IMAGE_ALT[locale] ?? SHARE_IMAGE_ALT.fr;
+}
 
 export type SeoPageKey =
   | "contact"
@@ -59,7 +69,9 @@ export function withSocial(
   const title = titleText(meta.title);
   const description = typeof meta.description === "string" ? meta.description : undefined;
   const image = opts.image ?? siteShareImage();
-  const sized = opts.image ? { url: image } : { url: image, ...SITE_SHARE_IMAGE_SIZE };
+  // Image par defaut : dimensions et texte alternatif ; une image propre
+  // (fiche, article) garde son adresse seule, comme avant.
+  const sized = opts.image ? { url: image } : { url: image, ...SITE_SHARE_IMAGE_SIZE, alt: shareImageAlt(locale) };
   return {
     ...meta,
     openGraph: {
@@ -75,7 +87,7 @@ export function withSocial(
       card: "summary_large_image",
       title,
       description,
-      images: [image],
+      images: [opts.image ? image : { url: image, alt: shareImageAlt(locale) }],
     },
   };
 }

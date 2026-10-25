@@ -7,6 +7,7 @@
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
+import { iconUrl } from "@/lib/icons";
 
 export const dynamic = "force-static";
 
@@ -25,9 +26,9 @@ export async function GET() {
     background_color: "#F0E6CC",
     theme_color: "#1F221A",
     icons: [
-      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: iconUrl("icon-192.png"), sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: iconUrl("icon-512.png"), sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: iconUrl("icon-maskable-512.png"), sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
   return NextResponse.json(manifest, {

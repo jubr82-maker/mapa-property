@@ -131,7 +131,7 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
-        source: "/:dir(fonts|images|logos|icons)/:path*",
+        source: "/:dir(fonts|images|logos|icons|brand)/:path*",
         headers: [{ key: "Cache-Control", value: STATIC_ASSET_CACHE }],
       },
       {
