@@ -93,7 +93,7 @@ export async function revalidatePropertyChange(
       });
       for (const l of LOCALES) fichePaths.add(`/${l}${paths[l]}`);
     }
-    const city = cityForProperty({ city: r.city, city_page: r.city_page ?? null });
+    const city = cityForProperty({ city: r.city, country: typeof r.country === "string" ? r.country : null, city_page: r.city_page ?? null });
     if (city) citySlugs.add(city.slug);
   }
   for (const p of fichePaths) revalidatePath(p);

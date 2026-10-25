@@ -59,3 +59,24 @@ rattacher à sa commune officielle.
 Ces positions ont été relevées dans les fichiers du 2026-09-28. Si l'ACT change
 le format, le contrôle de cohérence du script échoue au lieu de produire une
 table fausse.
+
+## Référentiel de l'admin des biens (oct. 2026)
+
+Liste fermée des localités pour le champ Ville des biens au Luxembourg, et
+rattachement automatique d'une localité à la page de sa commune ou de son
+quartier.
+
+- Archive : `data/caclr/caclr.zip` (non versionnée, jamais dans le site).
+  Version importée : fichiers du 2026-10-19.
+- Générateur : `node scripts/geo/build-lu-localities.mjs [chemin du zip]`
+  (Node, sans dépendance ni réseau ; lit le zip avec `unzip`).
+- Sortie : `lib/geo/lu-localities.json`, versionné. Il contient les
+  100 communes avec leur canton, les 565 localités actuelles (nom
+  officiel, commune, canton, codes postaux en plages) et les 24 quartiers
+  de la Ville de Luxembourg.
+- Écartées : les 25 enregistrements de LOCALITE qui portent une date de
+  suppression (position 88-98), dont l'enregistrement de test.
+- Contrôles : `node --import tsx scripts/geo/test-lu-localities.mts`.
+- Le simulateur d'estimation garde pour l'instant sa propre table
+  (`lib/geo/luxembourg-localities-official.ts`, fichiers du 2026-09-28,
+  avec alias), pour ne pas modifier son calibrage.

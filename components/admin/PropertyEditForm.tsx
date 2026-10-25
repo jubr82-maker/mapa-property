@@ -41,6 +41,10 @@ import { checkFields, describeIssues, type FieldIssues } from "@/lib/listing/wri
 import { htmlToText } from "@/lib/listing/template-engine";
 import { ownTextWords, propertyPath, seoMetaDescription, seoTitle, type ListingSeoVocab } from "@/lib/listing/listing-seo";
 import { CityPageSelect, type CityPageOption } from "@/components/admin/CityPageSelect";
+import { CitySuggestInput } from "@/components/admin/CitySuggestInput";
+import { LuLocalityCombobox } from "@/components/admin/LuLocalityCombobox";
+import { COUNTRIES } from "@/lib/countries";
+import { isLuCountry, placeKey, resolveLuPlace, type LuPlace } from "@/lib/geo/lu-place-match";
 import { generateListing, type GeneratedListing, type ListingColumns, type ListingTemplates, type ListingVocab } from "@/lib/listing/generate";
 import {
   AUTO_KEYS,
@@ -289,6 +293,20 @@ interface Props {
   };
   /** Referencement : apercu Google en direct et indicateurs (jamais bloquants). */
   seo: { slug: string; ctx: Record<ListingLang, SeoLangCtx>; photosWithoutAlt: number | null };
+  /**
+   * Pays et ville (oct. 2026), modifiables apres la creation : valeurs
+   * enregistrees, localites officielles du Luxembourg (registre CACLR) et
+   * villes des pages pour les autres pays.
+   */
+  location: { country: string | null; city: string | null; luPlaces: LuPlace[]; foreignSuggestions: string[] };
+}
+
+/** Code pays d'une valeur enregistree : code de la liste, ou nom (biens importes : "Luxembourg"). */
+function countryCodeOf(value: string | null): string | null {
+  if (!value) return null;
+  if (COUNTRIES.some((c) => c.code === value)) return value;
+  const k = placeKey(value);
+  return COUNTRIES.find((c) => [c.name_fr, c.name_en, c.name_de].some((n) => placeKey(n) === k))?.code ?? null;
 }
 
 type SeoLangCtx = { types: Record<string, string>; titleTx: { sale: string; rent: string }; seo: ListingSeoVocab; subtypes: Record<string, string> };
@@ -403,7 +421,7 @@ function EnergySelect({ value, onChange, labelNone, labelLegacy }: { value: stri
   );
 }
 
-export function PropertyEditForm({ propertyId, initial, mandateAvailable, listing, seo }: Props) {
+export function PropertyEditForm({ propertyId, initial, mandateAvailable, listing, seo, location }: Props) {
   const t = useTranslations("admin_properties");
   const tn = useTranslations("admin_notices");
   // Saisie brute ; "form" (plus bas) y ajoute les textes tires du modele.
@@ -415,6 +433,22 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
   const [busy, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Pays et ville (oct. 2026). Luxembourg : localite officielle preremplie
+  // depuis la ville enregistree si la correspondance est sure ("Mondorf les
+  // bains" -> "Mondorf-les-Bains"), sinon champ vide et message, rien de
+  // devine. Rien n'est ecrit en base avant "Enregistrer".
+  const [saved, setSaved] = useState(() => ({ country: location.country, city: location.city }));
+  const savedCode = countryCodeOf(saved.country);
+  const [country, setCountry] = useState<string>(() => countryCodeOf(location.country) ?? "");
+  const [locationTouched, setLocationTouched] = useState(false);
+  const lu = isLuCountry(country);
+  const prefill = useMemo(
+    () => (isLuCountry(countryCodeOf(location.country)) ? resolveLuPlace(location.luPlaces, location.city, sanitizeListingData(listing.initialData).facts.city_commune) : null),
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const [luPlace, setLuPlace] = useState<LuPlace | null>(() => (prefill?.status === "ok" ? prefill.place : null));
+  const [foreignCity, setForeignCity] = useState<string>(() => (isLuCountry(countryCodeOf(location.country)) ? "" : location.city ?? ""));
+  const liveCity: string | null = lu ? (luPlace?.name ?? (locationTouched ? null : saved.city)) : foreignCity.trim() || null;
   // Famille choisie avant le type ; un type hors liste (ancien import) n'a
   // pas de famille : tous les champs restent affiches.
   const [family, setFamily] = useState<ListingFamily | "">(() => familyOf(initial.property_type) ?? "");
@@ -426,7 +460,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
     property_type: rawForm.property_type || null,
     transaction: listing.transaction,
     mandate_type: rawForm.mandate_type || null,
-    city: listing.city,
+    city: liveCity,
     year_built: parseDecimalInput(rawForm.year) ?? parseDecimalInput(rawForm.year_built),
     surface: parseDecimalInput(rawForm.surface),
     living_surface: parseDecimalInput(rawForm.living_surface),
@@ -465,7 +499,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
     }
     return next;
   }, [engaged, generated, listingData.auto, rawForm]);
-  const dirty = isDirty(form, baseline) || (listing.available && JSON.stringify(listingData) !== listingBaseline);
+  const dirty = isDirty(form, baseline) || (listing.available && JSON.stringify(listingData) !== listingBaseline) || locationTouched;
 
   // Controle de redaction (meme code que l'action serveur, qui bloque) :
   // affiche en direct pour tous les textes, bloquant pour ceux modifies.
@@ -479,8 +513,8 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
     }));
     // Description Google saisie (facultative) : memes regles de redaction.
     const metaItems = LISTING_LANGS.map((l) => ({ field: `seo_description_${l}`, lang: l, title: false, text: listingData.written[l].seo_description }));
-    return checkFields([...items, ...metaItems], listing.city ? [listing.city] : []);
-  }, [form, listing.city, listingData.written]);
+    return checkFields([...items, ...metaItems], liveCity ? [liveCity] : []);
+  }, [form, liveCity, listingData.written]);
   // Apercu Google et indicateurs de referencement, en direct.
   const seoPreview = LISTING_LANGS.map((l) => {
     const c = seo.ctx[l];
@@ -491,7 +525,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
       bedrooms: parseDecimalInput(form.bedrooms),
       surface: parseDecimalInput(form.surface),
       living_surface: parseDecimalInput(form.living_surface),
-      city: listing.city,
+      city: liveCity,
       price: parseDecimalInput(form.price),
       price_on_demand: form.price_on_demand,
     };
@@ -626,6 +660,16 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
       setError([tl("chk_blocked"), ...describe(blocking)].join("\n"));
       return;
     }
+    // Pays et ville : envoyes seulement s'ils changent. Luxembourg : nom
+    // officiel exact (une ville enregistree "Mondorf les bains" devient
+    // "Mondorf-les-Bains" a l'enregistrement) ; sans localite choisie, la
+    // ville enregistree reste telle quelle, sauf si on l'a modifiee.
+    const countryOut = country && country !== savedCode ? country : undefined;
+    if (lu && !luPlace && (locationTouched || countryOut !== undefined)) {
+      setError(t("err_city_not_official"));
+      return;
+    }
+    const cityOut = lu ? (luPlace && luPlace.name !== saved.city ? luPlace.name : undefined) : (foreignCity.trim() || null) !== (saved.city ?? null) ? foreignCity.trim() || null : undefined;
     startTransition(async () => {
       try {
         // Type, mandat et classes : envoyes seulement s'ils changent (un
@@ -681,12 +725,16 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
           badge: form.badge.length > 0 ? form.badge : null,
           badge_size: form.badge.length > 0 ? form.badge_size : null,
           badge_position: form.badge.length > 0 ? form.badge_position : null,
+          country: countryOut,
+          city: cityOut,
         });
         if (result.ok) {
           setFeedback(t("saved"));
           setForm(form);
           setBaseline(form);
           setListingBaseline(JSON.stringify(listingData));
+          setSaved({ country: countryOut ?? saved.country, city: cityOut !== undefined ? cityOut : saved.city });
+          setLocationTouched(false);
         } else {
           setError(result.error);
         }
@@ -765,14 +813,76 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
             })}
           </div>
         </Field>
+        <Field label={t("field_country")}>
+          <select
+            value={country}
+            onChange={(e) => {
+              setCountry(e.target.value);
+              setLuPlace(null);
+              setForeignCity("");
+              setLocationTouched(true);
+              setListingData((d) => ({ ...d, facts: { ...d.facts, city_commune: null } }));
+            }}
+            className={inputCls}
+            data-country-select
+          >
+            {!countryCodeOf(location.country) && (
+              <option value="">{location.country ? t("city_country_unknown", { value: location.country }) : t("choose")}</option>
+            )}
+            {COUNTRIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.name_fr}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field
+          label={t("field_city")}
+          hint={
+            lu && !luPlace && !locationTouched && saved.city && prefill && prefill.status !== "ok"
+              ? t(prefill.status === "ambiguous" ? "city_prefill_ambiguous" : "city_prefill_none", { city: saved.city })
+              : lu
+                ? t("city_lu_hint")
+                : t("city_free_hint")
+          }
+        >
+          {lu ? (
+            <LuLocalityCombobox
+              key={`lu-${country}`}
+              places={location.luPlaces}
+              value={luPlace}
+              onChange={(p) => {
+                setLuPlace(p);
+                setLocationTouched(true);
+                setListingData((d) => ({ ...d, facts: { ...d.facts, city_commune: p?.commune ?? null } }));
+              }}
+              className={inputCls}
+            />
+          ) : (
+            <CitySuggestInput
+              key={`free-${country}`}
+              name="city_free"
+              defaultValue={foreignCity}
+              suggestions={location.foreignSuggestions}
+              className={inputCls}
+              onValueChange={(v) => {
+                setForeignCity(v);
+                setLocationTouched(true);
+              }}
+            />
+          )}
+        </Field>
         {listing.available ? (
           <Field label={t("f_city_page")} full>
             <CityPageSelect
               options={listing.cityPages}
-              place={listing.city}
+              place={liveCity}
               value={listingData.facts.city_page ?? ""}
               onChange={(v) => setListingData((d) => ({ ...d, facts: { ...d.facts, city_page: v || null } }))}
               className={inputCls}
+              country={country || saved.country}
+              commune={luPlace?.commune ?? listingData.facts.city_commune ?? null}
+              luPlaces={location.luPlaces}
             />
           </Field>
         ) : null}

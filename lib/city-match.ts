@@ -14,7 +14,7 @@ export function normPlace(s: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export type CityMatchEntry = { slug: string; keys: string[] };
+export type CityMatchEntry = { slug: string; keys: string[]; lu?: boolean };
 
 /** Cles d'une page : identifiant, noms dans les 3 langues, alias. */
 export function cityMatchKeys(c: { slug: string; name: { fr: string; en: string; de: string }; aliases?: string[] }): string[] {
@@ -32,10 +32,17 @@ export function matchCitySlug(entries: CityMatchEntry[], place: string | null | 
 /**
  * Choix "Page de ville" de l'admin (listing_data.facts.city_page) : absent =
  * automatique (selon la ville saisie), "none" = aucune page, sinon
- * l'identifiant d'une page.
+ * l'identifiant d'une page. Automatique : nom, identifiant ou alias d'une
+ * page, sinon `fallback` (bien au Luxembourg : page de la commune ou du
+ * quartier de la localite officielle, lib/geo/lu-place-match.ts).
  */
-export function resolveCitySlug(entries: CityMatchEntry[], place: string | null | undefined, choice: string | null | undefined): string | null {
+export function resolveCitySlug(
+  entries: CityMatchEntry[],
+  place: string | null | undefined,
+  choice: string | null | undefined,
+  fallback?: (place: string | null | undefined) => string | null,
+): string | null {
   if (choice === "none") return null;
   if (choice && entries.some((e) => e.slug === choice)) return choice;
-  return matchCitySlug(entries, place);
+  return matchCitySlug(entries, place) ?? fallback?.(place) ?? null;
 }

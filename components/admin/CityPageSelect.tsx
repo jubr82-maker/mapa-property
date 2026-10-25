@@ -7,9 +7,13 @@
  * une page precise, ou aucune page. La ligne d'etat dit en clair a quelle
  * page le bien est rattache. Valeur enregistree dans
  * listing_data.facts.city_page ; la ville saisie n'est jamais modifiee.
+ * Bien au Luxembourg (oct. 2026) : automatique = page de la commune ou du
+ * quartier de la localite officielle (lib/geo/lu-place-match.ts), meme
+ * calcul que le site (lib/internal-links.ts, cityForProperty).
  */
 import { useTranslations } from "next-intl";
 import { resolveCitySlug } from "@/lib/city-match";
+import { isLuCountry, luCitySlug, type LuPlace } from "@/lib/geo/lu-place-match";
 
 export type CityPageOption = { slug: string; label: string; lu: boolean; keys: string[] };
 
@@ -20,6 +24,9 @@ export function CityPageSelect({
   onChange,
   name,
   className,
+  country,
+  commune,
+  luPlaces,
 }: {
   options: CityPageOption[];
   /** Ville saisie pour le bien. */
@@ -30,9 +37,17 @@ export function CityPageSelect({
   /** Nom du champ dans un formulaire envoye tel quel (creation). */
   name?: string;
   className: string;
+  /** Pays du bien (code ou nom) ; Luxembourg : rattachement par localite officielle. */
+  country?: string | null;
+  /** Commune de la localite choisie (deux localites du meme nom). */
+  commune?: string | null;
+  /** Localites officielles du Luxembourg (liste legere, passee par la page). */
+  luPlaces?: LuPlace[];
 }) {
   const t = useTranslations("admin_properties");
-  const slug = resolveCitySlug(options, place, value || null);
+  const luOptions = options.filter((o) => o.lu);
+  const fallback = luPlaces && isLuCountry(country) ? (p: string | null | undefined) => luCitySlug(luPlaces, luOptions, p, commune) : undefined;
+  const slug = resolveCitySlug(options, place, value || null, fallback);
   const page = slug ? options.find((o) => o.slug === slug) : undefined;
   return (
     <>

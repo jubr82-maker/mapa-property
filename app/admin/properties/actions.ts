@@ -19,7 +19,8 @@ import { assertAdminAction, requireAdmin } from "@/lib/admin/require-admin";
 import { dbFailure, runAction, sessionFailure, type ActionResult as AdminActionResult } from "@/lib/admin/action-result";
 import { logAdminAction } from "@/lib/pilotage/audit";
 import { isEnergyClass, isListingType, isMandateType } from "@/lib/listing/families";
-import { emptyListingData, sanitizeListingData, type ListingLang } from "@/lib/listing/listing-data";
+import { emptyListingData, sanitizeListingData, type ListingData, type ListingLang } from "@/lib/listing/listing-data";
+import { checkLocation } from "@/lib/admin/property-location";
 import { cityPageOptions } from "@/lib/internal-links";
 import { checkFields, describeIssues } from "@/lib/listing/writing-check";
 import { htmlToText } from "@/lib/listing/template-engine";
@@ -248,6 +249,10 @@ export async function updateProperty(
     badge?: string | null;
     badge_size?: string | null;
     badge_position?: string | null;
+    /** Pays (code de lib/countries.ts) ; absent = inchange. */
+    country?: string;
+    /** Ville : au Luxembourg, nom officiel exact (registre CACLR) ; absent = inchangee. */
+    city?: string | null;
   },
 ): Promise<UpdatePropertyResult> {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
@@ -388,6 +393,18 @@ export async function updateProperty(
     const p = (data.badge_position ?? "").trim();
     update.badge_position =
       p.length > 0 && BADGE_POSITIONS.includes(p) ? p : null;
+  }
+
+  // --- Pays et ville (oct. 2026) : modifiables apres la creation. Au
+  // Luxembourg, seule une localite du registre officiel est acceptee.
+  if (data.country !== undefined || data.city !== undefined) {
+    const { data: cur } = await supabase.from("properties").select("country, city").eq("id", id).maybeSingle();
+    const current = (cur as { country: string | null; city: string | null } | null) ?? { country: null, city: null };
+    const commune = update.listing_data ? (update.listing_data as ListingData).facts.city_commune ?? null : null;
+    const location = checkLocation({ country: data.country, city: data.city, commune, currentCountry: current.country, currentCity: current.city });
+    if (!location.ok) return { ok: false, error: (await tProps())(`err_${location.code}`) };
+    if (location.country !== undefined) update.country = location.country;
+    if (location.city !== undefined) update.city = location.city;
   }
 
   if (Object.keys(update).length === 0) return { ok: true };
@@ -575,6 +592,11 @@ export async function createProperty(
   const priceOnDemand = formData.get("price_on_demand") === "on";
   const price = priceOnDemand ? null : num(formData.get("price"));
 
+  // Pays (liste fermee) et ville (Luxembourg : localite officielle).
+  const cityCommune = str(formData.get("city_commune"));
+  const location = checkLocation({ country: str(formData.get("country")) ?? "LU", city: str(formData.get("city")), commune: cityCommune });
+  if (!location.ok) return { ok: false, error: location.code };
+
   const slug = await generateUniquePropertySlug(supabase, titleFr);
   const cityPageRaw = str(formData.get("city_page"));
   const cityPage = cityPageRaw === "none" || (cityPageRaw && cityPageOptions().some((o) => o.slug === cityPageRaw)) ? cityPageRaw : null;
@@ -593,8 +615,8 @@ export async function createProperty(
     transaction_detail: transaction,
     property_type: propertyType,
     property_state: propertyState,
-    country: str(formData.get("country")) ?? "LU",
-    city: str(formData.get("city")),
+    country: location.country ?? "LU",
+    city: location.city ?? null,
     price,
     price_on_demand: priceOnDemand,
     internal_ref: str(formData.get("internal_ref")),
@@ -605,11 +627,12 @@ export async function createProperty(
     // listing_data.facts.city_page, avec les reperes "texte suivant le
     // modele" que la fiche admin poserait elle-meme (texte vide = modele).
     // Choix automatique : rien d'enregistre, rattachement par la ville.
-    ...(cityPage
+    // Commune d'une localite du Luxembourg (deux localites du meme nom).
+    ...(cityPage || (cityCommune && location.city)
       ? {
           listing_data: sanitizeListingData({
             ...emptyListingData(),
-            facts: { city_page: cityPage },
+            facts: { city_page: cityPage, city_commune: location.city ? cityCommune : null },
             auto: {
               title_fr: !titleFr,
               title_en: !str(formData.get("title_en")),

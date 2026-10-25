@@ -279,7 +279,7 @@ async function PropertyPage({
     ),
   }));
   // Page de ville du bien : choix de l'admin, sinon ville saisie et alias.
-  const propertyCity = cityForProperty({ city: property.city, city_page: sanitizeListingData(property.listing_data ?? null).facts.city_page });
+  const propertyCity = cityForProperty({ city: property.city, country: property.country, city_page: sanitizeListingData(property.listing_data ?? null).facts.city_page });
   const citySlug = propertyCity?.slug ?? null;
   const citySearches = citySlug ? await fetchSearchesForCity(citySlug) : [];
 

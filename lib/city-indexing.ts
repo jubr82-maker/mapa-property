@@ -26,7 +26,7 @@ export function isCityIndexable(city: City, publishedProperties: number): boolea
 }
 
 /** Nombre de biens publies par page de ville (meme rattachement que la page : cityForProperty). */
-export function publishedCountByCity(properties: { city?: string | null; city_page?: string | null }[]): Map<string, number> {
+export function publishedCountByCity(properties: { city?: string | null; city_page?: string | null; country?: string | null }[]): Map<string, number> {
   const out = new Map<string, number>();
   for (const p of properties) {
     const c = cityForProperty(p);
@@ -36,7 +36,7 @@ export function publishedCountByCity(properties: { city?: string | null; city_pa
 }
 
 /** Pages de villes du sitemap : les seules indexables, pour les biens publies donnes. */
-export function indexableCities(properties: { city?: string | null; city_page?: string | null }[]): City[] {
+export function indexableCities(properties: { city?: string | null; city_page?: string | null; country?: string | null }[]): City[] {
   const counts = publishedCountByCity(properties);
   return cities.filter((c) => isCityIndexable(c, counts.get(c.slug) ?? 0));
 }

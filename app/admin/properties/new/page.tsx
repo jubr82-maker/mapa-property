@@ -1,17 +1,18 @@
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { PropertyCreateForm } from "@/components/admin/PropertyCreateForm";
-import { getLuxembourgLocalityNames } from "@/lib/geo/luxembourg-communes";
+import { adminLuPlaces, foreignCitySuggestions } from "@/lib/admin/property-location";
 import { cityPageOptions } from "@/lib/internal-links";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewPropertyPage() {
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
-  // Calcule cote serveur : la liste complete (avec noms alternatifs
-  // multilingues) ne doit jamais atteindre le bundle client, seule cette
-  // liste de noms deja allegee est transmise en prop.
-  const citySuggestions = getLuxembourgLocalityNames();
+  // Calcule cote serveur (oct. 2026) : localites officielles du Luxembourg
+  // (registre CACLR, liste legere nom + commune) et villes des pages pour
+  // les autres pays, transmises en prop, jamais dans le JavaScript.
+  const luPlaces = adminLuPlaces();
+  const foreignSuggestions = foreignCitySuggestions();
   return (
     <div className="space-y-8">
       <header>
@@ -25,7 +26,7 @@ export default async function NewPropertyPage() {
           {t("new_intro")}
         </p>
       </header>
-      <PropertyCreateForm citySuggestions={citySuggestions} cityPages={cityPageOptions()} />
+      <PropertyCreateForm luPlaces={luPlaces} foreignSuggestions={foreignSuggestions} cityPages={cityPageOptions()} />
     </div>
   );
 }

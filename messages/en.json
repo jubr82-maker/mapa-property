@@ -1834,7 +1834,22 @@
     "city_page_group_intl": "International",
     "city_page_none_option": "No city page",
     "city_page_attached": "Linked to the page: {city}",
-    "city_page_missing": "No city page for this locality"
+    "city_page_missing": "No city page for this locality",
+    "city_lu_placeholder": "Type a few letters of the locality",
+    "city_lu_option": "{name}, municipality of {commune}",
+    "city_quartier_option": "{name}, district of Luxembourg City",
+    "city_lu_no_match": "No official locality matches.",
+    "city_lu_hint": "Official list of Luxembourg localities.",
+    "city_free_hint": "Free text, with the cities of our pages.",
+    "city_prefill_none": "Saved city \"{city}\": no reliable official locality. Choose it from the list.",
+    "city_prefill_ambiguous": "Saved city \"{city}\": several localities share this name. Choose the right municipality from the list.",
+    "city_country_unknown": "{value} (saved value)",
+    "err_city_not_official": "In Luxembourg, choose the locality from the official list.",
+    "err_code_city_not_official": "In Luxembourg, choose the locality from the official list.",
+    "err_country_invalid": "Unknown country.",
+    "err_code_country_invalid": "Unknown country.",
+    "err_city_invalid": "Invalid city (100 characters at most).",
+    "err_code_city_invalid": "Invalid city (100 characters at most)."
   },
   "property_gone": {
     "title": "This property is no longer available",

@@ -71,7 +71,8 @@ test("admin : liste fermee a cote de la ville, etat affiche, champ ville conserv
   const sel = read("components/admin/CityPageSelect.tsx");
   assert.ok(sel.includes('t("city_page_attached", { city: page.label })') && sel.includes('t("city_page_missing")') && !/border|rounded-2xl|shadow/.test(sel.replace(/className=\{className\}/g, "")));
   const create = read("components/admin/PropertyCreateForm.tsx");
-  assert.ok(create.includes('<CitySuggestInput\n            name="city"') && create.includes('name="city_page"'));
+  // Oct. 2026 : Luxembourg en liste fermee (registre CACLR), texte libre ailleurs.
+  assert.ok(create.includes('<LuLocalityCombobox key="lu"') && create.includes('<CitySuggestInput key={country} name="city"') && create.includes('name="city_page"'));
   assert.ok(read("components/admin/PropertyEditForm.tsx").includes("<CityPageSelect"));
   for (const l of ["fr", "en", "de"]) {
     const a = JSON.parse(read(`messages/${l}.json`)).admin_properties;

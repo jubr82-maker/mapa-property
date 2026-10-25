@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { PropertyVideoForm } from "@/components/admin/PropertyVideoForm";
+import { adminLuPlaces, foreignCitySuggestions } from "@/lib/admin/property-location";
 import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
 import { cityPageOptions } from "@/lib/internal-links";
 import { loadListingModels } from "@/lib/listing/model-server";
@@ -162,6 +163,7 @@ export default async function AdminPropertyEditPage({
             cityPages: cityPageOptions(),
           }}
           seo={{ slug: data.slug, ctx: seoCtx, photosWithoutAlt }}
+          location={{ country: data.country ?? null, city: data.city ?? null, luPlaces: adminLuPlaces(), foreignSuggestions: foreignCitySuggestions() }}
           initial={{
             property_type: data.property_type ?? null,
             mandate_type: mandateType,

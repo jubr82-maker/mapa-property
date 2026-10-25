@@ -57,6 +57,11 @@ export type ListingFacts = {
   location_formula?: (typeof LOCATION_FORMULAS)[number] | null;
   /** Page de ville choisie dans l'admin (oct. 2026) : absent = automatique, "none" = aucune. */
   city_page?: string | null;
+  /**
+   * Commune de la localite choisie au Luxembourg (oct. 2026) : distingue deux
+   * localites du meme nom (Hostert, commune de Niederanven ou de Rambrouch).
+   */
+  city_commune?: string | null;
 };
 
 export type ListingWritten = {
@@ -189,6 +194,7 @@ export function sanitizeListingData(input: unknown): ListingData {
     // Identifiant de page ("steinfort", "ile-maurice") ou "none" ; la page
     // doit exister (lib/city-match.ts, resolveCitySlug), sinon automatique.
     city_page: typeof f.city_page === "string" && /^[a-z0-9-]{1,60}$/.test(f.city_page) ? f.city_page : null,
+    city_commune: str(f.city_commune, 60).trim() || null,
   };
   out.facts = facts;
   const a = (o.auto && typeof o.auto === "object" ? o.auto : {}) as Record<string, unknown>;

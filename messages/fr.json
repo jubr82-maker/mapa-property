@@ -1834,7 +1834,22 @@
     "city_page_group_intl": "International",
     "city_page_none_option": "Aucune page de ville",
     "city_page_attached": "Rattaché à la page : {city}",
-    "city_page_missing": "Aucune page de ville pour cette localité"
+    "city_page_missing": "Aucune page de ville pour cette localité",
+    "city_lu_placeholder": "Tapez quelques lettres de la localité",
+    "city_lu_option": "{name}, commune de {commune}",
+    "city_quartier_option": "{name}, quartier de Luxembourg",
+    "city_lu_no_match": "Aucune localité officielle ne correspond.",
+    "city_lu_hint": "Liste officielle des localités du Luxembourg.",
+    "city_free_hint": "Texte libre, avec les villes de nos pages.",
+    "city_prefill_none": "Ville enregistrée « {city} » : aucune localité officielle sûre. Choisissez-la dans la liste.",
+    "city_prefill_ambiguous": "Ville enregistrée « {city} » : plusieurs localités portent ce nom. Choisissez la bonne commune dans la liste.",
+    "city_country_unknown": "{value} (valeur enregistrée)",
+    "err_city_not_official": "Au Luxembourg, choisissez la localité dans la liste officielle.",
+    "err_code_city_not_official": "Au Luxembourg, choisissez la localité dans la liste officielle.",
+    "err_country_invalid": "Pays inconnu.",
+    "err_code_country_invalid": "Pays inconnu.",
+    "err_city_invalid": "Ville invalide (100 caractères au plus).",
+    "err_code_city_invalid": "Ville invalide (100 caractères au plus)."
   },
   "property_gone": {
     "title": "Ce bien n'est plus disponible",

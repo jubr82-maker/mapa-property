@@ -1834,7 +1834,22 @@
     "city_page_group_intl": "International",
     "city_page_none_option": "Keine Stadtseite",
     "city_page_attached": "Zugeordnet zur Seite: {city}",
-    "city_page_missing": "Keine Stadtseite für diesen Ort"
+    "city_page_missing": "Keine Stadtseite für diesen Ort",
+    "city_lu_placeholder": "Einige Buchstaben der Ortschaft eingeben",
+    "city_lu_option": "{name}, Gemeinde {commune}",
+    "city_quartier_option": "{name}, Stadtviertel von Luxemburg",
+    "city_lu_no_match": "Keine offizielle Ortschaft gefunden.",
+    "city_lu_hint": "Offizielle Liste der Ortschaften Luxemburgs.",
+    "city_free_hint": "Freitext, mit den Städten unserer Seiten.",
+    "city_prefill_none": "Gespeicherte Stadt „{city}“: keine sichere offizielle Ortschaft. Bitte aus der Liste wählen.",
+    "city_prefill_ambiguous": "Gespeicherte Stadt „{city}“: mehrere Ortschaften tragen diesen Namen. Bitte die richtige Gemeinde aus der Liste wählen.",
+    "city_country_unknown": "{value} (gespeicherter Wert)",
+    "err_city_not_official": "In Luxemburg die Ortschaft aus der offiziellen Liste wählen.",
+    "err_code_city_not_official": "In Luxemburg die Ortschaft aus der offiziellen Liste wählen.",
+    "err_country_invalid": "Unbekanntes Land.",
+    "err_code_country_invalid": "Unbekanntes Land.",
+    "err_city_invalid": "Ungültige Stadt (höchstens 100 Zeichen).",
+    "err_code_city_invalid": "Ungültige Stadt (höchstens 100 Zeichen)."
   },
   "property_gone": {
     "title": "Diese Immobilie ist nicht mehr verfügbar",

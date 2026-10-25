@@ -23,6 +23,9 @@ import {
   TRANSACTION_TYPES,
 } from "@/lib/taxonomy/property-types";
 import { CitySuggestInput } from "@/components/admin/CitySuggestInput";
+import { LuLocalityCombobox } from "@/components/admin/LuLocalityCombobox";
+import { COUNTRIES } from "@/lib/countries";
+import { isLuCountry, type LuPlace } from "@/lib/geo/lu-place-match";
 
 const inputCls =
   "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none";
@@ -71,20 +74,26 @@ function Field({
   );
 }
 
-// Codes pays enregistres ; libelles : admin_properties.country_XX.
-const COUNTRIES = ["LU", "BE", "FR", "DE", "CH", "MC", "PT", "ES"] as const;
+// Pays : liste fermee lib/countries.ts (code enregistre, Luxembourg en tete).
 
 export function PropertyCreateForm({
-  citySuggestions,
+  luPlaces,
+  foreignSuggestions,
   cityPages,
 }: {
-  /** Communes/localites luxembourgeoises proposees (cf. page parente). */
-  citySuggestions: string[];
+  /** Localites officielles du Luxembourg (registre CACLR, cf. page parente). */
+  luPlaces: LuPlace[];
+  /** Hors Luxembourg : villes des pages et leurs alias. */
+  foreignSuggestions: string[];
   /** Pages de ville (referentiel lib/cities.ts) pour le choix "Page de ville". */
   cityPages: CityPageOption[];
 }) {
   const t = useTranslations("admin_properties");
-  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("LU");
+  const [luPlace, setLuPlace] = useState<LuPlace | null>(null);
+  const [foreignCity, setForeignCity] = useState("");
+  const lu = isLuCountry(country);
+  const city = lu ? (luPlace?.name ?? "") : foreignCity;
   const [cityPage, setCityPage] = useState("");
   const [busy, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +101,11 @@ export function PropertyCreateForm({
 
   const submit = (formData: FormData) => {
     setError(null);
+    // Luxembourg : une localite de la liste officielle est obligatoire.
+    if (lu && !luPlace) {
+      setError(t("err_city_not_official"));
+      return;
+    }
     startTransition(async () => {
       try {
         const result = await createProperty(formData);
@@ -184,24 +198,42 @@ export function PropertyCreateForm({
 
       <Section title={t("section_location")}>
         <Field label={t("field_country")}>
-          <select name="country" defaultValue="LU" className={inputCls}>
+          <select
+            name="country"
+            value={country}
+            onChange={(e) => {
+              setCountry(e.target.value);
+              setLuPlace(null);
+              setForeignCity("");
+            }}
+            className={inputCls}
+          >
             {COUNTRIES.map((c) => (
-              <option key={c} value={c}>
-                {t(`country_${c}`)}
+              <option key={c.code} value={c.code}>
+                {c.name_fr}
               </option>
             ))}
           </select>
         </Field>
-        <Field label={t("field_city")}>
-          <CitySuggestInput
-            name="city"
-            suggestions={citySuggestions}
-            className={inputCls}
-            onValueChange={setCity}
-          />
+        <Field label={t("field_city")} hint={lu ? t("city_lu_hint") : t("city_free_hint")}>
+          {lu ? (
+            <LuLocalityCombobox key="lu" places={luPlaces} value={luPlace} onChange={setLuPlace} name="city" communeName="city_commune" className={inputCls} />
+          ) : (
+            <CitySuggestInput key={country} name="city" suggestions={foreignSuggestions} className={inputCls} onValueChange={setForeignCity} />
+          )}
         </Field>
         <Field label={t("f_city_page")}>
-          <CityPageSelect options={cityPages} place={city} value={cityPage} onChange={setCityPage} name="city_page" className={inputCls} />
+          <CityPageSelect
+            options={cityPages}
+            place={city}
+            value={cityPage}
+            onChange={setCityPage}
+            name="city_page"
+            className={inputCls}
+            country={country}
+            commune={luPlace?.commune ?? null}
+            luPlaces={luPlaces}
+          />
         </Field>
       </Section>
 

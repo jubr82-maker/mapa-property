@@ -62,6 +62,7 @@ scripts/output/
 
 # Sources brutes volumineuses (cf. docs/REGISTRE_LOCALITES.md)
 data/sources/
+data/caclr/
 
 # Rapports de tests QA / SEO (generes)
 qa-reports/
