@@ -161,7 +161,7 @@ test("mandat (site public) : localite du registre au Luxembourg, refus d'une loc
   assert.deepEqual(checkLeadCity({ ...m, country: "FR", city: "Saint-Tropez, Var" }), { ok: true, city: "Saint-Tropez, Var" });
   assert.deepEqual(checkLeadCity({ type: "general_contact", country: "LU", city: "Villebidon" }), { ok: true, city: "Villebidon" });
   const form = read("components/forms/ContactForm.tsx");
-  assert.ok(form.includes('dynamic(() => import("./LuLocalityField")') && form.includes("isMandateForm && Boolean(luPlaces) && isLuCountry(country)"));
+  assert.ok(form.includes('dynamic(() => import("./LuLocalityField")') && form.includes('isMandateForm && Boolean(luPlaces) && country === "LU"') && !/import \{[^}]*isLuCountry/.test(form));
   // Meme apparence : classes du champ identiques au texte libre.
   const cls = 'className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:border-gold focus:outline-none"';
   const block = form.slice(form.indexOf("{luCity && luPlaces ?"), form.indexOf("{showSubject"));

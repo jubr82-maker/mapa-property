@@ -10,7 +10,7 @@ import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
 import { leadFormTypeOf, track, trackLead } from "@/lib/tracking/track";
-import { isLuCountry, type LuPlace } from "@/lib/geo/lu-place-match";
+import type { LuPlace } from "@/lib/geo/lu-place-match";
 
 // Liste fermee des localites du Luxembourg (oct. 2026), chargee a la
 // demande : seules les pages de mandat telechargent ce code.
@@ -68,7 +68,9 @@ export function ContactForm({
   const [luPlace, setLuPlace] = useState<LuPlace | null>(null);
   const [rgpd, setRgpd] = useState(false);
   const isMandateForm = isMandateFormType(type);
-  const luCity = isMandateForm && Boolean(luPlaces) && isLuCountry(country);
+  // Code pays de CountrySelect : "LU" (aucun module de recherche ici, seul
+  // le champ charge a la demande l'embarque).
+  const luCity = isMandateForm && Boolean(luPlaces) && country === "LU";
 
   // Si Turnstile n'est pas configuré côté client, on autorise la soumission
   // sans token (le back-end fait le bon choix : skip dev / fail prod).
