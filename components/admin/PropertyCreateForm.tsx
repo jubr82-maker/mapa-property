@@ -83,8 +83,8 @@ export function PropertyCreateForm({
 }: {
   /** Localites officielles du Luxembourg (registre CACLR, cf. page parente). */
   luPlaces: LuPlace[];
-  /** Hors Luxembourg : villes des pages et leurs alias. */
-  foreignSuggestions: string[];
+  /** Hors Luxembourg, par code pays : villes des pages et leurs alias. */
+  foreignSuggestions: Record<string, string[]>;
   /** Pages de ville (referentiel lib/cities.ts) pour le choix "Page de ville". */
   cityPages: CityPageOption[];
 }) {
@@ -219,7 +219,7 @@ export function PropertyCreateForm({
           {lu ? (
             <LuLocalityCombobox key="lu" places={luPlaces} value={luPlace} onChange={setLuPlace} name="city" communeName="city_commune" className={inputCls} />
           ) : (
-            <CitySuggestInput key={country} name="city" suggestions={foreignSuggestions} className={inputCls} onValueChange={setForeignCity} />
+            <CitySuggestInput key={country} name="city" suggestions={foreignSuggestions[country] ?? []} className={inputCls} onValueChange={setForeignCity} />
           )}
         </Field>
         <Field label={t("f_city_page")}>

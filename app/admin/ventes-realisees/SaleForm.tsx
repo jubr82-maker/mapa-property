@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LISTING_FAMILIES, LISTING_TYPES } from "@/lib/listing/families";
 import { LEGACY_SALE_TYPES, saleFieldRules, surfaceLabelKey } from "@/lib/admin/sale-fields";
+import { LuLocalityCombobox } from "@/components/admin/LuLocalityCombobox";
+import { resolveSaleCommune, type LuPlace } from "@/lib/geo/lu-place-match";
 
 // Formulaire vente realisee : modes "create" (POST /api/admin/ventes-realisees)
 // et "edit" (PATCH /api/admin/ventes-realisees/[id]). En edition, les champs
@@ -12,6 +14,12 @@ import { LEGACY_SALE_TYPES, saleFieldRules, surfaceLabelKey } from "@/lib/admin/
 // Oct. 2026 : types de la liste fermee des fiches de biens, champs sans
 // objet masques et surfaces facultatives selon le type
 // (lib/admin/sale-fields.ts, memes regles que le serveur).
+// Oct. 2026 : commune choisie dans la liste fermee des localites du
+// Luxembourg (registre CACLR) ; la COMMUNE de la localite est enregistree,
+// champ lu tel quel par le moteur d'estimation (comparaison par commune).
+// Vente deja saisie : preremplie seulement si la correspondance est sure
+// (lib/geo/lu-place-match.ts, resolveSaleCommune), rien n'est modifie en
+// base avant l'enregistrement.
 
 // Julien Brebion est le seul agent (oct. 2026).
 type Agent = "julien";
@@ -56,16 +64,22 @@ export function SaleForm({
   mode = "create",
   saleId,
   initial,
+  luPlaces,
 }: {
   mode?: "create" | "edit";
   saleId?: string;
   initial?: Partial<State>;
+  /** Localites officielles du Luxembourg (liste legere, passee par la page). */
+  luPlaces: LuPlace[];
 }) {
   const t = useTranslations("admin_sales");
   const tp = useTranslations("admin_properties");
   const tn = useTranslations("admin_notices");
   const router = useRouter();
   const [data, setData] = useState<State>({ ...emptyState, ...initial });
+  // Commune deja enregistree : correspondance officielle sure, sinon vide.
+  const [place, setPlace] = useState<LuPlace | null>(() => resolveSaleCommune(luPlaces, initial?.commune));
+  const [placeKey, setPlaceKey] = useState(0);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -81,6 +95,10 @@ export function SaleForm({
     e.preventDefault();
     setError(null);
     setSuccess(false);
+    if (!place) {
+      setError(t("form.saveFailed", { reason: t("errors.communeNotOfficial") }));
+      return;
+    }
     setPending(true);
     try {
       const url =
@@ -95,6 +113,7 @@ export function SaleForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
+          commune: place.commune,
           surface_habitable: shown("surface_habitable", data.surface_habitable) ? Number(data.surface_habitable) : null,
           surface_terrain: shown("surface_terrain", data.surface_terrain) ? Number(data.surface_terrain) : null,
           chambres: shown("chambres", data.chambres) ? Number(data.chambres) : null,
@@ -112,6 +131,8 @@ export function SaleForm({
             ? t("errors.session")
             : code === "missing_or_invalid_fields" || code === "invalid"
               ? t("errors.invalidFields")
+              : code === "commune_not_official"
+                ? t("errors.communeNotOfficial")
               : body?.message || tn("err_http", { status: res.status });
         throw new Error(t("form.saveFailed", { reason }));
       }
@@ -121,6 +142,8 @@ export function SaleForm({
         router.refresh();
       } else {
         setData(emptyState);
+        setPlace(null);
+        setPlaceKey((k) => k + 1);
         router.refresh();
       }
     } catch (e) {
@@ -236,14 +259,19 @@ export function SaleForm({
         </Field>
         ) : null}
         <Field label={t("form.commune")}>
-          <input
-            type="text"
-            required
-            value={data.commune}
-            onChange={(e) => set("commune", e.target.value)}
-            placeholder={t("form.communePlaceholder")}
+          <LuLocalityCombobox
+            key={placeKey}
+            places={luPlaces}
+            value={place}
+            onChange={(p) => {
+              setPlace(p);
+              set("commune", p?.commune ?? "");
+            }}
             className={inputCls}
           />
+          {!place && mode === "edit" && initial?.commune && data.commune === initial.commune ? (
+            <span className="text-xs text-[#3D4F63]/60">{t("form.communePrefillNone", { value: initial.commune })}</span>
+          ) : null}
         </Field>
         <Field label={t("form.address")}>
           <input

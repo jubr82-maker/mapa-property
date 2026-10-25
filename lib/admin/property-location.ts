@@ -57,8 +57,17 @@ export function adminLuPlaces(): LuPlace[] {
   return LU_PLACES;
 }
 
-/** Suggestions hors Luxembourg : villes des pages et leurs alias. */
-export function foreignCitySuggestions(): string[] {
-  const names = cities.filter((c) => c.country !== "LU").flatMap((c) => [c.name.fr, ...(c.aliases ?? [])]);
-  return [...new Set(names)].sort((a, b) => a.localeCompare(b, "fr"));
+/**
+ * Suggestions hors Luxembourg, par code pays : villes des pages de ce pays
+ * et leurs alias (Metz pour la France, Algarve pour le Portugal, Dubai pour
+ * les Emirats). Pays sans page : aucune suggestion.
+ */
+export function foreignCitySuggestions(): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+  for (const c of cities) {
+    if (c.country === "LU") continue;
+    out[c.country] = [...(out[c.country] ?? []), c.name.fr, ...(c.aliases ?? [])];
+  }
+  for (const k of Object.keys(out)) out[k] = [...new Set(out[k])].sort((a, b) => a.localeCompare(b, "fr"));
+  return out;
 }

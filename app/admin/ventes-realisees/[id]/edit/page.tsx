@@ -4,6 +4,7 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { adminLuPlaces } from "@/lib/admin/property-location";
 import { SaleForm } from "../../SaleForm";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
@@ -72,6 +73,7 @@ export default async function EditSalePage({
 
       <section className="rounded-lg border border-[#3D4F63]/20 bg-white p-6">
         <SaleForm
+          luPlaces={adminLuPlaces()}
           mode="edit"
           saleId={row.id}
           initial={{

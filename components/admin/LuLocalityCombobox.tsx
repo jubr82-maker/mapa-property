@@ -37,7 +37,11 @@ export function LuLocalityCombobox({
 }) {
   const t = useTranslations("admin_properties");
   const label = (p: LuPlace) =>
-    p.quartier ? t("city_quartier_option", { name: p.name }) : t("city_lu_option", { name: p.name, commune: p.commune });
+    p.communeOnly
+      ? t("city_commune_option", { commune: p.commune })
+      : p.quartier
+        ? t("city_quartier_option", { name: p.name })
+        : t("city_lu_option", { name: p.name, commune: p.commune });
   const [text, setText] = useState(value ? label(value) : "");
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);

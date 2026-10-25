@@ -16,6 +16,7 @@
 // s'élargit un jour, cette page ne doit pas hériter silencieusement du
 // nouvel accès.
 
+import { LU_COMMUNES } from "@/lib/geo/lu-localities";
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
@@ -101,6 +102,11 @@ export function parseSaleInput(body: Record<string, unknown>): { insert?: SaleIn
 
   if (!property_type || !isSaleType(property_type) || !adresse || !commune || !date_acte || !agent || !ALLOWED_AGENTS.has(agent) || !prix_vente || prix_vente <= 0) {
     return { error: "missing_or_invalid_fields" };
+  }
+  // Oct. 2026 : commune officielle du registre CACLR (nom exact), lue telle
+  // quelle par le moteur d'estimation (comparaison par commune).
+  if (!LU_COMMUNES.some((c) => c.name === commune)) {
+    return { error: "commune_not_official" };
   }
 
   const rules = saleFieldRules(property_type);

@@ -5,6 +5,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ALL_MANDATE_SLUGS, MANDATES, type MandateType } from "@/lib/mandates";
+import { LU_PLACES } from "@/lib/geo/lu-localities";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { BackButton } from "@/components/ui/BackButton";
 import { pageAlternates } from "@/lib/seo";
@@ -257,6 +258,7 @@ function MandateContent({ config, locale }: { config: (typeof MANDATES)[MandateT
             type={config.formType}
             source={`mandate:${config.slug}`}
             defaultMessage={config.defaultMessage}
+            luPlaces={LU_PLACES}
           />
         </section>
         {config.slug === "recherche" && (

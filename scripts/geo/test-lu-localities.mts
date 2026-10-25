@@ -5,7 +5,11 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { LU_COMMUNES, LU_LOCALITIES, LU_LOCALITIES_FILE_DATE, LU_PLACES, LU_QUARTIERS } from "../../lib/geo/lu-localities";
 import { luCitySlug, resolveLuPlace, searchLuPlaces } from "../../lib/geo/lu-place-match";
-import { checkLocation } from "../../lib/admin/property-location";
+import { checkLocation, foreignCitySuggestions } from "../../lib/admin/property-location";
+import { checkLeadCity } from "../../lib/lead-location";
+import { parseSaleInput } from "../../lib/admin/sales-auth";
+import { resolveSaleCommune } from "../../lib/geo/lu-place-match";
+import { OFFICIAL_COMMUNES } from "../../lib/geo/luxembourg-localities-official";
 import { cityForProperty, cityPageOptions } from "../../lib/internal-links";
 import { sanitizeListingData } from "../../lib/listing/listing-data";
 
@@ -143,6 +147,61 @@ test("site public : le referentiel n'entre dans aucun composant client", () => {
     const imports = src.split("\n").filter((l) => /^\s*import\b|from\s+["']/.test(l)).join("\n");
     assert.ok(!/lu-localities|property-location|lib\/internal-links/.test(imports), `${f} importe le referentiel`);
   }
+});
+
+test("mandat (site public) : localite du registre au Luxembourg, refus d'une localite inventee, texte libre ailleurs", () => {
+  const m = { type: "search_mandate", country: "LU" };
+  assert.deepEqual(checkLeadCity({ ...m, city: "Kleinbettingen", city_commune: "Steinfort" }), { ok: true, city: "Kleinbettingen" });
+  assert.deepEqual(checkLeadCity({ ...m, city: "Belair", city_commune: "Luxembourg" }), { ok: true, city: "Belair" });
+  assert.deepEqual(checkLeadCity({ ...m, city: "Villebidon" }), { ok: false });
+  assert.deepEqual(checkLeadCity({ ...m, city: "mondorf les bains" }), { ok: false });
+  assert.deepEqual(checkLeadCity({ ...m, city: "Hostert", city_commune: "Rambrouch" }), { ok: true, city: "Hostert (Rambrouch)" });
+  assert.deepEqual(checkLeadCity({ type: "mandate_exclusif", country: "LU", city: "Villebidon" }), { ok: false });
+  // Autre pays : texte libre inchange ; autres formulaires : non concernes.
+  assert.deepEqual(checkLeadCity({ ...m, country: "FR", city: "Saint-Tropez, Var" }), { ok: true, city: "Saint-Tropez, Var" });
+  assert.deepEqual(checkLeadCity({ type: "general_contact", country: "LU", city: "Villebidon" }), { ok: true, city: "Villebidon" });
+  const form = read("components/forms/ContactForm.tsx");
+  assert.ok(form.includes('dynamic(() => import("./LuLocalityField")') && form.includes("isMandateForm && Boolean(luPlaces) && isLuCountry(country)"));
+  // Meme apparence : classes du champ identiques au texte libre.
+  const cls = 'className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:border-gold focus:outline-none"';
+  const block = form.slice(form.indexOf("{luCity && luPlaces ?"), form.indexOf("{showSubject"));
+  assert.equal(block.split(cls).length - 1, 2);
+  assert.ok(read("app/[locale]/mandats/[type]/page.tsx").includes("luPlaces={LU_PLACES}"));
+  assert.ok(read("app/api/lead/route.ts").includes('{ error: "invalid_city" }, { status: 400 }'));
+});
+
+test("ventes realisees : commune officielle enregistree, relecture, ventes existantes preremplies seulement si sur", () => {
+  const base = { property_type: "appartement", surface_habitable: 80, adresse: "1 rue X", date_acte: "2026-09-01", agent: "julien", prix_vente: 500000 };
+  // Saisie : localite choisie -> sa commune enregistree ; relecture : la meme commune.
+  const kb = searchLuPlaces(LU_PLACES, "kleinbet")[0];
+  const saved = parseSaleInput({ ...base, commune: kb.commune }).insert!;
+  assert.equal(saved.commune, "Steinfort");
+  const back = resolveSaleCommune(LU_PLACES, saved.commune)!;
+  assert.deepEqual(back, { name: "Steinfort", commune: "Steinfort", communeOnly: true });
+  assert.equal(parseSaleInput({ ...base, commune: "Villebidon" }).error, "commune_not_official");
+  assert.equal(parseSaleInput({ ...base, commune: "Kleinbettingen" }).error, "commune_not_official");
+  // Valeurs deja saisies (jamais modifiees en base avant enregistrement).
+  assert.equal(resolveSaleCommune(LU_PLACES, "mondorf les bains")?.commune, "Mondorf-les-Bains");
+  assert.equal(resolveSaleCommune(LU_PLACES, "KLEINBETTINGEN")?.commune, "Steinfort");
+  assert.equal(resolveSaleCommune(LU_PLACES, "Hostert"), null);
+  assert.equal(resolveSaleCommune(LU_PLACES, "Villebidon"), null);
+  // Moteur d'estimation : meme champ "commune", memes noms officiels que sa table (comparaison par commune).
+  assert.deepEqual([...LU_COMMUNES.map((c) => c.name)].sort(), [...OFFICIAL_COMMUNES].sort());
+  const form = read("app/admin/ventes-realisees/SaleForm.tsx");
+  assert.ok(form.includes("<LuLocalityCombobox") && form.includes("commune: place.commune") && form.includes("resolveSaleCommune(luPlaces, initial?.commune)"));
+  assert.ok(read("app/api/estimate/route.ts").includes('.select("prix_vente, surface_habitable, commune, property_type, date_acte, comparable_override")'));
+});
+
+test("admin des biens : suggestions des autres pays filtrees par pays", () => {
+  const s = foreignCitySuggestions();
+  assert.ok(s.FR.includes("Metz") && s.FR.includes("Paris") && !s.FR.includes("Algarve") && !s.FR.includes("Monaco"));
+  assert.ok(s.PT.includes("Algarve") && s.PT.includes("Portimão") && !s.PT.includes("Metz"));
+  assert.ok(s.AE.includes("Dubai") && !s.AE.includes("Metz"));
+  assert.deepEqual(s.MC, ["Monaco", "Monte Carlo", "Monte-Carlo"]);
+  assert.equal(s.LU, undefined);
+  assert.equal(s.SE, undefined);
+  assert.ok(read("components/admin/PropertyCreateForm.tsx").includes("suggestions={foreignSuggestions[country] ?? []}"));
+  assert.ok(read("components/admin/PropertyEditForm.tsx").includes("suggestions={location.foreignSuggestions[country] ?? []}"));
 });
 
 console.log(`${pass} PASS, 0 FAIL`);

@@ -1,6 +1,7 @@
 "use client";
 
 import { getAttribution } from "@/lib/pilotage/attribution-client";
+import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Turnstile, type TurnstileHandle } from "@/components/ui/Turnstile";
@@ -9,6 +10,11 @@ import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Link } from "@/i18n/navigation";
 import { DEFAULT_COUNTRY } from "@/lib/countries";
 import { leadFormTypeOf, track, trackLead } from "@/lib/tracking/track";
+import { isLuCountry, type LuPlace } from "@/lib/geo/lu-place-match";
+
+// Liste fermee des localites du Luxembourg (oct. 2026), chargee a la
+// demande : seules les pages de mandat telechargent ce code.
+const LuLocalityField = dynamic(() => import("./LuLocalityField").then((m) => m.LuLocalityField));
 
 interface Props {
   type: string;
@@ -19,6 +25,11 @@ interface Props {
   propertyTitle?: string;
   defaultMessage?: string;
   showSubject?: boolean;
+  /**
+   * Localites officielles du Luxembourg (registre CACLR), transmises par les
+   * pages de mandat : pays Luxembourg = liste fermee, jamais de texte libre.
+   */
+  luPlaces?: LuPlace[];
 }
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -42,6 +53,7 @@ export function ContactForm({
   propertyTitle,
   defaultMessage = "",
   showSubject = false,
+  luPlaces,
 }: Props) {
   const locale = useLocale();
   const t = useTranslations("form");
@@ -53,8 +65,10 @@ export function ContactForm({
   const turnstileRef = useRef<TurnstileHandle>(null);
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [city, setCity] = useState("");
+  const [luPlace, setLuPlace] = useState<LuPlace | null>(null);
   const [rgpd, setRgpd] = useState(false);
   const isMandateForm = isMandateFormType(type);
+  const luCity = isMandateForm && Boolean(luPlaces) && isLuCountry(country);
 
   // Si Turnstile n'est pas configuré côté client, on autorise la soumission
   // sans token (le back-end fait le bon choix : skip dev / fail prod).
@@ -83,7 +97,8 @@ export function ContactForm({
       country,
       // Sprint MANDATS-A PARTIE 2 : la localite n'est envoyee que pour
       // les formulaires de mandat. /api/lead la persiste dans leads.city.
-      city: isMandateForm && city.trim() ? city.trim() : undefined,
+      city: luCity ? luPlace?.name : isMandateForm && city.trim() ? city.trim() : undefined,
+      city_commune: luCity ? luPlace?.commune : undefined,
       rgpd_consent: rgpd,
       subject: subjectRaw || undefined,
       message: String(formData.get("message") ?? ""),
@@ -102,6 +117,7 @@ export function ContactForm({
       if (res.ok) {
         setStatus("success");
         form.reset();
+        setLuPlace(null);
         trackLead(leadFormTypeOf(type), locale);
         track("form_submit", {
           form: type,
@@ -140,7 +156,7 @@ export function ContactForm({
     status === "submitting" ||
     !rgpd ||
     (turnstileEnabled && !captchaReady) ||
-    (isMandateForm && !city.trim());
+    (isMandateForm && (luCity ? !luPlace : !city.trim()));
   const submitLabel =
     status === "submitting"
       ? t("submitting")
@@ -202,15 +218,25 @@ export function ContactForm({
             {t("city_label")}
             <span className="ml-1 text-gold-deep">*</span>
           </span>
-          <input
-            name="city"
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder={t("city_placeholder")}
-            required
-            className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:border-gold focus:outline-none"
-          />
+          {luCity && luPlaces ? (
+            <LuLocalityField
+              places={luPlaces}
+              value={luPlace}
+              onChange={setLuPlace}
+              placeholder={t("city_placeholder")}
+              className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:border-gold focus:outline-none"
+            />
+          ) : (
+            <input
+              name="city"
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder={t("city_placeholder")}
+              required
+              className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:border-gold focus:outline-none"
+            />
+          )}
         </label>
       )}
       {showSubject && <SubjectSelect t={t} />}

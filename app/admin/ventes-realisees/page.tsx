@@ -19,6 +19,7 @@ import { AdminFilterPanel } from "@/components/admin/AdminFilterPanel";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
+import { adminLuPlaces } from "@/lib/admin/property-location";
 import { SaleForm } from "./SaleForm";
 import { DeleteSaleButton } from "./DeleteSaleButton";
 import { ComparableControl } from "./ComparableControl";
@@ -246,7 +247,7 @@ export default async function AdminVentesRealiseesPage({
         <p className="mt-1 text-xs text-[#3D4F63]/70">
           {t("add.intro")}
         </p>
-        <SaleForm />
+        <SaleForm luPlaces={adminLuPlaces()} />
       </section>
 
       {/* Onglets de vue */}

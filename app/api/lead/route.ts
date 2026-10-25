@@ -3,7 +3,7 @@
 // Ordre INVIOLABLE des opérations (voir bug UX 2026-05-12) :
 //   1. rate limit         → 429
 //   2. parsing body       → catch silent
-//   3. validation données → 400 (invalid_email / missing_type)
+//   3. validation données → 400 (invalid_email / missing_type / invalid_city)
 //   4. verifyTurnstile    → 403 (turnstile_failed)
 //   5. INSERT Supabase    → 500 (db_error) si Postgres rejette
 //   6. 200 ok             → succès
@@ -26,6 +26,7 @@ import { insertLeadWithConsent } from "@/lib/lead-insert";
 import { shouldDropTestLead } from "@/lib/test-email";
 import { sendLeadEmails } from "@/lib/email/lead-emails";
 import { pushLeadToApimo } from "@/lib/apimo/push-lead";
+import { checkLeadCity } from "@/lib/lead-location";
 
 const isEmail = (s: unknown): s is string =>
   typeof s === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -52,6 +53,11 @@ async function handlePost(req: Request) {
   }
   if (typeof body.type !== "string" || !body.type) {
     return NextResponse.json({ error: "missing_type" }, { status: 400 });
+  }
+  // Mandat au Luxembourg (oct. 2026) : localite du registre officiel seulement.
+  const leadCity = checkLeadCity({ type: body.type, country: body.country, city: body.city, city_commune: body.city_commune });
+  if (!leadCity.ok) {
+    return NextResponse.json({ error: "invalid_city" }, { status: 400 });
   }
   // BUG T7 : en prod, emails de test E2E -> OK sans INSERT (anti-pollution).
   if (shouldDropTestLead(body.email)) {
@@ -103,7 +109,7 @@ async function handlePost(req: Request) {
     source: typeof body.source === "string" ? body.source : "website",
     lang: typeof body.lang === "string" ? body.lang : undefined,
     country: typeof body.country === "string" ? body.country : undefined,
-    city: typeof body.city === "string" ? body.city : undefined,
+    city: leadCity.city,
     subject,
   };
 

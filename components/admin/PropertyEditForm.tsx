@@ -298,7 +298,7 @@ interface Props {
    * enregistrees, localites officielles du Luxembourg (registre CACLR) et
    * villes des pages pour les autres pays.
    */
-  location: { country: string | null; city: string | null; luPlaces: LuPlace[]; foreignSuggestions: string[] };
+  location: { country: string | null; city: string | null; luPlaces: LuPlace[]; foreignSuggestions: Record<string, string[]> };
 }
 
 /** Code pays d'une valeur enregistree : code de la liste, ou nom (biens importes : "Luxembourg"). */
@@ -863,7 +863,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
               key={`free-${country}`}
               name="city_free"
               defaultValue={foreignCity}
-              suggestions={location.foreignSuggestions}
+              suggestions={location.foreignSuggestions[country] ?? []}
               className={inputCls}
               onValueChange={(v) => {
                 setForeignCity(v);

@@ -5,8 +5,12 @@
 // JavaScript.
 import { normPlace, type CityMatchEntry } from "@/lib/city-match";
 
-/** Localite officielle, ou quartier de la Ville de Luxembourg. */
-export type LuPlace = { name: string; commune: string; quartier?: boolean };
+/**
+ * Localite officielle, ou quartier de la Ville de Luxembourg. `communeOnly` :
+ * commune seule, affichee quand une valeur deja enregistree est le nom
+ * exact d'une commune (ventes realisees), jamais proposee a la recherche.
+ */
+export type LuPlace = { name: string; commune: string; quartier?: boolean; communeOnly?: boolean };
 
 /** Cle de comparaison : sans accents, majuscules, espaces ni traits d'union. */
 export function placeKey(s: string): string {
@@ -91,4 +95,20 @@ export function luPlacePageSlug(place: LuPlace, entries: CityMatchEntry[]): stri
 export function luCitySlug(list: LuPlace[], entries: CityMatchEntry[], place: string | null | undefined, commune?: string | null): string | null {
   const r = resolveLuPlace(list, place, commune);
   return r.status === "ok" ? luPlacePageSlug(r.place, entries) : null;
+}
+
+/**
+ * Ventes realisees (oct. 2026) : le champ enregistre la COMMUNE (lue par le
+ * moteur d'estimation, comparaison par commune). Valeur deja enregistree :
+ * nom exact d'une commune -> cette commune ; sinon nom d'une seule localite
+ * -> cette localite (sa commune sera enregistree) ; sinon rien, sans deviner.
+ */
+export function resolveSaleCommune(list: LuPlace[], stored: string | null | undefined): LuPlace | null {
+  if (!stored) return null;
+  const k = placeKey(stored);
+  if (!k) return null;
+  const commune = [...new Set(list.map((p) => p.commune))].find((c) => placeKey(c) === k);
+  if (commune) return { name: commune, commune, communeOnly: true };
+  const r = resolveLuPlace(list.filter((p) => !p.quartier), stored);
+  return r.status === "ok" ? r.place : null;
 }
