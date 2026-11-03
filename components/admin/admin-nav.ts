@@ -23,6 +23,7 @@ import {
   ScrollText,
   SearchCheck,
   MessageCircleQuestion,
+  Wallet,
 } from "lucide-react";
 
 export type AdminNavItem = { href: string; key: string; icon: typeof Lock; match: "exact" | "prefix" };
@@ -47,6 +48,7 @@ export const ADMIN_NAV_GROUPS: { key: string; items: AdminNavItem[] }[] = [
       { href: "/admin/mandats", key: "mandats", icon: FileText, match: "prefix" },
       { href: "/admin/recherches", key: "searches", icon: SearchCheck, match: "prefix" },
       { href: "/admin/ventes-realisees", key: "sales", icon: Handshake, match: "prefix" },
+      { href: "/admin/remuneration", key: "remuneration", icon: Wallet, match: "prefix" },
       { href: "/admin/liste-attente", key: "waitlist", icon: ClipboardList, match: "prefix" },
       { href: "/admin/arcova", key: "arcova", icon: Users, match: "prefix" },
       { href: "/admin/reviews", key: "reviews", icon: Star, match: "prefix" },

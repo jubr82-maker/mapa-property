@@ -906,7 +906,12 @@ section = "P. Admin sur telephone";
   // Site public inchange : aucune page publique prerendue ne charge la
   // feuille mobile de l'admin.
   if (hasBuild) {
-    const adminCss = walk(".next/static/css", (x) => x.endsWith(".css")).filter((f) => /data-admin/.test(read(f))).map((f) => path.basename(f));
+    // Feuilles CSS : .next/static/css (webpack) ou .next/static/chunks
+    // (Turbopack, build par defaut de Next 16).
+    const adminCss = [".next/static/css", ".next/static/chunks"]
+      .flatMap((d) => walk(d, (x) => x.endsWith(".css")))
+      .filter((f) => /data-admin/.test(read(f)))
+      .map((f) => path.basename(f));
     const publicHtml = walk(".next/server/app", (x) => x.endsWith(".html") && !/[\\/]admin([\\/.]|$)/.test(x));
     const leaks = publicHtml.filter((f) => adminCss.some((c) => read(f).includes(c)));
     check(`site public : feuille mobile de l'admin absente de ${publicHtml.length} pages`, adminCss.length > 0 && publicHtml.length > 0 && leaks.length === 0, leaks.slice(0, 5).join(", "));

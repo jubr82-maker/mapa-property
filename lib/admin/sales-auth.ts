@@ -18,6 +18,8 @@
 
 import { LU_COMMUNES } from "@/lib/geo/lu-localities";
 import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
+import { ADMIN_MFA_PATH } from "@/lib/admin/security-config";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
 import { ADMIN_EMAIL_JULIEN, ADMIN_EMAIL_JBREBION } from "@/lib/admin/admin-emails";
@@ -56,6 +58,24 @@ export async function requireSalesAdmin(): Promise<RequireOk | RequireErr> {
     return { ok: false, response: NextResponse.json({ error: "mfa_required" }, { status: 403 }) };
   }
   return { ok: true, supabase, userEmail: user.email };
+}
+
+/**
+ * Meme garde pour une page (Server Component) : ventes realisees et
+ * remuneration (nov. 2026). Sans session : connexion ; hors liste : accueil
+ * de l'admin ; sans double authentification : page du second facteur. Ne
+ * retourne que si l'acces est accorde.
+ */
+export async function requireSalesAdminPage(from: string): Promise<{ supabase: SupabaseClient; userEmail: string }> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/admin/login?from=${encodeURIComponent(from)}`);
+  if (!user.email || !SALES_ALLOWED_EMAILS.has(user.email)) redirect("/admin");
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== "aal2") redirect(ADMIN_MFA_PATH);
+  return { supabase, userEmail: user.email };
 }
 
 export interface SaleInput {

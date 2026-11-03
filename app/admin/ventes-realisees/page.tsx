@@ -2,7 +2,7 @@
 // Source : table public.mapa_historical_sales (RLS strict : auth.email dans
 // (admin@mapagroup.org, j.brebion@mapagroup.org)).
 //
-//   - Vue LISTE (plate) : filtres commune + agent + annee, actions par ligne
+//   - Vue LISTE (plate) : filtres commune + agent + periode, actions par ligne
 //     (editer, supprimer, controle comparabilite 3 etats).
 //   - Vue PAR LOCALITE : ventes regroupees par commune (count + biens + €/m²).
 //   - Ajout via SaleForm (POST).
@@ -14,6 +14,9 @@
 //   best-effort : si absente, on degrade (mode auto par defaut) + banniere.
 // Nov. 2026 : commission HT et TTC (colonnes de supabase/sql/32, lues en
 // best-effort de la meme facon ; vente sans commission : "Non renseignee").
+// Nov. 2026 : totaux HT, TVA, TTC des ventes affichees et recapitulatif par
+// agent (part de l'agent selon ses reglages, supabase/sql/33, repli sur
+// les reglages par defaut), filtre de periode (lib/admin/sales-summary.ts).
 
 import { LISTING_TYPES } from "@/lib/listing/families";
 import { LEGACY_SALE_TYPES } from "@/lib/admin/sale-fields";
@@ -29,15 +32,17 @@ import { AdminNotice } from "@/components/admin/AdminNotice";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE, formatDateOnly } from "@/lib/datetime";
 import { commissionAmounts, storedCommission } from "@/lib/admin/sale-commission";
+import { DEFAULT_AGENT, DEFAULT_AGENT_SHARE_PCT, loadSalesAgents, saleAgentKey } from "@/lib/admin/remuneration-reglages";
+import { commissionTotals, luxembourgToday, resolvePeriod, summaryByAgent, type PeriodKey } from "@/lib/admin/sales-summary";
 
 // Types : liste fermee des fiches de biens (libelles admin_properties.ptype_*),
 // anciennes valeurs des ventes (maison, immeuble) avec leur libelle propre.
-// Julien Brebion est le seul agent (oct. 2026) : toute vente est affichee
-// a son nom, y compris une vente encore enregistree sous une ancienne
-// valeur (a reattribuer en base par
+// Agents : ceux des reglages, limites aux valeurs que la base accepte
+// aujourd'hui (Julien Brebion seul, oct. 2026). Une vente encore
+// enregistree sous une ancienne valeur est affichee au nom de Julien
+// (a reattribuer en base par
 // supabase/manual/execution/13_ventes_agent_julien.sql).
 const KNOWN_AGENTS = ["julien"];
-const displayAgent = (_v: string) => "julien";
 
 interface SaleRow {
   id: string;
@@ -95,11 +100,15 @@ function pricePerSqm(r: SaleRow): number | null {
   return r.surface_habitable ? Math.round(r.prix_vente / r.surface_habitable) : null;
 }
 
-function yearOf(iso: string): string {
-  return iso.slice(0, 4);
-}
+const PERIOD_LABEL: Record<PeriodKey, string> = {
+  mois: "filters.periodMonth",
+  annee: "filters.periodYear",
+  annee_precedente: "filters.periodPrevYear",
+  tout: "filters.periodAll",
+  dates: "filters.periodDates",
+};
 
-type SearchParams = { commune?: string; agent?: string; year?: string; vue?: string };
+type SearchParams = { commune?: string; agent?: string; periode?: string; du?: string; au?: string; year?: string; vue?: string };
 
 export default async function AdminVentesRealiseesPage({
   searchParams,
@@ -115,12 +124,26 @@ export default async function AdminVentesRealiseesPage({
   const tp = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
   const typeLabel = (v: string) =>
     LISTING_TYPES.some((x) => x.slug === v) ? tp(`ptype_${v}`) : (LEGACY_SALE_TYPES as readonly string[]).includes(v) ? t(`propertyType.${v}`) : v;
-  const agentLabel = (v: string) => (KNOWN_AGENTS.includes(displayAgent(v)) ? t(`agent.${displayAgent(v)}`) : v);
+
+  // Agents proposes : liste fermee des reglages (repli : Julien, 80 %).
+  const { agents: savedAgents, source: agentsSource } = await loadSalesAgents(supabase);
+  const agents = savedAgents.filter((a) => KNOWN_AGENTS.includes(a.key));
+  const agentName = (key: string) => {
+    const a = agents.find((x) => x.key === key);
+    return a?.displayName ?? (KNOWN_AGENTS.includes(key) ? t(`agent.${key}`) : key);
+  };
+  const agentLabel = (v: string) => agentName(saleAgentKey(v, agents.map((a) => a.key)));
 
   const params = await searchParams;
   const communeFilter = params.commune?.trim() || undefined;
-  const agentFilter = params.agent?.trim() || undefined;
-  const yearFilter = params.year?.trim() || undefined;
+  const agentParam = params.agent?.trim() || undefined;
+  const agentFilter = agentParam && agents.some((a) => a.key === agentParam) ? agentParam : undefined;
+  // Periode ; ancien lien ?year=AAAA : cette annee, de date a date.
+  const legacyYear = !params.periode && /^\d{4}$/.test(params.year ?? "") ? params.year : undefined;
+  const period = legacyYear
+    ? resolvePeriod("dates", `${legacyYear}-01-01`, `${legacyYear}-12-31`, luxembourgToday())
+    : resolvePeriod(params.periode, params.du, params.au, luxembourgToday());
+  const periodFiltered = period.key !== "tout";
   const vue = params.vue === "commune" ? "commune" : "liste";
 
   // Fenetre auto 12 mois (meme regle que le moteur), calculee cote serveur.
@@ -135,9 +158,16 @@ export default async function AdminVentesRealiseesPage({
       .order("date_acte", { ascending: false })
       .limit(500);
     if (communeFilter) q = q.ilike("commune", `%${communeFilter}%`);
-    // Seul agent : le filtre "julien" couvre toutes les ventes (anciennes
-    // valeurs comprises) ; toute autre valeur ne correspond a rien.
-    if (agentFilter && agentFilter !== "julien") q = q.eq("agent", agentFilter);
+    // Filtre agent : ses ventes ; pour l'agent par defaut, aussi celles
+    // encore enregistrees sous une ancienne valeur (toutes sauf celles des
+    // autres agents des reglages).
+    if (agentFilter && agentFilter !== DEFAULT_AGENT.key) q = q.eq("agent", agentFilter);
+    if (agentFilter === DEFAULT_AGENT.key) {
+      const others = agents.map((a) => a.key).filter((k) => k !== agentFilter);
+      if (others.length) q = q.not("agent", "in", `(${others.join(",")})`);
+    }
+    if (period.from) q = q.gte("date_acte", period.from);
+    if (period.to) q = q.lte("date_acte", period.to);
     return q;
   }
 
@@ -160,11 +190,7 @@ export default async function AdminVentesRealiseesPage({
     comparable_override: overrideColumnMissing ? null : (r.comparable_override ?? null),
   }));
 
-  const availableYears = Array.from(new Set(allRows.map((r) => yearOf(r.date_acte))))
-    .sort()
-    .reverse();
-
-  const rows = yearFilter ? allRows.filter((r) => yearOf(r.date_acte) === yearFilter) : allRows;
+  const rows = allRows;
 
   // Comparabilite effective (2 etats) + mode.
   const autoEffective = (r: SaleRow) => r.date_acte >= cutoffIso;
@@ -174,12 +200,27 @@ export default async function AdminVentesRealiseesPage({
   const totalCount = rows.length;
   const totalVolume = rows.reduce((sum, r) => sum + Number(r.prix_vente || 0), 0);
 
+  // Commissions des ventes affichees (sans commission : nombre seulement).
+  const saleRecords = rows as unknown as ({ agent: string } & Record<string, unknown>)[];
+  const totals = commissionTotals(saleRecords);
+  const recap = summaryByAgent(saleRecords, agentFilter ? agents.filter((a) => a.key === agentFilter) : agents, DEFAULT_AGENT_SHARE_PCT);
+  const periodText =
+    period.from && period.to
+      ? t("filters.periodRange", { from: formatDateOnly(period.from), to: formatDateOnly(period.to) })
+      : period.from
+        ? t("filters.periodFrom", { from: formatDateOnly(period.from) })
+        : period.to
+          ? t("filters.periodTo", { to: formatDateOnly(period.to) })
+          : t("filters.periodAllText");
+
   const qs = (over: Partial<SearchParams>) => {
     const p = new URLSearchParams();
-    const merged = { commune: communeFilter, agent: agentFilter, year: yearFilter, vue, ...over };
+    const merged = { commune: communeFilter, agent: agentFilter, periode: periodFiltered ? period.key : undefined, du: period.key === "dates" ? (period.from ?? undefined) : undefined, au: period.key === "dates" ? (period.to ?? undefined) : undefined, vue, ...over };
     if (merged.commune) p.set("commune", merged.commune);
     if (merged.agent) p.set("agent", merged.agent);
-    if (merged.year) p.set("year", merged.year);
+    if (merged.periode) p.set("periode", merged.periode);
+    if (merged.du) p.set("du", merged.du);
+    if (merged.au) p.set("au", merged.au);
     if (merged.vue && merged.vue !== "liste") p.set("vue", merged.vue);
     const str = p.toString();
     return str ? `/admin/ventes-realisees?${str}` : "/admin/ventes-realisees";
@@ -223,7 +264,7 @@ export default async function AdminVentesRealiseesPage({
           </p>
           <p className="mt-1 font-display text-3xl font-bold">{fmtEur(totalVolume)}</p>
         </div>
-        <AdminFilterPanel active={[communeFilter, agentFilter, yearFilter].filter(Boolean).length}>
+        <AdminFilterPanel active={[communeFilter, agentFilter, periodFiltered ? period.key : undefined].filter(Boolean).length}>
         <form
           method="get"
           className="space-y-2 rounded-lg border border-[#3D4F63]/20 bg-white p-5"
@@ -245,20 +286,45 @@ export default async function AdminVentesRealiseesPage({
             className="w-full rounded border border-[#3D4F63]/30 px-3 py-1.5 text-sm"
           >
             <option value="">{t("filters.allAgents")}</option>
-            <option value="julien">{t("agent.julien")}</option>
-          </select>
-          <select
-            name="year"
-            defaultValue={yearFilter ?? ""}
-            className="w-full rounded border border-[#3D4F63]/30 px-3 py-1.5 text-sm"
-          >
-            <option value="">{t("filters.allYears")}</option>
-            {availableYears.map((y) => (
-              <option key={y} value={y}>
-                {y}
+            {agents.map((a) => (
+              <option key={a.key} value={a.key}>
+                {agentName(a.key)}
               </option>
             ))}
           </select>
+          <select
+            name="periode"
+            aria-label={t("filters.period")}
+            defaultValue={period.key}
+            className="w-full rounded border border-[#3D4F63]/30 px-3 py-1.5 text-sm"
+          >
+            {(["mois", "annee", "annee_precedente", "tout", "dates"] as const).map((k) => (
+              <option key={k} value={k}>
+                {t(PERIOD_LABEL[k])}
+              </option>
+            ))}
+          </select>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="block">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">{t("filters.from")}</span>
+              <input
+                type="date"
+                name="du"
+                defaultValue={period.key === "dates" ? (period.from ?? "") : ""}
+                className="mt-1 w-full rounded border border-[#3D4F63]/30 px-2 py-1.5 text-sm"
+              />
+            </label>
+            <label className="block">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">{t("filters.to")}</span>
+              <input
+                type="date"
+                name="au"
+                defaultValue={period.key === "dates" ? (period.to ?? "") : ""}
+                className="mt-1 w-full rounded border border-[#3D4F63]/30 px-2 py-1.5 text-sm"
+              />
+            </label>
+          </div>
+          <p className="text-xs text-[#3D4F63]/60">{t("filters.datesHint")}</p>
           <button
             type="submit"
             className="w-full rounded bg-[#3D4F63] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-white"
@@ -308,7 +374,7 @@ export default async function AdminVentesRealiseesPage({
         )}
         {!error && rows.length === 0 && (
           <p className="rounded border border-[#3D4F63]/20 bg-white p-6 text-sm text-[#3D4F63]/70">
-            {allRows.length === 0 && !communeFilter && !agentFilter ? t("empty") : t("emptyFiltered")}
+            {allRows.length === 0 && !communeFilter && !agentFilter && !periodFiltered ? t("empty") : t("emptyFiltered")}
           </p>
         )}
 
@@ -440,6 +506,64 @@ export default async function AdminVentesRealiseesPage({
           </div>
         )}
       </section>
+
+      {/* Totaux des commissions des ventes affichees */}
+      {!error && (
+        <section className="space-y-4" data-sales-totals>
+          <div>
+            <h2 className="font-display text-xl font-bold uppercase tracking-[0.05em]">{t("totals.title")}</h2>
+            <p className="mt-1 text-xs text-[#3D4F63]/70">{periodText}</p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {(
+              [
+                ["totals.ht", totals.ht],
+                ["totals.tva", totals.tva],
+                ["totals.ttc", totals.ttc],
+              ] as const
+            ).map(([key, value]) => (
+              <div key={key} className="rounded-lg border border-[#3D4F63]/20 bg-white p-5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">{t(key)}</p>
+                <p className="mt-1 font-display text-3xl font-bold">{fmtCents(value)}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-[#3D4F63]/70">{t("totals.notProvided", { count: totals.notProvided, total: totals.count })}</p>
+
+          <h2 className="pt-4 font-display text-xl font-bold uppercase tracking-[0.05em]">{t("recap.title")}</h2>
+          <div className="overflow-x-auto rounded-lg border border-[#3D4F63]/20 bg-white">
+            <table data-card-primary="1" className="w-full text-sm">
+              <thead className="bg-[#3D4F63]/5 text-left">
+                <tr>
+                  <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.agent")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("recap.sales")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("recap.notProvided")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("recap.ht")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("recap.ttc")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("recap.agentShare")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("recap.mapaShare")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#3D4F63]/10">
+                {recap.map((a) => (
+                  <tr key={a.key}>
+                    <td className="px-3 py-2 font-medium">{agentName(a.key)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs">{a.count}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs">{a.notProvided}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs">{fmtCents(a.ht)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs font-bold">{fmtCents(a.ttc)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs">
+                      {fmtCents(a.agentHt)} <span className="text-[#3D4F63]/50">({t("recap.share", { pct: a.sharePct })})</span>
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono text-xs">{fmtCents(a.mapaHt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {agentsSource !== "saved" && <p className="text-xs text-[#3D4F63]/60">{t("recap.defaults", { pct: DEFAULT_AGENT_SHARE_PCT })}</p>}
+        </section>
+      )}
     </div>
   );
 }

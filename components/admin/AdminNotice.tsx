@@ -10,6 +10,7 @@ export type AdminNoticeKind =
   | "workflow_list"
   | "comparable"
   | "commission"
+  | "remuneration"
   | "read_error"
   | "views_unavailable"
   | "cms_unavailable"

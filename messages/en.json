@@ -2019,7 +2019,9 @@
     "db_other": "The database refused the record: {value}",
     "err_network": "The server did not respond: check the internet connection, then retry.",
     "err_unexpected": "Unexpected server error: {detail}",
-    "err_http": "The server refused the request (code {status}) without giving a reason."
+    "err_http": "The server refused the request (code {status}) without giving a reason.",
+    "remuneration_title": "Pay unavailable",
+    "remuneration": "The pay settings are not yet enabled in the database: the Pay screen uses the default settings."
   },
   "admin_reviews": {
     "eyebrow": "MAPA Console",
@@ -3230,9 +3232,22 @@
     "filters": {
       "title": "Filter",
       "commune": "Municipality",
-      "allAgents": "All agents",
+      "allAgents": "All",
       "allYears": "All years",
-      "apply": "Apply"
+      "apply": "Apply",
+      "period": "Period",
+      "periodMonth": "Current month",
+      "periodYear": "Current year",
+      "periodPrevYear": "Previous year",
+      "periodAll": "All",
+      "periodDates": "From date to date",
+      "from": "From",
+      "to": "To",
+      "datesHint": "The dates apply with \"From date to date\".",
+      "periodRange": "Period from {from} to {to}.",
+      "periodFrom": "Period from {from}.",
+      "periodTo": "Period up to {to}.",
+      "periodAllText": "All sales."
     },
     "agent": {
       "julien": "Julien"
@@ -3352,7 +3367,25 @@
       "commissionNone": "Commission not provided (optional).",
       "commissionNeedsPrice": "Enter the sale price to calculate the commission."
     },
-    "commissionNotProvided": "Not provided"
+    "commissionNotProvided": "Not provided",
+    "totals": {
+      "title": "Totals of the sales shown",
+      "ht": "Total commission excl. VAT",
+      "tva": "Total VAT",
+      "ttc": "Total commission incl. VAT",
+      "notProvided": "{total, plural, =0 {No sale shown.} other {{count, plural, =0 {All sales shown have a commission.} one {# sale out of {total} \"Not provided\": counted in the number of sales, not in the amounts.} other {# sales out of {total} \"Not provided\": counted in the number of sales, not in the amounts.}}}}"
+    },
+    "recap": {
+      "title": "Summary by agent",
+      "sales": "Sales",
+      "notProvided": "Not provided",
+      "ht": "Total excl. VAT",
+      "ttc": "Total incl. VAT",
+      "agentShare": "Agent share excl. VAT",
+      "mapaShare": "MAPA Property share excl. VAT",
+      "share": "{pct} %",
+      "defaults": "Default agent share ({pct} %): the agent settings have not been saved yet."
+    }
   },
   "admin_nav": {
     "brand": "MAPA Property",
@@ -3398,7 +3431,8 @@
     "thumb_activity": "Activity",
     "thumb_menu": "Menu",
     "searches": "Searches",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "remuneration": "Pay"
   },
   "admin_alerts": {
     "login_burst_subject": "Alert: repeated failed admin sign-ins",
@@ -4935,5 +4969,152 @@
     "blog_block_add": "Add a question",
     "blog_block_need_slug": "Save the article first: its questions are linked to its page address.",
     "key_broker_international": "International broker"
+  },
+  "admin_remuneration": {
+    "title": "Pay",
+    "intro": "Net, gross, tax and employer cost in Luxembourg from the agent's commissions. Estimates, admin accounts only.",
+    "settingsLink": "Settings",
+    "defaultsNotice": "Default settings (agent share 80 %, class 1, mutual insurance 0.23 %, factor 1): save the settings page to adjust them.",
+    "agent": "Agent",
+    "periodText": "Period from {from} to {to} ({months, plural, one {# month} other {# months}}).",
+    "class1aUnavailable": "Class 1a: calculation not available.",
+    "amountInvalid": "Invalid amount: digits only, 2 decimals at most.",
+    "net": {
+      "title": "I choose my net",
+      "intro": "{name}, monthly withholding in class {taxClass}. Enter a net or a gross amount: the other is calculated.",
+      "netField": "Desired monthly net (€)",
+      "brutField": "Monthly gross (€)",
+      "brut": "Monthly gross",
+      "employeeContributions": "Employee contributions",
+      "contributionsDetail": "Of which pension, health, long-term care",
+      "tax": "Tax withheld (class {taxClass})",
+      "credits": "Tax credits (employee and CO2)",
+      "net": "Monthly net",
+      "employerCharges": "Employer contributions",
+      "totalCost": "Total cost for MAPA Property",
+      "empty": "Enter a monthly net or gross amount."
+    },
+    "commissions": {
+      "title": "My commissions",
+      "count": "{count, plural, =0 {No sale in the period.} one {# sale in the period} other {# sales in the period}}{notProvided, plural, =0 {.} one {, including # \"Not provided\".} other {, including # \"Not provided\".}}",
+      "ht": "Commissions excl. VAT for the period",
+      "agentShare": "Agent share ({pct} %)",
+      "mapaShare": "MAPA Property share ({pct} %)",
+      "paysCharges": "The agent also pays the employer contributions: the share covers the total cost (gross and employer contributions).",
+      "mapaPaysCharges": "The agent does not pay the employer contributions: the share covers the gross only, the employer contributions are taken from the MAPA Property share."
+    },
+    "possible": {
+      "title": "What the period's commissions allow ({months, plural, one {# month} other {# months}})",
+      "totalCostPeriod": "Possible total cost for the period",
+      "totalCostMonthly": "Possible total cost per month",
+      "brut": "Corresponding monthly gross",
+      "net": "Equivalent monthly net",
+      "chargesOnMapa": "Employer contributions taken from the MAPA Property share",
+      "mapaRemaining": "Actually left to MAPA Property"
+    },
+    "alerts": {
+      "belowSsm": "Warning: this gross is below the applicable minimum social wage ({ssm} per month).",
+      "possibleBelowSsm": "Warning: the gross allowed by the period's commissions is below the applicable minimum social wage ({ssm} per month).",
+      "mapaNegative": "Warning: the employer contributions exceed the MAPA Property share for the period.",
+      "reserveShort": "Warning: the reserve no longer covers one month of salary at the current net."
+    },
+    "reserve": {
+      "title": "Reserve account",
+      "intro": "Since {start}: {months, plural, one {# month} other {# months}}, {sales, plural, =0 {no sale} one {# sale} other {# sales}}.",
+      "cumul": "Cumulated agent shares",
+      "monthlyCostTotal": "Monthly cost of the current salary ({net} net, gross and employer contributions)",
+      "monthlyCostBrut": "Monthly cost of the current salary ({net} net, gross only)",
+      "spent": "Salaries over the tracking period ({months, plural, one {# month} other {# months}})",
+      "balance": "Reserve balance",
+      "monthsCovered": "Months covered at the current net",
+      "monthsValue": "{months} months",
+      "notApplicable": "Not applicable",
+      "missing": "Enter the current monthly net and the tracking start date in the settings to follow the reserve."
+    },
+    "class2": {
+      "title": "Annual estimate in class 2",
+      "intro": "Agent's annual gross: {brut} (12 times the gross above).",
+      "needsSalary": "First enter a monthly net or gross amount above.",
+      "neverSaved": "The partner's amounts are never saved.",
+      "partnerIncome": "Partner's annual taxable income (€)",
+      "partnerTax": "Tax already withheld on the partner's income (€ per year, optional)",
+      "household": "Household taxable income",
+      "taxClass2": "Estimated annual tax in class 2",
+      "agentWithheld": "Tax withheld during the year in class 1 (agent)",
+      "partnerWithheld": "Partner's tax withheld",
+      "notEntered": "Not entered",
+      "extra": "Estimated difference: additional tax due",
+      "refund": "Estimated difference: refund",
+      "incomplete": "Partner's tax withheld not entered, incomplete difference.",
+      "empty": "Enter the partner's annual taxable income (0 if no income)."
+    },
+    "footer": {
+      "notice": "Estimates based on the 2026 parameters, updated on 1 June 2026. The actual tax is set by the Administration des contributions directes. Check with the official simulator saturn.etat.lu.",
+      "details": "Parameters and status"
+    },
+    "params": {
+      "indice": "Index 992.24 on 1 June 2026",
+      "ssm": "Minimum social wage: €2,771.33 unskilled, €3,325.59 skilled",
+      "plafond": "Monthly contribution ceiling: €13,856.63",
+      "cotisations_salarie": "Employee: pension 8.50 % and health 3.05 % on the capped gross",
+      "dependance": "Long-term care 1.40 % on the gross minus €692.83, not capped",
+      "cotisations_employeur": "Employer: pension 8.50 %, health 3.05 %, accident 0.65 %, occupational health 0.14 %, mutual insurance per settings",
+      "accident_facteur": "Accident insurance bonus-malus factor: 0.85, 1, 1.1, 1.3 or 1.5",
+      "base_plafonnee_accident_sante_mutualite": "Accident, occupational health and mutual insurance on the capped gross",
+      "bareme_classe_1": "Class 1 scale (2025, unchanged in 2026), from 0 % to 42 %",
+      "classe_2": "Class 2: twice the class 1 tax on half the income",
+      "fonds_emploi": "Employment fund: 7 %, 9 % above €150,000 (class 1) or €300,000 (class 2)",
+      "forfaits": "Flat-rate deductions: expenses €540, special expenses €480",
+      "cis": "2026 employee tax credit (up to €600)",
+      "co2": "2026 employee CO2 tax credit (up to €216)"
+    },
+    "status": {
+      "verifie": "Verified",
+      "suppose": "Assumed"
+    },
+    "settings": {
+      "title": "Pay settings",
+      "intro": "Agent and employer settings, used by the Pay screen and the completed sales summary.",
+      "back": "Pay",
+      "defaults": "No settings saved: default values below. The first save creates them.",
+      "agentTitle": "Agent: {name}",
+      "displayName": "Display name",
+      "share": "Agent share (%)",
+      "shareHint": "Share of the commission excl. VAT, from 0 to 100. MAPA Property keeps the rest.",
+      "taxClass": "Monthly withholding tax class",
+      "taxClass1": "Class 1",
+      "taxClass2": "Class 2",
+      "taxClass1a": "Class 1a (calculation not available)",
+      "travel": "Travel expenses (€ per year)",
+      "travelHint": "Annual deduction on the withholding card.",
+      "ssm": "Applicable minimum social wage",
+      "ssm_non_qualifie": "Unskilled",
+      "ssm_qualifie": "Skilled",
+      "currentNet": "Current monthly net (€)",
+      "currentNetHint": "Used for the reserve account.",
+      "reserveStart": "Reserve tracking start",
+      "paysCharges": "The agent also pays the employer contributions",
+      "active": "Active agent",
+      "employerTitle": "Employer",
+      "mutualite": "Mutual insurance rate",
+      "mutualiteOption": "Class {classe}: {rate} %",
+      "accident": "Accident insurance factor (bonus-malus)",
+      "saved": "Settings saved.",
+      "saving": "Saving…",
+      "save": "Save"
+    },
+    "errors": {
+      "agent": "Unknown agent.",
+      "name": "Display name required (80 characters at most).",
+      "share": "Invalid agent share: from 0 to 100, 2 decimals at most.",
+      "taxClass": "Invalid tax class: 1 or 2.",
+      "travel": "Invalid travel expenses: positive amount, 2 decimals at most.",
+      "ssm": "Invalid minimum social wage level.",
+      "net": "Invalid current monthly net: positive amount, 2 decimals at most.",
+      "reserveStart": "Invalid tracking start date.",
+      "mutualite": "Invalid mutual insurance rate.",
+      "accident": "Invalid accident insurance factor.",
+      "unavailable": "The settings are not yet enabled in the database."
+    }
   }
 }

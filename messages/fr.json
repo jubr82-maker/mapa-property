@@ -2019,7 +2019,9 @@
     "db_other": "La base refuse l'enregistrement : {value}",
     "err_network": "Le serveur n'a pas répondu : vérifiez la connexion internet, puis recommencez.",
     "err_unexpected": "Erreur inattendue côté serveur : {detail}",
-    "err_http": "Le serveur a refusé la demande (code {status}) sans en donner le motif."
+    "err_http": "Le serveur a refusé la demande (code {status}) sans en donner le motif.",
+    "remuneration_title": "Rémunération indisponible",
+    "remuneration": "Les réglages de la rémunération ne sont pas encore activés dans la base de données : l'écran Rémunération utilise les réglages par défaut."
   },
   "admin_reviews": {
     "eyebrow": "Console MAPA",
@@ -3230,9 +3232,22 @@
     "filters": {
       "title": "Filtrer",
       "commune": "Commune",
-      "allAgents": "Tous les agents",
+      "allAgents": "Tous",
       "allYears": "Toutes les années",
-      "apply": "Appliquer"
+      "apply": "Appliquer",
+      "period": "Période",
+      "periodMonth": "Mois en cours",
+      "periodYear": "Année en cours",
+      "periodPrevYear": "Année précédente",
+      "periodAll": "Tout",
+      "periodDates": "De date à date",
+      "from": "Du",
+      "to": "Au",
+      "datesHint": "Les dates servent avec « De date à date ».",
+      "periodRange": "Période du {from} au {to}.",
+      "periodFrom": "Période à partir du {from}.",
+      "periodTo": "Période jusqu'au {to}.",
+      "periodAllText": "Toutes les ventes."
     },
     "agent": {
       "julien": "Julien"
@@ -3350,9 +3365,27 @@
       "commissionVat": "TVA ({rate} %)",
       "commissionTtc": "Commission TTC",
       "commissionNone": "Commission non renseignée (facultative).",
-      "commissionNeedsPrice": "Saisissez le prix de vente pour calculer la commission."
+      "commissionNeedsPrice": "Indiquez le prix de vente pour calculer la commission."
     },
-    "commissionNotProvided": "Non renseignée"
+    "commissionNotProvided": "Non renseignée",
+    "totals": {
+      "title": "Totaux des ventes affichées",
+      "ht": "Total commission HT",
+      "tva": "Total TVA",
+      "ttc": "Total commission TTC",
+      "notProvided": "{total, plural, =0 {Aucune vente affichée.} other {{count, plural, =0 {Toutes les ventes affichées ont une commission renseignée.} one {# vente sur {total} « Non renseignée » : comptée dans le nombre de ventes, pas dans les montants.} other {# ventes sur {total} « Non renseignée » : comptées dans le nombre de ventes, pas dans les montants.}}}}"
+    },
+    "recap": {
+      "title": "Récapitulatif par agent",
+      "sales": "Ventes",
+      "notProvided": "Non renseignées",
+      "ht": "Total HT",
+      "ttc": "Total TTC",
+      "agentShare": "Part de l'agent HT",
+      "mapaShare": "Part MAPA Property HT",
+      "share": "{pct} %",
+      "defaults": "Part de l'agent par défaut ({pct} %) : les réglages des agents ne sont pas encore enregistrés."
+    }
   },
   "admin_nav": {
     "brand": "MAPA Property",
@@ -3398,7 +3431,8 @@
     "thumb_activity": "Activité",
     "thumb_menu": "Menu",
     "searches": "Recherches",
-    "faq": "Questions fréquentes"
+    "faq": "Questions fréquentes",
+    "remuneration": "Rémunération"
   },
   "admin_alerts": {
     "login_burst_subject": "Alerte : échecs de connexion répétés à l'admin",
@@ -4928,5 +4962,152 @@
     "blog_block_add": "Ajouter une question",
     "blog_block_need_slug": "Enregistrez d'abord l'article : ses questions se rattachent à son adresse de page.",
     "key_broker_international": "Broker international"
+  },
+  "admin_remuneration": {
+    "title": "Rémunération",
+    "intro": "Net, brut, impôt et coût employeur au Luxembourg à partir des commissions de l'agent. Estimations, réservées aux comptes admin.",
+    "settingsLink": "Réglages",
+    "defaultsNotice": "Réglages par défaut (part de l'agent 80 %, classe 1, mutualité 0,23 %, facteur 1) : enregistrez la page de réglages pour les adapter.",
+    "agent": "Agent",
+    "periodText": "Période du {from} au {to} ({months, plural, one {# mois} other {# mois}}).",
+    "class1aUnavailable": "Classe 1a : calcul non disponible.",
+    "amountInvalid": "Montant invalide : chiffres uniquement, 2 décimales au plus.",
+    "net": {
+      "title": "Je choisis mon net",
+      "intro": "{name}, retenue mensuelle en classe {taxClass}. Saisissez un net ou un brut : l'autre se calcule.",
+      "netField": "Net mensuel souhaité (€)",
+      "brutField": "Brut mensuel (€)",
+      "brut": "Brut mensuel",
+      "employeeContributions": "Cotisations salarié",
+      "contributionsDetail": "Dont pension, maladie, dépendance",
+      "tax": "Impôt retenu (classe {taxClass})",
+      "credits": "Crédits d'impôt (salarié et CO2)",
+      "net": "Net mensuel",
+      "employerCharges": "Charges patronales",
+      "totalCost": "Coût total pour MAPA Property",
+      "empty": "Saisissez un net ou un brut mensuel."
+    },
+    "commissions": {
+      "title": "Mes commissions",
+      "count": "{count, plural, =0 {Aucune vente sur la période.} one {# vente sur la période} other {# ventes sur la période}}{notProvided, plural, =0 {.} one {, dont # « Non renseignée ».} other {, dont # « Non renseignée ».}}",
+      "ht": "Commissions HT de la période",
+      "agentShare": "Part de l'agent ({pct} %)",
+      "mapaShare": "Part MAPA Property ({pct} %)",
+      "paysCharges": "L'agent paie aussi les charges patronales : sa part couvre le coût total (brut et charges patronales).",
+      "mapaPaysCharges": "L'agent ne paie pas les charges patronales : sa part couvre le brut seul, les charges patronales sont prises sur la part de MAPA Property."
+    },
+    "possible": {
+      "title": "Ce que les commissions de la période permettent ({months, plural, one {# mois} other {# mois}})",
+      "totalCostPeriod": "Coût total possible sur la période",
+      "totalCostMonthly": "Coût total possible par mois",
+      "brut": "Brut mensuel correspondant",
+      "net": "Net mensuel équivalent",
+      "chargesOnMapa": "Charges patronales prises sur la part de MAPA Property",
+      "mapaRemaining": "Reste réellement à MAPA Property"
+    },
+    "alerts": {
+      "belowSsm": "Attention : ce brut est sous le salaire social minimum applicable ({ssm} par mois).",
+      "possibleBelowSsm": "Attention : le brut permis par les commissions de la période est sous le salaire social minimum applicable ({ssm} par mois).",
+      "mapaNegative": "Attention : les charges patronales dépassent la part de MAPA Property sur la période.",
+      "reserveShort": "Attention : la réserve ne couvre plus un mois de salaire au net actuel."
+    },
+    "reserve": {
+      "title": "Compte de réserve",
+      "intro": "Depuis le {start} : {months, plural, one {# mois} other {# mois}}, {sales, plural, =0 {aucune vente} one {# vente} other {# ventes}}.",
+      "cumul": "Cumul des parts de l'agent",
+      "monthlyCostTotal": "Coût mensuel du salaire actuel ({net} net, brut et charges patronales)",
+      "monthlyCostBrut": "Coût mensuel du salaire actuel ({net} net, brut seul)",
+      "spent": "Salaires de la période de suivi ({months, plural, one {# mois} other {# mois}})",
+      "balance": "Solde de la réserve",
+      "monthsCovered": "Mois couverts au net actuel",
+      "monthsValue": "{months} mois",
+      "notApplicable": "Non applicable",
+      "missing": "Renseignez le net mensuel actuel et la date de début du suivi dans les réglages pour suivre la réserve."
+    },
+    "class2": {
+      "title": "Estimation annuelle en classe 2",
+      "intro": "Brut annuel de l'agent : {brut} (12 fois le brut ci-dessus).",
+      "needsSalary": "Saisissez d'abord un net ou un brut mensuel ci-dessus.",
+      "neverSaved": "Les montants du partenaire ne sont jamais enregistrés.",
+      "partnerIncome": "Revenu annuel imposable du partenaire (€)",
+      "partnerTax": "Impôt déjà retenu sur les revenus du partenaire (€ par an, facultatif)",
+      "household": "Revenu imposable du foyer",
+      "taxClass2": "Impôt annuel estimé en classe 2",
+      "agentWithheld": "Impôt retenu dans l'année en classe 1 (agent)",
+      "partnerWithheld": "Impôt retenu du partenaire",
+      "notEntered": "Non saisi",
+      "extra": "Différence estimée : supplément à payer",
+      "refund": "Différence estimée : remboursement",
+      "incomplete": "Impôt retenu du partenaire non saisi, différence incomplète.",
+      "empty": "Saisissez le revenu annuel imposable du partenaire (0 s'il n'a pas de revenus)."
+    },
+    "footer": {
+      "notice": "Estimations sur les paramètres 2026, mis à jour le 1er juin 2026. L'impôt réel est fixé par l'Administration des contributions directes. Vérifiez avec le simulateur officiel saturn.etat.lu.",
+      "details": "Paramètres et statut"
+    },
+    "params": {
+      "indice": "Indice 992,24 au 1er juin 2026",
+      "ssm": "Salaire social minimum : 2 771,33 € non qualifié, 3 325,59 € qualifié",
+      "plafond": "Plafond cotisable mensuel : 13 856,63 €",
+      "cotisations_salarie": "Salarié : pension 8,50 % et maladie 3,05 % sur le brut plafonné",
+      "dependance": "Dépendance 1,40 % sur le brut moins 692,83 €, non plafonnée",
+      "cotisations_employeur": "Employeur : pension 8,50 %, maladie 3,05 %, accident 0,65 %, santé au travail 0,14 %, mutualité selon les réglages",
+      "accident_facteur": "Facteur bonus-malus de l'assurance accident : 0,85, 1, 1,1, 1,3 ou 1,5",
+      "base_plafonnee_accident_sante_mutualite": "Accident, santé au travail et mutualité sur le brut plafonné",
+      "bareme_classe_1": "Barème classe 1 (2025, inchangé en 2026), de 0 % à 42 %",
+      "classe_2": "Classe 2 : deux fois l'impôt de la classe 1 sur la moitié du revenu",
+      "fonds_emploi": "Fonds pour l'emploi : 7 %, 9 % au-delà de 150 000 € (classe 1) ou 300 000 € (classe 2)",
+      "forfaits": "Forfaits : frais d'obtention 540 €, dépenses spéciales 480 €",
+      "cis": "Crédit d'impôt salarié 2026 (jusqu'à 600 €)",
+      "co2": "Crédit d'impôt CO2 salarié 2026 (jusqu'à 216 €)"
+    },
+    "status": {
+      "verifie": "Vérifié",
+      "suppose": "Supposé"
+    },
+    "settings": {
+      "title": "Réglages de la rémunération",
+      "intro": "Réglages des agents et de l'employeur, utilisés par l'écran Rémunération et le récapitulatif des ventes réalisées.",
+      "back": "Rémunération",
+      "defaults": "Aucun réglage enregistré : valeurs par défaut ci-dessous. Le premier enregistrement les crée.",
+      "agentTitle": "Agent : {name}",
+      "displayName": "Nom affiché",
+      "share": "Part de l'agent (%)",
+      "shareHint": "Part de la commission HT, de 0 à 100. MAPA Property garde le reste.",
+      "taxClass": "Classe d'impôt de la retenue mensuelle",
+      "taxClass1": "Classe 1",
+      "taxClass2": "Classe 2",
+      "taxClass1a": "Classe 1a (calcul non disponible)",
+      "travel": "Frais de déplacement (€ par an)",
+      "travelHint": "Déduction annuelle de la fiche de retenue.",
+      "ssm": "Salaire social minimum applicable",
+      "ssm_non_qualifie": "Non qualifié",
+      "ssm_qualifie": "Qualifié",
+      "currentNet": "Net mensuel actuel (€)",
+      "currentNetHint": "Sert au compte de réserve.",
+      "reserveStart": "Début du suivi de la réserve",
+      "paysCharges": "L'agent paie aussi les charges patronales",
+      "active": "Agent actif",
+      "employerTitle": "Employeur",
+      "mutualite": "Taux de mutualité",
+      "mutualiteOption": "Classe {classe} : {rate} %",
+      "accident": "Facteur assurance accident (bonus-malus)",
+      "saved": "Réglages enregistrés.",
+      "saving": "Enregistrement…",
+      "save": "Enregistrer"
+    },
+    "errors": {
+      "agent": "Agent inconnu.",
+      "name": "Nom affiché obligatoire (80 caractères au plus).",
+      "share": "Part de l'agent invalide : de 0 à 100, 2 décimales au plus.",
+      "taxClass": "Classe d'impôt invalide : 1 ou 2.",
+      "travel": "Frais de déplacement invalides : montant positif, 2 décimales au plus.",
+      "ssm": "Niveau du salaire social minimum invalide.",
+      "net": "Net mensuel actuel invalide : montant positif, 2 décimales au plus.",
+      "reserveStart": "Date de début du suivi invalide.",
+      "mutualite": "Taux de mutualité invalide.",
+      "accident": "Facteur assurance accident invalide.",
+      "unavailable": "Les réglages ne sont pas encore activés dans la base de données."
+    }
   }
 }
