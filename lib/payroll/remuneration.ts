@@ -92,29 +92,90 @@ export function possibilityFromShare(agentHt: number, mapaHt: number, months: nu
   };
 }
 
+// Calendrier des salaires : le salaire d'un mois est verse le DERNIER JOUR
+// de ce mois (decembre 2025 le 31/12/2025, janvier 2026 le 31/01/2026). La
+// reserve ne deduit que les salaires dont ce jour est passe ou atteint
+// (jour du calendrier a Luxembourg), a partir du mois de la date de debut.
+
+const monthIndex = (date: string) => Number(date.slice(0, 4)) * 12 + Number(date.slice(5, 7)) - 1;
+const monthOf = (i: number) => `${Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, "0")}`;
+
+/** Dernier jour du mois d'une date (AAAA-MM ou AAAA-MM-JJ), en AAAA-MM-JJ. */
+export function lastDayOfMonth(date: string): string {
+  const i = monthIndex(date);
+  return new Date(Date.UTC(Math.floor(i / 12), (i % 12) + 1, 0)).toISOString().slice(0, 10);
+}
+
+export type SalarySchedule = {
+  /** Salaires deja verses depuis le mois de la date de debut. */
+  count: number;
+  /** Premier et dernier mois verses (AAAA-MM), null si aucun. */
+  firstMonth: string | null;
+  lastMonth: string | null;
+  /** Prochain salaire deduit (dernier jour du mois suivant le dernier verse). */
+  nextPaymentDate: string;
+};
+
+/** Salaires verses entre la date de debut et aujourd'hui (inclus). */
+export function salariesPaid(start: string, today: string): SalarySchedule {
+  const first = monthIndex(start);
+  const current = monthIndex(today);
+  const paidThrough = lastDayOfMonth(today) <= today ? current : current - 1;
+  const count = Math.max(0, paidThrough - first + 1);
+  return {
+    count,
+    firstMonth: count > 0 ? monthOf(first) : null,
+    lastMonth: count > 0 ? monthOf(first + count - 1) : null,
+    nextPaymentDate: lastDayOfMonth(monthOf(first + count)),
+  };
+}
+
+/** Salaires verses du mois de la date de debut a la fin du mois d'une date donnee (inclus). */
+export function salariesThroughMonthOf(start: string, date: string): number {
+  return Math.max(0, monthIndex(date) - monthIndex(start) + 1);
+}
+
 export type ReserveView = {
-  /** Cumul des parts de l'agent depuis le debut du suivi. */
+  startBalance: number;
+  /** Parts de l'agent des ventes ajoutees au solde de depart. */
   cumulAgentHt: number;
-  months: number;
+  /** Salaires deduits. */
+  salaries: number;
   /** Cout mensuel du salaire actuel pris sur la part de l'agent. */
   monthlyCost: number;
   salary: SalaryView;
   balance: number;
-  /** Mois couverts au net actuel (une decimale, arrondi vers le bas), null si cout nul. */
+  /** Solde divise par le cout mensuel, 1 decimale ; null si cout nul. */
   monthsCovered: number | null;
   /** La reserve ne couvre plus un mois. */
   short: boolean;
 };
 
 /**
- * Compte de reserve : cumul des parts de l'agent depuis le debut du suivi,
- * moins le cout mensuel de son salaire actuel pour chaque mois ecoule.
+ * Compte de reserve : solde de depart a la date de debut, plus les parts de
+ * l'agent des ventes datees de la date de debut ou apres (les ventes
+ * anterieures sont deja comprises dans le solde de depart), moins le cout
+ * mensuel du salaire actuel pour chaque salaire deduit.
  */
-export function reserveAccount(cumulAgentHt: number, months: number, currentNet: number, agent: RemunerationAgent, employer: RemunerationEmployer, p: LuPayrollParams = PARAMS_2026): ReserveView {
-  const salary = salaryFromNet(currentNet, agent, employer, p);
+export function reserveAccount(
+  input: { startBalance: number; cumulAgentHt: number; salaries: number; currentNet: number },
+  agent: RemunerationAgent,
+  employer: RemunerationEmployer,
+  p: LuPayrollParams = PARAMS_2026,
+): ReserveView {
+  const salary = salaryFromNet(input.currentNet, agent, employer, p);
   const monthlyCost = costOnAgentShare(salary.employer, agent);
-  const m = Math.max(0, Math.round(months));
-  const balance = cents(cumulAgentHt - monthlyCost * m);
-  const monthsCovered = monthlyCost > 0 ? Math.floor((balance / monthlyCost) * 10) / 10 : null;
-  return { cumulAgentHt: cents(cumulAgentHt), months: m, monthlyCost, salary, balance, monthsCovered, short: monthlyCost > 0 && balance < monthlyCost };
+  const salaries = Math.max(0, Math.round(input.salaries));
+  const balance = cents(input.startBalance + input.cumulAgentHt - monthlyCost * salaries);
+  const monthsCovered = monthlyCost > 0 ? Math.round((balance / monthlyCost) * 10) / 10 : null;
+  return {
+    startBalance: cents(input.startBalance),
+    cumulAgentHt: cents(input.cumulAgentHt),
+    salaries,
+    monthlyCost,
+    salary,
+    balance,
+    monthsCovered,
+    short: monthlyCost > 0 && balance < monthlyCost,
+  };
 }

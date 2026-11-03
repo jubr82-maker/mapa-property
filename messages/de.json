@@ -3365,11 +3365,12 @@
       "commissionVat": "MwSt. ({rate} %)",
       "commissionTtc": "Provision inkl. MwSt.",
       "commissionNone": "Provision nicht angegeben (optional).",
-      "commissionNeedsPrice": "Verkaufspreis angeben, um die Provision zu berechnen."
+      "commissionNeedsPrice": "Verkaufspreis angeben, um die Provision zu berechnen.",
+      "upcomingHint": "Bevorstehender Verkauf: wird normal gespeichert und zählt als abgeschlossen, sobald das Datum der Urkunde vorbei ist."
     },
     "commissionNotProvided": "Nicht angegeben",
     "totals": {
-      "title": "Summen der angezeigten Verkäufe",
+      "title": "Summen der angezeigten abgeschlossenen Verkäufe",
       "ht": "Provision gesamt netto",
       "tva": "MwSt. gesamt",
       "ttc": "Provision gesamt brutto",
@@ -3385,6 +3386,10 @@
       "mapaShare": "Anteil MAPA Property netto",
       "share": "{pct} %",
       "defaults": "Standardanteil des Maklers ({pct} %): die Makler-Einstellungen sind noch nicht gespeichert."
+    },
+    "upcoming": {
+      "badge": "Bevorstehend",
+      "total": "Bevorstehend: {count, plural, one {# Verkauf} other {# Verkäufe}}, {ht} netto (nicht in den Summen oben)."
     }
   },
   "admin_nav": {
@@ -4994,40 +4999,48 @@
     },
     "commissions": {
       "title": "Meine Provisionen",
-      "count": "{count, plural, =0 {Kein Verkauf im Zeitraum.} one {# Verkauf im Zeitraum} other {# Verkäufe im Zeitraum}}{notProvided, plural, =0 {.} one {, davon # „Nicht angegeben“.} other {, davon # „Nicht angegeben“.}}",
+      "count": "{count, plural, =0 {Kein abgeschlossener Verkauf im Zeitraum.} one {# abgeschlossener Verkauf im Zeitraum} other {# abgeschlossene Verkäufe im Zeitraum}}{notProvided, plural, =0 {.} one {, davon # „Nicht angegeben“.} other {, davon # „Nicht angegeben“.}}",
       "ht": "Provisionen netto im Zeitraum",
       "agentShare": "Anteil des Maklers ({pct} %)",
       "mapaShare": "Anteil MAPA Property ({pct} %)",
       "paysCharges": "Der Makler trägt auch die Arbeitgeberbeiträge: sein Anteil deckt die Gesamtkosten (Brutto und Arbeitgeberbeiträge).",
-      "mapaPaysCharges": "Der Makler trägt die Arbeitgeberbeiträge nicht: sein Anteil deckt nur das Brutto, die Arbeitgeberbeiträge gehen vom Anteil von MAPA Property ab."
+      "mapaPaysCharges": "Der Makler trägt die Arbeitgeberbeiträge nicht: sein Anteil deckt nur das Brutto, die Arbeitgeberbeiträge gehen vom Anteil von MAPA Property ab.",
+      "upcoming": "Bevorstehend im Zeitraum: {count, plural, one {# Verkauf} other {# Verkäufe}}, {ht} netto (Anteil des Maklers {agentHt}), oben nicht gezählt."
     },
     "possible": {
       "title": "Was die Provisionen des Zeitraums ermöglichen ({months, plural, one {# Monat} other {# Monate}})",
       "totalCostPeriod": "Mögliche Gesamtkosten im Zeitraum",
       "totalCostMonthly": "Mögliche Gesamtkosten pro Monat",
       "brut": "Entsprechendes Monatsbrutto",
-      "net": "Entsprechendes Monatsnetto",
+      "net": "Monatsnetto, das den Zeitraum ausgleicht (abgeschlossen)",
       "chargesOnMapa": "Arbeitgeberbeiträge vom Anteil von MAPA Property",
-      "mapaRemaining": "Tatsächlich verbleibend für MAPA Property"
+      "mapaRemaining": "Tatsächlich verbleibend für MAPA Property",
+      "netForecast": "Monatsnetto, das den Zeitraum ausgleicht (Prognose, mit bevorstehenden Verkäufen)"
     },
     "alerts": {
       "belowSsm": "Achtung: dieses Brutto liegt unter dem geltenden sozialen Mindestlohn ({ssm} pro Monat).",
       "possibleBelowSsm": "Achtung: das durch die Provisionen des Zeitraums mögliche Brutto liegt unter dem geltenden sozialen Mindestlohn ({ssm} pro Monat).",
       "mapaNegative": "Achtung: die Arbeitgeberbeiträge übersteigen den Anteil von MAPA Property im Zeitraum.",
-      "reserveShort": "Achtung: die Reserve deckt keinen Monatslohn zum aktuellen Netto mehr."
+      "reserveShort": "Achtung: die Reserve deckt keinen Monatslohn zum aktuellen Netto mehr.",
+      "forecastShort": "Achtung: am {end} deckt die prognostizierte Reserve keinen Monatslohn mehr."
     },
     "reserve": {
       "title": "Reservekonto",
-      "intro": "Seit dem {start}: {months, plural, one {# Monat} other {# Monate}}, {sales, plural, =0 {kein Verkauf} one {# Verkauf} other {# Verkäufe}}.",
-      "cumul": "Kumulierte Anteile des Maklers",
+      "intro": "Seit dem {start}: {sales, plural, =0 {kein abgeschlossener Verkauf} one {# abgeschlossener Verkauf} other {# abgeschlossene Verkäufe}} zum Anfangssaldo hinzugefügt.",
+      "cumul": "Anteile des Maklers aus abgeschlossenen Verkäufen seit dem Startdatum",
       "monthlyCostTotal": "Monatliche Kosten des aktuellen Gehalts ({net} netto, Brutto und Arbeitgeberbeiträge)",
       "monthlyCostBrut": "Monatliche Kosten des aktuellen Gehalts ({net} netto, nur Brutto)",
-      "spent": "Gehälter im Erfassungszeitraum ({months, plural, one {# Monat} other {# Monate}})",
+      "spent": "{count, plural, =0 {Kein Gehalt gezahlt} one {# Gehalt gezahlt} other {# Gehälter gezahlt}}",
       "balance": "Saldo der Reserve",
       "monthsCovered": "Gedeckte Monate zum aktuellen Netto",
       "monthsValue": "{months} Monate",
       "notApplicable": "Nicht zutreffend",
-      "missing": "Aktuelles Monatsnetto und Beginn der Erfassung in den Einstellungen angeben, um die Reserve zu verfolgen."
+      "missing": "Aktuelles Monatsnetto und Beginn der Erfassung in den Einstellungen angeben, um die Reserve zu verfolgen.",
+      "noSalary": "Seit dem Startdatum kein Gehalt gezahlt.",
+      "oneSalary": "1 Gehalt gezahlt ({month}).",
+      "salaries": "{count} Gehälter gezahlt (von {from} bis {to}).",
+      "next": "Nächstes Gehalt abgezogen am {date}.",
+      "startBalance": "Anfangssaldo am {start}"
     },
     "class2": {
       "title": "Jahresschätzung in Klasse 2",
@@ -5099,7 +5112,9 @@
       "accident": "Faktor Unfallversicherung (Bonus-Malus)",
       "saved": "Einstellungen gespeichert.",
       "saving": "Speichern…",
-      "save": "Speichern"
+      "save": "Speichern",
+      "startBalance": "Anfangssaldo der Reserve (€)",
+      "startBalanceHint": "Betrag, der dem Makler am Startdatum zusteht, ohne MwSt. und ohne Anteil von MAPA Property, nach Zahlung aller früheren Gehälter"
     },
     "errors": {
       "agent": "Unbekannter Makler.",
@@ -5112,7 +5127,19 @@
       "reserveStart": "Ungültiges Startdatum.",
       "mutualite": "Ungültiger Mutualitätssatz.",
       "accident": "Ungültiger Faktor der Unfallversicherung.",
-      "unavailable": "Die Einstellungen sind in der Datenbank noch nicht aktiviert."
+      "unavailable": "Die Einstellungen sind in der Datenbank noch nicht aktiviert.",
+      "startBalance": "Ungültiger Anfangssaldo: positiver oder negativer Betrag, höchstens 2 Dezimalstellen.",
+      "startBalanceUnavailable": "Der Anfangssaldo ist in der Datenbank noch nicht aktiviert: vorerst mit 0 speichern."
+    },
+    "forecast": {
+      "title": "Prognose mit bevorstehenden Verkäufen",
+      "intro": "{count, plural, one {# bevorstehender Verkauf} other {# bevorstehende Verkäufe}}: geschätzter Saldo am Ende des Monats des letzten, am {end}.",
+      "balanceNow": "Saldo der Reserve heute",
+      "upcoming": "Anteile des Maklers aus bevorstehenden Verkäufen ({count})",
+      "salaries": "{count, plural, =0 {Bis dahin kein Gehalt zu zahlen} one {# Gehalt bis dahin gezahlt} other {# Gehälter bis dahin gezahlt}}",
+      "balance": "Prognostizierter Saldo am {end}",
+      "monthsCovered": "Gedeckte Monate zum aktuellen Netto (Prognose)",
+      "none": "Kein bevorstehender Verkauf."
     }
   }
 }

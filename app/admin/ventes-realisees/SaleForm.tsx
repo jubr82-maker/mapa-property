@@ -16,6 +16,7 @@ import {
   parseDecimalInput,
   type CommissionMode,
 } from "@/lib/admin/sale-commission";
+import { isUpcomingSale, luxembourgToday } from "@/lib/admin/sales-summary";
 
 // Formulaire vente realisee : modes "create" (POST /api/admin/ventes-realisees)
 // et "edit" (PATCH /api/admin/ventes-realisees/[id]). En edition, les champs
@@ -359,6 +360,12 @@ export function SaleForm({
             onChange={(e) => set("date_acte", e.target.value)}
             className={inputCls}
           />
+          {/* Nov. 2026 : date future acceptee (vente a venir), signalee seulement. */}
+          {isUpcomingSale(data.date_acte, luxembourgToday()) && (
+            <span className="text-xs text-[#9E7B2A]" data-sale-upcoming-hint>
+              {t("form.upcomingHint")}
+            </span>
+          )}
         </Field>
         <Field label={t("form.agent")}>
           <select

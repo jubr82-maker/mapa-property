@@ -23,8 +23,24 @@ type Props = {
     currentNet: number | null;
   };
   employer: { mutualiteRate: number; accidentFactor: number };
-  period: { months: number; count: number; notProvided: number; ht: number; agentHt: number; mapaHt: number };
-  reserve: { start: string; startLabel: string; cumulAgentHt: number; months: number; sales: number } | null;
+  /** Periode : realise seulement ; ventes a venir a part. Duree en mois entiers. */
+  period: {
+    months: number;
+    count: number;
+    notProvided: number;
+    ht: number;
+    agentHt: number;
+    mapaHt: number;
+    upcoming: { count: number; ht: number; agentHt: number; mapaHt: number };
+  };
+  reserve: {
+    startLabel: string;
+    startBalance: number;
+    cumulAgentHt: number;
+    sales: number;
+    paid: { count: number; firstLabel: string; lastLabel: string; nextLabel: string };
+    forecast: { cumulAgentHt: number; sales: number; endLabel: string; salaries: number } | null;
+  } | null;
 };
 
 const eur = (n: number) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
@@ -93,7 +109,24 @@ export function RemunerationScreen({ agent, employer, period, reserve }: Props) 
       : null;
 
   const possible = supported ? possibilityFromShare(period.agentHt, period.mapaHt, period.months, agent, employer) : null;
-  const reserveView = supported && reserve && agent.currentNet !== null ? reserveAccount(reserve.cumulAgentHt, reserve.months, agent.currentNet, agent, employer) : null;
+  // Net d'equilibre previsionnel : realise plus ventes a venir de la periode.
+  const possibleForecast =
+    supported
+      ? possibilityFromShare(period.agentHt + period.upcoming.agentHt, period.mapaHt + period.upcoming.mapaHt, period.months, agent, employer)
+      : null;
+  const reserveView =
+    supported && reserve && agent.currentNet !== null
+      ? reserveAccount({ startBalance: reserve.startBalance, cumulAgentHt: reserve.cumulAgentHt, salaries: reserve.paid.count, currentNet: agent.currentNet }, agent, employer)
+      : null;
+  const forecastView =
+    supported && reserve?.forecast && agent.currentNet !== null
+      ? reserveAccount(
+          { startBalance: reserve.startBalance, cumulAgentHt: reserve.cumulAgentHt + reserve.forecast.cumulAgentHt, salaries: reserve.forecast.salaries, currentNet: agent.currentNet },
+          agent,
+          employer,
+        )
+      : null;
+  const months1 = (n: number | null) => (n === null ? t("reserve.notApplicable") : t("reserve.monthsValue", { months: pct(Math.max(0, n)) }));
 
   return (
     <div className="space-y-6">
@@ -157,6 +190,11 @@ export function RemunerationScreen({ agent, employer, period, reserve }: Props) 
           <Row label={t("commissions.agentShare", { pct: pct(agent.sharePct) })} value={eur(period.agentHt)} />
           <Row label={t("commissions.mapaShare", { pct: pct(Math.round((100 - agent.sharePct) * 100) / 100) })} value={eur(period.mapaHt)} />
         </dl>
+        {period.upcoming.count > 0 && (
+          <p className="mt-3 text-sm text-[#3D4F63]/80" data-remuneration-upcoming>
+            {t("commissions.upcoming", { count: period.upcoming.count, ht: eur(period.upcoming.ht), agentHt: eur(period.upcoming.agentHt) })}
+          </p>
+        )}
         <p className="mt-3 text-sm text-[#3D4F63]/80">{agent.paysEmployerCharges ? t("commissions.paysCharges") : t("commissions.mapaPaysCharges")}</p>
         {possible && (
           <>
@@ -166,6 +204,7 @@ export function RemunerationScreen({ agent, employer, period, reserve }: Props) 
               <Row label={t("possible.totalCostMonthly")} value={eur(possible.salary.employer.coutTotal)} />
               <Row label={t("possible.brut")} value={eur(possible.salary.net.brut)} />
               <Row label={t("possible.net")} value={eur(possible.salary.net.net)} strong />
+              {possibleForecast && <Row label={t("possible.netForecast")} value={eur(possibleForecast.salary.net.net)} strong />}
               {!agent.paysEmployerCharges && (
                 <>
                   <Row label={t("possible.chargesOnMapa")} value={`- ${eur(possible.chargesOnMapa)}`} />
@@ -184,20 +223,45 @@ export function RemunerationScreen({ agent, employer, period, reserve }: Props) 
         <h2 className={titleCls}>{t("reserve.title")}</h2>
         {reserveView && reserve ? (
           <>
-            <p className="mt-1 text-xs text-[#3D4F63]/70">{t("reserve.intro", { start: reserve.startLabel, months: reserveView.months, sales: reserve.sales })}</p>
+            <p className="mt-1 text-xs text-[#3D4F63]/70">{t("reserve.intro", { start: reserve.startLabel, sales: reserve.sales })}</p>
+            <p className="mt-1 text-xs text-[#3D4F63]/70">
+              {reserve.paid.count === 0
+                ? t("reserve.noSalary")
+                : reserve.paid.count === 1
+                  ? t("reserve.oneSalary", { month: reserve.paid.firstLabel })
+                  : t("reserve.salaries", { count: reserve.paid.count, from: reserve.paid.firstLabel, to: reserve.paid.lastLabel })}{" "}
+              {t("reserve.next", { date: reserve.paid.nextLabel })}
+            </p>
             <dl className="mt-4">
-              <Row label={t("reserve.cumul")} value={eur(reserveView.cumulAgentHt)} />
+              <Row label={t("reserve.startBalance", { start: reserve.startLabel })} value={eur(reserveView.startBalance)} />
+              <Row label={t("reserve.cumul")} value={`+ ${eur(reserveView.cumulAgentHt)}`} />
               <Row label={t(agent.paysEmployerCharges ? "reserve.monthlyCostTotal" : "reserve.monthlyCostBrut", { net: eur(agent.currentNet ?? 0) })} value={eur(reserveView.monthlyCost)} />
-              <Row label={t("reserve.spent", { months: reserveView.months })} value={`- ${eur(Math.round(reserveView.monthlyCost * reserveView.months * 100) / 100)}`} />
+              <Row label={t("reserve.spent", { count: reserveView.salaries })} value={`- ${eur(Math.round(reserveView.monthlyCost * reserveView.salaries * 100) / 100)}`} />
               <Row label={t("reserve.balance")} value={eur(reserveView.balance)} strong />
-              <Row
-                label={t("reserve.monthsCovered")}
-                value={reserveView.monthsCovered === null ? t("reserve.notApplicable") : t("reserve.monthsValue", { months: pct(Math.max(0, reserveView.monthsCovered)) })}
-                strong
-              />
+              <Row label={t("reserve.monthsCovered")} value={months1(reserveView.monthsCovered)} strong />
             </dl>
             {reserveView.salary.belowSsm && <p className={`mt-3 ${alertCls}`}>{t("alerts.belowSsm", { ssm: eur(ssm) })}</p>}
             {reserveView.short && <p className={`mt-3 ${alertCls}`}>{t("alerts.reserveShort")}</p>}
+
+            <h3 className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/60">{t("forecast.title")}</h3>
+            {forecastView && reserve.forecast ? (
+              <div data-remuneration="previsionnel">
+                <p className="mt-1 text-xs text-[#3D4F63]/70">{t("forecast.intro", { count: reserve.forecast.sales, end: reserve.forecast.endLabel })}</p>
+                <dl className="mt-2">
+                  <Row label={t("forecast.balanceNow")} value={eur(reserveView.balance)} />
+                  <Row label={t("forecast.upcoming", { count: reserve.forecast.sales })} value={`+ ${eur(reserve.forecast.cumulAgentHt)}`} />
+                  <Row
+                    label={t("forecast.salaries", { count: forecastView.salaries - reserveView.salaries })}
+                    value={`- ${eur(Math.round(reserveView.monthlyCost * (forecastView.salaries - reserveView.salaries) * 100) / 100)}`}
+                  />
+                  <Row label={t("forecast.balance", { end: reserve.forecast.endLabel })} value={eur(forecastView.balance)} strong />
+                  <Row label={t("forecast.monthsCovered")} value={months1(forecastView.monthsCovered)} strong />
+                </dl>
+                {forecastView.short && <p className={`mt-3 ${alertCls}`}>{t("alerts.forecastShort", { end: reserve.forecast.endLabel })}</p>}
+              </div>
+            ) : (
+              <p className="mt-1 text-sm text-[#3D4F63]/70">{t("forecast.none")}</p>
+            )}
           </>
         ) : (
           <p className="mt-2 text-sm text-[#3D4F63]/70">{t("reserve.missing")}</p>

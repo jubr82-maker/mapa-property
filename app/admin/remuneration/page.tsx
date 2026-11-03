@@ -10,7 +10,7 @@ import { requireSalesAdminPage } from "@/lib/admin/sales-auth";
 import { ADMIN_LOCALE, formatDateOnly } from "@/lib/datetime";
 import { AdminNotice } from "@/components/admin/AdminNotice";
 import { SALE_AGENT_KEYS, loadEmployerSettings, loadSalesAgents, saleAgentKey } from "@/lib/admin/remuneration-reglages";
-import { luxembourgToday, monthsInPeriod, resolvePeriod, summaryByAgent, type PeriodKey } from "@/lib/admin/sales-summary";
+import { luxembourgToday, periodMonths, reserveData, resolvePeriod, splitBySaleDate, summaryByAgent, type PeriodKey } from "@/lib/admin/sales-summary";
 import { RemunerationScreen } from "./RemunerationScreen";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +22,11 @@ const PERIOD_LABEL: Record<PeriodKey, string> = {
   tout: "filters.periodAll",
   dates: "filters.periodDates",
 };
+
+/** "2026-11" vers "novembre 2026". */
+function monthLabel(ym: string | null): string {
+  return ym ? new Intl.DateTimeFormat(ADMIN_LOCALE, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${ym}-01T00:00:00Z`)) : "";
+}
 
 type SearchParams = { agent?: string; periode?: string; du?: string; au?: string };
 type SaleRow = { agent: string; date_acte: string } & Record<string, unknown>;
@@ -60,19 +65,28 @@ export default async function RemunerationPage({ searchParams }: { searchParams:
   const mine = ((res.data ?? []) as unknown as SaleRow[]).filter((r) => saleAgentKey(r.agent, keys) === agent.key);
   const inRange = (from: string | null, to: string | null) => mine.filter((r) => (!from || r.date_acte >= from) && (!to || r.date_acte <= to));
 
-  const periodSales = inRange(period.from, period.to);
-  const [summary] = summaryByAgent(periodSales, [agent], agent.sharePct);
-  // Mois de la periode ; bornes ouvertes : premiere vente de l'agent, aujourd'hui.
-  const from = period.from ?? mine[0]?.date_acte ?? today;
+  // Realise : ventes datees jusqu'a aujourd'hui ; a venir : apres aujourd'hui
+  // (jamais refusees, affichees a part, comptees dans le previsionnel).
+  const period_ = splitBySaleDate(inRange(period.from, period.to), today);
+  const [summary] = summaryByAgent(period_.realized, [agent], agent.sharePct);
+  const [upcoming] = summaryByAgent(period_.upcoming, [agent], agent.sharePct);
+  // Duree de la periode en mois entiers (lib/admin/sales-summary.ts).
+  const months = periodMonths(period, mine[0]?.date_acte ?? null, today);
+  const from = period.from ?? (mine[0] && mine[0].date_acte <= today ? mine[0].date_acte : today);
   const to = period.to ?? today;
-  const months = monthsInPeriod(from, to < from ? from : to);
 
-  // Reserve : depuis le debut du suivi jusqu'a aujourd'hui.
-  const reserve = agent.reserveStart && agent.reserveStart <= today
-    ? (() => {
-        const [r] = summaryByAgent(inRange(agent.reserveStart, today), [agent], agent.sharePct);
-        return { start: agent.reserveStart, cumulAgentHt: r.agentHt, months: monthsInPeriod(agent.reserveStart, today), sales: r.count };
-      })()
+  // Reserve : solde de depart a la date de debut, plus les ventes datees de
+  // la date de debut ou apres, moins les salaires verses (dernier jour du mois).
+  const rd = reserveData(mine, agent, today);
+  const reserve = rd
+    ? {
+        startLabel: formatDateOnly(rd.start),
+        startBalance: rd.startBalance,
+        cumulAgentHt: rd.cumulAgentHt,
+        sales: rd.sales,
+        paid: { count: rd.paid.count, firstLabel: monthLabel(rd.paid.firstMonth), lastLabel: monthLabel(rd.paid.lastMonth), nextLabel: formatDateOnly(rd.paid.nextPaymentDate) },
+        forecast: rd.forecast ? { cumulAgentHt: rd.forecast.cumulAgentHt, sales: rd.forecast.sales, endLabel: formatDateOnly(rd.forecast.endDate), salaries: rd.forecast.salaries } : null,
+      }
     : null;
 
   const inputCls = "w-full rounded border border-[#3D4F63]/30 bg-white px-3 py-1.5 text-sm focus:border-[#9E7B2A] focus:outline-none";
@@ -149,8 +163,16 @@ export default async function RemunerationPage({ searchParams }: { searchParams:
           currentNet: agent.currentNet,
         }}
         employer={employer}
-        period={{ months, count: summary.count, notProvided: summary.notProvided, ht: summary.ht, agentHt: summary.agentHt, mapaHt: summary.mapaHt }}
-        reserve={reserve ? { ...reserve, startLabel: formatDateOnly(reserve.start) } : null}
+        period={{
+          months,
+          count: summary.count,
+          notProvided: summary.notProvided,
+          ht: summary.ht,
+          agentHt: summary.agentHt,
+          mapaHt: summary.mapaHt,
+          upcoming: { count: upcoming.count, ht: upcoming.ht, agentHt: upcoming.agentHt, mapaHt: upcoming.mapaHt },
+        }}
+        reserve={reserve}
       />
     </div>
   );

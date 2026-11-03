@@ -36,6 +36,12 @@ export type SalesAgent = {
   ssmLevel: SsmLevel;
   currentNet: number | null;
   reserveStart: string | null;
+  /**
+   * Solde de depart de la reserve a la date de debut (supabase/sql/34) :
+   * montant qui revient a l'agent, hors TVA et hors part de MAPA Property,
+   * apres paiement de tous les salaires precedents. Positif ou negatif.
+   */
+  startBalance: number;
 };
 
 export type EmployerSettings = { mutualiteRate: MutualiteRate; accidentFactor: AccidentFactor };
@@ -51,6 +57,7 @@ export const DEFAULT_AGENT: SalesAgent = {
   ssmLevel: "non_qualifie",
   currentNet: null,
   reserveStart: null,
+  startBalance: 0,
 };
 
 export const DEFAULT_EMPLOYER: EmployerSettings = { mutualiteRate: 0.23, accidentFactor: 1 };
@@ -89,6 +96,8 @@ export function agentFromRow(row: Record<string, unknown>): SalesAgent | null {
     ssmLevel: row.niveau_ssm === "qualifie" ? "qualifie" : "non_qualifie",
     currentNet: net !== null && net >= 0 ? net : null,
     reserveStart: start,
+    // Colonne absente (fichier 34 pas encore execute) : 0.
+    startBalance: num(row.solde_depart_reserve) ?? 0,
   };
 }
 
@@ -138,6 +147,7 @@ export type SettingsError =
   | "ssm_invalid"
   | "net_invalid"
   | "reserve_start_invalid"
+  | "start_balance_invalid"
   | "mutualite_invalid"
   | "accident_invalid";
 
@@ -170,6 +180,11 @@ export function parseAgentInput(body: Record<string, unknown>): { row?: Record<s
     }
     reserveStart = start;
   }
+  const sb = body.startBalance;
+  const startBalance = sb === null || sb === undefined || sb === "" ? 0 : sb;
+  if (typeof startBalance !== "number" || !Number.isFinite(startBalance) || Math.abs(startBalance) > 9_999_999_999.99 || !twoDecimals(startBalance)) {
+    return { error: "start_balance_invalid" };
+  }
   return {
     row: {
       agent_key: key,
@@ -182,6 +197,7 @@ export function parseAgentInput(body: Record<string, unknown>): { row?: Record<s
       niveau_ssm: body.ssmLevel,
       net_mensuel_actuel: net,
       debut_suivi_reserve: reserveStart,
+      solde_depart_reserve: startBalance,
     },
   };
 }
@@ -198,4 +214,16 @@ export function parseEmployerInput(body: Record<string, unknown>): { row?: Recor
 /** Tables de reglages absentes (fichier SQL pas encore execute). */
 export function isSettingsTableMissing(error: { code?: string } | null | undefined): boolean {
   return !!error && (error.code === "42P01" || error.code === "PGRST205");
+}
+
+/** Colonne du solde de depart absente (fichier supabase/sql/34 pas encore execute). */
+export function isStartBalanceColumnMissing(error: { code?: string; message?: string } | null | undefined): boolean {
+  return !!error && (error.code === "PGRST204" || error.code === "42703") && /solde_depart_reserve/.test(error.message ?? "");
+}
+
+/** Montant signe saisi ("-1 250,50") : nombre, null si vide, NaN si invalide (2 decimales au plus). */
+export function parseSignedDecimal(raw: string): number | null {
+  const s = raw.replace(/[\s\u00a0\u202f]/g, "").replace(",", ".").replace(/^\u2212/, "-");
+  if (!s) return null;
+  return /^-?\d+(\.\d{1,2})?$/.test(s) ? Number(s) : NaN;
 }

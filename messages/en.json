@@ -3365,11 +3365,12 @@
       "commissionVat": "VAT ({rate} %)",
       "commissionTtc": "Commission incl. VAT",
       "commissionNone": "Commission not provided (optional).",
-      "commissionNeedsPrice": "Enter the sale price to calculate the commission."
+      "commissionNeedsPrice": "Enter the sale price to calculate the commission.",
+      "upcomingHint": "Upcoming sale: it is saved normally and will count as completed once the deed date has passed."
     },
     "commissionNotProvided": "Not provided",
     "totals": {
-      "title": "Totals of the sales shown",
+      "title": "Totals of the completed sales shown",
       "ht": "Total commission excl. VAT",
       "tva": "Total VAT",
       "ttc": "Total commission incl. VAT",
@@ -3385,6 +3386,10 @@
       "mapaShare": "MAPA Property share excl. VAT",
       "share": "{pct} %",
       "defaults": "Default agent share ({pct} %): the agent settings have not been saved yet."
+    },
+    "upcoming": {
+      "badge": "Upcoming",
+      "total": "Upcoming: {count, plural, one {# sale} other {# sales}}, {ht} excl. VAT (not counted in the totals above)."
     }
   },
   "admin_nav": {
@@ -4996,40 +5001,48 @@
     },
     "commissions": {
       "title": "My commissions",
-      "count": "{count, plural, =0 {No sale in the period.} one {# sale in the period} other {# sales in the period}}{notProvided, plural, =0 {.} one {, including # \"Not provided\".} other {, including # \"Not provided\".}}",
+      "count": "{count, plural, =0 {No completed sale in the period.} one {# completed sale in the period} other {# completed sales in the period}}{notProvided, plural, =0 {.} one {, including # \"Not provided\".} other {, including # \"Not provided\".}}",
       "ht": "Commissions excl. VAT for the period",
       "agentShare": "Agent share ({pct} %)",
       "mapaShare": "MAPA Property share ({pct} %)",
       "paysCharges": "The agent also pays the employer contributions: the share covers the total cost (gross and employer contributions).",
-      "mapaPaysCharges": "The agent does not pay the employer contributions: the share covers the gross only, the employer contributions are taken from the MAPA Property share."
+      "mapaPaysCharges": "The agent does not pay the employer contributions: the share covers the gross only, the employer contributions are taken from the MAPA Property share.",
+      "upcoming": "Upcoming in the period: {count, plural, one {# sale} other {# sales}}, {ht} excl. VAT (agent share {agentHt}), not counted above."
     },
     "possible": {
       "title": "What the period's commissions allow ({months, plural, one {# month} other {# months}})",
       "totalCostPeriod": "Possible total cost for the period",
       "totalCostMonthly": "Possible total cost per month",
       "brut": "Corresponding monthly gross",
-      "net": "Equivalent monthly net",
+      "net": "Monthly net that balances the period (completed)",
       "chargesOnMapa": "Employer contributions taken from the MAPA Property share",
-      "mapaRemaining": "Actually left to MAPA Property"
+      "mapaRemaining": "Actually left to MAPA Property",
+      "netForecast": "Monthly net that balances the period (forecast, with upcoming sales)"
     },
     "alerts": {
       "belowSsm": "Warning: this gross is below the applicable minimum social wage ({ssm} per month).",
       "possibleBelowSsm": "Warning: the gross allowed by the period's commissions is below the applicable minimum social wage ({ssm} per month).",
       "mapaNegative": "Warning: the employer contributions exceed the MAPA Property share for the period.",
-      "reserveShort": "Warning: the reserve no longer covers one month of salary at the current net."
+      "reserveShort": "Warning: the reserve no longer covers one month of salary at the current net.",
+      "forecastShort": "Warning: on {end}, the forecast reserve will no longer cover one month of salary."
     },
     "reserve": {
       "title": "Reserve account",
-      "intro": "Since {start}: {months, plural, one {# month} other {# months}}, {sales, plural, =0 {no sale} one {# sale} other {# sales}}.",
-      "cumul": "Cumulated agent shares",
+      "intro": "Since {start}: {sales, plural, =0 {no completed sale} one {# completed sale} other {# completed sales}} added to the starting balance.",
+      "cumul": "Agent shares of completed sales since the start date",
       "monthlyCostTotal": "Monthly cost of the current salary ({net} net, gross and employer contributions)",
       "monthlyCostBrut": "Monthly cost of the current salary ({net} net, gross only)",
-      "spent": "Salaries over the tracking period ({months, plural, one {# month} other {# months}})",
+      "spent": "{count, plural, =0 {No salary paid} one {# salary paid} other {# salaries paid}}",
       "balance": "Reserve balance",
       "monthsCovered": "Months covered at the current net",
       "monthsValue": "{months} months",
       "notApplicable": "Not applicable",
-      "missing": "Enter the current monthly net and the tracking start date in the settings to follow the reserve."
+      "missing": "Enter the current monthly net and the tracking start date in the settings to follow the reserve.",
+      "noSalary": "No salary paid since the start date.",
+      "oneSalary": "1 salary paid ({month}).",
+      "salaries": "{count} salaries paid (from {from} to {to}).",
+      "next": "Next salary deducted on {date}.",
+      "startBalance": "Starting balance on {start}"
     },
     "class2": {
       "title": "Annual estimate in class 2",
@@ -5101,7 +5114,9 @@
       "accident": "Accident insurance factor (bonus-malus)",
       "saved": "Settings saved.",
       "saving": "Saving…",
-      "save": "Save"
+      "save": "Save",
+      "startBalance": "Reserve starting balance (€)",
+      "startBalanceHint": "Amount due to the agent on the start date, excluding VAT and the MAPA Property share, after payment of all previous salaries"
     },
     "errors": {
       "agent": "Unknown agent.",
@@ -5114,7 +5129,19 @@
       "reserveStart": "Invalid tracking start date.",
       "mutualite": "Invalid mutual insurance rate.",
       "accident": "Invalid accident insurance factor.",
-      "unavailable": "The settings are not yet enabled in the database."
+      "unavailable": "The settings are not yet enabled in the database.",
+      "startBalance": "Invalid starting balance: positive or negative amount, 2 decimals at most.",
+      "startBalanceUnavailable": "The starting balance is not yet enabled in the database: save with 0 for now."
+    },
+    "forecast": {
+      "title": "Forecast with upcoming sales",
+      "intro": "{count, plural, one {# upcoming sale} other {# upcoming sales}}: estimated balance at the end of the month of the last one, on {end}.",
+      "balanceNow": "Reserve balance today",
+      "upcoming": "Agent shares of upcoming sales ({count})",
+      "salaries": "{count, plural, =0 {No salary to pay until then} one {# salary paid until then} other {# salaries paid until then}}",
+      "balance": "Forecast balance on {end}",
+      "monthsCovered": "Months covered at the current net (forecast)",
+      "none": "No upcoming sale."
     }
   }
 }

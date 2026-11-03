@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { parseDecimalInput } from "@/lib/admin/sale-commission";
-import { ACCIDENT_FACTORS, MUTUALITE_RATES, SSM_LEVELS, type EmployerSettings, type SalesAgent } from "@/lib/admin/remuneration-reglages";
+import { ACCIDENT_FACTORS, MUTUALITE_RATES, SSM_LEVELS, parseSignedDecimal, type EmployerSettings, type SalesAgent } from "@/lib/admin/remuneration-reglages";
 
 type AgentState = {
   key: string;
@@ -22,6 +22,7 @@ type AgentState = {
   ssmLevel: string;
   currentNet: string;
   reserveStart: string;
+  startBalance: string;
 };
 
 const decimalText = (n: number) => String(n).replace(".", ",");
@@ -48,6 +49,8 @@ const ERRORS: Record<string, string> = {
   ssm_invalid: "errors.ssm",
   net_invalid: "errors.net",
   reserve_start_invalid: "errors.reserveStart",
+  start_balance_invalid: "errors.startBalance",
+  start_balance_unavailable: "errors.startBalanceUnavailable",
   mutualite_invalid: "errors.mutualite",
   accident_invalid: "errors.accident",
   settings_unavailable: "errors.unavailable",
@@ -69,6 +72,7 @@ export function SettingsForm({ agents, employer }: { agents: (SalesAgent & { dis
       ssmLevel: a.ssmLevel,
       currentNet: a.currentNet === null ? "" : decimalText(a.currentNet),
       reserveStart: a.reserveStart ?? "",
+      startBalance: decimalText(a.startBalance),
     })),
   );
   const [mutualite, setMutualite] = useState(String(employer.mutualiteRate));
@@ -99,12 +103,23 @@ export function SettingsForm({ agents, employer }: { agents: (SalesAgent & { dis
         ssmLevel: r.ssmLevel,
         currentNet: parseDecimalInput(r.currentNet),
         reserveStart: r.reserveStart || null,
+        startBalance: parseSignedDecimal(r.startBalance) ?? 0,
       })),
       employer: { mutualiteRate: Number(mutualite), accidentFactor: Number(factor) },
     };
-    const bad = payload.agents.find((a) => a.sharePct === null || Number.isNaN(a.sharePct) || Number.isNaN(a.travelDeduction) || (a.currentNet !== null && Number.isNaN(a.currentNet)));
+    const bad = payload.agents.find((a) => a.sharePct === null || Number.isNaN(a.sharePct) || Number.isNaN(a.travelDeduction) || (a.currentNet !== null && Number.isNaN(a.currentNet)) || Number.isNaN(a.startBalance));
     if (bad) {
-      setError(t(bad.sharePct === null || Number.isNaN(bad.sharePct) ? "errors.share" : Number.isNaN(bad.travelDeduction) ? "errors.travel" : "errors.net"));
+      setError(
+        t(
+          bad.sharePct === null || Number.isNaN(bad.sharePct)
+            ? "errors.share"
+            : Number.isNaN(bad.travelDeduction)
+              ? "errors.travel"
+              : Number.isNaN(bad.startBalance)
+                ? "errors.startBalance"
+                : "errors.net",
+        ),
+      );
       return;
     }
     setPending(true);
@@ -166,6 +181,9 @@ export function SettingsForm({ agents, employer }: { agents: (SalesAgent & { dis
             </Field>
             <Field label={t("settings.reserveStart")}>
               <input type="date" value={r.reserveStart} onChange={(e) => set(i, { reserveStart: e.target.value })} className={inputCls} />
+            </Field>
+            <Field label={t("settings.startBalance")} hint={t("settings.startBalanceHint")}>
+              <input type="text" inputMode="decimal" value={r.startBalance} onChange={(e) => set(i, { startBalance: e.target.value })} className={inputCls} />
             </Field>
           </div>
           <div className="mt-4 flex flex-col gap-2 text-sm">

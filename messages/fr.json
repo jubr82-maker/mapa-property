@@ -3365,11 +3365,12 @@
       "commissionVat": "TVA ({rate} %)",
       "commissionTtc": "Commission TTC",
       "commissionNone": "Commission non renseignée (facultative).",
-      "commissionNeedsPrice": "Indiquez le prix de vente pour calculer la commission."
+      "commissionNeedsPrice": "Indiquez le prix de vente pour calculer la commission.",
+      "upcomingHint": "Vente à venir : elle s'enregistre normalement et sera comptée dans le réalisé une fois la date de l'acte passée."
     },
     "commissionNotProvided": "Non renseignée",
     "totals": {
-      "title": "Totaux des ventes affichées",
+      "title": "Totaux des ventes réalisées affichées",
       "ht": "Total commission HT",
       "tva": "Total TVA",
       "ttc": "Total commission TTC",
@@ -3385,6 +3386,10 @@
       "mapaShare": "Part MAPA Property HT",
       "share": "{pct} %",
       "defaults": "Part de l'agent par défaut ({pct} %) : les réglages des agents ne sont pas encore enregistrés."
+    },
+    "upcoming": {
+      "badge": "À venir",
+      "total": "À venir : {count, plural, one {# vente} other {# ventes}}, {ht} HT (non comptées dans les totaux ci-dessus)."
     }
   },
   "admin_nav": {
@@ -4989,40 +4994,48 @@
     },
     "commissions": {
       "title": "Mes commissions",
-      "count": "{count, plural, =0 {Aucune vente sur la période.} one {# vente sur la période} other {# ventes sur la période}}{notProvided, plural, =0 {.} one {, dont # « Non renseignée ».} other {, dont # « Non renseignée ».}}",
+      "count": "{count, plural, =0 {Aucune vente réalisée sur la période.} one {# vente réalisée sur la période} other {# ventes réalisées sur la période}}{notProvided, plural, =0 {.} one {, dont # « Non renseignée ».} other {, dont # « Non renseignée ».}}",
       "ht": "Commissions HT de la période",
       "agentShare": "Part de l'agent ({pct} %)",
       "mapaShare": "Part MAPA Property ({pct} %)",
       "paysCharges": "L'agent paie aussi les charges patronales : sa part couvre le coût total (brut et charges patronales).",
-      "mapaPaysCharges": "L'agent ne paie pas les charges patronales : sa part couvre le brut seul, les charges patronales sont prises sur la part de MAPA Property."
+      "mapaPaysCharges": "L'agent ne paie pas les charges patronales : sa part couvre le brut seul, les charges patronales sont prises sur la part de MAPA Property.",
+      "upcoming": "À venir sur la période : {count, plural, one {# vente} other {# ventes}}, {ht} HT (part de l'agent {agentHt}), non comptées ci-dessus."
     },
     "possible": {
       "title": "Ce que les commissions de la période permettent ({months, plural, one {# mois} other {# mois}})",
       "totalCostPeriod": "Coût total possible sur la période",
       "totalCostMonthly": "Coût total possible par mois",
       "brut": "Brut mensuel correspondant",
-      "net": "Net mensuel équivalent",
+      "net": "Net mensuel qui équilibre la période (réalisé)",
       "chargesOnMapa": "Charges patronales prises sur la part de MAPA Property",
-      "mapaRemaining": "Reste réellement à MAPA Property"
+      "mapaRemaining": "Reste réellement à MAPA Property",
+      "netForecast": "Net mensuel qui équilibre la période (prévisionnel, avec les ventes à venir)"
     },
     "alerts": {
       "belowSsm": "Attention : ce brut est sous le salaire social minimum applicable ({ssm} par mois).",
       "possibleBelowSsm": "Attention : le brut permis par les commissions de la période est sous le salaire social minimum applicable ({ssm} par mois).",
       "mapaNegative": "Attention : les charges patronales dépassent la part de MAPA Property sur la période.",
-      "reserveShort": "Attention : la réserve ne couvre plus un mois de salaire au net actuel."
+      "reserveShort": "Attention : la réserve ne couvre plus un mois de salaire au net actuel.",
+      "forecastShort": "Attention : au {end}, la réserve prévisionnelle ne couvrira plus un mois de salaire."
     },
     "reserve": {
       "title": "Compte de réserve",
-      "intro": "Depuis le {start} : {months, plural, one {# mois} other {# mois}}, {sales, plural, =0 {aucune vente} one {# vente} other {# ventes}}.",
-      "cumul": "Cumul des parts de l'agent",
+      "intro": "Depuis le {start} : {sales, plural, =0 {aucune vente réalisée} one {# vente réalisée} other {# ventes réalisées}} ajoutée(s) au solde de départ.",
+      "cumul": "Parts de l'agent des ventes réalisées depuis la date de début",
       "monthlyCostTotal": "Coût mensuel du salaire actuel ({net} net, brut et charges patronales)",
       "monthlyCostBrut": "Coût mensuel du salaire actuel ({net} net, brut seul)",
-      "spent": "Salaires de la période de suivi ({months, plural, one {# mois} other {# mois}})",
+      "spent": "{count, plural, =0 {Aucun salaire versé} one {# salaire versé} other {# salaires versés}}",
       "balance": "Solde de la réserve",
       "monthsCovered": "Mois couverts au net actuel",
       "monthsValue": "{months} mois",
       "notApplicable": "Non applicable",
-      "missing": "Renseignez le net mensuel actuel et la date de début du suivi dans les réglages pour suivre la réserve."
+      "missing": "Renseignez le net mensuel actuel et la date de début du suivi dans les réglages pour suivre la réserve.",
+      "noSalary": "Aucun salaire versé depuis la date de début.",
+      "oneSalary": "1 salaire versé ({month}).",
+      "salaries": "{count} salaires versés (de {from} à {to}).",
+      "next": "Prochain salaire déduit le {date}.",
+      "startBalance": "Solde de départ au {start}"
     },
     "class2": {
       "title": "Estimation annuelle en classe 2",
@@ -5094,7 +5107,9 @@
       "accident": "Facteur assurance accident (bonus-malus)",
       "saved": "Réglages enregistrés.",
       "saving": "Enregistrement…",
-      "save": "Enregistrer"
+      "save": "Enregistrer",
+      "startBalance": "Solde de départ de la réserve (€)",
+      "startBalanceHint": "Montant qui revient à l'agent à la date de début, hors TVA et hors part de MAPA Property, après paiement de tous les salaires précédents"
     },
     "errors": {
       "agent": "Agent inconnu.",
@@ -5107,7 +5122,19 @@
       "reserveStart": "Date de début du suivi invalide.",
       "mutualite": "Taux de mutualité invalide.",
       "accident": "Facteur assurance accident invalide.",
-      "unavailable": "Les réglages ne sont pas encore activés dans la base de données."
+      "unavailable": "Les réglages ne sont pas encore activés dans la base de données.",
+      "startBalance": "Solde de départ invalide : montant positif ou négatif, 2 décimales au plus.",
+      "startBalanceUnavailable": "Le solde de départ n'est pas encore activé dans la base de données : enregistrez avec 0 en attendant."
+    },
+    "forecast": {
+      "title": "Prévisionnel avec les ventes à venir",
+      "intro": "{count, plural, one {# vente à venir} other {# ventes à venir}} : solde estimé à la fin du mois de la dernière, le {end}.",
+      "balanceNow": "Solde de la réserve aujourd'hui",
+      "upcoming": "Parts de l'agent des ventes à venir ({count})",
+      "salaries": "{count, plural, =0 {Aucun salaire à verser d'ici là} one {# salaire versé d'ici là} other {# salaires versés d'ici là}}",
+      "balance": "Solde prévisionnel au {end}",
+      "monthsCovered": "Mois couverts au net actuel (prévisionnel)",
+      "none": "Aucune vente à venir."
     }
   }
 }

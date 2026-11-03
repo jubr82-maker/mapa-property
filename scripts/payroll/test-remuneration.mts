@@ -77,28 +77,30 @@ test("salaire social minimum : alerte sous 2 771,33 (non qualifie) ou 3 325,59 (
   assert.equal(possibilityFromShare(12000, 3000, 12, AGENT, EMP).salary.belowSsm, true);
 });
 
-test("compte de reserve : cumul moins le cout du salaire actuel, mois couverts, alerte", () => {
+test("compte de reserve : solde de depart, ventes, salaires deduits, mois couverts, alerte", () => {
   const cost = salaryFromNet(3720, AGENT, EMP).employer.coutTotal;
-  const r = reserveAccount(50000, 6, 3720, AGENT, EMP);
+  const res = (startBalance: number, cumulAgentHt: number, salaries: number, agent = AGENT) => reserveAccount({ startBalance, cumulAgentHt, salaries, currentNet: 3720 }, agent, EMP);
+  const r = res(10000, 40000, 6);
   assert.equal(r.monthlyCost, cost);
-  assert.equal(r.balance, Math.round((50000 - cost * 6) * 100) / 100);
-  assert.equal(r.monthsCovered, Math.floor((r.balance / cost) * 10) / 10);
+  assert.equal(r.balance, Math.round((10000 + 40000 - cost * 6) * 100) / 100);
+  assert.equal(r.monthsCovered, Math.round((r.balance / cost) * 10) / 10);
   assert.equal(r.short, false);
   // L'agent ne paie pas les charges : cout = brut seul.
-  const brutOnly = reserveAccount(50000, 6, 3720, { ...AGENT, paysEmployerCharges: false }, EMP);
-  assert.equal(brutOnly.monthlyCost, salaryFromNet(3720, AGENT, EMP).net.brut);
+  assert.equal(res(0, 50000, 6, { ...AGENT, paysEmployerCharges: false }).monthlyCost, salaryFromNet(3720, AGENT, EMP).net.brut);
+  // Solde de depart negatif accepte.
+  assert.equal(res(-2000, 0, 0).balance, -2000);
   // Moins d'un mois couvert : alerte.
-  const low = reserveAccount(cost * 3.5, 3, 3720, AGENT, EMP);
+  const low = res(0, cost * 3.5, 3);
   assert.equal(low.short, true);
   assert.equal(low.monthsCovered, 0.5);
-  const neg = reserveAccount(1000, 2, 3720, AGENT, EMP);
+  const neg = res(0, 1000, 2);
   assert.ok(neg.balance < 0 && neg.short);
-  assert.equal(reserveAccount(0, 0, 0, AGENT, EMP).monthsCovered, null);
+  assert.equal(reserveAccount({ startBalance: 0, cumulAgentHt: 0, salaries: 0, currentNet: 0 }, AGENT, EMP).monthsCovered, null);
 });
 
 test("reglages : listes fermees et bornes controlees cote serveur", () => {
-  const ok = parseAgentInput({ key: "julien", displayName: " Julien Brebion ", active: true, sharePct: 80, paysEmployerCharges: true, taxClass: 1, travelDeduction: 1881, ssmLevel: "non_qualifie", currentNet: 3720, reserveStart: "2026-01-01" });
-  assert.deepEqual(ok.row, { agent_key: "julien", display_name: "Julien Brebion", active: true, part_agent_pct: 80, paie_charges_patronales: true, classe_impot: 1, frais_deplacement_annuels: 1881, niveau_ssm: "non_qualifie", net_mensuel_actuel: 3720, debut_suivi_reserve: "2026-01-01" });
+  const ok = parseAgentInput({ key: "julien", displayName: " Julien Brebion ", active: true, sharePct: 80, paysEmployerCharges: true, taxClass: 1, travelDeduction: 1881, ssmLevel: "non_qualifie", currentNet: 3720, reserveStart: "2026-01-01", startBalance: -1250.5 });
+  assert.deepEqual(ok.row, { agent_key: "julien", display_name: "Julien Brebion", active: true, part_agent_pct: 80, paie_charges_patronales: true, classe_impot: 1, frais_deplacement_annuels: 1881, niveau_ssm: "non_qualifie", net_mensuel_actuel: 3720, debut_suivi_reserve: "2026-01-01", solde_depart_reserve: -1250.5 });
   const base = { key: "julien", displayName: "Julien", sharePct: 80, taxClass: 1, travelDeduction: 0, ssmLevel: "qualifie", currentNet: null, reserveStart: null };
   assert.equal(parseAgentInput(base).row?.net_mensuel_actuel, null);
   assert.equal(parseAgentInput({ ...base, key: "autre" }).error, "agent_invalid");
@@ -160,8 +162,15 @@ const { NextIntlClientProvider } = createRequire(import.meta.url)("next-intl") a
 const props = {
   agent: { name: "Julien", sharePct: 80, paysEmployerCharges: true, taxClass: 1 as const, travelDeduction: 1881, ssmLevel: "non_qualifie" as const, currentNet: 3720 },
   employer: EMP,
-  period: { months: 12, count: 4, notProvided: 1, ht: 30000, agentHt: 24000, mapaHt: 6000 },
-  reserve: { start: "2026-01-01", startLabel: "01/01/2026", cumulAgentHt: 24000, months: 11, sales: 3 },
+  period: { months: 12, count: 4, notProvided: 1, ht: 30000, agentHt: 24000, mapaHt: 6000, upcoming: { count: 0, ht: 0, agentHt: 0, mapaHt: 0 } },
+  reserve: {
+    startLabel: "01/01/2026",
+    startBalance: 0,
+    cumulAgentHt: 24000,
+    sales: 3,
+    paid: { count: 11, firstLabel: "janvier 2026", lastLabel: "novembre 2026", nextLabel: "31/12/2026" },
+    forecast: null,
+  } as Parameters<typeof RemunerationScreen>[0]["reserve"],
 };
 const render = (p: typeof props) =>
   renderToStaticMarkup(createElement(NextIntlClientProvider as unknown as ComponentType<Record<string, unknown>>, { locale: "fr", timeZone: "Europe/Luxembourg", messages: fr, onError: (e: Error) => { throw e; } }, createElement(RemunerationScreen, p)));
@@ -172,7 +181,7 @@ test("rendu de l'ecran : blocs, valeurs, alertes, bandeau ; toutes les traductio
   assert.ok(html.includes("Je choisis mon net") && html.includes("Mes commissions") && html.includes("Compte de réserve") && html.includes("Estimation annuelle en classe 2"));
   assert.ok(html.includes('value="3720,00"'), "net actuel prerempli");
   assert.ok(html.includes("Coût total pour MAPA Property"));
-  assert.ok(html.includes("4 ventes sur la période, dont 1 « Non renseignée »."));
+  assert.ok(html.includes("4 ventes réalisées sur la période, dont 1 « Non renseignée »."));
   assert.ok(html.includes("L&#x27;agent paie aussi les charges patronales") || html.includes("L'agent paie aussi les charges patronales"));
   assert.ok(html.includes("Attention : la réserve ne couvre plus un mois de salaire au net actuel."), "24 000 pour 11 mois : reserve negative");
   assert.ok(html.includes("Attention : le brut permis par les commissions de la période est sous le salaire social minimum"), "2 000 par mois");

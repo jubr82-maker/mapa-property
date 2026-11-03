@@ -33,7 +33,7 @@ import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE, formatDateOnly } from "@/lib/datetime";
 import { commissionAmounts, storedCommission } from "@/lib/admin/sale-commission";
 import { DEFAULT_AGENT, DEFAULT_AGENT_SHARE_PCT, loadSalesAgents, saleAgentKey } from "@/lib/admin/remuneration-reglages";
-import { commissionTotals, luxembourgToday, resolvePeriod, summaryByAgent, type PeriodKey } from "@/lib/admin/sales-summary";
+import { commissionTotals, isUpcomingSale, luxembourgToday, resolvePeriod, splitBySaleDate, summaryByAgent, type PeriodKey } from "@/lib/admin/sales-summary";
 
 // Types : liste fermee des fiches de biens (libelles admin_properties.ptype_*),
 // anciennes valeurs des ventes (maison, immeuble) avec leur libelle propre.
@@ -139,10 +139,11 @@ export default async function AdminVentesRealiseesPage({
   const agentParam = params.agent?.trim() || undefined;
   const agentFilter = agentParam && agents.some((a) => a.key === agentParam) ? agentParam : undefined;
   // Periode ; ancien lien ?year=AAAA : cette annee, de date a date.
+  const today = luxembourgToday();
   const legacyYear = !params.periode && /^\d{4}$/.test(params.year ?? "") ? params.year : undefined;
   const period = legacyYear
-    ? resolvePeriod("dates", `${legacyYear}-01-01`, `${legacyYear}-12-31`, luxembourgToday())
-    : resolvePeriod(params.periode, params.du, params.au, luxembourgToday());
+    ? resolvePeriod("dates", `${legacyYear}-01-01`, `${legacyYear}-12-31`, today)
+    : resolvePeriod(params.periode, params.du, params.au, today);
   const periodFiltered = period.key !== "tout";
   const vue = params.vue === "commune" ? "commune" : "liste";
 
@@ -201,8 +202,11 @@ export default async function AdminVentesRealiseesPage({
   const totalVolume = rows.reduce((sum, r) => sum + Number(r.prix_vente || 0), 0);
 
   // Commissions des ventes affichees (sans commission : nombre seulement).
-  const saleRecords = rows as unknown as ({ agent: string } & Record<string, unknown>)[];
+  // Realisees seulement ; ventes a venir (acte apres aujourd'hui) a part.
+  const split = splitBySaleDate(rows as unknown as ({ agent: string; date_acte: string } & Record<string, unknown>)[], today);
+  const saleRecords = split.realized;
   const totals = commissionTotals(saleRecords);
+  const upcomingTotals = commissionTotals(split.upcoming);
   const recap = summaryByAgent(saleRecords, agentFilter ? agents.filter((a) => a.key === agentFilter) : agents, DEFAULT_AGENT_SHARE_PCT);
   const periodText =
     period.from && period.to
@@ -404,7 +408,14 @@ export default async function AdminVentesRealiseesPage({
                   const com = commissionOf(r);
                   return (
                     <tr key={r.id} className="hover:bg-[#F5EFE1]/40">
-                      <td className="px-3 py-2 font-mono text-xs">{formatDateOnly(r.date_acte)}</td>
+                      <td className="px-3 py-2 font-mono text-xs">
+                        {formatDateOnly(r.date_acte)}
+                        {isUpcomingSale(r.date_acte, today) && (
+                          <span className="ml-2 whitespace-nowrap rounded-full border border-[#9E7B2A]/40 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-[#9E7B2A]" data-sale-upcoming>
+                            {t("upcoming.badge")}
+                          </span>
+                        )}
+                      </td>
                       <td className="px-3 py-2 font-medium">{r.commune}</td>
                       <td className="px-3 py-2 text-xs text-[#3D4F63]/80">{r.adresse}</td>
                       <td className="px-3 py-2 text-xs">{typeLabel(r.property_type)}</td>
@@ -485,7 +496,14 @@ export default async function AdminVentesRealiseesPage({
                         const mode = r.comparable_override === null ? t("comparable.mode_auto") : t("comparable.mode_forced");
                         return (
                           <tr key={r.id} className={eff ? "" : "opacity-50"}>
-                            <td className="px-4 py-1.5 font-mono text-xs">{formatDateOnly(r.date_acte)}</td>
+                            <td className="px-4 py-1.5 font-mono text-xs">
+                              {formatDateOnly(r.date_acte)}
+                              {isUpcomingSale(r.date_acte, today) && (
+                                <span className="ml-2 whitespace-nowrap rounded-full border border-[#9E7B2A]/40 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-[#9E7B2A]" data-sale-upcoming>
+                                  {t("upcoming.badge")}
+                                </span>
+                              )}
+                            </td>
                             <td className="px-4 py-1.5 text-xs">{typeLabel(r.property_type)}</td>
                             <td className="px-4 py-1.5 text-right font-mono text-xs">{r.surface_habitable} m²</td>
                             <td className="px-4 py-1.5 text-right font-mono font-bold">{fmtEur(r.prix_vente)}</td>
@@ -529,6 +547,11 @@ export default async function AdminVentesRealiseesPage({
             ))}
           </div>
           <p className="text-xs text-[#3D4F63]/70">{t("totals.notProvided", { count: totals.notProvided, total: totals.count })}</p>
+          {upcomingTotals.count > 0 && (
+            <p className="text-xs text-[#3D4F63]/70" data-sales-upcoming-total>
+              {t("upcoming.total", { count: upcomingTotals.count, ht: fmtCents(upcomingTotals.ht) })}
+            </p>
+          )}
 
           <h2 className="pt-4 font-display text-xl font-bold uppercase tracking-[0.05em]">{t("recap.title")}</h2>
           <div className="overflow-x-auto rounded-lg border border-[#3D4F63]/20 bg-white">

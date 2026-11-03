@@ -11,7 +11,7 @@
 import { NextResponse } from "next/server";
 import { dbFailure } from "@/lib/admin/action-result";
 import { requireSalesAdmin } from "@/lib/admin/sales-auth";
-import { isSettingsTableMissing, parseAgentInput, parseEmployerInput } from "@/lib/admin/remuneration-reglages";
+import { isSettingsTableMissing, isStartBalanceColumnMissing, parseAgentInput, parseEmployerInput } from "@/lib/admin/remuneration-reglages";
 
 export async function PUT(req: Request) {
   const auth = await requireSalesAdmin();
@@ -32,7 +32,14 @@ export async function PUT(req: Request) {
   const { row: employerRow, error: employerError } = parseEmployerInput(body.employer as Record<string, unknown>);
   if (employerError || !employerRow) return NextResponse.json({ error: employerError ?? "invalid" }, { status: 400 });
 
-  const a = await auth.supabase.from("mapa_sales_agents").upsert(agentRows, { onConflict: "agent_key" });
+  const saveAgents = (rows: Record<string, unknown>[]) => auth.supabase.from("mapa_sales_agents").upsert(rows, { onConflict: "agent_key" });
+  let a = await saveAgents(agentRows);
+  // Colonne du solde de depart pas encore creee (supabase/sql/34) : sans
+  // solde, enregistrement comme avant ; avec un solde, refus clair.
+  if (isStartBalanceColumnMissing(a.error)) {
+    if (agentRows.some((r) => r.solde_depart_reserve !== 0)) return NextResponse.json({ error: "start_balance_unavailable" }, { status: 409 });
+    a = await saveAgents(agentRows.map(({ solde_depart_reserve: _omit, ...r }) => r));
+  }
   const e = a.error ? null : await auth.supabase.from("mapa_employer_settings").upsert({ ...employerRow, updated_at: now }, { onConflict: "id" });
   const error = a.error ?? e?.error ?? null;
   if (error) {

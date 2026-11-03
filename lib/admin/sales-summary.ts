@@ -6,7 +6,8 @@
 // montants, et comptees a part ("Non renseignee").
 
 import { commissionAmounts, roundCents, storedCommission } from "@/lib/admin/sale-commission";
-import { saleAgentKey, type SalesAgent } from "@/lib/admin/remuneration-reglages";
+import { DEFAULT_AGENT, saleAgentKey, type SalesAgent } from "@/lib/admin/remuneration-reglages";
+import { lastDayOfMonth as monthEnd, salariesPaid, salariesThroughMonthOf, type SalarySchedule } from "@/lib/payroll/remuneration";
 
 export const PERIODS = ["mois", "annee", "annee_precedente", "tout", "dates"] as const;
 export type PeriodKey = (typeof PERIODS)[number];
@@ -117,4 +118,84 @@ export function summaryByAgent(sales: readonly SaleForSummary[], agents: readonl
     const sharePct = agents.find((a) => a.key === key)?.sharePct ?? fallbackSharePct;
     return { key, ...t, sharePct, ...splitCommission(t.ht, sharePct) };
   });
+}
+
+/** Vente a venir : date de l'acte posterieure a aujourd'hui (Luxembourg). Jamais refusee. */
+export function isUpcomingSale(dateActe: string, today: string): boolean {
+  return dateActe.slice(0, 10) > today;
+}
+
+/** Ventes realisees (date de l'acte jusqu'a aujourd'hui) et ventes a venir. */
+export function splitBySaleDate<T extends { date_acte: string }>(sales: readonly T[], today: string): { realized: T[]; upcoming: T[] } {
+  const realized: T[] = [];
+  const upcoming: T[] = [];
+  for (const s of sales) (isUpcomingSale(s.date_acte, today) ? upcoming : realized).push(s);
+  return { realized, upcoming };
+}
+
+/**
+ * Duree d'une periode en mois entiers, pour tout calcul "par mois" :
+ * mois en cours 1, annee en cours 12, annee precedente 12, de date a date
+ * les mois du calendrier couverts (borne absente : mois de la premiere
+ * vente, mois en cours), tout du mois de la premiere vente au mois en cours
+ * inclus. Toujours au moins 1.
+ */
+export function periodMonths(period: Period, firstSaleDate: string | null, today: string): number {
+  switch (period.key) {
+    case "mois":
+      return 1;
+    case "annee":
+    case "annee_precedente":
+      return 12;
+    case "dates": {
+      const from = period.from ?? firstSaleDate ?? today;
+      const to = period.to ?? today;
+      return from <= to ? monthsInPeriod(from, to) : monthsInPeriod(to, from);
+    }
+    default: {
+      const first = firstSaleDate && firstSaleDate <= today ? firstSaleDate : today;
+      return monthsInPeriod(first, today);
+    }
+  }
+}
+
+export type ReserveData = {
+  start: string;
+  startBalance: number;
+  /** Parts de l'agent des ventes realisees datees de la date de debut ou apres. */
+  cumulAgentHt: number;
+  sales: number;
+  paid: SalarySchedule;
+  /** Ventes a venir (acte apres aujourd'hui, a partir de la date de debut), null si aucune. */
+  forecast: { cumulAgentHt: number; sales: number; lastDate: string; endDate: string; salaries: number } | null;
+};
+
+/**
+ * Donnees du compte de reserve d'un agent : solde de depart a la date de
+ * debut ; s'y ajoutent les ventes datees de la date de debut ou apres (les
+ * ventes anterieures sont deja comprises dans le solde). Realise : jusqu'a
+ * aujourd'hui ; previsionnel : ventes a venir, jusqu'a la fin du mois de la
+ * derniere. Salaires : verses le dernier jour de chaque mois.
+ */
+export function reserveData(
+  sales: readonly SaleForSummary[],
+  agent: Pick<SalesAgent, "key" | "sharePct" | "reserveStart" | "startBalance">,
+  today: string,
+): ReserveData | null {
+  const start = agent.reserveStart;
+  if (!start) return null;
+  const since = (sales as (SaleForSummary & { date_acte: string })[]).filter((s) => s.date_acte.slice(0, 10) >= start);
+  const { realized, upcoming } = splitBySaleDate(since, today);
+  const asAgent = [{ ...DEFAULT_AGENT, key: agent.key, sharePct: agent.sharePct }];
+  const [r] = summaryByAgent(realized, asAgent, agent.sharePct);
+  const [u] = summaryByAgent(upcoming, asAgent, agent.sharePct);
+  const lastDate = upcoming.map((s) => s.date_acte.slice(0, 10)).sort().at(-1) ?? null;
+  return {
+    start,
+    startBalance: agent.startBalance,
+    cumulAgentHt: r.agentHt,
+    sales: r.count,
+    paid: salariesPaid(start, today),
+    forecast: lastDate ? { cumulAgentHt: u.agentHt, sales: u.count, lastDate, endDate: monthEnd(lastDate), salaries: salariesThroughMonthOf(start, lastDate) } : null,
+  };
 }

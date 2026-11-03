@@ -118,7 +118,7 @@ await test("reglages : repli par defaut si tables absentes ou vides, valeurs hor
     fake({ data: [{ agent_key: "julien", display_name: "Julien Brebion", active: true, part_agent_pct: "75.50", paie_charges_patronales: false, classe_impot: 2, frais_deplacement_annuels: "1881.00", niveau_ssm: "qualifie", net_mensuel_actuel: "3720.00", debut_suivi_reserve: "2026-01-01" }], error: null }),
   );
   assert.equal(saved.source, "saved");
-  assert.deepEqual(saved.agents[0], { key: "julien", displayName: "Julien Brebion", active: true, sharePct: 75.5, paysEmployerCharges: false, taxClass: 2, travelDeduction: 1881, ssmLevel: "qualifie", currentNet: 3720, reserveStart: "2026-01-01" });
+  assert.deepEqual(saved.agents[0], { key: "julien", displayName: "Julien Brebion", active: true, sharePct: 75.5, paysEmployerCharges: false, taxClass: 2, travelDeduction: 1881, ssmLevel: "qualifie", currentNet: 3720, reserveStart: "2026-01-01", startBalance: 0 });
   const bad = agentFromRow({ agent_key: "julien", display_name: " ", part_agent_pct: 140, classe_impot: 3, frais_deplacement_annuels: -5, niveau_ssm: "x", net_mensuel_actuel: -1 })!;
   assert.deepEqual([bad.displayName, bad.sharePct, bad.taxClass, bad.travelDeduction, bad.ssmLevel, bad.currentNet], [null, 80, 1, 0, "non_qualifie", null]);
   assert.equal(agentFromRow({ agent_key: "Julien!" }), null);
