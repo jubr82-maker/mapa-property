@@ -529,6 +529,8 @@
     "city_lu_option": "{name}, Gemeinde {commune}",
     "city_quartier_option": "{name}, Stadtviertel von Luxemburg",
     "city_lu_no_match": "Keine Ortschaft in Luxemburg gefunden.",
+    "city_lu_search": "Liste filtern",
+    "city_lu_choose": "Ortschaft wählen",
     "city_lu_list": "Ortschaften in Luxemburg",
     "subject": "Betreff",
     "subject_select": "Auswählen",
@@ -1843,6 +1845,9 @@
     "city_lu_option": "{name}, Gemeinde {commune}",
     "city_quartier_option": "{name}, Stadtviertel von Luxemburg",
     "city_lu_no_match": "Keine offizielle Ortschaft gefunden.",
+    "city_lu_list": "Ortschaften in Luxemburg",
+    "city_lu_search": "Liste filtern",
+    "city_lu_choose": "Ortschaft wählen",
     "city_lu_hint": "Offizielle Liste der Ortschaften Luxemburgs.",
     "city_free_hint": "Freitext, mit den Städten unserer Seiten.",
     "city_prefill_none": "Gespeicherte Stadt „{city}“: keine sichere offizielle Ortschaft. Bitte aus der Liste wählen.",
@@ -1988,6 +1993,8 @@
     "workflow_list": "Die Statusverfolgung ist noch nicht aktiviert: nur die Ansicht „Alle“ ist verfügbar.",
     "comparable_title": "Einstellung nicht verfügbar",
     "comparable": "Die manuelle Vergleichbarkeitseinstellung ist noch nicht aktiviert: automatischer Modus (12 Monate).",
+    "commission_title": "Provision nicht verfügbar",
+    "commission": "Verkaufsprovisionen sind in der Datenbank noch nicht aktiviert: Sie werden als „Nicht angegeben“ angezeigt und können nicht gespeichert werden.",
     "read_error_title": "Laden nicht möglich",
     "read_error": "Die Daten konnten nicht gelesen werden.",
     "views_unavailable_title": "Statistiken nicht verfügbar",
@@ -3252,7 +3259,9 @@
       "pricePerM2": "€/m²",
       "agent": "Makler",
       "comparable": "Vergleichbar",
-      "actions": "Aktionen"
+      "actions": "Aktionen",
+      "commissionHt": "Provision ohne MwSt.",
+      "commissionTtc": "Provision inkl. MwSt."
     },
     "edit": "Bearbeiten",
     "editTitle": "Verkauf bearbeiten",
@@ -3281,7 +3290,12 @@
       "invalidFields": "Pflichtfelder fehlen oder sind ungültig.",
       "network": "Netzwerkfehler, bitte prüfen Sie Ihre Verbindung.",
       "communeNotOfficial": "die Ortschaft muss aus der offiziellen Liste Luxemburgs gewählt werden.",
-      "http": "der Server hat die Anfrage abgelehnt (Code {status}), ohne einen Grund anzugeben"
+      "http": "der Server hat die Anfrage abgelehnt (Code {status}), ohne einen Grund anzugeben",
+      "commissionMode": "die Provisionsart muss „Prozentsatz des Preises“ oder „Festbetrag“ sein.",
+      "commissionRate": "der Provisionssatz muss eine Zahl zwischen 0 und 100 sein, mit höchstens 2 Dezimalstellen.",
+      "commissionAmount": "die Provision ohne MwSt. muss null oder positiv sein, mit höchstens 2 Dezimalstellen.",
+      "vatRate": "der MwSt.-Satz muss 17 %, 14 %, 8 %, 3 % oder 0 % sein.",
+      "commissionUnavailable": "die Provision kann noch nicht gespeichert werden (Datenbank noch nicht aktualisiert). Provisionsfeld leeren, um den Verkauf zu speichern."
     },
     "propertyType": {
       "appartement": "Wohnung",
@@ -3324,8 +3338,21 @@
       "saving": "Wird gespeichert…",
       "saveChanges": "Änderungen speichern",
       "saveFailed": "Speichern fehlgeschlagen: {reason}",
-      "add": "Verkauf hinzufügen"
-    }
+      "add": "Verkauf hinzufügen",
+      "commission": "Provision",
+      "commissionModePercent": "Prozentsatz des Preises",
+      "commissionModeFixed": "Festbetrag",
+      "commissionRate": "Provisionssatz (%)",
+      "commissionAmount": "Provision ohne MwSt. (€)",
+      "vat": "MwSt.",
+      "vatOption": "{rate} %",
+      "commissionHt": "Provision ohne MwSt.",
+      "commissionVat": "MwSt. ({rate} %)",
+      "commissionTtc": "Provision inkl. MwSt.",
+      "commissionNone": "Provision nicht angegeben (optional).",
+      "commissionNeedsPrice": "Verkaufspreis eingeben, um die Provision zu berechnen."
+    },
+    "commissionNotProvided": "Nicht angegeben"
   },
   "admin_nav": {
     "brand": "MAPA Property",

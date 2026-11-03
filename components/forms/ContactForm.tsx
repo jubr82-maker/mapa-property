@@ -225,7 +225,6 @@ export function ContactForm({
               places={luPlaces}
               value={luPlace}
               onChange={setLuPlace}
-              placeholder={t("city_placeholder")}
               className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft focus:border-gold focus:outline-none"
             />
           ) : (

@@ -529,6 +529,8 @@
     "city_lu_option": "{name}, commune de {commune}",
     "city_quartier_option": "{name}, quartier de Luxembourg",
     "city_lu_no_match": "Aucune localité du Luxembourg ne correspond.",
+    "city_lu_search": "Filtrer la liste",
+    "city_lu_choose": "Choisir une localité",
     "city_lu_list": "Localités du Luxembourg",
     "subject": "Objet",
     "subject_select": "Choisissez",
@@ -1843,6 +1845,9 @@
     "city_lu_option": "{name}, commune de {commune}",
     "city_quartier_option": "{name}, quartier de Luxembourg",
     "city_lu_no_match": "Aucune localité officielle ne correspond.",
+    "city_lu_list": "Localités du Luxembourg",
+    "city_lu_search": "Filtrer la liste",
+    "city_lu_choose": "Choisir une localité",
     "city_lu_hint": "Liste officielle des localités du Luxembourg.",
     "city_free_hint": "Texte libre, avec les villes de nos pages.",
     "city_prefill_none": "Ville enregistrée « {city} » : aucune localité officielle sûre. Choisissez-la dans la liste.",
@@ -1988,6 +1993,8 @@
     "workflow_list": "Le suivi par statut n'est pas encore activé : seule la vue « Tous » est disponible.",
     "comparable_title": "Réglage indisponible",
     "comparable": "Le réglage manuel de la comparabilité n'est pas encore activé : mode automatique (12 mois).",
+    "commission_title": "Commission indisponible",
+    "commission": "La commission des ventes n'est pas encore activée dans la base de données : elle s'affiche « Non renseignée » et ne peut pas être enregistrée.",
     "read_error_title": "Lecture impossible",
     "read_error": "Les données n'ont pas pu être lues.",
     "views_unavailable_title": "Statistiques indisponibles",
@@ -3252,7 +3259,9 @@
       "pricePerM2": "€/m²",
       "agent": "Agent",
       "comparable": "Comparable",
-      "actions": "Actions"
+      "actions": "Actions",
+      "commissionHt": "Commission HT",
+      "commissionTtc": "Commission TTC"
     },
     "edit": "Modifier",
     "editTitle": "Modifier une vente",
@@ -3281,7 +3290,12 @@
       "invalidFields": "des champs obligatoires sont manquants ou invalides.",
       "network": "erreur réseau, vérifiez votre connexion.",
       "communeNotOfficial": "la localité doit être choisie dans la liste officielle du Luxembourg.",
-      "http": "le serveur a refusé la demande (code {status}) sans en donner le motif"
+      "http": "le serveur a refusé la demande (code {status}) sans en donner le motif",
+      "commissionMode": "le mode de commission doit être « En pourcentage du prix » ou « Montant fixe ».",
+      "commissionRate": "le taux de commission doit être un nombre entre 0 et 100, avec 2 décimales au plus.",
+      "commissionAmount": "la commission hors taxes doit être un montant positif ou nul, avec 2 décimales au plus.",
+      "vatRate": "le taux de TVA doit être 17 %, 14 %, 8 %, 3 % ou 0 %.",
+      "commissionUnavailable": "la commission ne peut pas encore être enregistrée (base de données pas encore à jour). Videz le champ de commission pour enregistrer la vente."
     },
     "propertyType": {
       "appartement": "Appartement",
@@ -3324,8 +3338,21 @@
       "saving": "Enregistrement…",
       "saveChanges": "Enregistrer les modifications",
       "saveFailed": "Échec de l'enregistrement : {reason}",
-      "add": "Ajouter la vente"
-    }
+      "add": "Ajouter la vente",
+      "commission": "Commission",
+      "commissionModePercent": "En pourcentage du prix",
+      "commissionModeFixed": "Montant fixe",
+      "commissionRate": "Taux de commission (%)",
+      "commissionAmount": "Commission hors taxes (€)",
+      "vat": "TVA",
+      "vatOption": "{rate} %",
+      "commissionHt": "Commission HT",
+      "commissionVat": "TVA ({rate} %)",
+      "commissionTtc": "Commission TTC",
+      "commissionNone": "Commission non renseignée (facultative).",
+      "commissionNeedsPrice": "Saisissez le prix de vente pour calculer la commission."
+    },
+    "commissionNotProvided": "Non renseignée"
   },
   "admin_nav": {
     "brand": "MAPA Property",

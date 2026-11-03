@@ -217,7 +217,12 @@ export function PropertyCreateForm({
         </Field>
         <Field label={t("field_city")} hint={lu ? t("city_lu_hint") : t("city_free_hint")}>
           {lu ? (
-            <LuLocalityCombobox key="lu" places={luPlaces} value={luPlace} onChange={setLuPlace} name="city" communeName="city_commune" className={inputCls} />
+            <>
+              <LuLocalityCombobox key="lu" places={luPlaces} value={luPlace} onChange={setLuPlace} className={inputCls} />
+              {/* Memes champs envoyes qu'avant : nom officiel et commune. */}
+              <input type="hidden" name="city" value={luPlace?.name ?? ""} />
+              <input type="hidden" name="city_commune" value={luPlace?.commune ?? ""} />
+            </>
           ) : (
             <CitySuggestInput key={country} name="city" suggestions={foreignSuggestions[country] ?? []} className={inputCls} onValueChange={setForeignCity} />
           )}

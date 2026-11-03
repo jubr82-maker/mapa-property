@@ -9,6 +9,7 @@ export type AdminNoticeKind =
   | "workflow_partial"
   | "workflow_list"
   | "comparable"
+  | "commission"
   | "read_error"
   | "views_unavailable"
   | "cms_unavailable"

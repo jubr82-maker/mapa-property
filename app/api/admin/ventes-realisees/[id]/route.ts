@@ -8,6 +8,7 @@ import { dbFailure } from "@/lib/admin/action-result";
 
 import { NextResponse } from "next/server";
 import { requireSalesAdmin, parseSaleInput } from "@/lib/admin/sales-auth";
+import { COMMISSION_COLUMNS, isCommissionColumnMissing, parseSaleCommission } from "@/lib/admin/sale-commission";
 
 export async function PATCH(
   req: Request,
@@ -49,15 +50,27 @@ export async function PATCH(
     return NextResponse.json({ error: validationError ?? "invalid" }, { status: 400 });
   }
 
-  const update: Record<string, unknown> = { ...insert };
+  // Nov. 2026 : commission facultative, controlee ici (lib/admin/sale-commission.ts).
+  const { commission, error: commissionError } = parseSaleCommission(body, insert.prix_vente);
+  if (commissionError || !commission) {
+    return NextResponse.json({ error: commissionError ?? "invalid" }, { status: 400 });
+  }
+
+  const update: Record<string, unknown> = { ...insert, ...commission };
   if (hasOverride && overrideValid) {
     update.comparable_override = overrideValue;
   }
 
-  const { error } = await auth.supabase
-    .from("mapa_historical_sales")
-    .update(update)
-    .eq("id", id);
+  const save = (row: Record<string, unknown>) => auth.supabase.from("mapa_historical_sales").update(row).eq("id", id);
+  let { error } = await save(update);
+  // Colonnes de commission pas encore creees (supabase/sql/32) : une vente
+  // sans commission s'enregistre comme avant ; avec commission, refus clair.
+  if (isCommissionColumnMissing(error)) {
+    if (commission.commission_mode !== null) {
+      return NextResponse.json({ error: "commission_unavailable" }, { status: 409 });
+    }
+    ({ error } = await save(Object.fromEntries(Object.entries(update).filter(([k]) => !(COMMISSION_COLUMNS as readonly string[]).includes(k)))));
+  }
 
   if (error) {
     console.error("[admin/ventes-realisees/[id]] update error", error.message);

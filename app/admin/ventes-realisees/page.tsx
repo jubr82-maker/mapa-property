@@ -12,6 +12,8 @@
 //                                                     : (date_acte <= 12 mois)
 //   La colonne comparable_override (migration 20260701d) est lue en
 //   best-effort : si absente, on degrade (mode auto par defaut) + banniere.
+// Nov. 2026 : commission HT et TTC (colonnes de supabase/sql/32, lues en
+// best-effort de la meme facon ; vente sans commission : "Non renseignee").
 
 import { LISTING_TYPES } from "@/lib/listing/families";
 import { LEGACY_SALE_TYPES } from "@/lib/admin/sale-fields";
@@ -26,6 +28,7 @@ import { ComparableControl } from "./ComparableControl";
 import { AdminNotice } from "@/components/admin/AdminNotice";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE, formatDateOnly } from "@/lib/datetime";
+import { commissionAmounts, storedCommission } from "@/lib/admin/sale-commission";
 
 // Types : liste fermee des fiches de biens (libelles admin_properties.ptype_*),
 // anciennes valeurs des ventes (maison, immeuble) avec leur libelle propre.
@@ -53,8 +56,13 @@ interface SaleRow {
   notes: string | null;
   created_at: string;
   comparable_override: boolean | null;
+  commission_mode?: string | null;
+  commission_taux?: number | null;
+  commission_ht?: number | null;
+  tva_taux?: number | null;
 }
 
+const COMMISSION_SELECT = ", commission_mode, commission_taux, commission_ht, tva_taux";
 const SELECT_WITH_OVERRIDE =
   "id, property_type, surface_habitable, surface_terrain, chambres, classe_energie, annee_construction, etat, adresse, commune, prix_vente, date_acte, agent, notes, created_at, comparable_override";
 const SELECT_LEGACY =
@@ -66,6 +74,21 @@ function fmtEur(n: number): string {
     currency: "EUR",
     maximumFractionDigits: 0,
   }).format(n);
+}
+
+function fmtCents(n: number): string {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n);
+}
+
+/** Commission HT et TTC d'une vente, ou null (non renseignee). */
+function commissionOf(r: SaleRow): { ht: number; ttc: number } | null {
+  const c = storedCommission(r as unknown as Record<string, unknown>);
+  return c ? commissionAmounts(c.ht, c.vat) : null;
 }
 
 function pricePerSqm(r: SaleRow): number | null {
@@ -119,8 +142,14 @@ export default async function AdminVentesRealiseesPage({
   }
 
   // Best-effort : tente avec comparable_override, fallback si colonne absente.
+  // Puis commission (nov. 2026) : d'abord avec ses colonnes, sinon sans.
   let overrideColumnMissing = false;
-  let res = await buildQuery(SELECT_WITH_OVERRIDE);
+  let commissionColumnsMissing = false;
+  let res = await buildQuery(SELECT_WITH_OVERRIDE + COMMISSION_SELECT);
+  if (res.error) {
+    commissionColumnsMissing = true;
+    res = await buildQuery(SELECT_WITH_OVERRIDE);
+  }
   if (res.error) {
     overrideColumnMissing = true;
     res = await buildQuery(SELECT_LEGACY);
@@ -178,6 +207,7 @@ export default async function AdminVentesRealiseesPage({
       {overrideColumnMissing && (
         <AdminNotice kind="comparable" />
       )}
+      {commissionColumnsMissing && !overrideColumnMissing && <AdminNotice kind="commission" />}
 
       {/* Totaux + filtres */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -285,7 +315,7 @@ export default async function AdminVentesRealiseesPage({
         {/* Vue LISTE */}
         {!error && rows.length > 0 && vue === "liste" && (
           <div className="overflow-x-auto rounded-lg border border-[#3D4F63]/20 bg-white">
-            <table data-card-primary="2" data-card-keep="1,2,4,6,10" className="w-full text-sm">
+            <table data-card-primary="2" data-card-keep="1,2,4,6,8,9,12" className="w-full text-sm">
               <thead className="bg-[#3D4F63]/5 text-left">
                 <tr>
                   <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.date")}</th>
@@ -295,6 +325,8 @@ export default async function AdminVentesRealiseesPage({
                   <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.surface")}</th>
                   <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.price")}</th>
                   <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.pricePerM2")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.commissionHt")}</th>
+                  <th className="px-3 py-2 text-right font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.commissionTtc")}</th>
                   <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.agent")}</th>
                   <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.comparable")}</th>
                   <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em]">{t("col.actions")}</th>
@@ -303,6 +335,7 @@ export default async function AdminVentesRealiseesPage({
               <tbody className="divide-y divide-[#3D4F63]/10">
                 {rows.map((r) => {
                   const ppsqm = pricePerSqm(r);
+                  const com = commissionOf(r);
                   return (
                     <tr key={r.id} className="hover:bg-[#F5EFE1]/40">
                       <td className="px-3 py-2 font-mono text-xs">{formatDateOnly(r.date_acte)}</td>
@@ -313,6 +346,12 @@ export default async function AdminVentesRealiseesPage({
                       <td className="px-3 py-2 text-right font-mono font-bold">{fmtEur(r.prix_vente)}</td>
                       <td className="px-3 py-2 text-right font-mono text-xs text-[#9E7B2A]">
                         {ppsqm ? `${ppsqm} €` : ""}
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono text-xs">
+                        {com ? fmtCents(com.ht) : <span className="text-[#3D4F63]/50">{t("commissionNotProvided")}</span>}
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono text-xs font-bold">
+                        {com ? fmtCents(com.ttc) : <span className="font-normal text-[#3D4F63]/50">{t("commissionNotProvided")}</span>}
                       </td>
                       <td className="px-3 py-2 text-xs">{agentLabel(r.agent)}</td>
                       <td className="px-3 py-2">

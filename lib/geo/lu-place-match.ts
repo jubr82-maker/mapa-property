@@ -33,6 +33,23 @@ export function searchLuPlaces(list: LuPlace[], query: string, limit = 8): LuPla
   return hits.sort((a, b) => starts(a) - starts(b) || a.name.localeCompare(b.name, "fr") || a.commune.localeCompare(b.commune, "fr")).slice(0, limit);
 }
 
+/**
+ * Panneau du champ ville (nov. 2026) : sans saisie, la liste COMPLETE par
+ * ordre alphabetique ; avec une saisie, toutes les correspondances (meme
+ * comparaison que searchLuPlaces, sans limite). Une commune seule
+ * (communeOnly) n'est jamais proposee.
+ */
+export function filterLuPlaces(list: LuPlace[], query: string): LuPlace[] {
+  const choices = list.filter((p) => !p.communeOnly);
+  if (!placeKey(query)) return [...choices].sort((a, b) => a.name.localeCompare(b.name, "fr") || a.commune.localeCompare(b.commune, "fr"));
+  return searchLuPlaces(choices, query, Infinity);
+}
+
+/** Meme localite (nom, commune et nature). */
+export function sameLuPlace(a: LuPlace | null | undefined, b: LuPlace | null | undefined): boolean {
+  return Boolean(a && b && a.name === b.name && a.commune === b.commune && Boolean(a.quartier) === Boolean(b.quartier) && Boolean(a.communeOnly) === Boolean(b.communeOnly));
+}
+
 /** Localite officielle exacte (nom et, si donnee, commune), ou null. */
 export function findLuPlace(list: LuPlace[], name: string | null | undefined, commune?: string | null): LuPlace | null {
   if (!name) return null;

@@ -529,6 +529,8 @@
     "city_lu_option": "{name}, municipality of {commune}",
     "city_quartier_option": "{name}, district of Luxembourg City",
     "city_lu_no_match": "No Luxembourg locality matches.",
+    "city_lu_search": "Filter the list",
+    "city_lu_choose": "Choose a locality",
     "city_lu_list": "Luxembourg localities",
     "subject": "Subject",
     "subject_select": "Choose",
@@ -1843,6 +1845,9 @@
     "city_lu_option": "{name}, municipality of {commune}",
     "city_quartier_option": "{name}, district of Luxembourg City",
     "city_lu_no_match": "No official locality matches.",
+    "city_lu_list": "Luxembourg localities",
+    "city_lu_search": "Filter the list",
+    "city_lu_choose": "Choose a locality",
     "city_lu_hint": "Official list of Luxembourg localities.",
     "city_free_hint": "Free text, with the cities of our pages.",
     "city_prefill_none": "Saved city \"{city}\": no reliable official locality. Choose it from the list.",
@@ -1988,6 +1993,8 @@
     "workflow_list": "Status tracking is not enabled yet: only the “All” view is available.",
     "comparable_title": "Setting unavailable",
     "comparable": "Manual comparability setting is not enabled yet: automatic mode (12 months).",
+    "commission_title": "Commission unavailable",
+    "commission": "Sale commissions are not yet enabled in the database: they show as \"Not provided\" and cannot be saved.",
     "read_error_title": "Unable to load",
     "read_error": "The data could not be read.",
     "views_unavailable_title": "Statistics unavailable",
@@ -3252,7 +3259,9 @@
       "pricePerM2": "€/m²",
       "agent": "Agent",
       "comparable": "Comparable",
-      "actions": "Actions"
+      "actions": "Actions",
+      "commissionHt": "Commission excl. VAT",
+      "commissionTtc": "Commission incl. VAT"
     },
     "edit": "Edit",
     "editTitle": "Edit a sale",
@@ -3281,7 +3290,12 @@
       "invalidFields": "some required fields are missing or invalid.",
       "network": "network error, please check your connection.",
       "communeNotOfficial": "the locality must be chosen from the official Luxembourg list.",
-      "http": "the server refused the request (code {status}) without giving a reason"
+      "http": "the server refused the request (code {status}) without giving a reason",
+      "commissionMode": "the commission mode must be \"Percentage of the price\" or \"Fixed amount\".",
+      "commissionRate": "the commission rate must be a number between 0 and 100, with at most 2 decimals.",
+      "commissionAmount": "the commission excl. VAT must be zero or a positive amount, with at most 2 decimals.",
+      "vatRate": "the VAT rate must be 17 %, 14 %, 8 %, 3 % or 0 %.",
+      "commissionUnavailable": "the commission cannot be saved yet (database not yet updated). Clear the commission field to save the sale."
     },
     "propertyType": {
       "appartement": "Apartment",
@@ -3324,8 +3338,21 @@
       "saving": "Saving…",
       "saveChanges": "Save changes",
       "saveFailed": "Saving failed: {reason}",
-      "add": "Add the sale"
-    }
+      "add": "Add the sale",
+      "commission": "Commission",
+      "commissionModePercent": "Percentage of the price",
+      "commissionModeFixed": "Fixed amount",
+      "commissionRate": "Commission rate (%)",
+      "commissionAmount": "Commission excl. VAT (€)",
+      "vat": "VAT",
+      "vatOption": "{rate} %",
+      "commissionHt": "Commission excl. VAT",
+      "commissionVat": "VAT ({rate} %)",
+      "commissionTtc": "Commission incl. VAT",
+      "commissionNone": "Commission not provided (optional).",
+      "commissionNeedsPrice": "Enter the sale price to calculate the commission."
+    },
+    "commissionNotProvided": "Not provided"
   },
   "admin_nav": {
     "brand": "MAPA Property",

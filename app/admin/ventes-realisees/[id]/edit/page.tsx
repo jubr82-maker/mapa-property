@@ -8,6 +8,7 @@ import { adminLuPlaces } from "@/lib/admin/property-location";
 import { SaleForm } from "../../SaleForm";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
+import { DEFAULT_VAT_RATE, storedCommission } from "@/lib/admin/sale-commission";
 
 export const dynamic = "force-dynamic";
 
@@ -26,13 +27,15 @@ export default async function EditSalePage({
   if (!user) redirect(`/admin/login?from=/admin/ventes-realisees/${id}/edit`);
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_sales" });
 
-  const { data: row, error } = await supabase
-    .from("mapa_historical_sales")
-    .select(
-      "id, property_type, surface_habitable, surface_terrain, chambres, classe_energie, annee_construction, etat, adresse, commune, prix_vente, date_acte, agent, notes",
-    )
-    .eq("id", id)
-    .maybeSingle();
+  // Nov. 2026 : commission lue si ses colonnes existent (supabase/sql/32),
+  // sinon lecture sans elles : la vente reste modifiable.
+  const BASE =
+    "id, property_type, surface_habitable, surface_terrain, chambres, classe_energie, annee_construction, etat, adresse, commune, prix_vente, date_acte, agent, notes";
+  const read = (select: string) =>
+    supabase.from("mapa_historical_sales").select(select).eq("id", id).maybeSingle<Record<string, unknown> & { id: string }>();
+  let res = await read(`${BASE}, commission_mode, commission_taux, commission_ht, tva_taux`);
+  if (res.error) res = await read(BASE);
+  const { data: row, error } = res;
 
   if (error) {
     return (
@@ -52,6 +55,11 @@ export default async function EditSalePage({
   // reattribue a Julien.
   const agent = "julien" as const;
 
+  // Commission enregistree : mode et valeurs repris tels quels ; vente sans
+  // commission : pourcentage propose, champ vide (non renseignee), TVA 17 %.
+  const c = storedCommission(row);
+  const decimal = (n: number) => String(n).replace(".", ",");
+
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
@@ -60,7 +68,7 @@ export default async function EditSalePage({
             {t("editTitle")}
           </h1>
           <p className="mt-1 text-xs text-[#3D4F63]/70">
-            {row.commune} · {row.adresse}
+            {s(row.commune)} · {s(row.adresse)}
           </p>
         </div>
         <Link
@@ -90,6 +98,10 @@ export default async function EditSalePage({
             date_acte: s(row.date_acte).slice(0, 10),
             agent,
             notes: s(row.notes),
+            commission_mode: c?.mode ?? "pourcentage",
+            commission_taux: c?.mode === "pourcentage" && c.rate !== null ? decimal(c.rate) : "",
+            commission_ht: c?.mode === "montant_fixe" ? decimal(c.ht) : "",
+            tva_taux: String(c?.vat ?? DEFAULT_VAT_RATE),
           }}
         />
       </section>

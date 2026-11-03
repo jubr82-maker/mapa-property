@@ -109,7 +109,7 @@ test("serveur : localite inventee refusee au Luxembourg, texte libre ailleurs, p
 
 test("admin : liste fermee au Luxembourg a la creation et en modification, controle serveur, style inchange", () => {
   const create = read("components/admin/PropertyCreateForm.tsx");
-  assert.ok(create.includes("<LuLocalityCombobox") && create.includes('name="city"') && create.includes('communeName="city_commune"') && create.includes("COUNTRIES.map"));
+  assert.ok(create.includes("<LuLocalityCombobox") && create.includes('<input type="hidden" name="city" value={luPlace?.name ?? ""} />') && create.includes('<input type="hidden" name="city_commune" value={luPlace?.commune ?? ""} />') && create.includes("COUNTRIES.map"));
   const edit = read("components/admin/PropertyEditForm.tsx");
   assert.ok(edit.includes("<LuLocalityCombobox") && edit.includes("resolveLuPlace(") && edit.includes("country: countryOut") && edit.includes("city: cityOut"));
   const actions = read("app/admin/properties/actions.ts");
