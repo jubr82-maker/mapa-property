@@ -45,11 +45,46 @@ function isEmpty(el: HTMLElement): boolean {
   return false;
 }
 
-/** Remonte la page pour que `el` apparaisse sous l'en-tete fixe, puis le focus. */
+/** Titre (ou haut) visible entre le bas de l'en-tete fixe et le milieu de l'ecran. */
+export function inComfortZone(el: HTMLElement): boolean {
+  const top = el.getBoundingClientRect().top;
+  return top >= headerOffset() - 2 && top <= window.innerHeight / 2;
+}
+
+function scrollTargetTop(target: HTMLElement): number {
+  return Math.max(0, target.getBoundingClientRect().top + window.scrollY - headerOffset() - MARGIN);
+}
+
+/**
+ * Amene `target` juste sous l'en-tete fixe et donne le focus a `focusEl`.
+ * Nov. 2026, correctif (defaut constate dans un vrai navigateur : focus
+ * pose, mais page restee en bas, dans le pied de page) : le focus est donne
+ * AVANT le defilement (preventScroll), car dans Chrome un focus() appele
+ * pendant un defilement doux peut l'interrompre, et un ajustement du
+ * navigateur (ancrage du defilement quand l'etape raccourcit) aussi.
+ * Garde-fou : a la fin du defilement (scrollend, ou 900 ms au plus pour
+ * Safari qui ne connait pas scrollend), si le haut de l'etape n'est
+ * toujours pas visible, saut direct a la bonne position. Saut direct =
+ * behavior "auto" (aucun scroll-behavior CSS sur le site, donc immediat),
+ * plutot que la valeur instant, recente et refusee par les anciens navigateurs.
+ */
 export function scrollToAndFocus(target: HTMLElement, focusEl: HTMLElement | null = target): void {
-  const top = target.getBoundingClientRect().top + window.scrollY - headerOffset() - MARGIN;
-  window.scrollTo({ top: Math.max(0, top), behavior: reducedMotion() ? "auto" : "smooth" });
   focusEl?.focus({ preventScroll: true });
+  const smooth = !reducedMotion();
+  window.scrollTo({ top: scrollTargetTop(target), behavior: smooth ? "smooth" : "auto" });
+  let settled = false;
+  const settle = () => {
+    if (settled) return;
+    settled = true;
+    window.removeEventListener("scrollend", settle);
+    if (!inComfortZone(target)) window.scrollTo({ top: scrollTargetTop(target), behavior: "auto" });
+  };
+  if (!smooth) {
+    requestAnimationFrame(settle);
+    return;
+  }
+  window.addEventListener("scrollend", settle);
+  window.setTimeout(settle, 900);
 }
 
 /** Premier champ a remplir de l'etape, sinon premier bouton de choix, sinon premier champ. */
@@ -72,7 +107,9 @@ export function firstFieldInError(container: HTMLElement): HTMLElement | null {
 /** Nouvelle etape affichee : haut de l'etape, focus sur le premier champ a remplir. */
 export function revealStep(container: HTMLElement | null): void {
   if (!container) return;
-  scrollToAndFocus(container, firstFieldToFill(container));
+  // Haut de l'etape = son titre (sinon le conteneur).
+  const title = container.querySelector<HTMLElement>("h2, h3, legend") ?? container;
+  scrollToAndFocus(title, firstFieldToFill(container));
 }
 
 /** Champ obligatoire en erreur : remontee au premier, avec le focus. Renvoie true si trouve. */
@@ -90,13 +127,22 @@ export function revealFirstError(container: HTMLElement | null): boolean {
  * revealStep apres le rendu de la nouvelle etape.
  */
 export function useStepReveal(step: unknown, ref: RefObject<HTMLElement | null>): void {
-  const first = useRef(true);
+  // Etape precedente (et non un drapeau "premier affichage") : en
+  // developpement, React monte les composants deux fois ; seul un vrai
+  // changement d'etape declenche la remontee.
+  const prev = useRef(step);
   useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-    const id = requestAnimationFrame(() => revealStep(ref.current));
-    return () => cancelAnimationFrame(id);
+    if (Object.is(prev.current, step)) return;
+    prev.current = step;
+    // Deux images plus tard : la nouvelle etape est affichee et mise en page
+    // (hauteur de la page a jour) avant de calculer la position.
+    let id2 = 0;
+    const id1 = requestAnimationFrame(() => {
+      id2 = requestAnimationFrame(() => revealStep(ref.current));
+    });
+    return () => {
+      cancelAnimationFrame(id1);
+      cancelAnimationFrame(id2);
+    };
   }, [step, ref]);
 }

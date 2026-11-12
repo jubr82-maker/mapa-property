@@ -2,6 +2,14 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Fenetre ouverte en bas de l'ecran (question du pays, cookies) : la bulle
+   d'Elena et son invitation se masquent pour ne recouvrir aucun bouton
+   (lib/ui/bottom-sheet.ts). */
+html[data-bottom-sheet] [data-chatbot-bubble],
+html[data-bottom-sheet] [data-chatbot-invite] {
+  display: none;
+}
+
 /* ============================================================
    STEP3a-FORET — Palette Forêt Luxembourgeoise (4 couleurs strictes)
      - Sapin profond  #1F221A : fond nuit / texte jour / Hero+OffMkt

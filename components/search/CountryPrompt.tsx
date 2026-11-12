@@ -7,6 +7,7 @@
 // Libelles et adresses prepares par le serveur (aucun texte en dur ici).
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { useBottomSheet } from "@/lib/ui/bottom-sheet";
 
 export function CountryPrompt({
   title,
@@ -18,6 +19,8 @@ export function CountryPrompt({
   choices: { label: string; href: string }[];
 }) {
   const [open, setOpen] = useState(true);
+  // Bulle d'Elena masquee tant que la fenetre est ouverte (aucun bouton recouvert).
+  useBottomSheet(open);
   if (!open) return null;
   return (
     <aside

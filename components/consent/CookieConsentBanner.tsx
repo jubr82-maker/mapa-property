@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { useBottomSheet } from "@/lib/ui/bottom-sheet";
 import {
   acceptAll,
   CONSENT_REOPEN_EVENT,
@@ -36,6 +37,8 @@ export function CookieConsentBanner() {
   const [expanded, setExpanded] = useState(false);
   const [stats, setStats] = useState(false);
   const [marketing, setMarketing] = useState(false);
+  // Bulle d'Elena masquee tant que la banniere est affichee (nov. 2026).
+  useBottomSheet(visible);
 
   useEffect(() => {
     if (hasConsentDecision()) setVisible(false);

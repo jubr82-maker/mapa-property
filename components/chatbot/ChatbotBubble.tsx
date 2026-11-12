@@ -109,6 +109,7 @@ export function ChatbotBubble() {
       {inviteVisible && !open && (
         <div
           role="status"
+          data-chatbot-invite
           className="fixed bottom-24 right-5 z-50 max-w-[220px] rounded-2xl border border-gold/40 bg-bg px-4 py-3 text-sm text-ink shadow-xl shadow-ink/10 sm:bottom-28 print:hidden"
         >
           <button
@@ -133,6 +134,7 @@ export function ChatbotBubble() {
         onClick={() => (open ? setOpen(false) : openPanel())}
         aria-label="Eléna"
         aria-expanded={open}
+        data-chatbot-bubble
         className={`fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full shadow-xl shadow-gold/30 transition-all duration-300 hover:scale-105 sm:size-16 print:hidden ${
           open ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
