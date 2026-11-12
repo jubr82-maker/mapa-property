@@ -37,6 +37,11 @@ test("appartement de luxe : jamais le Luxembourg", () => {
   assert.equal(r.luxury, true);
   for (const w of ["luxe", "luxueux", "luxury", "luxueuse villa"]) assert.deepEqual(parseQuery(w).places, [], w);
 });
+test("Nice : la ville (page de ville), jamais l'adjectif anglais", () => {
+  for (const q of ["villa Nice", "appartement à Nice", "Nice", "Wohnung in Nizza"]) assert.deepEqual(places(q), ["foreign-city:Nice"], q);
+  assert.deepEqual(places("nice house in Strassen"), ["lu-commune:Strassen"]);
+  assert.deepEqual(places("Nice house"), []);
+});
 test("appartement : type seul, aucun lieu", () => {
   const r = parseQuery("appartement");
   assert.deepEqual(r.types, ["appartement"]);

@@ -246,6 +246,20 @@ const VOCAB = new Set([
 ]);
 
 /**
+ * Mot courant qui est aussi un nom de lieu ("nice" / Nice) : lieu seulement
+ * s'il est ecrit comme un nom propre (majuscule, pas en tete de phrase), ou
+ * s'il est le seul mot saisi. "villa Nice", "Nice" : la ville ; "nice house" :
+ * un adjectif.
+ */
+function writtenAsName(raw: string, token: string): boolean {
+  const plain = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (plain.trim().toLowerCase() === token) return true;
+  const re = new RegExp(`(?<![A-Za-z0-9])${token[0].toUpperCase()}${token.slice(1)}(?![A-Za-z0-9])`, "g");
+  for (let m = re.exec(plain); m; m = re.exec(plain)) if (plain.slice(0, m.index).trim().length > 0) return true;
+  return false;
+}
+
+/**
  * Analyse d'un texte libre. `extraPlaces` : villes des biens publies (hors
  * Luxembourg), cf. foreignCityPlaces.
  */
@@ -319,7 +333,8 @@ export function parseQuery(input: string, extraPlaces?: Map<string, Place[]>): P
     if (used[i]) continue;
     for (let n = Math.min(5, tokens.length - i); n >= 1; n--) {
       const span = tokens.slice(i, i + n);
-      if (n === 1 && (STOP.has(span[0]) || VOCAB.has(span[0]) || span[0].length < 3 || /^\d+$/.test(span[0]))) continue;
+      if (n === 1 && (span[0].length < 3 || /^\d+$/.test(span[0]))) continue;
+      if (n === 1 && (STOP.has(span[0]) || VOCAB.has(span[0])) && !writtenAsName(raw, span[0])) continue;
       const k = keyOf(span.join(" "));
       const noSur = keyOf(span.filter((t) => t !== "sur" && t !== "s").join(" "));
       const hits = lookupExact(k, extraPlaces).length ? lookupExact(k, extraPlaces) : lookupExact(noSur, extraPlaces);

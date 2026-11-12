@@ -68,8 +68,10 @@ test("base d'Elena : aucune ancienne valeur, 45 000 present", () => {
 test("SQL 36 : trois UPDATE cibles, controle final", () => {
   const s = readFileSync(join(root, "supabase/sql/36_faq_corrections.sql"), "utf8");
   assert.equal((s.match(/^UPDATE public\.faqs/gm) ?? []).length, 3);
-  for (const q of ["Qu''est-ce que le Bëllegen Akt ?", "Quels sont les honoraires de mise en location ?", "Combien coûte la gestion locative ?"]) assert.ok(s.includes(`WHERE question_fr = '${q}';`), q);
+  for (const q of ["Qu''est-ce que le Bëllegen Akt ?", "Quels sont les honoraires de mise en location ?", "Combien coûte la gestion locative ?"]) assert.ok(s.includes(`WHERE question_fr = '${q}'\n  AND page_key <> 'elena';`), q);
   assert.ok(/SELECT page_key, question_fr/.test(s));
+  // Reponses d'Elena (SQL 37, memes intitules pour E051 et E069) jamais modifiees.
+  assert.equal((s.match(/AND page_key <> 'elena'/g) ?? []).length, 4);
   assert.ok(!/40 000|encaissés|selon l''usage/.test(s.replace(/^--.*$/gm, "")));
 });
 

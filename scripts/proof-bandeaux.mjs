@@ -4,7 +4,7 @@
 // test FICTIF de la route de developpement /fr/test-bandeaux (rien en base).
 // Controles a chaque capture : bandeau present, texte sur une ligne (hauteur
 // du mot principal = une ligne), aucun debordement lateral de la page,
-// etiquette commerciale absente, prix remplace pour Vendu et Loue.
+// etiquette commerciale absente.
 // Lancement (machine de Julien) : pnpm dev, puis
 //   BASE=http://localhost:3000 node scripts/proof-bandeaux.mjs
 import { chromium } from "@playwright/test";
