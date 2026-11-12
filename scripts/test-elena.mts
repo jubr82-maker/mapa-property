@@ -1,7 +1,7 @@
 // Elena sans aucune liberte (nov. 2026, partie E4), sans reseau.
 // 30 questions reelles reformulees (FR, EN, DE). Pour chacune, la reponse
 // doit etre EXACTEMENT :
-//  - le texte d'une entree de docs/elena/elena-qa.json (langue du visiteur),
+//  - le texte d'une entree de lib/elena/elena-qa.json (langue du visiteur),
 //  - ou le texte d'un modele de recherche ({lieu} remplace) avec des biens,
 //  - ou une phrase figee d'un sujet verrouille (lib/chatbot/locked-topics.ts,
 //    prioritaire et inchange, construite depuis les sources du site),

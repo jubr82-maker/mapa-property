@@ -1,6 +1,6 @@
 -- =====================================================================
 -- 37 ELENA : REPONSES FERMEES VALIDEES
--- MAPA Property, prepare le 2026-11-12. Source unique : docs/elena/elena-qa.json
+-- MAPA Property, prepare le 2026-11-12. Source unique : lib/elena/elena-qa.json
 -- (106 entrees validees par Julien Brebion, 12/11/2026). AUCUN mot des reponses n'est modifie.
 --
 -- 1. Ajoute a public.faqs des colonnes FACULTATIVES (aucune donnee existante
@@ -15,7 +15,7 @@
 --    EXISTS sur page_key et question_fr) : rejouable.
 -- Aucune modification des droits (RLS) : memes regles que les autres
 -- questions (lecture publique des lignes publiees, ecriture admin).
--- Tant que ce fichier n'est pas execute, Elena lit docs/elena/elena-qa.json,
+-- Tant que ce fichier n'est pas execute, Elena lit lib/elena/elena-qa.json,
 -- sans aucune difference pour le visiteur.
 -- Retour arriere : DELETE FROM public.faqs WHERE page_key = 'elena';
 -- Mode d'emploi : coller le fichier ENTIER, Run. Un seul tableau.

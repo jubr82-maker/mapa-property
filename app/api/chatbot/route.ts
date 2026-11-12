@@ -284,7 +284,7 @@ export async function POST(req: Request) {
   // regles du site), puis reconnaissance de l'entree (Mistral : identifiant
   // seulement), sinon l'entree par defaut et la prise de contact. La reponse
   // affichee est TOUJOURS le texte exact d'une entree validee (table faqs,
-  // page 'elena', ou docs/elena/elena-qa.json), jamais un texte du modele.
+  // page 'elena', ou lib/elena/elena-qa.json), jamais un texte du modele.
   const tBanner = await getTranslations({ locale, namespace: "status_banner" });
   const tChat = await getTranslations({ locale, namespace: "chatbot" });
   const [{ entries }, properties] = await Promise.all([loadElenaEntries(), fetchAllPropertiesWithCover()]);

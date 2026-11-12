@@ -2,12 +2,12 @@
 // (page_key 'elena', lignes publiees, SQL 37), modifiable par Julien dans
 // l'admin (Questions frequentes, page "Elena"). Tant que le SQL 37 n'est pas
 // execute (colonnes absentes ou aucune ligne) : repli sur
-// docs/elena/elena-qa.json, sans aucune difference pour le visiteur.
+// lib/elena/elena-qa.json, sans aucune difference pour le visiteur.
 // Les reponses sont affichees MOT POUR MOT ; l'IA ne redige jamais rien.
 import { unstable_cache } from "next/cache";
 import { supabaseServer } from "@/lib/supabase-server";
 import { faqTag } from "@/lib/faq/data";
-import qaFile from "@/docs/elena/elena-qa.json";
+import qaFile from "@/lib/elena/elena-qa.json";
 
 export type ElenaLang = "fr" | "en" | "de";
 export type Tri = Record<ElenaLang, string>;
