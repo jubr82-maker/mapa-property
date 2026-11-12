@@ -235,6 +235,11 @@ interface RealEstateListingInput {
   propertyType?: string | null;
   /** sale ou rent : un loyer est declare par mois. */
   transaction?: string | null;
+  /**
+   * false : bien Vendu ou Loue (bandeau, SQL 35), indique comme n'etant
+   * plus disponible (schema.org SoldOut) et sans prix. Defaut : disponible.
+   */
+  available?: boolean;
 }
 
 /**
@@ -262,12 +267,13 @@ export const realEstateListing = (p: RealEstateListingInput) => {
     provider: { "@id": `${SITE_URL}#organization` },
     offers: {
       "@type": "Offer",
-      ...(p.price ? { price: p.price, priceCurrency: "EUR" } : {}),
+      ...(p.price && p.available !== false ? { price: p.price, priceCurrency: "EUR" } : {}),
       // Loyer : prix par mois (UnitPriceSpecification, code MON).
-      ...(p.price && p.transaction === "rent"
+      ...(p.price && p.available !== false && p.transaction === "rent"
         ? { priceSpecification: { "@type": "UnitPriceSpecification", price: p.price, priceCurrency: "EUR", unitCode: "MON" } }
         : {}),
-      availability: "https://schema.org/InStock",
+      // Vendu ou Loue : plus disponible (https://schema.org/SoldOut).
+      availability: p.available === false ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
       url: p.url,
       itemOffered: {
         "@type": accommodationType,

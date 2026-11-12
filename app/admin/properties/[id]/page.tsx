@@ -52,6 +52,11 @@ export default async function AdminPropertyEditPage({
   const mandateRes = await supabase.from("properties").select("mandate_type").eq("id", id).maybeSingle();
   const mandateAvailable = !mandateRes.error;
   const mandateType = mandateAvailable ? ((mandateRes.data as { mandate_type?: string | null } | null)?.mandate_type ?? null) : null;
+  // Bandeaux (SQL 35, nov. 2026) : meme principe ; colonnes absentes =
+  // listes desactivees et mention "enregistrables apres le SQL 35".
+  const bannerRes = await supabase.from("properties").select("status_banner, banner_position, banner_color").eq("id", id).maybeSingle();
+  const bannerAvailable = !bannerRes.error;
+  const bannerRow = bannerAvailable ? ((bannerRes.data as { status_banner?: string | null; banner_position?: string | null; banner_color?: string | null } | null) ?? null) : null;
   // Modele d'annonce (SQL 17) : meme principe, colonne listing_data.
   const listingRes = await supabase.from("properties").select("listing_data").eq("id", id).maybeSingle();
   const listingAvailable = !listingRes.error;
@@ -150,6 +155,7 @@ export default async function AdminPropertyEditPage({
         <PropertyEditForm
           propertyId={data.id}
           mandateAvailable={mandateAvailable}
+          banner={{ available: bannerAvailable, coverUrl: initialPhotos[0]?.url ?? null }}
           listing={{
             available: listingAvailable,
             initialData: listingData,
@@ -167,6 +173,9 @@ export default async function AdminPropertyEditPage({
           initial={{
             property_type: data.property_type ?? null,
             mandate_type: mandateType,
+            status_banner: bannerRow?.status_banner ?? null,
+            banner_position: bannerRow?.banner_position ?? null,
+            banner_color: bannerRow?.banner_color ?? null,
             title_fr: data.title_fr ?? null,
             title_en: data.title_en ?? null,
             title_de: data.title_de ?? null,

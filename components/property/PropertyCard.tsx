@@ -4,6 +4,9 @@ import { pickLang, type Locale } from "@/lib/types";
 import type { PropertyWithCover } from "@/lib/data";
 import { resolveBadgeStyles } from "@/lib/badge-style";
 import { formatPrice as formatPriceShared, formatSurface } from "@/lib/format/numbers";
+import { useTranslations } from "next-intl";
+import { bannerOf } from "@/lib/property-banner";
+import { StatusBanner } from "@/components/property/StatusBanner";
 
 interface PropertyCardProps {
   property: PropertyWithCover;
@@ -44,8 +47,15 @@ export function PropertyCard({
   compact = false,
   onClick,
 }: PropertyCardProps) {
+  const tBanner = useTranslations("status_banner");
   const title = pickLang(property, "title", locale) || "";
-  const price = formatPrice(property.price, property.transaction, locale);
+  // Bandeau (SQL 35) : Vendu et Loue remplacent le prix ; Sous compromis le garde.
+  const banner = bannerOf(property);
+  const closed = banner?.kind === "sold" || banner?.kind === "rented";
+  const price =
+    closed
+      ? tBanner(banner?.kind === "rented" ? "rented_price" : "sold_price")
+      : formatPrice(property.price, property.transaction, locale);
   // La table properties n'a pas de cover_image_url ; on s'appuie uniquement
   // sur cover_url (calculé depuis property_images via les fetchers data.ts).
   const cover = property.cover_url;
@@ -80,7 +90,9 @@ export function PropertyCard({
             no image
           </div>
         )}
-        {(() => {
+        {banner && <StatusBanner banner={banner} variant="card" />}
+        {/* Etiquette commerciale du coin (Exclusivite comprise) : jamais avec un bandeau. */}
+        {!banner && (() => {
           const b = resolveBadgeStyles(
             property.badge,
             property.badge_size,
@@ -124,10 +136,13 @@ export function PropertyCard({
           {title}
         </h3>
         <p
+          data-card-price
           className={
             compact
               ? "font-display text-base font-black tracking-tight text-ink"
-              : "font-display text-2xl font-black tracking-tight text-ink"
+              : closed
+                ? "font-display text-xl font-bold tracking-tight text-ink"
+                : "font-display text-2xl font-black tracking-tight text-ink"
           }
         >
           {price}

@@ -28,6 +28,13 @@ export interface Property {
   // Type de mandat (SQL 16, oct. 2026) : exclusive, semi_exclusive, simple,
   // autonomous. Absent tant que la colonne n'existe pas.
   mandate_type?: string | null;
+  // Bandeau de la premiere photo (SQL 35, nov. 2026) : under_compromise,
+  // sold, rented ; position straight/diagonal ; couleur sapin, cuivre,
+  // creme, blanc. Absents tant que les colonnes n'existent pas
+  // (lib/property-banner.ts, bannerOf).
+  status_banner?: string | null;
+  banner_position?: string | null;
+  banner_color?: string | null;
   // Modele d'annonce (SQL 17) : pieces par niveau (textes alternatifs).
   listing_data?: unknown;
   // Sprint badges commerciaux : libellé admin-driven (allowlist 6 valeurs

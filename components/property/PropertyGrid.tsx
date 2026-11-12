@@ -1,6 +1,7 @@
 import { PropertyCard } from "./PropertyCard";
 import type { PropertyWithCover } from "@/lib/data";
 import type { Locale } from "@/lib/types";
+import { availableFirst } from "@/lib/property-banner";
 
 export function PropertyGrid({
   properties,
@@ -21,7 +22,8 @@ export function PropertyGrid({
 
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {properties.map((p, i) => (
+      {/* Vendu et Loue apres les biens disponibles (ordre des autres inchange). */}
+      {availableFirst(properties).map((p, i) => (
         <PropertyCard key={p.id} property={p} locale={locale} priority={i === 0} />
       ))}
     </div>

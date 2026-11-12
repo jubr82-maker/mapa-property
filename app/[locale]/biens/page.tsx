@@ -358,4 +358,4 @@ async function PropertiesPage({
 }
 
 // Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
-export default withPageMessages(PropertiesPage, ["property_list", "search"]);
+export default withPageMessages(PropertiesPage, ["property_list", "search", "status_banner"]);

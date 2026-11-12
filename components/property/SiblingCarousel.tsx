@@ -25,6 +25,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import type { PropertyWithCover } from "@/lib/data";
 import type { Locale } from "@/lib/types";
 import { PropertyCard } from "@/components/property/PropertyCard";
+import { availableFirst } from "@/lib/property-banner";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { track } from "@/lib/tracking/track";
 
@@ -138,7 +139,7 @@ export function SiblingCarousel({
 
       <div ref={emblaRef} className="overflow-hidden">
         <ul className="flex gap-4">
-          {properties.map((property) => (
+          {availableFirst(properties).map((property) => (
             <li
               key={property.id}
               className="w-[280px] flex-[0_0_auto] sm:w-[300px]"

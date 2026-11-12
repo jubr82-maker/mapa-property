@@ -1859,7 +1859,27 @@
     "err_country_invalid": "Unbekanntes Land.",
     "err_code_country_invalid": "Unbekanntes Land.",
     "err_city_invalid": "Ungültige Stadt (höchstens 100 Zeichen).",
-    "err_code_city_invalid": "Ungültige Stadt (höchstens 100 Zeichen)."
+    "err_code_city_invalid": "Ungültige Stadt (höchstens 100 Zeichen).",
+    "f_banner": "Banner",
+    "banner_none": "Keines",
+    "banner_under_compromise": "Reserviert",
+    "banner_sold": "Verkauft",
+    "banner_rented": "Vermietet",
+    "f_banner_position": "Position des Banners",
+    "banner_position_straight": "Gerade, mittig",
+    "banner_position_diagonal": "Diagonal",
+    "f_banner_color": "Farbe des Banners",
+    "banner_color_sapin": "Tannengrün",
+    "banner_color_cuivre": "Kupfer",
+    "banner_color_creme": "Creme",
+    "banner_color_blanc": "Weiß",
+    "hint_banner": "Die Immobilie bleibt mit ihrem Banner auf der Website sichtbar. Um sie von der Website zu entfernen, nutzen Sie den Status. Mit Banner wird das Verkaufsetikett (auch Exklusivität) nicht mehr angezeigt.",
+    "banner_unavailable": "Banner können nach Ausführung der SQL-Datei 35 gespeichert werden.",
+    "banner_preview": "Vorschau der Immobilienkarte",
+    "banner_preview_no_photo": "Kein Foto",
+    "banner_preview_per_month": " / Monat",
+    "err_banner_invalid": "Banner, Position oder Farbe nicht in der Liste.",
+    "err_banner_transaction": "Dieses Banner ist für diese Immobilie nicht erlaubt: Verkauf, Keines, Reserviert oder Verkauft; Vermietung, Keines oder Vermietet."
   },
   "property_gone": {
     "title": "Diese Immobilie ist nicht mehr verfügbar",
@@ -5141,5 +5161,18 @@
       "monthsCovered": "Gedeckte Monate zum aktuellen Netto (Prognose)",
       "none": "Kein bevorstehender Verkauf."
     }
+  },
+  "status_banner": {
+    "under_compromise_main": "RESERVIERT",
+    "under_compromise_signature": "MAPA PROPERTY",
+    "under_compromise_aria": "Reserviert, MAPA Property",
+    "sold_main": "VERKAUFT",
+    "sold_signature": "DURCH MAPA PROPERTY",
+    "sold_aria": "Verkauft durch MAPA Property",
+    "rented_main": "VERMIETET",
+    "rented_signature": "DURCH MAPA PROPERTY",
+    "rented_aria": "Vermietet durch MAPA Property",
+    "sold_price": "Verkauft durch MAPA Property",
+    "rented_price": "Vermietet durch MAPA Property"
   }
 }

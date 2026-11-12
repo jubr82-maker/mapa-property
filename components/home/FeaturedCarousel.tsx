@@ -22,6 +22,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import type { HomeFeatured } from "@/lib/data";
 import { resolveBadgeStyles } from "@/lib/badge-style";
+import { StatusBanner } from "@/components/property/StatusBanner";
 import { SignatureLine } from "@/components/ui/SignatureLine";
 import { OffmarketPlaceholder } from "@/components/property/OffmarketPlaceholder";
 import { useDeviceMode } from "@/hooks/useDeviceMode";
@@ -337,8 +338,12 @@ function ViewAllCTA({ label, inline = false }: { label: string; inline?: boolean
 
 function FeaturedCard({ item }: { item: HomeFeatured }) {
   const tOff = useTranslations("offmarket");
+  const tBanner = useTranslations("status_banner");
   const locale = useLocale();
   const isOffmarket = item.kind === "offmarket";
+  // Bandeau (SQL 35) : biens Apimo seulement ; Vendu et Loue remplacent le prix.
+  const banner = isOffmarket ? null : item.banner ?? null;
+  const closedLabel = banner?.kind === "sold" ? tBanner("sold_price") : banner?.kind === "rented" ? tBanner("rented_price") : null;
   const href = isOffmarket
     ? `/off-market/${item.id}`
     : item.paths?.[locale] ?? (item.slug ? `/biens/${item.slug}` : "/biens");
@@ -388,7 +393,9 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
         )}
         {/* Sprint badges commerciaux : badge admin-driven sur biens apimo
             uniquement (offmarket conserve sa pilule cuivre ci-dessus). */}
-        {!isOffmarket && (() => {
+        {banner && <StatusBanner banner={banner} variant="card" />}
+        {/* Etiquette commerciale (Exclusivite comprise) : jamais avec un bandeau. */}
+        {!isOffmarket && !banner && (() => {
           const b = resolveBadgeStyles(
             item.badge,
             item.badge_size,
@@ -414,7 +421,7 @@ function FeaturedCard({ item }: { item: HomeFeatured }) {
         </h3>
         <div className="mt-auto flex items-baseline justify-between gap-3">
           <p className="font-display text-lg font-bold gold-text">
-            {item.price ? formatPrice(item.price, locale) : priceOnDemandLabel(locale)}
+            {closedLabel ?? (item.price ? formatPrice(item.price, locale) : priceOnDemandLabel(locale))}
           </p>
           {(item.surface || item.bedrooms) && (
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">

@@ -1,5 +1,6 @@
 "use server";
 
+import { checkBanner } from "@/lib/property-banner";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { cardFieldsChanged, readPropertyRevalRow, revalidateHomePages, revalidatePropertyChange, type PropertyRevalRow } from "@/lib/revalidate-property";
 import { redirect } from "next/navigation";
@@ -249,6 +250,8 @@ export async function updateProperty(
     badge?: string | null;
     badge_size?: string | null;
     badge_position?: string | null;
+    /** Bandeau (SQL 35) : envoye seulement si la colonne existe et qu'il change. */
+    banner?: { status_banner: string | null; banner_position: string; banner_color: string };
     /** Pays (code de lib/countries.ts) ; absent = inchange. */
     country?: string;
     /** Ville : au Luxembourg, nom officiel exact (registre CACLR) ; absent = inchangee. */
@@ -393,6 +396,19 @@ export async function updateProperty(
     const p = (data.badge_position ?? "").trim();
     update.badge_position =
       p.length > 0 && BADGE_POSITIONS.includes(p) ? p : null;
+  }
+
+  // --- Bandeau (SQL 35, nov. 2026) : trois listes fermees, et combinaison
+  // controlee selon la transaction ENREGISTREE du bien (vente : aucun, sous
+  // compromis, vendu ; location : aucun, loue). Tout le reste est refuse.
+  if (data.banner !== undefined) {
+    const b = data.banner;
+    const { data: tx } = await supabase.from("properties").select("transaction").eq("id", id).maybeSingle();
+    const problem = checkBanner((tx as { transaction?: string | null } | null)?.transaction ?? null, b?.status_banner ?? null, b?.banner_position, b?.banner_color);
+    if (!b || problem) return { ok: false, error: (await tProps())(`err_${problem ?? "banner_invalid"}`) };
+    update.status_banner = b.status_banner;
+    update.banner_position = b.banner_position;
+    update.banner_color = b.banner_color;
   }
 
   // --- Pays et ville (oct. 2026) : modifiables apres la creation. Au

@@ -49,6 +49,7 @@ import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
 import { withSocial } from "@/lib/seo-page-meta";
 import type { Property } from "@/lib/types";
+import { availableFirst, bannerOf } from "@/lib/property-banner";
 
 const langOf = (locale: string): ListingLang => (locale === "en" || locale === "de" ? locale : "fr");
 
@@ -244,6 +245,11 @@ async function PropertyPage({
 
   const t = await getTranslations({ locale, namespace: "property" });
   const tf = await getTranslations({ locale, namespace: "fiche" });
+  const tBanner = await getTranslations({ locale, namespace: "status_banner" });
+  // Bandeau (SQL 35) : Vendu et Loue remplacent le prix et ne sont plus
+  // disponibles (donnees structurees) ; Sous compromis garde le prix.
+  const banner = bannerOf(property);
+  const closed = banner?.kind === "sold" || banner?.kind === "rented";
   const tEx = await getTranslations({ locale, namespace: "explore" });
   const title = pickLang(property, "title", locale as Locale);
   // Mentions communes (cloture, signature, service multilingue, copyright)
@@ -305,14 +311,13 @@ async function PropertyPage({
     bathrooms: property.bathrooms,
     propertyType,
     transaction: property.transaction,
+    available: !closed,
   });
 
 
-  const formattedPrice = formatPrice(
-    property.price,
-    property.transaction,
-    locale,
-  );
+  const formattedPrice = closed
+    ? tBanner(banner?.kind === "rented" ? "rented_price" : "sold_price")
+    : formatPrice(property.price, property.transaction, locale);
   // Libellé riche (ex. "Vente en viager") si transaction_detail est renseigné
   // (saisie manuelle post sept. 2026) ; sinon Vente/Location comme avant
   // (les 16 biens Apimo existants, sans transaction_detail).
@@ -445,7 +450,8 @@ async function PropertyPage({
           actions={<PropertyActions propertyId={property.id} />}
           eyebrow={{
             lead: [property.country ?? "", property.city ?? ""],
-            accent: effectiveBadge(property.badge, property.mandate_type),
+            // Etiquette commerciale (Exclusivite comprise) : jamais avec un bandeau.
+            accent: banner ? null : effectiveBadge(property.badge, property.mandate_type),
           }}
           title={title}
           price={formattedPrice}
@@ -453,7 +459,7 @@ async function PropertyPage({
         />
 
         {/* Galerie + vidéo (POL2-10, null si absente) */}
-        <PropertyGallery items={galleryItems} title={title} />
+        <PropertyGallery items={galleryItems} title={title} banner={banner} />
         <div className="print:hidden">
           <PropertyVideo
             videoUrl={property.video_url}
@@ -582,7 +588,7 @@ async function PropertyPage({
             </h2>
             <SignatureLine width="w-8" />
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {similar.map((p) => (
+              {availableFirst(similar).map((p) => (
                 <PropertyCard key={p.id} property={p} locale={locale as Locale} />
               ))}
             </div>
@@ -605,4 +611,4 @@ async function PropertyPage({
 }
 
 // Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
-export default withPageMessages(PropertyPage, ["acquisition_simulator", "ai_transparency", "common", "contact", "form", "property", "rgpd"]);
+export default withPageMessages(PropertyPage, ["acquisition_simulator", "ai_transparency", "common", "contact", "form", "property", "rgpd", "status_banner"]);

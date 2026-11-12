@@ -154,4 +154,4 @@ async function HomePage({
 }
 
 // Traductions des composants client de la page seulement (oct. 2026, quotas Vercel).
-export default withPageMessages(HomePage, ["coverage", "featured", "mandates_home", "offmarket", "reviews_home", "search"]);
+export default withPageMessages(HomePage, ["coverage", "featured", "mandates_home", "offmarket", "reviews_home", "search", "status_banner"]);

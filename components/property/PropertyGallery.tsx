@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { PropertyLightbox } from "@/components/property/PropertyLightbox";
+import { StatusBanner } from "@/components/property/StatusBanner";
+import type { PropertyBanner } from "@/lib/property-banner";
 
 interface GalleryItem {
   type: "image" | "video";
@@ -15,6 +17,8 @@ interface GalleryItem {
 interface Props {
   items: GalleryItem[];
   title: string;
+  /** Bandeau Sous compromis, Vendu, Loue (SQL 35) : premiere photo seulement. */
+  banner?: PropertyBanner | null;
 }
 
 // Zone principale (oct. 2026) : la photo est posee DIRECTEMENT dans le
@@ -24,7 +28,7 @@ interface Props {
 // Robustesse : si l'optimiseur d'images (/_next/image) echoue pour une
 // photo, elle est rechargee directement depuis son adresse d'origine
 // (unoptimized) au lieu de laisser une zone vide.
-export function PropertyGallery({ items, title }: Props) {
+export function PropertyGallery({ items, title, banner = null }: Props) {
   const t = useTranslations("property");
   const tAi = useTranslations("ai_transparency");
   const [active, setActive] = useState(0);
@@ -97,6 +101,7 @@ export function PropertyGallery({ items, title }: Props) {
               className="absolute inset-0 size-full object-cover"
             />
           )}
+          {banner && active === 0 && current.type === "image" && <StatusBanner banner={banner} variant="gallery" />}
         </button>
 
         {items.length > 1 && (

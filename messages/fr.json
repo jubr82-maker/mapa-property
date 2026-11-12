@@ -1859,7 +1859,27 @@
     "err_country_invalid": "Pays inconnu.",
     "err_code_country_invalid": "Pays inconnu.",
     "err_city_invalid": "Ville invalide (100 caractères au plus).",
-    "err_code_city_invalid": "Ville invalide (100 caractères au plus)."
+    "err_code_city_invalid": "Ville invalide (100 caractères au plus).",
+    "f_banner": "Bandeau",
+    "banner_none": "Aucun",
+    "banner_under_compromise": "Sous compromis",
+    "banner_sold": "Vendu",
+    "banner_rented": "Loué",
+    "f_banner_position": "Position du bandeau",
+    "banner_position_straight": "Droit, au centre",
+    "banner_position_diagonal": "En diagonale",
+    "f_banner_color": "Couleur du bandeau",
+    "banner_color_sapin": "Sapin",
+    "banner_color_cuivre": "Cuivre",
+    "banner_color_creme": "Crème",
+    "banner_color_blanc": "Blanc",
+    "hint_banner": "Le bien reste visible sur le site avec son bandeau. Pour le retirer du site, utilisez le statut. Quand un bandeau est posé, l'étiquette commerciale (Exclusivité comprise) n'est plus affichée.",
+    "banner_unavailable": "Les bandeaux seront enregistrables après exécution du fichier SQL 35.",
+    "banner_preview": "Aperçu de la carte du bien",
+    "banner_preview_no_photo": "Aucune photo",
+    "banner_preview_per_month": " / mois",
+    "err_banner_invalid": "Bandeau, position ou couleur hors liste.",
+    "err_banner_transaction": "Ce bandeau n'est pas permis pour ce bien : en vente, Aucun, Sous compromis ou Vendu ; en location, Aucun ou Loué."
   },
   "property_gone": {
     "title": "Ce bien n'est plus disponible",
@@ -5136,5 +5156,18 @@
       "monthsCovered": "Mois couverts au net actuel (prévisionnel)",
       "none": "Aucune vente à venir."
     }
+  },
+  "status_banner": {
+    "under_compromise_main": "SOUS COMPROMIS",
+    "under_compromise_signature": "MAPA PROPERTY",
+    "under_compromise_aria": "Sous compromis, MAPA Property",
+    "sold_main": "VENDU",
+    "sold_signature": "PAR MAPA PROPERTY",
+    "sold_aria": "Vendu par MAPA Property",
+    "rented_main": "LOUÉ",
+    "rented_signature": "PAR MAPA PROPERTY",
+    "rented_aria": "Loué par MAPA Property",
+    "sold_price": "Vendu par MAPA Property",
+    "rented_price": "Loué par MAPA Property"
   }
 }

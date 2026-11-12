@@ -95,6 +95,23 @@ body {
   --badge-opportunite:  #e0af6e;  /* Opportunité — cuivre (alias --copper, texte sapin) */
   --badge-investment:   #3E5563;  /* Investissement — bleu ardoise */
   --badge-discover:     #1F221A;  /* À découvrir — sapin + filet cuivre, texte cuivre */
+
+  /* ── Bandeaux Sous compromis / Vendu / Loué (nov. 2026, SQL 35).
+     FIGÉS jour=nuit : le bandeau est posé sur une photo, jamais sur le fond
+     du site. Lus par components/property/StatusBanner.tsx. ── */
+  --banner-ground:        #F0E6CC;  /* fond crème sous la photo à 50 % */
+  --banner-sapin-bg:      rgba(31, 34, 26, 0.92);
+  --banner-sapin-text:    #F0E6CC;
+  --banner-sapin-line:    #D4A574;
+  --banner-cuivre-bg:     linear-gradient(90deg, #B8865A 0%, #D4A574 50%, #B8865A 100%);
+  --banner-cuivre-text:   #1F221A;
+  --banner-cuivre-line:   #1F221A;
+  --banner-creme-bg:      rgba(240, 230, 204, 0.95);
+  --banner-creme-text:    #1F221A;
+  --banner-creme-line:    #B8865A;
+  --banner-blanc-bg:      rgba(255, 255, 255, 0.95);
+  --banner-blanc-text:    #1F221A;
+  --banner-blanc-line:    #1F221A;
 }
 
 /* `:root.dark` (spécificité 0,2,0) et NON `.dark` (0,1,0) : sinon le

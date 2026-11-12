@@ -18,11 +18,13 @@ import { AdminTableCards } from "@/components/admin/AdminTableCards";
 import type { Viewport } from "next";
 import { iconUrl } from "@/lib/icons";
 
-// Tous les namespaces admin (prefixe admin_), pour les composants clients.
+// Tous les namespaces admin (prefixe admin_), pour les composants clients,
+// et celui des bandeaux des biens (apercu dans la fiche admin).
 
 async function adminMessages() {
   const all = (await getMessages({ locale: ADMIN_LOCALE })) as Record<string, unknown>;
-  return Object.fromEntries(Object.entries(all).filter(([ns]) => ns.startsWith("admin_")));
+  // status_banner : apercu du bandeau des biens (BannerFields, nov. 2026).
+  return Object.fromEntries(Object.entries(all).filter(([ns]) => ns.startsWith("admin_") || ns === "status_banner"));
 }
 
 const display = Big_Shoulders({

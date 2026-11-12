@@ -1859,7 +1859,27 @@
     "err_country_invalid": "Unknown country.",
     "err_code_country_invalid": "Unknown country.",
     "err_city_invalid": "Invalid city (100 characters at most).",
-    "err_code_city_invalid": "Invalid city (100 characters at most)."
+    "err_code_city_invalid": "Invalid city (100 characters at most).",
+    "f_banner": "Banner",
+    "banner_none": "None",
+    "banner_under_compromise": "Under offer",
+    "banner_sold": "Sold",
+    "banner_rented": "Let",
+    "f_banner_position": "Banner position",
+    "banner_position_straight": "Straight, centred",
+    "banner_position_diagonal": "Diagonal",
+    "f_banner_color": "Banner colour",
+    "banner_color_sapin": "Fir green",
+    "banner_color_cuivre": "Copper",
+    "banner_color_creme": "Cream",
+    "banner_color_blanc": "White",
+    "hint_banner": "The property stays visible on the site with its banner. To remove it from the site, use the status. When a banner is set, the sales label (Exclusivity included) is no longer shown.",
+    "banner_unavailable": "Banners can be saved once SQL file 35 has been run.",
+    "banner_preview": "Property card preview",
+    "banner_preview_no_photo": "No photo",
+    "banner_preview_per_month": " / month",
+    "err_banner_invalid": "Banner, position or colour not in the list.",
+    "err_banner_transaction": "This banner is not allowed for this property: for sale, None, Under offer or Sold; for rent, None or Let."
   },
   "property_gone": {
     "title": "This property is no longer available",
@@ -5143,5 +5163,18 @@
       "monthsCovered": "Months covered at the current net (forecast)",
       "none": "No upcoming sale."
     }
+  },
+  "status_banner": {
+    "under_compromise_main": "UNDER OFFER",
+    "under_compromise_signature": "MAPA PROPERTY",
+    "under_compromise_aria": "Under offer, MAPA Property",
+    "sold_main": "SOLD",
+    "sold_signature": "BY MAPA PROPERTY",
+    "sold_aria": "Sold by MAPA Property",
+    "rented_main": "LET",
+    "rented_signature": "BY MAPA PROPERTY",
+    "rented_aria": "Let by MAPA Property",
+    "sold_price": "Sold by MAPA Property",
+    "rented_price": "Let by MAPA Property"
   }
 }

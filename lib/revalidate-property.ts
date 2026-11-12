@@ -52,7 +52,12 @@ export type PropertyRevalRow = {
 
 /** Etat d'un bien, lu avec le client de l'admin (jamais la cle serveur). */
 export async function readPropertyRevalRow(supabase: SupabaseClient, id: string): Promise<PropertyRevalRow | null> {
-  const { data, error } = await supabase.from("properties").select(PROPERTY_REVAL_COLUMNS).eq("id", id).maybeSingle();
+  // Bandeaux (SQL 35) lus en plus pour detecter leur changement sur les
+  // cartes ; tant que les colonnes manquent, lecture sans elles.
+  let { data, error } = await supabase.from("properties").select(`${PROPERTY_REVAL_COLUMNS}, status_banner, banner_position, banner_color`).eq("id", id).maybeSingle();
+  if (error && (error.code === "PGRST204" || error.code === "42703")) {
+    ({ data, error } = await supabase.from("properties").select(PROPERTY_REVAL_COLUMNS).eq("id", id).maybeSingle());
+  }
   if (error) {
     console.error("[revalidate] lecture du bien", { code: error.code ?? null });
     return null;

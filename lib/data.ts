@@ -9,6 +9,7 @@ import { cityForProperty } from "./internal-links";
 import { pickSimilar, type SimilarCandidate } from "./similar-properties";
 import { coverAlts, propertyPaths } from "./listing/property-paths";
 import { blogSlugLower } from "./blog/slug";
+import { BANNER_COLUMNS, availableFirst, bannerOf, type PropertyBanner } from "./property-banner";
 import type {
   BlogPost,
   InterestRates,
@@ -96,6 +97,8 @@ export type HomeFeatured = {
   created_at: string | null;
   /** Adresse lisible par langue (biens Apimo), absente pour l'off-market. */
   paths?: Record<string, string>;
+  /** Bandeau Sous compromis, Vendu, Loue (SQL 35), null sinon. */
+  banner?: PropertyBanner | null;
   /** Texte alternatif de la photo par langue (biens Apimo). */
   alts?: Record<string, string>;
   // Sprint badges commerciaux : badge admin-driven sur biens apimo. Pour
@@ -168,6 +171,9 @@ export async function fetchHomeFeatured(
       | "bottom-right"
       | null;
     mandate_type?: string | null;
+    status_banner?: string | null;
+    banner_position?: string | null;
+    banner_color?: string | null;
     property_type?: string | null;
     transaction?: string | null;
     property_images: { url: string; sort: number | null }[] | null;
@@ -211,6 +217,7 @@ export async function fetchHomeFeatured(
       badge: effectiveBadge(row.badge, row.mandate_type),
       badge_size: row.badge_size,
       badge_position: row.badge_position,
+      banner: bannerOf(row),
     };
   });
 
@@ -238,13 +245,14 @@ export async function fetchHomeFeatured(
       badge_position: null,
     }));
 
-  const all = [...apimo, ...offmarket]
-    .sort((a, b) => {
+  // Vendu et Loue apres les biens disponibles, ordre des autres inchange.
+  const all = availableFirst(
+    [...apimo, ...offmarket].sort((a, b) => {
       const ad = a.created_at ? new Date(a.created_at).getTime() : 0;
       const bd = b.created_at ? new Date(b.created_at).getTime() : 0;
       return bd - ad;
-    })
-    .slice(0, limit);
+    }),
+  ).slice(0, limit);
 
   return all;
 }
@@ -270,10 +278,15 @@ const PROPERTY_CARD_COLUMNS =
 // que la colonne manque (PGRST204 / 42703), nouvel essai sans elle plutot
 // qu'une liste vide.
 const MISSING_COLUMN_CODES = new Set(["PGRST204", "42703"]);
+// Bandeaux (SQL 35, nov. 2026) : meme principe, essayes en premier ; sans
+// ces colonnes, nouvel essai avec le seul type de mandat, puis sans rien.
 async function withMandateColumn<R extends { error: { code?: string } | null }>(run: (extra: string) => PromiseLike<R>): Promise<R> {
-  const first = await run(",mandate_type");
-  if (first.error && MISSING_COLUMN_CODES.has(first.error.code ?? "")) return run("");
-  return first;
+  let res = await run(`,mandate_type,${BANNER_COLUMNS}`);
+  for (const extra of [",mandate_type", ""]) {
+    if (!(res.error && MISSING_COLUMN_CODES.has(res.error.code ?? ""))) return res;
+    res = await run(extra);
+  }
+  return res;
 }
 
 /**
@@ -320,6 +333,9 @@ async function queryPropertiesWithCover(): Promise<PropertyWithCover[]> {
       | "badge_size"
       | "badge_position"
       | "mandate_type"
+      | "status_banner"
+      | "banner_position"
+      | "banner_color"
     > & { city_page: string | null; city_commune: string | null; property_images: { url: string; sort: number | null }[] | null };
     return ((data as unknown as Row[] | null) ?? []).map(
       (row) =>

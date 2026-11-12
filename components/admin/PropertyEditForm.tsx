@@ -44,6 +44,7 @@ import { CityPageSelect, type CityPageOption } from "@/components/admin/CityPage
 import { CitySuggestInput } from "@/components/admin/CitySuggestInput";
 import { LuLocalityCombobox } from "@/components/admin/LuLocalityCombobox";
 import { COUNTRIES } from "@/lib/countries";
+import { BannerFields } from "@/components/admin/BannerFields";
 import { isLuCountry, placeKey, resolveLuPlace, type LuPlace } from "@/lib/geo/lu-place-match";
 import { generateListing, type GeneratedListing, type ListingColumns, type ListingTemplates, type ListingVocab } from "@/lib/listing/generate";
 import {
@@ -123,6 +124,10 @@ interface PropertyEditFormInitial {
   badge: string | null;
   badge_size: string | null;
   badge_position: string | null;
+  /** Bandeau de la premiere photo (SQL 35), null si aucun ou colonne absente. */
+  status_banner: string | null;
+  banner_position: string | null;
+  banner_color: string | null;
 }
 
 interface FormState {
@@ -173,6 +178,9 @@ interface FormState {
   badge: string;
   badge_size: string;
   badge_position: string;
+  status_banner: string;
+  banner_position: string;
+  banner_color: string;
 }
 
 const NUMERIC_KEYS = [
@@ -250,6 +258,9 @@ function toFormState(initial: PropertyEditFormInitial): FormState {
     badge: s(initial.badge),
     badge_size: initial.badge_size ?? "M",
     badge_position: initial.badge_position ?? "top-left",
+    status_banner: s(initial.status_banner),
+    banner_position: initial.banner_position ?? "straight",
+    banner_color: initial.banner_color ?? "sapin",
   };
 }
 
@@ -281,6 +292,8 @@ interface Props {
   initial: PropertyEditFormInitial;
   /** Colonne properties.mandate_type presente (SQL 16 execute). */
   mandateAvailable: boolean;
+  /** Colonnes des bandeaux presentes (SQL 35 execute) et premiere photo (apercu). */
+  banner: { available: boolean; coverUrl: string | null };
   /** Modele d'annonce : colonne listing_data (SQL 17), modeles des 3 langues. */
   listing: {
     available: boolean;
@@ -421,7 +434,7 @@ function EnergySelect({ value, onChange, labelNone, labelLegacy }: { value: stri
   );
 }
 
-export function PropertyEditForm({ propertyId, initial, mandateAvailable, listing, seo, location }: Props) {
+export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner, listing, seo, location }: Props) {
   const t = useTranslations("admin_properties");
   const tn = useTranslations("admin_notices");
   // Saisie brute ; "form" (plus bas) y ajoute les textes tires du modele.
@@ -725,6 +738,11 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
           badge: form.badge.length > 0 ? form.badge : null,
           badge_size: form.badge.length > 0 ? form.badge_size : null,
           badge_position: form.badge.length > 0 ? form.badge_position : null,
+          // Bandeau (SQL 35) : envoye seulement si la colonne existe et qu'il change.
+          banner:
+            banner.available && (changed("status_banner") || changed("banner_position") || changed("banner_color"))
+              ? { status_banner: form.status_banner || null, banner_position: form.banner_position, banner_color: form.banner_color }
+              : undefined,
           country: countryOut,
           city: cityOut,
         });
@@ -1249,6 +1267,19 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, listin
             ))}
           </select>
         </Field>
+        <BannerFields
+          available={banner.available}
+          transaction={listing.transaction}
+          value={{ kind: form.status_banner, position: form.banner_position, color: form.banner_color }}
+          onChange={(k, v) => set(k, v)}
+          preview={{
+            coverUrl: banner.coverUrl,
+            title: form.title_fr,
+            place: [saved.country, saved.city].filter(Boolean).join(" · "),
+            price: form.price,
+            transaction: listing.transaction,
+          }}
+        />
       </Section>
 
       {/* Telephone : barre d'enregistrement collee en bas de l'ecran, au-dessus

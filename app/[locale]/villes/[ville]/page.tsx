@@ -12,6 +12,7 @@ import { routing } from "@/i18n/routing";
 import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
 import { PropertyCard } from "@/components/property/PropertyCard";
+import { availableFirst } from "@/lib/property-banner";
 import { fetchAllBlogPosts, fetchCityPropertiesStrict } from "@/lib/data";
 import { pickLang } from "@/lib/types";
 import { FaqSection } from "@/components/faq/FaqSection";
@@ -280,7 +281,7 @@ export default async function VillePage({
           <section className="mt-16" data-city-properties>
             <h2 className="t-h2">{fr(ts("city_properties_title", { city: inSentence }), inSentence)}</h2>
             <ul className="mt-6 grid gap-5 sm:grid-cols-2">
-              {cityProperties.slice(0, 6).map((p) => (
+              {availableFirst(cityProperties).slice(0, 6).map((p) => (
                 <li key={p.id}>
                   <PropertyCard property={p} locale={loc} />
                 </li>
