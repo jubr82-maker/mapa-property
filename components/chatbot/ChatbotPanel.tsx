@@ -17,9 +17,25 @@ import { getGreetingKey, type GreetingKey } from "./chatbot-knowledge";
 // rester dans la charte MAPA (--gold).
 const AVATAR_SRC = "/elena-avatar.jpg";
 
+interface ElenaCard {
+  id: string;
+  title: string;
+  place: string;
+  price: string;
+  href: string;
+  cover: string | null;
+  banner: string | null;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
+  /** Bouton de l'entree (chemin interne prefixe de la langue). */
+  button?: { href: string; label: string } | null;
+  /** Biens trouves (recherche). */
+  properties?: ElenaCard[] | null;
+  /** Entree par defaut : proposition de prise de contact. */
+  offerContact?: boolean;
   /** Coordonnees detectees sur ce tour, en attente de consentement explicite. */
   contactDetected?: { email?: string; phone?: string } | null;
 }
@@ -108,12 +124,18 @@ export function ChatbotPanel({
       const json = (await res.json()) as {
         reply?: string;
         intent?: NavigateIntent | null;
+        button?: { href: string; label: string } | null;
+        properties?: ElenaCard[] | null;
+        offerContact?: boolean;
         contactDetected?: { email?: string; phone?: string } | null;
       };
       const reply = json?.reply ?? "";
+      // Bouton : chemin interne seulement (jamais de lien externe).
+      const button = json?.button && safeInternalPath(json.button.href) ? { href: safeInternalPath(json.button.href) as string, label: json.button.label } : null;
+      const properties = (json?.properties ?? []).filter((p) => safeInternalPath(p.href));
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: reply, contactDetected: json?.contactDetected },
+        { role: "assistant", content: reply, button, properties, offerContact: json?.offerContact === true, contactDetected: json?.contactDetected },
       ]);
       if (json?.contactDetected) setConsentAnswered(false);
       // Sprint ELENA-NAV C2 — navigation declenchee par l'intent LLM.
@@ -229,6 +251,46 @@ export function ChatbotPanel({
                   {m.content}
                 </div>
               </div>
+
+              {/* Biens trouves (recherche) : fiches publiees seulement. */}
+              {m.role === "assistant" && m.properties && m.properties.length > 0 && (
+                <ul className="ml-10 space-y-2" aria-label={t("properties_label")} data-elena-properties>
+                  {m.properties.map((p) => (
+                    <li key={p.id}>
+                      <a href={p.href} className="flex items-center gap-3 rounded-xl border border-line bg-bg p-2 transition-colors hover:border-gold">
+                        <span className="relative block size-14 shrink-0 overflow-hidden rounded-lg bg-bg-deep">
+                          {p.cover ? <Image src={p.cover} alt="" fill sizes="56px" className="object-cover" /> : null}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-semibold text-ink">{p.title}</span>
+                          <span className="block truncate text-xs text-ink-mid">{p.place}</span>
+                          <span className="block text-xs font-semibold text-ink">{p.price}</span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Bouton de l'entree validee (chemin interne, langue du visiteur). */}
+              {m.role === "assistant" && m.button && (
+                <div className="ml-10">
+                  <a
+                    href={m.button.href}
+                    data-elena-button
+                    className="inline-flex min-h-9 items-center rounded-full border border-gold/60 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-gold-text transition-colors hover:border-gold"
+                  >
+                    {m.button.label}
+                  </a>
+                </div>
+              )}
+
+              {/* Entree par defaut : proposition de prise de contact existante. */}
+              {m.role === "assistant" && m.offerContact && (
+                <div className="ml-10">
+                  <ContactReveal variant="compact" theme="light" />
+                </div>
+              )}
 
               {/* Point 5 — carte de consentement explicite, affichee sous le
                   tour ou des coordonnees ont ete detectees, tant que non

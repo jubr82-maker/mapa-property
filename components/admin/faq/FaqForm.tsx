@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { deleteFaq, saveFaq } from "@/app/admin/faq/actions";
 import type { FaqPageOption } from "@/lib/faq/admin-options";
+import { ELENA_BUTTON_PATHS } from "@/lib/elena/button-paths";
+import { ELENA_FAQ_KEY } from "@/lib/faq/keys";
 
 type Lang = "fr" | "en" | "de";
 const LANGS: Lang[] = ["fr", "en", "de"];
@@ -20,10 +22,16 @@ export type FaqFormValue = {
   question: Record<Lang, string>;
   answer: Record<Lang, string>;
   published: boolean;
+  /** Reponses d'Elena (page "Eléna") : autres formulations (une par ligne), bouton, source. */
+  elena: { variants: string; button_path: string; button_label: Record<Lang, string>; source: string; is_template: boolean };
 };
 
+export function emptyElena(): FaqFormValue["elena"] {
+  return { variants: "", button_path: "", button_label: { fr: "", en: "", de: "" }, source: "", is_template: false };
+}
+
 export function emptyFaq(pageKey = ""): FaqFormValue {
-  return { id: null, page_key: pageKey, question: { fr: "", en: "", de: "" }, answer: { fr: "", en: "", de: "" }, published: true };
+  return { id: null, page_key: pageKey, question: { fr: "", en: "", de: "" }, answer: { fr: "", en: "", de: "" }, published: true, elena: emptyElena() };
 }
 
 export function FaqForm({
@@ -58,7 +66,21 @@ export function FaqForm({
     start(async () => {
       setError(null);
       try {
-        const r = await saveFaq(value.id, { page_key: value.page_key, question: value.question, answer: value.answer, published: value.published });
+        const r = await saveFaq(value.id, {
+          page_key: value.page_key,
+          question: value.question,
+          answer: value.answer,
+          published: value.published,
+          elena:
+            value.page_key === ELENA_FAQ_KEY
+              ? {
+                  variants: value.elena.variants.split("\n").map((v) => v.trim()).filter(Boolean),
+                  button_path: value.elena.button_path || null,
+                  button_label: value.elena.button_label,
+                  source: value.elena.source,
+                }
+              : undefined,
+        });
         if (!r.ok) return setError(r.error);
         done();
       } catch {
@@ -82,6 +104,7 @@ export function FaqForm({
 
   const groups: { key: FaqPageOption["group"]; label: string }[] = [
     { key: "pages", label: t("group_pages") },
+    { key: "elena", label: t("group_elena") },
     { key: "cities", label: t("group_cities") },
     { key: "blog", label: t("group_blog") },
   ];
@@ -138,6 +161,60 @@ export function FaqForm({
         <textarea rows={6} value={value.answer[lang]} onChange={(e) => setText("answer", e.target.value)} maxLength={5000} className={inputCls + " mt-1 font-sans"} />
         <span className="mt-1 block text-xs text-[#3D4F63]/70">{t("answer_hint")}</span>
       </label>
+
+      {value.page_key === ELENA_FAQ_KEY ? (
+        <div className="space-y-4 rounded-xl border border-[#3D4F63]/15 bg-[#F5EFE1]/40 p-4" data-faq-elena>
+          <p className="text-xs text-[#3D4F63]/80">{value.elena.is_template ? t("elena_template_hint") : t("elena_hint")}</p>
+          <label className="block">
+            <span className={labelCls}>{t("field_variants")}</span>
+            <textarea
+              rows={4}
+              value={value.elena.variants}
+              onChange={(e) => setValue((p) => ({ ...p, elena: { ...p.elena, variants: e.target.value } }))}
+              className={inputCls + " mt-1 font-sans"}
+            />
+            <span className="mt-1 block text-xs text-[#3D4F63]/70">{t("field_variants_hint")}</span>
+          </label>
+          <label className="block">
+            <span className={labelCls}>{t("field_button")}</span>
+            <select
+              value={value.elena.button_path}
+              onChange={(e) => setValue((p) => ({ ...p, elena: { ...p.elena, button_path: e.target.value } }))}
+              className={inputCls + " mt-1"}
+            >
+              <option value="">{t("field_button_none")}</option>
+              {ELENA_BUTTON_PATHS.map((path) => (
+                <option key={path} value={path}>
+                  {path}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {LANGS.map((l) => (
+              <label key={l} className="block">
+                <span className={labelCls}>{t("field_button_label", { lang: t(`lang_${l}`) })}</span>
+                <input
+                  value={value.elena.button_label[l]}
+                  onChange={(e) => setValue((p) => ({ ...p, elena: { ...p.elena, button_label: { ...p.elena.button_label, [l]: e.target.value } } }))}
+                  disabled={!value.elena.button_path}
+                  maxLength={80}
+                  className={inputCls + " mt-1 disabled:opacity-50"}
+                />
+              </label>
+            ))}
+          </div>
+          <label className="block">
+            <span className={labelCls}>{t("field_source")}</span>
+            <input
+              value={value.elena.source}
+              onChange={(e) => setValue((p) => ({ ...p, elena: { ...p.elena, source: e.target.value } }))}
+              maxLength={200}
+              className={inputCls + " mt-1"}
+            />
+          </label>
+        </div>
+      ) : null}
 
       <label className="inline-flex items-center gap-2 text-sm text-[#3D4F63]">
         <input

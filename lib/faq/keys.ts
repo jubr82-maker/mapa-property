@@ -16,6 +16,12 @@ export const FAQ_FIXED_KEYS = [
 ] as const;
 
 export type FaqFixedKey = (typeof FAQ_FIXED_KEYS)[number];
+
+/**
+ * Reponses d'Elena (nov. 2026, SQL 37) : page "Eléna" de l'admin. Jamais
+ * affichees sur une page publique (aucun chemin), lues seulement par Elena.
+ */
+export const ELENA_FAQ_KEY = "elena";
 export type FaqLang = "fr" | "en" | "de";
 export const FAQ_LANGS: FaqLang[] = ["fr", "en", "de"];
 
@@ -35,7 +41,7 @@ export const blogFaqKey = (postSlug: string) => `blog:${slugKey(postSlug)}`;
 const DYNAMIC = /^(ville|blog):[a-z0-9]+(-[a-z0-9]+)*$/;
 
 export function isFaqPageKey(v: unknown): v is string {
-  return typeof v === "string" && ((FAQ_FIXED_KEYS as readonly string[]).includes(v) || DYNAMIC.test(v));
+  return typeof v === "string" && ((FAQ_FIXED_KEYS as readonly string[]).includes(v) || v === ELENA_FAQ_KEY || DYNAMIC.test(v));
 }
 
 /** Chemins publics (sans langue) ou s'affiche une page_key. */
@@ -52,6 +58,7 @@ export function faqPagePaths(key: string): string[] {
     "faq-generale": ["/faq"],
     "broker-international": ["/services/broker-international"],
   };
+  if (key === ELENA_FAQ_KEY) return [];
   if ((FAQ_FIXED_KEYS as readonly string[]).includes(key)) return fixed[key as FaqFixedKey];
   const [kind, slug] = key.split(":");
   if (kind === "ville" && slug) return [`/villes/${slug}`];

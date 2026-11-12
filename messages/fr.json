@@ -1351,7 +1351,10 @@
     "consent_decline": "Non merci",
     "consent_accepted": "Merci, un conseiller MAPA Property vous recontactera prochainement.",
     "consent_declined": "Très bien, je ne transmets rien. N'hésitez pas si vous changez d'avis.",
-    "consent_error": "La transmission a échoué. Réessayez ou utilisez notre formulaire de contact."
+    "consent_error": "La transmission a échoué. Réessayez ou utilisez notre formulaire de contact.",
+    "price_per_month": "{price} / mois",
+    "price_on_request": "Prix sur demande",
+    "properties_label": "Biens proposés"
   },
   "financing_simulator": {
     "disclaimer": "Disclaimer : simulation indicative à titre d'information. Les montants ne constituent pas une offre de prêt. Les taux pratiqués par les banques varient selon le profil emprunteur, l'apport, la garantie, le type de bien et la conjoncture. Pour une étude personnalisée, contactez MAPA Property pour un rendez-vous avec un partenaire bancaire qualifié.",
@@ -4986,7 +4989,19 @@
     "blog_block_intro": "Affichées sous l'article, dans chaque langue où elles sont traduites.",
     "blog_block_add": "Ajouter une question",
     "blog_block_need_slug": "Enregistrez d'abord l'article : ses questions se rattachent à son adresse de page.",
-    "key_broker_international": "Broker international"
+    "key_broker_international": "Broker international",
+    "key_elena": "Eléna (réponses de l'assistante, jamais affichées sur le site)",
+    "group_elena": "Eléna",
+    "elena_hint": "Réponse d'Eléna : le texte est affiché mot pour mot au visiteur. Les autres formulations aident à reconnaître la question.",
+    "elena_template_hint": "Modèle de la recherche de biens : '{lieu}' est remplacé par le lieu reconnu. Gardez l'intitulé de la question tel quel.",
+    "field_variants": "Autres formulations",
+    "field_variants_hint": "Une formulation par ligne.",
+    "field_button": "Bouton",
+    "field_button_none": "Aucun bouton",
+    "field_button_label": "Libellé du bouton ({lang})",
+    "field_source": "Source",
+    "err_button_path": "Ce chemin de bouton n'est pas dans la liste des pages du site.",
+    "err_button_label": "Le libellé français du bouton est obligatoire."
   },
   "admin_remuneration": {
     "title": "Rémunération",

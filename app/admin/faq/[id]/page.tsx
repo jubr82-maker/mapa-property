@@ -17,7 +17,17 @@ export default async function EditFaqPage({ params }: { params: Promise<{ id: st
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.from("faqs").select("*").eq("id", id).maybeSingle();
   if (!data) notFound();
-  const r = data as FaqRow & { published: boolean };
+  // Colonnes des reponses d'Elena (SQL 37) : absentes avant son execution.
+  const r = data as FaqRow & {
+    published: boolean;
+    variants_fr?: string[] | null;
+    button_path?: string | null;
+    button_label_fr?: string | null;
+    button_label_en?: string | null;
+    button_label_de?: string | null;
+    source?: string | null;
+    is_template?: boolean | null;
+  };
   const options = await faqPageOptions(supabase);
   return (
     <div className="space-y-6">
@@ -33,6 +43,13 @@ export default async function EditFaqPage({ params }: { params: Promise<{ id: st
           question: { fr: r.question_fr ?? "", en: r.question_en ?? "", de: r.question_de ?? "" },
           answer: { fr: r.answer_fr ?? "", en: r.answer_en ?? "", de: r.answer_de ?? "" },
           published: r.published,
+          elena: {
+            variants: (r.variants_fr ?? []).join("\n"),
+            button_path: r.button_path ?? "",
+            button_label: { fr: r.button_label_fr ?? "", en: r.button_label_en ?? "", de: r.button_label_de ?? "" },
+            source: r.source ?? "",
+            is_template: r.is_template === true,
+          },
         }}
       />
     </div>

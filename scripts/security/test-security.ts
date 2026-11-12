@@ -261,10 +261,14 @@ for (const f of publicWrites) {
     const w = firstIndex(consent, WRITE);
     check(`${f} : Turnstile avant creation du lead`, c >= 0 && (w < 0 || c < w));
     const post = exportedFunctions(src).find((x) => x.name === "POST")?.body ?? "";
-    const call = firstIndex(post, /callMistral\(/);
+    // Nov. 2026 : Mistral n'est plus appele directement par la route ; il ne
+    // sert qu'a reconnaitre l'entree, via elenaRespond (lib/elena/respond.ts,
+    // lib/elena/recognize.ts, lib/mistral.ts). Memes garanties : plafond et
+    // messages bornes AVANT cet appel, reponse du modele bornee (max_tokens).
+    const call = firstIndex(post, /elenaRespond(<[^>]*>)?\(|callMistral\(/);
     check(`${f} : plafond quotidien verifie avant l'appel Mistral`, firstIndex(post, /checkDailyLimit\(/) >= 0 && firstIndex(post, /checkDailyLimit\(/) < call);
     check(`${f} : messages bornes (roles, nombre, longueur) avant l'appel Mistral`, firstIndex(post, /CHATBOT_MAX_MESSAGES/) >= 0 && firstIndex(post, /CHATBOT_MAX_MESSAGES/) < call && /m\.role === "user" \|\| m\.role === "assistant"/.test(post));
-    check(`${f} : reponse Mistral bornee (max_tokens)`, /max_tokens:\s*\d+/.test(src));
+    check(`${f} : reponse Mistral bornee (max_tokens)`, /max_tokens:\s*\d+/.test(src) || (/from "@\/lib\/elena\/recognize"/.test(src) && /max_tokens: maxTokens/.test(read("lib/mistral.ts")) && /mistralJson\([\s\S]*?\n\s*30,\n\s*\)/.test(read("lib/elena/recognize.ts"))));
     continue;
   }
   const post = postHandlerBody(src);

@@ -88,7 +88,7 @@ test("activation : un bien publie suffit, sa suppression la retire ; lecture en 
   assert.ok(read("app/sitemap.ts").includes("indexableCities(await fetchAllPropertiesWithCoverStrict())"));
   // Page de ville : ses biens seulement (cache par ville), lecture sans repli.
   assert.ok(read("app/[locale]/villes/[ville]/page.tsx").includes("(await fetchCityPropertiesStrict(city.slug)).length"));
-  assert.ok(read("lib/data.ts").includes('["city-properties-v1", citySlug]') && read("lib/data.ts").includes("tags: [cityPropertiesTag(citySlug)]"));
+  assert.ok(read("lib/data.ts").includes('["city-properties-v2", citySlug]') && read("lib/data.ts").includes("tags: [cityPropertiesTag(citySlug)]"));
   assert.ok(read("lib/data.ts").includes("city_page:listing_data->facts->>city_page"));
   // Fiche, page de ville et sitemap : meme rattachement.
   assert.ok(read("app/[locale]/biens/[slug]/page.tsx").includes("cityForProperty({ city: property.city"));

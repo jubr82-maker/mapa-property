@@ -1351,7 +1351,10 @@
     "consent_decline": "Nein danke",
     "consent_accepted": "Vielen Dank, ein Berater von MAPA Property meldet sich in Kürze bei Ihnen.",
     "consent_declined": "In Ordnung, es wird nichts weitergegeben. Sie können es sich jederzeit anders überlegen.",
-    "consent_error": "Die Übermittlung ist fehlgeschlagen. Versuchen Sie es erneut oder nutzen Sie unser Kontaktformular."
+    "consent_error": "Die Übermittlung ist fehlgeschlagen. Versuchen Sie es erneut oder nutzen Sie unser Kontaktformular.",
+    "price_per_month": "{price} / Monat",
+    "price_on_request": "Preis auf Anfrage",
+    "properties_label": "Vorgeschlagene Immobilien"
   },
   "financing_simulator": {
     "disclaimer": "Haftungsausschluss: indikative Simulation zu Informationszwecken. Die angegebenen Beträge stellen kein Kreditangebot dar. Die von den Banken angewandten Zinssätze variieren je nach Kreditnehmerprofil, Eigenkapital, Sicherheiten, Immobilientyp und Marktlage. Für eine persönliche Analyse kontaktieren Sie MAPA Property für einen Termin mit einem qualifizierten Bankpartner.",
@@ -4991,7 +4994,19 @@
     "blog_block_intro": "Unter dem Artikel angezeigt, in jeder Sprache, in die sie übersetzt sind.",
     "blog_block_add": "Frage hinzufügen",
     "blog_block_need_slug": "Artikel zuerst speichern: Die Fragen hängen an seiner Seitenadresse.",
-    "key_broker_international": "Internationaler Broker"
+    "key_broker_international": "Internationaler Broker",
+    "key_elena": "Eléna (Antworten der Assistentin, nie auf der Website angezeigt)",
+    "group_elena": "Eléna",
+    "elena_hint": "Antwort von Eléna: Der Text wird dem Besucher wortwörtlich angezeigt. Weitere Formulierungen helfen, die Frage zu erkennen.",
+    "elena_template_hint": "Vorlage der Immobiliensuche: '{lieu}' wird durch den erkannten Ort ersetzt. Den Fragetitel unverändert lassen.",
+    "field_variants": "Weitere Formulierungen",
+    "field_variants_hint": "Eine Formulierung pro Zeile.",
+    "field_button": "Schaltfläche",
+    "field_button_none": "Keine Schaltfläche",
+    "field_button_label": "Beschriftung der Schaltfläche ({lang})",
+    "field_source": "Quelle",
+    "err_button_path": "Dieser Pfad ist nicht in der Liste der Seiten der Website.",
+    "err_button_label": "Die französische Beschriftung ist erforderlich."
   },
   "admin_remuneration": {
     "title": "Vergütung",

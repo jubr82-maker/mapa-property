@@ -1,0 +1,2858 @@
+{
+  "version": "2026-11-12",
+  "validated_by": "Julien Brebion, 12/11/2026",
+  "entries": [
+    {
+      "id": "E001",
+      "theme": "Accueil",
+      "is_template": false,
+      "question": {
+        "fr": "Bonjour",
+        "en": "Hello",
+        "de": "Hallo"
+      },
+      "variants_fr": [
+        "salut",
+        "hello",
+        "bonsoir",
+        "hallo",
+        "guten Tag"
+      ],
+      "answer": {
+        "fr": "Bonjour, je suis Eléna, l'assistante de MAPA Property. Je peux vous aider à trouver un bien, à vendre ou louer le vôtre, ou vous présenter nos services. Que puis-je faire pour vous ?",
+        "en": "Hello, I am Eléna, MAPA Property's assistant. I can help you find a property, sell or let yours, or present our services. How can I help you?",
+        "de": "Guten Tag, ich bin Eléna, die Assistentin von MAPA Property. Ich helfe Ihnen gerne, eine Immobilie zu finden, Ihre eigene zu verkaufen oder zu vermieten, oder stelle Ihnen unsere Leistungen vor. Was kann ich für Sie tun?"
+      },
+      "button": null,
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E002",
+      "theme": "Accueil",
+      "is_template": false,
+      "question": {
+        "fr": "Qui êtes-vous ?",
+        "en": "Who are you?",
+        "de": "Wer sind Sie?"
+      },
+      "variants_fr": [
+        "tu es qui",
+        "c'est quoi Eléna"
+      ],
+      "answer": {
+        "fr": "Je suis Eléna, l'assistante virtuelle de MAPA Property. Je réponds uniquement à partir des informations validées par l'agence. Pour un échange personnalisé, notre équipe vous répond directement.",
+        "en": "I am Eléna, MAPA Property's virtual assistant. I only answer with information approved by the agency. For a personal conversation, our team will reply to you directly.",
+        "de": "Ich bin Eléna, die virtuelle Assistentin von MAPA Property. Ich antworte ausschließlich mit Informationen, die von der Agentur freigegeben wurden. Für ein persönliches Gespräch antwortet Ihnen unser Team direkt."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E003",
+      "theme": "Accueil",
+      "is_template": false,
+      "question": {
+        "fr": "Êtes-vous un robot ou une IA ?",
+        "en": "Are you a robot or an AI?",
+        "de": "Sind Sie ein Roboter oder eine KI?"
+      },
+      "variants_fr": [
+        "je parle à un humain",
+        "chatbot",
+        "machine"
+      ],
+      "answer": {
+        "fr": "Oui, je suis une assistante virtuelle. Je ne donne que des informations validées par l'agence. Si vous préférez parler à une personne, notre équipe vous recontacte.",
+        "en": "Yes, I am a virtual assistant. I only provide information approved by the agency. If you would rather speak to a person, our team will get back to you.",
+        "de": "Ja, ich bin eine virtuelle Assistentin. Ich gebe nur von der Agentur freigegebene Informationen weiter. Wenn Sie lieber mit einer Person sprechen möchten, meldet sich unser Team bei Ihnen."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E004",
+      "theme": "Accueil",
+      "is_template": false,
+      "question": {
+        "fr": "Merci",
+        "en": "Thank you",
+        "de": "Danke"
+      },
+      "variants_fr": [
+        "merci beaucoup",
+        "super",
+        "parfait",
+        "danke",
+        "thanks"
+      ],
+      "answer": {
+        "fr": "Avec plaisir. N'hésitez pas si vous avez une autre question.",
+        "en": "You are welcome. Do not hesitate if you have another question.",
+        "de": "Gern geschehen. Zögern Sie nicht, wenn Sie eine weitere Frage haben."
+      },
+      "button": null,
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E005",
+      "theme": "Accueil",
+      "is_template": false,
+      "question": {
+        "fr": "Au revoir",
+        "en": "Goodbye",
+        "de": "Auf Wiedersehen"
+      },
+      "variants_fr": [
+        "bonne journée",
+        "à bientôt",
+        "bye",
+        "tschüss"
+      ],
+      "answer": {
+        "fr": "Merci de votre visite et à bientôt chez MAPA Property.",
+        "en": "Thank you for your visit, and see you soon at MAPA Property.",
+        "de": "Vielen Dank für Ihren Besuch und bis bald bei MAPA Property."
+      },
+      "button": null,
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E006",
+      "theme": "Accueil",
+      "is_template": false,
+      "question": {
+        "fr": "Je veux parler à quelqu'un",
+        "en": "I want to speak to someone",
+        "de": "Ich möchte mit jemandem sprechen"
+      },
+      "variants_fr": [
+        "un conseiller",
+        "un agent",
+        "une vraie personne",
+        "être rappelé"
+      ],
+      "answer": {
+        "fr": "Bien sûr. Laissez vos coordonnées dans le formulaire de contact : notre équipe vous recontacte rapidement.",
+        "en": "Of course. Leave your details in the contact form and our team will get back to you shortly.",
+        "de": "Selbstverständlich. Hinterlassen Sie Ihre Kontaktdaten im Kontaktformular, unser Team meldet sich umgehend bei Ihnen."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E007",
+      "theme": "Accueil",
+      "is_template": false,
+      "question": {
+        "fr": "Quel est votre numéro de téléphone ?",
+        "en": "What is your phone number?",
+        "de": "Wie lautet Ihre Telefonnummer?"
+      },
+      "variants_fr": [
+        "téléphone",
+        "numéro",
+        "appeler l'agence",
+        "gsm"
+      ],
+      "answer": {
+        "fr": "Pour vous mettre en relation avec la bonne personne, passez par le formulaire de contact : notre équipe vous rappelle rapidement.",
+        "en": "To put you in touch with the right person, please use the contact form: our team will call you back shortly.",
+        "de": "Damit Sie mit der richtigen Person sprechen, nutzen Sie bitte das Kontaktformular: unser Team ruft Sie umgehend zurück."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E008",
+      "theme": "Accueil",
+      "is_template": false,
+      "question": {
+        "fr": "Quelle est votre adresse e-mail ?",
+        "en": "What is your email address?",
+        "de": "Wie lautet Ihre E-Mail-Adresse?"
+      },
+      "variants_fr": [
+        "mail",
+        "email",
+        "courriel",
+        "écrire à l'agence"
+      ],
+      "answer": {
+        "fr": "Le plus simple est le formulaire de contact : votre message arrive directement à l'équipe, qui vous répond rapidement.",
+        "en": "The simplest way is the contact form: your message goes straight to the team, who will reply shortly.",
+        "de": "Am einfachsten ist das Kontaktformular: Ihre Nachricht geht direkt an das Team, das Ihnen umgehend antwortet."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E009",
+      "theme": "Accueil",
+      "is_template": false,
+      "question": {
+        "fr": "Dans quelles langues pouvez-vous me répondre ?",
+        "en": "Which languages do you speak?",
+        "de": "Welche Sprachen sprechen Sie?"
+      },
+      "variants_fr": [
+        "vous parlez anglais",
+        "sprechen Sie Deutsch",
+        "italien"
+      ],
+      "answer": {
+        "fr": "Le site et l'assistante sont disponibles en français, en anglais et en allemand. L'équipe de MAPA Property vous accompagne en luxembourgeois, français, anglais, allemand et italien.",
+        "en": "The website and the assistant are available in French, English and German. The MAPA Property team works with you in Luxembourgish, French, English, German and Italian.",
+        "de": "Website und Assistentin sind auf Französisch, Englisch und Deutsch verfügbar. Das Team von MAPA Property begleitet Sie auf Luxemburgisch, Französisch, Englisch, Deutsch und Italienisch."
+      },
+      "button": null,
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E010",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Qui est MAPA Property ?",
+        "en": "Who is MAPA Property?",
+        "de": "Wer ist MAPA Property?"
+      },
+      "variants_fr": [
+        "présentation",
+        "c'est quoi MAPA",
+        "votre agence"
+      ],
+      "answer": {
+        "fr": "MAPA Property est une agence immobilière luxembourgeoise, marque commerciale de MAPA Synergy Sàrl. Elle accompagne la vente, l'achat, la location et la recherche de biens au Luxembourg et à l'international.",
+        "en": "MAPA Property is a Luxembourg real estate agency, a trade name of MAPA Synergy Sàrl. It supports sales, purchases, lettings and property searches in Luxembourg and internationally.",
+        "de": "MAPA Property ist eine luxemburgische Immobilienagentur und Handelsmarke der MAPA Synergy Sàrl. Sie begleitet Verkauf, Kauf, Vermietung und Immobiliensuche in Luxemburg und international."
+      },
+      "button": {
+        "path": "/qui-sommes-nous",
+        "label": {
+          "fr": "Qui sommes-nous",
+          "en": "About us",
+          "de": "Über uns"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E011",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Où se trouve votre agence ?",
+        "en": "Where is your agency?",
+        "de": "Wo befindet sich Ihre Agentur?"
+      },
+      "variants_fr": [
+        "adresse",
+        "bureau",
+        "où êtes-vous"
+      ],
+      "answer": {
+        "fr": "Notre bureau public se trouve au 26 Rue du Commerce, L-3450 Dudelange. Pour un rendez-vous, utilisez le formulaire de contact.",
+        "en": "Our public office is at 26 Rue du Commerce, L-3450 Dudelange. To arrange a meeting, please use the contact form.",
+        "de": "Unser öffentliches Büro befindet sich in der 26 Rue du Commerce, L-3450 Dudelange. Für einen Termin nutzen Sie bitte das Kontaktformular."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E012",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Puis-je prendre rendez-vous ?",
+        "en": "Can I book a meeting?",
+        "de": "Kann ich einen Termin vereinbaren?"
+      },
+      "variants_fr": [
+        "rdv",
+        "rencontrer",
+        "visioconférence"
+      ],
+      "answer": {
+        "fr": "Oui. Nous vous recevons à Luxembourg-Ville, sur place dans le bien, à votre domicile ou en visioconférence. Indiquez vos disponibilités dans le formulaire de contact.",
+        "en": "Yes. We can meet in Luxembourg City, at the property, at your home or by video call. Let us know your availability in the contact form.",
+        "de": "Ja. Wir treffen Sie in Luxemburg-Stadt, direkt in der Immobilie, bei Ihnen zu Hause oder per Videogespräch. Teilen Sie uns Ihre Verfügbarkeit im Kontaktformular mit."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E013",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Quels sont vos horaires ?",
+        "en": "What are your opening hours?",
+        "de": "Wann sind Sie erreichbar?"
+      },
+      "variants_fr": [
+        "ouvert quand",
+        "le week-end",
+        "samedi",
+        "dimanche"
+      ],
+      "answer": {
+        "fr": "Nous vous recevons en semaine, et le week-end sur rendez-vous uniquement. Le formulaire de contact est le moyen le plus rapide de fixer un rendez-vous.",
+        "en": "We see clients on weekdays, and at weekends by appointment only. The contact form is the quickest way to book a meeting.",
+        "de": "Wir empfangen Sie unter der Woche, am Wochenende nur nach Vereinbarung. Über das Kontaktformular vereinbaren Sie am schnellsten einen Termin."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Fiche Google"
+    },
+    {
+      "id": "E014",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Qui est Julien Brebion ?",
+        "en": "Who is Julien Brebion?",
+        "de": "Wer ist Julien Brebion?"
+      },
+      "variants_fr": [
+        "le directeur",
+        "le fondateur"
+      ],
+      "answer": {
+        "fr": "Julien Brebion est co-fondateur de MAPA Property, Real Estate Director et Exclusive Sourcing Specialist. Sa présentation figure sur la page Qui sommes-nous.",
+        "en": "Julien Brebion is co-founder of MAPA Property, Real Estate Director and Exclusive Sourcing Specialist. His profile is on the About us page.",
+        "de": "Julien Brebion ist Mitgründer von MAPA Property, Real Estate Director und Exclusive Sourcing Specialist. Seine Vorstellung finden Sie auf der Seite Über uns."
+      },
+      "button": {
+        "path": "/qui-sommes-nous",
+        "label": {
+          "fr": "Qui sommes-nous",
+          "en": "About us",
+          "de": "Über uns"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E015",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Où intervient MAPA Property au Luxembourg ?",
+        "en": "Where does MAPA Property operate in Luxembourg?",
+        "de": "Wo ist MAPA Property in Luxemburg tätig?"
+      },
+      "variants_fr": [
+        "quelles communes",
+        "quelle région"
+      ],
+      "answer": {
+        "fr": "Sur l'ensemble du territoire du Grand-Duché, avec une présence forte sur le centre, le sud et l'ouest. Les pages par ville présentent les marchés suivis par l'agence.",
+        "en": "Across the whole Grand Duchy, with a strong presence in the centre, south and west. The city pages describe the markets the agency follows.",
+        "de": "Im gesamten Großherzogtum, mit starker Präsenz im Zentrum, im Süden und im Westen. Die Städteseiten stellen die von der Agentur beobachteten Märkte vor."
+      },
+      "button": null,
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E016",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Travaillez-vous dans ma commune ?",
+        "en": "Do you work in my municipality?",
+        "de": "Sind Sie in meiner Gemeinde tätig?"
+      },
+      "variants_fr": [
+        "vous êtes actifs à",
+        "vous connaissez la commune de"
+      ],
+      "answer": {
+        "fr": "MAPA Property intervient dans toutes les communes du Luxembourg. Indiquez-moi votre commune et votre projet, ou passez par le formulaire de contact pour être recontacté.",
+        "en": "MAPA Property works in every municipality in Luxembourg. Tell me your municipality and your project, or use the contact form to be called back.",
+        "de": "MAPA Property ist in allen Gemeinden Luxemburgs tätig. Nennen Sie mir Ihre Gemeinde und Ihr Vorhaben, oder nutzen Sie das Kontaktformular für einen Rückruf."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E017",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "L'agence peut-elle intervenir sans mandat ?",
+        "en": "Can the agency act without a mandate?",
+        "de": "Kann die Agentur ohne Auftrag tätig werden?"
+      },
+      "variants_fr": [
+        "sans contrat",
+        "sans signer",
+        "juste m'aider"
+      ],
+      "answer": {
+        "fr": "Non. MAPA Property n'intervient jamais sans mandat écrit et signé : c'est lui qui fixe la mission, les honoraires et qui protège nos clients. L'agence ne défend qu'un seul intérêt à la fois, celui du vendeur ou celui de l'acquéreur qui l'a mandatée.",
+        "en": "No. MAPA Property never acts without a written, signed mandate: it sets out the assignment and the fees, and it protects our clients. The agency represents only one interest at a time, that of the seller or that of the buyer who appointed it.",
+        "de": "Nein. MAPA Property wird niemals ohne schriftlichen, unterzeichneten Auftrag tätig: Er legt die Aufgabe und die Honorare fest und schützt unsere Kunden. Die Agentur vertritt immer nur ein Interesse, das des Verkäufers oder das des Käufers, der sie beauftragt hat."
+      },
+      "button": {
+        "path": "/services/vendre",
+        "label": {
+          "fr": "Nos mandats",
+          "en": "Our mandates",
+          "de": "Unsere Mandate"
+        }
+      },
+      "source": "Julien, 12/11/2026"
+    },
+    {
+      "id": "E018",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Représentez-vous à la fois le vendeur et l'acheteur ?",
+        "en": "Do you represent both the seller and the buyer?",
+        "de": "Vertreten Sie Verkäufer und Käufer gleichzeitig?"
+      },
+      "variants_fr": [
+        "double mandat",
+        "conflit d'intérêts"
+      ],
+      "answer": {
+        "fr": "Non. MAPA Property représente un seul intérêt à la fois, celui de son mandant, acquéreur ou vendeur.",
+        "en": "No. MAPA Property represents a single interest at a time, that of its principal, whether buyer or seller.",
+        "de": "Nein. MAPA Property vertritt immer nur ein Interesse, das ihres Auftraggebers, ob Käufer oder Verkäufer."
+      },
+      "button": null,
+      "source": "Page Broker international"
+    },
+    {
+      "id": "E019",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Utilisez-vous l'intelligence artificielle ?",
+        "en": "Do you use artificial intelligence?",
+        "de": "Nutzen Sie künstliche Intelligenz?"
+      },
+      "variants_fr": [
+        "IA",
+        "ChatGPT",
+        "automatisation"
+      ],
+      "answer": {
+        "fr": "L'agence utilise l'IA pour l'analyse et l'organisation, jamais en remplacement de la rencontre et du conseil humain.",
+        "en": "The agency uses AI for analysis and organisation, never as a substitute for meeting you and for human advice.",
+        "de": "Die Agentur nutzt KI für Analyse und Organisation, niemals als Ersatz für das persönliche Gespräch und die menschliche Beratung."
+      },
+      "button": null,
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E020",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Êtes-vous membre d'une fédération ?",
+        "en": "Are you a member of a federation?",
+        "de": "Sind Sie Mitglied eines Verbands?"
+      },
+      "variants_fr": [
+        "FIL",
+        "chambre immobilière",
+        "agréé"
+      ],
+      "answer": {
+        "fr": "MAPA Property est membre de la Fédération Immobilière du Luxembourg (FIL).",
+        "en": "MAPA Property is a member of the Fédération Immobilière du Luxembourg (FIL).",
+        "de": "MAPA Property ist Mitglied der Fédération Immobilière du Luxembourg (FIL)."
+      },
+      "button": null,
+      "source": "Julien, 12/11/2026"
+    },
+    {
+      "id": "E021",
+      "theme": "L'agence",
+      "is_template": false,
+      "question": {
+        "fr": "Sur quels portails publiez-vous vos annonces ?",
+        "en": "Which portals do you publish your listings on?",
+        "de": "Auf welchen Portalen veröffentlichen Sie Ihre Anzeigen?"
+      },
+      "variants_fr": [
+        "immotop",
+        "athome",
+        "filia",
+        "où voir vos annonces"
+      ],
+      "answer": {
+        "fr": "Nos biens sont présentés sur notre site, diffusés sur immotop.lu et référencés sur FILIA, le moteur de recherche de la Fédération Immobilière du Luxembourg. Les biens off-market ne sont jamais publiés.",
+        "en": "Our properties are presented on our website, published on immotop.lu and listed on FILIA, the property search engine of the Fédération Immobilière du Luxembourg. Off-market properties are never published.",
+        "de": "Unsere Immobilien werden auf unserer Website präsentiert, auf immotop.lu veröffentlicht und auf FILIA, der Immobiliensuchmaschine der Fédération Immobilière du Luxembourg, gelistet. Off-Market-Objekte werden nie veröffentlicht."
+      },
+      "button": {
+        "path": "/biens",
+        "label": {
+          "fr": "Voir les biens",
+          "en": "View properties",
+          "de": "Immobilien ansehen"
+        }
+      },
+      "source": "Julien, 12/11/2026"
+    },
+    {
+      "id": "E022",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Je veux vendre mon bien",
+        "en": "I want to sell my property",
+        "de": "Ich möchte meine Immobilie verkaufen"
+      },
+      "variants_fr": [
+        "vendre ma maison",
+        "mettre en vente"
+      ],
+      "answer": {
+        "fr": "Avec plaisir. La première étape est une estimation : en ligne pour une fourchette, ou avec visite pour une valeur précise. Vous pouvez aussi découvrir notre accompagnement à la vente.",
+        "en": "With pleasure. The first step is a valuation: online for a range, or with a visit for a precise value. You can also discover how we support sellers.",
+        "de": "Sehr gerne. Der erste Schritt ist eine Bewertung: online für eine Spanne oder mit Besichtigung für einen genauen Wert. Sie können auch unsere Verkaufsbegleitung entdecken."
+      },
+      "button": {
+        "path": "/services/vendre",
+        "label": {
+          "fr": "Vendre mon bien",
+          "en": "Sell my property",
+          "de": "Meine Immobilie verkaufen"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E023",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Quels mandats de vente proposez-vous ?",
+        "en": "Which sale mandates do you offer?",
+        "de": "Welche Verkaufsaufträge bieten Sie an?"
+      },
+      "variants_fr": [
+        "types de mandat",
+        "quel contrat"
+      ],
+      "answer": {
+        "fr": "Quatre mandats : exclusif, semi-exclusif, simple et autonome. Chacun a sa page détaillée.",
+        "en": "Four mandates: exclusive, semi-exclusive, simple and autonomous. Each has its own detailed page.",
+        "de": "Vier Aufträge: exklusiv, halb-exklusiv, einfach und autonom. Jeder hat seine eigene Detailseite."
+      },
+      "button": {
+        "path": "/services/vendre",
+        "label": {
+          "fr": "Nos mandats",
+          "en": "Our mandates",
+          "de": "Unsere Mandate"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E024",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Quel mandat de vente choisir ?",
+        "en": "Which sale mandate should I choose?",
+        "de": "Welchen Verkaufsauftrag sollte ich wählen?"
+      },
+      "variants_fr": [
+        "lequel est le mieux",
+        "différence entre les mandats"
+      ],
+      "answer": {
+        "fr": "Le mandat exclusif confie la vente à MAPA Property seule, au taux le plus bas des trois mandats complets. Le semi-exclusif vous laisse présenter vous-même des acquéreurs de votre cercle. Le mandat simple permet de confier la vente à plusieurs agences. Le mandat autonome vous laisse gérer visites et négociation, avec un appui juridique et notarial.",
+        "en": "The exclusive mandate entrusts the sale to MAPA Property alone, at the lowest rate of the three full mandates. The semi-exclusive mandate lets you introduce buyers from your own circle. The simple mandate allows several agencies. The autonomous mandate lets you handle viewings and negotiation, with legal and notarial support.",
+        "de": "Der Alleinauftrag überträgt den Verkauf allein MAPA Property, zum niedrigsten Satz der drei vollständigen Aufträge. Der halb-exklusive Auftrag erlaubt Ihnen, selbst Käufer aus Ihrem Umfeld vorzustellen. Der einfache Auftrag erlaubt mehrere Agenturen. Beim autonomen Auftrag übernehmen Sie Besichtigungen und Verhandlung, mit juristischer und notarieller Unterstützung."
+      },
+      "button": {
+        "path": "/services/vendre",
+        "label": {
+          "fr": "Nos mandats",
+          "en": "Our mandates",
+          "de": "Unsere Mandate"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E025",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Pourquoi recommandez-vous le mandat exclusif ?",
+        "en": "Why do you recommend the exclusive mandate?",
+        "de": "Warum empfehlen Sie den Alleinauftrag?"
+      },
+      "variants_fr": [
+        "intérêt de l'exclusivité"
+      ],
+      "answer": {
+        "fr": "Le marché luxembourgeois est petit. Confier la même annonce à plusieurs agences expose votre bien sur les mêmes plateformes et donne un signal de vente pressée, souvent défavorable à la négociation.",
+        "en": "The Luxembourg market is small. Giving the same listing to several agencies exposes your property on the same platforms and signals a rushed sale, which usually weakens your negotiating position.",
+        "de": "Der luxemburgische Markt ist klein. Dasselbe Inserat mehreren Agenturen anzuvertrauen, zeigt Ihre Immobilie auf denselben Plattformen und signalisiert einen eiligen Verkauf, was in der Verhandlung meist nachteilig ist."
+      },
+      "button": {
+        "path": "/mandats/exclusif",
+        "label": {
+          "fr": "Mandat exclusif",
+          "en": "Exclusive mandate",
+          "de": "Alleinauftrag"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E026",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce que le mandat exclusif ?",
+        "en": "What is the exclusive mandate?",
+        "de": "Was ist der Alleinauftrag?"
+      },
+      "variants_fr": [
+        "exclusivité"
+      ],
+      "answer": {
+        "fr": "MAPA Property est seule chargée de la vente, avec l'engagement le plus fort des deux côtés. Diffusion off-market d'abord, puis publique selon la stratégie. Honoraires : 3 % HT du prix net vendeur. Pack Vidéo en option.",
+        "en": "MAPA Property alone handles the sale, with the strongest commitment on both sides. Off-market marketing first, then public according to the strategy. Fees: 3% excluding VAT of the net seller price. Video Pack optional.",
+        "de": "MAPA Property übernimmt den Verkauf allein, mit dem stärksten Engagement auf beiden Seiten. Zuerst Off-Market-Vermarktung, dann öffentlich je nach Strategie. Honorar: 3 % zzgl. MwSt. des Nettoverkaufspreises. Videopaket optional."
+      },
+      "button": {
+        "path": "/mandats/exclusif",
+        "label": {
+          "fr": "Mandat exclusif",
+          "en": "Exclusive mandate",
+          "de": "Alleinauftrag"
+        }
+      },
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E027",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce que le mandat semi-exclusif ?",
+        "en": "What is the semi-exclusive mandate?",
+        "de": "Was ist der halb-exklusive Auftrag?"
+      },
+      "variants_fr": [
+        "semi exclusif",
+        "garder mon cercle"
+      ],
+      "answer": {
+        "fr": "Vous gardez la possibilité de vendre à un acquéreur de votre cercle privé, MAPA Property mobilise ses canaux. Honoraires : 4 % HT du prix net vendeur, dus uniquement si MAPA présente l'acquéreur.",
+        "en": "You keep the option of selling to a buyer from your private circle, while MAPA Property activates its channels. Fees: 4% excluding VAT of the net seller price, due only if MAPA introduces the buyer.",
+        "de": "Sie behalten die Möglichkeit, an einen Käufer aus Ihrem privaten Umfeld zu verkaufen, MAPA Property aktiviert ihre Kanäle. Honorar: 4 % zzgl. MwSt. des Nettoverkaufspreises, nur fällig, wenn MAPA den Käufer vorstellt."
+      },
+      "button": {
+        "path": "/mandats/semi-exclusif",
+        "label": {
+          "fr": "Mandat semi-exclusif",
+          "en": "Semi-exclusive mandate",
+          "de": "Halb-exklusiver Auftrag"
+        }
+      },
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E028",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce que le mandat simple ?",
+        "en": "What is the simple mandate?",
+        "de": "Was ist der einfache Auftrag?"
+      },
+      "variants_fr": [
+        "plusieurs agences"
+      ],
+      "answer": {
+        "fr": "Aucune exclusivité : vous pouvez confier la vente à plusieurs agences. Honoraires : 5 % HT du prix net vendeur.",
+        "en": "No exclusivity: you can entrust the sale to several agencies. Fees: 5% excluding VAT of the net seller price.",
+        "de": "Keine Exklusivität: Sie können mehrere Agenturen beauftragen. Honorar: 5 % zzgl. MwSt. des Nettoverkaufspreises."
+      },
+      "button": {
+        "path": "/mandats/simple",
+        "label": {
+          "fr": "Mandat simple",
+          "en": "Simple mandate",
+          "de": "Einfacher Auftrag"
+        }
+      },
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E029",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce que le mandat autonome ?",
+        "en": "What is the autonomous mandate?",
+        "de": "Was ist der autonome Auftrag?"
+      },
+      "variants_fr": [
+        "je fais les visites moi-même"
+      ],
+      "answer": {
+        "fr": "Vous gérez vous-même les visites et la négociation. MAPA Property intervient en appui juridique et notarial. Honoraires : 1 % HT du prix net vendeur.",
+        "en": "You handle viewings and negotiation yourself. MAPA Property provides legal and notarial support. Fees: 1% excluding VAT of the net seller price.",
+        "de": "Sie übernehmen Besichtigungen und Verhandlung selbst. MAPA Property leistet juristische und notarielle Unterstützung. Honorar: 1 % zzgl. MwSt. des Nettoverkaufspreises."
+      },
+      "button": {
+        "path": "/mandats/autonome",
+        "label": {
+          "fr": "Mandat autonome",
+          "en": "Autonomous mandate",
+          "de": "Autonomer Auftrag"
+        }
+      },
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E030",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Combien prenez-vous pour vendre ?",
+        "en": "How much do you charge to sell?",
+        "de": "Was kostet ein Verkauf bei Ihnen?"
+      },
+      "variants_fr": [
+        "vos honoraires",
+        "votre commission",
+        "frais d'agence vente"
+      ],
+      "answer": {
+        "fr": "Nos honoraires de vente sont publics, hors TVA (17 %), sur le prix net vendeur : 3 % en mandat exclusif, 4 % en semi-exclusif, 5 % en mandat simple et 1 % en mandat autonome.",
+        "en": "Our sale fees are public, excluding VAT (17%), on the net seller price: 3% exclusive, 4% semi-exclusive, 5% simple and 1% autonomous.",
+        "de": "Unsere Verkaufshonorare sind öffentlich, zzgl. MwSt. (17 %), auf den Nettoverkaufspreis: 3 % exklusiv, 4 % halb-exklusiv, 5 % einfach und 1 % autonom."
+      },
+      "button": {
+        "path": "/legal/honoraires",
+        "label": {
+          "fr": "Honoraires",
+          "en": "Fees",
+          "de": "Honorare"
+        }
+      },
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E031",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Combien de temps dure un mandat ?",
+        "en": "How long does a mandate last?",
+        "de": "Wie lange läuft ein Auftrag?"
+      },
+      "variants_fr": [
+        "durée du mandat",
+        "engagement",
+        "résilier"
+      ],
+      "answer": {
+        "fr": "À partir de deux mois, durée recommandée par MAPA Property. Il est reconductible tacitement et résiliable avec un préavis de 15 jours.",
+        "en": "From two months, the duration recommended by MAPA Property. It renews automatically and can be terminated with 15 days' notice.",
+        "de": "Ab zwei Monaten, die von MAPA Property empfohlene Dauer. Er verlängert sich stillschweigend und ist mit einer Frist von 15 Tagen kündbar."
+      },
+      "button": {
+        "path": "/services/vendre",
+        "label": {
+          "fr": "Nos mandats",
+          "en": "Our mandates",
+          "de": "Unsere Mandate"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E032",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Quand les honoraires sont-ils dus ?",
+        "en": "When are the fees due?",
+        "de": "Wann sind die Honorare fällig?"
+      },
+      "variants_fr": [
+        "quand je paie",
+        "paiement de la commission"
+      ],
+      "answer": {
+        "fr": "À la signature de l'acte authentique, sauf disposition contraire écrite. Les taux s'entendent hors TVA (17 %), sur le prix net vendeur.",
+        "en": "On signature of the notarial deed, unless otherwise agreed in writing. Rates are excluding VAT (17%), on the net seller price.",
+        "de": "Bei Unterzeichnung der notariellen Urkunde, sofern nicht schriftlich anders vereinbart. Die Sätze verstehen sich zzgl. MwSt. (17 %) auf den Nettoverkaufspreis."
+      },
+      "button": {
+        "path": "/legal/honoraires",
+        "label": {
+          "fr": "Honoraires",
+          "en": "Fees",
+          "de": "Honorare"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E033",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Dois-je payer quelque chose avant la vente ?",
+        "en": "Do I pay anything before the sale?",
+        "de": "Muss ich vor dem Verkauf etwas bezahlen?"
+      },
+      "variants_fr": [
+        "frais à l'avance",
+        "acompte"
+      ],
+      "answer": {
+        "fr": "Pour une vente, nos honoraires sont dus à la signature de l'acte authentique, sauf disposition contraire écrite. Le Pack Vidéo, s'il est choisi, fait l'objet d'un devis.",
+        "en": "For a sale, our fees are due on signature of the notarial deed, unless otherwise agreed in writing. The Video Pack, if chosen, is quoted separately.",
+        "de": "Bei einem Verkauf sind unsere Honorare bei Unterzeichnung der notariellen Urkunde fällig, sofern nicht schriftlich anders vereinbart. Das Videopaket wird, falls gewählt, gesondert angeboten."
+      },
+      "button": {
+        "path": "/legal/honoraires",
+        "label": {
+          "fr": "Honoraires",
+          "en": "Fees",
+          "de": "Honorare"
+        }
+      },
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E034",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce que le Pack Vidéo ?",
+        "en": "What is the Video Pack?",
+        "de": "Was ist das Videopaket?"
+      },
+      "variants_fr": [
+        "vidéo du bien",
+        "drone",
+        "film"
+      ],
+      "answer": {
+        "fr": "Une option sur devis, quel que soit le mandat : tournage professionnel, drone si pertinent, post-production et fichiers haute définition pour les réseaux et le site.",
+        "en": "An option on quotation, whatever the mandate: professional filming, drone where relevant, post-production and high-definition files for social media and the website.",
+        "de": "Eine Option auf Angebot, unabhängig vom Auftrag: professioneller Dreh, Drohne falls sinnvoll, Nachbearbeitung und hochauflösende Dateien für soziale Netzwerke und Website."
+      },
+      "button": null,
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E035",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Les honoraires sont-ils dus si je vends après la fin du mandat ?",
+        "en": "Are fees due if I sell after the mandate ends?",
+        "de": "Sind Honorare fällig, wenn ich nach Ende des Auftrags verkaufe?"
+      },
+      "variants_fr": [
+        "après le mandat",
+        "24 mois"
+      ],
+      "answer": {
+        "fr": "Oui, si l'acquéreur a été présenté par MAPA Property et que la vente se conclut dans les 24 mois suivant la fin du mandat, comme le prévoient les conditions générales.",
+        "en": "Yes, if the buyer was introduced by MAPA Property and the sale is completed within 24 months after the mandate ends, as provided in the terms and conditions.",
+        "de": "Ja, wenn der Käufer von MAPA Property vorgestellt wurde und der Verkauf innerhalb von 24 Monaten nach Ende des Auftrags zustande kommt, wie in den AGB vorgesehen."
+      },
+      "button": {
+        "path": "/legal/honoraires",
+        "label": {
+          "fr": "Honoraires",
+          "en": "Fees",
+          "de": "Honorare"
+        }
+      },
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E036",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Quels documents faut-il pour vendre ?",
+        "en": "Which documents do I need to sell?",
+        "de": "Welche Unterlagen brauche ich für den Verkauf?"
+      },
+      "variants_fr": [
+        "papiers pour vendre",
+        "pièces à fournir vendeur"
+      ],
+      "answer": {
+        "fr": "Pour préparer la vente, il faut notamment votre pièce d'identité, votre titre de propriété et le certificat de performance énergétique en cours de validité. Notre équipe vous remet la liste complète selon votre situation.",
+        "en": "To prepare the sale, we need in particular your identity document, your title deed and a valid energy performance certificate. Our team will give you the full list for your situation.",
+        "de": "Für die Vorbereitung benötigen wir insbesondere Ihren Ausweis, Ihren Eigentumsnachweis und einen gültigen Energiepass. Unser Team gibt Ihnen die vollständige Liste für Ihre Situation."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Liste des pièces MAPA"
+    },
+    {
+      "id": "E037",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Le certificat de performance énergétique est-il obligatoire ?",
+        "en": "Is the energy performance certificate mandatory?",
+        "de": "Ist der Energiepass Pflicht?"
+      },
+      "variants_fr": [
+        "CPE",
+        "passeport énergétique"
+      ],
+      "answer": {
+        "fr": "Oui. Le certificat de performance énergétique est obligatoire pour vendre ou louer un logement au Luxembourg. Il est valable 10 ans et sa classe doit figurer dans l'annonce.",
+        "en": "Yes. The energy performance certificate is mandatory to sell or let a home in Luxembourg. It is valid for 10 years and its class must appear in the listing.",
+        "de": "Ja. Der Energiepass ist in Luxemburg für den Verkauf und die Vermietung einer Wohnung Pflicht. Er ist 10 Jahre gültig und seine Klasse muss in der Anzeige stehen."
+      },
+      "button": null,
+      "source": "Fiche bien MAPA"
+    },
+    {
+      "id": "E038",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Pourquoi demandez-vous ma pièce d'identité ?",
+        "en": "Why do you ask for my ID?",
+        "de": "Warum benötigen Sie meinen Ausweis?"
+      },
+      "variants_fr": [
+        "KYC",
+        "blanchiment",
+        "origine des fonds"
+      ],
+      "answer": {
+        "fr": "La loi luxembourgeoise contre le blanchiment impose à l'agence de vérifier l'identité de ses clients, et l'origine des fonds pour les acquéreurs. Ces informations restent strictement confidentielles.",
+        "en": "Luxembourg anti-money-laundering law requires the agency to verify its clients' identity, and the source of funds for buyers. This information remains strictly confidential.",
+        "de": "Das luxemburgische Geldwäschegesetz verpflichtet die Agentur, die Identität ihrer Kunden und bei Käufern die Herkunft der Mittel zu prüfen. Diese Angaben bleiben streng vertraulich."
+      },
+      "button": null,
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E039",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Puis-je vendre sans que mon bien soit publié ?",
+        "en": "Can I sell without my property being published?",
+        "de": "Kann ich verkaufen, ohne dass meine Immobilie veröffentlicht wird?"
+      },
+      "variants_fr": [
+        "vente discrète",
+        "confidentielle"
+      ],
+      "answer": {
+        "fr": "Oui. MAPA Property propose une vente off-market : votre bien n'est présenté qu'à des acquéreurs qualifiés, après signature d'un accord de confidentialité, et n'est jamais publié en ligne.",
+        "en": "Yes. MAPA Property offers off-market sales: your property is presented only to qualified buyers, after a confidentiality agreement is signed, and is never published online.",
+        "de": "Ja. MAPA Property bietet den Off-Market-Verkauf an: Ihre Immobilie wird nur qualifizierten Käufern nach Unterzeichnung einer Vertraulichkeitsvereinbarung vorgestellt und nie online veröffentlicht."
+      },
+      "button": {
+        "path": "/off-market",
+        "label": {
+          "fr": "Off-market",
+          "en": "Off-market",
+          "de": "Off-Market"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E040",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Combien de temps faut-il pour vendre ?",
+        "en": "How long does it take to sell?",
+        "de": "Wie lange dauert ein Verkauf?"
+      },
+      "variants_fr": [
+        "délai de vente",
+        "vendre vite"
+      ],
+      "answer": {
+        "fr": "Le délai dépend du bien, du prix et du marché. Notre équipe vous donne une estimation réaliste après la visite du bien.",
+        "en": "It depends on the property, the price and the market. Our team will give you a realistic estimate after visiting the property.",
+        "de": "Das hängt von der Immobilie, dem Preis und dem Markt ab. Unser Team gibt Ihnen nach der Besichtigung eine realistische Einschätzung."
+      },
+      "button": {
+        "path": "/services/estimer",
+        "label": {
+          "fr": "Estimer mon bien",
+          "en": "Value my property",
+          "de": "Immobilie bewerten"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E041",
+      "theme": "Vendre",
+      "is_template": false,
+      "question": {
+        "fr": "Je suis dans une situation particulière (succession, divorce, urgence)",
+        "en": "I am in a specific situation (inheritance, divorce, urgency)",
+        "de": "Ich bin in einer besonderen Situation (Erbschaft, Scheidung, Dringlichkeit)"
+      },
+      "variants_fr": [
+        "succession",
+        "héritage",
+        "divorce",
+        "séparation"
+      ],
+      "answer": {
+        "fr": "Chaque situation demande un accompagnement adapté. Décrivez-la dans le formulaire de contact : notre équipe vous recontacte en toute confidentialité.",
+        "en": "Every situation needs tailored support. Describe it in the contact form and our team will contact you in complete confidence.",
+        "de": "Jede Situation verlangt eine passende Begleitung. Beschreiben Sie sie im Kontaktformular, unser Team meldet sich vertraulich bei Ihnen."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E042",
+      "theme": "Estimer",
+      "is_template": false,
+      "question": {
+        "fr": "Combien vaut mon bien ?",
+        "en": "How much is my property worth?",
+        "de": "Was ist meine Immobilie wert?"
+      },
+      "variants_fr": [
+        "valeur de ma maison",
+        "estimation"
+      ],
+      "answer": {
+        "fr": "Le simulateur du site vous donne gratuitement une fourchette indicative. Pour une valeur précise, la visite reste indispensable : elle est gratuite dans le cadre d'un mandat de vente potentiel.",
+        "en": "The website's simulator gives you a free indicative range. For a precise value, a visit is essential: it is free as part of a potential sale mandate.",
+        "de": "Der Rechner der Website gibt Ihnen kostenlos eine Richtspanne. Für einen genauen Wert ist eine Besichtigung unerlässlich: Sie ist im Rahmen eines möglichen Verkaufsauftrags kostenlos."
+      },
+      "button": {
+        "path": "/services/estimer",
+        "label": {
+          "fr": "Estimer mon bien",
+          "en": "Value my property",
+          "de": "Immobilie bewerten"
+        }
+      },
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E043",
+      "theme": "Estimer",
+      "is_template": false,
+      "question": {
+        "fr": "L'estimation est-elle payante ?",
+        "en": "Is the valuation free?",
+        "de": "Ist die Bewertung kostenpflichtig?"
+      },
+      "variants_fr": [
+        "gratuit",
+        "prix de l'estimation"
+      ],
+      "answer": {
+        "fr": "L'estimation indicative en ligne est gratuite. L'estimation avec visite et rapport écrit est gratuite dans le cadre d'un mandat de vente potentiel, et sur devis en dehors.",
+        "en": "The indicative online valuation is free. A valuation with a visit and a written report is free as part of a potential sale mandate, and on quotation otherwise.",
+        "de": "Die Online-Richtbewertung ist kostenlos. Die Bewertung mit Besichtigung und schriftlichem Bericht ist im Rahmen eines möglichen Verkaufsauftrags kostenlos, sonst auf Angebot."
+      },
+      "button": {
+        "path": "/services/estimer",
+        "label": {
+          "fr": "Estimer mon bien",
+          "en": "Value my property",
+          "de": "Immobilie bewerten"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E044",
+      "theme": "Estimer",
+      "is_template": false,
+      "question": {
+        "fr": "Comment fonctionne votre simulateur ?",
+        "en": "How does your simulator work?",
+        "de": "Wie funktioniert Ihr Rechner?"
+      },
+      "variants_fr": [
+        "fiabilité",
+        "méthode d'estimation"
+      ],
+      "answer": {
+        "fr": "Le modèle est calibré sur les données de l'Observatoire de l'Habitat. Il donne une fourchette indicative ; la visite la rend juste.",
+        "en": "The model is calibrated on Observatoire de l'Habitat data. It gives an indicative range; the visit makes it accurate.",
+        "de": "Das Modell ist auf Daten des Observatoire de l'Habitat kalibriert. Es liefert eine Richtspanne; die Besichtigung macht sie genau."
+      },
+      "button": {
+        "path": "/services/estimer",
+        "label": {
+          "fr": "Estimer mon bien",
+          "en": "Value my property",
+          "de": "Immobilie bewerten"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E045",
+      "theme": "Estimer",
+      "is_template": false,
+      "question": {
+        "fr": "Quel est le prix au m² dans ma commune ?",
+        "en": "What is the price per m² in my municipality?",
+        "de": "Wie hoch ist der Quadratmeterpreis in meiner Gemeinde?"
+      },
+      "variants_fr": [
+        "prix du m²",
+        "prix moyen"
+      ],
+      "answer": {
+        "fr": "Les prix varient fortement d'une rue et d'un bien à l'autre, je ne donne donc pas de chiffre général. Le simulateur vous donne une fourchette pour votre bien, et notre équipe une estimation précise sur place.",
+        "en": "Prices vary greatly from one street and one property to another, so I do not give a general figure. The simulator gives you a range for your property, and our team a precise valuation on site.",
+        "de": "Die Preise schwanken stark je nach Straße und Objekt, daher nenne ich keine allgemeine Zahl. Der Rechner gibt Ihnen eine Spanne für Ihre Immobilie, unser Team eine genaue Bewertung vor Ort."
+      },
+      "button": {
+        "path": "/services/estimer",
+        "label": {
+          "fr": "Estimer mon bien",
+          "en": "Value my property",
+          "de": "Immobilie bewerten"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E046",
+      "theme": "Estimer",
+      "is_template": false,
+      "question": {
+        "fr": "Les prix vont-ils baisser ou monter ?",
+        "en": "Will prices go up or down?",
+        "de": "Werden die Preise steigen oder fallen?"
+      },
+      "variants_fr": [
+        "évolution du marché",
+        "bon moment pour acheter"
+      ],
+      "answer": {
+        "fr": "Je ne fais pas de prévision de marché. La page Marchés actifs présente les marchés suivis par l'agence, et notre équipe peut analyser votre projet avec vous.",
+        "en": "I do not make market forecasts. The Active markets page presents the markets the agency follows, and our team can analyse your project with you.",
+        "de": "Ich mache keine Marktprognosen. Die Seite Aktive Märkte stellt die von der Agentur beobachteten Märkte vor, und unser Team analysiert Ihr Vorhaben gerne mit Ihnen."
+      },
+      "button": {
+        "path": "/services/marches-actifs",
+        "label": {
+          "fr": "Marchés actifs",
+          "en": "Active markets",
+          "de": "Aktive Märkte"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E047",
+      "theme": "Estimer",
+      "is_template": false,
+      "question": {
+        "fr": "J'ai fait une estimation en ligne, et maintenant ?",
+        "en": "I did an online valuation, what next?",
+        "de": "Ich habe eine Online-Bewertung gemacht, wie geht es weiter?"
+      },
+      "variants_fr": [
+        "suite de l'estimation"
+      ],
+      "answer": {
+        "fr": "Vous avez reçu une fourchette indicative par e-mail. Pour une valeur précise, notre équipe peut visiter le bien : c'est gratuit dans le cadre d'un mandat de vente potentiel.",
+        "en": "You received an indicative range by email. For a precise value, our team can visit the property: it is free as part of a potential sale mandate.",
+        "de": "Sie haben per E-Mail eine Richtspanne erhalten. Für einen genauen Wert kann unser Team die Immobilie besichtigen: im Rahmen eines möglichen Verkaufsauftrags kostenlos."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Page Honoraires"
+    },
+    {
+      "id": "E048",
+      "theme": "Estimer",
+      "is_template": false,
+      "question": {
+        "fr": "Je n'ai pas reçu le résultat de mon estimation",
+        "en": "I did not receive my valuation result",
+        "de": "Ich habe das Ergebnis meiner Bewertung nicht erhalten"
+      },
+      "variants_fr": [
+        "pas reçu le mail"
+      ],
+      "answer": {
+        "fr": "Vérifiez vos courriers indésirables. Si vous ne trouvez rien, écrivez-nous depuis le formulaire de contact : nous vous renvoyons le résultat.",
+        "en": "Please check your spam folder. If you cannot find it, write to us through the contact form and we will send the result again.",
+        "de": "Bitte prüfen Sie Ihren Spam-Ordner. Wenn Sie nichts finden, schreiben Sie uns über das Kontaktformular, wir senden Ihnen das Ergebnis erneut."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E049",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Je cherche un bien",
+        "en": "I am looking for a property",
+        "de": "Ich suche eine Immobilie"
+      },
+      "variants_fr": [
+        "je cherche un appartement",
+        "une maison",
+        "acheter"
+      ],
+      "answer": {
+        "fr": "Avec plaisir. Dites-moi la commune, le type de bien et votre budget, et je vous montre les biens disponibles.",
+        "en": "With pleasure. Tell me the municipality, the type of property and your budget, and I will show you the available properties.",
+        "de": "Sehr gerne. Nennen Sie mir die Gemeinde, die Art der Immobilie und Ihr Budget, und ich zeige Ihnen die verfügbaren Objekte."
+      },
+      "button": {
+        "path": "/biens",
+        "label": {
+          "fr": "Voir les biens",
+          "en": "View properties",
+          "de": "Immobilien ansehen"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E050",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Quels frais prévoir en plus du prix d'achat ?",
+        "en": "What costs should I plan on top of the purchase price?",
+        "de": "Welche Kosten kommen zum Kaufpreis hinzu?"
+      },
+      "variants_fr": [
+        "frais de notaire",
+        "droits d'enregistrement"
+      ],
+      "answer": {
+        "fr": "Au Luxembourg, comptez environ 6 % de droits d'enregistrement, 1 % de droit de transcription et environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % du prix.",
+        "en": "In Luxembourg, allow about 6% registration duty, 1% transcription duty and about 1% notary fees, an indicative total of around 8% of the price.",
+        "de": "In Luxemburg rechnen Sie mit etwa 6 % Eintragungsgebühren, 1 % Umschreibungsgebühr und etwa 1 % Notarkosten, insgesamt rund 8 % des Preises als Richtwert."
+      },
+      "button": null,
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E051",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce que le Bëllegen Akt ?",
+        "en": "What is the Bëllegen Akt?",
+        "de": "Was ist der Bëllegen Akt?"
+      },
+      "variants_fr": [
+        "crédit d'impôt achat",
+        "aide résidence principale"
+      ],
+      "answer": {
+        "fr": "Un crédit d'impôt sur les droits d'enregistrement pour l'achat de votre résidence principale. Depuis le 16 juillet 2026, il est porté à 45 000 euros par acquéreur.",
+        "en": "A tax credit on registration duties when buying your main residence. Since 16 July 2026, it has been raised to 45,000 euros per buyer.",
+        "de": "Eine Steuergutschrift auf die Eintragungsgebühren beim Kauf Ihres Hauptwohnsitzes. Seit dem 16. Juli 2026 beträgt sie 45.000 Euro pro Käufer."
+      },
+      "button": null,
+      "source": "gouvernement.lu, 16/07/2026"
+    },
+    {
+      "id": "E052",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Combien puis-je emprunter ?",
+        "en": "How much can I borrow?",
+        "de": "Wie viel kann ich leihen?"
+      },
+      "variants_fr": [
+        "capacité d'emprunt",
+        "prêt",
+        "crédit"
+      ],
+      "answer": {
+        "fr": "Le simulateur de capacité d'emprunt et le simulateur de financement donnent une première indication, avec les taux du marché luxembourgeois. L'accord final reste celui de la banque.",
+        "en": "The borrowing capacity and financing simulators give a first indication, using Luxembourg market rates. The final decision remains the bank's.",
+        "de": "Der Kreditrechner und der Finanzierungsrechner geben eine erste Orientierung mit den Zinsen des luxemburgischen Marktes. Die endgültige Zusage gibt die Bank."
+      },
+      "button": {
+        "path": "/services/simulateurs",
+        "label": {
+          "fr": "Simulateurs",
+          "en": "Simulators",
+          "de": "Rechner"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E053",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Quels sont les taux d'intérêt actuels ?",
+        "en": "What are current interest rates?",
+        "de": "Wie hoch sind die aktuellen Zinsen?"
+      },
+      "variants_fr": [
+        "taux",
+        "taux du crédit",
+        "Zinssatz"
+      ],
+      "answer": {
+        "fr": "Les taux évoluent chaque jour, je ne cite donc pas de chiffre. Les simulateurs du site utilisent les taux du marché luxembourgeois.",
+        "en": "Rates change every day, so I do not quote a figure. The website's simulators use Luxembourg market rates.",
+        "de": "Die Zinsen ändern sich täglich, daher nenne ich keine Zahl. Die Rechner der Website verwenden die Zinsen des luxemburgischen Marktes."
+      },
+      "button": {
+        "path": "/services/simulateurs",
+        "label": {
+          "fr": "Simulateurs",
+          "en": "Simulators",
+          "de": "Rechner"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E054",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Dois-je payer des honoraires si j'achète un bien chez vous ?",
+        "en": "Do I pay fees if I buy a property through you?",
+        "de": "Zahle ich Honorare, wenn ich eine Immobilie bei Ihnen kaufe?"
+      },
+      "variants_fr": [
+        "frais d'agence acheteur",
+        "qui paie la commission"
+      ],
+      "answer": {
+        "fr": "Pour un bien vendu par MAPA Property, nos honoraires sont prévus dans le mandat signé avec le vendeur. Si vous nous confiez votre propre recherche, ce sont les honoraires du mandat de recherche qui s'appliquent.",
+        "en": "For a property sold by MAPA Property, our fees are set out in the mandate signed with the seller. If you entrust us with your own search, the search mandate fees apply.",
+        "de": "Bei einer von MAPA Property verkauften Immobilie sind unsere Honorare im mit dem Verkäufer unterzeichneten Auftrag geregelt. Wenn Sie uns Ihre eigene Suche anvertrauen, gelten die Honorare des Suchauftrags."
+      },
+      "button": {
+        "path": "/legal/honoraires",
+        "label": {
+          "fr": "Honoraires",
+          "en": "Fees",
+          "de": "Honorare"
+        }
+      },
+      "source": "Julien, 12/11/2026"
+    },
+    {
+      "id": "E055",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Comment visiter un bien ?",
+        "en": "How can I view a property?",
+        "de": "Wie kann ich eine Immobilie besichtigen?"
+      },
+      "variants_fr": [
+        "visite",
+        "voir le bien"
+      ],
+      "answer": {
+        "fr": "Depuis la fiche du bien, cliquez sur le bouton de demande : notre équipe vous propose un créneau de visite.",
+        "en": "On the property page, click the request button: our team will offer you a viewing slot.",
+        "de": "Klicken Sie auf der Objektseite auf die Anfrage-Schaltfläche: unser Team schlägt Ihnen einen Besichtigungstermin vor."
+      },
+      "button": {
+        "path": "/biens",
+        "label": {
+          "fr": "Voir les biens",
+          "en": "View properties",
+          "de": "Immobilien ansehen"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E056",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Puis-je faire une offre ?",
+        "en": "Can I make an offer?",
+        "de": "Kann ich ein Angebot machen?"
+      },
+      "variants_fr": [
+        "proposer un prix",
+        "offre d'achat"
+      ],
+      "answer": {
+        "fr": "Oui. Contactez-nous depuis la fiche du bien : notre équipe vous accompagne dans la rédaction d'une offre d'achat écrite et la transmet au vendeur.",
+        "en": "Yes. Contact us from the property page: our team will help you draft a written purchase offer and pass it on to the seller.",
+        "de": "Ja. Kontaktieren Sie uns über die Objektseite: unser Team hilft Ihnen, ein schriftliches Kaufangebot zu verfassen, und leitet es an den Verkäufer weiter."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Offre d'achat MAPA"
+    },
+    {
+      "id": "E057",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce qu'un compromis de vente ?",
+        "en": "What is a sale agreement (compromis)?",
+        "de": "Was ist ein Vorvertrag (compromis) ?"
+      },
+      "variants_fr": [
+        "compromis",
+        "promesse",
+        "avant-contrat"
+      ],
+      "answer": {
+        "fr": "C'est le contrat signé entre le vendeur et l'acquéreur avant l'acte notarié. Il fixe le bien, le prix, les conditions suspensives et la date de l'acte. Notre équipe vous accompagne à chaque étape.",
+        "en": "It is the contract signed between seller and buyer before the notarial deed. It sets out the property, the price, the conditions precedent and the date of the deed. Our team supports you at every step.",
+        "de": "Das ist der Vertrag zwischen Verkäufer und Käufer vor der notariellen Urkunde. Er legt Objekt, Preis, aufschiebende Bedingungen und Datum der Urkunde fest. Unser Team begleitet Sie bei jedem Schritt."
+      },
+      "button": null,
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E058",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Je ne trouve pas ce que je cherche",
+        "en": "I cannot find what I am looking for",
+        "de": "Ich finde nicht, was ich suche"
+      },
+      "variants_fr": [
+        "rien ne correspond",
+        "aucun bien",
+        "pas de résultat"
+      ],
+      "answer": {
+        "fr": "Au Luxembourg comme en Europe, de plus en plus de biens se vendent en off-market : ils ne sont jamais publiés nulle part, et on ne peut y accéder que par un mandat de recherche précis. Confiez-nous le vôtre : nous activons notre réseau et ne vous présentons que des biens qui correspondent vraiment à votre projet.",
+        "en": "In Luxembourg as in Europe, more and more properties are sold off-market: they are never published anywhere, and can only be reached through a precise search mandate. Entrust yours to us: we activate our network and only present properties that truly match your project.",
+        "de": "In Luxemburg wie in Europa werden immer mehr Immobilien off-market verkauft: Sie werden nirgends veröffentlicht und sind nur über einen genauen Suchauftrag zugänglich. Vertrauen Sie uns Ihren an: Wir aktivieren unser Netzwerk und stellen Ihnen nur Objekte vor, die wirklich zu Ihrem Vorhaben passen."
+      },
+      "button": {
+        "path": "/mandats/recherche",
+        "label": {
+          "fr": "Mandat de recherche",
+          "en": "Search mandate",
+          "de": "Suchauftrag"
+        }
+      },
+      "source": "Julien, 12/11/2026"
+    },
+    {
+      "id": "E059",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Puis-je être prévenu des nouveaux biens ?",
+        "en": "Can I be notified of new properties?",
+        "de": "Kann ich über neue Objekte informiert werden?"
+      },
+      "variants_fr": [
+        "alerte",
+        "nouvelles annonces"
+      ],
+      "answer": {
+        "fr": "Laissez votre recherche dans le formulaire de contact : notre équipe vous prévient dès qu'un bien correspond.",
+        "en": "Leave your search in the contact form: our team will let you know as soon as a property matches.",
+        "de": "Hinterlassen Sie Ihre Suche im Kontaktformular: unser Team informiert Sie, sobald ein passendes Objekt verfügbar ist."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E060",
+      "theme": "Acheter",
+      "is_template": false,
+      "question": {
+        "fr": "Pourquoi demandez-vous l'origine de mes fonds ?",
+        "en": "Why do you ask about the source of my funds?",
+        "de": "Warum fragen Sie nach der Herkunft meiner Mittel?"
+      },
+      "variants_fr": [
+        "justificatif fonds",
+        "blanchiment acheteur"
+      ],
+      "answer": {
+        "fr": "La loi luxembourgeoise contre le blanchiment impose de vérifier l'identité de l'acquéreur et l'origine des fonds. Ces informations restent strictement confidentielles.",
+        "en": "Luxembourg anti-money-laundering law requires us to verify the buyer's identity and the source of funds. This information remains strictly confidential.",
+        "de": "Das luxemburgische Geldwäschegesetz verlangt die Prüfung der Identität des Käufers und der Herkunft der Mittel. Diese Angaben bleiben streng vertraulich."
+      },
+      "button": null,
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E061",
+      "theme": "Mandat de recherche",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce qu'un mandat de recherche ?",
+        "en": "What is a search mandate?",
+        "de": "Was ist ein Suchauftrag?"
+      },
+      "variants_fr": [
+        "chasseur immobilier",
+        "buyer's agent"
+      ],
+      "answer": {
+        "fr": "Vous confiez votre recherche à MAPA Property, qui travaille exclusivement sur votre projet : définition du besoin, réseau, biens hors marché, visites et négociation.",
+        "en": "You entrust your search to MAPA Property, which works exclusively on your project: defining the need, network, off-market properties, viewings and negotiation.",
+        "de": "Sie vertrauen Ihre Suche MAPA Property an, die ausschließlich an Ihrem Vorhaben arbeitet: Bedarfsdefinition, Netzwerk, Off-Market-Objekte, Besichtigungen und Verhandlung."
+      },
+      "button": {
+        "path": "/mandats/recherche",
+        "label": {
+          "fr": "Mandat de recherche",
+          "en": "Search mandate",
+          "de": "Suchauftrag"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E062",
+      "theme": "Mandat de recherche",
+      "is_template": false,
+      "question": {
+        "fr": "Combien coûte un mandat de recherche ?",
+        "en": "How much does a search mandate cost?",
+        "de": "Was kostet ein Suchauftrag?"
+      },
+      "variants_fr": [
+        "prix chasseur",
+        "honoraires recherche"
+      ],
+      "answer": {
+        "fr": "Au Luxembourg, 3 % à 5 % hors TVA du prix d'acquisition. En Europe, France comprise, 3 % à 8 % hors TVA selon la complexité et le pays. Ailleurs, sur devis défini au mandat.",
+        "en": "In Luxembourg, 3% to 5% excluding VAT of the purchase price. In Europe, including France, 3% to 8% excluding VAT depending on complexity and country. Elsewhere, on quotation set in the mandate.",
+        "de": "In Luxemburg 3 % bis 5 % zzgl. MwSt. des Kaufpreises. In Europa, Frankreich eingeschlossen, 3 % bis 8 % zzgl. MwSt. je nach Komplexität und Land. Anderswo auf Angebot, im Auftrag festgelegt."
+      },
+      "button": {
+        "path": "/mandats/recherche",
+        "label": {
+          "fr": "Mandat de recherche",
+          "en": "Search mandate",
+          "de": "Suchauftrag"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E063",
+      "theme": "Mandat de recherche",
+      "is_template": false,
+      "question": {
+        "fr": "À quoi sert l'avance sur frais ?",
+        "en": "What is the cost advance for?",
+        "de": "Wozu dient der Kostenvorschuss?"
+      },
+      "variants_fr": [
+        "avance",
+        "acompte recherche",
+        "250 euros"
+      ],
+      "answer": {
+        "fr": "Elle formalise l'engagement réciproque : l'agence travaille exclusivement sur votre projet. Elle est de 250 euros hors TVA au Luxembourg, à partir de 500 euros hors TVA dans les régions limitrophes jusqu'à 100 km, sur devis ailleurs, et entièrement déduite des honoraires si la transaction se conclut avec MAPA Property.",
+        "en": "It formalises the mutual commitment: the agency works exclusively on your project. It is 250 euros excluding VAT in Luxembourg, from 500 euros excluding VAT in neighbouring regions up to 100 km, on quotation elsewhere, and fully deducted from the fees if the transaction is completed with MAPA Property.",
+        "de": "Er besiegelt das gegenseitige Engagement: Die Agentur arbeitet ausschließlich an Ihrem Vorhaben. Er beträgt 250 Euro zzgl. MwSt. in Luxemburg, ab 500 Euro zzgl. MwSt. in den Grenzregionen bis 100 km, anderswo auf Angebot, und wird vollständig auf die Honorare angerechnet, wenn das Geschäft mit MAPA Property zustande kommt."
+      },
+      "button": {
+        "path": "/mandats/recherche",
+        "label": {
+          "fr": "Mandat de recherche",
+          "en": "Search mandate",
+          "de": "Suchauftrag"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E064",
+      "theme": "Mandat de recherche",
+      "is_template": false,
+      "question": {
+        "fr": "L'avance est-elle remboursée si j'abandonne ?",
+        "en": "Is the advance refunded if I give up?",
+        "de": "Wird der Vorschuss erstattet, wenn ich aufgebe?"
+      },
+      "variants_fr": [
+        "remboursement avance",
+        "je change d'avis"
+      ],
+      "answer": {
+        "fr": "Non. L'avance est acquise si vous renoncez à votre projet. Elle est entièrement déduite des honoraires si la transaction se conclut avec MAPA Property.",
+        "en": "No. The advance is retained if you abandon your project. It is fully deducted from the fees if the transaction is completed with MAPA Property.",
+        "de": "Nein. Der Vorschuss verbleibt, wenn Sie Ihr Vorhaben aufgeben. Er wird vollständig auf die Honorare angerechnet, wenn das Geschäft mit MAPA Property zustande kommt."
+      },
+      "button": {
+        "path": "/mandats/recherche",
+        "label": {
+          "fr": "Mandat de recherche",
+          "en": "Search mandate",
+          "de": "Suchauftrag"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E065",
+      "theme": "Mandat de recherche",
+      "is_template": false,
+      "question": {
+        "fr": "La recherche inclut-elle les biens hors marché ?",
+        "en": "Does the search include off-market properties?",
+        "de": "Umfasst die Suche auch Off-Market-Objekte?"
+      },
+      "variants_fr": [
+        "off-market recherche",
+        "biens non publiés"
+      ],
+      "answer": {
+        "fr": "Oui. De plus en plus de biens se vendent en off-market, sans jamais être publiés : le mandat de recherche active le réseau confidentiel de l'agence, agences partenaires, propriétaires directs et sources off-market.",
+        "en": "Yes. More and more properties are sold off-market without ever being published: the search mandate activates the agency's confidential network, partner agencies, direct owners and off-market sources.",
+        "de": "Ja. Immer mehr Immobilien werden off-market verkauft, ohne je veröffentlicht zu werden: Der Suchauftrag aktiviert das vertrauliche Netzwerk der Agentur, Partneragenturen, direkte Eigentümer und Off-Market-Quellen."
+      },
+      "button": {
+        "path": "/mandats/recherche",
+        "label": {
+          "fr": "Mandat de recherche",
+          "en": "Search mandate",
+          "de": "Suchauftrag"
+        }
+      },
+      "source": "Julien, 12/11/2026"
+    },
+    {
+      "id": "E066",
+      "theme": "Mandat de recherche",
+      "is_template": false,
+      "question": {
+        "fr": "Que se passe-t-il après la fin du mandat de recherche ?",
+        "en": "What happens after the search mandate ends?",
+        "de": "Was passiert nach Ende des Suchauftrags?"
+      },
+      "variants_fr": [
+        "clause de survie",
+        "après le mandat"
+      ],
+      "answer": {
+        "fr": "Les conditions générales prévoient une clause de survie : les honoraires restent dus si vous achetez, après la fin du mandat, un bien présenté par MAPA Property pendant celui-ci. Le détail figure dans les conditions générales.",
+        "en": "The terms and conditions include a survival clause: fees remain due if, after the mandate ends, you buy a property presented by MAPA Property during it. Details are in the terms and conditions.",
+        "de": "Die AGB enthalten eine Nachwirkungsklausel: Die Honorare bleiben fällig, wenn Sie nach Ende des Auftrags eine Immobilie kaufen, die MAPA Property während des Auftrags vorgestellt hat. Einzelheiten stehen in den AGB."
+      },
+      "button": {
+        "path": "/legal/cgv",
+        "label": {
+          "fr": "Conditions générales",
+          "en": "Terms and conditions",
+          "de": "AGB"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E067",
+      "theme": "Mandat de recherche",
+      "is_template": false,
+      "question": {
+        "fr": "Voir les recherches de vos clients",
+        "en": "See your clients' searches",
+        "de": "Suchaufträge Ihrer Kunden ansehen"
+      },
+      "variants_fr": [
+        "recherches en cours",
+        "j'ai un bien qui correspond"
+      ],
+      "answer": {
+        "fr": "La page des recherches présente, de façon anonyme, les biens que nos clients cherchent. Si vous avez un bien qui correspond, contactez-nous depuis la recherche concernée.",
+        "en": "The searches page presents, anonymously, the properties our clients are looking for. If you own a matching property, contact us from the relevant search.",
+        "de": "Die Seite der Suchaufträge zeigt anonym, welche Immobilien unsere Kunden suchen. Wenn Sie ein passendes Objekt besitzen, kontaktieren Sie uns über den jeweiligen Suchauftrag."
+      },
+      "button": {
+        "path": "/recherches",
+        "label": {
+          "fr": "Recherches de nos clients",
+          "en": "Our clients' searches",
+          "de": "Suchaufträge unserer Kunden"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E068",
+      "theme": "Location",
+      "is_template": false,
+      "question": {
+        "fr": "Je veux louer mon bien",
+        "en": "I want to let my property",
+        "de": "Ich möchte meine Immobilie vermieten"
+      },
+      "variants_fr": [
+        "mettre en location",
+        "bailleur"
+      ],
+      "answer": {
+        "fr": "Avec plaisir. MAPA Property assure la mise en location de votre bien, état des lieux inclus, et peut aussi s'occuper des entrées et sorties de vos locataires.",
+        "en": "With pleasure. MAPA Property handles letting your property, inventory included, and can also manage your tenants' move-ins and move-outs.",
+        "de": "Sehr gerne. MAPA Property übernimmt die Vermietung Ihrer Immobilie, Übergabeprotokoll inklusive, und kann sich auch um Ein- und Auszüge Ihrer Mieter kümmern."
+      },
+      "button": {
+        "path": "/services/louer",
+        "label": {
+          "fr": "Louer mon bien",
+          "en": "Let my property",
+          "de": "Meine Immobilie vermieten"
+        }
+      },
+      "source": "Julien, 12/11/2026"
+    },
+    {
+      "id": "E069",
+      "theme": "Location",
+      "is_template": false,
+      "question": {
+        "fr": "Quels sont les honoraires de mise en location ?",
+        "en": "What are the letting fees?",
+        "de": "Wie hoch sind die Vermietungshonorare?"
+      },
+      "variants_fr": [
+        "frais de location",
+        "commission location"
+      ],
+      "answer": {
+        "fr": "Un mois de loyer hors TVA, état des lieux inclus. Conformément à la loi luxembourgeoise sur le bail d'habitation, ces honoraires sont partagés par moitié entre le bailleur et le locataire.",
+        "en": "One month's rent excluding VAT, inventory included. In accordance with Luxembourg residential lease law, these fees are split equally between landlord and tenant.",
+        "de": "Eine Monatsmiete zzgl. MwSt., Übergabeprotokoll inklusive. Gemäß dem luxemburgischen Wohnmietgesetz werden diese Honorare je zur Hälfte zwischen Vermieter und Mieter geteilt."
+      },
+      "button": {
+        "path": "/legal/honoraires",
+        "label": {
+          "fr": "Honoraires",
+          "en": "Fees",
+          "de": "Honorare"
+        }
+      },
+      "source": "Loi du 23/07/2024, Mémorial A 311"
+    },
+    {
+      "id": "E070",
+      "theme": "Location",
+      "is_template": false,
+      "question": {
+        "fr": "Proposez-vous la gestion locative ?",
+        "en": "Do you offer property management?",
+        "de": "Bieten Sie Mietverwaltung an?"
+      },
+      "variants_fr": [
+        "gestion",
+        "gérer mon bien",
+        "encaisser les loyers",
+        "état des lieux",
+        "travaux"
+      ],
+      "answer": {
+        "fr": "MAPA Property n'encaisse pas les loyers. Nous prenons en charge les entrées et les sorties de vos locataires, avec tous les états des lieux, et nous pouvons vous mettre en relation avec des entreprises si des travaux sont nécessaires. Cette gestion coûte de 6 % à 8 % hors TVA du loyer mensuel, selon les services inclus.",
+        "en": "MAPA Property does not collect rents. We handle your tenants' move-ins and move-outs, with all inventories, and can put you in touch with contractors if work is needed. This service costs 6% to 8% excluding VAT of the monthly rent, depending on the services included.",
+        "de": "MAPA Property zieht keine Mieten ein. Wir übernehmen Ein- und Auszüge Ihrer Mieter mit allen Übergabeprotokollen und vermitteln Ihnen bei Bedarf Handwerksbetriebe. Dieser Service kostet 6 % bis 8 % zzgl. MwSt. der Monatsmiete, je nach enthaltenen Leistungen."
+      },
+      "button": {
+        "path": "/services/louer",
+        "label": {
+          "fr": "Louer mon bien",
+          "en": "Let my property",
+          "de": "Meine Immobilie vermieten"
+        }
+      },
+      "source": "Julien, 12/11/2026"
+    },
+    {
+      "id": "E071",
+      "theme": "Location",
+      "is_template": false,
+      "question": {
+        "fr": "Quel est le loyer maximum autorisé au Luxembourg ?",
+        "en": "What is the maximum rent allowed in Luxembourg?",
+        "de": "Wie hoch darf die Miete in Luxemburg höchstens sein?"
+      },
+      "variants_fr": [
+        "plafond loyer",
+        "5 %"
+      ],
+      "answer": {
+        "fr": "Le loyer annuel ne peut pas dépasser 5 % du capital investi dans le logement (loi du 21 septembre 2006 sur le bail à usage d'habitation).",
+        "en": "Annual rent may not exceed 5% of the capital invested in the home (law of 21 September 2006 on residential leases).",
+        "de": "Die Jahresmiete darf 5 % des in die Wohnung investierten Kapitals nicht übersteigen (Gesetz vom 21. September 2006 über Wohnraummietverträge)."
+      },
+      "button": null,
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E072",
+      "theme": "Location",
+      "is_template": false,
+      "question": {
+        "fr": "Comment sont choisis les locataires ?",
+        "en": "How are tenants selected?",
+        "de": "Wie werden die Mieter ausgewählt?"
+      },
+      "variants_fr": [
+        "sélection locataire",
+        "dossier locataire"
+      ],
+      "answer": {
+        "fr": "Par une sélection rigoureuse sur dossier complet, avec les vérifications d'identité et de lutte contre le blanchiment, avant la signature d'un contrat de bail conforme.",
+        "en": "Through careful selection based on a complete file, with identity and anti-money-laundering checks, before a compliant lease is signed.",
+        "de": "Durch eine sorgfältige Auswahl anhand vollständiger Unterlagen, mit Identitäts- und Geldwäscheprüfungen, vor der Unterzeichnung eines rechtskonformen Mietvertrags."
+      },
+      "button": {
+        "path": "/services/louer",
+        "label": {
+          "fr": "Louer mon bien",
+          "en": "Let my property",
+          "de": "Meine Immobilie vermieten"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E073",
+      "theme": "Location",
+      "is_template": false,
+      "question": {
+        "fr": "Je cherche une location",
+        "en": "I am looking for a rental",
+        "de": "Ich suche eine Mietwohnung"
+      },
+      "variants_fr": [
+        "louer un appartement",
+        "location à"
+      ],
+      "answer": {
+        "fr": "Dites-moi la commune, le type de bien et votre budget mensuel, et je vous montre les biens à louer.",
+        "en": "Tell me the municipality, the type of property and your monthly budget, and I will show you the properties to rent.",
+        "de": "Nennen Sie mir die Gemeinde, die Art der Immobilie und Ihr monatliches Budget, und ich zeige Ihnen die Mietobjekte."
+      },
+      "button": {
+        "path": "/biens?transaction=rent",
+        "label": {
+          "fr": "Biens à louer",
+          "en": "Properties to rent",
+          "de": "Mietobjekte"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E074",
+      "theme": "Location",
+      "is_template": false,
+      "question": {
+        "fr": "Quels documents pour louer ?",
+        "en": "Which documents do I need to rent?",
+        "de": "Welche Unterlagen brauche ich zum Mieten?"
+      },
+      "variants_fr": [
+        "dossier locataire",
+        "papiers location"
+      ],
+      "answer": {
+        "fr": "Il faut notamment une pièce d'identité et des justificatifs de revenus. Notre équipe vous remet la liste complète selon votre situation.",
+        "en": "You will need in particular an identity document and proof of income. Our team will give you the full list for your situation.",
+        "de": "Sie benötigen insbesondere einen Ausweis und Einkommensnachweise. Unser Team gibt Ihnen die vollständige Liste für Ihre Situation."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Liste des pièces MAPA"
+    },
+    {
+      "id": "E075",
+      "theme": "Location",
+      "is_template": false,
+      "question": {
+        "fr": "Puis-je louer avec option d'achat ?",
+        "en": "Can I rent with an option to buy?",
+        "de": "Kann ich mit Kaufoption mieten?"
+      },
+      "variants_fr": [
+        "location-accession",
+        "option d'achat"
+      ],
+      "answer": {
+        "fr": "Ce type de projet se traite au cas par cas. Décrivez-le dans le formulaire de contact : notre équipe vous recontacte.",
+        "en": "This kind of project is handled case by case. Describe it in the contact form and our team will get back to you.",
+        "de": "Solche Vorhaben werden im Einzelfall geprüft. Beschreiben Sie es im Kontaktformular, unser Team meldet sich bei Ihnen."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E076",
+      "theme": "Off-market et ARCOVA",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce que l'off-market ?",
+        "en": "What is off-market?",
+        "de": "Was bedeutet Off-Market?"
+      },
+      "variants_fr": [
+        "biens confidentiels",
+        "non publiés"
+      ],
+      "answer": {
+        "fr": "Des biens présentés en toute confidentialité, jamais publiés en ligne, réservés à des acquéreurs qualifiés.",
+        "en": "Properties presented in complete confidentiality, never published online, reserved for qualified buyers.",
+        "de": "Immobilien, die streng vertraulich präsentiert, nie online veröffentlicht und qualifizierten Käufern vorbehalten werden."
+      },
+      "button": {
+        "path": "/off-market",
+        "label": {
+          "fr": "Off-market",
+          "en": "Off-market",
+          "de": "Off-Market"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E077",
+      "theme": "Off-market et ARCOVA",
+      "is_template": false,
+      "question": {
+        "fr": "Comment accéder aux biens off-market ?",
+        "en": "How can I access off-market properties?",
+        "de": "Wie erhalte ich Zugang zu Off-Market-Objekten?"
+      },
+      "variants_fr": [
+        "voir les biens confidentiels"
+      ],
+      "answer": {
+        "fr": "En trois étapes : une demande motivée, la vérification de votre capacité financière avec la signature d'un accord de confidentialité, puis la transmission du dossier complet et les visites.",
+        "en": "In three steps: a reasoned request, verification of your financial capacity with signature of a confidentiality agreement, then the full file and viewings.",
+        "de": "In drei Schritten: eine begründete Anfrage, die Prüfung Ihrer Finanzkraft mit Unterzeichnung einer Vertraulichkeitsvereinbarung, dann das vollständige Dossier und die Besichtigungen."
+      },
+      "button": {
+        "path": "/off-market",
+        "label": {
+          "fr": "Off-market",
+          "en": "Off-market",
+          "de": "Off-Market"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E078",
+      "theme": "Off-market et ARCOVA",
+      "is_template": false,
+      "question": {
+        "fr": "Pourquoi ne puis-je pas voir les photos d'un bien off-market ?",
+        "en": "Why can't I see the photos of an off-market property?",
+        "de": "Warum sehe ich keine Fotos eines Off-Market-Objekts?"
+      },
+      "variants_fr": [
+        "photos floues",
+        "pas de photos"
+      ],
+      "answer": {
+        "fr": "Les photos complètes ne sont accessibles qu'après signature de l'accord de confidentialité, pour protéger le vendeur.",
+        "en": "Full photos are only available after the confidentiality agreement is signed, to protect the seller.",
+        "de": "Die vollständigen Fotos sind erst nach Unterzeichnung der Vertraulichkeitsvereinbarung zugänglich, zum Schutz des Verkäufers."
+      },
+      "button": {
+        "path": "/off-market",
+        "label": {
+          "fr": "Off-market",
+          "en": "Off-market",
+          "de": "Off-Market"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E079",
+      "theme": "Off-market et ARCOVA",
+      "is_template": false,
+      "question": {
+        "fr": "Qu'est-ce qu'ARCOVA ?",
+        "en": "What is ARCOVA?",
+        "de": "Was ist ARCOVA?"
+      },
+      "variants_fr": [
+        "espace privé",
+        "plateforme confidentielle"
+      ],
+      "answer": {
+        "fr": "ARCOVA est l'espace confidentiel réservé aux clients qualifiés sous mandat MAPA Property, avec vérifications d'identité et accord de confidentialité avant tout accès. La plateforme sera très prochainement disponible ; ces conditions s'appliquent déjà sur demande directe.",
+        "en": "ARCOVA is the confidential space reserved for qualified clients under a MAPA Property mandate, with identity checks and a confidentiality agreement before any access. The platform will be available very soon; these conditions already apply on direct request.",
+        "de": "ARCOVA ist der vertrauliche Bereich für qualifizierte Kunden mit Auftrag bei MAPA Property, mit Identitätsprüfung und Vertraulichkeitsvereinbarung vor jedem Zugang. Die Plattform ist in Kürze verfügbar; diese Bedingungen gelten bereits auf direkte Anfrage."
+      },
+      "button": {
+        "path": "/off-market/arcova",
+        "label": {
+          "fr": "ARCOVA",
+          "en": "ARCOVA",
+          "de": "ARCOVA"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E080",
+      "theme": "International",
+      "is_template": false,
+      "question": {
+        "fr": "Intervenez-vous hors du Luxembourg ?",
+        "en": "Do you work outside Luxembourg?",
+        "de": "Sind Sie auch außerhalb Luxemburgs tätig?"
+      },
+      "variants_fr": [
+        "étranger",
+        "France",
+        "international"
+      ],
+      "answer": {
+        "fr": "Oui. MAPA Property intervient directement sur des biens situés en France, en Allemagne et en Italie grâce à la carte professionnelle européenne. Ailleurs, elle agit comme broker avec une agence locale habilitée et reste votre interlocuteur unique.",
+        "en": "Yes. MAPA Property works directly on properties in France, Germany and Italy thanks to the European Professional Card. Elsewhere, it acts as a broker with a licensed local agency and remains your single point of contact.",
+        "de": "Ja. MAPA Property ist dank des Europäischen Berufsausweises direkt bei Immobilien in Frankreich, Deutschland und Italien tätig. Anderswo handelt sie als Broker mit einer zugelassenen lokalen Agentur und bleibt Ihr einziger Ansprechpartner."
+      },
+      "button": {
+        "path": "/services/broker-international",
+        "label": {
+          "fr": "Broker international",
+          "en": "International broker",
+          "de": "Internationaler Broker"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E081",
+      "theme": "International",
+      "is_template": false,
+      "question": {
+        "fr": "Dans quels pays intervenez-vous ?",
+        "en": "Which countries do you work in?",
+        "de": "In welchen Ländern sind Sie tätig?"
+      },
+      "variants_fr": [
+        "pays couverts"
+      ],
+      "answer": {
+        "fr": "Directement au Luxembourg, ainsi qu'en France, en Allemagne et en Italie grâce à la carte professionnelle européenne. Ailleurs, sur demande, avec des agences locales habilitées ; la page Marchés actifs présente la couverture régulière.",
+        "en": "Directly in Luxembourg, and in France, Germany and Italy thanks to the European Professional Card. Elsewhere, on request, with licensed local agencies; the Active markets page shows our regular coverage.",
+        "de": "Direkt in Luxemburg sowie dank des Europäischen Berufsausweises in Frankreich, Deutschland und Italien. Anderswo auf Anfrage mit zugelassenen lokalen Agenturen; die Seite Aktive Märkte zeigt unsere regelmäßige Abdeckung."
+      },
+      "button": {
+        "path": "/services/marches-actifs",
+        "label": {
+          "fr": "Marchés actifs",
+          "en": "Active markets",
+          "de": "Aktive Märkte"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E082",
+      "theme": "International",
+      "is_template": false,
+      "question": {
+        "fr": "Que fait un broker immobilier international ?",
+        "en": "What does an international real estate broker do?",
+        "de": "Was macht ein internationaler Immobilienbroker?"
+      },
+      "variants_fr": [
+        "broker",
+        "c'est quoi un broker"
+      ],
+      "answer": {
+        "fr": "Il définit précisément le besoin, identifie les biens, choisit le bon partenaire local, pilote le dossier et reste l'interlocuteur unique du client jusqu'à la signature.",
+        "en": "They define the need precisely, identify properties, choose the right local partner, manage the file and remain the client's single point of contact until signing.",
+        "de": "Er definiert den Bedarf genau, findet die Objekte, wählt den richtigen lokalen Partner, steuert das Dossier und bleibt bis zur Unterzeichnung der einzige Ansprechpartner des Kunden."
+      },
+      "button": {
+        "path": "/services/broker-international",
+        "label": {
+          "fr": "Broker international",
+          "en": "International broker",
+          "de": "Internationaler Broker"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E083",
+      "theme": "International",
+      "is_template": false,
+      "question": {
+        "fr": "Qui réalise la transaction à l'étranger ?",
+        "en": "Who carries out the transaction abroad?",
+        "de": "Wer wickelt das Geschäft im Ausland ab?"
+      },
+      "variants_fr": [
+        "négociation à l'étranger",
+        "agence locale"
+      ],
+      "answer": {
+        "fr": "En France, en Allemagne et en Italie, MAPA Property peut la conduire elle-même. Dans les autres pays, la négociation et la transaction sont réalisées par une agence locale habilitée, qui représente le client sur place.",
+        "en": "In France, Germany and Italy, MAPA Property can conduct it itself. In other countries, negotiation and the transaction are carried out by a licensed local agency representing the client on site.",
+        "de": "In Frankreich, Deutschland und Italien kann MAPA Property es selbst durchführen. In anderen Ländern übernimmt eine zugelassene lokale Agentur Verhandlung und Abschluss und vertritt den Kunden vor Ort."
+      },
+      "button": {
+        "path": "/services/broker-international",
+        "label": {
+          "fr": "Broker international",
+          "en": "International broker",
+          "de": "Internationaler Broker"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E084",
+      "theme": "International",
+      "is_template": false,
+      "question": {
+        "fr": "Quels sont les honoraires à l'international ?",
+        "en": "What are your fees abroad?",
+        "de": "Wie hoch sind die Honorare im Ausland?"
+      },
+      "variants_fr": [
+        "prix international"
+      ],
+      "answer": {
+        "fr": "Pour une recherche en Europe, France comprise, 3 % à 8 % hors TVA du prix d'acquisition selon la complexité et le pays. Hors d'Europe, sur devis défini au mandat.",
+        "en": "For a search in Europe, including France, 3% to 8% excluding VAT of the purchase price depending on complexity and country. Outside Europe, on quotation set in the mandate.",
+        "de": "Für eine Suche in Europa, Frankreich eingeschlossen, 3 % bis 8 % zzgl. MwSt. des Kaufpreises je nach Komplexität und Land. Außerhalb Europas auf Angebot, im Auftrag festgelegt."
+      },
+      "button": {
+        "path": "/legal/honoraires",
+        "label": {
+          "fr": "Honoraires",
+          "en": "Fees",
+          "de": "Honorare"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E085",
+      "theme": "International",
+      "is_template": false,
+      "question": {
+        "fr": "Je cherche une résidence secondaire",
+        "en": "I am looking for a second home",
+        "de": "Ich suche einen Zweitwohnsitz"
+      },
+      "variants_fr": [
+        "maison de vacances",
+        "Côte d'Azur"
+      ],
+      "answer": {
+        "fr": "Avec plaisir. Indiquez-moi le pays ou la région, le type de bien et votre budget, et je vous montre ce qui est disponible. Le mandat de recherche permet aussi d'accéder aux biens non publiés.",
+        "en": "With pleasure. Tell me the country or region, the type of property and your budget, and I will show you what is available. A search mandate also gives access to unpublished properties.",
+        "de": "Sehr gerne. Nennen Sie mir Land oder Region, die Art der Immobilie und Ihr Budget, und ich zeige Ihnen, was verfügbar ist. Ein Suchauftrag öffnet auch den Zugang zu nicht veröffentlichten Objekten."
+      },
+      "button": {
+        "path": "/mandats/recherche",
+        "label": {
+          "fr": "Mandat de recherche",
+          "en": "Search mandate",
+          "de": "Suchauftrag"
+        }
+      },
+      "source": "Base actuelle d'Eléna"
+    },
+    {
+      "id": "E086",
+      "theme": "Site et données",
+      "is_template": false,
+      "question": {
+        "fr": "Que faites-vous de mes données ?",
+        "en": "What do you do with my data?",
+        "de": "Was machen Sie mit meinen Daten?"
+      },
+      "variants_fr": [
+        "RGPD",
+        "vie privée"
+      ],
+      "answer": {
+        "fr": "Vos données servent uniquement à traiter votre demande. Tout est expliqué dans notre politique de confidentialité.",
+        "en": "Your data is used only to handle your request. Everything is explained in our privacy policy.",
+        "de": "Ihre Daten dienen ausschließlich der Bearbeitung Ihrer Anfrage. Alles ist in unserer Datenschutzerklärung erklärt."
+      },
+      "button": {
+        "path": "/legal/rgpd",
+        "label": {
+          "fr": "Confidentialité",
+          "en": "Privacy",
+          "de": "Datenschutz"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E087",
+      "theme": "Site et données",
+      "is_template": false,
+      "question": {
+        "fr": "Je veux supprimer mes données",
+        "en": "I want my data deleted",
+        "de": "Ich möchte meine Daten löschen lassen"
+      },
+      "variants_fr": [
+        "effacer mes données",
+        "droit à l'oubli"
+      ],
+      "answer": {
+        "fr": "Envoyez votre demande depuis le formulaire de contact en précisant « suppression de mes données » : elle est traitée conformément à notre politique de confidentialité.",
+        "en": "Send your request through the contact form stating \"deletion of my data\": it will be handled in line with our privacy policy.",
+        "de": "Senden Sie Ihre Anfrage über das Kontaktformular mit dem Hinweis „Löschung meiner Daten“: Sie wird gemäß unserer Datenschutzerklärung bearbeitet."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E088",
+      "theme": "Site et données",
+      "is_template": false,
+      "question": {
+        "fr": "Où lire vos articles ?",
+        "en": "Where can I read your articles?",
+        "de": "Wo finde ich Ihre Artikel?"
+      },
+      "variants_fr": [
+        "journal",
+        "blog",
+        "actualités",
+        "conseils"
+      ],
+      "answer": {
+        "fr": "Nos articles, analyses et conseils sont dans notre Journal.",
+        "en": "Our articles, analyses and advice are in our Journal.",
+        "de": "Unsere Artikel, Analysen und Ratschläge finden Sie in unserem Journal."
+      },
+      "button": {
+        "path": "/blog",
+        "label": {
+          "fr": "Journal",
+          "en": "Journal",
+          "de": "Journal"
+        }
+      },
+      "source": "Julien, 12/11/2026"
+    },
+    {
+      "id": "E089",
+      "theme": "Site et données",
+      "is_template": false,
+      "question": {
+        "fr": "Où trouver vos conditions générales ?",
+        "en": "Where are your terms and conditions?",
+        "de": "Wo finde ich Ihre AGB?"
+      },
+      "variants_fr": [
+        "CGV",
+        "CGU",
+        "conditions"
+      ],
+      "answer": {
+        "fr": "Les conditions générales et les mentions légales sont accessibles en bas de chaque page du site.",
+        "en": "The terms and conditions and the legal notice are available at the bottom of every page.",
+        "de": "AGB und Impressum finden Sie unten auf jeder Seite der Website."
+      },
+      "button": {
+        "path": "/legal/cgv",
+        "label": {
+          "fr": "Conditions générales",
+          "en": "Terms and conditions",
+          "de": "AGB"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E090",
+      "theme": "Site et données",
+      "is_template": false,
+      "question": {
+        "fr": "Le site ne fonctionne pas",
+        "en": "The website is not working",
+        "de": "Die Website funktioniert nicht"
+      },
+      "variants_fr": [
+        "bug",
+        "erreur",
+        "formulaire ne marche pas"
+      ],
+      "answer": {
+        "fr": "Désolée pour ce désagrément. Décrivez le problème dans le formulaire de contact : notre équipe le corrige au plus vite.",
+        "en": "Sorry for the inconvenience. Describe the problem in the contact form and our team will fix it as soon as possible.",
+        "de": "Entschuldigen Sie die Unannehmlichkeit. Beschreiben Sie das Problem im Kontaktformular, unser Team behebt es so schnell wie möglich."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E091",
+      "theme": "Site et données",
+      "is_template": false,
+      "question": {
+        "fr": "Puis-je déposer une annonce sur votre site ?",
+        "en": "Can I post a listing on your website?",
+        "de": "Kann ich eine Anzeige auf Ihrer Website aufgeben?"
+      },
+      "variants_fr": [
+        "publier mon annonce moi-même"
+      ],
+      "answer": {
+        "fr": "Les biens publiés sur le site sont ceux confiés à MAPA Property sous mandat. Pour faire publier votre bien, la première étape est une estimation.",
+        "en": "The properties on the website are those entrusted to MAPA Property under a mandate. To have your property published, the first step is a valuation.",
+        "de": "Auf der Website stehen die Immobilien, die MAPA Property per Auftrag anvertraut wurden. Der erste Schritt zur Veröffentlichung Ihrer Immobilie ist eine Bewertung."
+      },
+      "button": {
+        "path": "/services/estimer",
+        "label": {
+          "fr": "Estimer mon bien",
+          "en": "Value my property",
+          "de": "Immobilie bewerten"
+        }
+      },
+      "source": "FAQ du site"
+    },
+    {
+      "id": "E092",
+      "theme": "Limites d'Eléna",
+      "is_template": false,
+      "question": {
+        "fr": "Question juridique ou fiscale personnelle",
+        "en": "Personal legal or tax question",
+        "de": "Persönliche Rechts- oder Steuerfrage"
+      },
+      "variants_fr": [
+        "mon cas fiscal",
+        "impôts",
+        "litige",
+        "avocat"
+      ],
+      "answer": {
+        "fr": "Je ne donne pas de conseil juridique ou fiscal personnel. Notre équipe peut vous orienter, et votre notaire ou votre conseiller fiscal reste la bonne référence.",
+        "en": "I do not give personal legal or tax advice. Our team can point you in the right direction, and your notary or tax adviser remains the right reference.",
+        "de": "Ich gebe keine persönliche Rechts- oder Steuerberatung. Unser Team kann Sie orientieren, und Ihr Notar oder Steuerberater bleibt die richtige Anlaufstelle."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E093",
+      "theme": "Limites d'Eléna",
+      "is_template": false,
+      "question": {
+        "fr": "Que pensez-vous d'une autre agence ?",
+        "en": "What do you think of another agency?",
+        "de": "Was halten Sie von einer anderen Agentur?"
+      },
+      "variants_fr": [
+        "avis sur une agence",
+        "concurrent"
+      ],
+      "answer": {
+        "fr": "Je ne commente pas les autres agences. Je peux en revanche vous présenter l'accompagnement de MAPA Property.",
+        "en": "I do not comment on other agencies. I can, however, present how MAPA Property supports you.",
+        "de": "Ich kommentiere keine anderen Agenturen. Gerne stelle ich Ihnen aber die Begleitung durch MAPA Property vor."
+      },
+      "button": {
+        "path": "/qui-sommes-nous",
+        "label": {
+          "fr": "Qui sommes-nous",
+          "en": "About us",
+          "de": "Über uns"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E094",
+      "theme": "Limites d'Eléna",
+      "is_template": false,
+      "question": {
+        "fr": "Question sans rapport avec l'immobilier",
+        "en": "Question unrelated to real estate",
+        "de": "Frage ohne Bezug zu Immobilien"
+      },
+      "variants_fr": [
+        "météo",
+        "recette",
+        "sport",
+        "politique",
+        "blague"
+      ],
+      "answer": {
+        "fr": "Je suis l'assistante immobilière de MAPA Property et je réponds uniquement aux questions sur nos biens et nos services. Que puis-je faire pour vous dans ce domaine ?",
+        "en": "I am MAPA Property's real estate assistant and I only answer questions about our properties and services. How can I help you with that?",
+        "de": "Ich bin die Immobilienassistentin von MAPA Property und beantworte nur Fragen zu unseren Objekten und Leistungen. Wie kann ich Ihnen dabei helfen?"
+      },
+      "button": null,
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E095",
+      "theme": "Limites d'Eléna",
+      "is_template": false,
+      "question": {
+        "fr": "Question dont la réponse n'est pas dans la base",
+        "en": "Question not covered",
+        "de": "Nicht vorgesehene Frage"
+      },
+      "variants_fr": [
+        "toute question non prévue"
+      ],
+      "answer": {
+        "fr": "Je n'ai pas cette information. Je transmets votre question à notre équipe, qui vous répond rapidement. Souhaitez-vous laisser vos coordonnées ?",
+        "en": "I do not have this information. I am passing your question on to our team, who will reply shortly. Would you like to leave your contact details?",
+        "de": "Diese Information habe ich nicht. Ich leite Ihre Frage an unser Team weiter, das Ihnen umgehend antwortet. Möchten Sie Ihre Kontaktdaten hinterlassen?"
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E096",
+      "theme": "Limites d'Eléna",
+      "is_template": false,
+      "question": {
+        "fr": "Message incompréhensible",
+        "en": "Unclear message",
+        "de": "Unverständliche Nachricht"
+      },
+      "variants_fr": [
+        "texte vide",
+        "caractères au hasard"
+      ],
+      "answer": {
+        "fr": "Je n'ai pas bien compris votre demande. Vous pouvez me demander par exemple : « maison à Steinfort », « combien vaut mon bien » ou « vos honoraires ».",
+        "en": "I did not quite understand your request. You can ask me, for example: \"house in Steinfort\", \"how much is my property worth\" or \"your fees\".",
+        "de": "Ich habe Ihre Anfrage nicht ganz verstanden. Sie können mich zum Beispiel fragen: „Haus in Steinfort“, „Was ist meine Immobilie wert“ oder „Ihre Honorare“."
+      },
+      "button": null,
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E097",
+      "theme": "Limites d'Eléna",
+      "is_template": false,
+      "question": {
+        "fr": "Insulte ou message agressif",
+        "en": "Insult or aggressive message",
+        "de": "Beleidigung oder aggressive Nachricht"
+      },
+      "variants_fr": [
+        "grossièreté",
+        "insulte"
+      ],
+      "answer": {
+        "fr": "Je reste à votre disposition pour toute question sur nos biens et nos services.",
+        "en": "I remain at your disposal for any question about our properties and services.",
+        "de": "Für Fragen zu unseren Objekten und Leistungen stehe ich Ihnen weiterhin gerne zur Verfügung."
+      },
+      "button": null,
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E098",
+      "theme": "Recherche de biens (modèles)",
+      "is_template": true,
+      "question": {
+        "fr": "Des biens correspondent",
+        "en": "Matching properties",
+        "de": "Passende Objekte"
+      },
+      "variants_fr": [],
+      "answer": {
+        "fr": "Voici les biens disponibles qui correspondent à votre recherche. Souhaitez-vous affiner par budget ou nombre de chambres ?",
+        "en": "Here are the available properties matching your search. Would you like to refine by budget or number of bedrooms?",
+        "de": "Hier sind die verfügbaren Objekte, die zu Ihrer Suche passen. Möchten Sie nach Budget oder Anzahl der Schlafzimmer verfeinern?"
+      },
+      "button": {
+        "path": "/biens",
+        "label": {
+          "fr": "Voir les biens",
+          "en": "View properties",
+          "de": "Immobilien ansehen"
+        }
+      },
+      "source": "Règles de recherche du 12/11/2026"
+    },
+    {
+      "id": "E099",
+      "theme": "Recherche de biens (modèles)",
+      "is_template": true,
+      "question": {
+        "fr": "Aucun bien sur place, biens proches",
+        "en": "None here, nearby properties",
+        "de": "Keine vor Ort, Objekte in der Nähe"
+      },
+      "variants_fr": [],
+      "answer": {
+        "fr": "Aucun bien disponible à {lieu} pour le moment. Voici les biens les plus proches. Vous pouvez aussi nous confier votre recherche.",
+        "en": "No property available in {lieu} at the moment. Here are the closest properties. You can also entrust us with your search.",
+        "de": "Derzeit ist in {lieu} kein Objekt verfügbar. Hier sind die nächstgelegenen Objekte. Sie können uns auch Ihre Suche anvertrauen."
+      },
+      "button": {
+        "path": "/mandats/recherche",
+        "label": {
+          "fr": "Mandat de recherche",
+          "en": "Search mandate",
+          "de": "Suchauftrag"
+        }
+      },
+      "source": "Règles de recherche du 12/11/2026"
+    },
+    {
+      "id": "E100",
+      "theme": "Recherche de biens (modèles)",
+      "is_template": true,
+      "question": {
+        "fr": "Aucun bien du tout",
+        "en": "No property at all",
+        "de": "Gar kein Objekt"
+      },
+      "variants_fr": [],
+      "answer": {
+        "fr": "Aucun bien ne correspond pour le moment. De plus en plus de biens se vendent en off-market : confiez-nous votre recherche, nous activons notre réseau, y compris les biens jamais publiés.",
+        "en": "No property matches at the moment. More and more properties are sold off-market: entrust us with your search and we will activate our network, including properties never published.",
+        "de": "Derzeit passt kein Objekt. Immer mehr Immobilien werden off-market verkauft: Vertrauen Sie uns Ihre Suche an, wir aktivieren unser Netzwerk, auch für nie veröffentlichte Objekte."
+      },
+      "button": {
+        "path": "/mandats/recherche",
+        "label": {
+          "fr": "Mandat de recherche",
+          "en": "Search mandate",
+          "de": "Suchauftrag"
+        }
+      },
+      "source": "Règles de recherche du 12/11/2026"
+    },
+    {
+      "id": "E101",
+      "theme": "Recherche de biens (modèles)",
+      "is_template": true,
+      "question": {
+        "fr": "Aucun pays indiqué",
+        "en": "No country given",
+        "de": "Kein Land angegeben"
+      },
+      "variants_fr": [],
+      "answer": {
+        "fr": "Voici d'abord nos biens au Luxembourg. Dans quel pays souhaitez-vous chercher ?",
+        "en": "Here are our properties in Luxembourg first. Which country would you like to search in?",
+        "de": "Hier zuerst unsere Objekte in Luxemburg. In welchem Land möchten Sie suchen?"
+      },
+      "button": null,
+      "source": "Règles de recherche du 12/11/2026"
+    },
+    {
+      "id": "E102",
+      "theme": "Recherche de biens (modèles)",
+      "is_template": true,
+      "question": {
+        "fr": "Bien sous compromis",
+        "en": "Property under offer",
+        "de": "Objekt reserviert"
+      },
+      "variants_fr": [],
+      "answer": {
+        "fr": "Ce bien est sous compromis. Je peux vous montrer des biens similaires, ou vous prévenir s'il redevenait disponible.",
+        "en": "This property is under offer. I can show you similar properties, or let you know if it becomes available again.",
+        "de": "Dieses Objekt ist reserviert. Ich kann Ihnen ähnliche Objekte zeigen oder Sie informieren, falls es wieder verfügbar wird."
+      },
+      "button": {
+        "path": "/biens",
+        "label": {
+          "fr": "Voir les biens",
+          "en": "View properties",
+          "de": "Immobilien ansehen"
+        }
+      },
+      "source": "Chantier bandeaux du 11/11/2026"
+    },
+    {
+      "id": "E103",
+      "theme": "Recherche de biens (modèles)",
+      "is_template": true,
+      "question": {
+        "fr": "Bien vendu ou loué",
+        "en": "Property sold or let",
+        "de": "Objekt verkauft oder vermietet"
+      },
+      "variants_fr": [],
+      "answer": {
+        "fr": "Ce bien a été vendu par MAPA Property. Voici des biens similaires encore disponibles.",
+        "en": "This property has been sold by MAPA Property. Here are similar properties still available.",
+        "de": "Dieses Objekt wurde von MAPA Property verkauft. Hier sind ähnliche, noch verfügbare Objekte."
+      },
+      "button": {
+        "path": "/biens",
+        "label": {
+          "fr": "Voir les biens",
+          "en": "View properties",
+          "de": "Immobilien ansehen"
+        }
+      },
+      "source": "Chantier bandeaux du 11/11/2026"
+    },
+    {
+      "id": "E104",
+      "theme": "Recherche de biens (modèles)",
+      "is_template": false,
+      "question": {
+        "fr": "Question sur un bien précis",
+        "en": "Question about a specific property",
+        "de": "Frage zu einem bestimmten Objekt"
+      },
+      "variants_fr": [
+        "détail d'une annonce",
+        "charges",
+        "étage",
+        "année"
+      ],
+      "answer": {
+        "fr": "Je vous donne les informations publiées sur la fiche du bien. Pour toute autre précision, notre équipe vous répond depuis le bouton de demande de la fiche.",
+        "en": "I can give you the information published on the property page. For any other detail, our team will reply via the request button on the page.",
+        "de": "Ich gebe Ihnen die auf der Objektseite veröffentlichten Informationen. Für weitere Details antwortet Ihnen unser Team über die Anfrage-Schaltfläche der Seite."
+      },
+      "button": {
+        "path": "/biens",
+        "label": {
+          "fr": "Voir les biens",
+          "en": "View properties",
+          "de": "Immobilien ansehen"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E105",
+      "theme": "Recherche de biens (modèles)",
+      "is_template": false,
+      "question": {
+        "fr": "Adresse exacte d'un bien",
+        "en": "Exact address of a property",
+        "de": "Genaue Adresse eines Objekts"
+      },
+      "variants_fr": [
+        "où se trouve exactement",
+        "rue"
+      ],
+      "answer": {
+        "fr": "L'adresse exacte est communiquée lors de l'organisation de la visite. Demandez une visite depuis la fiche du bien.",
+        "en": "The exact address is given when the viewing is arranged. Request a viewing from the property page.",
+        "de": "Die genaue Adresse erhalten Sie bei der Vereinbarung der Besichtigung. Fragen Sie eine Besichtigung über die Objektseite an."
+      },
+      "button": {
+        "path": "/biens",
+        "label": {
+          "fr": "Voir les biens",
+          "en": "View properties",
+          "de": "Immobilien ansehen"
+        }
+      },
+      "source": "Règle Eléna"
+    },
+    {
+      "id": "E106",
+      "theme": "Recherche de biens (modèles)",
+      "is_template": false,
+      "question": {
+        "fr": "Le prix est-il négociable ?",
+        "en": "Is the price negotiable?",
+        "de": "Ist der Preis verhandelbar?"
+      },
+      "variants_fr": [
+        "négocier le prix",
+        "dernier prix"
+      ],
+      "answer": {
+        "fr": "Je ne peux pas répondre pour le vendeur. Vous pouvez faire une offre écrite : notre équipe la lui transmet.",
+        "en": "I cannot answer on the seller's behalf. You can make a written offer and our team will pass it on.",
+        "de": "Ich kann nicht für den Verkäufer antworten. Sie können ein schriftliches Angebot machen, unser Team leitet es weiter."
+      },
+      "button": {
+        "path": "/contact",
+        "label": {
+          "fr": "Nous contacter",
+          "en": "Contact us",
+          "de": "Kontakt"
+        }
+      },
+      "source": "Règle Eléna"
+    }
+  ]
+}

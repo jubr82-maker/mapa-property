@@ -34,6 +34,8 @@ export default async function EditBlogPostPage({
     question: { fr: r.question_fr ?? "", en: r.question_en ?? "", de: r.question_de ?? "" },
     answer: { fr: r.answer_fr ?? "", en: r.answer_en ?? "", de: r.answer_de ?? "" },
     published: r.published,
+    // Champs des reponses d'Elena : sans objet pour un article.
+    elena: { variants: "", button_path: "", button_label: { fr: "", en: "", de: "" }, source: "", is_template: false },
   }));
 
   return (

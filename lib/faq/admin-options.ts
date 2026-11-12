@@ -5,9 +5,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { cities } from "@/lib/cities";
-import { FAQ_FIXED_KEYS, blogFaqKey, cityFaqKey } from "@/lib/faq/keys";
+import { ELENA_FAQ_KEY, FAQ_FIXED_KEYS, blogFaqKey, cityFaqKey } from "@/lib/faq/keys";
 
-export type FaqPageOption = { value: string; label: string; group: "pages" | "cities" | "blog" };
+export type FaqPageOption = { value: string; label: string; group: "pages" | "elena" | "cities" | "blog" };
 
 export async function faqPageOptions(supabase: SupabaseClient): Promise<FaqPageOption[]> {
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_faq" });
@@ -15,6 +15,8 @@ export async function faqPageOptions(supabase: SupabaseClient): Promise<FaqPageO
   const posts = ((data as { slug: string | null; title_fr: string | null }[] | null) ?? []).filter((p) => p.slug);
   return [
     ...FAQ_FIXED_KEYS.map((k) => ({ value: k, label: t(`key_${k.replace(/-/g, "_")}`), group: "pages" as const })),
+    // Reponses d'Elena (nov. 2026) : jamais affichees sur le site public.
+    { value: ELENA_FAQ_KEY, label: t("key_elena"), group: "elena" as const },
     ...[...cities]
       .sort((a, b) => a.name.fr.localeCompare(b.name.fr, "fr"))
       .map((c) => ({ value: cityFaqKey(c.slug), label: t("city_label", { name: c.name.fr }), group: "cities" as const })),

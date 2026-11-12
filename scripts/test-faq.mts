@@ -43,6 +43,10 @@ test("SQL 23 : table, contrainte identique a la liste du code, lecture publique 
 
 test("SQL 24 : questions d'origine reprises mot pour mot (FR, EN, DE), Steinfort extrait avec garde-fous", () => {
   const sql = read("supabase/sql/24_faq_reprise.sql");
+  // Nov. 2026 : trois reponses corrigees depuis (Bëllegen Akt, mise en
+  // location, gestion locative) par le SQL 36, qui reprend le texte du site.
+  const sql36 = read("supabase/sql/36_faq_corrections.sql");
+  const corrected = new Set(["acheter faq_a2", "louer faq_a1", "louer faq_a2"]);
   const sets: [string, string, number][] = [["agency", "agence", 5], ["sell", "vendre", 4], ["buy", "acheter", 4], ["rent", "louer", 4], ["search", "mandat-recherche", 4], ["broker", "broker-international", 4]];
   for (const l of ["fr", "en", "de"]) {
     const m = JSON.parse(read(`messages/${l}.json`)).intent_pages;
@@ -50,7 +54,7 @@ test("SQL 24 : questions d'origine reprises mot pour mot (FR, EN, DE), Steinfort
       for (let i = 1; i <= count; i++) {
         for (const f of ["faq_q", "faq_a"]) {
           const v = String(m[intent][`${f}${i}`]).replace(/'/g, "''");
-          assert.ok(sql.includes(`'${v}'`), `${l} ${key} ${f}${i}`);
+          assert.ok((corrected.has(`${key} ${f}${i}`) ? sql36 : sql).includes(`'${v}'`), `${l} ${key} ${f}${i}`);
         }
       }
     }

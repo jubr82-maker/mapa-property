@@ -12,13 +12,25 @@ import { ActionFailure, dbFailure, sessionFailure } from "@/lib/admin/action-res
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { logAdminAction } from "@/lib/pilotage/audit";
 import { faqTag } from "@/lib/faq/data";
-import { FAQ_LANGS, faqPagePaths, isFaqPageKey, type FaqLang } from "@/lib/faq/keys";
+import { ELENA_FAQ_KEY, FAQ_LANGS, faqPagePaths, isFaqPageKey, type FaqLang } from "@/lib/faq/keys";
+import { isElenaButtonPath } from "@/lib/elena/button-paths";
 
 export type FaqPayload = {
   page_key: string;
   question: Record<FaqLang, string>;
   answer: Record<FaqLang, string>;
   published: boolean;
+  /**
+   * Reponses d'Elena (page 'elena', SQL 37) : autres formulations, bouton
+   * (liste fermee des chemins du site) et son libelle, source. Ignore pour
+   * les autres pages.
+   */
+  elena?: {
+    variants: string[];
+    button_path: string | null;
+    button_label: Record<FaqLang, string>;
+    source: string;
+  };
 };
 
 export type FaqResult = { ok: true; id: string } | { ok: false; error: string };
@@ -63,6 +75,19 @@ export async function saveFaq(id: string | null, input: FaqPayload): Promise<Faq
       row[`answer_${l}`] = a || null;
     }
     if (!row.question_fr) return { ok: false, error: tf("err_fr") };
+    if (input.page_key === ELENA_FAQ_KEY) {
+      const e = input.elena;
+      const variants = (Array.isArray(e?.variants) ? e.variants : []).map((v) => clean(v, 200)).filter(Boolean).slice(0, 60);
+      const path = e?.button_path ? String(e.button_path) : null;
+      if (path && !isElenaButtonPath(path)) return { ok: false, error: tf("err_button_path") };
+      const labels = Object.fromEntries(FAQ_LANGS.map((l) => [l, clean(e?.button_label?.[l], 80)])) as Record<FaqLang, string>;
+      if (path && !labels.fr) return { ok: false, error: tf("err_button_label") };
+      if ([...variants, ...Object.values(labels)].some((v) => DASHES.test(v))) return { ok: false, error: tf("err_dash", { lang: tf("lang_fr") }) };
+      row.variants_fr = variants;
+      row.button_path = path;
+      for (const l of FAQ_LANGS) row[`button_label_${l}`] = path ? labels[l] || null : null;
+      row.source = clean(e?.source, 200) || null;
+    }
 
     let previousKey: string | null = null;
     let faqId = id;

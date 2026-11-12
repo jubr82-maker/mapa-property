@@ -1,16 +1,20 @@
 import { attributionColumns } from "@/lib/pilotage/attribution";
 import { recordFormEvent } from "@/lib/pilotage/form-events";
 import { NextResponse } from "next/server";
-import { safeInternalPath } from "@/lib/security/sanitize";
 import { createHash } from "crypto";
 import { getTranslations } from "next-intl/server";
-import { buildSystemPrompt } from "@/components/chatbot/chatbot-knowledge";
 import { supabaseService } from "@/lib/supabase-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendLeadEmails } from "@/lib/email/lead-emails";
 import { insertLeadWithConsent } from "@/lib/lead-insert";
 import { verifyTurnstile, clientIp } from "@/lib/turnstile";
 import { getLockedTopicsReply } from "@/lib/chatbot/locked-topics";
+import { fetchAllPropertiesWithCover, type PropertyWithCover } from "@/lib/data";
+import { loadElenaEntries } from "@/lib/elena/qa";
+import { recognizeEntry } from "@/lib/elena/recognize";
+import { elenaRespond, type ElenaReply } from "@/lib/elena/respond";
+import { bannerOf } from "@/lib/property-banner";
+import { formatPrice } from "@/lib/format/numbers";
 
 const CHATBOT_MAX_MESSAGES = 20;
 const CHATBOT_MAX_MESSAGE_CHARS = 2000;
@@ -32,57 +36,6 @@ interface RequestBody {
   transcript?: string;
   turnstileToken?: string;
   attribution?: unknown;
-}
-
-interface NavigateIntent {
-  action: "navigate";
-  url: string;
-}
-
-// Sprint ELENA-NAV C2 — parse la reponse LLM en JSON strict {message, intent}.
-// Robuste : si parse fail OR structure invalide -> retourne le texte tel
-// quel comme message + intent=null. Validation URL : doit etre un path
-// relatif (commence par "/") pour eviter open redirect.
-function parseAssistantReply(
-  raw: string,
-): { message: string; intent: NavigateIntent | null } {
-  if (!raw) return { message: "", intent: null };
-  let parsed: unknown;
-  try {
-    // Tolere les wrappers markdown ```json ... ``` que Mistral ajoute
-    // parfois malgre le system prompt.
-    const stripped = raw
-      .trim()
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/```\s*$/i, "")
-      .trim();
-    parsed = JSON.parse(stripped);
-  } catch {
-    return { message: raw, intent: null };
-  }
-  if (
-    !parsed ||
-    typeof parsed !== "object" ||
-    typeof (parsed as { message?: unknown }).message !== "string"
-  ) {
-    return { message: raw, intent: null };
-  }
-  const obj = parsed as { message: string; intent?: unknown };
-  let intent: NavigateIntent | null = null;
-  if (
-    obj.intent &&
-    typeof obj.intent === "object" &&
-    (obj.intent as { action?: unknown }).action === "navigate" &&
-    safeInternalPath((obj.intent as { url?: unknown }).url)
-  ) {
-    // Chemin interne uniquement (OWASP ASVS 5.1.5) : "//site", "/\site",
-    // schemas et caracteres de controle refuses.
-    intent = {
-      action: "navigate",
-      url: safeInternalPath((obj.intent as { url?: unknown }).url) as string,
-    };
-  }
-  return { message: obj.message, intent };
 }
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
@@ -144,7 +97,7 @@ async function checkDailyLimit(visitorHash: string): Promise<boolean> {
 async function logChatbotInteraction(entry: {
   locale: string;
   pageContext: string;
-  engine: "mistral" | "fallback" | "locked" | "consent_accept" | "consent_decline";
+  engine: "qa" | "default" | "search" | "locked" | "consent_accept" | "consent_decline";
   question: string;
   answer: string;
   leadCreated: boolean;
@@ -169,96 +122,6 @@ async function logChatbotInteraction(entry: {
       code: (e as { code?: string })?.code ?? "unknown_error",
     });
   }
-}
-
-// Sprint MODELE-DEBIT — modele change de mistral-small-latest (plafond
-// compte : 20 000 jetons/min, 1 req/s, PROUVE epuise en 2-3 echanges vu le
-// prompt systeme complet a chaque appel) vers ministral-3b-2512 (meme
-// compte : 1 300 000 jetons/min, 12,5 req/s). Nom exact verifie sur la
-// documentation officielle Mistral (docs.mistral.ai/models/ministral-3-3b-25-12,
-// qui cite litteralement "ministral-3b-2512" comme identifiant d'API),
-// jamais devine.
-const MISTRAL_MODEL = "ministral-3b-2512";
-const MISTRAL_RETRY_DELAY_MS = 1000;
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function callMistralOnce(
-  apiKey: string,
-  messages: Message[],
-): Promise<{ text: string | null; failureCode: string | null }> {
-  try {
-    const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: MISTRAL_MODEL,
-        messages,
-        max_tokens: 400,
-        temperature: 0.6,
-        // Sprint ELENA-NAV phase 2 : fiabilise le JSON strict attendu par
-        // parseAssistantReply. Ministral 3B supporte aussi json_object.
-        // parseAssistantReply reste filet en cas de drift inattendu.
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (!res.ok) return { text: null, failureCode: `mistral_http_${res.status}` };
-    const json = await res.json();
-    const text = json?.choices?.[0]?.message?.content as string | null;
-    if (!text) return { text: null, failureCode: "mistral_empty_response" };
-    return { text, failureCode: null };
-  } catch {
-    return { text: null, failureCode: "mistral_exception" };
-  }
-}
-
-// Une seule nouvelle tentative, uniquement sur 429 (plafond de debit
-// depasse), apres 1 seconde d'attente. Toute autre erreur (cle absente,
-// 4xx/5xx non lie au debit, exception reseau) tombe directement sur le
-// repli heuristique, sans attendre inutilement le visiteur.
-const callMistral = async (
-  messages: Message[],
-): Promise<{ text: string | null; failureCode: string | null }> => {
-  const apiKey = process.env.MISTRAL_API_KEY;
-  if (!apiKey) return { text: null, failureCode: "no_api_key" };
-
-  const first = await callMistralOnce(apiKey, messages);
-  if (first.text || first.failureCode !== "mistral_http_429") return first;
-
-  console.warn("[api/chatbot] mistral 429, nouvelle tentative dans 1s", {
-    code: first.failureCode,
-  });
-  await sleep(MISTRAL_RETRY_DELAY_MS);
-  const retry = await callMistralOnce(apiKey, messages);
-  if (!retry.text) {
-    console.error("[api/chatbot] mistral 429 persiste apres nouvelle tentative", {
-      code: retry.failureCode,
-    });
-  }
-  return retry;
-};
-
-// Sprint ELENA-REFONTE point 4 — repli professionnel. Les reponses
-// specifiques (off-market, honoraires, mandats, estimation) restent
-// utiles et exactes ; seul le message generique changeait de ton avant
-// cette passe ("chatbot non active", faux et pejoratif). Toutes les
-// chaines passent desormais par next-intl (namespace chatbot), 3 langues.
-async function fallbackReply(locale: string, lastUser: string): Promise<string> {
-  const t = await getTranslations({ locale, namespace: "chatbot" });
-  const lower = lastUser.toLowerCase();
-  if (/(off.?market|nda)/.test(lower)) return t("fallback_offmarket");
-  if (/(fee|honor|price|cost|honorair|prix|tarif|coût|cout)/.test(lower))
-    return t("fallback_fees");
-  if (/(mandat|exclusive|search|exclusif|recherche)/.test(lower))
-    return t("fallback_mandate");
-  if (/(estim|valeur|value|combien|how much)/.test(lower))
-    return t("fallback_estimate");
-  return t("fallback_reply");
 }
 
 // Sprint ELENA-REFONTE point 5 — detection de coordonnees, SANS creation
@@ -416,46 +279,31 @@ export async function POST(req: Request) {
 
   const lastUser = messages.filter((m) => m.role === "user").pop()?.content ?? "";
 
-  let reply: string;
-  let engine: "mistral" | "fallback" | "locked";
-  let intent: NavigateIntent | null = null;
-
-  // Mission "chiffres verrouilles" : sujets a fort risque (frais
-  // d'acquisition, Bëllegen Akt, TVA, taux de mandats, avance sur frais,
-  // durees de mandat) : reponse figee construite depuis les sources
-  // uniques, jamais transmise au modele pour reformulation. Court-circuite
-  // entierement l'appel a Mistral pour ce tour (cf. commentaire dans
-  // lib/chatbot/locked-topics.ts pour le cas d'un message mixte).
-  const lockedReply = getLockedTopicsReply(lastUser, locale);
-
-  if (lockedReply) {
-    reply = lockedReply;
-    engine = "locked";
-  } else {
-    const systemPrompt = buildSystemPrompt(locale, pageContext);
-    const fullMessages: Message[] = [
-      { role: "system", content: systemPrompt },
-      ...messages,
-    ];
-    const { text: mistralText, failureCode } = await callMistral(fullMessages);
-
-    if (mistralText) {
-      const parsed = parseAssistantReply(mistralText);
-      reply = parsed.message;
-      intent = parsed.intent;
-      engine = "mistral";
-    } else {
-      // Point 4 — la vraie cause de l'echec est journalisee cote serveur,
-      // sans donnee personnelle (code technique uniquement, jamais le texte
-      // de l'utilisateur ni sa reponse). Lecture : cf. rapport de mission
-      // (Vercel Runtime Logs du projet, filtre "[api/chatbot] mistral").
-      console.error("[api/chatbot] mistral indisponible, repli heuristique", {
-        code: failureCode ?? "unknown",
-      });
-      reply = await fallbackReply(locale, lastUser);
-      engine = "fallback";
-    }
-  }
+  // Nov. 2026 : Elena sans aucune liberte (lib/elena/respond.ts). Sujets
+  // verrouilles d'abord (inchanges), puis recherche de biens (analyseur et
+  // regles du site), puis reconnaissance de l'entree (Mistral : identifiant
+  // seulement), sinon l'entree par defaut et la prise de contact. La reponse
+  // affichee est TOUJOURS le texte exact d'une entree validee (table faqs,
+  // page 'elena', ou docs/elena/elena-qa.json), jamais un texte du modele.
+  const tBanner = await getTranslations({ locale, namespace: "status_banner" });
+  const tChat = await getTranslations({ locale, namespace: "chatbot" });
+  const [{ entries }, properties] = await Promise.all([loadElenaEntries(), fetchAllPropertiesWithCover()]);
+  const answer: ElenaReply = await elenaRespond<PropertyWithCover>(lastUser, locale, {
+    entries,
+    properties,
+    recognize: recognizeEntry,
+    locked: getLockedTopicsReply,
+    priceLabel: (p) => {
+      const b = bannerOf(p);
+      if (b?.kind === "sold") return tBanner("sold_price");
+      if (b?.kind === "rented") return tBanner("rented_price");
+      if (!p.price) return tChat("price_on_request");
+      const v = formatPrice(p.price, locale);
+      return p.transaction === "rent" ? tChat("price_per_month", { price: v }) : v;
+    },
+  });
+  const reply = answer.reply;
+  const engine = answer.engine;
 
   // Point 5 — detection sans creation silencieuse. Le client affiche la
   // demande de consentement explicite ; rien n'est ecrit en base ici.
@@ -472,7 +320,14 @@ export async function POST(req: Request) {
     visitorHash,
   });
 
-  return NextResponse.json({ reply: message, intent, contactDetected });
+  return NextResponse.json({
+    reply: message,
+    intent: null,
+    button: answer.button,
+    properties: answer.properties,
+    offerContact: answer.offerContact,
+    contactDetected,
+  });
 }
 
 export const dynamic = "force-dynamic";

@@ -1351,7 +1351,10 @@
     "consent_decline": "No thanks",
     "consent_accepted": "Thank you, a MAPA Property advisor will get back to you shortly.",
     "consent_declined": "No problem, nothing is shared. Feel free to change your mind at any time.",
-    "consent_error": "Sending failed. Please try again or use our contact form."
+    "consent_error": "Sending failed. Please try again or use our contact form.",
+    "price_per_month": "{price} / month",
+    "price_on_request": "Price on request",
+    "properties_label": "Suggested properties"
   },
   "financing_simulator": {
     "disclaimer": "Disclaimer: indicative simulation for information purposes only. The amounts shown do not constitute a loan offer. The rates applied by banks vary according to the borrower profile, down payment, collateral, property type and market conditions. For a personalised study, contact MAPA Property for an appointment with a qualified banking partner.",
@@ -4993,7 +4996,19 @@
     "blog_block_intro": "Shown below the article, in each language they are translated into.",
     "blog_block_add": "Add a question",
     "blog_block_need_slug": "Save the article first: its questions are linked to its page address.",
-    "key_broker_international": "International broker"
+    "key_broker_international": "International broker",
+    "key_elena": "Eléna (assistant answers, never shown on the site)",
+    "group_elena": "Eléna",
+    "elena_hint": "Eléna answer: the text is shown word for word to the visitor. Other phrasings help recognise the question.",
+    "elena_template_hint": "Property search template: '{lieu}' is replaced by the recognised place. Keep the question title as is.",
+    "field_variants": "Other phrasings",
+    "field_variants_hint": "One phrasing per line.",
+    "field_button": "Button",
+    "field_button_none": "No button",
+    "field_button_label": "Button label ({lang})",
+    "field_source": "Source",
+    "err_button_path": "This button path is not in the list of site pages.",
+    "err_button_label": "The French button label is required."
   },
   "admin_remuneration": {
     "title": "Pay",
