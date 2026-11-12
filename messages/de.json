@@ -790,7 +790,7 @@
     "list_text": "Sorgfältige Mieterauswahl, vollständige Akte, AML/KYC, gesetzeskonformer Mietvertrag.",
     "manage_label": "Verwaltung",
     "manage_title": "Hausverwaltung",
-    "manage_text": "Inkasso, Nebenkosten, Schäden, Vertragsende. Eine modulare Formel nach Ihren Bedürfnissen.",
+    "manage_text": "Ein- und Auszüge der Mieter mit allen Übergabeprotokollen sowie Vermittlung von Handwerksbetrieben, falls Arbeiten nötig sind. MAPA Property zieht keine Mieten ein.",
     "learn_more": "Mehr erfahren",
     "legal_notice": "Die Luxemburger Obergrenze beträgt 5% des investierten Kapitals pro Jahr. MAPA Property garantiert die strikte Einhaltung dieser Regel: sie schützt Mieter und Vermieter."
   },
@@ -1056,7 +1056,7 @@
     "intro": "Monatsrate, Mietrendite, Kreditkapazität: vorausgefüllt mit den neuesten luxemburgischen Marktzinssätzen.",
     "disclaimer_title": "Nur indikative Werkzeuge, nicht vertraglich bindend.",
     "disclaimer_p1": "Unser Rechner basiert auf öffentlichen Daten des Observatoire de l'Habitat (Luxemburger Wohnungsministerium) und Referenzzinsen der Banque centrale du Luxembourg (BCL), kontinuierlich von unserer Agentur an Markttrends angepasst.",
-    "disclaimer_p2": "Üblicher prudentieller Verschuldungsgrenzwert (35%). Luxemburger Mietobergrenze: 5% des investierten Kapitals pro Jahr. Notarkosten ~7% des Kaufpreises in Luxemburg. Bëllegen Akt: Steuergutschrift von bis zu 40 000 € pro Käufer (80 000 € für ein gemeinsam erwerbendes Paar) auf die Eintragungsgebühren, unter der Bedingung der tatsächlichen Nutzung als Hauptwohnsitz.",
+    "disclaimer_p2": "Üblicher prudentieller Verschuldungsgrenzwert (35%). Luxemburger Mietobergrenze: 5% des investierten Kapitals pro Jahr. Notarkosten ~7% des Kaufpreises in Luxemburg. Bëllegen Akt: Steuergutschrift von bis zu 45 000 € pro Käufer (90 000 € für ein gemeinsam erwerbendes Paar) seit dem 16. Juli 2026 auf die Eintragungsgebühren, unter der Bedingung der tatsächlichen Nutzung als Hauptwohnsitz.",
     "source": "Quelle: MAPA Property. © 2026. Alle Rechte vorbehalten. Vervielfältigung untersagt."
   },
   "simulators": {
@@ -1133,7 +1133,7 @@
     "read": "Lesen"
   },
   "booklet": {
-    "close": "Zurück zum Blog",
+    "close": "Zurück zum Journal",
     "page": "Seite",
     "prev": "Vorherige Seite",
     "next": "Nächste Seite"
@@ -1436,7 +1436,7 @@
       "description": "Landesweite Abdeckung im Großherzogtum und internationale Suche mit in Luxemburg unterzeichnetem Mandat: Trophy Assets, Prestigeobjekte und Off-Market."
     },
     "blog": {
-      "title": "Immobilienblog, Analysen und Steuern, MAPA Property",
+      "title": "Immobilien-Journal, Analysen und Steuern, MAPA Property",
       "description": "Analysen zum luxemburgischen Immobilienmarkt, zu Steuern, Off-Market und Mandaten: unsere Einblicke für präzise Immobilienentscheidungen."
     },
     "journal": {
@@ -3955,7 +3955,7 @@
   "breadcrumb": {
     "home": "Startseite",
     "properties": "Immobilien",
-    "blog": "Blog",
+    "blog": "Journal",
     "contact": "Kontakt",
     "waitlist": "Warteliste",
     "acquisition_notice": "Hinweise zum Erwerbskostenrechner",
@@ -4001,7 +4001,7 @@
     "link_simulators": "Rechner",
     "link_markets": "Aktive Märkte",
     "link_offmarket": "Off-Market",
-    "link_blog": "Blog",
+    "link_blog": "Journal",
     "link_contact": "Kontakt"
   },
   "explore": {
@@ -4067,7 +4067,7 @@
       "faq_q1": "Welche Kosten kommen zum Kaufpreis hinzu?",
       "faq_a1": "In Luxemburg rund 6 % Registrierungsgebühren, 1 % Umschreibungsgebühr und rund 1 % Notarhonorar, insgesamt also etwa 8 % des Preises (Richtwert).",
       "faq_q2": "Was ist der Bëllegen Akt?",
-      "faq_a2": "Eine Steuergutschrift auf die Registrierungsgebühren von bis zu 40 000 Euro pro Käufer beim Kauf eines Hauptwohnsitzes, ohne Alters- oder Ersterwerbsbedingung (Gesetz vom 3. Juli 2025).",
+      "faq_a2": "Eine Steuergutschrift auf die Registrierungsgebühren von bis zu 45 000 Euro pro Käufer seit dem 16. Juli 2026, beim Kauf eines Hauptwohnsitzes, ohne Alters- oder Ersterwerbsbedingung.",
       "faq_q3": "Wie erhalte ich Zugang zu nicht veröffentlichten Immobilien?",
       "faq_a3": "Die Off-Market-Auswahl ist auf begründete Anfrage nach Unterzeichnung einer Vertraulichkeitsvereinbarung zugänglich. Ein Suchauftrag aktiviert zudem das vertrauliche Netzwerk der Agentur.",
       "faq_q4": "Wie viel kann ich leihen?",
@@ -4093,9 +4093,9 @@
       "service_name": "Vermietung und Mietverwaltung in Luxemburg",
       "answer": "MAPA Property begleitet Sie beim Mieten in Luxemburg in beide Richtungen: ein Mietobjekt unter den veröffentlichten Immobilien finden oder Ihre Immobilie vermieten, mit Mieterauswahl und rechtskonformem Mietvertrag sowie optionaler Mietverwaltung. Die Miete hält stets die gesetzliche Luxemburger Obergrenze von 5 % des investierten Kapitals pro Jahr ein.",
       "faq_q1": "Wie hoch ist das Honorar für die Vermietung?",
-      "faq_a1": "Eine Monatsmiete zzgl. MwSt., je nach Gepflogenheit geteilt (50 % Vermieter, 50 % Mieter) oder je nach Mandat vollständig vom Vermieter getragen.",
+      "faq_a1": "Eine Monatsmiete zzgl. MwSt., Wohnungsübergabeprotokoll inbegriffen, je zur Hälfte zwischen Vermieter und Mieter geteilt gemäß dem luxemburgischen Gesetz über den Wohnungsmietvertrag (Gesetz vom 23. Juli 2024).",
       "faq_q2": "Was kostet die Mietverwaltung?",
-      "faq_a2": "6 % bis 8 % zzgl. MwSt. der eingenommenen Mieten, je nach enthaltenen Leistungen: Inkasso, Nebenkosten, Schadensfälle und Mietende.",
+      "faq_a2": "6 % bis 8 % zzgl. MwSt. der Monatsmiete: Ein- und Auszüge der Mieter mit allen Übergabeprotokollen sowie Vermittlung von Handwerksbetrieben, falls Arbeiten nötig sind. MAPA Property zieht keine Mieten ein.",
       "faq_q3": "Wie hoch darf die Miete in Luxemburg höchstens sein?",
       "faq_a3": "Die Jahresmiete darf 5 % des in die Wohnung investierten Kapitals nicht übersteigen (Gesetz vom 21. September 2006 über den Wohnungsmietvertrag).",
       "faq_q4": "Wie werden die Mieter ausgewählt?",

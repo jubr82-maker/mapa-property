@@ -12,6 +12,13 @@
 //   - messages/fr.json (et en/de) namespace about_page, lu directement
 // Zéro invention. Sprint ELENA-NAV phase 2.
 //
+// Nov. 2026 : aucune ancienne valeur. Bëllegen Akt 45 000 euros par acquéreur
+// depuis le 16 juillet 2026, honoraires de mise en location (un mois de loyer
+// HT, état des lieux inclus, partagé par moitié) et gestion locative (6 % à
+// 8 % HT du loyer mensuel, MAPA Property n'encaisse pas les loyers) : lus
+// directement dans lib/legal-fees.ts et lib/legal/honoraires.ts, jamais
+// recopiés ici (vérifié par scripts/test-textes-d.mts).
+//
 // Le plafond loyer luxembourgeois (5 % du capital investi par an) reste
 // une valeur statique ci-dessous : aucune constante unique ne l'expose
 // ailleurs dans le code (verifie par recherche dans lib/estimation/*,

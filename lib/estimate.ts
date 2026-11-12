@@ -173,11 +173,11 @@ export const estimateProperty = (
       const buyers = input.buyersCount ?? 1;
       helps.push({
         key: "bellegen_akt",
-        amount: 40000 * buyers,
+        amount: 45000 * buyers,
         conditions: [
           "Résidence principale (occupation effective et personnelle)",
           "Aucune condition d'âge ni de primo-accession",
-          `Crédit d'impôt 40 000 € par acquéreur (${buyers} personne${buyers > 1 ? "s" : ""})`,
+          `Crédit d'impôt 45 000 € par acquéreur (${buyers} personne${buyers > 1 ? "s" : ""})`,
         ],
       });
     }
@@ -267,7 +267,7 @@ export interface AcquisitionCostsResult {
 
 export const computeAcquisitionCosts = (input: AcquisitionCostsInput): AcquisitionCostsResult => {
   const registrationDuty = input.priceEur * 0.07;
-  const bellegenAktReduction = (input.bellegenAktBuyers ?? 0) * 40000;
+  const bellegenAktReduction = (input.bellegenAktBuyers ?? 0) * 45000;
   const notaryFees = input.priceEur * 0.0175;
   const mapaFees = input.priceEur * (input.mandateRate ?? 0);
   const vatOnFees = mapaFees * 0.17;

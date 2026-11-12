@@ -56,8 +56,8 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Mise en location & gestion locative",
         paragraphs: [
-          "Honoraires de mise en location : un mois de loyer HT, partagé selon usage (50 % bailleur / 50 % locataire) ou intégralement à la charge du bailleur selon mandat.",
-          "Gestion locative : 6 % à 8 % HT des loyers encaissés, selon les services inclus.",
+          "Honoraires de mise en location : un mois de loyer HT, état des lieux inclus, partagé par moitié entre le bailleur et le locataire conformément à la loi luxembourgeoise sur le bail d'habitation (loi du 23 juillet 2024).",
+          "Gestion locative : 6 % à 8 % HT du loyer mensuel : entrées et sorties des locataires avec tous les états des lieux, et mise en relation avec des entreprises si des travaux sont nécessaires. MAPA Property n'encaisse pas les loyers.",
           "Le plafond luxembourgeois de 5 % du capital investi par an est strictement respecté.",
         ],
       },
@@ -85,7 +85,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Frais annexes (à la charge du Mandant)",
         paragraphs: [
-          "Frais d'enregistrement et de notaire : environ 6 % de droits d'enregistrement, 1 % de droit de transcription et environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % au Luxembourg. Le Bëllegen Akt est un crédit d'impôt jusqu'à 40 000 € par acquéreur, sans condition d'âge ni de primo-accession, pour toute résidence principale.",
+          "Frais d'enregistrement et de notaire : environ 6 % de droits d'enregistrement, 1 % de droit de transcription et environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % au Luxembourg. Le Bëllegen Akt est un crédit d'impôt jusqu'à 45 000 € par acquéreur depuis le 16 juillet 2026, sans condition d'âge ni de primo-accession, pour toute résidence principale.",
           "Frais d'huissier en cas de procédure : à la charge du Mandant.",
           "Frais de déplacement à l'international au-delà de 200 km du siège : forfait kilométrique sur devis.",
         ],
@@ -137,8 +137,8 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Rental & property management",
         paragraphs: [
-          "Letting: one month's rent (excl. VAT), split as customary or fully at landlord's expense.",
-          "Property management: 6% to 8% (excl. VAT) of collected rents.",
+          "Letting fees: one month's rent excluding VAT, inventory of fixtures included, split equally between the landlord and the tenant in accordance with the Luxembourg residential lease law (law of 23 July 2024).",
+          "Property management: 6% to 8% excluding VAT of the monthly rent: tenant move-ins and move-outs with all inventories of fixtures, and referral to contractors if works are needed. MAPA Property does not collect rents.",
           "Strict compliance with the Luxembourg 5% rent cap on invested capital per year.",
         ],
       },
@@ -166,7 +166,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Ancillary fees (Mandant's expense)",
         paragraphs: [
-          "Registration and notary fees: approximately 6% registration duty, 1% transcription duty and approximately 1% notary fees, for an indicative total close to 8% in Luxembourg. The Bëllegen Akt is a tax credit of up to €40,000 per buyer on registration duty, for any primary residence, no age or first-time buyer condition.",
+          "Registration and notary fees: approximately 6% registration duty, 1% transcription duty and approximately 1% notary fees, for an indicative total close to 8% in Luxembourg. The Bëllegen Akt is a tax credit of up to €45,000 per buyer on registration duty since 16 July 2026, for any primary residence, no age or first-time buyer condition.",
           "Bailiff fees if proceedings.",
           "International travel beyond 200 km from HQ: per-quote.",
         ],
@@ -218,8 +218,8 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Vermietung & Verwaltung",
         paragraphs: [
-          "Vermietung: eine Monatsmiete zzgl. MwSt., je nach Brauch geteilt oder voll vom Vermieter getragen.",
-          "Hausverwaltung: 6 % bis 8 % zzgl. MwSt. der eingenommenen Mieten.",
+          "Vermietungshonorar: eine Monatsmiete zzgl. MwSt., Wohnungsübergabeprotokoll inbegriffen, je zur Hälfte zwischen Vermieter und Mieter geteilt gemäß dem luxemburgischen Gesetz über den Wohnungsmietvertrag (Gesetz vom 23. Juli 2024).",
+          "Hausverwaltung: 6 % bis 8 % zzgl. MwSt. der Monatsmiete: Ein- und Auszüge der Mieter mit allen Übergabeprotokollen sowie Vermittlung von Handwerksbetrieben, falls Arbeiten nötig sind. MAPA Property zieht keine Mieten ein.",
           "Strikte Einhaltung der Luxemburger 5 %-Mietobergrenze auf investiertes Kapital pro Jahr.",
         ],
       },
@@ -247,7 +247,7 @@ export const honoraires: Record<"fr" | "en" | "de", LegalContent> = {
       {
         heading: "Nebenkosten (zu Lasten des Mandanten)",
         paragraphs: [
-          "Eintragungs- und Notarkosten: etwa 6 % Eintragungsgebühr, 1 % Übertragungsgebühr und etwa 1 % Notarhonorar, insgesamt indikativ nahe 8 % in Luxemburg. Der Bëllegen Akt ist eine Steuergutschrift von bis zu 40 000 € pro Käufer auf die Eintragungsgebühr für jeden Hauptwohnsitz, ohne Alters- oder Erstkäufer-Bedingung.",
+          "Eintragungs- und Notarkosten: etwa 6 % Eintragungsgebühr, 1 % Übertragungsgebühr und etwa 1 % Notarhonorar, insgesamt indikativ nahe 8 % in Luxemburg. Der Bëllegen Akt ist eine Steuergutschrift von bis zu 45 000 € pro Käufer seit dem 16. Juli 2026 auf die Eintragungsgebühr für jeden Hauptwohnsitz, ohne Alters- oder Erstkäufer-Bedingung.",
           "Gerichtsvollzieherkosten bei Verfahren.",
           "Internationale Reisen über 200 km vom Sitz: auf Angebot.",
         ],

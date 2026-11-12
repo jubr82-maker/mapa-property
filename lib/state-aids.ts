@@ -48,8 +48,8 @@ export const STATE_AIDS_LU: StateAid[] = [
     country: "LU",
     name: "Bëllegen Akt",
     description:
-      "Crédit d'impôt jusqu'à 40 000 EUR par acquéreur sur les droits d'enregistrement, pour toute résidence principale, sans condition d'âge ni de primo-accession.",
-    maxAmount: 40000,
+      "Crédit d'impôt jusqu'à 45 000 EUR par acquéreur (depuis le 16 juillet 2026) sur les droits d'enregistrement, pour toute résidence principale, sans condition d'âge ni de primo-accession.",
+    maxAmount: 45000,
     conditions: {
       primoAccedant: null,
       residencePrincipale: true,
@@ -59,7 +59,7 @@ export const STATE_AIDS_LU: StateAid[] = [
       locatif: false,
     },
     stackable: ["lu_tva_3"],
-    legalRef: "Loi du 3 juillet 2025 (abattement des droits d'enregistrement)",
+    legalRef: "Communiqué du gouvernement du 16 juillet 2026 (45 000 euros par acquéreur)",
     appliesTo: "registration_rights",
   },
   {

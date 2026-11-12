@@ -790,7 +790,7 @@
     "list_text": "Rigorous tenant selection, full file, AML/KYC, compliant lease.",
     "manage_label": "Management",
     "manage_title": "Property management",
-    "manage_text": "Collection, charges, claims, end of lease. A modular formula tailored to your needs.",
+    "manage_text": "Tenant move-ins and move-outs with all inventories of fixtures, and referral to contractors if works are needed. MAPA Property does not collect rents.",
     "learn_more": "Learn more",
     "legal_notice": "The Luxembourg cap is 5% of invested capital per year. MAPA Property guarantees strict compliance with this rule, which protects both tenant and landlord."
   },
@@ -1056,7 +1056,7 @@
     "intro": "Monthly payment, rental yield, borrowing capacity: pre-filled with the latest Luxembourg market rates.",
     "disclaimer_title": "Indicative tools only, non-contractual.",
     "disclaimer_p1": "Our simulator is based on public data from the Observatoire de l'Habitat (Luxembourg Ministry of Housing) and reference rates from the Banque centrale du Luxembourg (BCL), continuously adapted by our agency to market trends.",
-    "disclaimer_p2": "Usual prudential debt threshold (35%). Luxembourg rent cap: 5% of invested capital per year. Notary fees ~7% of acquisition price in Luxembourg. Bëllegen Akt: tax credit of up to €40,000 per buyer (€80,000 for a couple buying together) on registration duty, subject to effective occupation as primary residence.",
+    "disclaimer_p2": "Usual prudential debt threshold (35%). Luxembourg rent cap: 5% of invested capital per year. Notary fees ~7% of acquisition price in Luxembourg. Bëllegen Akt: tax credit of up to €45,000 per buyer (€90,000 for a couple buying together) since 16 July 2026 on registration duty, subject to effective occupation as primary residence.",
     "source": "Source: MAPA Property. © 2026. All rights reserved. Reproduction prohibited."
   },
   "simulators": {
@@ -1133,7 +1133,7 @@
     "read": "Read"
   },
   "booklet": {
-    "close": "Back to blog",
+    "close": "Back to the Journal",
     "page": "Page",
     "prev": "Previous page",
     "next": "Next page"
@@ -1436,7 +1436,7 @@
       "description": "Nationwide coverage in the Grand Duchy and international search under a mandate signed in Luxembourg: trophy assets, prestige homes and off-market."
     },
     "blog": {
-      "title": "Real estate blog, insights and taxation, MAPA Property",
+      "title": "Real estate journal, insights and taxation, MAPA Property",
       "description": "Insights on the Luxembourg property market, taxation, off-market deals and mandates: our analyses to help you make precise real estate decisions."
     },
     "journal": {
@@ -3955,7 +3955,7 @@
   "breadcrumb": {
     "home": "Home",
     "properties": "Properties",
-    "blog": "Blog",
+    "blog": "Journal",
     "contact": "Contact",
     "waitlist": "Waiting list",
     "acquisition_notice": "Acquisition simulator notice",
@@ -4001,7 +4001,7 @@
     "link_simulators": "Simulators",
     "link_markets": "Active markets",
     "link_offmarket": "Off-Market",
-    "link_blog": "Blog",
+    "link_blog": "Journal",
     "link_contact": "Contact"
   },
   "explore": {
@@ -4067,7 +4067,7 @@
       "faq_q1": "What costs should I plan on top of the price?",
       "faq_a1": "In Luxembourg, allow about 6% registration duties, 1% transcription duty and about 1% notary fees, an indicative total close to 8% of the price.",
       "faq_q2": "What is the Bëllegen Akt?",
-      "faq_a2": "A tax credit on registration duties of up to 40,000 euros per buyer for the purchase of a main residence, with no age or first-time buyer condition (law of 3 July 2025).",
+      "faq_a2": "A tax credit on registration duties of up to 45,000 euros per buyer since 16 July 2026, for the purchase of a main residence, with no age or first-time buyer condition.",
       "faq_q3": "How can I access properties that are not listed?",
       "faq_a3": "The Off-Market selection is available on a reasoned request, after signing a non-disclosure agreement. A search mandate also activates the agency's confidential network.",
       "faq_q4": "How much can I borrow?",
@@ -4093,9 +4093,9 @@
       "service_name": "Lettings and property management in Luxembourg",
       "answer": "MAPA Property helps you rent in Luxembourg both ways: find a rental among the listed properties, or let your property with tenant selection and a compliant lease, with optional property management. The rent always respects the Luxembourg legal cap of 5% of the invested capital per year.",
       "faq_q1": "What are the letting fees?",
-      "faq_a1": "One month's rent excluding VAT, shared according to custom (50% landlord, 50% tenant) or paid entirely by the landlord, depending on the mandate.",
+      "faq_a1": "One month's rent excluding VAT, inventory of fixtures included, split equally between the landlord and the tenant in accordance with the Luxembourg residential lease law (law of 23 July 2024).",
       "faq_q2": "How much does property management cost?",
-      "faq_a2": "From 6% to 8% excluding VAT of the rents collected, depending on the services included: collection, service charges, claims and end of lease.",
+      "faq_a2": "From 6% to 8% excluding VAT of the monthly rent: tenant move-ins and move-outs with all inventories of fixtures, and referral to contractors if works are needed. MAPA Property does not collect rents.",
       "faq_q3": "What is the maximum rent allowed in Luxembourg?",
       "faq_a3": "The annual rent may not exceed 5% of the capital invested in the dwelling (law of 21 September 2006 on residential leases).",
       "faq_q4": "How are tenants selected?",

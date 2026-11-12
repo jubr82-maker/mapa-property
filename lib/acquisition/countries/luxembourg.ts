@@ -30,7 +30,7 @@ const TRANSCRIPTION_RATE = 0.01; // 1%
 const VAT_NEW_PRIMARY_RATE = 0.03; // TVA super-réduite logement RP neuf
 const VAT_NEW_PRIMARY_CAP = 50_000; // plafond crédit TVA
 const NOTARY_AVG_RATE = 0.01; // 0,8% à 1,2% — moyenne 1%
-const BELLEGEN_AKT_PER_BUYER = 40_000; // crédit d'impôt droits
+const BELLEGEN_AKT_PER_BUYER = 45_000; // crédit d'impôt droits, depuis le 16 juillet 2026
 
 export function computeLuxembourg(input: AcquisitionInput): AcquisitionResult {
   const { price, propertyType, usage, buyerProfile } = input;
@@ -72,7 +72,7 @@ export function computeLuxembourg(input: AcquisitionInput): AcquisitionResult {
     isPercentage: true,
   });
 
-  // ── Bëllegen Akt : credit d'impot 40 000 € / acquereur, sans condition
+  // ── Bëllegen Akt : credit d'impot 45 000 € / acquereur (depuis le 16 juillet 2026), sans condition
   //    primo-accession ni d'age (cadre legal en vigueur).
   //    Multiplicateur 2 si famille / couple.
   let bellegenAkt = 0;

@@ -790,7 +790,7 @@
     "list_text": "Sélection rigoureuse des locataires, dossier complet, AML/KYC, contrat-bail conforme.",
     "manage_label": "Gestion",
     "manage_title": "Gestion locative",
-    "manage_text": "Encaissement, charges, sinistres, fin de bail. Une formule modulable selon vos besoins.",
+    "manage_text": "Entrées et sorties des locataires avec tous les états des lieux, et mise en relation avec des entreprises si des travaux sont nécessaires. MAPA Property n'encaisse pas les loyers.",
     "learn_more": "En savoir plus",
     "legal_notice": "Le plafond luxembourgeois est de 5% du capital investi par an. MAPA Property garantit le respect strict de cette règle, qui protège locataire et bailleur."
   },
@@ -1056,7 +1056,7 @@
     "intro": "Mensualité, rendement locatif, capacité d'emprunt : pré-remplis avec les derniers taux du marché luxembourgeois.",
     "disclaimer_title": "Outils indicatifs uniquement, non contractuels.",
     "disclaimer_p1": "Notre simulateur s'appuie sur les données publiques de l'Observatoire de l'Habitat (Ministère du Logement luxembourgeois) et les taux de référence de la Banque centrale du Luxembourg (BCL), adaptés en continu par notre agence aux tendances du marché.",
-    "disclaimer_p2": "Seuil prudentiel usuel d'endettement (35%). Plafond loyer luxembourgeois : 5% du capital investi par an. Frais de notaire ~7% du prix d'acquisition au Luxembourg. Bëllegen Akt : crédit d'impôt jusqu'à 40 000 € par acquéreur (80 000 € pour un couple acquérant ensemble) sur les droits d'enregistrement, sous conditions d'occupation effective comme résidence principale.",
+    "disclaimer_p2": "Seuil prudentiel usuel d'endettement (35%). Plafond loyer luxembourgeois : 5% du capital investi par an. Frais de notaire ~7% du prix d'acquisition au Luxembourg. Bëllegen Akt : crédit d'impôt jusqu'à 45 000 € par acquéreur (90 000 € pour un couple acquérant ensemble), depuis le 16 juillet 2026, sur les droits d'enregistrement, sous conditions d'occupation effective comme résidence principale.",
     "source": "Source : MAPA Property. © 2026. Tous droits réservés. Toute reproduction interdite."
   },
   "simulators": {
@@ -1133,7 +1133,7 @@
     "read": "Lire"
   },
   "booklet": {
-    "close": "Retour au blog",
+    "close": "Retour au Journal",
     "page": "Page",
     "prev": "Page précédente",
     "next": "Page suivante"
@@ -1436,7 +1436,7 @@
       "description": "Couverture nationale au Grand-Duché et recherche internationale sous mandat signé au Luxembourg : trophy assets, résidences de prestige et off-market."
     },
     "blog": {
-      "title": "Blog immobilier, analyses et fiscalité, MAPA Property",
+      "title": "Journal immobilier, analyses et fiscalité, MAPA Property",
       "description": "Décryptages du marché immobilier luxembourgeois, fiscalité, off-market et mandats : nos analyses pour prendre des décisions immobilières précises."
     },
     "journal": {
@@ -3955,7 +3955,7 @@
   "breadcrumb": {
     "home": "Accueil",
     "properties": "Biens",
-    "blog": "Blog",
+    "blog": "Journal",
     "contact": "Contact",
     "waitlist": "Liste d'attente",
     "acquisition_notice": "Mentions du simulateur d'acquisition",
@@ -4001,7 +4001,7 @@
     "link_simulators": "Simulateurs",
     "link_markets": "Marchés actifs",
     "link_offmarket": "Off-Market",
-    "link_blog": "Blog",
+    "link_blog": "Journal",
     "link_contact": "Contact"
   },
   "explore": {
@@ -4067,7 +4067,7 @@
       "faq_q1": "Quels frais prévoir en plus du prix d'achat ?",
       "faq_a1": "Au Luxembourg, comptez environ 6 % de droits d'enregistrement, 1 % de droit de transcription et environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 % du prix.",
       "faq_q2": "Qu'est-ce que le Bëllegen Akt ?",
-      "faq_a2": "Un crédit d'impôt sur les droits d'enregistrement, jusqu'à 40 000 euros par acquéreur, pour l'achat d'une résidence principale, sans condition d'âge ni de première acquisition (loi du 3 juillet 2025).",
+      "faq_a2": "Un crédit d'impôt sur les droits d'enregistrement, jusqu'à 45 000 euros par acquéreur depuis le 16 juillet 2026, pour l'achat d'une résidence principale, sans condition d'âge ni de première acquisition.",
       "faq_q3": "Comment accéder aux biens qui ne sont pas publiés ?",
       "faq_a3": "La sélection Off-Market est accessible sur demande motivée, après signature d'un accord de confidentialité. Le mandat de recherche active aussi le réseau confidentiel de l'agence.",
       "faq_q4": "Combien puis-je emprunter ?",
@@ -4093,9 +4093,9 @@
       "service_name": "Location et gestion locative au Luxembourg",
       "answer": "MAPA Property vous accompagne pour louer au Luxembourg dans les deux sens : trouver une location parmi les biens publiés, ou mettre votre bien en location avec sélection des locataires et bail conforme, et une gestion locative en option. Le loyer respecte toujours le plafond légal luxembourgeois de 5 % du capital investi par an.",
       "faq_q1": "Quels sont les honoraires de mise en location ?",
-      "faq_a1": "Un mois de loyer hors TVA, partagé selon l'usage (50 % bailleur, 50 % locataire) ou entièrement à la charge du bailleur selon le mandat.",
+      "faq_a1": "Un mois de loyer HT, état des lieux inclus, partagé par moitié entre le bailleur et le locataire conformément à la loi luxembourgeoise sur le bail d'habitation (loi du 23 juillet 2024).",
       "faq_q2": "Combien coûte la gestion locative ?",
-      "faq_a2": "De 6 % à 8 % hors TVA des loyers encaissés, selon les services inclus : encaissement, charges, sinistres et fin de bail.",
+      "faq_a2": "De 6 % à 8 % HT du loyer mensuel : entrées et sorties des locataires avec tous les états des lieux, et mise en relation avec des entreprises si des travaux sont nécessaires. MAPA Property n'encaisse pas les loyers.",
       "faq_q3": "Quel est le loyer maximum autorisé au Luxembourg ?",
       "faq_a3": "Le loyer annuel ne peut pas dépasser 5 % du capital investi dans le logement (loi du 21 septembre 2006 sur le bail à usage d'habitation).",
       "faq_q4": "Comment sont choisis les locataires ?",

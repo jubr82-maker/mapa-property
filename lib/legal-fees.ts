@@ -56,14 +56,14 @@ export const LEGAL_FEES: { LU: CountryFees } & Partial<Record<CountryCode, Count
     aids: [
       {
         name: "Bëllegen Akt",
-        amount_per_person: 40000,
+        amount_per_person: 45000,
         conditions: "Résidence principale (occupation 2 ans, 4 ans VEFA), sans condition d'âge ni de primo-accession",
         conditions_i18n: {
           fr: "résidence principale (occupation 2 ans, 4 ans en VEFA), sans condition d'âge ni de primo-accession",
           en: "primary residence (2 years of occupancy, 4 years for off-plan/VEFA purchases), no age or first-time buyer condition",
           de: "Hauptwohnsitz (2 Jahre Nutzung, 4 Jahre bei Kauf vom Plan/VEFA), ohne Alters- oder Erstkäuferbedingung",
         },
-        legal_ref: "Loi du 3 juillet 2025 (définitif)",
+        legal_ref: "Communiqué du gouvernement du 16 juillet 2026 : 45 000 euros par acquéreur",
         source_url: "https://logement.public.lu/fr/aides-logement/bellegen-akt.html",
       },
       {

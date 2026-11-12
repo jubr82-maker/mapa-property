@@ -25,7 +25,7 @@
 1. Vente au Luxembourg, sous mandat exclusif (3 % HT du prix net vendeur), semi-exclusif (4 %), simple (5 %) ou autonome (1 %). TVA 17 % en sus.
 2. Achat : biens publiés, liste d'attente (nouveaux biens 24 heures avant leur diffusion publique), Off-Market sous accord de confidentialité.
 3. Mandat de recherche pour acquéreurs : 3 % à 5 % HT du prix d'acquisition au Luxembourg, 3 % à 8 % HT en Europe, sur devis ailleurs ; avance sur frais déduite des honoraires.
-4. Location : mise en location (un mois de loyer HT) et gestion locative (6 % à 8 % HT des loyers encaissés), dans le respect du plafond légal de 5 % du capital investi par an.
+4. Location : mise en location (un mois de loyer HT, état des lieux inclus, partagé par moitié entre le bailleur et le locataire) et gestion locative (6 % à 8 % HT du loyer mensuel ; MAPA Property n'encaisse pas les loyers), dans le respect du plafond légal de 5 % du capital investi par an.
 5. Estimation : fourchette indicative en ligne gratuite, affinée par une visite.
 6. Broker immobilier international, selon le positionnement ci-dessus.
 
@@ -83,13 +83,13 @@ Autres pages :
 - Off-Market : https://mapaproperty.lu/fr/off-market
 - Honoraires : https://mapaproperty.lu/fr/legal/honoraires
 - Qui sommes-nous : https://mapaproperty.lu/fr/qui-sommes-nous
-- Blog : https://mapaproperty.lu/fr/blog
+- Journal : https://mapaproperty.lu/fr/blog
 - Contact (formulaire) : https://mapaproperty.lu/fr/contact
 
 ## Cadre légal luxembourgeois (sources officielles)
 
 - Frais d'acquisition : environ 6 % de droits d'enregistrement, 1 % de droit de transcription et environ 1 % d'honoraires de notaire, soit un total indicatif proche de 8 %.
-- Bëllegen Akt : crédit d'impôt sur les droits d'enregistrement, jusqu'à 40 000 euros par acquéreur pour une résidence principale (loi du 3 juillet 2025). Source : https://logement.public.lu/fr/aides-logement/bellegen-akt.html
+- Bëllegen Akt : crédit d'impôt sur les droits d'enregistrement, jusqu'à 45 000 euros par acquéreur pour une résidence principale, depuis le 16 juillet 2026. Source : https://logement.public.lu/fr/aides-logement/bellegen-akt.html
 - Plafond légal du loyer : 5 % du capital investi par an (loi du 21 septembre 2006 sur le bail à usage d'habitation).
 
 ## Données personnelles et usage de l'intelligence artificielle
