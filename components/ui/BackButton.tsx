@@ -26,7 +26,7 @@ export function BackButton({
           router.push(fallback);
         }
       }}
-      className={`inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold hover:text-gold ${className}`}
+      className={`inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold hover:text-gold-text ${className}`}
     >
       <span aria-hidden>←</span>
       {t("back")}

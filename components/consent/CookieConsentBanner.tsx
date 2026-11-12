@@ -155,7 +155,7 @@ export function CookieConsentBanner() {
                   <button
                     type="button"
                     onClick={onRejectAll}
-                    className="rounded-full border border-line px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink transition-colors hover:border-gold hover:text-gold"
+                    className="rounded-full border border-line px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink transition-colors hover:border-gold hover:text-gold-text"
                   >
                     {t("reject_all")}
                   </button>

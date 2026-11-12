@@ -82,7 +82,7 @@ export function MandateDetailModal({ mandate, open, onClose }: Props) {
           type="button"
           onClick={onClose}
           aria-label={mandate.closeLabel}
-          className="absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-full border border-line text-ink-mid transition-colors hover:border-gold hover:text-gold md:right-6 md:top-6"
+          className="absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-full border border-line text-ink-mid transition-colors hover:border-gold hover:text-gold-text md:right-6 md:top-6"
         >
           <svg
             viewBox="0 0 24 24"
@@ -144,8 +144,10 @@ export function MandateDetailModal({ mandate, open, onClose }: Props) {
           <Link
             href={mandate.ctaHref}
             onClick={onClose}
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white shadow-md transition-transform hover:scale-[1.02]"
-            style={{ backgroundColor: mandate.accent }}
+            className="inline-flex items-center gap-2 rounded-full px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] shadow-md transition-transform hover:scale-[1.02]"
+            // Texte lisible sur la couleur du mandat (nov. 2026) : blanc sur
+            // cuivre ne donnait que 1,9:1 ; sapin sur fond clair, creme sur fond fonce.
+            style={{ backgroundColor: mandate.accent, color: isLightColor(mandate.accent) ? "var(--bg-contrast)" : "var(--text-contrast)" }}
           >
             {mandate.ctaLabel}
             <span aria-hidden>→</span>
@@ -155,4 +157,15 @@ export function MandateDetailModal({ mandate, open, onClose }: Props) {
     </div>,
     document.body,
   );
+}
+
+/** Couleur claire (luminance relative > 0,4) : texte fonce par-dessus. */
+function isLightColor(hex: string): boolean {
+  const h = hex.replace("#", "");
+  if (!/^[0-9a-f]{6}$/i.test(h)) return false;
+  const lin = (i: number) => {
+    const v = parseInt(h.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * lin(0) + 0.7152 * lin(2) + 0.0722 * lin(4) > 0.4;
 }

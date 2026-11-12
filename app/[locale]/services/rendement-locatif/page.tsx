@@ -54,7 +54,7 @@ export default async function RendementLocatifPage({
           </ul>
           <Link
             href="/contact"
-            className="mt-6 inline-flex items-center gap-2 rounded-full border border-gold/60 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-gold-deep hover:border-gold hover:text-gold"
+            className="mt-6 inline-flex items-center gap-2 rounded-full border border-gold/60 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-gold-text hover:border-gold hover:text-gold-text"
           >
             {t("cta")} →
           </Link>

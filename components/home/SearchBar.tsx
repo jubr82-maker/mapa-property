@@ -67,14 +67,11 @@ export function SearchBar() {
         body: JSON.stringify({ query: aiQuery }),
       });
       if (!res.ok) throw new Error("ai-failed");
-      const filters = (await res.json()) as Record<string, string | number>;
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([k, v]) => {
-        if (v !== null && v !== undefined && v !== "") {
-          params.set(k, String(v));
-        }
-      });
-      router.push(`/biens?${params.toString()}`);
+      // Nov. 2026 : le serveur analyse le texte (referentiel officiel) et
+      // renvoie l'adresse de la liste des biens a ouvrir (sans la langue).
+      const { url } = (await res.json()) as { url?: string };
+      if (!url || !url.startsWith("/")) throw new Error("ai-failed");
+      router.push(url);
     } catch {
       setAiError(t("ai_error"));
     } finally {
@@ -221,7 +218,7 @@ function ModeButton({
       type="button"
       onClick={onClick}
       className={`rounded-full px-4 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] transition-colors ${
-        active ? "bg-ink text-bg" : "text-ink-mid hover:text-gold"
+        active ? "bg-ink text-bg" : "text-ink-mid hover:text-gold-text"
       }`}
     >
       {children}

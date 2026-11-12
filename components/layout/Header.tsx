@@ -189,7 +189,7 @@ function DropdownItem({
               <li key={it.href}>
                 <Link
                   href={it.href}
-                  className="block px-4 py-2 font-sans text-sm text-ink-mid transition-colors hover:bg-bg-soft hover:text-gold"
+                  className="block px-4 py-2 font-sans text-sm text-ink-mid transition-colors hover:bg-bg-soft hover:text-gold-text"
                 >
                   {t(it.key)}
                 </Link>

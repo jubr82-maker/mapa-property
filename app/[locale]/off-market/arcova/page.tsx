@@ -42,7 +42,7 @@ function ArcovaContent() {
       >
         ← Retour à Off-Market
       </Link>
-      <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">
+      <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.3em] text-ink-mid">
         <LockIcon /> {t("eyebrow")}
       </div>
       <h1 className="t-h1">

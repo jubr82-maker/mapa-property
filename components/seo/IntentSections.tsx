@@ -105,7 +105,7 @@ export async function IntentSections({ locale, intent, faqKey }: { locale: strin
             <li key={l.href}>
               <Link
                 href={l.href}
-                className="inline-flex min-h-11 items-center rounded-full border border-line px-5 text-sm text-ink transition-colors hover:border-gold hover:text-gold-deep"
+                className="inline-flex min-h-11 items-center rounded-full border border-line px-5 text-sm text-ink transition-colors hover:border-gold hover:text-gold-text"
               >
                 {t(l.key)}
               </Link>

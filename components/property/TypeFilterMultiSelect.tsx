@@ -222,7 +222,7 @@ export function TypeFilterMultiSelect({ value, onChange }: Props) {
               <button
                 type="button"
                 onClick={clearAll}
-                className="w-full rounded-md border border-line px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold hover:text-gold"
+                className="w-full rounded-md border border-line px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold hover:text-gold-text"
               >
                 {t("type_filter.clear")}
               </button>

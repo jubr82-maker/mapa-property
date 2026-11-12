@@ -25,7 +25,7 @@ export function MarketsSection() {
         </p>
         <Link
           href="/services/marches-actifs"
-          className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/60 px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-deep transition-colors hover:text-gold md:mt-5"
+          className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/60 px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-text transition-colors hover:text-gold-text md:mt-5"
         >
           {t("see_all")} →
         </Link>

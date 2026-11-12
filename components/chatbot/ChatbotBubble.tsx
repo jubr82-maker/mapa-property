@@ -115,7 +115,7 @@ export function ChatbotBubble() {
             type="button"
             onClick={dismissInvite}
             aria-label={t("invite_dismiss")}
-            className="absolute -right-2 -top-2 inline-flex size-6 items-center justify-center rounded-full border border-line bg-bg text-ink-mid shadow-sm hover:border-gold hover:text-gold"
+            className="absolute -right-2 -top-2 inline-flex size-6 items-center justify-center rounded-full border border-line bg-bg text-ink-mid shadow-sm hover:border-gold hover:text-gold-text"
           >
             <svg viewBox="0 0 24 24" className="size-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />

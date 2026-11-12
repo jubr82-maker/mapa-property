@@ -45,7 +45,7 @@ export function LangSwitcher({ className = "" }: { className?: string }) {
             className={`px-2.5 py-1 font-mono text-[11px] font-medium tracking-widest uppercase transition-colors ${
               active
                 ? "rounded-full bg-ink text-bg"
-                : "text-ink-soft hover:text-gold"
+                : "text-ink-soft hover:text-gold-text"
             }`}
           >
             {labels[l]}

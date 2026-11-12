@@ -21,7 +21,7 @@ export async function RadiusCTA({
     <div className="mt-10 flex justify-center">
       <Link
         href={showAllHref}
-        className="inline-flex items-center gap-2 rounded-full border border-[#B8865A] px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] text-[#B8865A] transition-colors hover:bg-[#B8865A]/10"
+        className="inline-flex items-center gap-2 rounded-full border border-[#B8865A] px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] text-gold-text transition-colors hover:bg-[#B8865A]/10"
       >
         {t("radius_cta", { count })}
         <span aria-hidden>→</span>

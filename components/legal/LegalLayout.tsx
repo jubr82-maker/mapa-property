@@ -47,7 +47,7 @@ export function LegalLayout({
               href={sbUrl("Documents", pdfFile)}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-bg-soft px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-deep hover:border-gold hover:text-gold"
+              className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-bg-soft px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-gold-text hover:border-gold hover:text-gold-text"
             >
               <span aria-hidden>↓</span>
               {pdfLabel ?? "Télécharger le PDF officiel"}

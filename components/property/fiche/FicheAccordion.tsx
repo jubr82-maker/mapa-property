@@ -56,7 +56,7 @@ export function FicheAccordion({ panels }: { panels: FichePanel[] }) {
                 </span>
                 <span
                   aria-hidden
-                  className={`inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-[#e0af6e]/40 text-[#e0af6e] transition-transform duration-300 ${
+                  className={`inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-[#e0af6e]/40 text-gold-text transition-transform duration-300 ${
                     isOpen ? "rotate-180" : ""
                   }`}
                 >

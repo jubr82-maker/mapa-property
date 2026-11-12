@@ -5,23 +5,17 @@ import dynamic from "next/dynamic";
 import { fetchAllPropertiesWithCover, type PropertyWithCover } from "@/lib/data";
 import { FilterBar } from "@/components/property/FilterBar";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
-import { RadiusCTA } from "@/components/search/RadiusCTA";
 import { pageAlternates } from "@/lib/seo";
 import type { Locale } from "@/lib/types";
-import { matchesTypeQuery } from "@/lib/property-types";
-import {
-  CHILD_TO_PARENT,
-  PARENT_TO_CHILDREN,
-  expandType,
-} from "@/lib/taxonomy/property-types";
-import { DEFAULT_COUNTRY, matchesCountry } from "@/lib/geo/countries";
-import {
-  getLocalityCoords,
-  haversineKm,
-} from "@/lib/geo/luxembourg-communes";
-
+import { CHILD_TO_PARENT, PARENT_TO_CHILDREN, expandType } from "@/lib/taxonomy/property-types";
 import { withSocial } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+import { redirect } from "@/i18n/navigation";
+import { foreignCityPlaces } from "@/lib/search/places";
+import { runSearch, type SearchCriteria } from "@/lib/search/engine";
+import { hrefWith, paramsFromParsed, searchFromParams, type SearchParamsRecord } from "@/lib/search/url";
+import { SearchSummary } from "@/components/search/SearchSummary";
+import { CountryPrompt } from "@/components/search/CountryPrompt";
 // Sprint OPTIM-BIENS-3 — chargé en lazy (chunk séparé, embla-carousel-react
 // inclus) : ne pèse sur le bundle client que sur les recherches où le
 // carrousel s'affiche réellement (peu de résultats + type précis). SSR
@@ -34,207 +28,42 @@ const SiblingCarousel = dynamic(() =>
   ),
 );
 
-interface SearchParams {
-  country?: string;
-  city?: string;
-  // Sprint C13-ter : multi-select types (comma-separated, ex.
-  // ?types=studio,villa,bureau). 'type' legacy single conserve pour
-  // retro-compat (cf. parseTypesFilter ci-dessous).
-  types?: string;
-  type?: string;
-  transaction?: string;
-  budget_max?: string;
-  min_bedrooms?: string;
-  min_surface?: string;
-  // Sprint C13-bis C4 : bypass rayon 10km Luxembourg (CTA "voir tout").
-  showAll?: string;
-}
-
-/**
- * Sprint C13-ter — Resolu la liste des types coches depuis l'URL.
- * Priorite : ?types= (nouveau) > ?type= (legacy single). Retourne
- * une chaine vide -> [] -> pas de filtre.
- */
-function parseTypesFilter(filters: SearchParams): string[] {
-  const src = filters.types ?? filters.type ?? "";
-  return src
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
-const RADIUS_KM = 10;
-
-// Sprint C13-bis C1 : matching STRICT sur property_type. Plus de fallback
-// title-matching (ex-matchTypeFromTitle supprime). Un bien sans
-// property_type renseigne est EXCLU des resultats si un filtre type est
-// applique — regle business Julien : pas de match accidentel sur le
-// titre (bug "bureau" matchant un appartement avec "bureau" dans le
-// libelle). Quand aucun filtre type n'est passe, tous les biens passent.
-
-const filterProperties = (
-  list: PropertyWithCover[],
-  filters: SearchParams,
-): PropertyWithCover[] => {
-  return list.filter((p) => {
-    // Sprint C13-bis C2 : country toujours present (defaut LU applique
-    // dans le caller). matchesCountry tolere les formats heterogenes :
-    // 'LU' (offmarket) ou 'Luxembourg' (Apimo nom FR via Intl.DisplayNames).
-    if (!matchesCountry(p.country, filters.country)) return false;
-    if (
-      filters.city &&
-      !(p.city ?? "").toLowerCase().includes(filters.city.toLowerCase())
-    )
-      return false;
-    if (filters.transaction && p.transaction !== filters.transaction) return false;
-    // Sprint C13-ter : multi-select string[]. matchesTypeQuery(array)
-    // applique strict OR (aucun expand groupe). Si types est vide ->
-    // pas de filtre. Si types non-vide ET property_type null -> bien
-    // EXCLU (contrat strict C13-bis C1, anti-régression fallback titre).
-    const typesFilter = parseTypesFilter(filters);
-    if (typesFilter.length > 0) {
-      if (!p.property_type) return false;
-      if (!matchesTypeQuery(p.property_type, typesFilter)) return false;
-    }
-    if (filters.budget_max) {
-      const max = Number(filters.budget_max);
-      if (p.price !== null && p.price > max) return false;
-    }
-    if (filters.min_bedrooms) {
-      const min = Number(filters.min_bedrooms);
-      if ((p.bedrooms ?? 0) < min) return false;
-    }
-    if (filters.min_surface) {
-      const min = Number(filters.min_surface);
-      if ((p.surface ?? 0) < min) return false;
-    }
-    return true;
-  });
-};
-
-/**
- * Sprint C13-bis C4 (extrait en fonction reutilisable pour SIBLING-1) —
- * calcule l'ensemble affiche pour un jeu de filtres donne, en respectant
- * le mode rayon 10km (LU + ville connue) ou le filtrage standard. Seule
- * fonction qui decide "quels biens matchent ces criteres" — reutilisee a
- * l'identique pour les resultats principaux ET pour le pool de biens
- * freres du carrousel de suggestions, afin qu'un bien frere respecte
- * TOUJOURS la meme localisation/transaction/prix/chambres que la
- * recherche courante.
- */
-function computeDisplayed(
-  allProperties: PropertyWithCover[],
-  filters: SearchParams,
-  rawFilters: SearchParams,
-): { displayed: PropertyWithCover[]; beyondCount: number; radiusActive: boolean } {
-  const showAll = rawFilters.showAll === "true";
-  const cityCenter =
-    filters.country === DEFAULT_COUNTRY && filters.city
-      ? getLocalityCoords(filters.city)
-      : null;
-
-  if (!cityCenter) {
-    // Mode normal : pays != LU OU pas de city OU city inconnue dans
-    // GeoNames LU. city LIKE applique via filterProperties standard.
-    return { displayed: filterProperties(allProperties, filters), beyondCount: 0, radiusActive: false };
-  }
-
-  // Mode rayon : on ignore city LIKE (filterProperties sans city), on
-  // applique tous les autres filtres standards, puis on partitionne.
-  const noCity = filterProperties(allProperties, { ...filters, city: undefined });
-  if (showAll) {
-    // User a clique "voir tout" -> tous les biens du pays (sans rayon,
-    // sans city LIKE).
-    return { displayed: noCity, beyondCount: 0, radiusActive: false };
-  }
-
-  const within: PropertyWithCover[] = [];
-  const beyond: PropertyWithCover[] = [];
-  for (const p of noCity) {
-    const target = p.city ? getLocalityCoords(p.city) : null;
-    if (!target) {
-      beyond.push(p);
-      continue;
-    }
-    const km = haversineKm(cityCenter.lat, cityCenter.lng, target.lat, target.lng);
-    if (km <= RADIUS_KM) within.push(p);
-    else beyond.push(p);
-  }
-  return { displayed: within, beyondCount: beyond.length, radiusActive: true };
-}
+// Recherche (nov. 2026) : la liste des biens applique les regles uniques de
+// lib/search/engine.ts (meme referentiel et memes regles que la recherche
+// en texte libre et qu'Elena) : champ "Ville / quartier" (city), texte libre
+// (q), pres de, zones, equipements, question du pays. L'ancien mode "rayon
+// de 10 km" est remplace par ces regles.
 
 const SIBLING_LIMIT = 12;
 
 /**
  * Sprint SIBLING-1 — "Voir aussi les autres [famille]" : quand un filtre
- * de type PRÉCIS (un enfant de la hiérarchie, pas un type large comme
- * "appartement"/"maison") ramène peu de résultats (<= 3), propose les
- * biens frères de la/les même(s) famille(s) parente(s).
- *
- * CORRECTIF bug carrousel biens hors périmètre : le pool de biens frères
- * est calculé via computeDisplayed() avec les MÊMES filtres que la
- * recherche courante (pays, ville/rayon, transaction, prix, chambres,
- * surface...) — seul le type précis est remplacé par la liste élargie de
- * la famille. Un bien hors localisation/critères de la recherche en
- * cours ne peut donc jamais apparaître dans le carrousel.
- *
- * Retourne null si l'une des conditions d'affichage n'est pas remplie ou
- * si aucun bien frère n'est disponible.
+ * de type PRECIS (un enfant de la hierarchie) ramene peu de resultats
+ * (<= 3), propose les biens freres de la meme famille, avec EXACTEMENT les
+ * memes autres criteres (lieu, transaction, budget, chambres...) : seul le
+ * type change.
  */
 function computeSiblingSuggestions(
   allProperties: PropertyWithCover[],
   displayed: PropertyWithCover[],
-  filters: SearchParams,
-  rawFilters: SearchParams,
-): {
-  parentSlugs: string[];
-  triggerTypes: string[];
-  properties: PropertyWithCover[];
-} | null {
+  criteria: SearchCriteria,
+): { parentSlugs: string[]; triggerTypes: string[]; properties: PropertyWithCover[] } | null {
   if (displayed.length > 3) return null;
-
-  const typesFilter = parseTypesFilter(filters);
-  if (typesFilter.length === 0) return null;
-
-  const normalizedTypes = typesFilter.map((t) => t.trim().toLowerCase());
-  // Condition (a) : uniquement des types précis — aucun type large parmi
-  // les filtres actifs (un type large est déjà une clé de PARENT_TO_CHILDREN).
+  const normalizedTypes = criteria.types.map((t) => t.trim().toLowerCase());
+  if (normalizedTypes.length === 0) return null;
   if (normalizedTypes.some((t) => t in PARENT_TO_CHILDREN)) return null;
-
-  const parentSlugs = Array.from(
-    new Set(
-      normalizedTypes
-        .map((t) => CHILD_TO_PARENT[t])
-        .filter((p): p is string => Boolean(p)),
-    ),
-  );
+  const parentSlugs = Array.from(new Set(normalizedTypes.map((t) => CHILD_TO_PARENT[t]).filter((p): p is string => Boolean(p))));
   if (parentSlugs.length === 0) return null;
-
   const candidateTypes = new Set<string>();
-  for (const parent of parentSlugs) {
-    for (const t of expandType(parent)) candidateTypes.add(t);
-  }
+  for (const parent of parentSlugs) for (const t of expandType(parent)) candidateTypes.add(t);
   for (const t of normalizedTypes) candidateTypes.delete(t);
   if (candidateTypes.size === 0) return null;
-
-  // Mêmes critères que la recherche courante — seul `types` change,
-  // remplacé par la famille élargie (types précis déjà filtrés exclus).
-  const siblingFilters: SearchParams = {
-    ...filters,
-    types: [...candidateTypes].join(","),
-    type: undefined,
-  };
-  const siblingPool = computeDisplayed(allProperties, siblingFilters, rawFilters).displayed;
-
+  const r = runSearch(allProperties, { ...criteria, types: [...candidateTypes], hasQuery: false });
+  if (r.relaxed.length) return null;
   const displayedIds = new Set(displayed.map((p) => p.id));
-  const siblings = siblingPool.filter((p) => !displayedIds.has(p.id));
+  const siblings = [...r.main, ...r.nearby].filter((p) => !displayedIds.has(p.id));
   if (siblings.length === 0) return null;
-
-  return {
-    parentSlugs,
-    triggerTypes: normalizedTypes,
-    properties: siblings.slice(0, SIBLING_LIMIT),
-  };
+  return { parentSlugs, triggerTypes: normalizedTypes, properties: siblings.slice(0, SIBLING_LIMIT) };
 }
 
 // Canonical SANS les query params de filtre (?country=&types=&budget_max=...)
@@ -260,54 +89,32 @@ async function PropertiesPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<SearchParams>;
+  searchParams: Promise<SearchParamsRecord>;
 }) {
   const { locale } = await params;
   const rawFilters = await searchParams;
   setRequestLocale(locale);
 
-  // Sprint UI-MAI : pays OPTIONNEL. Si l'URL ne contient pas de
-  // country, on n'applique aucun filtre pays (vide = tous les pays).
-  // matchesCountry(p.country, undefined) retourne true (cf. lib/geo/countries.ts:109).
-  // Le lien "Tous les biens" du header pointe vers /biens sans param,
-  // donc TOUS les biens (Luxembourg + secondaires + trophy) sont visibles.
-  const filters: SearchParams = {
-    ...rawFilters,
-    country: rawFilters.country,
-  };
-
   const t = await getTranslations({ locale, namespace: "property_list" });
+  const tr = await getTranslations({ locale, namespace: "search_results" });
   const allProperties = await fetchAllPropertiesWithCover();
+  const extraPlaces = foreignCityPlaces(allProperties);
+  const { criteria, parsedText, offmarket } = searchFromParams(rawFilters, extraPlaces);
 
-  // Sprint C13-bis C4 : mode rayon 10 km active si :
-  //   1. country = LU
-  //   2. city saisie
-  //   3. getLocalityCoords(city) trouve un point (sinon fallback city LIKE
-  //      via filterProperties standard).
-  // En mode rayon, on IGNORE city LIKE (le rayon remplace), et on
-  // partitionne en within/beyond. showAll=true bypass le rayon.
-  const { displayed, beyondCount, radiusActive } = computeDisplayed(
-    allProperties,
-    filters,
-    rawFilters,
-  );
-
-  const siblingSuggestions = computeSiblingSuggestions(
-    allProperties,
-    displayed,
-    filters,
-    rawFilters,
-  );
-
-  // URL pour le CTA "voir tout" : preserve les filtres + showAll=true.
-  const showAllParams = new URLSearchParams();
-  for (const [k, v] of Object.entries(rawFilters)) {
-    if (v) showAllParams.set(k, v);
+  // Off-market : jamais detaille ici, renvoi vers sa page.
+  if (offmarket) redirect({ href: "/off-market", locale });
+  // Texte libre compris : adresse normalisee (pastilles retirables).
+  if (rawFilters.q && parsedText?.understood) {
+    const merged = paramsFromParsed(parsedText);
+    for (const [k, v] of Object.entries(rawFilters)) if (v && k !== "q" && !merged.has(k)) merged.set(k, v);
+    redirect({ href: `/biens?${merged.toString()}`, locale });
   }
-  // country preserve UNIQUEMENT si l'utilisateur en a explicitement choisi un.
-  if (filters.country) showAllParams.set("country", filters.country);
-  showAllParams.set("showAll", "true");
-  const showAllHref = `/biens?${showAllParams.toString()}`;
+
+  const outcome = runSearch(allProperties, criteria);
+  const displayed = outcome.main;
+  const total = outcome.main.length + outcome.nearby.length;
+  const siblingSuggestions = criteria.notUnderstood ? null : computeSiblingSuggestions(allProperties, displayed, criteria);
+  const countryChoices = (["LU", "FR", "autre", "tous"] as const).map((c) => ({ label: tr(`pays_${c}`), href: hrefWith(rawFilters, { pays: c }) }));
 
   return (
     <>
@@ -326,33 +133,46 @@ async function PropertiesPage({
 
         <FilterBar />
 
-        <div className="mt-10 mb-6 flex items-baseline justify-between">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-soft">
-            {displayed.length}{" "}
-            {displayed.length > 1 ? t("results") : t("result")}
-          </p>
-        </div>
+        <SearchSummary
+          locale={locale}
+          sp={rawFilters}
+          criteria={criteria}
+          emptyPlace={outcome.emptyPlace}
+          relaxed={outcome.relaxed}
+          suggestCity={outcome.suggestCity}
+        />
 
-        <PropertyGrid properties={displayed} locale={locale as Locale} />
+        {!criteria.notUnderstood && (
+          <>
+            <div className="mt-10 mb-6 flex items-baseline justify-between">
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-soft">
+                {total}{" "}
+                {total > 1 ? t("results") : t("result")}
+              </p>
+            </div>
 
-        {radiusActive && beyondCount > 0 && (
-          <RadiusCTA
-            count={beyondCount}
-            locale={locale}
-            showAllHref={showAllHref}
-          />
-        )}
+            {displayed.length > 0 && <PropertyGrid properties={displayed} locale={locale as Locale} />}
 
-        {siblingSuggestions && (
-          <SiblingCarousel
-            properties={siblingSuggestions.properties}
-            parentSlugs={siblingSuggestions.parentSlugs}
-            triggerTypes={siblingSuggestions.triggerTypes}
-            locale={locale as Locale}
-          />
+            {outcome.nearby.length > 0 && (
+              <section className="mt-14" data-search-nearby>
+                <h2 className="t-h2 mb-6">{tr("nearby_title")}</h2>
+                <PropertyGrid properties={outcome.nearby} locale={locale as Locale} />
+              </section>
+            )}
+
+            {siblingSuggestions && (
+              <SiblingCarousel
+                properties={siblingSuggestions.properties}
+                parentSlugs={siblingSuggestions.parentSlugs}
+                triggerTypes={siblingSuggestions.triggerTypes}
+                locale={locale as Locale}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
+      {outcome.askCountry && <CountryPrompt title={tr("country_prompt")} closeLabel={tr("country_prompt_close")} choices={countryChoices} />}
     </>
   );
 }

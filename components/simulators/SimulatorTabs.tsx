@@ -48,7 +48,7 @@ export function SimulatorTabs({ rates }: Props) {
             className={`rounded-full px-5 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em] transition-colors ${
               active === tab
                 ? "bg-ink text-bg"
-                : "text-ink-soft hover:text-gold"
+                : "text-ink-soft hover:text-gold-text"
             }`}
           >
             {t(`tab_${tab}`)}
@@ -465,7 +465,7 @@ function RateTypeRadio({
             aria-checked={active}
             onClick={() => onChange(opt.value)}
             className={`flex-1 rounded-full px-4 py-2 font-mono text-[10px] font-medium uppercase tracking-[0.2em] transition-colors ${
-              active ? "bg-ink text-bg" : "text-ink-soft hover:text-gold"
+              active ? "bg-ink text-bg" : "text-ink-soft hover:text-gold-text"
             }`}
           >
             {t(opt.key)}

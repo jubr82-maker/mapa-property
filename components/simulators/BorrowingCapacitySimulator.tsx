@@ -277,7 +277,7 @@ function Field({
           className="flex-1 bg-transparent px-3 py-2 text-sm text-ink placeholder:text-ink-soft focus:outline-none"
         />
         {unit && (
-          <span className="border-l border-line bg-bg-soft px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-ink-soft">
+          <span className="border-l border-line bg-bg-soft px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-ink-mid">
             {unit}
           </span>
         )}

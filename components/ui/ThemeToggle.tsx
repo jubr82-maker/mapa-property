@@ -23,7 +23,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={() => setTheme(next)}
       aria-label={label}
       title={label}
-      className={`inline-flex size-9 items-center justify-center rounded-full border border-line text-ink-mid transition-colors hover:border-gold hover:text-gold ${className}`}
+      className={`inline-flex size-9 items-center justify-center rounded-full border border-line text-ink-mid transition-colors hover:border-gold hover:text-gold-text ${className}`}
     >
       <span aria-hidden className="block size-4">
         {isDark ? <MoonIcon /> : <SunIcon />}

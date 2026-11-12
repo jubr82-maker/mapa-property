@@ -91,7 +91,7 @@ async function SearchPage({ params }: { params: Params }) {
             </p>
             <h1 className="mt-2 t-h1">{title}</h1>
             {found && (
-              <p className="mt-4 inline-block rounded-full border border-line px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">{t("found_badge")}</p>
+              <p className="mt-4 inline-block rounded-full border border-line px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid">{t("found_badge")}</p>
             )}
           </header>
 
@@ -112,7 +112,7 @@ async function SearchPage({ params }: { params: Params }) {
                       {s.communes.map((c) => {
                         const city = cityForPlace(c);
                         return city ? (
-                          <Link key={c} href={`/villes/${city.slug}`} className="rounded-full border border-line px-3 py-1 text-ink hover:border-gold hover:text-gold">
+                          <Link key={c} href={`/villes/${city.slug}`} className="rounded-full border border-line px-3 py-1 text-ink hover:border-gold hover:text-gold-text">
                             {c}
                           </Link>
                         ) : (

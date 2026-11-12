@@ -188,7 +188,7 @@ export function ContactForm({
             setToken(null);
             setCaptchaFailed(false);
           }}
-          className="mt-5 inline-flex items-center gap-2 rounded-full border border-gold px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] text-gold-deep transition-colors hover:bg-gold/10"
+          className="mt-5 inline-flex items-center gap-2 rounded-full border border-gold px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] text-gold-text transition-colors hover:bg-gold/10"
         >
           {t("send_another")} →
         </button>

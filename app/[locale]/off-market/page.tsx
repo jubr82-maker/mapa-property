@@ -136,7 +136,7 @@ export default async function OffMarketListPage({
           </div>
           <Link
             href="/off-market/arcova"
-            className="inline-flex items-center gap-2 rounded-full border border-gold px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-gold-deep transition-colors hover:bg-gold/10"
+            className="inline-flex items-center gap-2 rounded-full border border-gold px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-gold-text transition-colors hover:bg-gold/10"
           >
             {t("arcova_cta_label")} →
           </Link>

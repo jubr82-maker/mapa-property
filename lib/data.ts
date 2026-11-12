@@ -271,8 +271,11 @@ export const PROPERTIES_LIST_TAG = "properties";
 // coûteuses en payload) ni les autres colonnes de `properties`. Si un
 // composant listé ci-dessus a besoin d'un champ absent d'ici, l'ajouter
 // explicitement — ne pas revenir à select("*").
+// Nov. 2026 : + colonnes des equipements et de la surface habitable, lues
+// par la recherche (lib/search/engine.ts : jardin, terrasse, garage,
+// ascenseur, piscine en premier).
 const PROPERTY_CARD_COLUMNS =
-  "id, slug, transaction, property_type, country, city, title_fr, title_en, title_de, price, surface, bedrooms, bathrooms, energy, badge, badge_size, badge_position, updated_at";
+  "id, slug, transaction, property_type, country, city, title_fr, title_en, title_de, price, surface, living_surface, bedrooms, bathrooms, energy, badge, badge_size, badge_position, updated_at, has_pool, parking, terrace_surface, garden_surface, amenities";
 
 // Type de mandat (SQL 16) : demande en plus des colonnes de la liste ; tant
 // que la colonne manque (PGRST204 / 42703), nouvel essai sans elle plutot
@@ -326,6 +329,7 @@ async function queryPropertiesWithCover(): Promise<PropertyWithCover[]> {
       | "title_de"
       | "price"
       | "surface"
+      | "living_surface"
       | "bedrooms"
       | "bathrooms"
       | "energy"
@@ -336,7 +340,7 @@ async function queryPropertiesWithCover(): Promise<PropertyWithCover[]> {
       | "status_banner"
       | "banner_position"
       | "banner_color"
-    > & { city_page: string | null; city_commune: string | null; property_images: { url: string; sort: number | null }[] | null };
+    > & { has_pool?: boolean | null; parking?: number | null; terrace_surface?: number | null; garden_surface?: number | null; amenities?: string | null; city_page: string | null; city_commune: string | null; property_images: { url: string; sort: number | null }[] | null };
     return ((data as unknown as Row[] | null) ?? []).map(
       (row) =>
         ({
@@ -356,13 +360,13 @@ async function queryPropertiesWithCover(): Promise<PropertyWithCover[]> {
 //     rafraichie seulement si un champ affiche sur les cartes change ;
 //   - biens d'une page de ville (etiquette city-properties:<ville>) :
 //     seulement la ville du bien, et l'ancienne si elle change.
-const fetchPropertiesWithCoverCached = unstable_cache(queryPropertiesWithCover, ["properties-with-cover-v2"], {
+const fetchPropertiesWithCoverCached = unstable_cache(queryPropertiesWithCover, ["properties-with-cover-v3"], {
   revalidate: false,
   tags: [PROPERTIES_LIST_TAG],
 });
 
 export const PROPERTIES_SIMILAR_TAG = "properties-similar";
-const fetchSimilarPoolCached = unstable_cache(queryPropertiesWithCover, ["properties-similar-v1"], {
+const fetchSimilarPoolCached = unstable_cache(queryPropertiesWithCover, ["properties-similar-v2"], {
   revalidate: false,
   tags: [PROPERTIES_SIMILAR_TAG],
 });
@@ -391,7 +395,7 @@ export async function fetchSimilarFor(target: SimilarCandidate): Promise<Propert
   try {
     return await unstable_cache(
       async () => pickSimilar(target, await queryPropertiesWithCover()),
-      ["similar-of-v1", target.id, String(target.price ?? ""), target.transaction ?? "", target.country ?? "", target.property_type ?? target.badge ?? "", target.city ?? ""],
+      ["similar-of-v2", target.id, String(target.price ?? ""), target.transaction ?? "", target.country ?? "", target.property_type ?? target.badge ?? "", target.city ?? ""],
       { revalidate: false, tags: [PROPERTIES_SIMILAR_TAG, similarTag(target.id)] },
     )();
   } catch (e) {
@@ -418,7 +422,7 @@ export function cityPropertiesTag(citySlug: string): string {
 export function fetchCityPropertiesStrict(citySlug: string): Promise<PropertyWithCover[]> {
   return unstable_cache(
     async () => (await queryPropertiesWithCover()).filter((p) => cityForProperty(p)?.slug === citySlug),
-    ["city-properties-v1", citySlug],
+    ["city-properties-v2", citySlug],
     { revalidate: false, tags: [cityPropertiesTag(citySlug)] },
   )();
 }

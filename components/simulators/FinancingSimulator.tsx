@@ -209,7 +209,7 @@ export function FinancingSimulator({ initial }: Props) {
           </h2>
           <div className="mt-5 overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-bg-soft text-left font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
+              <thead className="bg-bg-soft text-left font-mono text-[10px] uppercase tracking-[0.2em] text-ink-mid">
                 <tr>
                   <th className="px-3 py-2">Mois</th>
                   <th className="px-3 py-2 text-right">Capital</th>

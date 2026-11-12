@@ -121,7 +121,7 @@ export function SiblingCarousel({
             onClick={() => emblaApi?.scrollPrev()}
             disabled={!canScrollPrev}
             aria-label={t("sibling_carousel.prev")}
-            className="flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold-deep disabled:pointer-events-none disabled:opacity-30"
+            className="flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold-text disabled:pointer-events-none disabled:opacity-30"
           >
             <span aria-hidden>←</span>
           </button>
@@ -130,7 +130,7 @@ export function SiblingCarousel({
             onClick={() => emblaApi?.scrollNext()}
             disabled={!canScrollNext}
             aria-label={t("sibling_carousel.next")}
-            className="flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold-deep disabled:pointer-events-none disabled:opacity-30"
+            className="flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-gold hover:text-gold-text disabled:pointer-events-none disabled:opacity-30"
           >
             <span aria-hidden>→</span>
           </button>

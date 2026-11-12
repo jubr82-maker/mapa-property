@@ -49,7 +49,7 @@ export function BookletReader({
           type="button"
           onClick={() => router.push(`/${locale}/blog`)}
           aria-label={t("close")}
-          className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold hover:text-gold"
+          className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mid transition-colors hover:border-gold hover:text-gold-text"
         >
           ← {t("close")}
         </button>

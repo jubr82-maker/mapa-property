@@ -203,7 +203,7 @@ export function ChatbotPanel({
             type="button"
             onClick={onClose}
             aria-label={t("close_label")}
-            className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-line text-ink-mid transition-colors hover:border-gold hover:text-gold"
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-line text-ink-mid transition-colors hover:border-gold hover:text-gold-text"
           >
             <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -263,7 +263,7 @@ export function ChatbotPanel({
                       type="button"
                       disabled={consentBusy}
                       onClick={() => submitConsent("decline")}
-                      className="rounded-full border border-line px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-ink-mid transition-colors hover:border-gold hover:text-gold disabled:opacity-50"
+                      className="rounded-full border border-line px-4 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-ink-mid transition-colors hover:border-gold hover:text-gold-text disabled:opacity-50"
                     >
                       {t("consent_decline")}
                     </button>

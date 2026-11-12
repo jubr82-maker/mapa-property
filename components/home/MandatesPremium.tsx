@@ -162,7 +162,7 @@ export function MandatesPremium() {
                   className={`relative mt-auto inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors md:text-[11px] ${
                     isFeatured
                       ? "border-text-contrast/40 text-text-contrast hover:border-text-contrast hover:bg-text-contrast/10"
-                      : "border-gold/50 text-gold-deep hover:border-gold hover:bg-gold/5"
+                      : "border-gold/50 text-gold-text hover:border-gold hover:bg-gold/5"
                   }`}
                   aria-haspopup="dialog"
                   aria-expanded={openId === card.id}

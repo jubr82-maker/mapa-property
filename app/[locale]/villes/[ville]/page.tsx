@@ -264,14 +264,14 @@ export default async function VillePage({
         <section className="mt-14 flex flex-col gap-4 sm:flex-row">
           <Link
             href="/mandats/recherche"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-navy px-6 py-3 font-sans text-[13px] font-medium uppercase tracking-[0.08em] text-white transition-colors hover:bg-navy-deep"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 font-sans text-[13px] font-medium uppercase tracking-[0.08em] text-bg transition-opacity hover:opacity-85"
           >
             {t.cta_search}
             <span aria-hidden>→</span>
           </Link>
           <Link
             href="/services/estimer"
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-line px-6 py-3 font-sans text-[13px] font-medium uppercase tracking-[0.08em] text-ink transition-colors hover:border-gold hover:text-gold"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-line px-6 py-3 font-sans text-[13px] font-medium uppercase tracking-[0.08em] text-ink transition-colors hover:border-gold hover:text-gold-text"
           >
             {t.cta_estimate}
           </Link>
@@ -317,7 +317,7 @@ export default async function VillePage({
                 <li key={b.slug}>
                   <Link
                     href={`/blog/${b.slug}`}
-                    className="block rounded-md border border-line bg-bg p-4 transition-colors hover:border-gold hover:text-gold"
+                    className="block rounded-md border border-line bg-bg p-4 transition-colors hover:border-gold hover:text-gold-text"
                   >
                     <p className="font-display text-lg font-bold text-ink">
                       {pickLang(b, "title", loc)}
@@ -339,7 +339,7 @@ export default async function VillePage({
                 <li key={n.slug}>
                   <Link
                     href={`/villes/${n.slug}`}
-                    className="block rounded-md border border-line bg-bg p-4 transition-colors hover:border-gold hover:text-gold"
+                    className="block rounded-md border border-line bg-bg p-4 transition-colors hover:border-gold hover:text-gold-text"
                   >
                     <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">
                       {n.country === "LU" ? "Luxembourg" : n.country}

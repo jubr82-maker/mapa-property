@@ -2,6 +2,7 @@
 
 import { getAttribution } from "@/lib/pilotage/attribution-client";
 import { useState, useMemo, useRef } from "react";
+import { revealFirstError, revealStep, useStepReveal } from "@/lib/forms/step-scroll";
 import { useTranslations } from "next-intl";
 import { formatEuro } from "@/lib/finance";
 import type { EstimateResult } from "@/lib/estimate";
@@ -257,6 +258,8 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
   const [touchedLastName, setTouchedLastName] = useState(false);
   const [touchedEmail, setTouchedEmail] = useState(false);
   const [touchedPhone, setTouchedPhone] = useState(false);
+  // Envoi tente sans les consentements : cases signalees en erreur.
+  const [consentTried, setConsentTried] = useState(false);
   // Sprint C9 — code ISO pays choisi dans PhoneInput, requis par
   // validatePhone(phone, iso). Defaut LU (cf. DEFAULT_COUNTRY).
   const [phoneCountry, setPhoneCountry] = useState<string>(DEFAULT_COUNTRY);
@@ -268,6 +271,14 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
   // Anti-robots (oct. 2026) : jeton Turnstile exige par /api/estimate si
   // configure. Script indisponible : soumission autorisee, le serveur tranche.
   const turnstileRef = useRef<TurnstileHandle>(null);
+  // Etapes (nov. 2026, lib/forms/step-scroll.ts) : a chaque Suivant et
+  // Retour, haut de la nouvelle etape sous l'en-tete fixe et focus sur le
+  // premier champ a remplir ; champ obligatoire en erreur : focus dessus.
+  const stepRef = useRef<HTMLDivElement>(null);
+  useStepReveal(step, stepRef);
+  const showFirstError = () => {
+    if (!revealFirstError(stepRef.current)) revealStep(stepRef.current);
+  };
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaFailed, setCaptchaFailed] = useState(false);
   const turnstileEnabled = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
@@ -535,6 +546,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
       <DisclaimerLegal />
       <div className="rounded-2xl border border-line bg-bg p-8 shadow-sm">
       <Stepper current={step} t={t} />
+      <div ref={stepRef} className="scroll-mt-28">
 
       {step === 1 && (
         <StepWrap title={t("step1_title")} subtitle={t("step1_subtitle")}>
@@ -664,8 +676,8 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
                       onClick={() => set("conditionC7", active ? "" : c)}
                       className={`rounded-full border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors ${
                         active
-                          ? "border-gold bg-gold/15 text-gold-deep"
-                          : "border-line text-ink-soft hover:border-gold hover:text-gold"
+                          ? "border-gold bg-gold/15 text-gold-text"
+                          : "border-line text-ink-soft hover:border-gold hover:text-gold-text"
                       }`}
                     >
                       {t(`c7_condition_${c}`)}
@@ -743,6 +755,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
           </div>
           <NextBtn
             onClick={() => setStep(2)}
+            onInvalid={showFirstError}
             disabled={
               hasWorksErrors ||
               (data.type === "terrain"
@@ -802,6 +815,7 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
           <BackNextBtn
             onBack={() => setStep(1)}
             onNext={() => setStep(3)}
+            onInvalid={showFirstError}
             disabled={!selectedPlace}
             t={t}
           />
@@ -895,6 +909,8 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
               checked={data.contactConsent}
               onChange={(v) => set("contactConsent", v)}
               label={t("contact_consent")}
+              required
+              invalid={consentTried && !data.contactConsent}
             />
           </div>
           <div className="mt-3">
@@ -903,6 +919,8 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
                 type="checkbox"
                 checked={data.rgpdConsent}
                 onChange={(e) => set("rgpdConsent", e.target.checked)}
+                aria-required="true"
+                aria-invalid={consentTried && !data.rgpdConsent ? true : undefined}
                 className="mt-0.5 size-4 accent-gold-deep"
               />
               <span>
@@ -952,10 +970,20 @@ export function EstimateForm({ places = [] }: { places?: EstimatePlace[] }) {
             t={t}
             disabled={step3Disabled || !captchaReady}
             disabledTooltip={t("validation.submit_disabled_tooltip")}
+            onInvalid={() => {
+              // Affiche les erreurs des champs obligatoires, puis focus sur le premier.
+              setTouchedFirstName(true);
+              setTouchedLastName(true);
+              setTouchedEmail(true);
+              setTouchedPhone(true);
+              setConsentTried(true);
+              requestAnimationFrame(showFirstError);
+            }}
           />
         </StepWrap>
         );
       })()}
+      </div>
       </div>
     </div>
   );
@@ -1098,7 +1126,7 @@ function FieldNumber({
             role="img"
             aria-label={tooltip}
             title={tooltip}
-            className="inline-flex size-4 cursor-help items-center justify-center rounded-full border border-line text-[9px] font-bold text-ink-soft hover:border-gold hover:text-gold focus:outline-none"
+            className="inline-flex size-4 cursor-help items-center justify-center rounded-full border border-line text-[9px] font-bold text-ink-soft hover:border-gold hover:text-gold-text focus:outline-none"
           >
             ⓘ
           </span>
@@ -1109,6 +1137,7 @@ function FieldNumber({
         min="0"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        aria-required={required || undefined}
         className="rounded-md border border-line bg-bg px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
       />
     </label>
@@ -1258,8 +1287,8 @@ function WorksDetailsBlock({
                       onClick={() => toggleCat(cat)}
                       className={`rounded-full border px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] transition-colors ${
                         active
-                          ? "border-gold bg-gold/15 text-gold-deep"
-                          : "border-line text-ink-soft hover:border-gold hover:text-gold"
+                          ? "border-gold bg-gold/15 text-gold-text"
+                          : "border-line text-ink-soft hover:border-gold hover:text-gold-text"
                       }`}
                     >
                       {active ? "✓ " : ""}
@@ -1468,8 +1497,8 @@ function WorksLevelRadio({
               onClick={() => onChange(active ? "" : level)}
               className={`rounded-full border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors ${
                 active
-                  ? "border-gold bg-gold/10 text-gold-deep"
-                  : "border-line text-ink-soft hover:border-gold hover:text-gold"
+                  ? "border-gold bg-gold/10 text-gold-text"
+                  : "border-line text-ink-soft hover:border-gold hover:text-gold-text"
               }`}
             >
               {t(`works_${level}`)}
@@ -1519,10 +1548,14 @@ function CheckboxField({
   checked,
   onChange,
   label,
+  required = false,
+  invalid = false,
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
   label: string;
+  required?: boolean;
+  invalid?: boolean;
 }) {
   return (
     <label className="flex items-start gap-3 text-sm leading-snug text-ink-mid">
@@ -1530,6 +1563,8 @@ function CheckboxField({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
+        aria-required={required || undefined}
+        aria-invalid={invalid || undefined}
         className="mt-0.5 size-4 accent-gold-deep"
       />
       <span>{label}</span>
@@ -1537,12 +1572,17 @@ function CheckboxField({
   );
 }
 
+// Boutons d'etape (nov. 2026) : "indisponible" annonce par aria-disabled et
+// non par disabled, pour qu'un clic mene au premier champ en erreur
+// (onInvalid) au lieu de ne rien faire.
 function NextBtn({
   onClick,
+  onInvalid,
   disabled,
   t,
 }: {
   onClick: () => void;
+  onInvalid?: () => void;
   disabled?: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
@@ -1550,9 +1590,9 @@ function NextBtn({
     <div className="mt-8 flex justify-end">
       <button
         type="button"
-        onClick={onClick}
-        disabled={disabled}
-        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
+        onClick={() => (disabled ? onInvalid?.() : onClick())}
+        aria-disabled={disabled || undefined}
+        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] aria-disabled:opacity-50 aria-disabled:hover:scale-100"
       >
         {t("next")} →
       </button>
@@ -1616,11 +1656,13 @@ function CoverageNotice({
 function BackNextBtn({
   onBack,
   onNext,
+  onInvalid,
   disabled = false,
   t,
 }: {
   onBack: () => void;
   onNext: () => void;
+  onInvalid?: () => void;
   disabled?: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
@@ -1629,15 +1671,15 @@ function BackNextBtn({
       <button
         type="button"
         onClick={onBack}
-        className="rounded-full border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold"
+        className="rounded-full border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold-text"
       >
         ← {t("back")}
       </button>
       <button
         type="button"
-        onClick={onNext}
-        disabled={disabled}
-        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
+        onClick={() => (disabled ? onInvalid?.() : onNext())}
+        aria-disabled={disabled || undefined}
+        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:scale-100"
       >
         {t("next")} →
       </button>
@@ -1648,6 +1690,7 @@ function BackNextBtn({
 function BackSubmitBtn({
   onBack,
   onSubmit,
+  onInvalid,
   pending,
   t,
   disabled = false,
@@ -1655,6 +1698,7 @@ function BackSubmitBtn({
 }: {
   onBack: () => void;
   onSubmit: () => void;
+  onInvalid?: () => void;
   pending: boolean;
   t: ReturnType<typeof useTranslations>;
   disabled?: boolean;
@@ -1665,16 +1709,17 @@ function BackSubmitBtn({
       <button
         type="button"
         onClick={onBack}
-        className="rounded-full border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold"
+        className="rounded-full border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold-text"
       >
         ← {t("back")}
       </button>
       <button
         type="button"
-        onClick={onSubmit}
-        disabled={pending || disabled}
+        onClick={() => (disabled ? onInvalid?.() : onSubmit())}
+        disabled={pending}
+        aria-disabled={disabled || undefined}
         title={disabled && !pending ? disabledTooltip : undefined}
-        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="gold-shine-bg rounded-full px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink shadow-md shadow-gold/20 transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:cursor-not-allowed"
       >
         {pending ? t("computing") : t("compute")}
       </button>
@@ -1830,14 +1875,14 @@ function ResultView({
         </Link>
         <Link
           href="/services"
-          className="rounded-full border border-gold px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-gold-deep transition-colors hover:bg-gold/10"
+          className="rounded-full border border-gold px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-gold-text transition-colors hover:bg-gold/10"
         >
           {t("cta_services")}
         </Link>
         <button
           type="button"
           onClick={onReset}
-          className="rounded-full border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold"
+          className="rounded-full border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-ink-mid hover:border-gold hover:text-gold-text"
         >
           {t("restart")}
         </button>

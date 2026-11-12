@@ -72,7 +72,7 @@ export function LanguageSwitcher({ variant = "light", onSwitched }: Props) {
           : "border-[#e0af6e] text-[#e0af6e] hover:bg-[#e0af6e]/10"
       }`
     : `inline-flex items-center justify-center gap-1 rounded-full px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.2em] transition-all duration-200 ${
-        open ? "text-gold" : "text-ink-soft hover:text-gold"
+        open ? "text-gold-text" : "text-ink-soft hover:text-gold-text"
       }`;
 
   const menuClass = isDark

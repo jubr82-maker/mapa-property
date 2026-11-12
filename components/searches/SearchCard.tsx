@@ -18,7 +18,7 @@ export async function SearchCard({ search, locale }: { search: PublicSearch; loc
           {t(`type.${search.property_type}`)} · {t(search.transaction === "rent" ? "tx_rent" : "tx_sale")}
         </p>
         {found && (
-          <span className="rounded-full border border-line px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">{t("found_badge")}</span>
+          <span className="rounded-full border border-line px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-mid">{t("found_badge")}</span>
         )}
       </div>
       <h2 className="mt-3 font-display text-xl font-bold leading-snug text-ink">
@@ -62,7 +62,7 @@ export async function SearchCard({ search, locale }: { search: PublicSearch; loc
         ) : (
           <Link
             href={`/recherches/${search.reference}#contact-form`}
-            className="inline-flex items-center justify-center rounded-full bg-navy px-5 py-2.5 font-sans text-[13px] font-medium uppercase tracking-[0.08em] text-white transition-colors hover:bg-navy-deep"
+            className="inline-flex items-center justify-center rounded-full bg-ink px-5 py-2.5 font-sans text-[13px] font-medium uppercase tracking-[0.08em] text-bg transition-opacity hover:opacity-85"
           >
             {t("cta")}
           </Link>

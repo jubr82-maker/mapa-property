@@ -76,6 +76,11 @@ body {
   --accent-warm:  #e0af6e;
   --line:         rgba(31, 34, 26, 0.14);
   --line-strong:  rgba(31, 34, 26, 0.26);
+  /* Texte cuivre LISIBLE (nov. 2026) : boutons, pastilles, liens-boutons
+     posés sur le fond du site. Le cuivre #e0af6e sur crème ne donne que
+     1,6:1 ; en clair, cuivre foncé (5,4:1 sur crème) ; en sombre, le cuivre
+     habituel (8,1:1 sur sapin). S'inverse avec le fond. */
+  --gold-text:    #7A5428;
 
   /* ── Tokens sémantiques — palette Forêt stricte ── */
   --copper:         #e0af6e;                 /* cuivre citron — fixe 2 modes */
@@ -99,6 +104,10 @@ body {
   /* ── Bandeaux Sous compromis / Vendu / Loué (nov. 2026, SQL 35).
      FIGÉS jour=nuit : le bandeau est posé sur une photo, jamais sur le fond
      du site. Lus par components/property/StatusBanner.tsx. ── */
+  /* Carte "Mandat exclusif" de la fiche (nov. 2026) : dégradé cuivre
+     assombri pour un texte blanc lisible (5,2:1 au plus clair). */
+  --mandate-exclu-from:   #8B6635;
+  --mandate-exclu-to:     #5E4424;
   --banner-ground:        #F0E6CC;  /* fond crème sous la photo à 50 % */
   --banner-sapin-bg:      rgba(31, 34, 26, 0.92);
   --banner-sapin-text:    #F0E6CC;
@@ -136,6 +145,7 @@ body {
   --accent-warm:  #e0af6e;
   --line:         rgba(240, 230, 204, 0.14);
   --line-strong:  rgba(240, 230, 204, 0.28);
+  --gold-text:    #e0af6e;
 
   /* ── Tokens sémantiques — inversion nuit ── */
   --copper:         #e0af6e;                   /* cuivre citron — fixe 2 modes */
@@ -173,6 +183,7 @@ body {
   --color-accent-warm:  var(--accent-warm);
   --color-line:         var(--line);
   --color-line-strong:  var(--line-strong);
+  --color-gold-text:    var(--gold-text);
 
   /* Tokens sémantiques exposés en utilitaires Tailwind v4.
      --bg-base/--text-base = alias de bg/ink (déjà exposés) — documentés, pas de doublon d'utilitaire. */

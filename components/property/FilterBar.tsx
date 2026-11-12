@@ -64,7 +64,13 @@ export function FilterBar() {
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const apply = () => {
+    // Filtres de la recherche non geres ici (pres de, zone, equipements,
+    // surface, budget minimum, pays) : conserves (nov. 2026).
     const sp = new URLSearchParams();
+    for (const k of ["near", "zone", "equip", "min_surface", "budget_min", "pays"]) {
+      const v = params.get(k);
+      if (v) sp.set(k, v);
+    }
     // Sprint UI-MAI : country optionnel (vide -> pas de filtre pays).
     if (country) sp.set("country", country);
     if (city.trim()) sp.set("city", city.trim());
@@ -182,14 +188,14 @@ export function FilterBar() {
         </Field>
         <button
           type="submit"
-          className="self-end rounded-full bg-ink px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-bg transition-colors hover:bg-gold-deep"
+          className="self-end rounded-full bg-ink px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-bg transition-opacity hover:opacity-85"
         >
           {tSearch("search")}
         </button>
         <button
           type="button"
           onClick={reset}
-          className="self-end rounded-full border border-line px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-ink-mid transition-colors hover:border-gold hover:text-gold"
+          className="self-end rounded-full border border-line px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-ink-mid transition-colors hover:border-gold hover:text-gold-text"
         >
           {t("reset")}
         </button>

@@ -76,7 +76,9 @@ export function FicheAdvisorColumn({
         data-fiche-mandate-exclusive
         className="overflow-hidden rounded-xl p-5 text-white shadow-sm"
         style={{
-          backgroundImage: "linear-gradient(135deg, #e0af6e 0%, #8B6635 100%)",
+          // Texte blanc lisible (nov. 2026) : le depart cuivre clair #e0af6e
+          // ne donnait que 1,9:1 ; degrade assombri, variables de globals.css.
+          backgroundImage: "linear-gradient(135deg, var(--mandate-exclu-from) 0%, var(--mandate-exclu-to) 100%)",
         }}
       >
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/80">

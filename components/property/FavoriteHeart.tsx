@@ -36,8 +36,8 @@ export function FavoriteHeart({ propertyId, size = "md", className = "" }: Props
       aria-label={active ? "Retirer des favoris" : "Ajouter aux favoris"}
       className={`inline-flex ${sizes[size]} items-center justify-center rounded-full border backdrop-blur transition-all ${
         active
-          ? "border-gold bg-gold/10 text-gold-deep"
-          : "border-line bg-bg/80 text-ink-mid hover:border-gold hover:text-gold"
+          ? "border-gold bg-gold/10 text-gold-text"
+          : "border-line bg-bg/80 text-ink-mid hover:border-gold hover:text-gold-text"
       } ${className}`}
     >
       <svg

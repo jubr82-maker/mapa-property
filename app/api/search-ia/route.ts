@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
+import { fetchAllPropertiesWithCover } from "@/lib/data";
+import { foreignCityPlaces } from "@/lib/search/places";
+import { parseQuery } from "@/lib/search/parse-query";
+import { mistralFallback } from "@/lib/search/mistral-fallback";
+import { paramsFromParsed } from "@/lib/search/url";
 
-const SYSTEM_PROMPT = `Tu es un assistant qui transforme une demande immobilière en filtres structurés.
-Renvoie uniquement un JSON :
-{
-  "country": "LU|FR|...",
-  "city": "...",
-  "type": "appartement|maison|villa|immeuble|...",
-  "transaction": "sale|rent|offmarket",
-  "budget_max": number|null,
-  "min_bedrooms": number|null,
-  "min_surface": number|null,
-  "must_have": ["terrasse", "parking", "..."]
-}`;
-
+// Recherche en texte libre (nov. 2026), entierement remplacee : analyse
+// COTE SERVEUR par l'analyseur unique (lib/search/parse-query.ts) sur le
+// referentiel officiel des lieux (lib/search/places.ts) ; Mistral seulement
+// en dernier recours, si rien d'utile n'est reconnu (lib/search/mistral-
+// fallback.ts, valeurs revérifiées). Renvoie l'adresse de la liste des
+// biens (sans la langue) qui applique les regles d'affichage
+// (lib/search/engine.ts) ; "off-market" renvoie vers sa page.
 export async function POST(req: Request) {
   // Audit oct. 2026 : limite par IP et longueur bornee (ASVS 11.1.4, 5.1.3).
   const limit = rateLimit(req, { windowMs: 60_000, max: 30, namespace: "search-ia" });
@@ -23,52 +22,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_query" }, { status: 400 });
   }
 
-  // TODO: brancher Mistral (MISTRAL_API_KEY).
-  // Pour l'instant on renvoie un parse heuristique léger basé sur mots-clés.
-  const lower = query.toLowerCase();
-
-  const filters: Record<string, string | number | string[]> = {};
-
-  if (/lux|luxembourg/.test(lower)) filters.country = "LU";
-  else if (/france|paris|cannes|nice/.test(lower)) filters.country = "FR";
-
-  const cityMatch = lower.match(
-    /\b(belair|kirchberg|limpertsberg|merl|cessange|paris|cannes|nice|monaco|marbella|ibiza|dubaï|dubai|miami|new york)\b/i,
-  );
-  if (cityMatch) filters.city = cityMatch[1];
-
-  if (/apparte/.test(lower)) filters.type = "appartement";
-  else if (/maison/.test(lower)) filters.type = "maison";
-  else if (/villa/.test(lower)) filters.type = "villa";
-  else if (/penthouse/.test(lower)) filters.type = "penthouse";
-  else if (/duplex/.test(lower)) filters.type = "duplex";
-  else if (/terrain/.test(lower)) filters.type = "terrain";
-  else if (/immeuble/.test(lower)) filters.type = "immeuble";
-
-  if (/louer|loue|location|rent/.test(lower)) filters.transaction = "rent";
-  else if (/off.?market/.test(lower)) filters.transaction = "offmarket";
-  else filters.transaction = "sale";
-
-  const budgetMatch = lower.match(
-    /(\d+(?:[\.,]\d+)?)\s*(m€|millions?|m|k€|k)/,
-  );
-  if (budgetMatch) {
-    const num = Number(budgetMatch[1].replace(",", "."));
-    const unit = budgetMatch[2];
-    const multiplier = unit.startsWith("m") ? 1_000_000 : 1_000;
-    filters.budget_max = Math.round(num * multiplier);
+  const extra = foreignCityPlaces(await fetchAllPropertiesWithCover());
+  let parsed = parseQuery(query, extra);
+  let engine: "parser" | "mistral" | "none" = parsed.understood ? "parser" : "none";
+  if (!parsed.understood) {
+    const fromMistral = await mistralFallback(query, extra);
+    if (fromMistral) {
+      parsed = fromMistral;
+      engine = "mistral";
+    }
   }
-
-  const bedroomsMatch = lower.match(/(\d+)\s*(chambres?|bedroom|zimmer)/);
-  if (bedroomsMatch) filters.min_bedrooms = Number(bedroomsMatch[1]);
-
-  const surfaceMatch = lower.match(/(\d+)\s*m[²2]/);
-  if (surfaceMatch) filters.min_surface = Number(surfaceMatch[1]);
-
-  return NextResponse.json(filters);
+  if (parsed.offmarket) return NextResponse.json({ url: "/off-market", understood: true, engine });
+  const sp = paramsFromParsed(parsed, query);
+  return NextResponse.json({ url: `/biens?${sp.toString()}`, understood: parsed.understood, engine });
 }
 
 export const dynamic = "force-dynamic";
-
-// Suppress unused warning for SYSTEM_PROMPT (reserved for Mistral integration)
-void SYSTEM_PROMPT;

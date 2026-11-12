@@ -41,7 +41,7 @@ export default async function SearchesPage({ params }: { params: Promise<{ local
               <p className="text-base text-ink-mid">{t("empty")}</p>
               <Link
                 href="/mandats/recherche"
-                className="mt-5 inline-flex items-center justify-center rounded-full bg-navy px-6 py-3 font-sans text-[13px] font-medium uppercase tracking-[0.08em] text-white transition-colors hover:bg-navy-deep"
+                className="mt-5 inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 font-sans text-[13px] font-medium uppercase tracking-[0.08em] text-bg transition-opacity hover:opacity-85"
               >
                 {t("empty_cta")}
               </Link>
