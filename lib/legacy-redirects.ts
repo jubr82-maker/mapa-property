@@ -104,6 +104,18 @@ export const OLD_SITE_PAGES: Record<string, string> = {
   "politique-de-confidentialite": "/legal/rgpd",
   "privacy-policy": "/legal/rgpd",
   datenschutz: "/legal/rgpd",
+  // D. Selection et favoris de l'ancien site : la liste des biens.
+  // /en/selection PROUVEE (Search Console, exploree le 9 novembre 2026,
+  // toujours en 404) ; les autres formes sont SUPPOSEES (memes pages dans
+  // les autres langues et variantes courantes).
+  selection: "/biens",
+  selections: "/biens",
+  "ma-selection": "/biens",
+  "my-selection": "/biens",
+  auswahl: "/biens",
+  favoris: "/biens",
+  favorites: "/biens",
+  favoriten: "/biens",
 };
 
 /** D. Pages legales de l'ancien site (/<langue>/mentions-legales/<page>). */

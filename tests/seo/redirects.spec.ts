@@ -59,6 +59,10 @@ test("logique des anciennes adresses (sans serveur)", () => {
   // Bien absent : liste des biens de la langue, jamais une erreur.
   expect(legacyPropertyDestination({ locale: "en", id: "11111111" }, map)).toBe("/en/biens");
   expect(legacyPropertyDestination({ locale: "fr", id: null }, map)).toBe("/fr/biens");
+  // Ancienne page "selection" (nov. 2026) : liste des biens de la langue.
+  expect(resolveLegacyPath("/en/selection")).toEqual({ kind: "path", to: "/en/biens" });
+  expect(resolveLegacyPath("/fr/selection")).toEqual({ kind: "path", to: "/fr/biens" });
+  expect(resolveLegacyPath("/de/auswahl")).toEqual({ kind: "path", to: "/de/biens" });
   // Adresses actuelles jamais detournees.
   for (const p of ["/fr", "/fr/biens", "/fr/biens/86388715", "/en/off-market/abc", "/de/blog/x", "/fr/villes/belair"]) {
     expect(resolveLegacyPath(p), p).toBeNull();
@@ -108,6 +112,13 @@ test("redirections 308 : un controle par format d'adresse", async () => {
     await expect301("/fr/mentions-legales/honoraires", "/fr/legal/honoraires");
     await expect301("/en/our-agency", "/en/qui-sommes-nous");
     await expect301("/en/contact-us", "/en/contact");
+    // D. Ancienne page "selection" (Search Console, exploree le 9 novembre
+    // 2026, toujours en 404) : une seule etape vers la liste des biens.
+    for (const [from, to] of [["/en/selection", "/en/biens"], ["/fr/selection", "/fr/biens"], ["/de/auswahl", "/de/biens"]]) {
+      await expect301(from, to);
+      const final = await server.request(to);
+      if (final.status !== 200 && !(OFFLINE && final.status === 598)) failures.push(`${from} : destination ${to} en ${final.status} (une seule etape attendue)`);
+    }
     // B et D. Pages de l'ancien site (journal : 308 de next.config.ts,
     // controle plus bas).
     for (const [seg, to] of Object.entries(OLD_SITE_PAGES)) {
