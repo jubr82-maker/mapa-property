@@ -131,6 +131,16 @@ export const OLD_LEGAL_SUBPAGES: Record<string, string> = {
   cgv: "/legal/cgv",
 };
 
+/**
+ * E. Adresses exactes de l'ancien site relevees en 404 sur le site en ligne,
+ * sans equivalent dans les autres langues connu (nov. 2026) :
+ * /en/legals/fees (PROUVE, 404 le 13/11/2026). Variantes fr et de non
+ * ajoutees : rien ne montre que l'ancien site les avait.
+ */
+export const OLD_EXACT_PAGES: Record<string, string> = {
+  "/en/legals/fees": "/en/legal/honoraires",
+};
+
 /** B. Segments des anciennes fiches de biens (suivis de <...>+<identifiant>). */
 export const OLD_PROPERTY_SEGMENTS = new Set([
   "propriete",
@@ -186,6 +196,9 @@ export function resolveLegacyPath(pathname: string): LegacyTarget | null {
     if (parts[0] === "blog" && parts[1]) return { kind: "path", to: `/fr/blog/${parts.slice(1).join("/")}` };
     return null;
   }
+
+  // E. Adresses exactes de l'ancien site.
+  if (Object.hasOwn(OLD_EXACT_PAGES, path)) return { kind: "path", to: OLD_EXACT_PAGES[path] };
 
   const locale = parts[0];
   const seg = parts[1];

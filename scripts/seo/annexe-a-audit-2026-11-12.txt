@@ -2,3 +2,26 @@
 # Une adresse par ligne, sans le domaine (ex. /fr/villes/steinfort).
 # Le rapport d'audit n'est pas dans le depot : a completer par Julien
 # avant de lancer scripts/seo/crawl-maillage.mjs.
+/fr/off-market/eb7c7bd4-7a0c-4307-bca3-2aa314a63077
+/fr/liste-attente
+/fr/blog/vivre-au-luxembourg-choix-rationnel-europe
+/fr/blog/off-market-luxembourg-fin-modele-informel
+/fr/villes/dudelange
+/fr/villes/weimerskirch
+/fr/villes/cessange
+/fr/villes/neudorf
+/fr/villes/merl
+/fr/villes/walferdange
+/fr/villes/clausen
+/fr/villes/hollerich
+/fr/villes/eich
+/fr/villes/grund
+/fr/villes/pfaffenthal
+/fr/villes/metz
+/fr/villes/differdange
+/fr/villes/hamm
+/fr/villes/gasperich
+/fr/recherches/R-2026-002
+/fr/off-market/arcova
+/fr/off-market/84bb5a23-edbe-43f5-817f-1c3f86eaa13a
+/fr/blog/vendre-luxembourg-2026-prix-estimation

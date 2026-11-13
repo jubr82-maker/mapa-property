@@ -7,6 +7,7 @@ import { getArchivedPropertyKeys } from "@/lib/archived-properties";
 import { getPublishedPropertyPathsByKey, isPublishedOffmarketId, lookupPublishedProperty } from "@/lib/published-property-keys";
 import { legacyPropertyDestination, resolveLegacyPath } from "@/lib/legacy-redirects";
 import { blogLowercaseRedirect } from "@/lib/blog/slug";
+import { isTestPagePath, wwwRedirectTarget } from "@/lib/host-redirect";
 import {
   ADMIN_ACTIVITY_COOKIE,
   ADMIN_ACTIVITY_COOKIE_MAX_AGE_SECONDS,
@@ -34,6 +35,11 @@ function notFoundRewrite(request: NextRequest, locale: string) {
 
 
 export default async function middleware(request: NextRequest) {
+  // Hote www. (nov. 2026) : 308 vers la meme adresse sans "www.", avant
+  // tout autre traitement (lib/host-redirect.ts).
+  const wwwTarget = wwwRedirectTarget(request.nextUrl, request.headers.get("host"));
+  if (wwwTarget) return NextResponse.redirect(wwwTarget, 308);
+
   const { pathname } = request.nextUrl;
 
   // Admin section — auth Supabase, hors next-intl
@@ -193,6 +199,12 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // Pages de test (app/[locale]/test-*) : 404 en production, comme
+  // /test-bandeaux (nov. 2026).
+  if (process.env.NODE_ENV === "production" && isTestPagePath(pathname)) {
+    return notFoundRewrite(request, pathname.split("/")[1]);
+  }
+
   // Fiche d'un bien ARCHIVE (oct. 2026) : 410 + page "plus disponible"
   // (app/api/property-gone), au lieu d'une erreur brute.
   const ficheMatch = pathname.match(/^\/(fr|en|de)\/biens\/([^/]+)\/?$/);
@@ -233,5 +245,8 @@ export const config = {
     "/((?!api|_next|_vercel|.*\\..*).*)",
     // Anciennes fiches dont l'adresse contient un point (exclues ci-dessus).
     "/:locale(fr|en|de)/:seg(propriete|proprietes|property|properties|immobilie|immobilien|objekt|eigenschaft|bien)/:rest*",
+    // Hote www. : toutes les adresses (fichiers, sitemaps, API compris)
+    // passent par la redirection du debut.
+    { source: "/:path*", has: [{ type: "header", key: "host", value: "www\\..*" }] },
   ],
 };

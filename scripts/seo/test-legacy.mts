@@ -112,4 +112,14 @@ await test("pages actuelles : aucune redirection", async () => {
   }
 });
 
+await test("/en/legals/fees (404 en ligne le 13/11/2026) : 301 vers /en/legal/honoraires, en une etape", async () => {
+  const r = await run("/en/legals/fees");
+  assert.equal(r.status, 301);
+  assert.equal(r.to, "/en/legal/honoraires");
+  assert.equal((await run("/en/legals/fees/")).to, "/en/legal/honoraires");
+  // Variantes fr et de non prouvees : pas de redirection inventee.
+  assert.equal(resolveLegacyPath("/fr/legals/fees"), null);
+  assert.equal(resolveLegacyPath("/de/legals/fees"), null);
+});
+
 console.log(`${pass} PASS, 0 FAIL`);

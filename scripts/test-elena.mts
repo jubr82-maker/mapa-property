@@ -151,6 +151,30 @@ await test("hors sujet : entree prevue meme sans Mistral, un seul Nous contacter
   assert.ok(panel.includes("m.offerContact && !m.button"), "proposition de contact seulement sans bouton de l'entree");
 });
 
+// Conditions du vrai serveur (13/11/2026) : entrees lues dans la table faqs,
+// ou la ligne E094 a ete inseree par l'ancienne version du SQL 37 (5
+// formulations, SQL 38 pas encore execute), et Mistral ne reconnait rien.
+await test("hors sujet avec la base aux anciennes formulations : E094, aucun bouton de contact en double", async () => {
+  const OLD_E094_VARIANTS = ["météo", "recette", "sport", "politique", "blague"];
+  const tableEntries: ElenaEntry[] = FILE_ENTRIES.map((e) => (e.id === "E094" ? { ...e, id: "row-94", variants: OLD_E094_VARIANTS } : { ...e, id: `row-${e.id}` }));
+  const tableDeps = { ...deps(() => Promise.resolve(null)), entries: tableEntries };
+  const e094 = FILE_ENTRIES.find((e) => e.id === "E094");
+  for (const q of ["quelle météo vendredi ?", "qui a gagné le match de foot ?", "raconte une blague"]) {
+    const r = await elenaRespond(q, "fr", tableDeps);
+    assert.equal(r.reply, e094?.answer.fr, q);
+    assert.equal(r.offerContact, false, q);
+    assert.equal(r.button, null, q);
+  }
+  // Question imprevue : un seul bouton de contact au plus (bouton de l'entree,
+  // la proposition de contact n'est affichee que sans bouton).
+  const d = await elenaRespond("une question imprevue", "fr", tableDeps);
+  const shown = (d.button ? 1 : 0) + (d.offerContact && !d.button ? 1 : 0);
+  assert.ok(shown <= 1, `${shown} boutons de contact`);
+  // La reponse et le bouton restent ceux de la base (modifiables dans l'admin).
+  const edited = tableEntries.map((e) => (e.id === "row-94" ? { ...e, answer: { ...e.answer, fr: "Texte modifie dans l'admin." } } : e));
+  assert.equal((await elenaRespond("qui a gagné le match de foot ?", "fr", { ...tableDeps, entries: edited })).reply, "Texte modifie dans l'admin.");
+});
+
 await test("boutons : uniquement des chemins internes de la liste fermee", () => {
   for (const e of FILE_ENTRIES) if (e.button) assert.ok((ELENA_BUTTON_PATHS as readonly string[]).includes(e.button.path), `${e.id} ${e.button.path}`);
 });

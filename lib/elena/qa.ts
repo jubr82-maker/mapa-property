@@ -129,9 +129,16 @@ export function templateEntry(entries: ElenaEntry[], kind: TemplateKind): ElenaE
 
 /** Entree "Question sans rapport avec l'immobilier" (meteo, sport, recette...). */
 export const OFF_TOPIC_ENTRY_ID = "E094";
+// Reponse et bouton : ceux de la base (modifiables dans l'admin). Formulations
+// reconnues : celles de la base ET celles du fichier valide (13/11/2026). Une
+// ligne inseree par une ancienne version du SQL 37 (5 formulations, sans
+// "match de foot") ne fait donc jamais perdre une formulation du fichier.
 export function offTopicEntry(entries: ElenaEntry[]): ElenaEntry {
   const label = LABEL_OF(OFF_TOPIC_ENTRY_ID);
-  return entries.find((e) => !e.isTemplate && e.question.fr === label) ?? (FILE_ENTRIES.find((e) => e.id === OFF_TOPIC_ENTRY_ID) as ElenaEntry);
+  const file = FILE_ENTRIES.find((e) => e.id === OFF_TOPIC_ENTRY_ID) as ElenaEntry;
+  const row = entries.find((e) => !e.isTemplate && e.question.fr === label);
+  if (!row) return file;
+  return { ...row, variants: [...new Set([...row.variants, ...file.variants])] };
 }
 
 /** Entree "Question dont la reponse n'est pas dans la base". */

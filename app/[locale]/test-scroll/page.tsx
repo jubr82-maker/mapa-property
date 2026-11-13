@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchHomeFeatured } from "@/lib/data";
 import { FeaturedDesktopTest } from "./FeaturedDesktopTest";
@@ -13,6 +14,8 @@ import { FeaturedDesktopTest } from "./FeaturedDesktopTest";
  * de FeaturedCarousel.
  *
  * Noindex strict — la route ne doit jamais être indexée.
+ * Nov. 2026 : route de developpement seulement, 404 en production (comme
+ * /test-bandeaux ; regle generale des pages test-* dans proxy.ts).
  */
 
 export const metadata: Metadata = {
@@ -25,6 +28,7 @@ export default async function TestScrollPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  if (process.env.NODE_ENV === "production") notFound();
   const { locale } = await params;
   setRequestLocale(locale);
 
