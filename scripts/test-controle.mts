@@ -225,7 +225,42 @@ await test("pages sorties de l'index et pages a soumettre, par importance", () =
   assert.deepEqual(core.droppedFromIndex(prev, cur), [`${B}/fr/a`]);
   const sorted = core.sortForSubmission([{ url: `${B}/fr/biens/maison-1` }, { url: `${B}/fr/villes/mamer` }, { url: `${B}/de/services/vendre` }, { url: `${B}/fr` }, { url: `${B}/fr/blog/x` }]);
   assert.deepEqual(sorted.map((x) => x.url), [`${B}/fr`, `${B}/de/services/vendre`, `${B}/fr/villes/mamer`, `${B}/fr/biens/maison-1`, `${B}/fr/blog/x`]);
-  assert.equal(cfg.searchConsoleInspectLink(`${B}/fr/a?x=1`), "https://search.google.com/search-console/inspect?resource_id=sc-domain%3Amapaproperty.lu&id=https%3A%2F%2Fmapaproperty.lu%2Ffr%2Fa%3Fx%3D1");
+});
+
+await test("bouton Search Console : accueil de la propriete, copie de l'adresse, secours si refus", async () => {
+  // Pas d'adresse directe d'inspection (le parametre id de Google est un jeton interne).
+  assert.equal(cfg.SEARCH_CONSOLE_HOME, "https://search.google.com/search-console?resource_id=sc-domain%3Amapaproperty.lu");
+  assert.equal("searchConsoleInspectLink" in cfg, false);
+  const { copyText } = await import("../lib/pilotage/copy-address");
+  const url = `${B}/fr/villes/mamer?x=1`;
+  let copied = "";
+  assert.equal(await copyText(url, { clipboard: { writeText: async (t) => void (copied = t) }, legacyCopy: () => false }), true, "presse-papiers si l'ancienne methode echoue");
+  assert.equal(copied, url, "adresse complete copiee");
+  let legacy = "";
+  let modernCalled = false;
+  const p = copyText(url, { clipboard: { writeText: async () => void (modernCalled = true) }, legacyCopy: (t) => ((legacy = t), true) });
+  assert.equal(legacy, url, "ancienne methode lancee tout de suite, pendant le clic");
+  assert.equal(await p, true);
+  assert.equal(modernCalled, false);
+  assert.equal(await copyText(url, { clipboard: { writeText: async () => Promise.reject(new Error("NotAllowed")) }, legacyCopy: () => false }), false, "refus : adresse affichee a la main");
+  assert.equal(await copyText(url, { clipboard: null, legacyCopy: () => { throw new Error("x"); } }), false);
+  // Plus aucune construction de l'ancienne adresse inspect?...&id= dans le code, l'e-mail ou les messages.
+  const files = ["lib/pilotage/config.ts", "lib/pilotage/controle-view.ts", "lib/pilotage/controle-run.ts", "app/admin/controle-google/page.tsx", "components/admin/pilotage/CopyOpenSearchConsole.tsx", "messages/fr.json", "messages/en.json", "messages/de.json"];
+  for (const f of files) assert.equal(/search-console\/inspect/.test(readFileSync(join(root, f), "utf8")), false, f);
+  const fr = JSON.parse(readFileSync(join(root, "messages", "fr.json"), "utf8")) as Record<string, Record<string, string>>;
+  assert.equal(fr.admin_controle.submit_button, "Copier et ouvrir Search Console");
+  assert.equal(fr.admin_controle.submit_copied, "Adresse copiée : collez-la dans la barre du haut de Search Console");
+  const page = readFileSync(join(root, "components/admin/pilotage/CopyOpenSearchConsole.tsx"), "utf8");
+  assert.match(page, /href=\{SEARCH_CONSOLE_HOME\}/);
+  assert.match(page, /target="_blank"/);
+});
+
+await test("crawl-maillage : option IGNORER_ROBOTS=1 documentee et lue", () => {
+  const src = readFileSync(join(root, "scripts/seo/crawl-maillage.mjs"), "utf8");
+  const head = src.slice(0, src.indexOf("import "));
+  assert.match(head, /IGNORER_ROBOTS=1/);
+  assert.match(src, /process\.env\.IGNORER_ROBOTS === "1"/);
+  assert.match(src, /IGNORE_ROBOTS \? \(\) => false : await loadRobots\(\)/);
 });
 
 await test("sans base prete : aucun plantage, message SQL 39 ; sans cle Google : arret propre", async () => {

@@ -113,6 +113,9 @@ export const CONTROLE_LOCK_SECONDS = 330;
 export const CONTROLE_MIN_INBOUND_LINKS = 3;
 /** Longueur raisonnable d'un title (caracteres). */
 export const CONTROLE_TITLE_LENGTH = { min: 15, max: 65 } as const;
-/** Lien d'inspection Search Console d'une adresse. */
-export const searchConsoleInspectLink = (url: string) =>
-  `https://search.google.com/search-console/inspect?resource_id=sc-domain%3Amapaproperty.lu&id=${encodeURIComponent(url)}`;
+/**
+ * Accueil de la propriete Search Console. Il n'existe pas d'adresse directe
+ * vers l'inspection d'une page (le parametre id de Google est un jeton
+ * interne) : l'admin copie l'adresse et la colle dans la barre du haut.
+ */
+export const SEARCH_CONSOLE_HOME = "https://search.google.com/search-console?resource_id=sc-domain%3Amapaproperty.lu";

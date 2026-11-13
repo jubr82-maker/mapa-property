@@ -1,7 +1,8 @@
 // scripts/seo/crawl-maillage.mjs : controle du maillage interne (nov. 2026,
 // audit SEO du 12/11/2026, partie G). Node seul, aucune dependance.
 // Explore depuis BASE (par defaut http://localhost:3005) toutes les pages
-// internes HTML, sans suivre les adresses bloquees par robots.txt,
+// internes HTML, sans suivre les adresses bloquees par robots.txt (sauf
+// option IGNORER_ROBOTS=1, voir plus bas),
 // User-Agent generique "Mozilla/5.0". Affiche, pour chaque page indexable
 // (statut 200, sans noindex, canonical = elle-meme), le nombre de pages qui
 // lui font un lien et sa profondeur depuis /fr ; en rouge les pages sous
@@ -11,6 +12,10 @@
 // Lancement (machine de Julien) :
 //   pnpm build && pnpm start -p 3005
 //   node scripts/seo/crawl-maillage.mjs        (ou BASE=... node ...)
+// Option IGNORER_ROBOTS=1 : explore meme les adresses interdites par
+// robots.txt. A utiliser en local ou sur la beta, dont robots.txt interdit
+// tout (sans l'option, seule la page de depart serait exploree) :
+//   IGNORER_ROBOTS=1 node scripts/seo/crawl-maillage.mjs
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -64,7 +69,9 @@ function canonicalPath(href, from) {
   }
 }
 
-const isBlocked = await loadRobots();
+const IGNORE_ROBOTS = process.env.IGNORER_ROBOTS === "1";
+const isBlocked = IGNORE_ROBOTS ? () => false : await loadRobots();
+if (IGNORE_ROBOTS) console.log("IGNORER_ROBOTS=1 : robots.txt n'est pas respecte pour cette exploration.");
 const pages = new Map(); // chemin -> { status, indexable, depth, links: Set }
 const inbound = new Map(); // chemin -> Set(pages sources)
 const queue = [["/fr", 0]];

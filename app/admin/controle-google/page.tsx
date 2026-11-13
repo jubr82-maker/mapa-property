@@ -10,6 +10,7 @@ import { CATEGORIES, pathOf, type Category } from "@/lib/pilotage/controle-core"
 import { LineChart } from "@/components/admin/analytics/LineChart";
 import { PageHeader } from "@/components/admin/pilotage/ui";
 import { RunControleButton } from "@/components/admin/pilotage/RunControleButton";
+import { CopyOpenSearchConsole } from "@/components/admin/pilotage/CopyOpenSearchConsole";
 
 export const dynamic = "force-dynamic";
 // Un clic sur "Lancer le controle" avance le passage pendant 45 s au plus.
@@ -113,14 +114,7 @@ export default async function ControleGooglePage() {
                   <p className="break-all font-mono text-xs text-ink">{s.url}</p>
                   <p className="text-xs text-ink-soft">{t(`label_${s.key}`)}</p>
                 </div>
-                <a
-                  href={s.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-md border border-ink/30 px-4 font-mono text-[11px] uppercase tracking-[0.15em] text-ink transition-colors hover:border-gold hover:text-gold"
-                >
-                  {t("submit_button")}
-                </a>
+                <CopyOpenSearchConsole url={s.url} />
               </li>
             ))}
           </ol>

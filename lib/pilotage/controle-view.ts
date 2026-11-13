@@ -1,6 +1,5 @@
 // Page admin "Controle Google" (nov. 2026) : lecture seule des resultats
 // enregistres par les passages (aucun appel a Google a l'ouverture).
-import { searchConsoleInspectLink } from "@/lib/pilotage/config";
 import { CATEGORIES, sortForSubmission, type Category, type CheckKey } from "@/lib/pilotage/controle-core";
 import { controleDbReady, googleQuotaUsed, loadResults, loadRuns, lockHeld, type ResultRow, type RunRow } from "@/lib/pilotage/controle-store";
 import { googleConfigured, googleQuotaDay, type GoogleAnalytics } from "@/lib/pilotage/controle-google";
@@ -20,7 +19,7 @@ export type ControleView =
       lastCheckAt: string | null;
       zones: Record<Category, Group[]>;
       counts: Record<Category, number>;
-      toSubmit: { url: string; link: string; key: CheckKey }[];
+      toSubmit: { url: string; key: CheckKey }[];
       indexHistory: { date: string; value: number }[];
       clicksHistory: { date: string; value: number }[];
       impressionsHistory: { date: string; value: number }[];
@@ -66,7 +65,7 @@ export async function loadControleView(): Promise<ControleView> {
   const openRuns = [...siteRuns, ...googleRuns].filter((r) => r.state === "running" || r.state === "paused" || r.state === "quota");
   const rows = [...(lastSite ? await loadResults(lastSite.id) : []), ...(lastGoogle ? await loadResults(lastGoogle.id) : [])];
   const { zones, counts } = groupResults(rows);
-  const toSubmit = sortForSubmission(rows.filter((r) => SUBMIT_KEYS.has(r.check_key)).map((r) => ({ url: r.url, key: r.check_key, link: searchConsoleInspectLink(r.url) })));
+  const toSubmit = sortForSubmission(rows.filter((r) => SUBMIT_KEYS.has(r.check_key)).map((r) => ({ url: r.url, key: r.check_key })));
   const doneGoogle = googleRuns.filter((r) => r.state === "done").reverse();
   const perDay = <T,>(runs: RunRow[], pick: (r: RunRow) => T | null) => {
     const m = new Map<string, T>();
