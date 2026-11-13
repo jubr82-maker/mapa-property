@@ -6,6 +6,7 @@
 // RLS is_mapa_admin (SQL 18). Les champs du client (nom, contact, budget
 // exact, adresse actuelle) vont dans property_search_private et ne sont
 // jamais lus par le site. Publication impossible sans l'accord du client.
+import { revalidateSitemaps } from "@/lib/sitemaps";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireAdmin } from "@/lib/admin/require-admin";
@@ -76,7 +77,7 @@ function revalidatePublic(reference?: string, ...communeLists: unknown[]) {
     if (reference) revalidatePath(`/${l}/recherches/${reference}`);
   }
   // Le sitemap liste les recherches publiees.
-  revalidatePath("/sitemap.xml");
+  revalidateSitemaps(["recherches"]);
   revalidatePath("/admin/recherches");
 }
 

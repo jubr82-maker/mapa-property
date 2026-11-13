@@ -116,10 +116,10 @@ for (const f of pages) {
 }
 
 // ---------------------------------------------------------------------------
-// 2. Routes : app/**/route.ts, app/robots.ts, app/sitemap.ts, proxy.ts
+// 2. Routes : app/**/route.ts (sitemaps compris), app/robots.ts, proxy.ts
 // ---------------------------------------------------------------------------
-const RULE_2 = "app/**/route.ts + app/robots.ts + app/sitemap.ts + proxy.ts (find app -name route.ts)";
-const routes = [...walk("app", (p) => p.endsWith("route.ts")), "app/robots.ts", "app/sitemap.ts", "proxy.ts"].sort();
+const RULE_2 = "app/**/route.ts + app/robots.ts + proxy.ts (find app -name route.ts)";
+const routes = [...walk("app", (p) => p.endsWith("route.ts")), "app/robots.ts", "proxy.ts"].sort();
 const PUBLIC_FORM_ROUTES = /api\/(contact|nda-offmarket|nda-request|offmarket-request|liste-attente|arcova-waitlist|lead|estimate|chatbot|contact-reveal)\/route\.ts$/;
 for (const f of routes) {
   const s = read(f);

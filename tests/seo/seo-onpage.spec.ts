@@ -218,7 +218,10 @@ test("seo-onpage : liens, titles, descriptions, H1, hreflang (fr, en, de)", asyn
   for (const [desc, urls] of byDesc) if (urls.length > 1) failures.push(`[description partagee x${urls.length}] "${desc.slice(0, 60)}..." : ${urls.slice(0, 4).join(", ")}`);
 
   // 7 : hreflang du sitemap.
-  const sitemap = await server.request("/sitemap.xml");
+  // Index des sitemaps (nov. 2026) : hreflang de chaque fichier par type.
+  const smIndex = await server.request("/sitemap.xml");
+  const smFiles = [...smIndex.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+  const sitemap = { body: (await Promise.all(smFiles.map((f) => server.request(f)))).map((r) => r.body).join("\n") };
   for (const m of sitemap.body.matchAll(/hreflang="([^"]+)"/g)) {
     if (!ALLOWED_HREFLANG.has(m[1])) failures.push(`[sitemap hreflang ${m[1]}]`);
   }

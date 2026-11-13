@@ -44,7 +44,7 @@ test("anciennes adresses : une seule etape vers ces pages", () => {
   }
 });
 test("sitemap : les 6 adresses", () => {
-  const s = readFileSync(join(root, "app/sitemap.ts"), "utf8");
+  const s = readFileSync(join(root, "lib/sitemaps.ts"), "utf8");
   assert.ok(s.includes("LISTING_TRANSACTION_PATHS"));
 });
 console.log(`${pass} PASS, 0 FAIL`);

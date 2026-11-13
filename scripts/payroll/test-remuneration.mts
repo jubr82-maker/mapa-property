@@ -141,7 +141,7 @@ test("garde d'acces : pages et route reservees aux comptes des ventes avec doubl
   const i = nav.indexOf('href: "/admin/ventes-realisees"');
   assert.ok(i > 0 && nav.indexOf('href: "/admin/remuneration"') > i && nav.slice(i, nav.indexOf('href: "/admin/remuneration"')).split("\n").length === 2, "juste sous Ventes realisees");
   // Rien dans le site public : aucune page sous app/[locale] ne lit ces modules.
-  assert.ok(!read("app/sitemap.ts").includes("remuneration"));
+  assert.ok(!read("lib/sitemaps.ts").includes("remuneration"));
 });
 
 test("donnees du partenaire : jamais enregistrees ni envoyees", () => {

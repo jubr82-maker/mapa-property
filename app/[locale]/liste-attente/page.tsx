@@ -20,6 +20,8 @@ export async function generateMetadata({
     // paragraphe d'introduction affiche reste inchange.
     description: t("meta_description"),
     alternates: pageAlternates(locale, "/liste-attente"),
+    // Nov. 2026 (audit SEO) : page de formulaire, sans contenu a indexer.
+    robots: { index: false, follow: true },
   });
 }
 

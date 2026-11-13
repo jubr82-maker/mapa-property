@@ -287,7 +287,10 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
     const legal = await server.request("/fr/legal/mentions-legales");
     if (!/"vatID"/.test(ldBlocks(legal.body ?? "").join(""))) failures.push("mentions legales : TVA absente des donnees structurees");
     // Sitemap : aucune adresse qui redirige.
-    const sm = await server.request("/sitemap.xml");
+    // Index des sitemaps (nov. 2026) : on lit chaque fichier par type.
+    const index = await server.request("/sitemap.xml");
+    const files = [...(index.body ?? "").matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+    const sm = { body: (await Promise.all(files.map((f) => server.request(f)))).map((r) => r.body ?? "").join("\n") };
     const locs = [...(sm.body ?? "").matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
     for (const bad of ["/services/mandat-exclusif", "/services/mandat-recherche", "/journal"]) {
       if (locs.some((l) => l.endsWith(bad))) failures.push(`sitemap : ${bad} redirige`);
@@ -312,6 +315,40 @@ test("donnees structurees, fil d'Ariane, sitemap et villes (build)", async () =>
 // les trois langues, reponse dans le premier paragraphe, FAQ visible et
 // FAQPage identiques, Service rattache a l'etablissement unique, liens vers
 // les biens, les villes et les simulateurs, aucun tiret long ou moyen.
+// Sitemaps par type (nov. 2026, audit SEO, partie C3) : chaque adresse de
+// chaque fichier est une page publique indexable (200, sans noindex, non
+// bloquee par robots.txt) dont la canonical est elle-meme.
+test("sitemaps : chaque adresse indexable, canonical elle-meme (build)", async () => {
+  const server = await startServerProcess();
+  const failures: string[] = [];
+  try {
+    const index = await server.request("/sitemap.xml");
+    const files = [...(index.body ?? "").matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+    if (!files.length && !/beta\./.test(process.env.NEXT_PUBLIC_SITE_URL ?? "")) failures.push("index vide");
+    for (const f of files) {
+      const xml = (await server.request(f)).body ?? "";
+      for (const loc of [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(/&amp;/g, "&"))) {
+        const u = new URL(loc);
+        const p = u.pathname + u.search;
+        if (u.search && !/^\/(fr|en|de)\/biens\?transaction=(sale|rent)$/.test(p)) failures.push(`${f} : parametre ${p}`);
+        const r = await server.request(p);
+        if (OFFLINE && r.status >= 590) {
+          unverified.push(p);
+          continue;
+        }
+        const body = r.body ?? "";
+        if (r.status !== 200) { failures.push(`${p} : ${r.status}`); continue; }
+        if (/<meta name="robots" content="[^"]*noindex/.test(body)) failures.push(`${p} : noindex`);
+        const canon = body.match(/<link rel="canonical" href="([^"]+)"/)?.[1]?.replace(/&amp;/g, "&");
+        if (!canon || new URL(canon).pathname + new URL(canon).search !== p) failures.push(`${p} : canonical ${canon}`);
+      }
+    }
+  } finally {
+    await server.close();
+  }
+  expect(failures, failures.join("\n")).toEqual([]);
+});
+
 test("pages de recherche immobiliere (build)", async () => {
   const server = await startServerProcess();
   const failures: string[] = [];

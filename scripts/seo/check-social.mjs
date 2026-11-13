@@ -88,8 +88,8 @@ function buildPaths() {
 }
 
 function sitemapStaticPaths() {
-  const src = readFileSync(join(root, "app", "sitemap.ts"), "utf8");
-  const block = /const STATIC_PATHS = \[([\s\S]*?)\];/.exec(src)?.[1] ?? "";
+  const src = readFileSync(join(root, "lib", "sitemaps.ts"), "utf8");
+  const block = /export const STATIC_PATHS = \[([\s\S]*?)\];/.exec(src)?.[1] ?? "";
   const paths = [...block.matchAll(/"([^"]*)"/g)].map((m) => m[1]);
   return ["fr", "en", "de"].flatMap((l) => paths.map((p) => `/${l}${p}`));
 }
@@ -100,8 +100,12 @@ if (BUILD) {
 } else {
   let urls = [];
   try {
-    const xml = await (await fetch(`${BASE}/sitemap.xml`)).text();
-    urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+    // Index des sitemaps (nov. 2026) : un fichier par type.
+    const index = await (await fetch(`${BASE}/sitemap.xml`)).text();
+    for (const f of [...index.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname)) {
+      const xml = await (await fetch(`${BASE}${f}`)).text();
+      urls.push(...[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname));
+    }
   } catch {}
   if (urls.length === 0) {
     console.log("sitemap vide (site beta) : pages du build et pages fixes du sitemap");

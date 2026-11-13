@@ -22,6 +22,7 @@ import { PROPERTIES_LIST_TAG, PROPERTIES_SIMILAR_TAG, cityPropertiesTag, fetchPu
 import { pickSimilar } from "@/lib/similar-properties";
 import { localizedUrls, scheduleIndexNow } from "@/lib/indexnow";
 import { blogSlugLower } from "@/lib/blog/slug";
+import { revalidateSitemaps } from "@/lib/sitemaps";
 import { propertyPaths } from "@/lib/listing/property-paths";
 import { cityForPlace, cityForProperty } from "@/lib/internal-links";
 
@@ -105,7 +106,8 @@ export async function revalidatePropertyChange(
   for (const p of fichePaths) revalidatePath(p);
   for (const slug of citySlugs) revalidateTag(cityPropertiesTag(slug), { expire: 0 });
   revalidateTag(PROPERTIES_LIST_TAG, { expire: 0 });
-  revalidatePath("/sitemap.xml");
+  // Sitemaps par type (nov. 2026) : biens et villes (indexabilite).
+  revalidateSitemaps(["biens", "villes"]);
   if (list.some((r) => r.is_featured)) for (const l of LOCALES) revalidatePath(`/${l}`);
   if (list.length === 0) revalidateTag(PROPERTIES_SIMILAR_TAG, { expire: 0 });
   else if (opts.cards) await revalidateSimilarContaining(list.map((r) => r.id));
@@ -165,6 +167,6 @@ export function revalidateBlogChange(change: { slugs?: (string | null | undefine
   }
   const cities = new Set((change.communes ?? []).map((c) => cityForPlace(c)?.slug).filter((s): s is string => Boolean(s)));
   for (const slug of cities) for (const l of LOCALES) revalidatePath(`/${l}/villes/${slug}`);
-  revalidatePath("/sitemap.xml");
+  revalidateSitemaps(["journal"]);
   if (slugs.length) scheduleIndexNow([...localizedUrls("/blog"), ...slugs.flatMap((s) => localizedUrls(`/blog/${s}`))]);
 }

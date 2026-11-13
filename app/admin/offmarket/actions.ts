@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidateSitemaps } from "@/lib/sitemaps";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
@@ -561,7 +562,7 @@ function revalidateOffmarketPublic(id: string): void {
     revalidatePath(`/${locale}/off-market/${id}`);
     revalidatePath(`/${locale}`);
   }
-  revalidatePath("/sitemap.xml");
+  revalidateSitemaps(["off-market"]);
 }
 
 export async function updateOffmarket(id: string, formData: FormData): Promise<ActionResult> {

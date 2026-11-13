@@ -225,7 +225,7 @@ test("liens internes : fiche vers commune et recherches, commune vers biens et r
   const ville = read("app/[locale]/villes/[ville]/page.tsx");
   expect(ville).toContain("data-city-properties");
   expect(ville).toContain("data-city-searches");
-  for (const f of ["components/property/PropertyCard.tsx", "components/home/FeaturedCarousel.tsx", "app/sitemap.ts"]) expect(read(f)).toMatch(/paths\?\.\[locale\]/);
+  for (const f of ["components/property/PropertyCard.tsx", "components/home/FeaturedCarousel.tsx", "lib/sitemaps.ts"]) expect(read(f)).toMatch(/paths\?\.\[locale\]/);
 });
 
 test("indicateurs de l'admin : jamais bloquants (mots, textes alternatifs, apercu Google)", () => {
