@@ -4031,7 +4031,8 @@
     "city_all_quartiers": "All districts of Luxembourg City",
     "city_more_title": "Further reading",
     "city_commune_link": "The municipality: {city}",
-    "city_search_link": "A client's search: {reference}"
+    "city_search_link": "A client's search: {reference}",
+    "related_articles_title": "Related articles"
   },
   "intent_pages": {
     "faq_title": "Frequently asked questions",

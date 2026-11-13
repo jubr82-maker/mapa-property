@@ -4031,7 +4031,8 @@
     "city_all_quartiers": "Tous les quartiers de Luxembourg-Ville",
     "city_more_title": "Pour aller plus loin",
     "city_commune_link": "La commune : {city}",
-    "city_search_link": "Recherche d'un client : {reference}"
+    "city_search_link": "Recherche d'un client : {reference}",
+    "related_articles_title": "Articles liés"
   },
   "intent_pages": {
     "faq_title": "Questions fréquentes",

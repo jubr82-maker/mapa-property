@@ -9,7 +9,8 @@ import { siteShareImage } from "@/lib/og";
 import { displayableImageSrc } from "@/lib/image-hosts";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { fetchBlogPostBySlug } from "@/lib/data";
+import { fetchAllBlogPosts, fetchBlogPostBySlug } from "@/lib/data";
+import { relatedPosts } from "@/lib/blog/related";
 import { pickLang, type Locale } from "@/lib/types";
 import { BookletReader } from "@/components/blog/BookletReader";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -61,6 +62,8 @@ async function BlogPostPage({
   // Page de la commune de l'article (champ commune, admin Blog), si elle existe.
   const city = cityForPlace(post.commune);
   const tx = await getTranslations({ locale, namespace: "explore" });
+  // Articles lies (nov. 2026, audit SEO) : meme langue, meme ville d'abord.
+  const related = relatedPosts(post, await fetchAllBlogPosts(), locale);
 
   const title = pickLang(post, "title", locale as Locale);
   const content = pickLang(post, "content", locale as Locale);
@@ -113,6 +116,23 @@ async function BlogPostPage({
           </p>
         ) : null}
         <FaqSection pageKey={blogFaqKey(post.slug)} locale={locale} className="mx-auto mt-16 max-w-[65ch]" />
+        {related.length > 0 ? (
+          <section className="mx-auto mt-16 max-w-[65ch]" data-related-articles>
+            <h2 className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">{tx("related_articles_title")}</h2>
+            <ul className="mt-4 grid gap-3">
+              {related.map((b) => (
+                <li key={b.slug}>
+                  <Link
+                    href={`/blog/${b.slug}`}
+                    className="block rounded-md border border-line bg-bg p-4 transition-colors hover:border-gold hover:text-gold-text"
+                  >
+                    <p className="font-display text-lg font-bold text-ink">{pickLang(b, "title", locale as Locale)}</p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
         <p className="mx-auto mt-8 max-w-[65ch] font-mono text-[10px] leading-snug text-ink-soft">
           <Link href="/legal/intelligence-artificielle" className="hover:underline">
             {tAi("note_journal")}
