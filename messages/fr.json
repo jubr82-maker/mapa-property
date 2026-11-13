@@ -4019,7 +4019,13 @@
     "fiche_title": "Pour aller plus loin",
     "fiche_searches_title": "Nos recherches en cours à {city}",
     "city_articles_title": "À lire",
-    "article_city_link": "Le marché immobilier à {city}"
+    "article_city_link": "Le marché immobilier à {city}",
+    "city_searches_here": "Nos clients recherchent ici",
+    "city_quartiers_title": "Les quartiers",
+    "city_all_quartiers": "Tous les quartiers de Luxembourg-Ville",
+    "city_more_title": "Pour aller plus loin",
+    "city_commune_link": "La commune : {city}",
+    "city_search_link": "Recherche d'un client : {reference}"
   },
   "intent_pages": {
     "faq_title": "Questions fréquentes",

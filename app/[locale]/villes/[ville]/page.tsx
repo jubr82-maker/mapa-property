@@ -7,7 +7,8 @@ import { Link } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { pageAlternates } from "@/lib/seo";
-import { getCityBySlug, getCitySlugs, getNearbyCities, isAgencyCity, type City } from "@/lib/cities";
+import { cities as allCities, getCityBySlug, getCitySlugs, getNearbyCities, isAgencyCity, type City } from "@/lib/cities";
+import { communeCityOf, isQuartierCity, quartierCities } from "@/lib/city-links";
 import { routing } from "@/i18n/routing";
 import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
@@ -19,7 +20,7 @@ import { FaqSection } from "@/components/faq/FaqSection";
 import { cityFaqKey } from "@/lib/faq/keys";
 import { withSocial } from "@/lib/seo-page-meta";
 import { cityForPlace } from "@/lib/internal-links";
-import { isCityIndexable } from "@/lib/city-indexing";
+import { cityHasOwnContent, isCityIndexable } from "@/lib/city-indexing";
 
 type Locale = "fr" | "en" | "de";
 
@@ -168,7 +169,22 @@ export default async function VillePage({
   // Nom dans une phrase ("a l'Ile Maurice") ; sinon le nom de la ville.
   const inSentence = city.nameInSentence?.[loc] ?? city.name[loc];
   const fr = frenchPreposition(city, loc);
-  const nearby = getNearbyCities(city.slug, 4);
+  // Voisines par distance reelle, jamais une ville non indexable (nov. 2026).
+  // Indexabilite lue ville par ville (cache city-properties:<ville>), jamais
+  // la liste complete des biens : modifier un bien ne regenere pas toutes les
+  // pages de ville (quotas Vercel). Une ville du Luxembourg est toujours
+  // indexable ; une erreur de lecture exclut la ville (prudence).
+  const indexableSlugs = new Set<string>();
+  for (const c of allCities) {
+    if (c.country === "LU" || cityHasOwnContent(c)) indexableSlugs.add(c.slug);
+    else if (city.country !== "LU" && (await fetchCityPropertiesStrict(c.slug).catch(() => [])).length > 0) indexableSlugs.add(c.slug);
+  }
+  const nearby = getNearbyCities(city.slug, 4, (c) => indexableSlugs.has(c.slug));
+  // Luxembourg-Ville : ses quartiers ; un quartier : lien vers tous les
+  // quartiers ; une ville : la page de sa commune (nov. 2026, audit SEO).
+  const quartiers = city.slug === "luxembourg-ville" ? quartierCities() : [];
+  const isQuartier = isQuartierCity(city);
+  const communeCity = communeCityOf(city);
   // Recherches en cours qui visent cette commune (oct. 2026).
   const searches = await fetchSearchesForCity(city.slug);
   // Biens publies de la commune (oct. 2026).
@@ -292,7 +308,7 @@ export default async function VillePage({
 
         {searches.length > 0 ? (
           <section className="mt-16" data-city-searches>
-            <h2 className="t-h2">{fr(ts("city_block_title", { city: inSentence }), inSentence)}</h2>
+            <h2 className="t-h2">{tx("city_searches_here")}</h2>
             <p className="mt-3 text-base leading-relaxed text-ink-mid">{fr(ts("city_block_intro", { city: inSentence }), inSentence)}</p>
             <ul className="mt-6 grid gap-4">
               {searches.slice(0, 4).map((s) => (
@@ -352,6 +368,56 @@ export default async function VillePage({
               ))}
             </ul>
           </section>
+        ) : null}
+
+        {quartiers.length > 0 ? (
+          <section id="quartiers" className="mt-16 scroll-mt-28" data-city-quartiers>
+            <h2 className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">
+              {tx("city_quartiers_title")}
+            </h2>
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+              {quartiers.map((q) => (
+                <li key={q.slug}>
+                  <Link
+                    href={`/villes/${q.slug}`}
+                    className="block rounded-md border border-line bg-bg p-4 transition-colors hover:border-gold hover:text-gold-text"
+                  >
+                    <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft">Luxembourg</span>
+                    <p className="mt-1 font-display text-lg font-bold text-ink">{q.name[loc]}</p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {communeCity || isQuartier || searches.length > 0 ? (
+          <nav aria-label={tx("city_more_title")} className="mt-16 border-t border-line pt-8" data-city-more>
+            <h2 className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft">{tx("city_more_title")}</h2>
+            <ul className="mt-4 grid gap-3">
+              {isQuartier ? (
+                <li>
+                  <Link href="/villes/luxembourg-ville#quartiers" className="block rounded-md border border-line bg-bg p-4 font-display text-lg font-bold text-ink transition-colors hover:border-gold hover:text-gold-text">
+                    {tx("city_all_quartiers")}
+                  </Link>
+                </li>
+              ) : null}
+              {communeCity ? (
+                <li>
+                  <Link href={`/villes/${communeCity.slug}`} className="block rounded-md border border-line bg-bg p-4 font-display text-lg font-bold text-ink transition-colors hover:border-gold hover:text-gold-text">
+                    {tx("city_commune_link", { city: communeCity.name[loc] })}
+                  </Link>
+                </li>
+              ) : null}
+              {searches.map((s) => (
+                <li key={s.id}>
+                  <Link href={`/recherches/${s.reference}`} className="block rounded-md border border-line bg-bg p-4 font-display text-lg font-bold text-ink transition-colors hover:border-gold hover:text-gold-text">
+                    {tx("city_search_link", { reference: s.reference })}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         ) : null}
 
         <FaqSection pageKey={cityFaqKey(city.slug)} locale={locale} />

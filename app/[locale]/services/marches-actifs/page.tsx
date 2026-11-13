@@ -10,6 +10,16 @@ import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { ExploreLinks } from "@/components/seo/ExploreLinks";
 import { cities } from "@/lib/cities";
+import { cityForPlace, cityForProperty } from "@/lib/internal-links";
+
+// Nov. 2026 (audit SEO) : chaque commune pointe vers sa page de ville quand
+// elle existe (nom, alias, puis rattachement officiel de la localite), sinon
+// vers la liste des biens filtree sur la commune. Plus aucun lien vers
+// la liste filtree par pays et ville, adresses bloquees par robots.txt.
+function communeHref(commune: string): string {
+  const page = cityForPlace(commune) ?? cityForProperty({ city: commune, country: "LU" });
+  return page ? `/villes/${page.slug}` : `/biens?city=${encodeURIComponent(commune)}`;
+}
 export async function generateMetadata({
   params,
 }: {
@@ -75,7 +85,7 @@ async function ActiveMarketsPage({
               {luxembourgCommunes.map((c) => (
                 <li key={c}>
                   <Link
-                    href={`/biens?country=LU&city=${encodeURIComponent(c)}`}
+                    href={communeHref(c)}
                     className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mid hover:text-gold"
                   >
                     {c}

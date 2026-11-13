@@ -4019,7 +4019,13 @@
     "fiche_title": "Go further",
     "fiche_searches_title": "Our current searches in {city}",
     "city_articles_title": "Further reading",
-    "article_city_link": "The property market in {city}"
+    "article_city_link": "The property market in {city}",
+    "city_searches_here": "Our clients are searching here",
+    "city_quartiers_title": "The districts",
+    "city_all_quartiers": "All districts of Luxembourg City",
+    "city_more_title": "Further reading",
+    "city_commune_link": "The municipality: {city}",
+    "city_search_link": "A client's search: {reference}"
   },
   "intent_pages": {
     "faq_title": "Frequently asked questions",

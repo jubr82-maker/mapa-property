@@ -4019,7 +4019,13 @@
     "fiche_title": "Weiterführend",
     "fiche_searches_title": "Unsere aktuellen Suchen in {city}",
     "city_articles_title": "Zum Weiterlesen",
-    "article_city_link": "Der Immobilienmarkt in {city}"
+    "article_city_link": "Der Immobilienmarkt in {city}",
+    "city_searches_here": "Unsere Kunden suchen hier",
+    "city_quartiers_title": "Die Stadtviertel",
+    "city_all_quartiers": "Alle Stadtviertel von Luxemburg-Stadt",
+    "city_more_title": "Weiterführend",
+    "city_commune_link": "Die Gemeinde: {city}",
+    "city_search_link": "Suche eines Kunden: {reference}"
   },
   "intent_pages": {
     "faq_title": "Häufige Fragen",

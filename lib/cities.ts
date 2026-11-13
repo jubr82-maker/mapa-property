@@ -1,3 +1,4 @@
+import { getLocalityCoords, haversineKm } from "@/lib/geo/luxembourg-communes";
 export type CountryCode =
   | "LU" | "FR" | "CH" | "BE" | "NL" | "GB" | "ES" | "PT" | "IT" | "AT" | "DE" | "AE" | "US" | "MU" | "MC";
 
@@ -971,11 +972,57 @@ export function getCitySlugs(): string[] {
 // francaise, comme quand son pays etait code "FR".
 const nearbyGroup = (c: City): CountryCode => (c.country === "MC" ? "FR" : c.country);
 
-export function getNearbyCities(slug: string, count = 4): City[] {
+/** Coordonnees d'une page de ville (GeoNames, lib/geo/luxembourg-communes.ts) ; null si inconnues. */
+export function cityCoords(city: City): { lat: number; lng: number } | null {
+  if (city.country !== "LU") return null; // aucune coordonnee de reference pour l'etranger
+  for (const name of [city.name.fr, city.name.de, city.slug.replace(/-/g, " "), ...(city.aliases ?? []), city.name.fr.split(/[-\s]/)[0]]) {
+    const c = getLocalityCoords(name);
+    if (c) return { lat: c.lat, lng: c.lng };
+  }
+  return null;
+}
+
+/**
+ * Villes voisines (nov. 2026, audit SEO) : les PLUS PROCHES par distance
+ * reelle (haversineKm) au Luxembourg ; a l'etranger, meme pays (ou meme
+ * marche) par distance si les coordonnees existent, sinon l'ordre de la
+ * liste. Complete par les autres marches si besoin. `isIndexable` : une
+ * ville non indexable (lib/city-indexing.ts) n'est jamais proposee.
+ * Relation reciproque : une ville qui a celle-ci parmi ses plus proches y
+ * figure aussi (une commune en bordure, comme Steinfort, n'est le plus
+ * proche voisin de personne et ne recevait sinon aucun lien). Au plus
+ * 2 x count villes, triees par distance.
+ */
+function closestCities(target: City, count: number, isIndexable: (c: City) => boolean): City[] {
+  const here = cityCoords(target);
+  const dist = (c: City) => {
+    const there = cityCoords(c);
+    return here && there ? haversineKm(here.lat, here.lng, there.lat, there.lng) : Number.POSITIVE_INFINITY;
+  };
+  const candidates = cities.filter((c) => c.slug !== target.slug && isIndexable(c));
+  const byDistance = (list: City[]) =>
+    list
+      .map((c, i) => ({ c, i, d: dist(c) }))
+      .sort((a, b) => a.d - b.d || a.i - b.i)
+      .map((x) => x.c);
+  const sameCountry = byDistance(candidates.filter((c) => nearbyGroup(c) === nearbyGroup(target)));
+  if (sameCountry.length >= count) return sameCountry.slice(0, count);
+  const others = candidates.filter((c) => nearbyGroup(c) !== nearbyGroup(target));
+  return [...sameCountry, ...others].slice(0, count);
+}
+
+export function getNearbyCities(slug: string, count = 4, isIndexable: (c: City) => boolean = () => true): City[] {
   const target = getCityBySlug(slug);
   if (!target) return [];
-  const sameCountry = cities.filter((c) => nearbyGroup(c) === nearbyGroup(target) && c.slug !== slug);
-  if (sameCountry.length >= count) return sameCountry.slice(0, count);
-  const others = cities.filter((c) => nearbyGroup(c) !== nearbyGroup(target) && c.slug !== slug);
-  return [...sameCountry, ...others].slice(0, count);
+  const primary = closestCities(target, count, isIndexable);
+  const reverse = cities.filter(
+    (c) => c.slug !== slug && nearbyGroup(c) === nearbyGroup(target) && isIndexable(c) && !primary.includes(c) && closestCities(c, count, isIndexable).some((x) => x.slug === slug),
+  );
+  if (!reverse.length) return primary;
+  const here = cityCoords(target);
+  const d = (c: City) => {
+    const there = cityCoords(c);
+    return here && there ? haversineKm(here.lat, here.lng, there.lat, there.lng) : Number.POSITIVE_INFINITY;
+  };
+  return [...primary, ...reverse].sort((a, b) => d(a) - d(b)).slice(0, count * 2);
 }
