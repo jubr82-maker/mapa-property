@@ -1,0 +1,4 @@
+# Annexe A de l'audit SEO du 12/11/2026 : les 23 pages faibles.
+# Une adresse par ligne, sans le domaine (ex. /fr/villes/steinfort).
+# Le rapport d'audit n'est pas dans le depot : a completer par Julien
+# avant de lancer scripts/seo/crawl-maillage.mjs.
