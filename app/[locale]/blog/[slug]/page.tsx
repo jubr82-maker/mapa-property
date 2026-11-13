@@ -77,6 +77,7 @@ async function BlogPostPage({
     url: `${SITE_URL}/${locale}/blog/${post.slug}`,
     image: displayableImageSrc(post.cover_image) ?? undefined,
     publishedAt: post.published_at,
+    updatedAt: (post as { updated_at?: string | null }).updated_at ?? null,
     author: post.author,
   });
   return (

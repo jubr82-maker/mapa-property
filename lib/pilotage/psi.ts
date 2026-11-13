@@ -5,7 +5,7 @@
 // dans public.psi_runs. INP remplace FID : donnee terrain (CrUX) quand
 // Google en dispose, sinon Total Blocking Time en laboratoire.
 import { supabaseService } from "@/lib/supabase-service";
-import { PSI_PATHS, PSI_STRATEGIES } from "@/lib/pilotage/config";
+import { PSI_CONCURRENCY, PSI_MODELS, PSI_STRATEGIES } from "@/lib/pilotage/config";
 import { extractLcpDiagnosis, type LcpDiagnosis } from "@/lib/pilotage/lcp-diagnosis";
 
 const PSI_ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
@@ -100,12 +100,59 @@ async function measure(url: string, strategy: string, trigger: PsiTrigger): Prom
   }
 }
 
+/**
+ * Pages a mesurer : un exemple de chaque modele. Fiche : le premier bien
+ * publie ; article : le plus recent. Contenu absent ou erreur de lecture :
+ * le modele est saute (jamais d'adresse inventee).
+ */
+export async function resolvePsiPaths(): Promise<string[]> {
+  const out: string[] = [];
+  for (const m of PSI_MODELS) {
+    if (m.path) {
+      out.push(m.path);
+      continue;
+    }
+    try {
+      const data = await import("@/lib/data");
+      if (m.key === "property") {
+        const p = (await data.fetchAllPropertiesWithCover()).find((x) => x.slug);
+        if (p) out.push(`/fr${p.paths?.fr ?? `/biens/${p.slug}`}`);
+      } else if (m.key === "article") {
+        const a = (await data.fetchAllBlogPosts()).filter((x) => x.slug).sort((x, y) => (y.published_at ?? "").localeCompare(x.published_at ?? ""))[0];
+        if (a) out.push(`/fr/blog/${a.slug}`);
+      }
+    } catch {
+      // modele saute
+    }
+  }
+  return out;
+}
+
+/** Execute des taches, au plus `limit` a la fois (ordre des resultats conserve). */
+async function withLimit<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
+  const out: T[] = new Array(tasks.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < tasks.length) {
+      const i = next++;
+      out[i] = await tasks[i]();
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
+  return out;
+}
+
 /** Lance les mesures (pages x strategies) et les enregistre. */
 export async function runPsiMeasurements(trigger: PsiTrigger): Promise<{ ok: boolean; detail: string }> {
   if (!psiConfigured()) return { ok: false, detail: "not_configured" };
   const root = siteRoot();
-  const rows = await Promise.all(
-    PSI_PATHS.flatMap((p) => PSI_STRATEGIES.map((s) => measure(`${root}${p}`, s, trigger))),
+  // Limite de frequence existante inchangee (delai entre deux mesures
+  // manuelles, mesure planifiee quotidienne) ; au plus PSI_CONCURRENCY
+  // appels simultanes a l'API PageSpeed.
+  const paths = await resolvePsiPaths();
+  const rows = await withLimit(
+    paths.flatMap((p) => PSI_STRATEGIES.map((s) => () => measure(`${root}${p}`, s, trigger))),
+    PSI_CONCURRENCY,
   );
   let { error } = await supabaseService().from("psi_runs").insert(rows);
   // Colonne lcp_diagnosis absente (SQL 19 pas encore execute) : mesures

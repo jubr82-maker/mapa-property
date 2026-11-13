@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { requireAdminPage } from "@/lib/admin/require-admin";
 import { ADMIN_LOCALE, formatDateOnly, formatDateTimeShort } from "@/lib/datetime";
 import { Fragment } from "react";
-import { loadPsiHistory, psiConfigured, type PsiRow } from "@/lib/pilotage/psi";
+import { loadPsiHistory, psiConfigured, resolvePsiPaths, type PsiRow } from "@/lib/pilotage/psi";
 import { LCP_PHASE_ORDER, type LcpDiagnosis } from "@/lib/pilotage/lcp-diagnosis";
 import { loadCronRuns, loadEmailLog, loadFormHealth } from "@/lib/pilotage/health";
 import { deployInfo, domainStatus, loadBackupStatus } from "@/lib/pilotage/site-facts";
@@ -43,7 +43,10 @@ export default async function SantePage() {
 
   // Derniere mesure par page et par strategie.
   const latest: PsiRow[] = [];
-  for (const p of PSI_PATHS) {
+  // Un exemple de chaque modele de page (nov. 2026) : fiche et article
+  // choisis parmi les contenus publies.
+  const measuredPaths = await resolvePsiPaths();
+  for (const p of measuredPaths) {
     for (const s of PSI_STRATEGIES) {
       const r = psi.rows.find((x) => x.url.endsWith(p) && x.strategy === s);
       if (r) latest.push(r);

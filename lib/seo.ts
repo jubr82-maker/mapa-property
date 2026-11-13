@@ -311,21 +311,45 @@ interface BlogJsonLdInput {
   url: string;
   image?: string;
   publishedAt?: string | null;
+  /** Date reelle de derniere modification (updated_at), sinon omise. */
+  updatedAt?: string | null;
   author?: string | null;
 }
 
+// Nov. 2026 (audit SEO, donnees structurees verifiees) : aucune valeur nulle
+// ni inventee. Avant : dateModified recopiait la date de publication et un
+// auteur "Julien" etait invente quand le champ etait vide.
 export const blogPosting = (p: BlogJsonLdInput) => ({
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   headline: p.title,
   description: p.description,
   url: p.url,
-  image: p.image,
-  datePublished: p.publishedAt,
-  dateModified: p.publishedAt,
-  author: { "@type": "Person", name: p.author ?? "Julien" },
+  ...(p.image ? { image: p.image } : {}),
+  ...(p.publishedAt ? { datePublished: p.publishedAt } : {}),
+  ...(p.updatedAt ? { dateModified: p.updatedAt } : {}),
+  ...(p.author ? { author: { "@type": "Person", name: p.author } } : {}),
   publisher: { "@id": `${SITE_URL}#organization` },
   mainEntityOfPage: p.url,
+});
+
+/**
+ * Page de ville (WebPage) : la page parle du lieu (Place), editee par
+ * l'etablissement unique. Deplace depuis la page (nov. 2026) pour etre teste.
+ */
+export const cityWebPage = (p: { url: string; name: string; description: string; locale: string; country: string }) => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  url: p.url,
+  name: p.name,
+  description: p.description,
+  inLanguage: p.locale,
+  about: {
+    "@type": "Place",
+    name: p.name,
+    address: { "@type": "PostalAddress", addressLocality: p.name, addressCountry: p.country },
+  },
+  publisher: { "@id": `${SITE_URL}#organization` },
 });
 
 export const faqPage = (faq: { question: string; answer: string }[]) => ({
@@ -360,7 +384,7 @@ export const intentService = (p: {
   serviceType: p.name,
   description: p.description,
   url: `${SITE_URL}/${p.locale}${p.path}`,
-  inLanguage: p.locale,
+  // inLanguage retire (nov. 2026) : propriete inexistante pour Service sur schema.org.
   provider: { "@id": `${SITE_URL}#organization` },
   areaServed: p.area === "luxembourg" ? AREA_SERVED[0] : AREA_SERVED,
 });

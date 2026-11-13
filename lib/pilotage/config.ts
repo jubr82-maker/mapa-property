@@ -24,7 +24,24 @@ export const BACKUP_REPORT_RECIPIENT = "site@mapagroup.org";
 export const LISTING_STALE_DAYS = 90;
 
 /** Pages mesurees chaque jour par PageSpeed Insights. */
-export const PSI_PATHS = ["/fr", "/fr/biens", "/fr/services/estimer"] as const;
+/**
+ * Pages mesurees (nov. 2026, audit SEO) : un exemple de chaque modele de
+ * page. Les pages fixes ont leur chemin ; la fiche d'un bien et l'article
+ * du Journal sont choisis a chaque mesure parmi les contenus publies
+ * (lib/pilotage/psi.ts, resolvePsiPaths).
+ */
+export const PSI_MODELS = [
+  { key: "home", path: "/fr" },
+  { key: "list", path: "/fr/biens" },
+  { key: "property", path: null },
+  { key: "city", path: "/fr/villes/steinfort" },
+  { key: "article", path: null },
+  { key: "estimate", path: "/fr/services/estimer" },
+] as const;
+/** Pages fixes mesurees (l'accueil en premier, tendance de Sante du site). */
+export const PSI_PATHS = PSI_MODELS.flatMap((m) => (m.path ? [m.path] : []));
+/** Mesures lancees en meme temps (au plus), pour menager l'API PageSpeed. */
+export const PSI_CONCURRENCY = 4;
 export const PSI_STRATEGIES = ["mobile", "desktop"] as const;
 /** Delai minimal entre deux mesures lancees a la main. */
 export const PSI_MANUAL_COOLDOWN_MINUTES = 10;

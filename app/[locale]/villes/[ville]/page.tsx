@@ -6,7 +6,7 @@ import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
-import { pageAlternates } from "@/lib/seo";
+import { cityWebPage, pageAlternates } from "@/lib/seo";
 import { cities as allCities, getCityBySlug, getCitySlugs, getNearbyCities, isAgencyCity, type City } from "@/lib/cities";
 import { communeCityOf, isQuartierCity, quartierCities } from "@/lib/city-links";
 import { routing } from "@/i18n/routing";
@@ -138,21 +138,7 @@ function cityDescription(tc: (k: string, v: Record<string, string>) => string, c
 }
 
 function buildJsonLd(city: City, locale: Locale, description: string) {
-  const url = `${SITE_URL}/${locale}/villes/${city.slug}`;
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    url,
-    name: city.name[locale],
-    description,
-    inLanguage: locale,
-    about: {
-      "@type": "Place",
-      name: city.name[locale],
-      address: { "@type": "PostalAddress", addressLocality: city.name[locale], addressCountry: city.country },
-    },
-    publisher: { "@id": `${SITE_URL}#organization` },
-  };
+  return cityWebPage({ url: `${SITE_URL}/${locale}/villes/${city.slug}`, name: city.name[locale], description, locale, country: city.country });
 }
 
 export default async function VillePage({
