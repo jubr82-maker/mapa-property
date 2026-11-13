@@ -106,6 +106,15 @@ function MandateContent({ config, locale }: { config: (typeof MANDATES)[MandateT
             <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-mid sm:text-lg">
               {t("intro")}
             </p>
+            {/* Nov. 2026 (controle Google du 13/11) : lien vers les
+                recherches en cours depuis le mandat de recherche. */}
+            {config.slug === "recherche" && (
+              <p className="mt-4">
+                <Link href="/recherches" className="inline-flex min-h-11 items-center text-base text-ink underline decoration-line underline-offset-4 transition-colors hover:text-gold-deep">
+                  {tCommon("searches_link")}
+                </Link>
+              </p>
+            )}
           </div>
 
           <aside className="rounded-2xl border border-gold/40 bg-gradient-to-br from-bg-soft via-bg to-bg-soft p-6">

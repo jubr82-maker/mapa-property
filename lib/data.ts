@@ -7,6 +7,7 @@ import { effectiveBadge } from "./listing/families";
 import { refTokenFromParam } from "./listing/listing-seo";
 import { cityForProperty } from "./internal-links";
 import { pickSimilar, type SimilarCandidate } from "./similar-properties";
+import { pickOtherProperties, type OtherCandidate } from "./other-properties";
 import { coverAlts, propertyPaths } from "./listing/property-paths";
 import { blogSlugLower } from "./blog/slug";
 import { BANNER_COLUMNS, availableFirst, bannerOf, type PropertyBanner } from "./property-banner";
@@ -400,6 +401,31 @@ export async function fetchSimilarFor(target: SimilarCandidate): Promise<Propert
     )();
   } catch (e) {
     console.error("[data] fetchSimilarFor", e instanceof Error ? e.message : String(e));
+    return [];
+  }
+}
+
+/**
+ * Bloc « Autres biens » d'une fiche (nov. 2026, lib/other-properties.ts) :
+ * quatre biens publies hors biens similaires, meme cache et memes
+ * etiquettes que le bloc des biens similaires (regeneration limitee aux
+ * fiches qui montrent le bien modifie). Erreur : liste vide.
+ */
+export async function fetchOthersFor(target: SimilarCandidate & OtherCandidate): Promise<PropertyWithCover[]> {
+  try {
+    return await unstable_cache(
+      async () => {
+        const all = await queryPropertiesWithCover();
+        return pickOtherProperties(target, all, { exclude: pickSimilar(target, all).map((p) => p.id) });
+      },
+      // Cle : page de ville resolue (et non les champs bruts), identique
+      // que la fiche passe les faits nettoyes ou la revalidation les champs
+      // lus en base.
+      ["others-of-v2", target.id, String(target.price ?? ""), target.transaction ?? "", target.country ?? "", target.property_type ?? target.badge ?? "", target.city ?? "", cityForProperty(target)?.slug ?? "", target.city_commune ?? ""],
+      { revalidate: false, tags: [PROPERTIES_SIMILAR_TAG, similarTag(target.id)] },
+    )();
+  } catch (e) {
+    console.error("[data] fetchOthersFor", e instanceof Error ? e.message : String(e));
     return [];
   }
 }

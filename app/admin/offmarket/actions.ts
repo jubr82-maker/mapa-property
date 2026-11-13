@@ -95,7 +95,7 @@ async function insertWithRetry(
   table: string,
   payload: Record<string, unknown>,
 ) {
-  let attempt = { ...payload };
+  const attempt = { ...payload };
   for (let i = 0; i < 10; i++) {
     const { data, error } = await supabase.from(table).insert(attempt).select("id").single();
     if (!error) return { data, error: null };
@@ -116,7 +116,7 @@ async function updateWithRetry(
   payload: Record<string, unknown>,
   id: string,
 ) {
-  let attempt = { ...payload };
+  const attempt = { ...payload };
   for (let i = 0; i < 10; i++) {
     const { error } = await supabase.from(table).update(attempt).eq("id", id);
     if (!error) return { error: null };
@@ -553,15 +553,22 @@ export async function createOffmarket(formData: FormData): Promise<ActionResult>
 
 /**
  * Pages publiques d'un bien off-market (oct. 2026, quotas Vercel) : liste,
- * page du bien et accueil (coups de coeur) dans les trois langues, sitemap.
+ * page du bien et accueil (coups de coeur) dans les trois langues, sitemap ;
+ * depuis nov. 2026 aussi ARCOVA et les autres pages off-market (bloc
+ * « Autres opportunites off-market »).
  * Seule source de rafraichissement : la minuterie de secours est de 30 jours.
  */
 function revalidateOffmarketPublic(id: string): void {
   for (const locale of ["fr", "en", "de"]) {
     revalidatePath(`/${locale}/off-market`);
     revalidatePath(`/${locale}/off-market/${id}`);
+    // Nov. 2026 : bloc « Autres opportunites off-market » sur ARCOVA.
+    revalidatePath(`/${locale}/off-market/arcova`);
     revalidatePath(`/${locale}`);
   }
+  // Et sur les pages des autres opportunites (peu nombreuses), regenerees
+  // a la visite suivante.
+  revalidatePath("/[locale]/off-market/[id]", "page");
   revalidateSitemaps(["off-market"]);
 }
 

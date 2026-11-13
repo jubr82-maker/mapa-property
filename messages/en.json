@@ -33,6 +33,7 @@
     "close_menu": "Close menu",
     "all_properties": "All properties",
     "all_mandates": "All our mandates",
+    "all_services": "All our services",
     "search_mandate": "Search mandate",
     "mandate_exclusive": "Exclusive mandate",
     "mandate_semi": "Semi-exclusive",
@@ -438,6 +439,7 @@
     "placeholder": "MAPA Property, homepage under construction."
   },
   "property_list": {
+    "cities_title": "Our properties by city",
     "eyebrow": "Catalogue",
     "title": "All our properties",
     "subtitle": "Filter by country, city, type, budget, or let Eléna guide you from the chatbot.",
@@ -463,7 +465,7 @@
         "parking": "parking spaces"
       }
     },
-    "seo_sale_title": "Properties for sale in Luxembourg and internationally, MAPA Property",
+    "seo_sale_title": "Properties for sale in Luxembourg and abroad, MAPA Property",
     "seo_sale_h1": "Properties for sale",
     "seo_sale_description": "Houses, apartments and exceptional properties for sale in Luxembourg and internationally, selected by MAPA Property.",
     "seo_rent_title": "Properties for rent in Luxembourg, MAPA Property",
@@ -495,6 +497,7 @@
     "form_title": "A question about this property?",
     "form_subtitle": "MAPA Property will personally get back to you within 24 working hours.",
     "similar": "Similar properties",
+    "others_title": "Other properties",
     "download_pdf": "Download / Print",
     "request_info": "Request information",
     "gallery_empty": "Photos coming soon",
@@ -617,6 +620,8 @@
     "form_eyebrow": "Request the full file",
     "form_title": "Access the full dossier",
     "form_subtitle": "Under contractual NDA and verified financial capacity.",
+    "others_title": "Other off-market opportunities",
+    "others_all": "All our off-market opportunities",
     "arcova_cta_eyebrow": "ARCOVA",
     "arcova_cta_title": "ARCOVA, confidential access",
     "arcova_cta_label": "Register for ARCOVA",
@@ -641,6 +646,7 @@
     "policy_link": "Privacy policy"
   },
   "mandate_common": {
+    "searches_link": "See our ongoing searches",
     "eyebrow": "Mandate",
     "rate_label": "Fees",
     "duration_label": "Duration",
@@ -4137,7 +4143,7 @@
     "broker": {
       "eyebrow": "International",
       "title": "International real estate broker",
-      "meta_title": "International real estate broker based in Luxembourg",
+      "meta_title": "International real estate broker in Luxembourg",
       "meta_description": "MAPA Property, international real estate broker: European Professional Card for France, Germany and Italy, licensed local agencies elsewhere.",
       "service_name": "International real estate broker",
       "answer": "MAPA Property acts as an international real estate broker for clients buying or selling outside Luxembourg. The agency holds the European Professional Card for real estate agents, which allows it to operate on properties located in France, Germany and Italy. Elsewhere, regulated acts are carried out by a licensed local agency that it selects, and MAPA Property remains your single point of contact through to signing.",
@@ -4750,6 +4756,9 @@
     "seo_meta_label_de": "Google description (DE)"
   },
   "searches_page": {
+    "meta_title_type": "Wanted: {type}",
+    "meta_title_place": "Wanted: {type} in {place}",
+    "others_title": "Other ongoing searches",
     "eyebrow": "Buy with MAPA Property",
     "title": "Our current searches",
     "intro": "Our clients entrust us with finding their next property in Luxembourg. Do you own a property that matches one of these searches? Contact us: your enquiry stays confidential.",

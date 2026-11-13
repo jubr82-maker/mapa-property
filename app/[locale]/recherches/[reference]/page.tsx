@@ -4,12 +4,15 @@ import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { buildPageMetadata } from "@/lib/seo-page-meta";
-import { brandedTitle } from "@/lib/meta-text";
+import { searchTitle, searchTitles, typeInTitle } from "@/lib/searches/title";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { cityForPlace } from "@/lib/internal-links";
-import { fetchPublicSearch } from "@/lib/searches/data";
+import { fetchPublicSearch, fetchPublicSearches } from "@/lib/searches/data";
+import { otherSearches } from "@/lib/searches/related";
+import { SearchCard } from "@/components/searches/SearchCard";
+import { SignatureLine } from "@/components/ui/SignatureLine";
 import { budgetLabel, criteriaList, localizedText, searchJsonLd } from "@/lib/searches/display";
 import { isSearchReference } from "@/lib/searches/search";
 
@@ -34,7 +37,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!s) return {};
   const t = await getTranslations({ locale, namespace: "searches_page" });
   const tr = (k: string, v?: Record<string, string | number>) => t(k, v);
-  const title = localizedText(s, "title", locale) || s.reference;
   // 155 caracteres au plus (oct. 2026), sans "..." : phrase de fin plus
   // courte, puis communes resumees ("et 3 autres communes"), puis phrase
   // de fin minimale.
@@ -58,7 +60,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       }
     }
   }
-  return buildPageMetadata(locale, `/recherches/${s.reference}`, brandedTitle(title), description);
+  // Nov. 2026 (controle Google du 13/11) : title court, type de bien et
+  // lieu, puis la marque s'il reste de la place (lib/searches/title.ts) ;
+  // le titre complet reste le H1 de la page.
+  const tpl = { type: t.raw("meta_title_type") as string, place: t.raw("meta_title_place") as string };
+  const typeLabel = (type: string) => typeInTitle(t.has(`type.${type}`) ? t(`type.${type}`) : type, locale);
+  const all = await fetchPublicSearches();
+  const titles = searchTitles(all.some((x) => x.reference === s.reference) ? all : [...all, s], typeLabel, tpl);
+  const pageTitle = titles.get(s.reference) ?? searchTitle(s, typeLabel(s.property_type), tpl);
+  return buildPageMetadata(locale, `/recherches/${s.reference}`, pageTitle, description);
 }
 
 async function SearchPage({ params }: { params: Params }) {
@@ -73,6 +83,8 @@ async function SearchPage({ params }: { params: Params }) {
   const criteria = criteriaList(s, locale, tr);
   const found = s.status === "found";
   const paragraphs = description.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  // Nov. 2026 : autres recherches ouvertes (lib/searches/related.ts).
+  const others = otherSearches(await fetchPublicSearches(), s.reference);
 
   return (
     <>
@@ -165,6 +177,25 @@ async function SearchPage({ params }: { params: Params }) {
                   defaultMessage={t("default_message", { reference: s.reference })}
                 />
               </div>
+            </section>
+          )}
+
+          {others.length > 0 && (
+            <section className="mt-16" data-search-others>
+              <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">{t("others_title")}</h2>
+              <SignatureLine width="w-8" />
+              <ul className="grid gap-6 md:grid-cols-2">
+                {others.map((o) => (
+                  <li key={o.id}>
+                    <SearchCard search={o} locale={locale} />
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-6">
+                <Link href="/recherches" className="inline-flex min-h-11 items-center text-base text-ink underline decoration-line underline-offset-4 transition-colors hover:text-gold-deep">
+                  {t("back")}
+                </Link>
+              </p>
             </section>
           )}
         </div>

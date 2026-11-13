@@ -40,3 +40,17 @@ export function indexableCities(properties: { city?: string | null; city_page?: 
   const counts = publishedCountByCity(properties);
   return cities.filter((c) => isCityIndexable(c, counts.get(c.slug) ?? 0));
 }
+
+/**
+ * Pages de villes qui ont des biens publies (nov. 2026, bloc « Nos biens par
+ * ville » de la liste des biens) : toutes indexables par definition, les
+ * plus fournies d'abord, puis dans l'ordre de la liste des villes.
+ */
+export function citiesWithProperties(properties: { city?: string | null; city_page?: string | null; country?: string | null }[]): City[] {
+  const counts = publishedCountByCity(properties);
+  return cities
+    .map((c, i) => ({ c, i, n: counts.get(c.slug) ?? 0 }))
+    .filter((x) => x.n > 0 && isCityIndexable(x.c, x.n))
+    .sort((a, b) => b.n - a.n || a.i - b.i)
+    .map((x) => x.c);
+}

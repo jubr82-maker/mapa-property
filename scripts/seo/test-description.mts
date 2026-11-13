@@ -92,7 +92,9 @@ test("pages branchees sur le rendu commun", () => {
   const fiche = read("app/[locale]/biens/[slug]/page.tsx");
   assert.ok(fiche.includes("descriptionPlainText(splitCommonMentions(pickLang(property, \"description\"") && fiche.includes("clipText(descriptionPlainText(description), 500)") && fiche.includes("descriptionSummary(description)"));
   assert.ok(!read("lib/formatting/highlightTitles.tsx").includes("dangerouslySetInnerHTML"));
-  assert.ok(read("app/[locale]/off-market/page.tsx").includes("descriptionPlainText(property.short_pitch)"));
+  // Nov. 2026 : carte off-market partagee (liste, pages off-market, ARCOVA).
+  assert.ok(read("app/[locale]/off-market/page.tsx").includes("<OffMarketTeaser "));
+  assert.ok(read("components/offmarket/OffMarketTeaser.tsx").includes("descriptionPlainText(property.short_pitch)"));
 });
 
 // --- Fin standard des annonces (oct. 2026) ---------------------------------

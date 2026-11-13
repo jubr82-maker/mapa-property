@@ -6,6 +6,8 @@ import { ManageCookiesLink } from "@/components/consent/ManageCookiesLink";
 import { ExploreLinks } from "@/components/seo/ExploreLinks";
 
 const colServices = [
+  // Nov. 2026 (controle Google du 13/11) : lien vers la page Services.
+  { href: "/services", key: "all_services" },
   { href: "/services/vendre", key: "sell" },
   { href: "/services/acheter", key: "buy" },
   { href: "/biens?transaction=rent", key: "rent" },

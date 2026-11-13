@@ -10,7 +10,8 @@ import type { Locale } from "@/lib/types";
 import { CHILD_TO_PARENT, PARENT_TO_CHILDREN, expandType } from "@/lib/taxonomy/property-types";
 import { withSocial } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
-import { redirect } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
+import { citiesWithProperties } from "@/lib/city-indexing";
 import { foreignCityPlaces } from "@/lib/search/places";
 import { runSearch, type SearchCriteria } from "@/lib/search/engine";
 import { hrefWith, listingTransaction, paramsFromParsed, searchFromParams, type SearchParamsRecord } from "@/lib/search/url";
@@ -130,6 +131,7 @@ async function PropertiesPage({
   const displayed = outcome.main;
   const total = outcome.main.length + outcome.nearby.length;
   const siblingSuggestions = criteria.notUnderstood ? null : computeSiblingSuggestions(allProperties, displayed, criteria);
+  const propertyCities = citiesWithProperties(listingTx ? allProperties.filter((p) => p.transaction === listingTx) : allProperties);
   const countryChoices = (["LU", "FR", "autre", "tous"] as const).map((c) => ({ label: tr(`pays_${c}`), href: hrefWith(rawFilters, { pays: c }) }));
 
   return (
@@ -174,6 +176,24 @@ async function PropertiesPage({
                 <h2 className="t-h2 mb-6">{tr("nearby_title")}</h2>
                 <PropertyGrid properties={outcome.nearby} locale={locale as Locale} />
               </section>
+            )}
+
+            {/* Nov. 2026 (controle Google du 13/11) : pages des villes qui
+                ont des biens publies (pour la page vente ou location : les
+                villes de ces biens), jamais une ville non indexable. */}
+            {propertyCities.length > 0 && (
+              <nav aria-label={t("cities_title")} className="mt-14 border-t border-line pt-8" data-listing-cities>
+                <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">{t("cities_title")}</h2>
+                <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+                  {propertyCities.map((c) => (
+                    <li key={c.slug}>
+                      <Link href={`/villes/${c.slug}`} className="inline-flex min-h-11 items-center text-base text-ink underline decoration-line underline-offset-4 transition-colors hover:text-gold-deep">
+                        {c.name[locale as Locale]}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
             )}
 
             {siblingSuggestions && (

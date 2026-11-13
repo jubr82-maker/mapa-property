@@ -33,6 +33,7 @@
     "close_menu": "Fermer le menu",
     "all_properties": "Tous les biens",
     "all_mandates": "Tous nos mandats",
+    "all_services": "Tous nos services",
     "search_mandate": "Mandat de recherche",
     "mandate_exclusive": "Mandat Exclusif",
     "mandate_semi": "Semi-Exclusif",
@@ -438,6 +439,7 @@
     "placeholder": "MAPA Property, page d'accueil en construction."
   },
   "property_list": {
+    "cities_title": "Nos biens par ville",
     "eyebrow": "Catalogue",
     "title": "Tous nos biens",
     "subtitle": "Filtrez par pays, ville, type, budget, ou laissez Eléna vous guider depuis le chatbot.",
@@ -495,6 +497,7 @@
     "form_title": "Une question sur ce bien ?",
     "form_subtitle": "MAPA Property vous recontacte personnellement sous 48 heures ouvrées.",
     "similar": "Biens similaires",
+    "others_title": "Autres biens",
     "download_pdf": "Télécharger / Imprimer",
     "request_info": "Demander des informations",
     "gallery_empty": "Photos bientôt disponibles",
@@ -617,6 +620,8 @@
     "form_eyebrow": "Demande de dossier complet",
     "form_title": "Accéder au dossier complet",
     "form_subtitle": "Sous NDA contractuel et capacité financière vérifiée.",
+    "others_title": "Autres opportunités off-market",
+    "others_all": "Toutes nos opportunités off-market",
     "arcova_cta_eyebrow": "ARCOVA",
     "arcova_cta_title": "ARCOVA, accès confidentiel",
     "arcova_cta_label": "S'inscrire à ARCOVA",
@@ -641,6 +646,7 @@
     "policy_link": "Politique de confidentialité"
   },
   "mandate_common": {
+    "searches_link": "Voir nos recherches en cours",
     "eyebrow": "Mandat",
     "rate_label": "Honoraires",
     "duration_label": "Durée",
@@ -4137,7 +4143,7 @@
     "broker": {
       "eyebrow": "International",
       "title": "Broker immobilier international",
-      "meta_title": "Broker immobilier international depuis le Luxembourg",
+      "meta_title": "Broker immobilier international au Luxembourg",
       "meta_description": "MAPA Property, broker immobilier international : carte professionnelle européenne pour la France, l'Allemagne et l'Italie, agences habilitées ailleurs.",
       "service_name": "Broker immobilier international",
       "answer": "MAPA Property agit comme broker immobilier international pour les clients qui achètent ou vendent hors du Luxembourg. L'agence détient la carte professionnelle européenne d'agent immobilier, qui lui permet d'intervenir sur des biens situés en France, en Allemagne et en Italie. Ailleurs, les actes réglementés sont réalisés par une agence locale habilitée qu'elle sélectionne, et MAPA Property reste votre interlocuteur unique jusqu'à la signature.",
@@ -4743,6 +4749,9 @@
     "seo_meta_label_de": "Description Google (DE)"
   },
   "searches_page": {
+    "meta_title_type": "Recherche : {type}",
+    "meta_title_place": "Recherche : {type} à {place}",
+    "others_title": "Autres recherches en cours",
     "eyebrow": "Acheter avec MAPA Property",
     "title": "Nos recherches en cours",
     "intro": "Nos clients nous confient la recherche de leur futur bien au Luxembourg. Vous êtes propriétaire d'un bien qui correspond à l'une de ces recherches ? Contactez-nous : votre demande reste confidentielle.",

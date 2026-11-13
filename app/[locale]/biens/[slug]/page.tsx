@@ -4,6 +4,7 @@ import { brandedTitle, htmlToPlainText, metaDescription } from "@/lib/meta-text"
 import { notFound, permanentRedirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import {
+  fetchOthersFor,
   fetchSimilarFor,
   fetchOffmarketById,
   fetchPropertyByIdOrSlug,
@@ -37,6 +38,7 @@ import { realEstateListing } from "@/lib/seo";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { ExploreLinks } from "@/components/seo/ExploreLinks";
 import { cityForProperty, featuredCities } from "@/lib/internal-links";
+import { isCityIndexable } from "@/lib/city-indexing";
 import { siteShareImage } from "@/lib/og";
 import { transactionDetailLabel } from "@/lib/taxonomy/property-types";
 import { effectiveBadge } from "@/lib/listing/families";
@@ -307,6 +309,19 @@ async function PropertyPage({
   const propertyCity = cityForProperty({ city: property.city, country: property.country, city_page: propertyFacts.city_page, city_commune: propertyFacts.city_commune });
   const citySlug = propertyCity?.slug ?? null;
   const citySearches = citySlug ? await fetchSearchesForCity(citySlug) : [];
+  // Autres biens (nov. 2026, lib/other-properties.ts) : meme ville, villes
+  // voisines, meme type ; hors biens similaires et hors le bien lui-meme.
+  const others = await fetchOthersFor({
+    id: property.id,
+    transaction: property.transaction,
+    country: property.country,
+    property_type: propertyType,
+    badge: property.badge,
+    price: property.price,
+    city: property.city,
+    city_page: propertyFacts.city_page ?? null,
+    city_commune: propertyFacts.city_commune ?? null,
+  });
 
   // Biens similaires : logique stricte V3 (meme type, prix a 15 % pres, meme
   // pays, meme ville en tete), dans lib/similar-properties.ts.
@@ -578,7 +593,10 @@ async function PropertyPage({
           <div className="mt-6">
             <ExploreLinks
               cities={(() => {
-                const c = propertyCity;
+                // Nov. 2026 : la page de la ville du bien, seulement si elle
+                // est indexable (lib/city-indexing.ts). La fiche n'existe que
+                // pour un bien publie : sa ville compte donc au moins ce bien.
+                const c = propertyCity && isCityIndexable(propertyCity, 1) ? propertyCity : null;
                 return c ? [c] : featuredCities().slice(0, 4);
               })()}
             />
@@ -608,6 +626,22 @@ async function PropertyPage({
             <SignatureLine width="w-8" />
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {availableFirst(similar).map((p) => (
+                <PropertyCard key={p.id} property={p} locale={locale as Locale} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Autres biens (nov. 2026) : quatre biens publies, meme ville
+            d'abord, puis villes voisines, puis meme type. */}
+        {others.length > 0 && (
+          <section className={`${similar.length > 0 ? "mt-4" : "mt-20"} mb-16 print:hidden`} data-fiche-others>
+            <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-ink-soft">
+              {t("others_title")}
+            </h2>
+            <SignatureLine width="w-8" />
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {availableFirst(others).map((p) => (
                 <PropertyCard key={p.id} property={p} locale={locale as Locale} />
               ))}
             </div>

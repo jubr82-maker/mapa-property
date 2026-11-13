@@ -50,8 +50,10 @@ test("page : noindex, follow et aucune autre langue declaree ; sitemap filtre ; 
   const rv = read("lib/revalidate-property.ts");
   const fn = rv.slice(rv.indexOf("export async function revalidatePropertyChange"), rv.indexOf("async function revalidateSimilarContaining"));
   assert.ok(fn.includes("revalidateTag(cityPropertiesTag(slug)") && fn.includes('revalidateSitemaps(["biens", "villes"])') && fn.includes("revalidateTag(PROPERTIES_LIST_TAG"));
-  // Menus et listes inchanges : la liste des villes n'est jamais filtree.
-  assert.ok(read("app/[locale]/services/marches-actifs/page.tsx").includes("<ExploreLinks cities={cities}"));
+  // Nov. 2026 (controle Google du 13/11, consigne de Julien : jamais de
+  // lien vers une ville non indexable) : la page des marches ne liste plus
+  // que les villes indexables.
+  assert.ok(read("app/[locale]/services/marches-actifs/page.tsx").includes("<ExploreLinks cities={indexableCities(await fetchAllPropertiesWithCover())}"));
 });
 
 console.log(`${pass} PASS, 0 FAIL`);

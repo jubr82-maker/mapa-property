@@ -30,8 +30,18 @@ assert.equal(src.split(KG).length - 1, 1, "adresse Knowledge Graph : une seule c
 // Un seul bloc RealEstateAgent : le layout ; ni la page Agence ni les
 // mentions legales n'en publient un second.
 assert.ok(!read("app/[locale]/agence-immobiliere-luxembourg/page.tsx").includes("realEstateAgent("));
+// Mentions legales : simple complement de la meme entite (meme @id), avec
+// un @type depuis le controle Google du 13/11/2026 (bloc sans type
+// signale), meme nom et meme adresse publique.
 const legal = read("app/[locale]/legal/mentions-legales/page.tsx");
-assert.ok(!/"@type": "RealEstateAgent"|foundingDate/.test(legal) && legal.includes('"@id": `${LEGAL_SITE_URL}#organization`'));
+assert.ok(legal.includes("<JsonLd data={legalNoticeOrganization()} />") && !/foundingDate|realEstateAgent\(/.test(legal));
+const { legalNoticeOrganization } = await import("../../lib/legal/notice-jsonld");
+const notice = legalNoticeOrganization("https://mapaproperty.lu");
+assert.equal(notice["@type"], "RealEstateAgent");
+assert.equal(notice["@id"], "https://mapaproperty.lu#organization");
+// Adresse publique identique a celle du layout (Dudelange), pas de date de creation.
+assert.ok(!("foundingDate" in notice));
+assert.equal((notice.address as { addressLocality: string }).addressLocality, "Dudelange");
 // Plus aucune creation en 2024 dans les textes, la meta et llms.txt.
 for (const l of ["fr", "en", "de"]) {
   const m = JSON.parse(read(`messages/${l}.json`));

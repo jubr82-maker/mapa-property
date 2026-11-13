@@ -13,6 +13,10 @@
 // `key` → cle i18n namespace "nav" (utilisee comme t(item.key)).
 
 export const SERVICES_ITEMS: readonly { href: string; key: string }[] = [
+  // Nov. 2026 (controle Google du 13/11) : la page Services ne recevait
+  // aucun lien interne ; lien en tete de la rubrique (et titre cliquable
+  // sur ordinateur, voir Header.tsx).
+  { href: "/services", key: "all_services" },
   { href: "/services/estimer", key: "estimate" },
   { href: "/services/simulateurs", key: "simulators" },
   { href: "/services/marches-actifs", key: "markets" },

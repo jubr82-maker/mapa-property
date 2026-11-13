@@ -40,6 +40,8 @@ const leftDropdowns = [
 const rightDropdowns = [
   {
     label: "services",
+    // Nov. 2026 : le titre de la rubrique mene a la page Services.
+    href: "/services",
     // Sprint menu restructure : SERVICES reduit a 3 items.
     items: SERVICES_ITEMS,
   },
@@ -139,7 +141,7 @@ export function Header() {
                 {t("off_market")}
               </Link>
               {rightDropdowns.map((d) => (
-                <DropdownItem key={d.label} label={t(d.label)} items={d.items} t={t} />
+                <DropdownItem key={d.label} label={t(d.label)} href={"href" in d ? d.href : undefined} items={d.items} t={t} />
               ))}
             </nav>
             {/* POL3 : poussé à l'extrême droite (ml-auto). */}
@@ -156,32 +158,44 @@ export function Header() {
 
 function DropdownItem({
   label,
+  href,
   items,
   t,
 }: {
   label: string;
+  /** Titre de rubrique cliquable (page de la rubrique), sinon simple bouton. */
+  href?: string;
   items: readonly { href: string; key: string }[];
   t: ReturnType<typeof useTranslations>;
 }) {
+  const triggerCls =
+    "inline-flex whitespace-nowrap items-center gap-1 px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors group-hover:text-gold";
+  const chevron = (
+    <svg
+      aria-hidden
+      viewBox="0 0 12 12"
+      className="size-2.5 transition-transform group-hover:rotate-180"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    >
+      <path d="m3 4 3 3 3-3" />
+    </svg>
+  );
   return (
     <div className="group relative">
-      <button
-        type="button"
-        className="inline-flex whitespace-nowrap items-center gap-1 px-3 py-2 font-sans text-[17px] font-medium uppercase tracking-[0.05em] text-ink transition-colors group-hover:text-gold"
-      >
-        {label}
-        <svg
-          aria-hidden
-          viewBox="0 0 12 12"
-          className="size-2.5 transition-transform group-hover:rotate-180"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        >
-          <path d="m3 4 3 3 3-3" />
-        </svg>
-      </button>
+      {href ? (
+        <Link href={href} className={triggerCls}>
+          {label}
+          {chevron}
+        </Link>
+      ) : (
+        <button type="button" className={triggerCls}>
+          {label}
+          {chevron}
+        </button>
+      )}
       <div className="invisible absolute left-1/2 top-full -translate-x-1/2 pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
         <div className="min-w-[240px] overflow-hidden rounded-md border border-line bg-bg shadow-lg shadow-ink/10">
           <ul className="py-2">

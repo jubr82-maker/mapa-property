@@ -33,6 +33,7 @@
     "close_menu": "Menü schließen",
     "all_properties": "Alle Objekte",
     "all_mandates": "Alle unsere Mandate",
+    "all_services": "Alle unsere Leistungen",
     "search_mandate": "Suchmandat",
     "mandate_exclusive": "Exklusivmandat",
     "mandate_semi": "Halb-exklusiv",
@@ -438,6 +439,7 @@
     "placeholder": "MAPA Property, Startseite im Aufbau."
   },
   "property_list": {
+    "cities_title": "Unsere Immobilien nach Stadt",
     "eyebrow": "Katalog",
     "title": "Alle unsere Objekte",
     "subtitle": "Filtern Sie nach Land, Stadt, Typ, Budget, oder lassen Sie sich von Eléna im Chatbot führen.",
@@ -495,6 +497,7 @@
     "form_title": "Eine Frage zu diesem Objekt?",
     "form_subtitle": "MAPA Property meldet sich persönlich innerhalb von 24 Werkstunden bei Ihnen.",
     "similar": "Ähnliche Objekte",
+    "others_title": "Weitere Immobilien",
     "download_pdf": "Herunterladen / Drucken",
     "request_info": "Informationen anfragen",
     "gallery_empty": "Fotos folgen in Kürze",
@@ -617,6 +620,8 @@
     "form_eyebrow": "Vollständiges Dossier anfordern",
     "form_title": "Zugang zum vollständigen Dossier",
     "form_subtitle": "Unter vertraglicher NDA und geprüfter Finanzkraft.",
+    "others_title": "Weitere Off-Market-Gelegenheiten",
+    "others_all": "Alle unsere Off-Market-Gelegenheiten",
     "arcova_cta_eyebrow": "ARCOVA",
     "arcova_cta_title": "ARCOVA, vertraulicher Zugang",
     "arcova_cta_label": "Bei ARCOVA anmelden",
@@ -641,6 +646,7 @@
     "policy_link": "Datenschutzrichtlinie"
   },
   "mandate_common": {
+    "searches_link": "Unsere laufenden Suchaufträge ansehen",
     "eyebrow": "Mandat",
     "rate_label": "Honorar",
     "duration_label": "Laufzeit",
@@ -4137,7 +4143,7 @@
     "broker": {
       "eyebrow": "International",
       "title": "Internationaler Immobilienbroker",
-      "meta_title": "Internationaler Immobilienbroker mit Sitz in Luxemburg",
+      "meta_title": "Internationaler Immobilienbroker in Luxemburg",
       "meta_description": "MAPA Property, internationaler Immobilienbroker: Europäischer Berufsausweis für Frankreich, Deutschland und Italien, zugelassene Agenturen andernorts.",
       "service_name": "Internationaler Immobilienbroker",
       "answer": "MAPA Property ist als internationaler Immobilienbroker für Kunden tätig, die außerhalb Luxemburgs kaufen oder verkaufen. Die Agentur besitzt den Europäischen Berufsausweis für Immobilienmakler, der es ihr erlaubt, bei Immobilien in Frankreich, Deutschland und Italien tätig zu werden. Andernorts werden die reglementierten Tätigkeiten von einer zugelassenen lokalen Agentur ausgeführt, die sie auswählt, und MAPA Property bleibt bis zur Unterzeichnung Ihr einziger Ansprechpartner.",
@@ -4748,6 +4754,9 @@
     "seo_meta_label_de": "Google-Beschreibung (DE)"
   },
   "searches_page": {
+    "meta_title_type": "Gesucht: {type}",
+    "meta_title_place": "Gesucht: {type} in {place}",
+    "others_title": "Weitere laufende Suchaufträge",
     "eyebrow": "Kaufen mit MAPA Property",
     "title": "Unsere aktuellen Suchaufträge",
     "intro": "Unsere Kunden beauftragen uns mit der Suche nach ihrer nächsten Immobilie in Luxemburg. Sie besitzen eine Immobilie, die zu einer dieser Suchen passt? Kontaktieren Sie uns: Ihre Anfrage bleibt vertraulich.",

@@ -9,7 +9,8 @@ import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { ExploreLinks } from "@/components/seo/ExploreLinks";
-import { cities } from "@/lib/cities";
+import { indexableCities } from "@/lib/city-indexing";
+import { fetchAllPropertiesWithCover } from "@/lib/data";
 import { cityForPlace } from "@/lib/internal-links";
 
 // Nov. 2026 (audit SEO) : chaque commune pointe vers sa page de ville quand
@@ -126,9 +127,12 @@ async function ActiveMarketsPage({
         {/* Sprint juridique : disclaimer unifie sous les tableaux de
             donnees STATEC/Observatoire (remplace l'ancienne mention custom). */}
         <DisclaimerLegal className="mt-12" />
-        {/* Maillage (oct. 2026) : les 52 pages villes. */}
+        {/* Maillage (oct. 2026) : les pages villes. Nov. 2026 (controle
+            Google du 13/11) : seulement les villes indexables (toutes celles
+            du Luxembourg, et les villes etrangeres qui ont un bien publie,
+            comme Algarve et Metz), jamais une page en noindex. */}
         <section className="mt-16 border-t border-line pt-10">
-          <ExploreLinks cities={cities} showAllCities={false} />
+          <ExploreLinks cities={indexableCities(await fetchAllPropertiesWithCover())} showAllCities={false} />
         </section>
       </div>
     </div>

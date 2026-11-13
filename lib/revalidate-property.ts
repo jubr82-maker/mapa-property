@@ -11,15 +11,18 @@
 //     city-properties:<ville>) : une ville etrangere devient indexable des
 //     son premier bien publie et repasse en noindex sans bien
 //     (lib/city-indexing.ts) ;
-//   - la liste des biens et le sitemap (etiquette "properties") ;
+//   - la liste des biens et le sitemap (etiquette "properties") ; depuis
+//     nov. 2026 aussi la page des marches actifs (3 pages : elle ne liste
+//     que les villes indexables, qui dependent des biens publies) ;
 //   - l'accueil seulement si le bien y figure (mis en avant) ;
-//   - le bloc "biens similaires" seulement des fiches qui montrent le bien
-//     (avant ou apres), et seulement si un champ des cartes change
-//     (etiquette similar-of:<bien>).
+//   - les blocs "biens similaires" et "Autres biens" seulement des fiches
+//     qui montrent le bien (avant ou apres), et seulement si un champ des
+//     cartes change (etiquette similar-of:<bien>).
 import { revalidatePath, revalidateTag } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { PROPERTIES_LIST_TAG, PROPERTIES_SIMILAR_TAG, cityPropertiesTag, fetchPublishedPropertiesFresh, fetchSimilarFor, similarTag } from "@/lib/data";
+import { PROPERTIES_LIST_TAG, PROPERTIES_SIMILAR_TAG, cityPropertiesTag, fetchOthersFor, fetchPublishedPropertiesFresh, fetchSimilarFor, similarTag } from "@/lib/data";
 import { pickSimilar } from "@/lib/similar-properties";
+import { pickOtherProperties } from "@/lib/other-properties";
 import { localizedUrls, scheduleIndexNow } from "@/lib/indexnow";
 import { blogSlugLower } from "@/lib/blog/slug";
 import { revalidateSitemaps } from "@/lib/sitemaps";
@@ -142,8 +145,12 @@ async function revalidateSimilarContaining(ids: string[]): Promise<void> {
       revalidateTag(similarTag(f.id), { expire: 0 });
       continue;
     }
-    const after = pickSimilar(f, fresh).some((p) => changed.has(p.id));
-    const before = after ? true : (await fetchSimilarFor(f)).some((p) => changed.has(p.id));
+    // Biens similaires et « Autres biens » (nov. 2026), meme etiquette.
+    const similarAfter = pickSimilar(f, fresh);
+    const othersAfter = pickOtherProperties(f, fresh, { exclude: similarAfter.map((p) => p.id) });
+    const after = [...similarAfter, ...othersAfter].some((p) => changed.has(p.id));
+    // Avant : lu dans le cache des blocs (lecture en base seulement si absent).
+    const before = after || (await fetchSimilarFor(f)).some((p) => changed.has(p.id)) || (await fetchOthersFor(f)).some((p) => changed.has(p.id));
     if (after || before) revalidateTag(similarTag(f.id), { expire: 0 });
   }
 }

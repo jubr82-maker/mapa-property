@@ -69,7 +69,8 @@ test("liens : ville vers articles de la commune, article vers la ville, dans la 
 
 test("sitemap et Marches par ville : liste des villes", () => {
   assert.ok(read("lib/sitemaps.ts").includes("cities.map((city)"));
-  assert.ok(read("app/[locale]/services/marches-actifs/page.tsx").includes("<ExploreLinks cities={cities}"));
+  // Nov. 2026 : villes indexables seulement (toutes celles du Luxembourg).
+  assert.ok(read("app/[locale]/services/marches-actifs/page.tsx").includes("<ExploreLinks cities={indexableCities(await fetchAllPropertiesWithCover())}"));
 });
 
 console.log(`${pass} PASS, 0 FAIL`);

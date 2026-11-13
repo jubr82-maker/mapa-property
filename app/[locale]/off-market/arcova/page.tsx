@@ -8,6 +8,14 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+import { fetchOffmarketList } from "@/lib/data";
+import { OtherOffmarket } from "@/components/offmarket/OtherOffmarket";
+
+// Nov. 2026 : la page montre les opportunites off-market publiees ;
+// revalidation a la demande (app/admin/offmarket/actions.ts), minuterie de
+// secours de 30 jours comme la liste (quotas Vercel).
+export const revalidate = 2592000;
+
 export async function generateMetadata({
   params,
 }: {
@@ -24,10 +32,15 @@ export default async function OffmarketArcovaPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const list = await fetchOffmarketList(locale);
   return (
     <>
       <PageBreadcrumb locale={locale} path="/off-market/arcova" />
       <ArcovaContent />
+      {/* Nov. 2026 : opportunites off-market publiees (cartes de la liste). */}
+      <div className="mx-auto max-w-[1400px] px-6 lg:px-10">
+        <OtherOffmarket list={list} currentId={null} locale={locale} showArcova={false} />
+      </div>
     </>
   );
 }

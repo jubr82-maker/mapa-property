@@ -6,29 +6,11 @@ import { mentions } from "@/lib/legal/mentions";
 
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { legalNoticeOrganization } from "@/lib/legal/notice-jsonld";
 type Locale = keyof typeof mentions;
 
-const LEGAL_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
-
-/**
- * Complement de l'etablissement unique (#organization, lib/seo.ts) publie
- * UNIQUEMENT ici : TVA, RCS et autorisation d'etablissement (regle du
- * projet). Meme nom, nom legal et adresse que sur toutes les pages
- * (ORGANIZATION_ADDRESS). Valeurs recopiees de lib/legal/mentions.ts.
- */
-// Oct. 2026 : simple complement de l'etablissement (#organization) deja
-// publie par le layout sur chaque page, sans second bloc RealEstateAgent :
-// meme @id, seulement les identifiants legaux de la societe.
-const legalNoticeOrganization = () => ({
-  "@context": "https://schema.org",
-  "@id": `${LEGAL_SITE_URL}#organization`,
-  vatID: "LU31988923",
-  identifier: [
-    { "@type": "PropertyValue", propertyID: "RCS Luxembourg", value: "B241974" },
-    { "@type": "PropertyValue", propertyID: "Autorisation d'établissement", value: "10108681/0-1-2-3" },
-  ],
-});
-
+// Donnees structurees : complement de l'etablissement (#organization) avec
+// les identifiants legaux, type RealEstateAgent (lib/legal/notice-jsonld.ts).
 export async function generateMetadata({
   params,
 }: {

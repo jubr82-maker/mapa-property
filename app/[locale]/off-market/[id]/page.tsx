@@ -1,4 +1,5 @@
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+import { OtherOffmarket } from "@/components/offmarket/OtherOffmarket";
 import { withPageMessages } from "@/components/i18n/withPageMessages";
 import type { Metadata } from "next";
 import { offmarketFicheMetadata } from "@/lib/offmarket-seo";
@@ -94,7 +95,7 @@ async function OffMarketDetailPage({
   const { locale, id } = await params;
   setRequestLocale(locale);
 
-  const property = await fetchOffmarketById(id, locale);
+  const [property, offmarketList] = await Promise.all([fetchOffmarketById(id, locale), fetchOffmarketList(locale)]);
   if (!property) notFound();
 
   const t = await getTranslations({ locale, namespace: "offmarket" });
@@ -312,6 +313,9 @@ async function OffMarketDetailPage({
           </header>
           <NDAForm propertyRef={property.id} propertyTitle={title} />
         </section>
+
+        {/* Nov. 2026 : autres opportunites off-market et ARCOVA. */}
+        <OtherOffmarket list={offmarketList} currentId={property.id} locale={locale} />
       </div>
     </article>
   );
