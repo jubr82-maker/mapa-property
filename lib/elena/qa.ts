@@ -127,6 +127,13 @@ export function templateEntry(entries: ElenaEntry[], kind: TemplateKind): ElenaE
   return entries.find((e) => e.isTemplate && e.question.fr === label) ?? (FILE_ENTRIES.find((e) => e.id === TEMPLATE_IDS[kind]) as ElenaEntry);
 }
 
+/** Entree "Question sans rapport avec l'immobilier" (meteo, sport, recette...). */
+export const OFF_TOPIC_ENTRY_ID = "E094";
+export function offTopicEntry(entries: ElenaEntry[]): ElenaEntry {
+  const label = LABEL_OF(OFF_TOPIC_ENTRY_ID);
+  return entries.find((e) => !e.isTemplate && e.question.fr === label) ?? (FILE_ENTRIES.find((e) => e.id === OFF_TOPIC_ENTRY_ID) as ElenaEntry);
+}
+
 /** Entree "Question dont la reponse n'est pas dans la base". */
 export function defaultEntry(entries: ElenaEntry[]): ElenaEntry {
   const label = LABEL_OF(DEFAULT_ENTRY_ID);

@@ -19,7 +19,7 @@ import { paramsFromParsed } from "@/lib/search/url";
 import { bannerOf, isClosed } from "@/lib/property-banner";
 import { familyOf } from "@/lib/listing/families";
 import { localizedButtonHref } from "./button-paths";
-import { defaultEntry, templateEntry, type ElenaEntry, type ElenaLang, type TemplateKind } from "./qa";
+import { defaultEntry, offTopicEntry, templateEntry, type ElenaEntry, type ElenaLang, type TemplateKind } from "./qa";
 
 export interface ElenaCard {
   id: string;
@@ -131,6 +131,19 @@ function searchReply<P extends ElenaProperty>(text: string, q: ParsedQuery, loca
   return templateReply("found", deps, locale, { cards: found, query });
 }
 
+// Mots de l'immobilier : une question qui en contient n'est jamais hors sujet.
+const REAL_ESTATE = /(bien|maison|appart|immo|vend|achat|achet|lou|loyer|location|mandat|estim|agence|notaire|credit|pret|terrain|bureau|property|house|flat|apartment|rent|sell|buy|mortgage|agency|immobil|haus|wohnung|miete|kauf|verkauf|makler|grundst)/;
+
+/** Question sans rapport avec l'immobilier : une formulation de l'entree, en mot entier. */
+export function isOffTopic(text: string, entry: ElenaEntry): boolean {
+  const t = ` ${normText(text).replace(/[^a-z0-9]+/g, " ")} `;
+  if (REAL_ESTATE.test(t)) return false;
+  return entry.variants.some((v) => {
+    const k = normText(v).replace(/[^a-z0-9]+/g, " ").trim();
+    return k.length >= 4 && t.includes(` ${k} `);
+  });
+}
+
 export async function elenaRespond<P extends ElenaProperty>(text: string, locale: string, deps: ElenaDeps<P>): Promise<ElenaReply> {
   const l = lang(locale);
   const locked = deps.locked(text, l);
@@ -138,6 +151,12 @@ export async function elenaRespond<P extends ElenaProperty>(text: string, locale
 
   const q = parseQuery(text, foreignCityPlaces(deps.properties));
   if (isPropertySearch(text, q)) return searchReply(text, q, l, deps);
+
+  // Hors sujet (nov. 2026) : une question sans rapport avec l'immobilier
+  // (meteo, sport, recette...) recoit l'entree prevue, reconnue par ses
+  // formulations, sans attendre Mistral.
+  const off = offTopicEntry(deps.entries);
+  if (isOffTopic(text, off)) return { reply: off.answer[l], button: buttonOf(off, l), properties: null, entryId: off.id, engine: "qa", offerContact: false };
 
   let id: string | null = null;
   try {

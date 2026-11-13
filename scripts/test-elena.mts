@@ -139,6 +139,18 @@ await test("Mistral : identifiant inconnu, modele ou reponse invalide = entree p
   assert.ok(!recognitionList(FILE_ENTRIES).includes("E098"), "modeles jamais proposes au modele");
 });
 
+await test("hors sujet : entree prevue meme sans Mistral, un seul Nous contacter", async () => {
+  const none = deps(() => Promise.resolve(null));
+  for (const [q, l] of [["quelle météo demain", "fr"], ["what's the weather tomorrow", "en"], ["wie wird das Wetter morgen", "de"], ["une recette de cuisine ?", "fr"]] as const) {
+    const r = await elenaRespond(q, l, none);
+    assert.equal(r.entryId, "E094", q);
+    assert.equal(r.reply, FILE_ENTRIES.find((e) => e.id === "E094")?.answer[l]);
+  }
+  assert.equal((await elenaRespond("météo du marché immobilier", "fr", none)).entryId, "E095", "question immobiliere jamais hors sujet");
+  const panel = readFileSync(join(root, "components/chatbot/ChatbotPanel.tsx"), "utf8");
+  assert.ok(panel.includes("m.offerContact && !m.button"), "proposition de contact seulement sans bouton de l'entree");
+});
+
 await test("boutons : uniquement des chemins internes de la liste fermee", () => {
   for (const e of FILE_ENTRIES) if (e.button) assert.ok((ELENA_BUTTON_PATHS as readonly string[]).includes(e.button.path), `${e.id} ${e.button.path}`);
 });

@@ -972,7 +972,7 @@ INSERT INTO public.faqs (page_key, question_fr, answer_fr, question_en, answer_e
 SELECT 'elena', 'Question sans rapport avec l''immobilier', 'Je suis l''assistante immobilière de MAPA Property et je réponds uniquement aux questions sur nos biens et nos services. Que puis-je faire pour vous dans ce domaine ?',
   'Question unrelated to real estate', 'I am MAPA Property''s real estate assistant and I only answer questions about our properties and services. How can I help you with that?',
   'Frage ohne Bezug zu Immobilien', 'Ich bin die Immobilienassistentin von MAPA Property und beantworte nur Fragen zu unseren Objekten und Leistungen. Wie kann ich Ihnen dabei helfen?',
-  94, true, ARRAY['météo', 'recette', 'sport', 'politique', 'blague']::text[],
+  94, true, ARRAY['météo', 'recette', 'sport', 'politique', 'blague', 'quel temps fera-t-il', 'météo demain', 'il va pleuvoir', 'match de foot', 'résultat du match', 'recette de cuisine', 'raconte une blague', 'élections', 'weather', 'football', 'recipe', 'joke', 'Wetter', 'Fußball', 'Rezept', 'Witz']::text[],
   NULL, NULL, NULL, NULL,
   'Règle Eléna', false
 WHERE NOT EXISTS (SELECT 1 FROM public.faqs WHERE page_key = 'elena' AND question_fr = 'Question sans rapport avec l''immobilier');

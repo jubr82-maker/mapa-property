@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { derivePageContext } from "./chatbot-knowledge";
+import { useBubbleClearance } from "@/lib/ui/bubble-clearance";
 
 // Sprint ELENA-REFONTE point 1 — le panneau (messages, envoi, consentement)
 // n'est importe qu'a partir du moment ou l'utilisateur a reellement ouvert
@@ -33,6 +34,9 @@ export function ChatbotBubble() {
   const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
   const [inviteVisible, setInviteVisible] = useState(false);
   const visibleSecondsRef = useRef(0);
+  // Jamais par-dessus un bouton de la page (Suivant, Envoyer, Estimer...).
+  const bubbleRef = useRef<HTMLButtonElement>(null);
+  const clearForButton = useBubbleClearance(bubbleRef, !open);
 
   const inviteKey: "invite_property" | "invite_offmarket" | null = pageContext.startsWith(
     "property:",
@@ -135,8 +139,11 @@ export function ChatbotBubble() {
         aria-label="Eléna"
         aria-expanded={open}
         data-chatbot-bubble
+        ref={bubbleRef}
+        aria-hidden={clearForButton || undefined}
+        tabIndex={clearForButton ? -1 : undefined}
         className={`fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full shadow-xl shadow-gold/30 transition-all duration-300 hover:scale-105 sm:size-16 print:hidden ${
-          open ? "opacity-0 pointer-events-none" : "opacity-100"
+          open || clearForButton ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
         <span className="relative block size-14 overflow-hidden rounded-full ring-2 ring-gold/70 sm:size-16">

@@ -286,7 +286,9 @@ export function ChatbotPanel({
               )}
 
               {/* Entree par defaut : proposition de prise de contact existante. */}
-              {m.role === "assistant" && m.offerContact && (
+              {/* Un seul "Nous contacter" : la proposition de contact ne
+                  s'ajoute que si la reponse n'a pas deja ce bouton. */}
+              {m.role === "assistant" && m.offerContact && !m.button && (
                 <div className="ml-10">
                   <ContactReveal variant="compact" theme="light" />
                 </div>

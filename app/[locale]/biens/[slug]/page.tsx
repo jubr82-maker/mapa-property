@@ -49,7 +49,7 @@ import { fetchSearchesForCity } from "@/lib/searches/data";
 import { SearchCard } from "@/components/searches/SearchCard";
 import { withSocial } from "@/lib/seo-page-meta";
 import type { Property } from "@/lib/types";
-import { availableFirst, bannerOf } from "@/lib/property-banner";
+import { availableFirst, bannerOf, isClosed } from "@/lib/property-banner";
 
 const langOf = (locale: string): ListingLang => (locale === "en" || locale === "de" ? locale : "fr");
 
@@ -65,6 +65,17 @@ function seoProperty(p: Property): SeoProperty {
     price: p.price ?? null,
     price_on_demand: (p as { price_on_demand?: boolean }).price_on_demand ?? false,
   };
+}
+
+/** Description sans montant (bien Vendu ou Loue) : phrases citant un prix retirees. */
+function withoutPrices(text: string): string {
+  const PRICE = /\d[\d\s.,\u00a0\u202f']*\s?(€|eur\b|euros?\b)|€\s?\d/i;
+  if (!PRICE.test(text)) return text;
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .filter((p) => !PRICE.test(p))
+    .join(" ")
+    .trim();
 }
 
 /** Reperes de la fin ecrite a la main, des trois langues (texte non traduit compris). */
@@ -185,9 +196,16 @@ export async function generateMetadata({
   // sans qualificatif) ; meta construite depuis les faits du bien, ou
   // "Description Google" saisie dans l'admin. Repli : ancienne meta.
   const sp = seoProperty(property);
-  const description =
-    seoMetaDescription(listingColumnsOf(property), sanitizeListingData(property.listing_data ?? null), lang, { vocab: ctx.vocab, seo: ctx.seo, fallbackType: ctx.subtypes[sp.property_type ?? ""] }) ||
+  // Nov. 2026 : bien Vendu ou Loue (bandeau, SQL 35) : la description
+  // Google ne cite plus aucun prix (prix retire des faits, description
+  // saisie ignoree, phrases avec un montant retirees du repli).
+  const closedForSeo = isClosed(property);
+  const listingForMeta = sanitizeListingData(property.listing_data ?? null);
+  if (closedForSeo) for (const l of ["fr", "en", "de"] as const) listingForMeta.written[l].seo_description = "";
+  const rawDescription =
+    seoMetaDescription(closedForSeo ? { ...listingColumnsOf(property), price: null } : listingColumnsOf(property), listingForMeta, lang, { vocab: ctx.vocab, seo: ctx.seo, fallbackType: ctx.subtypes[sp.property_type ?? ""] }) ||
     metaDescription(descriptionPlainText(splitCommonMentions(pickLang(property, "description", locale as Locale) ?? "", ALL_COMMON_MARKERS).body));
+  const description = closedForSeo ? withoutPrices(rawDescription) : rawDescription;
   const pageTitle = seoTitle(sp, lang, { ...ctx, fallbackType: ctx.subtypes[sp.property_type ?? ""] });
   const images = await fetchPropertyImages(property.id);
   // Carte de partage : photo principale de l'admin, sinon image du site.
@@ -409,7 +427,8 @@ async function PropertyPage({
             offmarketText: tf("conditions_offmarket_text"),
           }}
           financing={
-            price > 0 && property.transaction !== "rent" ? (
+            // Bien Vendu ou Loue : plus de simulateur d'achat (nov. 2026).
+            price > 0 && property.transaction !== "rent" && !closed ? (
               <AcquisitionSimulator
                 price={price}
                 country={property.country ?? "LU"}
