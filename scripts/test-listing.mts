@@ -658,7 +658,7 @@ test("aucune donnee client publiee : textes, colonnes publiques, pages, donnees 
   const cols = S.PUBLIC_SEARCH_COLUMNS.split(",").map((c) => c.trim());
   for (const c of cols) assert.ok(!/client|email|phone|address|budget_exact|notes|search_data|consent_at|created_by/.test(c), `colonne publique ${c}`);
   // Le site ne lit jamais la table privee ni les champs du client.
-  const publicFiles = ["lib/searches/data.ts", "lib/searches/display.ts", "components/searches/SearchCard.tsx", "app/[locale]/recherches/page.tsx", "app/[locale]/recherches/[reference]/page.tsx", "app/[locale]/villes/[ville]/page.tsx", "app/sitemap.ts"];
+  const publicFiles = ["lib/searches/data.ts", "lib/searches/display.ts", "components/searches/SearchCard.tsx", "app/[locale]/recherches/page.tsx", "app/[locale]/recherches/[reference]/page.tsx", "app/[locale]/villes/[ville]/page.tsx", "lib/sitemaps.ts"];
   for (const f of publicFiles) {
     const src = readFileSync(join(root, f), "utf8");
     assert.ok(!/property_search_private|client_name|client_email|client_phone|budget_exact|current_address/.test(src), f);
@@ -713,7 +713,7 @@ test("site : menu, pied de page, communes, plan du site, 3 langues", () => {
   for (const f of ["components/layout/Header.tsx", "components/layout/HeaderBurger.tsx", "components/layout/Footer.tsx"]) assert.ok(readFileSync(join(root, f), "utf8").includes('{ href: "/recherches", key: "our_searches" }'), f);
   const ville = readFileSync(join(root, "app/[locale]/villes/[ville]/page.tsx"), "utf8");
   assert.ok(ville.includes("fetchSearchesForCity(city.slug)") && ville.includes("<SearchCard"));
-  const sm = readFileSync(join(root, "app/sitemap.ts"), "utf8");
+  const sm = readFileSync(join(root, "lib/sitemaps.ts"), "utf8");
   assert.ok(sm.includes('"/recherches",') && sm.includes("/recherches/${s.reference}"));
   for (const l of ["fr", "en", "de"]) {
     assert.ok((messages[l].nav as Record<string, string>).our_searches);

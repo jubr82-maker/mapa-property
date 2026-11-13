@@ -99,7 +99,7 @@ test("site : une section par page, une seule FAQPage, rien sans question publiee
 });
 
 test("page /faq : sitemap, pied de page, fil d'Ariane, textes dans les trois langues sans tiret long", () => {
-  assert.ok(read("app/sitemap.ts").includes('"/faq",'));
+  assert.ok(read("lib/sitemaps.ts").includes('"/faq",'));
   assert.ok(read("components/layout/Footer.tsx").includes('{ href: "/faq", key: "faq" }'));
   assert.ok(read("lib/breadcrumbs.ts").includes('"/faq": "faq"'));
   for (const l of ["fr", "en", "de"]) {

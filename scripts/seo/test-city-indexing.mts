@@ -45,11 +45,11 @@ test("une ville etrangere avec un bien publie, ou un contenu propre, l'est", () 
 test("page : noindex, follow et aucune autre langue declaree ; sitemap filtre ; rafraichi par un bien", () => {
   const page = read("app/[locale]/villes/[ville]/page.tsx");
   assert.ok(page.includes("robots: { index: false, follow: true }") && page.includes("alternates: indexable ? alternates : { canonical: alternates.canonical }"));
-  const sm = read("app/sitemap.ts");
-  assert.ok(sm.includes("const sitemapCities = indexableCities(await fetchAllPropertiesWithCoverStrict());") && sm.includes("sitemapCities.map((city)"));
+  const sm = read("lib/sitemaps.ts");
+  assert.ok(sm.includes("const cities = indexableCities(await (await data()).fetchAllPropertiesWithCoverStrict());") && sm.includes("cities.map((city)"));
   const rv = read("lib/revalidate-property.ts");
   const fn = rv.slice(rv.indexOf("export async function revalidatePropertyChange"), rv.indexOf("async function revalidateSimilarContaining"));
-  assert.ok(fn.includes("revalidateTag(cityPropertiesTag(slug)") && fn.includes('revalidatePath("/sitemap.xml")') && fn.includes("revalidateTag(PROPERTIES_LIST_TAG"));
+  assert.ok(fn.includes("revalidateTag(cityPropertiesTag(slug)") && fn.includes('revalidateSitemaps(["biens", "villes"])') && fn.includes("revalidateTag(PROPERTIES_LIST_TAG"));
   // Menus et listes inchanges : la liste des villes n'est jamais filtree.
   assert.ok(read("app/[locale]/services/marches-actifs/page.tsx").includes("<ExploreLinks cities={cities}"));
 });

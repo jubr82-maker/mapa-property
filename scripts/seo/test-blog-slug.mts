@@ -70,9 +70,10 @@ test("admin : adresse enregistree en minuscules, sans accents ni espaces", () =>
 });
 
 test("sitemap : chaque article publie, revalide toutes les heures et a chaque enregistrement", () => {
-  assert.ok(read("app/sitemap.ts").includes("export const revalidate = 2592000;"));
-  assert.ok(read("lib/revalidate-property.ts").includes('revalidatePath("/sitemap.xml");'));
-  assert.ok(read("app/sitemap.ts").includes("fetchAllBlogPosts()"));
+  // Sitemaps par type (nov. 2026) : index et fichier "journal".
+  assert.ok(read("app/sitemap.xml/route.ts").includes("export const revalidate = 2592000;") && read("app/sitemaps/[file]/route.ts").includes("export const revalidate = 2592000;"));
+  assert.ok(read("lib/revalidate-property.ts").includes('revalidateSitemaps(["journal"]);'));
+  assert.ok(read("lib/sitemaps.ts").includes("fetchAllBlogPosts()"));
 });
 
 test("SQL 26 : une seule valeur modifiee, garde-fous, a executer apres la mise en ligne", () => {

@@ -85,7 +85,7 @@ test("activation : un bien publie suffit, sa suppression la retire ; lecture en 
   const dubai = getCityBySlug("dubai")!;
   assert.equal(isCityIndexable(dubai, publishedCountByCity([{ city: "Downtown Dubai" }]).get("dubai") ?? 0), true);
   assert.equal(isCityIndexable(dubai, publishedCountByCity([]).get("dubai") ?? 0), false);
-  assert.ok(read("app/sitemap.ts").includes("indexableCities(await fetchAllPropertiesWithCoverStrict())"));
+  assert.ok(read("lib/sitemaps.ts").includes("indexableCities(await (await data()).fetchAllPropertiesWithCoverStrict())"));
   // Page de ville : ses biens seulement (cache par ville), lecture sans repli.
   assert.ok(read("app/[locale]/villes/[ville]/page.tsx").includes("(await fetchCityPropertiesStrict(city.slug)).length"));
   assert.ok(read("lib/data.ts").includes('["city-properties-v2", citySlug]') && read("lib/data.ts").includes("tags: [cityPropertiesTag(citySlug)]"));
@@ -101,7 +101,7 @@ test("activation : un bien publie suffit, sa suppression la retire ; lecture en 
   }
   const rv = read("lib/revalidate-property.ts");
   // Ville actuelle et ancienne seulement (lignes avant et apres), jamais toutes les villes.
-  assert.ok(rv.includes("revalidateTag(cityPropertiesTag(slug), { expire: 0 })") && rv.includes('revalidatePath("/sitemap.xml")'));
+  assert.ok(rv.includes("revalidateTag(cityPropertiesTag(slug), { expire: 0 })") && rv.includes('revalidateSitemaps(["biens", "villes"])'));
   assert.ok(!rv.includes('"/[locale]/villes/[ville]"'));
 });
 
