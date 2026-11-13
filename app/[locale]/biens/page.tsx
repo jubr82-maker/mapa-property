@@ -13,7 +13,7 @@ import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
 import { redirect } from "@/i18n/navigation";
 import { foreignCityPlaces } from "@/lib/search/places";
 import { runSearch, type SearchCriteria } from "@/lib/search/engine";
-import { hrefWith, paramsFromParsed, searchFromParams, type SearchParamsRecord } from "@/lib/search/url";
+import { hrefWith, listingTransaction, paramsFromParsed, searchFromParams, type SearchParamsRecord } from "@/lib/search/url";
 import { SearchSummary } from "@/components/search/SearchSummary";
 import { CountryPrompt } from "@/components/search/CountryPrompt";
 // Sprint OPTIM-BIENS-3 — chargé en lazy (chunk séparé, embla-carousel-react
@@ -72,11 +72,25 @@ function computeSiblingSuggestions(
 // filtrées canonicalisent vers /[locale]/biens, la liste non filtrée.
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<SearchParamsRecord>;
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "property_list" });
+  // Nov. 2026 (audit SEO) : /biens?transaction=sale et ?transaction=rent,
+  // SEULS, sont des pages a part entiere (titre, description, canonical et
+  // hreflang vers elles-memes). Toute autre combinaison de filtres garde la
+  // canonical de la liste /biens.
+  const tx = listingTransaction(await searchParams);
+  if (tx) {
+    return withSocial(locale, {
+      title: t(`seo_${tx}_title`),
+      description: t(`seo_${tx}_description`),
+      alternates: pageAlternates(locale, `/biens?transaction=${tx}`),
+    });
+  }
   return withSocial(locale, {
     title: `${t("title")}, MAPA Property`,
     description: t("subtitle"),
@@ -111,6 +125,8 @@ async function PropertiesPage({
   }
 
   const outcome = runSearch(allProperties, criteria);
+  // Pages "biens a vendre" et "biens a louer" (seul parametre : transaction).
+  const listingTx = listingTransaction(rawFilters);
   const displayed = outcome.main;
   const total = outcome.main.length + outcome.nearby.length;
   const siblingSuggestions = criteria.notUnderstood ? null : computeSiblingSuggestions(allProperties, displayed, criteria);
@@ -126,9 +142,9 @@ async function PropertiesPage({
             {t("eyebrow")}
           </p>
           <h1 className="mt-2 t-h1">
-            {t("title")}
+            {listingTx ? t(`seo_${listingTx}_h1`) : t("title")}
           </h1>
-          <p className="mt-3 text-base text-ink-mid">{t("subtitle")}</p>
+          <p className="mt-3 text-base text-ink-mid">{listingTx ? t(`seo_${listingTx}_description`) : t("subtitle")}</p>
         </header>
 
         <FilterBar />

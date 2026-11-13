@@ -117,3 +117,17 @@ export function withoutItem(value: string | undefined, item: string): string | n
   const rest = list(value).filter((x) => x !== item);
   return rest.length ? rest.join(",") : null;
 }
+
+/**
+ * Pages "biens a vendre" et "biens a louer" (nov. 2026, audit SEO) : la
+ * liste avec le SEUL parametre transaction=sale ou transaction=rent. Toute
+ * autre combinaison : null (canonical /biens).
+ */
+export function listingTransaction(sp: SearchParamsRecord): "sale" | "rent" | null {
+  const keys = Object.entries(sp).filter(([, v]) => v !== undefined && v !== "").map(([k]) => k);
+  if (keys.length !== 1 || keys[0] !== "transaction") return null;
+  return sp.transaction === "sale" || sp.transaction === "rent" ? sp.transaction : null;
+}
+
+/** Les 6 adresses indexables avec parametre (trois langues), sans la langue. */
+export const LISTING_TRANSACTION_PATHS = ["/biens?transaction=sale", "/biens?transaction=rent"] as const;

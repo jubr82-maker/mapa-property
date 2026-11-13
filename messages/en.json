@@ -462,7 +462,13 @@
         "terrain": "plots of land",
         "parking": "parking spaces"
       }
-    }
+    },
+    "seo_sale_title": "Properties for sale in Luxembourg and internationally, MAPA Property",
+    "seo_sale_h1": "Properties for sale",
+    "seo_sale_description": "Houses, apartments and exceptional properties for sale in Luxembourg and internationally, selected by MAPA Property.",
+    "seo_rent_title": "Properties for rent in Luxembourg, MAPA Property",
+    "seo_rent_h1": "Properties for rent",
+    "seo_rent_description": "Apartments and houses for rent in Luxembourg, selected by MAPA Property."
   },
   "property": {
     "tx_sale": "Sale",

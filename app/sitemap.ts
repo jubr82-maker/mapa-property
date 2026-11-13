@@ -8,6 +8,7 @@ import {
 } from "@/lib/data";
 import { ALL_MANDATE_SLUGS } from "@/lib/mandates";
 import { indexableCities } from "@/lib/city-indexing";
+import { LISTING_TRANSACTION_PATHS } from "@/lib/search/url";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mapaproperty.lu";
@@ -95,6 +96,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
+  // Nov. 2026 (audit SEO) : pages "biens a vendre" et "biens a louer", les
+  // seules adresses avec parametre du sitemap (canonical vers elles-memes).
+  const listingEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
+    LISTING_TRANSACTION_PATHS.map((path) => ({
+      url: `${SITE_URL}/${locale}${path}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+      alternates: { languages: buildAlternates(path) },
+    })),
+  );
+
   const mandateEntries: MetadataRoute.Sitemap = LOCALES.flatMap((locale) =>
     ALL_MANDATE_SLUGS.map((slug) => ({
       url: `${SITE_URL}/${locale}/mandats/${slug}`,
@@ -169,6 +181,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticEntries,
+    ...listingEntries,
     ...searchEntries,
     ...mandateEntries,
     ...cityEntries,

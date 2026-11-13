@@ -462,7 +462,13 @@
         "terrain": "Grundstücke",
         "parking": "Stellplätze"
       }
-    }
+    },
+    "seo_sale_title": "Immobilien zum Kauf in Luxemburg und international, MAPA Property",
+    "seo_sale_h1": "Immobilien zum Kauf",
+    "seo_sale_description": "Häuser, Wohnungen und außergewöhnliche Immobilien zum Kauf in Luxemburg und international, ausgewählt von MAPA Property.",
+    "seo_rent_title": "Immobilien zur Miete in Luxemburg, MAPA Property",
+    "seo_rent_h1": "Immobilien zur Miete",
+    "seo_rent_description": "Wohnungen und Häuser zur Miete in Luxemburg, ausgewählt von MAPA Property."
   },
   "property": {
     "tx_sale": "Verkauf",

@@ -462,7 +462,13 @@
         "terrain": "terrains",
         "parking": "parkings"
       }
-    }
+    },
+    "seo_sale_title": "Biens à vendre au Luxembourg et à l'international, MAPA Property",
+    "seo_sale_h1": "Biens à vendre",
+    "seo_sale_description": "Maisons, appartements et biens d'exception à vendre au Luxembourg et à l'international, sélectionnés par MAPA Property.",
+    "seo_rent_title": "Biens à louer au Luxembourg, MAPA Property",
+    "seo_rent_h1": "Biens à louer",
+    "seo_rent_description": "Appartements et maisons à louer au Luxembourg, sélectionnés par MAPA Property."
   },
   "property": {
     "tx_sale": "Vente",
