@@ -22,6 +22,7 @@ export type AdminAuditAction =
   | "settings_design_changed"
   | "performance_measured"
   | "backup_run"
+  | "controle_started"
   | "estimation_value_opinion"
   | "listing_template_changed"
   | "property_search_created"

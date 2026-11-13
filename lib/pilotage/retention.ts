@@ -3,6 +3,7 @@
 // duree acceptee (RETENTION_RULES) ; une table absente est ignoree.
 import { supabaseService } from "@/lib/supabase-service";
 import { RETENTION_RULES } from "@/lib/pilotage/config";
+import { isMissingRelation } from "@/lib/pilotage/controle-core";
 
 /**
  * Date limite : maintenant moins `months` mois civils, jour ramene au
@@ -18,16 +19,15 @@ export function retentionCutoff(months: number, now = new Date()): Date {
   return d;
 }
 
-function isMissingTable(code: string | undefined): boolean {
-  return code === "42P01" || code === "PGRST205";
-}
+// Table absente : meme regle que le controle quotidien (controle-core).
+const isMissingTable = (code: string | undefined) => isMissingRelation(code);
 
 export async function purgeExpiredRows(now = new Date()): Promise<{ ok: boolean; detail: string }> {
   const svc = supabaseService();
   const parts: string[] = [];
   let ok = true;
   for (const rule of RETENTION_RULES) {
-    const cutoff = retentionCutoff(rule.months, now).toISOString();
+    const cutoff = (rule.days !== undefined ? new Date(now.getTime() - rule.days * 86400_000) : retentionCutoff(rule.months, now)).toISOString();
     const { count, error } = await svc
       .from(rule.table)
       .delete({ count: "exact" })

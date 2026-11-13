@@ -24,6 +24,7 @@ import {
   SearchCheck,
   MessageCircleQuestion,
   Wallet,
+  ScanSearch,
 } from "lucide-react";
 
 export type AdminNavItem = { href: string; key: string; icon: typeof Lock; match: "exact" | "prefix" };
@@ -35,6 +36,7 @@ export const ADMIN_NAV_GROUPS: { key: string; items: AdminNavItem[] }[] = [
       { href: "/admin", key: "dashboard", icon: LayoutDashboard, match: "exact" },
       { href: "/admin/activite", key: "activity", icon: Radar, match: "prefix" },
       { href: "/admin/trafic", key: "traffic", icon: BarChart3, match: "prefix" },
+      { href: "/admin/controle-google", key: "google_control", icon: ScanSearch, match: "prefix" },
       { href: "/admin/sante", key: "health", icon: HeartPulse, match: "prefix" },
       { href: "/admin/journal", key: "journal", icon: ScrollText, match: "prefix" },
     ],

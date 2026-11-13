@@ -150,6 +150,7 @@ export type EmailKind =
   | "security_alert"
   | "weekly_summary"
   | "backup_report"
+  | "controle_report"
   | "other";
 
 export interface SendMailResult {

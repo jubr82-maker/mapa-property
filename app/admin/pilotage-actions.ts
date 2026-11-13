@@ -6,7 +6,8 @@ import { revalidatePath } from "next/cache";
 import { assertAdminAction } from "@/lib/admin/require-admin";
 import { lastManualRunAt, runPsiMeasurements } from "@/lib/pilotage/psi";
 import { logAdminAction } from "@/lib/pilotage/audit";
-import { BACKUP_MANUAL_COOLDOWN_MINUTES, PSI_MANUAL_COOLDOWN_MINUTES } from "@/lib/pilotage/config";
+import { BACKUP_MANUAL_COOLDOWN_MINUTES, CONTROLE_CLICK_BUDGET_MS, PSI_MANUAL_COOLDOWN_MINUTES } from "@/lib/pilotage/config";
+import { runControle } from "@/lib/pilotage/controle-run";
 import { loadCronRuns } from "@/lib/pilotage/health";
 import { runBackupNow } from "@/lib/backup/run";
 
@@ -44,4 +45,30 @@ export async function runBackupNowAction(): Promise<BackupRunResult> {
   await logAdminAction({ actorEmail: user.email, action: "backup_run", diff: { result: r.detail } });
   revalidatePath("/admin/sante");
   return r.ok ? { ok: true, detail: r.detail } : { ok: false, error: "failed", detail: r.detail };
+}
+
+export type ControleActionResult = {
+  ok: boolean;
+  /** db_not_ready, busy, no_key, done, paused, quota, failed */
+  detail: string;
+  progress?: { done: number; total: number };
+};
+
+/**
+ * Controle du site puis de Google a la demande (nov. 2026, page Controle
+ * Google). Admin seulement (liste + session aal2). Chaque appel avance le
+ * passage pendant au plus CONTROLE_CLICK_BUDGET_MS ; la page relance tant
+ * que le passage n'est pas fini. Verrou : un seul controle a la fois.
+ */
+export async function runControleStepAction(kind: "site" | "google", first: boolean): Promise<ControleActionResult> {
+  const { user } = await assertAdminAction();
+  if (kind !== "site" && kind !== "google") return { ok: false, detail: "failed" };
+  // Un passage en pause (nuit ou clic precedent) est repris, jamais
+  // recommence ; sinon un nouveau passage demarre. Journal : premier appel.
+  const r = await runControle(kind, { trigger: "manual", budgetMs: CONTROLE_CLICK_BUDGET_MS, forceNew: false });
+  if (first === true && r.detail !== "busy" && r.detail !== "db_not_ready") {
+    await logAdminAction({ actorEmail: user.email, action: "controle_started", diff: { kind, result: r.detail } });
+  }
+  if (r.detail === "done" || r.detail === "no_key" || r.detail === "quota") revalidatePath("/admin/controle-google");
+  return { ok: r.ok, detail: r.detail, progress: r.progress };
 }

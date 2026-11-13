@@ -490,7 +490,8 @@ section = "K. Pilotage";
   const vercel = JSON.parse(read("vercel.json")) as { crons?: { path: string; schedule: string }[] };
   // Oct. 2026 : tache quotidienne et sauvegarde nocturne, une fois par jour
   // chacune (limite de la formule Hobby).
-  check("deux taches planifiees seulement (quotidienne et sauvegarde), une fois par jour", vercel.crons?.length === 2 && vercel.crons.map((c) => c.path).sort().join(",") === "/api/cron/backup,/api/cron/daily" && vercel.crons.every((c) => /^\d+ \d+ \* \* \*$/.test(c.schedule)), JSON.stringify(vercel.crons));
+  // Nov. 2026 : + controle du site et controle Google (une fois par jour chacun).
+  check("quatre taches planifiees seulement (quotidienne, sauvegarde, controle du site, controle Google), une fois par jour", vercel.crons?.length === 4 && vercel.crons.map((c) => c.path).sort().join(",") === "/api/cron/backup,/api/cron/controle-google,/api/cron/controle-site,/api/cron/daily" && vercel.crons.every((c) => /^\d+ \d+ \* \* \*$/.test(c.schedule)), JSON.stringify(vercel.crons));
   check("sauvegarde nocturne : secret obligatoire", /isAuthorizedCron\(req\)/.test(read("app/api/cron/backup/route.ts")));
   check("tache quotidienne : secret obligatoire", /isAuthorizedCron\(req\)/.test(read("app/api/cron/daily/route.ts")));
   // PageSpeed : jamais a l'ouverture d'une page ni par une lecture.
@@ -626,8 +627,11 @@ section = "L. Regles d'acces et purge";
   check("purge lancee par la tache quotidienne", /step\("retention", \(\) => purgeExpiredRows\(now\)\)/.test(read("lib/pilotage/daily-task.ts")));
   const f04 = read("supabase/manual/execution/04_bloc_F.sql");
   const sqlRules = [...f04.matchAll(/\(\d, '(\w+)', '(\w+)', '(\d+) months'\)/g)].map((m) => `${m[1]}.${m[2]}.${m[3]}`).sort().join(",");
-  const codeRules = RETENTION_RULES.map((r) => `${r.table}.${r.column}.${r.months}`).sort().join(",");
+  // Tables du bloc F (les tables du controle quotidien, SQL 39, ont leurs propres durees).
+  const codeRules = RETENTION_RULES.filter((r) => !/^(controle_|seo_positions_daily)/.test(r.table)).map((r) => `${r.table}.${r.column}.${r.months}`).sort().join(",");
   check("durees de conservation identiques au bloc F", sqlRules === codeRules && codeRules === "admin_auth_log.created_at.12,chatbot_logs.created_at.6,property_views.viewed_at.13,tracking_events.created_at.13", `${codeRules} / ${sqlRules}`);
+  const controleRules = RETENTION_RULES.filter((r) => /^(controle_|seo_positions_daily)/.test(r.table)).map((r) => `${r.table}.${r.column}.${r.days ?? `${r.months}m`}`).sort().join(",");
+  check("controle quotidien : 90 jours de detail, resumes 1 an", controleRules === "controle_google_quota.day.90,controle_results.created_at.90,controle_runs.started_at.12m,seo_positions_daily.day.12m", controleRules);
   const ret = read("lib/pilotage/retention.ts");
   check("purge : seules les tables de RETENTION_RULES", (ret.match(/\.from\(/g) ?? []).length === 1 && /\.from\(rule\.table\)/.test(ret) && /\.lt\(rule\.column, cutoff\)/.test(ret));
   check("purge : 6 mois avant le 31 mars 2026 = 30 septembre 2025", retentionCutoff(6, new Date("2026-03-31T05:00:00Z")).toISOString() === "2025-09-30T05:00:00.000Z");
@@ -1043,7 +1047,7 @@ section = "P. Admin sur telephone";
     const all = JSON.parse(read(`messages/${l}.json`));
     const out: string[] = [];
     const walkMsg = (o: unknown, p: string) => {
-      if (typeof o === "string") { if (/\b(cliqu|clic\b|click|klick)/i.test(o) && !/col_clicks/.test(p)) out.push(`${l}:${p}`); return; }
+      if (typeof o === "string") { if (/\b(cliqu|clic\b|click|klick)/i.test(o) && !/col_clicks|admin_controle\.(clicks_chart|totals)$/.test(p)) out.push(`${l}:${p}`); return; }
       if (o && typeof o === "object") for (const [k, v] of Object.entries(o)) walkMsg(v, p ? `${p}.${k}` : k);
     };
     for (const [ns, v] of Object.entries(all)) if (ns.startsWith("admin_")) walkMsg(v, ns);

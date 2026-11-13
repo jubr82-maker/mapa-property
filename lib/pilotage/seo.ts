@@ -110,3 +110,69 @@ export async function loadSeoHistory(maxWeeks = 26): Promise<SeoHistory> {
     averageByWeek,
   };
 }
+
+// --- Releve QUOTIDIEN (nov. 2026, controle quotidien) ----------------------
+// Le releve hebdomadaire ci-dessus continue a l'identique (historique de
+// seo_positions intact) ; le releve quotidien est enregistre a part dans
+// seo_positions_daily (SQL 39), un jour consolide a la fois (J-3).
+
+/** Jour de reference du releve quotidien : il y a 3 jours (UTC). */
+export function referenceDay(now = new Date()): string {
+  return iso(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - 3 * DAY));
+}
+
+/** Jours rattrapes si un passage a manque (J-3 a J-9). */
+const DAILY_BACKFILL_DAYS = 7;
+
+export async function snapshotDailyPositions(now = new Date()): Promise<{ ok: boolean; detail: string }> {
+  if (!searchConsoleConfigured()) return { ok: false, detail: "not_configured" };
+  const parts: string[] = [];
+  let ok = true;
+  for (let k = DAILY_BACKFILL_DAYS - 1; k >= 0; k--) {
+    const r = await snapshotDay(referenceDay(new Date(now.getTime() - k * DAY)));
+    ok = ok && r.ok;
+    parts.push(r.detail);
+  }
+  return { ok, detail: parts.filter((d) => !d.startsWith("deja_releve")).join(",") || "a_jour" };
+}
+
+async function snapshotDay(day: string): Promise<{ ok: boolean; detail: string }> {
+  const svc = supabaseService();
+  const { count, error: cErr } = await svc.from("seo_positions_daily").select("id", { count: "exact", head: true }).eq("day", day);
+  if (cErr) return { ok: false, detail: `db_${cErr.code ?? "error"}` };
+  if ((count ?? 0) > 0) return { ok: true, detail: `deja_releve_${day}` };
+  const rows = (await fetchQueries(day, day, 5000)).filter((r) => isTargetQuery(r.query));
+  const payload: { day: string; query: string; clicks: number; impressions: number; ctr: number | null; position: number | null }[] = rows.length
+    ? rows.map((r) => ({ day, query: r.query.slice(0, 200), clicks: r.clicks, impressions: r.impressions, ctr: r.ctr, position: Math.round(r.position * 10) / 10 }))
+    : [{ day, query: "", clicks: 0, impressions: 0, ctr: null, position: null }];
+  const { error } = await svc.from("seo_positions_daily").upsert(payload, { onConflict: "day,query" });
+  return { ok: !error, detail: error ? `db_${error.code ?? "error"}` : `${rows.length}_requetes_${day}` };
+}
+
+export type DailyPositions = { available: boolean; days: string[]; averageByDay: { date: string; value: number }[]; queries: { query: string; byDay: Record<string, number | null>; last: number | null; impressions: number }[] };
+
+export async function loadDailyPositions(days = 30): Promise<DailyPositions> {
+  const since = iso(new Date(Date.now() - (days + 3) * DAY));
+  const { data, error } = await supabaseService().from("seo_positions_daily").select("day,query,impressions,position").gte("day", since).order("day").limit(20_000);
+  if (error) return { available: false, days: [], averageByDay: [], queries: [] };
+  const rows = (data ?? []) as { day: string; query: string; impressions: number; position: number | null }[];
+  const dayList = [...new Set(rows.map((r) => r.day))].sort();
+  const map = new Map<string, DailyPositions["queries"][number]>();
+  for (const r of rows) {
+    if (!r.query) continue;
+    const q = map.get(r.query) ?? { query: r.query, byDay: {}, last: null, impressions: 0 };
+    q.byDay[r.day] = r.position;
+    q.last = r.position;
+    q.impressions += r.impressions;
+    map.set(r.query, q);
+  }
+  // Position moyenne du jour, ponderee par les impressions.
+  const averageByDay = dayList
+    .map((d) => {
+      const ws = rows.filter((r) => r.day === d && r.query && r.position !== null);
+      const imp = ws.reduce((a, r) => a + r.impressions, 0);
+      return { date: d, value: imp > 0 ? Math.round((ws.reduce((a, r) => a + (r.position ?? 0) * r.impressions, 0) / imp) * 10) / 10 : 0 };
+    })
+    .filter((p) => p.value > 0);
+  return { available: true, days: dayList, averageByDay, queries: [...map.values()].sort((a, b) => b.impressions - a.impressions).slice(0, 30) };
+}
