@@ -141,7 +141,7 @@ await test("Mistral : identifiant inconnu, modele ou reponse invalide = entree p
 
 await test("hors sujet : entree prevue meme sans Mistral, un seul Nous contacter", async () => {
   const none = deps(() => Promise.resolve(null));
-  for (const [q, l] of [["quelle météo demain", "fr"], ["what's the weather tomorrow", "en"], ["wie wird das Wetter morgen", "de"], ["une recette de cuisine ?", "fr"]] as const) {
+  for (const [q, l] of [["quelle météo demain", "fr"], ["what's the weather tomorrow", "en"], ["wie wird das Wetter morgen", "de"], ["une recette de cuisine ?", "fr"], ["quelle météo vendredi ?", "fr"], ["combien de buts au match de foot ?", "fr"], ["une recette de cuisine pour mes parents", "fr"]] as const) {
     const r = await elenaRespond(q, l, none);
     assert.equal(r.entryId, "E094", q);
     assert.equal(r.reply, FILE_ENTRIES.find((e) => e.id === "E094")?.answer[l]);

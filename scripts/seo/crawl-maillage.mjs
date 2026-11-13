@@ -55,6 +55,15 @@ function normalize(href, from) {
   }
 }
 
+function canonicalPath(href, from) {
+  try {
+    const u = new URL(href, `${BASE}${from}`);
+    return (u.pathname.replace(/\/$/, "") || "/") + u.search;
+  } catch {
+    return null;
+  }
+}
+
 const isBlocked = await loadRobots();
 const pages = new Map(); // chemin -> { status, indexable, depth, links: Set }
 const inbound = new Map(); // chemin -> Set(pages sources)
@@ -66,7 +75,7 @@ while (queue.length && pages.size < MAX_PAGES) {
   let res;
   try {
     res = await fetch(`${BASE}${path}`, { headers: { "user-agent": UA }, redirect: "manual" });
-  } catch (e) {
+  } catch {
     pages.set(path, { status: "erreur", indexable: false, depth });
     continue;
   }
@@ -84,7 +93,9 @@ while (queue.length && pages.size < MAX_PAGES) {
   const html = await res.text();
   const noindex = /<meta[^>]+name="robots"[^>]+content="[^"]*noindex/i.test(html);
   const canon = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
-  const canonPath = canon ? normalize(canon.replace(/&amp;/g, "&"), path) : null;
+  // Canonical absolue sur le domaine public (mapaproperty.lu), pas sur BASE :
+  // on compare le chemin seul, quel que soit le domaine (controle du 13/11/2026).
+  const canonPath = canon ? canonicalPath(canon.replace(/&amp;/g, "&"), path) : null;
   const indexable = res.status === 200 && !noindex && (!canonPath || canonPath === path);
   pages.set(path, { status: res.status, indexable, depth, noindex, canonical: canonPath });
   if (res.status !== 200) continue;

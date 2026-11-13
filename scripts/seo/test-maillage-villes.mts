@@ -16,7 +16,7 @@ import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { cities, getNearbyCities, luxembourgCities } from "../../lib/cities";
-import { FEATURED_CITY_SLUGS, cityForPlace, cityForProperty } from "../../lib/internal-links";
+import { FEATURED_CITY_SLUGS, cityForPlace } from "../../lib/internal-links";
 import { communeCityOf, isQuartierCity, quartierCities } from "../../lib/city-links";
 import { luxembourgCommunes } from "../../lib/markets";
 
@@ -41,7 +41,7 @@ for (const s of FEATURED_CITY_SLUGS) for (const from of ["/", "/services", "/bie
 // Page des marches : toutes les villes (ExploreLinks) et les communes.
 for (const c of cities) link("/services/marches-actifs", c.slug);
 for (const name of luxembourgCommunes) {
-  const page = cityForPlace(name) ?? cityForProperty({ city: name, country: "LU" });
+  const page = cityForPlace(name);
   if (page) link("/services/marches-actifs", page.slug);
 }
 // Pages de ville (villes du Luxembourg toujours indexables).

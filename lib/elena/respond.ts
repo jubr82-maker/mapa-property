@@ -132,7 +132,9 @@ function searchReply<P extends ElenaProperty>(text: string, q: ParsedQuery, loca
 }
 
 // Mots de l'immobilier : une question qui en contient n'est jamais hors sujet.
-const REAL_ESTATE = /(bien|maison|appart|immo|vend|achat|achet|lou|loyer|location|mandat|estim|agence|notaire|credit|pret|terrain|bureau|property|house|flat|apartment|rent|sell|buy|mortgage|agency|immobil|haus|wohnung|miete|kauf|verkauf|makler|grundst)/;
+// Mots courts en debut de mot seulement : "vendredi", "combien", "parents", "different"
+// ou "interpreter" ne sont pas de l'immobilier (controle du 13/11/2026).
+const REAL_ESTATE = /(maison|appart|immo|vente|achat|achet|loyer|location|mandat|estim|agence|notaire|credit|terrain|bureau|property|house|apartment|mortgage|agency|immobil|haus|wohnung|miete|kauf|verkauf|makler|grundst| (?:bien(?!tot)|vend(?!redi)|lou|pret|flat|rent|sell|buy))/;
 
 /** Question sans rapport avec l'immobilier : une formulation de l'entree, en mot entier. */
 export function isOffTopic(text: string, entry: ElenaEntry): boolean {
