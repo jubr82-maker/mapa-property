@@ -17,6 +17,8 @@ import { RevalidateButton } from "@/components/admin/RevalidateButton";
 import type { PhotoData } from "@/components/admin/PhotoManager";
 import { ImportSummaryBanner } from "@/components/admin/ImportSummaryBanner";
 import { draftTodo } from "@/lib/import-listing/todo";
+import { loadClaudeUsage } from "@/lib/claude/usage";
+import { getUsdPerEur } from "@/lib/claude/usd-rate";
 
 export const dynamic = "force-dynamic";
 // Amelioration des photos (nov. 2026) : une photo par appel.
@@ -57,6 +59,8 @@ export default async function AdminPropertyEditPage({
   // pour que la fiche reste editable tant que ce SQL n'est pas execute
   // (colonne absente : boutons desactives, rien n'est envoye).
   const mandateRes = await supabase.from("properties").select("mandate_type").eq("id", id).maybeSingle();
+  // Consommation Claude (SQL 40) : "base pas encore prete" tant qu'absent.
+  const claudeUsage = await loadClaudeUsage(supabase, await getUsdPerEur());
   const mandateAvailable = !mandateRes.error;
   const mandateType = mandateAvailable ? ((mandateRes.data as { mandate_type?: string | null } | null)?.mandate_type ?? null) : null;
   // Bandeaux (SQL 35, nov. 2026) : meme principe ; colonnes absentes =
@@ -183,6 +187,7 @@ export default async function AdminPropertyEditPage({
         </header>
         <PropertyEditForm
           propertyId={data.id}
+          claudeUsage={claudeUsage}
           mandateAvailable={mandateAvailable}
           banner={{ available: bannerAvailable, coverUrl: initialPhotos[0]?.url ?? null }}
           listing={{

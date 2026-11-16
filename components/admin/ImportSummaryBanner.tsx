@@ -11,10 +11,12 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { importSummaryKey, type StoredImportSummary } from "@/lib/import-listing/summary";
+import { CLAUDE_TRANSLATE_EVENT } from "@/components/admin/ClaudeTranslateButton";
 
 export function ImportSummaryBanner({ propertyId, todo }: { propertyId: string; todo: string[] }) {
   const t = useTranslations("admin_properties");
   const tl = useTranslations("admin_listing");
+  const tc = useTranslations("admin_claude");
   const [summary, setSummary] = useState<StoredImportSummary | null>(null);
   const [hidden, setHidden] = useState(false);
 
@@ -130,6 +132,18 @@ export function ImportSummaryBanner({ propertyId, todo }: { propertyId: string; 
       {summary && summary.recognized && !summary.translated && <p className="mt-2 text-sm text-ink-mid">{t("import_sum_not_translated")}</p>}
       {summary?.countryDefaulted && <p className="mt-2 text-sm text-red-700">{t("import_sum_country_default")}</p>}
       {summary?.transactionDefaulted && <p className="mt-2 text-sm text-red-700">{t("import_sum_tx_default")}</p>}
+      {/* Traduction de l'import : Mistral. Claude est propose ici, appele
+          seulement par un clic (la fiche fait l'appel, avec le cout estime). */}
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-ink/10 pt-4">
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event(CLAUDE_TRANSLATE_EVENT))}
+          className="min-h-11 rounded-full border border-ink/30 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink hover:border-gold"
+        >
+          {tc("button")}
+        </button>
+        <span className="text-xs text-ink-soft">{tc("import_hint")}</span>
+      </div>
     </section>
   );
 }

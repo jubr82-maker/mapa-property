@@ -81,6 +81,84 @@ export const BARE_VERBS: Record<ListingLang, string[]> = {
   de: ["entdecken sie"],
 };
 
+/**
+ * Remplacement propose pour chaque formule interdite (nov. 2026), applique
+ * en un clic ("Appliquer") : meme cle que FORBIDDEN_PHRASES ; un "*" final
+ * reporte la terminaison du mot remplace (atemberaubende -> bemerkenswerte).
+ * La majuscule initiale du texte remplace est gardee.
+ */
+export const FORBIDDEN_REPLACEMENTS: Record<ListingLang, Record<string, string>> = {
+  fr: {
+    "niché": "situé",
+    "nichée": "située",
+    "nichés": "situés",
+    "nichées": "situées",
+    "havre de paix": "lieu calme",
+    "n'attend que vous": "est disponible",
+    "idéal pour les familles": "adapté à une famille",
+    "idéale pour les familles": "adaptée à une famille",
+    "alliant à la perfection": "associant",
+    "à couper le souffle": "remarquable",
+    "un must": "un atout",
+    "plongez": "entrez",
+    "laissez-vous séduire": "appréciez",
+    "véritable joyau": "bien rare",
+    "écrin": "cadre",
+    "écrins": "cadres",
+  },
+  en: {
+    "nestled": "located",
+    "haven of peace": "quiet setting",
+    "haven of tranquillity": "quiet setting",
+    "awaits you": "is available",
+    "is waiting for you": "is available",
+    "ideal for families": "suited to a family",
+    "perfect for families": "suited to a family",
+    "perfectly combines": "combines",
+    "perfect blend": "combination",
+    "breathtaking": "remarkable",
+    "a must-see": "worth a visit",
+    "a must": "an asset",
+    "dive into": "explore",
+    "immerse yourself": "take your time",
+    "let yourself be seduced": "enjoy",
+    "let yourself be charmed": "enjoy",
+    "true gem": "rare property",
+    "hidden gem": "rare property",
+    "jewel": "rare property",
+    "showcase": "present",
+    "stunning": "remarkable",
+    "boasts": "offers",
+  },
+  de: {
+    "eingebettet*": "gelegen*",
+    "oase der ruhe": "ruhige Lage",
+    "ruheoase": "ruhige Lage",
+    "wartet auf sie": "ist verfügbar",
+    "erwartet sie": "bietet Ihnen",
+    "ideal für familien": "für eine Familie geeignet",
+    "perfekt für familien": "für eine Familie geeignet",
+    "perfekte verbindung": "gelungene Verbindung",
+    "perfekt vereint": "vereint",
+    "atemberaubend*": "bemerkenswert*",
+    "ein muss": "ein Vorteil",
+    "tauchen sie ein": "nehmen Sie sich Zeit",
+    "lassen sie sich verzaubern": "genießen Sie",
+    "lassen sie sich begeistern": "genießen Sie",
+    "wahres juwel": "seltene Immobilie",
+    "schmuckstück*": "besondere Immobilie",
+    "kleinod": "besondere Immobilie",
+    "traumhaft*": "reizvoll*",
+  },
+};
+
+/** Remplacement propose pour un verbe employe sans complement. */
+export const BARE_VERB_REPLACEMENTS: Record<ListingLang, Record<string, string>> = {
+  fr: { "découvrez": "visite sur rendez-vous" },
+  en: { "discover": "viewings by appointment" },
+  de: { "entdecken sie": "Besichtigung nach Vereinbarung" },
+};
+
 /** Sigles autorises en capitales dans un titre. */
 export const ALLOWED_CAPS = ["MAPA", "PAG", "PAP", "TVA", "RDC", "LU", "CPE", "WC", "HAB", "MIX", "BEP", "ZAE"];
 

@@ -6,15 +6,21 @@ import { requireAdminPage } from "@/lib/admin/require-admin";
 import { ADMIN_LOCALE, formatDateTime } from "@/lib/datetime";
 import { loadDashboard } from "@/lib/pilotage/dashboard";
 import { Card, GoLink, PageHeader, Pill, Section, type Tone } from "@/components/admin/pilotage/ui";
+import { ClaudeUsagePanel } from "@/components/admin/ClaudeUsage";
+import { loadClaudeUsage } from "@/lib/claude/usage";
+import { getUsdPerEur } from "@/lib/claude/usd-rate";
 
 export const dynamic = "force-dynamic";
 
 const TONE: Record<"critical" | "warning" | "info", Tone> = { critical: "critical", warning: "warning", info: "neutral" };
 
 export default async function AdminDashboardPage() {
-  await requireAdminPage();
+  const { supabase } = await requireAdminPage();
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_pilotage" });
+  const tc = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_claude" });
   const { items, checked } = await loadDashboard();
+  // Consommation Claude (SQL 40) : "base pas encore prete" tant qu'absent.
+  const claudeUsage = await loadClaudeUsage(supabase, await getUsdPerEur());
 
   const spaces = [
     { href: "/admin/activite", title: t("nav_activity"), text: t("dashboard_link_activity") },
@@ -48,6 +54,10 @@ export default async function AdminDashboardPage() {
             ))}
           </ul>
         )}
+      </Section>
+
+      <Section title={tc("panel_title")} intro={tc("panel_intro")}>
+        <ClaudeUsagePanel usage={claudeUsage} />
       </Section>
 
       <Section title={t("dashboard_spaces")}>

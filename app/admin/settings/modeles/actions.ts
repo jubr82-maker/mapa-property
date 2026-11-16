@@ -13,6 +13,7 @@ import { logAdminAction } from "@/lib/pilotage/audit";
 import { LISTING_LANGS, type ListingLang } from "@/lib/listing/listing-data";
 import { isTemplatePart } from "@/lib/listing/families";
 import { checkFields, describeIssues, templateLiteral } from "@/lib/listing/writing-check";
+import { autoFixText, isContentCode } from "@/lib/listing/writing-autofix";
 import { LISTING_TEMPLATES_TAG } from "@/lib/listing/public-templates";
 
 // Le tronc donne la fin standard des fiches publiques : l'etiquette suffit,
@@ -39,14 +40,19 @@ export async function saveListingTemplate(lang: string, part: string, body: stri
   if (!admin.ok) return sessionFailure();
   return runAction(async () => {
     const target = await checkTarget(lang, part);
-    const text = String(body ?? "").replace(/\r\n?/g, "\n");
-    if (!text.trim()) throw new ActionFailure((await tl())("tpl_err_empty"));
-    if (text.length > MAX_BODY) throw new ActionFailure((await tl())("tpl_err_too_long", { max: MAX_BODY }));
-    // Regles de redaction sur le texte fixe du modele (reperes retires).
-    const issues = checkFields([{ field: target.part, lang: target.lang, text: templateLiteral(text), title: target.part === "title" || target.part === "search_title" }]);
+    const raw = String(body ?? "").replace(/\r\n?/g, "\n");
+    if (!raw.trim()) throw new ActionFailure((await tl())("tpl_err_empty"));
+    if (raw.length > MAX_BODY) throw new ActionFailure((await tl())("tpl_err_too_long", { max: MAX_BODY }));
+    const isTitle = target.part === "title" || target.part === "search_title";
+    // Regles de redaction (nov. 2026) : la forme du texte fixe est corrigee
+    // automatiquement (reperes {{cle}} et [[ ]] proteges), seul le fond bloque.
+    const text = autoFixText(raw, target.lang, { title: isTitle, protect: /\{\{[^}]*\}\}|\[\[|\]\]/g }).text;
+    const issues = checkFields([{ field: target.part, lang: target.lang, text: templateLiteral(text), title: isTitle }])
+      .map((x) => ({ ...x, issues: x.issues.filter((i) => isContentCode(i.code)) }))
+      .filter((x) => x.issues.length > 0);
     if (issues.length) {
       const t = await tl();
-      throw new ActionFailure([t("chk_template_blocked"), ...describeIssues(issues, (k, v) => t(k, v), () => t("chk_template_field"))].join("\n"));
+      throw new ActionFailure([t("chk_template_blocked_content"), ...describeIssues(issues, (k, v) => t(k, v), () => t("chk_template_field"))].join("\n"));
     }
     const { error } = await admin.supabase
       .from("listing_templates")

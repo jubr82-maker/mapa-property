@@ -16,6 +16,9 @@ import { useTranslations } from "next-intl";
 import { LISTING_FAMILIES, LISTING_TYPES } from "@/lib/listing/families";
 import { LISTING_LANGS, type ListingLang } from "@/lib/listing/listing-data";
 import { checkFields, describeIssues } from "@/lib/listing/writing-check";
+import { autoFixHtml, autoFixText, isContentCode } from "@/lib/listing/writing-autofix";
+import { applyAllHits, applyHit, contentHits } from "@/lib/listing/writing-suggest";
+import { WritingFixPanel, type ContentItem, type FixLogEntry } from "@/components/admin/WritingFixPanel";
 import { htmlToText, textToHtml } from "@/lib/listing/template-engine";
 import { formatMoney } from "@/lib/listing/language";
 import {
@@ -107,8 +110,10 @@ export function SearchForm({ initial, models, mandateLabel }: { initial: SearchF
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s, communesText, models]);
 
-  const title = (l: ListingLang) => (s.auto[`title_${l}`] !== false ? generated[l].title : s.titles[l]);
-  const text = (l: ListingLang) => (s.auto[`description_${l}`] !== false ? generated[l].text : htmlToText(s.descriptions[l]));
+  const titleOf = (src: SearchFormInitial, l: ListingLang) => (src.auto[`title_${l}`] !== false ? generated[l].title : src.titles[l]);
+  const textOf = (src: SearchFormInitial, l: ListingLang) => (src.auto[`description_${l}`] !== false ? generated[l].text : htmlToText(src.descriptions[l]));
+  const title = (l: ListingLang) => titleOf(s, l);
+  const text = (l: ListingLang) => textOf(s, l);
 
   const checks = checkFields(
     LISTING_LANGS.flatMap((l) => [
@@ -118,31 +123,117 @@ export function SearchForm({ initial, models, mandateLabel }: { initial: SearchF
     ]),
     communes,
   );
-  const issueLines = describeIssues(checks, (k, v) => tl(k, v), (f) => t(`field_${f}`), 50);
+  // Fond (bloquant) et forme (corrigee a l'enregistrement), nov. 2026.
+  const contentChecks = checks.map((c) => ({ ...c, issues: c.issues.filter((i) => isContentCode(i.code)) })).filter((c) => c.issues.length > 0);
+  // Forme : seulement ce que la correction automatique changera vraiment.
+  const fixCodes = (field: string, l: ListingLang) => {
+    const v = field.startsWith("title_") ? title(l) : field.startsWith("criteria_") ? s.criteria[l] : text(l);
+    return new Set(autoFixText(v, l, { title: field.startsWith("title_") }).changes.map((c) => c.code as string));
+  };
+  const formChecks = checks
+    .map((c) => {
+      const codes = fixCodes(c.field, c.lang);
+      return { ...c, issues: c.issues.filter((i) => !isContentCode(i.code) && codes.has(i.code)) };
+    })
+    .filter((c) => c.issues.length > 0);
+  const issueLines = describeIssues(contentChecks, (k, v) => tl(k, v), (f) => t(`field_${f}`), 50);
+  const formLines = describeIssues(formChecks, (k, v) => tl(k, v), (f) => t(`field_${f}`), 50);
 
-  function payload(): SearchFormPayload {
+  const [fixLog, setFixLog] = useState<FixLogEntry[]>([]);
+  const [showContent, setShowContent] = useState(false);
+
+  /** Corrige la forme des textes saisis (un texte tire du modele reste lie au modele). */
+  function fixForm(src: SearchFormInitial): { next: SearchFormInitial; log: FixLogEntry[] } {
+    let next = src;
+    const log: FixLogEntry[] = [];
+    for (const l of LISTING_LANGS) {
+      const c = autoFixText(src.criteria[l], l);
+      if (c.changes.length) {
+        next = { ...next, criteria: { ...next.criteria, [l]: c.text } };
+        log.push({ label: t(`field_criteria_${l}`), changes: c.changes });
+      }
+      if (src.auto[`title_${l}`] === false) {
+        const r = autoFixText(src.titles[l], l, { title: true, properNouns: communes });
+        if (r.changes.length) {
+          next = { ...next, titles: { ...next.titles, [l]: r.text } };
+          log.push({ label: t(`field_title_${l}`), changes: r.changes });
+        }
+      }
+      if (src.auto[`description_${l}`] === false) {
+        const r = autoFixHtml(src.descriptions[l], l);
+        if (r.changes.length) {
+          next = { ...next, descriptions: { ...next.descriptions, [l]: r.text } };
+          log.push({ label: t(`field_description_${l}`), changes: r.changes });
+        }
+      }
+    }
+    return { next, log };
+  }
+
+  /** Formules interdites, avec le remplacement propose. */
+  function contentOf(src: SearchFormInitial): ContentItem[] {
+    return LISTING_LANGS.flatMap((l) => [
+      ...contentHits(titleOf(src, l), l).map((hit) => ({ key: `title_${l}`, label: t(`field_title_${l}`), hit })),
+      ...contentHits(src.auto[`description_${l}`] !== false ? generated[l].text : src.descriptions[l], l).map((hit) => ({ key: `description_${l}`, label: t(`field_description_${l}`), hit })),
+      ...contentHits(src.criteria[l], l).map((hit) => ({ key: `criteria_${l}`, label: t(`field_criteria_${l}`), hit })),
+    ]);
+  }
+  const pendingContent = showContent ? contentOf(s) : [];
+
+  /** Remplacement applique a un texte ; un texte tire du modele devient saisi. */
+  function withReplaced(src: SearchFormInitial, key: string, edit: (v: string, l: ListingLang) => string): SearchFormInitial {
+    const l = key.slice(-2) as ListingLang;
+    if (key.startsWith("criteria_")) return { ...src, criteria: { ...src.criteria, [l]: edit(src.criteria[l], l) } };
+    if (key.startsWith("title_")) return { ...src, titles: { ...src.titles, [l]: edit(titleOf(src, l), l) }, auto: { ...src.auto, [key]: false } };
+    const html = src.auto[key] !== false ? textToHtml(generated[l].text) : src.descriptions[l];
+    // Texte du modele : remplacement fait sur le texte, puis converti.
+    const replaced = src.auto[key] !== false ? textToHtml(edit(generated[l].text, l)) : edit(html, l);
+    return { ...src, descriptions: { ...src.descriptions, [l]: replaced }, auto: { ...src.auto, [key]: false } };
+  }
+  function applyContent(item: ContentItem) {
+    setS((p) => withReplaced(p, item.key, (v) => applyHit(v, item.hit)));
+  }
+  function applyAllContent() {
+    let next = s;
+    for (const key of new Set(contentOf(s).map((c) => c.key))) next = withReplaced(next, key, (v, l) => applyAllHits(v, l));
+    setS(next);
+    saveWith(next);
+  }
+
+  function payload(src: SearchFormInitial = s): SearchFormPayload {
     return {
-      transaction: s.transaction,
-      property_type: s.property_type,
+      transaction: src.transaction,
+      property_type: src.property_type,
       communes,
-      bedrooms_min: s.bedrooms_min,
-      surface_min: s.surface_min,
-      land_min: s.land_min,
-      delay: s.delay,
-      criteria: s.criteria,
-      titles: { fr: title("fr"), en: title("en"), de: title("de") },
-      descriptions: { fr: textToHtml(text("fr")), en: textToHtml(text("en")), de: textToHtml(text("de")) },
-      auto: s.auto,
-      consent: s.consent,
-      client: s.client,
+      bedrooms_min: src.bedrooms_min,
+      surface_min: src.surface_min,
+      land_min: src.land_min,
+      delay: src.delay,
+      criteria: src.criteria,
+      titles: { fr: titleOf(src, "fr"), en: titleOf(src, "en"), de: titleOf(src, "de") },
+      descriptions: { fr: textToHtml(textOf(src, "fr")), en: textToHtml(textOf(src, "en")), de: textToHtml(textOf(src, "de")) },
+      auto: src.auto,
+      consent: src.consent,
+      client: src.client,
     };
   }
 
   function save() {
+    saveWith(s);
+  }
+
+  function saveWith(src: SearchFormInitial) {
     setMsg(null);
-    if (checks.length) return setMsg({ ok: false, text: [tl("chk_blocked"), ...issueLines].join("\n") });
+    const { next, log } = fixForm(src);
+    setFixLog(log);
+    if (log.length) setS(next);
+    if (contentOf(next).length) {
+      setShowContent(true);
+      return setMsg({ ok: false, text: tl("chk_blocked_content_screen") });
+    }
+    setShowContent(false);
     startTransition(async () => {
-      const r = await saveSearch(s.id, payload());
+      const r = await saveSearch(next.id, payload(next));
       if (!r.ok) return setMsg({ ok: false, text: r.error });
       setMsg({ ok: true, text: t("saved", { reference: r.reference }) });
       if (!s.id) router.replace(`/admin/recherches/${r.id}`);
@@ -290,15 +381,32 @@ export function SearchForm({ initial, models, mandateLabel }: { initial: SearchF
         </div>
         <div className="rounded-md border border-[#3D4F63]/15 px-3 py-2 md:col-span-3" role="status" data-writing-check>
           <p className={labelCls}>{tl("chk_live_title")}</p>
-          {issueLines.length === 0 ? (
+          {issueLines.length === 0 && formLines.length === 0 ? (
             <p className="mt-1 text-sm text-emerald-800">{tl("chk_live_ok")}</p>
           ) : (
-            <ul className="mt-1 space-y-1 text-sm text-red-700">
-              {issueLines.map((line, i) => (
-                <li key={i}>{line}</li>
-              ))}
-            </ul>
+            <>
+              {issueLines.length > 0 && (
+                <ul className="mt-1 space-y-1 text-sm text-red-700">
+                  {issueLines.map((line, i) => (
+                    <li key={i}>{line}</li>
+                  ))}
+                </ul>
+              )}
+              {formLines.length > 0 && (
+                <>
+                  <p className="mt-1 text-xs text-emerald-800">{tl("chk_live_autofix")}</p>
+                  <ul className="mt-1 space-y-1 text-xs text-[#3D4F63]/80">
+                    {formLines.map((line, i) => (
+                      <li key={i}>{line}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </>
           )}
+        </div>
+        <div className="md:col-span-3">
+          <WritingFixPanel fixes={fixLog} content={pendingContent} onApply={applyContent} onApplyAll={applyAllContent} busy={busy} />
         </div>
       </section>
 

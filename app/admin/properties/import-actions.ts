@@ -27,11 +27,13 @@ import { listingWritingPrompt } from "@/lib/listing/writing-rules";
 import { emptyListingData, sanitizeListingData, type ListingLang } from "@/lib/listing/listing-data";
 import { htmlToText } from "@/lib/listing/template-engine";
 import { LU_PLACES } from "@/lib/geo/lu-localities";
-import { transactionToBase } from "@/lib/taxonomy/property-types";
+import { TRANSACTION_TYPES, transactionToBase } from "@/lib/taxonomy/property-types";
 import { logAdminAction } from "@/lib/pilotage/audit";
 import { generateUniquePropertySlug } from "@/lib/admin/property-slug";
 import { extractPasted, type SkippedImage } from "@/lib/import-listing/extract";
-import { extractionMessages, validateExtraction, type ImportField } from "@/lib/import-listing/fields";
+import { extractionMessages, IMPORT_TYPES, validateExtraction, type ImportField } from "@/lib/import-listing/fields";
+import { missingRequired } from "@/lib/import-listing/required";
+import { COUNTRIES } from "@/lib/countries";
 import { mechanicalFixes, plainToHtml, remainingIssues } from "@/lib/import-listing/writing-fix";
 import { imageToken } from "@/lib/import-listing/token";
 
@@ -61,11 +63,17 @@ export type ImportSummary = {
   imagesBlocked: boolean;
 };
 
-export type ImportResult = { ok: true; summary: ImportSummary } | { ok: false; error: string };
+/** Colonnes obligatoires que l'import doit connaitre avant d'enregistrer. */
+export type ImportChoiceField = "property_type" | "transaction" | "country";
+export type ImportChoices = Partial<Record<ImportChoiceField, string>>;
+
+export type ImportResult =
+  | { ok: true; summary: ImportSummary }
+  | { ok: false; error: string; needs?: ImportChoiceField[] };
 
 type InsertError = { code?: string; message?: string } | null;
 
-export async function importListing(input: { html?: string; text?: string; textEdited?: boolean }): Promise<ImportResult> {
+export async function importListing(input: { html?: string; text?: string; textEdited?: boolean; choices?: ImportChoices }): Promise<ImportResult> {
   const admin = await requireAdmin();
   if (!admin.ok) return sessionFailure();
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
@@ -86,7 +94,29 @@ export async function importListing(input: { html?: string; text?: string; textE
   // 2. Reconnaissance puis controle contre le texte colle.
   const raw = await mistralJson(extractionMessages(pasted.text), 1500, { timeoutMs: 60000 });
   const checked = validateExtraction(raw, pasted.text, { luPlaces: LU_PLACES });
-  const v = checked.values;
+  // Colonnes obligatoires (type de bien, transaction, pays) : choisies dans
+  // la zone d'import si l'annonce ne permet pas de les reconnaitre. Sans
+  // elles, l'enregistrement n'est JAMAIS tente (nov. 2026).
+  const c = input?.choices ?? {};
+  const chosen: ImportField[] = [];
+  const v = { ...checked.values };
+  // Un choix ne remplace jamais une valeur reconnue dans l'annonce.
+  if (!v.property_type && typeof c.property_type === "string" && IMPORT_TYPES.includes(c.property_type)) {
+    v.property_type = c.property_type;
+    chosen.push("property_type");
+  }
+  if (!transactionToBase(v.transaction) && typeof c.transaction === "string" && TRANSACTION_TYPES.some((x) => x.slug === c.transaction)) {
+    v.transaction = c.transaction;
+    chosen.push("transaction");
+  }
+  if (!v.country && typeof c.country === "string" && COUNTRIES.some((x) => x.code === c.country)) {
+    v.country = c.country;
+    chosen.push("country");
+  }
+  const needs = missingRequired(v);
+  if (needs.length) return { ok: false, error: t("import_need_choices"), needs };
+  const filled = [...new Set([...checked.filled, ...chosen])];
+  const todo = checked.todo.filter((f) => !filled.includes(f));
 
   // 3. Corrections mecaniques seulement ; le reste est signale.
   const titleFr = v.title_fr ? mechanicalFixes(v.title_fr, "fr").replace(/\s+/g, " ").trim() : null;
@@ -157,7 +187,7 @@ export async function importListing(input: { html?: string; text?: string; textE
     transaction: transactionBase,
     transaction_detail: transactionBase ? v.transaction : null,
     property_type: v.property_type,
-    // Pays non reconnu : vide (a completer), jamais "LU" par defaut.
+    // Pays reconnu ou choisi dans la zone d'import, jamais "LU" par defaut.
     country: v.country,
     city: v.city,
     price: v.price,
@@ -186,14 +216,15 @@ export async function importListing(input: { html?: string; text?: string; textE
     listing_data: listingData,
   };
 
-  // Base sans la colonne listing_data (SQL 17 non execute) ou sans
-  // transaction vide (colonne obligatoire) : nouvel essai adapte.
-  let transactionDefaulted = false;
-  let countryDefaulted = false;
+  // Base sans la colonne listing_data (SQL 17 non execute) : nouvel essai
+  // sans elle. Type, transaction et pays sont toujours connus ici : plus
+  // aucune valeur par defaut n'est enregistree a la place de Julien.
+  const transactionDefaulted = false;
+  const countryDefaulted = false;
   let payload = { ...base };
   let row: { id: string; slug: string | null } | null = null;
   let lastError: InsertError = null;
-  for (let attempt = 0; attempt < 4 && !row; attempt++) {
+  for (let attempt = 0; attempt < 2 && !row; attempt++) {
     const { data, error } = await admin.supabase.from("properties").insert(payload).select("id, slug").single();
     if (!error && data) {
       row = data as { id: string; slug: string | null };
@@ -205,13 +236,6 @@ export async function importListing(input: { html?: string; text?: string; textE
       const { listing_data: _drop, ...rest } = payload;
       void _drop;
       payload = rest;
-    } else if (/23502/.test(msg) && /transaction/.test(msg) && payload.transaction == null) {
-      payload = { ...payload, transaction: "sale" };
-      transactionDefaulted = true;
-    } else if (/23502/.test(msg) && /country/.test(msg) && payload.country == null) {
-      // Colonne obligatoire : "LU" enregistre, signale a verifier.
-      payload = { ...payload, country: "LU" };
-      countryDefaulted = true;
     } else break;
   }
   if (!row) return { ok: false, error: (await dbFailure(lastError ?? { code: "PGRST116" }, "importListing")).message };
@@ -224,8 +248,8 @@ export async function importListing(input: { html?: string; text?: string; textE
     ok: true,
     summary: {
       id: row.id,
-      filled: checked.filled,
-      todo: checked.todo,
+      filled,
+      todo,
       rejected: checked.rejected,
       words,
       issues,

@@ -14,6 +14,7 @@ import { ActionFailure, dbFailure, runAction, sessionFailure, type ActionResult 
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { logAdminAction } from "@/lib/pilotage/audit";
 import { checkFields, describeIssues } from "@/lib/listing/writing-check";
+import { autoFixHtml, autoFixText, isContentCode } from "@/lib/listing/writing-autofix";
 import { htmlToText } from "@/lib/listing/template-engine";
 import type { ListingLang } from "@/lib/listing/listing-data";
 import { SEARCHES_TAG, searchCitySlugs, searchesCityTag } from "@/lib/searches/data";
@@ -115,7 +116,16 @@ export async function saveSearch(id: string | null, input: SearchFormPayload): P
       row[`description_${l}`] = str(input.descriptions?.[l], 20000) || null;
     }
 
-    // Controle de redaction : memes regles que les annonces.
+    // Controle de redaction : memes regles que les annonces ; la forme est
+    // corrigee automatiquement (nov. 2026), seul le fond bloque.
+    for (const l of LANGS) {
+      const fixT = autoFixText(String(row[`title_${l}`] ?? ""), l, { title: true, properNouns: communes });
+      if (fixT.changes.length) row[`title_${l}`] = fixT.text;
+      const fixD = autoFixHtml(String(row[`description_${l}`] ?? ""), l);
+      if (fixD.changes.length) row[`description_${l}`] = fixD.text;
+      const fixC = autoFixText(String(row[`criteria_${l}`] ?? ""), l);
+      if (fixC.changes.length) row[`criteria_${l}`] = fixC.text;
+    }
     const issues = checkFields(
       LANGS.flatMap((l) => [
         { field: `title_${l}`, lang: l, title: true, text: String(row[`title_${l}`] ?? "") },
@@ -123,10 +133,12 @@ export async function saveSearch(id: string | null, input: SearchFormPayload): P
         { field: `criteria_${l}`, lang: l, text: String(row[`criteria_${l}`] ?? "") },
       ]),
       communes,
-    );
+    )
+      .map((x) => ({ ...x, issues: x.issues.filter((i) => isContentCode(i.code)) }))
+      .filter((x) => x.issues.length > 0);
     if (issues.length) {
       const tl = await tL();
-      return { ok: false, error: [tl("chk_blocked"), ...describeIssues(issues, (k, v) => tl(k, v), (f) => t(`field_${f}`))].join("\n") };
+      return { ok: false, error: [tl("chk_blocked_content"), ...describeIssues(issues, (k, v) => tl(k, v), (f) => t(`field_${f}`))].join("\n") };
     }
 
     let searchId = id;

@@ -13,6 +13,8 @@ import { LISTING_TYPES, MANDATE_TYPES, TEMPLATE_PARTS, type TemplatePart } from 
 import { generateListing, listingValues, type ListingTemplates, type ListingVocab } from "@/lib/listing/generate";
 import { LISTING_LANGS, type ListingLang } from "@/lib/listing/listing-data";
 import { sampleColumns, sampleListing, type SampleTexts } from "@/lib/listing/sample";
+import { autoFixText } from "@/lib/listing/writing-autofix";
+import { WritingFixPanel, type FixLogEntry } from "@/components/admin/WritingFixPanel";
 import { generateSearch, publicBudgetRange, searchValues, type SearchTemplates, type SearchVocab } from "@/lib/searches/search";
 import { saveListingTemplate, resetListingTemplate } from "@/app/admin/settings/modeles/actions";
 
@@ -50,6 +52,7 @@ function withPart(tpl: Tpl, part: TemplatePart, body: string): Tpl {
 }
 
 export function ListingTemplatesEditor({ models }: { models: Record<ListingLang, LangModel> }) {
+  const [fixLog, setFixLog] = useState<FixLogEntry[]>([]);
   const t = useTranslations("admin_listing");
   const tp = useTranslations("admin_properties");
   const [lang, setLang] = useState<ListingLang>("fr");
@@ -103,10 +106,16 @@ export function ListingTemplatesEditor({ models }: { models: Record<ListingLang,
 
   function save() {
     setMsg(null);
+    // Forme corrigee automatiquement (nov. 2026), meme code que le serveur ;
+    // reperes {{cle}} et [[ ]] proteges.
+    const fixed = autoFixText(body, lang, { title: part === "title" || part === "search_title", protect: /\{\{[^}]*\}\}|\[\[|\]\]/g });
+    const text = fixed.text;
+    if (fixed.changes.length) setDrafts((d) => ({ ...d, [lang]: withPart(d[lang], part, text) }));
+    setFixLog(fixed.changes.length ? [{ label: `${part} (${lang.toUpperCase()})`, changes: fixed.changes }] : []);
     startTransition(async () => {
-      const r = await saveListingTemplate(lang, part, body);
+      const r = await saveListingTemplate(lang, part, text);
       if (!r.ok) return setMsg({ ok: false, text: r.error });
-      setSaved((s) => ({ ...s, [lang]: withPart(s[lang], part, body) }));
+      setSaved((s) => ({ ...s, [lang]: withPart(s[lang], part, text) }));
       setOverridden((o) => ({ ...o, [lang]: o[lang].includes(part) ? o[lang] : [...o[lang], part] }));
       setMsg({ ok: true, text: t("tpl_saved") });
     });
@@ -180,6 +189,7 @@ export function ListingTemplatesEditor({ models }: { models: Record<ListingLang,
               {msg.text}
             </p>
           )}
+          <WritingFixPanel fixes={fixLog} content={[]} onApply={() => {}} onApplyAll={() => {}} />
           <details className="rounded-lg border border-[#3D4F63]/10 p-3">
             <summary className="cursor-pointer font-display text-sm font-bold text-[#3D4F63]">{t("tpl_syntax_title")}</summary>
             <ul className="mt-2 space-y-1 text-xs text-[#3D4F63]/80">

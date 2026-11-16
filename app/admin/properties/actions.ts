@@ -24,13 +24,18 @@ import { emptyListingData, sanitizeListingData, type ListingData, type ListingLa
 import { checkLocation } from "@/lib/admin/property-location";
 import { cityPageOptions } from "@/lib/internal-links";
 import { checkFields, describeIssues } from "@/lib/listing/writing-check";
-import { htmlToText } from "@/lib/listing/template-engine";
+import { autoFixHtml, autoFixText, isContentCode } from "@/lib/listing/writing-autofix";
+import { contentHits } from "@/lib/listing/writing-suggest";
+import { LU_PLACES } from "@/lib/geo/lu-localities";
 import { sendAdminAlert } from "@/lib/pilotage/alerts";
 import { generateUniquePropertySlug } from "@/lib/admin/property-slug";
 
 /** Libelles des messages renvoyes a l'ecran (admin_properties). */
 const tProps = () => getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
 const tListing = () => getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_listing" });
+
+/** Localites du Luxembourg : noms propres permis en majuscule dans un titre. */
+const LU_PLACE_NAMES = [...new Set(LU_PLACES.map((p) => p.name))];
 
 // Textes d'annonce soumis au controle de redaction (oct. 2026).
 const LISTING_TEXT_FIELDS: { field: string; lang: ListingLang; title: boolean; label: string }[] = [
@@ -46,9 +51,12 @@ const LISTING_TEXT_FIELDS: { field: string; lang: ListingLang; title: boolean; l
 ];
 
 /**
- * Controle de redaction des textes MODIFIES (un texte deja en base n'est
- * pas bloque tant qu'on n'y touche pas). Renvoie le motif detaille, ou
- * null. Le texte n'est jamais corrige automatiquement.
+ * Redaction des textes MODIFIES (nov. 2026) : les regles de FORME sont
+ * corrigees automatiquement dans `update` (meme code qu'a l'ecran,
+ * lib/listing/writing-autofix.ts) ; seules les regles de FOND (formules
+ * interdites, verbe sans complement) bloquent encore. Renvoie le motif
+ * detaille, ou null. Un texte deja en base n'est pas touche tant qu'on
+ * n'y touche pas.
  */
 async function listingWritingFailure(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
@@ -64,19 +72,23 @@ async function listingWritingFailure(
     .maybeSingle();
   const cur = (current ?? {}) as unknown as Record<string, unknown>;
   const changed = provided.filter((f) => cur[f.field] !== update[f.field]);
-  const issues = checkFields(
-    changed.map((f) => ({
-      field: f.field,
-      lang: f.lang,
-      title: f.title,
-      text: f.field.startsWith("description_") ? htmlToText(String(update[f.field])) : String(update[f.field]),
-    })),
-    typeof cur.city === "string" ? [cur.city] : [],
-  );
+  // Ville envoyee dans le meme enregistrement, sinon ville enregistree.
+  const city = typeof update.city === "string" ? update.city : typeof cur.city === "string" ? cur.city : null;
+  const proper = [...(city ? [city] : []), ...LU_PLACE_NAMES];
+  for (const f of changed) {
+    const value = String(update[f.field]);
+    const fixed = f.field.startsWith("description_") ? autoFixHtml(value, f.lang) : autoFixText(value, f.lang, { title: f.title, properNouns: proper });
+    if (fixed.changes.length) update[f.field] = fixed.text;
+  }
+  // Fond : meme recherche que l'ecran (lib/listing/writing-suggest.ts, sur
+  // le HTML tel qu'enregistre), pour que tout blocage ait son "Appliquer".
+  const issues = changed
+    .map((f) => ({ field: f.field, lang: f.lang, issues: contentHits(String(update[f.field]), f.lang).map((h) => ({ code: h.code, excerpt: h.code === "forbidden" ? h.match : h.excerpt })) }))
+    .filter((x) => x.issues.length > 0);
   if (!issues.length) return null;
   const [tl, tp] = await Promise.all([tListing(), tProps()]);
   const label = (field: string) => tp(LISTING_TEXT_FIELDS.find((f) => f.field === field)?.label ?? "f_title_fr");
-  return [tl("chk_blocked"), ...describeIssues(issues, (k, v) => tl(k, v), label)].join("\n");
+  return [tl("chk_blocked_content"), ...describeIssues(issues, (k, v) => tl(k, v), label)].join("\n");
 }
 
 /**
@@ -293,11 +305,18 @@ export async function updateProperty(
   // Modele d'annonce (SQL 17) : assaini (forme fermee, longueurs bornees).
   if (data.listing_data !== undefined) {
     const ld = sanitizeListingData(data.listing_data);
-    // Description Google saisie : memes regles de redaction que l'annonce.
-    const metaIssues = checkFields((["fr", "en", "de"] as const).map((l) => ({ field: `seo_description_${l}`, lang: l, text: ld.written[l].seo_description })));
+    // Description Google saisie : memes regles de redaction que l'annonce
+    // (forme corrigee automatiquement, fond bloquant).
+    for (const l of ["fr", "en", "de"] as const) {
+      const fixed = autoFixText(ld.written[l].seo_description, l);
+      if (fixed.changes.length) ld.written[l].seo_description = fixed.text;
+    }
+    const metaIssues = checkFields((["fr", "en", "de"] as const).map((l) => ({ field: `seo_description_${l}`, lang: l, text: ld.written[l].seo_description })))
+      .map((x) => ({ ...x, issues: x.issues.filter((i) => isContentCode(i.code)) }))
+      .filter((x) => x.issues.length > 0);
     if (metaIssues.length) {
       const tl = await tListing();
-      return { ok: false, error: [tl("chk_blocked"), ...describeIssues(metaIssues, (k, v) => tl(k, v), (f) => tl(`seo_meta_label_${f.slice(-2)}`))].join("\n") };
+      return { ok: false, error: [tl("chk_blocked_content"), ...describeIssues(metaIssues, (k, v) => tl(k, v), (f) => tl(`seo_meta_label_${f.slice(-2)}`))].join("\n") };
     }
     update.listing_data = ld;
   }

@@ -22,7 +22,11 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { FolderOpen, ImagePlus } from "lucide-react";
-import { importListing, type ImportSummary } from "@/app/admin/properties/import-actions";
+import { importListing, type ImportChoiceField, type ImportChoices, type ImportSummary } from "@/app/admin/properties/import-actions";
+import { IMPORT_TYPES } from "@/lib/import-listing/fields";
+import { familyOf } from "@/lib/listing/families";
+import { TRANSACTION_TYPES } from "@/lib/taxonomy/property-types";
+import { COUNTRIES, countryName } from "@/lib/countries";
 import { importPastedPhoto, savePropertyPhotos, uploadPropertyPhoto } from "@/app/admin/properties/[id]/photos/actions";
 import { compressImageFile } from "@/lib/image-compress";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
@@ -87,6 +91,18 @@ export function ListingImporter() {
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Colonnes obligatoires non reconnues : choisies ici avant d'enregistrer.
+  const [needs, setNeeds] = useState<ImportChoiceField[]>([]);
+  const [choices, setChoices] = useState<ImportChoices>({});
+  const typeGroups = useMemo(() => {
+    const groups = new Map<string, string[]>();
+    for (const slug of IMPORT_TYPES) {
+      const f = familyOf(slug) ?? "other";
+      groups.set(f, [...(groups.get(f) ?? []), slug]);
+    }
+    return [...groups.entries()];
+  }, []);
+  const choicesMissing = needs.some((n) => !choices[n]);
   // Etat d'un import en cours (reprise des photos en echec).
   const [job, setJob] = useState<{ summary: ImportSummary; tasks: Task[]; done: (Done | null)[]; failures: { index: number; label: string; message: string }[] } | null>(null);
   const folderInput = useRef<HTMLInputElement | null>(null);
@@ -106,6 +122,9 @@ export function ListingImporter() {
     setText(shown);
     setPastedText(shown);
     setError(null);
+    // Nouvelle annonce : les choix de la precedente ne s'appliquent pas.
+    setNeeds([]);
+    setChoices({});
   }
 
   async function addFiles(list: { name: string; file: File }[]) {
@@ -216,11 +235,17 @@ export function ListingImporter() {
     setBusy(true);
     setStep(t("import_step_reading"));
     try {
-      const res = await importListing({ html, text, textEdited: Boolean(html) && text !== pastedText });
+      const res = await importListing({ html, text, textEdited: Boolean(html) && text !== pastedText, choices });
       if (!res.ok) {
+        if (res.needs?.length) {
+          setNeeds(res.needs);
+          setStep(null);
+          return;
+        }
         setError(res.error);
         return;
       }
+      setNeeds([]);
       const summary = res.summary;
       const tasks: Task[] = [
         ...summary.images.map((img, i) => ({ label: t("import_photo_label", { n: i + 1 }), remote: img })),
@@ -292,6 +317,8 @@ export function ListingImporter() {
             onClick={() => {
               setText("");
               setHtml("");
+              setNeeds([]);
+              setChoices({});
             }}
             className="min-h-11 font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft underline underline-offset-4 hover:text-gold-deep"
           >
@@ -361,12 +388,64 @@ export function ListingImporter() {
         <button
           type="button"
           onClick={submit}
-          disabled={busy || reading || job != null}
+          disabled={busy || reading || job != null || choicesMissing}
           className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-ink px-8 font-mono text-xs uppercase tracking-[0.2em] text-bg transition-colors hover:bg-gold-deep disabled:opacity-50"
         >
           {busy ? t("import_working") : t("import_submit")}
         </button>
       </div>
+
+      {needs.length > 0 && (
+        <div className="mt-5 rounded-xl border border-gold/50 bg-bg-soft p-4" role="alert" data-import-choices>
+          <p className="text-sm font-semibold text-ink">{t(needs.includes("property_type") ? "import_choose_type" : "import_choose_required")}</p>
+          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {needs.includes("property_type") && (
+              <label className="block">
+                <span className={labelCls}>{t("import_field_property_type")}</span>
+                <select value={choices.property_type ?? ""} onChange={(e) => setChoices((c) => ({ ...c, property_type: e.target.value || undefined }))} disabled={busy} className="mt-1 block min-h-11 w-full rounded-md border border-ink/20 bg-bg px-3 text-sm text-ink">
+                  <option value="">{t("choose_type")}</option>
+                  {typeGroups.map(([family, slugs]) => (
+                    <optgroup key={family} label={t.has(`family_${family}`) ? t(`family_${family}`) : family}>
+                      {slugs.map((slug) => (
+                        <option key={slug} value={slug}>
+                          {t.has(`ptype_${slug}`) ? t(`ptype_${slug}`) : slug}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </label>
+            )}
+            {needs.includes("transaction") && (
+              <label className="block">
+                <span className={labelCls}>{t("import_field_transaction")}</span>
+                <select value={choices.transaction ?? ""} onChange={(e) => setChoices((c) => ({ ...c, transaction: e.target.value || undefined }))} disabled={busy} className="mt-1 block min-h-11 w-full rounded-md border border-ink/20 bg-bg px-3 text-sm text-ink">
+                  <option value="">{t("choose")}</option>
+                  {TRANSACTION_TYPES.map((tx) => (
+                    <option key={tx.slug} value={tx.slug}>
+                      {tx.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {needs.includes("country") && (
+              <label className="block">
+                <span className={labelCls}>{t("import_field_country")}</span>
+                <select value={choices.country ?? ""} onChange={(e) => setChoices((c) => ({ ...c, country: e.target.value || undefined }))} disabled={busy} className="mt-1 block min-h-11 w-full rounded-md border border-ink/20 bg-bg px-3 text-sm text-ink">
+                  <option value="">{t("choose")}</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {countryName(c, "fr")}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
+          <p className="mt-3 text-xs text-ink-soft">{t("import_choose_then")}</p>
+        </div>
+      )}
 
       {step && (
         <p className="mt-4 text-sm font-semibold text-ink" role="status" aria-live="polite">

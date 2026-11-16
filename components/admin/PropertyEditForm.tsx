@@ -38,6 +38,12 @@ import {
 } from "@/lib/listing/families";
 import { ListingModelEditor } from "@/components/admin/ListingModelEditor";
 import { checkFields, describeIssues, type FieldIssues } from "@/lib/listing/writing-check";
+import { autoFixHtml, autoFixText, isContentCode } from "@/lib/listing/writing-autofix";
+import { applyAllHits, applyHit, contentHits } from "@/lib/listing/writing-suggest";
+import { WritingFixPanel, type ContentItem, type FixLogEntry } from "@/components/admin/WritingFixPanel";
+import { ClaudeTranslateButton } from "@/components/admin/ClaudeTranslateButton";
+import type { ClaudeUsageSummary } from "@/lib/claude/usage";
+import type { ListingTranslation } from "@/lib/claude/translate-listing";
 import { htmlToText } from "@/lib/listing/template-engine";
 import { ownTextWords, propertyPath, seoMetaDescription, seoTitle, type ListingSeoVocab } from "@/lib/listing/listing-seo";
 import { CityPageSelect, type CityPageOption } from "@/components/admin/CityPageSelect";
@@ -275,6 +281,8 @@ function isDirty(a: FormState, b: FormState): boolean {
 
 const SEO_META_LABEL: Record<string, string> = { seo_description_fr: "seo_meta_label_fr", seo_description_en: "seo_meta_label_en", seo_description_de: "seo_meta_label_de" };
 
+const CLAUDE_TARGETS = ["title_en", "description_en", "short_description_en", "title_de", "description_de", "short_description_de"] as const;
+
 const TEXT_FIELDS: { field: "title_fr" | "title_en" | "title_de" | "description_fr" | "description_en" | "description_de" | "short_description_fr" | "short_description_en" | "short_description_de"; lang: ListingLang; title: boolean; label: string }[] = [
   { field: "title_fr", lang: "fr", title: true, label: "f_title_fr" },
   { field: "title_en", lang: "en", title: true, label: "f_title_en" },
@@ -289,6 +297,8 @@ const TEXT_FIELDS: { field: "title_fr" | "title_en" | "title_de" | "description_
 
 interface Props {
   propertyId: string;
+  /** Consommation Claude (bouton "Traduire maintenant avec Claude API"). */
+  claudeUsage: ClaudeUsageSummary;
   initial: PropertyEditFormInitial;
   /** Colonne properties.mandate_type presente (SQL 16 execute). */
   mandateAvailable: boolean;
@@ -445,7 +455,7 @@ function EnergySelect({ value, onChange, labelNone, labelLegacy }: { value: stri
   );
 }
 
-export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner, listing, seo, location, todo }: Props) {
+export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner, listing, seo, location, todo, claudeUsage }: Props) {
   const todoSet = useMemo(() => new Set(todo ?? []), [todo]);
   const t = useTranslations("admin_properties");
   const tn = useTranslations("admin_notices");
@@ -570,6 +580,23 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
     };
   });
 
+  // Regles de fond (bloquantes) et de forme (corrigees a l'enregistrement).
+  const splitChecks = (keep: (content: boolean) => boolean) =>
+    textChecks.map((c) => ({ ...c, issues: c.issues.filter((i) => keep(isContentCode(i.code))) })).filter((c) => c.issues.length > 0);
+  const liveContent = splitChecks((c) => c);
+  // Seulement ce que la correction automatique changera vraiment.
+  const autoCodes = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    for (const f of TEXT_FIELDS) {
+      const r = f.field.startsWith("description_") ? autoFixHtml(form[f.field], f.lang) : autoFixText(form[f.field], f.lang, { title: f.title });
+      m.set(f.field, new Set(r.changes.map((c) => c.code)));
+    }
+    for (const l of LISTING_LANGS) m.set(`seo_description_${l}`, new Set(autoFixText(listingData.written[l].seo_description, l).changes.map((c) => c.code)));
+    return m;
+  }, [form, listingData.written]);
+  const liveForm = splitChecks((c) => !c)
+    .map((c) => ({ ...c, issues: c.issues.filter((i) => autoCodes.get(c.field)?.has(i.code)) }))
+    .filter((c) => c.issues.length > 0);
   const describe = (list: FieldIssues[]) =>
     describeIssues(list, (k, v) => tl(k, v), (field) => (SEO_META_LABEL[field] ? tl(SEO_META_LABEL[field]) : t(TEXT_FIELDS.find((f) => f.field === field)?.label ?? "f_title_fr")), 50);
 
@@ -630,6 +657,23 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
     }
   }
 
+  // Traduction Claude : confirmation deja demandee avant l'appel, les
+  // textes recus remplacent les champs (relecture, puis Enregistrer).
+  function applyClaude(en: ListingTranslation, de: ListingTranslation): number {
+    const map: [(typeof CLAUDE_TARGETS)[number], string][] = [
+      ["title_en", en.title], ["description_en", en.description], ["short_description_en", en.short],
+      ["title_de", de.title], ["description_de", de.description], ["short_description_de", de.short],
+    ];
+    let applied = 0;
+    for (const [k, v] of map) {
+      if (!v.trim()) continue;
+      set(k, v);
+      if ((AUTO_KEYS as readonly string[]).includes(k)) markManual(k as AutoKey);
+      applied++;
+    }
+    return applied;
+  }
+
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
@@ -671,20 +715,99 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
       });
   }, []);
 
+  // Redaction a l'enregistrement (nov. 2026) : la forme est corrigee
+  // automatiquement (message vert, detail depliable), seules les formules
+  // interdites bloquent encore, avec un remplacement pret a appliquer.
+  const [fixLog, setFixLog] = useState<FixLogEntry[]>([]);
+  const [showContent, setShowContent] = useState(false);
+  const properNouns = useMemo(() => [...(liveCity ? [liveCity] : []), ...location.luPlaces.map((p) => p.name)], [liveCity, location.luPlaces]);
+  const textLabel = (field: string) => (SEO_META_LABEL[field] ? tl(SEO_META_LABEL[field]) : t(TEXT_FIELDS.find((f) => f.field === field)?.label ?? "f_title_fr"));
+  /** Formules interdites des textes modifies (texte et description Google). */
+  function contentItems(src: FormState, ld: ListingData): ContentItem[] {
+    const savedListing = JSON.parse(listingBaseline) as ListingData;
+    const out: ContentItem[] = [];
+    for (const f of TEXT_FIELDS) {
+      if (src[f.field] === baseline[f.field]) continue;
+      for (const hit of contentHits(src[f.field], f.lang)) out.push({ key: f.field, label: textLabel(f.field), hit });
+    }
+    for (const l of LISTING_LANGS) {
+      const v = ld.written[l].seo_description;
+      if (v === (savedListing.written?.[l]?.seo_description ?? "")) continue;
+      for (const hit of contentHits(v, l)) out.push({ key: `seo_description_${l}`, label: textLabel(`seo_description_${l}`), hit });
+    }
+    return out;
+  }
+  const pendingContent = showContent ? contentItems(form, listingData) : [];
+  function applyContent(item: ContentItem) {
+    if (item.key.startsWith("seo_description_")) {
+      const l = item.key.slice(-2) as ListingLang;
+      setListingData((d) => ({ ...d, written: { ...d.written, [l]: { ...d.written[l], seo_description: applyHit(d.written[l].seo_description, item.hit) } } }));
+      return;
+    }
+    const k = item.key as (typeof TEXT_FIELDS)[number]["field"];
+    set(k, applyHit(form[k], item.hit));
+    if ((AUTO_KEYS as readonly string[]).includes(k)) markManual(k as AutoKey);
+  }
+  function applyAllContent() {
+    let next = form;
+    let ld = listingData;
+    for (const f of TEXT_FIELDS) {
+      if (form[f.field] === baseline[f.field]) continue;
+      const v = applyAllHits(form[f.field], f.lang);
+      if (v === form[f.field]) continue;
+      next = { ...next, [f.field]: v };
+      if ((AUTO_KEYS as readonly string[]).includes(f.field)) ld = { ...ld, auto: { ...ld.auto, [f.field]: false } };
+    }
+    for (const l of LISTING_LANGS) {
+      const v = applyAllHits(ld.written[l].seo_description, l);
+      if (v !== ld.written[l].seo_description) ld = { ...ld, written: { ...ld.written, [l]: { ...ld.written[l], seo_description: v } } };
+    }
+    setForm(next);
+    setListingData(ld);
+    save(next, ld);
+  }
+
   const onSave = (e: React.FormEvent) => {
     e.preventDefault();
+    save(form, listingData);
+  };
+
+  function save(src: FormState, srcListing: ListingData) {
     setFeedback(null);
     setError(null);
     const savedListing = JSON.parse(listingBaseline) as ListingData;
-    const blocking = textChecks.filter((c) =>
-      c.field.startsWith("seo_description_")
-        ? listingData.written[c.lang].seo_description !== (savedListing.written?.[c.lang]?.seo_description ?? "")
-        : form[c.field as keyof FormState] !== baseline[c.field as keyof FormState],
-    );
-    if (blocking.length) {
-      setError([tl("chk_blocked"), ...describe(blocking)].join("\n"));
+    // 1. Forme : corrigee dans les textes modifies (un texte qui suit le
+    // modele est corrige par le serveur, l'ecran le garde lie au modele).
+    const log: FixLogEntry[] = [];
+    let form = src;
+    for (const f of TEXT_FIELDS) {
+      if (src[f.field] === baseline[f.field] || (engaged && srcListing.auto[f.field as AutoKey])) continue;
+      const r = f.field.startsWith("description_") ? autoFixHtml(src[f.field], f.lang) : autoFixText(src[f.field], f.lang, { title: f.title, properNouns });
+      if (!r.changes.length) continue;
+      form = { ...form, [f.field]: r.text };
+      log.push({ label: textLabel(f.field), changes: r.changes });
+    }
+    let listingData = srcListing;
+    for (const l of LISTING_LANGS) {
+      const v = srcListing.written[l].seo_description;
+      if (v === (savedListing.written?.[l]?.seo_description ?? "")) continue;
+      const r = autoFixText(v, l);
+      if (!r.changes.length) continue;
+      listingData = { ...listingData, written: { ...listingData.written, [l]: { ...listingData.written[l], seo_description: r.text } } };
+      log.push({ label: textLabel(`seo_description_${l}`), changes: r.changes });
+    }
+    setFixLog(log);
+    if (log.length) {
+      setForm(form);
+      setListingData(listingData);
+    }
+    // 2. Fond : seules les formules interdites bloquent.
+    if (contentItems(form, listingData).length) {
+      setShowContent(true);
+      setError(tl("chk_blocked_content_screen"));
       return;
     }
+    setShowContent(false);
     // Pays et ville : envoyes seulement s'ils changent. Luxembourg : nom
     // officiel exact (une ville enregistree "Mondorf les bains" devient
     // "Mondorf-les-Bains" a l'enregistrement) ; sans localite choisie, la
@@ -772,7 +895,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
         setError(err instanceof Error ? err.message : t("err_unknown"));
       }
     });
-  };
+  }
 
   return (
     <FamilyContext.Provider value={typeFamily}>
@@ -945,16 +1068,38 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
             {translating ? t("translate_running") : t("translate_button")}
           </button>
           <p className="mt-1 text-xs text-[#3D4F63]/70">{t("translate_hint")}</p>
+          <ClaudeTranslateButton
+            source={{ title: form.title_fr, description: form.description_fr, short: form.short_description_fr }}
+            filledCount={CLAUDE_TARGETS.filter((k) => String(form[k] ?? "").trim()).length}
+            usage={claudeUsage}
+            propertyId={propertyId}
+            onTranslated={applyClaude}
+            onMistral={translateFromFrench}
+          />
           <div className="mt-3 rounded-md border border-[#3D4F63]/15 bg-white px-3 py-2" data-writing-check role="status">
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">{tl("chk_live_title")}</p>
             {textChecks.length === 0 ? (
               <p className="mt-1 text-sm text-emerald-800">{tl("chk_live_ok")}</p>
             ) : (
-              <ul className="mt-1 space-y-1 text-sm text-red-700">
-                {describe(textChecks).map((line, i) => (
-                  <li key={i}>{line}</li>
-                ))}
-              </ul>
+              <>
+                {liveContent.length > 0 && (
+                  <ul className="mt-1 space-y-1 text-sm text-red-700">
+                    {describe(liveContent).map((line, i) => (
+                      <li key={i}>{line}</li>
+                    ))}
+                  </ul>
+                )}
+                {liveForm.length > 0 && (
+                  <>
+                    <p className="mt-1 text-xs text-emerald-800">{tl("chk_live_autofix")}</p>
+                    <ul className="mt-1 space-y-1 text-xs text-[#3D4F63]/80">
+                      {describe(liveForm).map((line, i) => (
+                        <li key={i}>{line}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </>
             )}
           </div>
           <div className="mt-3 rounded-md border border-[#3D4F63]/15 bg-white px-3 py-2" data-seo-preview>
@@ -1312,6 +1457,9 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
         </button>
         {feedback && <span className="text-sm text-emerald-700">{feedback}</span>}
         {error && <span role="alert" className="whitespace-pre-line text-sm text-red-700">{t("error_prefix", { message: error })}</span>}
+        <div className="w-full">
+          <WritingFixPanel fixes={fixLog} content={pendingContent} onApply={applyContent} onApplyAll={applyAllContent} busy={busy} />
+        </div>
       </div>
     </form>
     </TodoContext.Provider>

@@ -577,7 +577,9 @@ test("enregistrement bloque : action serveur et ecran, motif detaille", () => {
   assert.ok(/const writing = await listingWritingFailure\(supabase, id, update\);\s*if \(writing\) return \{ ok: false, error: writing \};/.test(act));
   assert.ok(act.indexOf("listingWritingFailure(supabase, id, update)") < act.indexOf('.from("properties")\n    .update(update)'), "controle avant l'ecriture");
   const form = readFileSync(join(root, "components/admin/PropertyEditForm.tsx"), "utf8");
-  assert.ok(form.includes('setError([tl("chk_blocked"), ...describe(blocking)].join("\\n"))'));
+  // Nov. 2026 : la forme est corrigee automatiquement, seul le fond bloque
+  // (scripts/admin/test-correction-claude.mts).
+  assert.ok(form.includes('setError(tl("chk_blocked_content_screen"))'));
   const tpl = readFileSync(join(root, "app/admin/settings/modeles/actions.ts"), "utf8");
   assert.ok(tpl.includes("checkFields([{ field: target.part, lang: target.lang, text: templateLiteral(text)"));
   for (const l of ["fr", "en", "de"]) {
