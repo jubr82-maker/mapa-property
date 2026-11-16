@@ -15,15 +15,22 @@ import { sanitizeListingData } from "@/lib/listing/listing-data";
 import { PropertyPhotosSection } from "@/components/admin/PropertyPhotosSection";
 import { RevalidateButton } from "@/components/admin/RevalidateButton";
 import type { PhotoData } from "@/components/admin/PhotoManager";
+import { ImportSummaryBanner } from "@/components/admin/ImportSummaryBanner";
+import { draftTodo } from "@/lib/import-listing/todo";
 
 export const dynamic = "force-dynamic";
+// Amelioration des photos (nov. 2026) : une photo par appel.
+export const maxDuration = 300;
 
 export default async function AdminPropertyEditPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ import?: string }>;
 }) {
   const { id } = await params;
+  const imported = (await searchParams).import === "1";
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
   const tl = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_listing" });
   const supabase = await createSupabaseServerClient();
@@ -103,6 +110,26 @@ export default async function AdminPropertyEditPage({
     };
   });
 
+  // Import d'une annonce (nov. 2026) : champs a completer du brouillon.
+  const importTodo = imported
+    ? draftTodo(
+        {
+          title_fr: data.title_fr ?? null,
+          transaction: data.transaction ?? null,
+          property_type: data.property_type ?? null,
+          country: data.country ?? null,
+          city: data.city ?? null,
+          price: data.price ?? null,
+          price_on_demand: data.price_on_demand ?? null,
+          living_surface: data.living_surface ?? null,
+          bedrooms: data.bedrooms ?? null,
+          energy: data.energy ?? null,
+          description_fr: data.description_fr ?? null,
+        },
+        t("import_title_fallback"),
+      )
+    : undefined;
+
   const countryLabel =
     data.country && t.has(`country_${data.country}`) ? t(`country_${data.country}`) : data.country;
   const transactionLabel =
@@ -138,6 +165,8 @@ export default async function AdminPropertyEditPage({
         </p>
       </header>
 
+      {importTodo && <ImportSummaryBanner propertyId={data.id} todo={importTodo} />}
+
       {/* Formulaire complet de la fiche (description, caractéristiques,
           prix), au-dessus de la section vidéo. */}
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6">
@@ -170,6 +199,7 @@ export default async function AdminPropertyEditPage({
           }}
           seo={{ slug: data.slug, ctx: seoCtx, photosWithoutAlt }}
           location={{ country: data.country ?? null, city: data.city ?? null, luPlaces: adminLuPlaces(), foreignSuggestions: foreignCitySuggestions() }}
+          todo={importTodo}
           initial={{
             property_type: data.property_type ?? null,
             mandate_type: mandateType,

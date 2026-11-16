@@ -14,6 +14,9 @@ import {
   uploadPropertyPhoto,
   savePropertyPhotos,
   deletePropertyPhoto,
+  previewPhotoEnhancement,
+  applyPhotoEnhancement,
+  revertPhotoEnhancement,
 } from "@/app/admin/properties/[id]/photos/actions";
 
 interface Props {
@@ -28,6 +31,12 @@ export function PropertyPhotosSection({ propertyId, initialPhotos }: Props) {
       onUpload={(fd) => uploadPropertyPhoto(propertyId, fd)}
       onSave={(photos) => savePropertyPhotos(propertyId, photos)}
       onDelete={(path) => deletePropertyPhoto(propertyId, path)}
+      // Amelioration des photos (nov. 2026), biens publies compris.
+      enhance={{
+        preview: (path) => previewPhotoEnhancement(propertyId, path),
+        apply: (path, url) => applyPhotoEnhancement(propertyId, path, url),
+        revert: (path, url) => revertPhotoEnhancement(propertyId, path, url),
+      }}
     />
   );
 }

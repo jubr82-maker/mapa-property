@@ -12,11 +12,12 @@ const TIMEOUT_MS = 6000;
 export type MistralMessage = { role: "system" | "user" | "assistant"; content: string };
 
 /** Objet JSON renvoye par Mistral (temperature 0, json_object), ou null. */
-export async function mistralJson(messages: MistralMessage[], maxTokens = 200): Promise<Record<string, unknown> | null> {
+export async function mistralJson(messages: MistralMessage[], maxTokens = 200, opts: { timeoutMs?: number } = {}): Promise<Record<string, unknown> | null> {
   const apiKey = process.env.MISTRAL_API_KEY;
   if (!apiKey) return null;
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  // Import d'une annonce (nov. 2026) : texte long, delai plus large.
+  const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? TIMEOUT_MS);
   try {
     const res = await fetch(ENDPOINT, {
       method: "POST",

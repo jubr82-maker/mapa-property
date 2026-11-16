@@ -1,10 +1,14 @@
 import { getTranslations } from "next-intl/server";
 import { ADMIN_LOCALE } from "@/lib/datetime";
 import { PropertyCreateForm } from "@/components/admin/PropertyCreateForm";
+import { ListingImporter } from "@/components/admin/ListingImporter";
 import { adminLuPlaces, foreignCitySuggestions } from "@/lib/admin/property-location";
 import { cityPageOptions } from "@/lib/internal-links";
 
 export const dynamic = "force-dynamic";
+// Import d'une annonce (nov. 2026) : analyse, traduction et photos dans des
+// appels distincts, chacun bien en dessous de cette limite (Vercel Hobby).
+export const maxDuration = 300;
 
 export default async function NewPropertyPage() {
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_properties" });
@@ -26,6 +30,7 @@ export default async function NewPropertyPage() {
           {t("new_intro")}
         </p>
       </header>
+      <ListingImporter />
       <PropertyCreateForm luPlaces={luPlaces} foreignSuggestions={foreignSuggestions} cityPages={cityPageOptions()} />
     </div>
   );

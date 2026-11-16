@@ -312,6 +312,8 @@ interface Props {
    * villes des pages pour les autres pays.
    */
   location: { country: string | null; city: string | null; luPlaces: LuPlace[]; foreignSuggestions: Record<string, string[]> };
+  /** Import d'une annonce (nov. 2026) : champs a completer, surlignes. */
+  todo?: string[];
 }
 
 /** Code pays d'une valeur enregistree : code de la liste, ou nom (biens importes : "Luxembourg"). */
@@ -333,6 +335,8 @@ function initialListing(raw: unknown, form: FormState): ListingData {
 
 // Famille du type choisi : Field et Section masquent les champs inutiles.
 const FamilyContext = createContext<ListingFamily | null>(null);
+// Import d'une annonce (nov. 2026) : champs a completer, surlignes.
+const TodoContext = createContext<ReadonlySet<string>>(new Set());
 
 const inputCls =
   "block w-full rounded-md border border-[#3D4F63]/20 bg-white px-3 py-2 font-mono text-sm text-[#1A1F2A] focus:border-[#e0af6e] focus:outline-none";
@@ -373,6 +377,7 @@ function Field({
   hint,
   full,
   field,
+  mark,
   children,
 }: {
   label: string;
@@ -380,14 +385,20 @@ function Field({
   full?: boolean;
   /** Colonne du champ, pour l'afficher seulement si la famille l'utilise. */
   field?: string;
+  /** Cle "a completer" de l'import d'annonce (sinon `field`). */
+  mark?: string;
   children: React.ReactNode;
 }) {
   const family = useContext(FamilyContext);
+  const todo = useContext(TodoContext);
+  const t = useTranslations("admin_properties");
   if (field && !fieldVisible(field, family)) return null;
+  const toFill = todo.has(mark ?? field ?? "");
   return (
-    <label className={`block ${full ? "md:col-span-2" : ""}`}>
+    <label className={`block ${full ? "md:col-span-2" : ""} ${toFill ? "-m-2 rounded-lg bg-gold/10 p-2 ring-1 ring-gold" : ""}`} data-import-todo={toFill ? "" : undefined}>
       <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-[#3D4F63]/70">
         {label}
+        {toFill && <span className="ml-2 rounded-full bg-gold px-2 py-0.5 text-[9px] tracking-[0.15em] text-ink">{t("import_todo_badge")}</span>}
       </span>
       <div className="mt-1">{children}</div>
       {hint && <span className="mt-1 block text-xs text-[#3D4F63]/60">{hint}</span>}
@@ -434,7 +445,8 @@ function EnergySelect({ value, onChange, labelNone, labelLegacy }: { value: stri
   );
 }
 
-export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner, listing, seo, location }: Props) {
+export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner, listing, seo, location, todo }: Props) {
+  const todoSet = useMemo(() => new Set(todo ?? []), [todo]);
   const t = useTranslations("admin_properties");
   const tn = useTranslations("admin_notices");
   // Saisie brute ; "form" (plus bas) y ajoute les textes tires du modele.
@@ -764,6 +776,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
 
   return (
     <FamilyContext.Provider value={typeFamily}>
+    <TodoContext.Provider value={todoSet}>
     <form ref={formRef} onSubmit={onSave} className="space-y-5">
       {dirty && (
         <div className="sticky top-16 z-10 md:top-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 shadow-sm">
@@ -793,7 +806,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
             ))}
           </select>
         </Field>
-        <Field label={t("f_listing_type")}>
+        <Field label={t("f_listing_type")} mark="property_type">
           <select
             value={form.property_type}
             onChange={(e) => set("property_type", e.target.value)}
@@ -831,7 +844,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
             })}
           </div>
         </Field>
-        <Field label={t("field_country")}>
+        <Field label={t("field_country")} mark="country">
           <select
             value={country}
             onChange={(e) => {
@@ -855,6 +868,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
           </select>
         </Field>
         <Field
+          mark="city"
           label={t("field_city")}
           hint={
             lu && !luPlace && !locationTouched && saved.city && prefill && prefill.status !== "ok"
@@ -999,7 +1013,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
             </p>
           )}
         </div>
-        <Field label={t("f_title_fr")}>
+        <Field label={t("f_title_fr")} mark="title_fr">
           <input
             value={form.title_fr}
             onChange={(e) => {
@@ -1031,6 +1045,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
         </Field>
 
         <Field
+          mark="description_fr"
           label={t("f_description_fr")}
           hint={t("hint_description")}
           full
@@ -1179,7 +1194,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
       </Section>
 
       <Section title={t("section_price")}>
-        <Field label={t("field_price")}>
+        <Field label={t("field_price")} mark="price">
           <input
             type="number"
             min="0"
@@ -1299,6 +1314,7 @@ export function PropertyEditForm({ propertyId, initial, mandateAvailable, banner
         {error && <span role="alert" className="whitespace-pre-line text-sm text-red-700">{t("error_prefix", { message: error })}</span>}
       </div>
     </form>
+    </TodoContext.Provider>
     </FamilyContext.Provider>
   );
 }

@@ -32,6 +32,8 @@ import { useTranslations } from "next-intl";
 import { Camera, GripVertical, ImagePlus, Trash2 } from "lucide-react";
 import { compressImageFile } from "@/lib/image-compress";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
+import { isEnhancedPath } from "@/lib/images/enhance-paths";
+import { BeforeAfter } from "@/components/admin/BeforeAfter";
 
 // Valeur large (HEIC/HEIF sans type MIME reconnu sur certains OS/
 // navigateurs) : le controle reel du format se fait server-side, par le
@@ -50,8 +52,21 @@ type UploadResult =
   | { ok: false; error: string };
 type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Amelioration des photos (nov. 2026), optionnelle : apercu sans rien
+ * enregistrer, application apres validation, retour a l'original.
+ */
+export interface EnhanceHandlers {
+  preview: (path: string) => Promise<{ ok: true; after: string } | { ok: false; error: string }>;
+  apply: (path: string, url: string) => Promise<UploadResult>;
+  revert: (path: string, url: string) => Promise<UploadResult>;
+}
+
+type ReviewItem = { path: string; url: string; after: string | null; error: string | null; keep: boolean };
+
 interface Props {
   initialPhotos: PhotoData[];
+  enhance?: EnhanceHandlers;
   /** Upload un fichier vers Storage. Ne throw jamais : résultat structuré. */
   onUpload: (formData: FormData) => Promise<UploadResult>;
   /** Persiste l'état complet (ordre + cover). Ne throw jamais. */
@@ -65,6 +80,7 @@ export function PhotoManager({
   onUpload,
   onSave,
   onDelete,
+  enhance,
 }: Props) {
   const t = useTranslations("admin_properties");
   // On normalise toujours l'ordre à partir de l'index courant : order/isCover
@@ -285,6 +301,94 @@ export function PhotoManager({
     persist(photosRef.current);
   }
 
+  // --- Amelioration (nov. 2026) ------------------------------------------
+  // Rien n'est remplace avant validation de l'apercu ; l'original reste
+  // dans le stockage et « Revenir a l'original » le remet a sa place.
+  const [review, setReview] = useState<ReviewItem[] | null>(null);
+  const [preparing, setPreparing] = useState<{ done: number; total: number } | null>(null);
+  const [applying, setApplying] = useState(false);
+  // Annulation pendant la preparation des apercus : la boucle s'arrete.
+  const reviewRun = useRef(0);
+  const canEnhance = (p: PhotoData) => Boolean(enhance && p.path && !isEnhancedPath(p.path));
+  const external = enhance ? photos.filter((p) => !p.path).length : 0;
+
+  async function openReview(list: PhotoData[]) {
+    if (!enhance || !list.length) return;
+    setError(null);
+    setFeedback(null);
+    const run = ++reviewRun.current;
+    let items: ReviewItem[] = list.map((p) => ({ path: p.path, url: p.url, after: null, error: null, keep: true }));
+    setReview(items);
+    setPreparing({ done: 0, total: items.length });
+    for (let i = 0; i < list.length; i++) {
+      let patch: Partial<ReviewItem>;
+      try {
+        const r = await enhance.preview(list[i].path);
+        patch = r.ok ? { after: r.after } : { error: r.error, keep: false };
+      } catch {
+        patch = { error: t("enhance_err_failed"), keep: false };
+      }
+      if (reviewRun.current !== run) return;
+      items = items.map((x, j) => (j === i ? { ...x, ...patch } : x));
+      const snapshot = items;
+      // Les cases deja decochees par Julien pendant la preparation restent decochees.
+      setReview((prev) => snapshot.map((x, j) => ({ ...x, keep: x.keep && (prev?.[j]?.after ? prev[j].keep : true) })));
+      setPreparing({ done: i + 1, total: list.length });
+    }
+    setPreparing(null);
+  }
+
+  function replacePhoto(fromPath: string, fromUrl: string, to: { url: string; path: string }) {
+    const list = photosRef.current.map((p) => (p.path === fromPath && p.url === fromUrl ? { ...p, url: to.url, path: to.path } : p));
+    commit(renormalize(list));
+  }
+
+  async function applyReview() {
+    if (!enhance || !review) return;
+    setApplying(true);
+    const failures: string[] = [];
+    let done = 0;
+    for (const item of review.filter((x) => x.keep && x.after)) {
+      try {
+        const r = await enhance.apply(item.path, item.url);
+        if (r.ok) {
+          replacePhoto(item.path, item.url, r);
+          done++;
+        } else failures.push(r.error);
+      } catch {
+        failures.push(t("enhance_err_failed"));
+      }
+    }
+    setApplying(false);
+    setReview(null);
+    setUploadErrors(failures);
+    if (done) {
+      persist(photosRef.current);
+      setFeedback(t("enhance_done", { count: done }));
+    }
+  }
+
+  function revert(idx: number) {
+    const p = photosRef.current[idx];
+    if (!enhance || !p) return;
+    setError(null);
+    setFeedback(null);
+    startTransition(async () => {
+      try {
+        const r = await enhance.revert(p.path, p.url);
+        if (!r.ok) {
+          setError(r.error);
+          return;
+        }
+        replacePhoto(p.path, p.url, r);
+        persist(photosRef.current);
+        setFeedback(t("enhance_reverted"));
+      } catch {
+        setError(t("enhance_err_failed"));
+      }
+    });
+  }
+
 
   return (
     <div className="space-y-4">
@@ -385,6 +489,11 @@ export function PhotoManager({
                 <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white">
                   #{idx + 1}
                 </span>
+                {enhance && isEnhancedPath(p.path) && (
+                  <span className="absolute bottom-2 left-2 rounded-full bg-ink/80 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-bg">
+                    {t("enhance_badge")}
+                  </span>
+                )}
                 {/* Poignee de deplacement au doigt (telephone et tablette). */}
                 <button
                   type="button"
@@ -423,6 +532,29 @@ export function PhotoManager({
                   <Trash2 className="size-4" aria-hidden />
                 </button>
               </div>
+              {enhance && p.path && (
+                <div className="px-2 pb-2">
+                  {isEnhancedPath(p.path) ? (
+                    <button
+                      type="button"
+                      onClick={() => revert(idx)}
+                      disabled={busy || applying || preparing != null}
+                      className="min-h-11 w-full rounded border border-ink/20 px-2 font-mono text-[10px] uppercase tracking-[0.15em] text-ink hover:border-gold disabled:opacity-40"
+                    >
+                      {t("enhance_revert")}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => openReview([p])}
+                      disabled={busy || applying || preparing != null}
+                      className="min-h-11 w-full rounded border border-ink/20 px-2 font-mono text-[10px] uppercase tracking-[0.15em] text-ink hover:border-gold disabled:opacity-40"
+                    >
+                      {t("enhance_one")}
+                    </button>
+                  )}
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -437,6 +569,16 @@ export function PhotoManager({
         >
           {busy ? t("saving") : t("save_order")}
         </button>
+        {enhance && photos.some(canEnhance) && (
+          <button
+            type="button"
+            onClick={() => openReview(photos.filter(canEnhance))}
+            disabled={busy || uploadProgress != null || applying || preparing != null}
+            className="min-h-11 rounded-full border border-ink/30 px-6 font-mono text-xs uppercase tracking-[0.2em] text-ink transition-colors hover:border-gold disabled:opacity-50"
+          >
+            {t("enhance_all")}
+          </button>
+        )}
         {feedback && (
           <span className="text-sm text-emerald-700">{feedback}</span>
         )}
@@ -447,6 +589,67 @@ export function PhotoManager({
           {t("photo_count", { count: photos.length })}
         </span>
       </div>
+      {external > 0 && <p className="text-xs text-ink-soft">{t("enhance_unavailable", { count: external })}</p>}
+
+      {review && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/70 sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label={t("enhance_title")}>
+          <div className="max-h-[92dvh] w-full max-w-3xl overflow-y-auto rounded-t-2xl bg-bg px-5 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:rounded-2xl sm:px-8">
+            <h3 className="font-display text-xl font-bold text-ink">{t("enhance_title")}</h3>
+            <p className="mt-1 text-sm text-ink-mid">{t("enhance_hint")}</p>
+            {preparing && (
+              <p className="mt-3 text-sm font-semibold text-ink" role="status">
+                {t("enhance_preparing", { done: preparing.done, total: preparing.total })}
+              </p>
+            )}
+            <ul className="mt-5 space-y-8">
+              {review.map((item, i) => (
+                <li key={item.path} className="space-y-3">
+                  {item.after ? (
+                    <BeforeAfter before={item.url} after={item.after} />
+                  ) : item.error ? (
+                    <p className="text-sm text-red-700">{item.error}</p>
+                  ) : (
+                    <div className="aspect-[3/2] w-full animate-pulse rounded-lg bg-bg-soft" aria-hidden />
+                  )}
+                  {review.length > 1 && item.after && (
+                    <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
+                      <input
+                        type="checkbox"
+                        checked={item.keep}
+                        onChange={(e) => setReview((r) => (r ? r.map((x, j) => (j === i ? { ...x, keep: e.target.checked } : x)) : r))}
+                        className="size-5 accent-gold"
+                      />
+                      {t("enhance_keep", { n: i + 1 })}
+                    </label>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <div className="sticky bottom-0 mt-6 flex flex-wrap justify-end gap-3 bg-bg pt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  reviewRun.current++;
+                  setReview(null);
+                  setPreparing(null);
+                }}
+                disabled={applying}
+                className="min-h-11 rounded-full border border-ink/30 px-6 font-mono text-xs uppercase tracking-[0.2em] text-ink hover:border-gold disabled:opacity-50"
+              >
+                {t("enhance_cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={applyReview}
+                disabled={applying || preparing != null || !review.some((x) => x.keep && x.after)}
+                className="min-h-11 rounded-full bg-ink px-6 font-mono text-xs uppercase tracking-[0.2em] text-bg hover:bg-gold-deep disabled:opacity-50"
+              >
+                {applying ? t("enhance_applying") : review.length > 1 ? t("enhance_apply_all", { count: review.filter((x) => x.keep && x.after).length }) : t("enhance_apply")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
