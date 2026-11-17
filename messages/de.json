@@ -869,6 +869,8 @@
     "source": "Quelle: MAPA Property. © 2026. Alle Rechte vorbehalten. Vervielfältigung untersagt."
   },
   "estimate_form": {
+    "rate_basis_fixed_over_10": "Durchschnittszins der Darlehen mit Zinsbindung über 10 Jahre.",
+    "rate_source": "Marktdaten Luxemburg, {month}. Quelle: EZB-Statistiken",
     "step1_label": "Das Objekt",
     "step2_label": "Lage",
     "step3_label": "Kontakt",
@@ -1063,15 +1065,33 @@
     }
   },
   "simulators_page": {
+    "rates_row_average_renegotiated": "Neu verhandelte Darlehen",
+    "rates_row_average_new_only": "Nur neue Darlehen, ohne Neuverhandlungen",
+    "rates_row_average": "Durchschnitt aller Laufzeiten",
+    "rates_row_fixed_over_1": "Alle Zinsbindungen über 1 Jahr",
+    "rates_row_fixed_over_10": "Zinsbindung über 10 Jahre",
+    "rates_row_fixed_5_10": "Zinsbindung 5 bis 10 Jahre",
+    "rates_row_fixed_1_5": "Zinsbindung 1 bis 5 Jahre",
+    "rates_row_variable_1y": "Variabler Zins und Zinsbindung bis 1 Jahr",
+    "rates_col_rate": "Jahreszins",
+    "rates_col_type": "Darlehensart",
+    "rates_note": "Durchschnitt der abgeschlossenen Darlehen, veröffentlicht mit etwa zwei Monaten Verzögerung. Der Zinssatz Ihrer Bank kann abweichen.",
+    "rates_source": "Marktdaten Luxemburg, {month}. Quelle: EZB-Statistiken",
+    "rates_title": "Durchschnittszinsen in Luxemburg",
     "eyebrow": "Finanzwerkzeuge",
     "title": "Drei sofortige Rechner.",
     "intro": "Monatsrate, Mietrendite, Kreditkapazität: vorausgefüllt mit den neuesten luxemburgischen Marktzinssätzen.",
     "disclaimer_title": "Nur indikative Werkzeuge, nicht vertraglich bindend.",
-    "disclaimer_p1": "Unser Rechner basiert auf öffentlichen Daten des Observatoire de l'Habitat (Luxemburger Wohnungsministerium) und Referenzzinsen der Banque centrale du Luxembourg (BCL), kontinuierlich von unserer Agentur an Markttrends angepasst.",
+    "disclaimer_p1": "Unser Rechner basiert auf öffentlichen Daten des Observatoire de l'Habitat (Luxemburger Wohnungsministerium) und von der EZB veröffentlichten Durchschnittszinsen (EZB-Statistiken), unverändert übernommen.",
     "disclaimer_p2": "Üblicher prudentieller Verschuldungsgrenzwert (35%). Luxemburger Mietobergrenze: 5% des investierten Kapitals pro Jahr. Notarkosten ~7% des Kaufpreises in Luxemburg. Bëllegen Akt: Steuergutschrift von bis zu 45 000 € pro Käufer (90 000 € für ein gemeinsam erwerbendes Paar) seit dem 16. Juli 2026 auf die Eintragungsgebühren, unter der Bedingung der tatsächlichen Nutzung als Hauptwohnsitz.",
     "source": "Quelle: MAPA Property. © 2026. Alle Rechte vorbehalten. Vervielfältigung untersagt."
   },
   "simulators": {
+    "rate_basis_fixed_over_10": "Durchschnittszins der Darlehen mit Zinsbindung über 10 Jahre",
+    "rate_basis_fixed_5_10": "Durchschnittszins der Darlehen mit Zinsbindung von 5 bis 10 Jahren",
+    "rate_basis_interpolated": "interpoliert zwischen den Durchschnittszinsen mit Zinsbindung von 1 bis 5 und von 5 bis 10 Jahren",
+    "rate_basis_fixed_1_5": "Durchschnittszins der Darlehen mit Zinsbindung von 1 bis 5 Jahren",
+    "rate_basis_variable": "Durchschnittszins der Darlehen mit variablem Zins oder Zinsbindung bis 1 Jahr",
     "tab_mortgage": "Hypothekenrate",
     "tab_yield": "Mietrendite",
     "tab_capacity": "Kreditkapazität",
@@ -1082,7 +1102,7 @@
     "monthly_label": "Monatsrate",
     "total_paid": "Gesamtkosten",
     "total_interest": "Gesamtzinsen",
-    "source_label": "Quellen: BCL und zugelassene Luxemburger Makler ({month})",
+    "source_label": "Marktdaten Luxemburg, {month}. Quelle: EZB-Statistiken",
     "purchase_price": "Kaufpreis",
     "rent_monthly": "Monatsmiete",
     "charges_year": "Jährliche Nebenkosten",
@@ -1239,9 +1259,11 @@
     "feature_3": "Projizierte IRR über 10, 15 und 20 Jahre",
     "feature_4": "Vergleich mit der luxemburgischen 10-jährigen Staatsanleihe",
     "cta": "Persönliche Berechnung anfragen",
-    "source": "Quelle: BCL / Statec / ABBL"
+    "source": "Marktdaten Luxemburg, {month}. Quelle: EZB-Statistiken"
   },
   "borrowing_capacity": {
+    "source_label": "Marktdaten Luxemburg, {month}. Quelle: EZB-Statistiken",
+    "rate_reference": "Richtwert: {rate} %, Durchschnittszins der Darlehen mit Zinsbindung über 10 Jahre.",
     "meta_title": "Kreditkapazität, MAPA Property",
     "meta_description": "Berechnen Sie Ihre Immobilien-Kreditkapazität in Luxemburg. Richtwert, vorbehaltlich der Bankzustimmung.",
     "eyebrow": "KREDITKAPAZITÄT",
@@ -1329,7 +1351,7 @@
     "short": "Indikative Schätzung auf Basis von Marktdaten und dem MAPA-Property-Algorithmus: sie stellt keine vertragliche Wertermittlung dar. Auf Anfrage erstellt MAPA Property eine ausführliche Wertermittlung (Avis de Valeur). Fragen zur Finanzierung und zu notariellen Formalitäten obliegen Ihrer Bank und Ihrem Notar.",
     "full": {
       "title": "Unverbindliche Informationen",
-      "p1": "Die auf dieser Website dargestellten Schätzungen, Simulationen, Marktanalysen und Daten dienen Informations- und Richtzwecken. Sie stützen sich auf öffentliche Quellen (STATEC, Observatoire de l'Habitat, ABBL, Zentralbank Luxemburg) und auf die proprietären Algorithmen von MAPA Property.",
+      "p1": "Die auf dieser Website dargestellten Schätzungen, Simulationen, Marktanalysen und Daten dienen Informations- und Richtzwecken. Sie stützen sich auf öffentliche Quellen (STATEC, Observatoire de l'Habitat, ABBL, EZB-Statistiken) und auf die proprietären Algorithmen von MAPA Property.",
       "p2": "MAPA Property übernimmt keine Haftung für die Verwendung dieser Informationen, für auf ihrer Grundlage getroffene Entscheidungen oder für etwaige Abweichungen von der Marktrealität oder der individuellen Situation des Nutzers.",
       "p3": "Diese Daten stellen keine finanzielle, steuerliche, rechtliche oder notarielle Beratung dar. Für jede konkrete Transaktion konsultieren Sie die zuständigen Fachleute: Notar (notarielle Urkunde, Erbschaft, Güterstand), Bank oder zugelassener Kreditvermittler (Finanzierung), Steuerberater (Besteuerung, Veräußerungsgewinne), Anwalt (Rechtsberatung)."
     }
@@ -1369,10 +1391,16 @@
     "properties_label": "Vorgeschlagene Immobilien"
   },
   "financing_simulator": {
+    "rate_basis_fixed_over_10": "Durchschnittszins der Darlehen mit Zinsbindung über 10 Jahre",
+    "rate_basis_fixed_5_10": "Durchschnittszins der Darlehen mit Zinsbindung von 5 bis 10 Jahren",
+    "source_label": "Marktdaten Luxemburg, {month}. Quelle: EZB-Statistiken",
     "disclaimer": "Haftungsausschluss: indikative Simulation zu Informationszwecken. Die angegebenen Beträge stellen kein Kreditangebot dar. Die von den Banken angewandten Zinssätze variieren je nach Kreditnehmerprofil, Eigenkapital, Sicherheiten, Immobilientyp und Marktlage. Für eine persönliche Analyse kontaktieren Sie MAPA Property für einen Termin mit einem qualifizierten Bankpartner.",
     "aids_title": "Anwendbare Förderungen: {country}"
   },
   "acquisition_simulator": {
+    "rate_basis_fixed_over_10": "Durchschnittszins der Darlehen mit Zinsbindung über 10 Jahre",
+    "rate_basis_fixed_5_10": "Durchschnittszins der Darlehen mit Zinsbindung von 5 bis 10 Jahren",
+    "source_label": "Marktdaten Luxemburg, {month}. Quelle: EZB-Statistiken",
     "eyebrow": "Finanzierungsplan",
     "country_not_covered_title": "Land nicht abgedeckt",
     "country_not_covered_body": "Der Erwerbskosten-Rechner ist für dieses Land noch nicht verfügbar. MAPA Property bietet Ihnen eine individuelle Analyse mit seinen lokalen Partnern.",
@@ -3630,6 +3658,10 @@
     "footer": "Details in der Verwaltung, Bereich Steuerung."
   },
   "admin_pilotage": {
+    "rates_fallback_hint": "Keine EZB-Daten in der Datenbank: Die Website zeigt die Ersatzwerte von {month}.",
+    "rates_stale": "Zinssätze seit {month} nicht aktualisiert",
+    "rates_ok_hint": "EZB-Statistiken, täglich von der geplanten Aufgabe geprüft.",
+    "rates_label": "Zinssätze der Rechner",
     "eyebrow": "Steuerung",
     "open": "Öffnen",
     "unavailable": "Daten derzeit nicht verfügbar.",
@@ -4352,7 +4384,7 @@
     "annex_pages": "{count, plural, one {# Seite} other {# Seiten}}",
     "not_expertise_short": "Eine Werteinschätzung, kein Immobiliengutachten.",
     "legal_title": "Unverbindliche Informationen",
-    "legal_p1": "Die in diesem Dokument dargestellten Schätzungen, Marktanalysen und Daten dienen Informations- und Richtzwecken. Sie stützen sich auf öffentliche Quellen (STATEC, Observatoire de l'Habitat, ABBL, Zentralbank Luxemburg) und auf die proprietären Algorithmen von MAPA Property.",
+    "legal_p1": "Die in diesem Dokument dargestellten Schätzungen, Marktanalysen und Daten dienen Informations- und Richtzwecken. Sie stützen sich auf öffentliche Quellen (STATEC, Observatoire de l'Habitat, ABBL, EZB-Statistiken) und auf die proprietären Algorithmen von MAPA Property.",
     "legal_p2": "MAPA Property übernimmt keine Haftung für die Verwendung dieses Dokuments, für auf seiner Grundlage getroffene Entscheidungen oder für etwaige Abweichungen von der Marktrealität oder der individuellen Situation seines Empfängers.",
     "legal_p3": "Dieses Dokument stellt keine finanzielle, steuerliche, rechtliche oder notarielle Beratung dar. Für jede konkrete Transaktion konsultieren Sie die zuständigen Fachleute: Notar (notarielle Urkunde, Erbschaft, Güterstand), Bank oder zugelassener Kreditvermittler (Finanzierung), Steuerberater (Besteuerung, Veräußerungsgewinne), Anwalt (Rechtsberatung)."
   },

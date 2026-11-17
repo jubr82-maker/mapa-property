@@ -10,6 +10,7 @@ import { pickSimilar, type SimilarCandidate } from "./similar-properties";
 import { pickOtherProperties, type OtherCandidate } from "./other-properties";
 import { coverAlts, propertyPaths } from "./listing/property-paths";
 import { blogSlugLower } from "./blog/slug";
+import { ECB_SOURCE } from "./rates";
 import { BANNER_COLUMNS, availableFirst, bannerOf, type PropertyBanner } from "./property-banner";
 import type {
   BlogPost,
@@ -867,12 +868,19 @@ export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null
   return post ? withLowerSlug(post) : null;
 }
 
+// Nov. 2026 : derniere ligne "Statistiques BCE" (lib/pilotage/bce.ts). Les
+// anciennes lignes (saisie manuelle de mai 2026, insertions sans mois de
+// reference de l'ancienne veille) sont ignorees : en tri decroissant,
+// Postgres placait les mois NULL en tete. Sans ligne BCE, les appelants
+// passent par effectiveRates (lib/rates.ts) : valeurs de secours datees.
 export async function fetchLatestInterestRates(): Promise<InterestRates | null> {
   const sb = supabaseServer();
   const { data, error } = await sb
     .from("interest_rates")
-    .select("*")
-    .order("reference_month", { ascending: false })
+    .select("id, rates, reference_month, source")
+    .eq("source", ECB_SOURCE)
+    .not("reference_month", "is", null)
+    .order("reference_month", { ascending: false, nullsFirst: false })
     .limit(1)
     .maybeSingle();
   if (error) {

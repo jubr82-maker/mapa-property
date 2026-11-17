@@ -6,7 +6,8 @@
 //                      mesures PageSpeed, releve des positions Google
 //                      (idempotent : une fois par semaine de reference)
 //   le lundi         : resume hebdomadaire (une seule fois par semaine)
-//   le 1er du mois   : taux BCE (ancienne tache bce-rates)
+//   tous les jours   : taux BCE (requete legere, ecriture seulement si un
+//                      nouveau mois est publie, cf. lib/pilotage/bce.ts)
 //   tous les jours   : purge des journaux et statistiques au-dela des
 //                      durees de conservation (RETENTION_RULES)
 import { runPsiMeasurements } from "@/lib/pilotage/psi";
@@ -52,7 +53,7 @@ export async function runDailyTask(now = new Date()): Promise<StepResult[]> {
     );
     if (!alreadySent) results.push(await step("weekly_summary", () => sendWeeklySummary()));
   }
-  if (now.getUTCDate() === 1) results.push(await step("bce_rate", () => refreshBceRate()));
+  results.push(await step("bce_rate", () => refreshBceRate()));
   results.push(await step("retention", () => purgeExpiredRows(now)));
 
   const failed = results.filter((r) => !r.ok).map((r) => r.task);

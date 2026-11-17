@@ -3,8 +3,9 @@
 import { getAttribution } from "@/lib/pilotage/attribution-client";
 import { useState, useMemo, useRef } from "react";
 import { revealFirstError, revealStep, useStepReveal } from "@/lib/forms/step-scroll";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { formatEuro } from "@/lib/finance";
+import { formatRateMonth } from "@/lib/rates";
 import type { EstimateResult } from "@/lib/estimate";
 import { track, trackLead } from "@/lib/tracking/track";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
@@ -1739,6 +1740,7 @@ function ResultView({
   onReset: () => void;
 }) {
   const t = useTranslations("estimate_form");
+  const locale = useLocale();
   return (
     <div className="space-y-8">
       {/* Range */}
@@ -1824,6 +1826,12 @@ function ResultView({
               value={`~ ${formatEuro(result.financing.notaryFees)}`}
             />
           </dl>
+          {result.financing.rateMonth && (
+            <p className="mt-4 text-[11px] leading-snug text-ink-soft">
+              {t("rate_basis_fixed_over_10")}{" "}
+              {t("rate_source", { month: formatRateMonth(result.financing.rateMonth, locale) })}
+            </p>
+          )}
         </section>
       )}
 

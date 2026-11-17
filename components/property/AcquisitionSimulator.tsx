@@ -8,7 +8,9 @@ import type {
   AcquisitionInput,
   AcquisitionResult,
 } from "@/lib/acquisition/types";
-import { computeMortgage, computeDebtRatio, fmtEur } from "@/lib/finance-sim";
+import { computeMortgage, computeDebtRatio, fmtEur, getRateForDuration } from "@/lib/finance-sim";
+import { effectiveRates, formatRateMonth, rateBasis } from "@/lib/rates";
+import type { InterestRates } from "@/lib/types";
 import { formatRateFraction } from "@/lib/format/numbers";
 import { ContactReveal } from "@/components/contact-reveal";
 
@@ -19,6 +21,8 @@ interface Props {
   /** Ville Apimo, utilisée pour déduire région / Land / département. */
   city?: string;
   variant?: "default" | "compact";
+  /** Derniere ligne BCE (null : valeurs de secours datees). */
+  rates?: InterestRates | null;
 }
 
 const DURATIONS = [10, 15, 20, 25, 30] as const;
@@ -65,7 +69,7 @@ function mapCountry(raw: string): string {
 
 // Oct. 2026 : Luxembourg seul. Les regles des autres pays
 // (lib/acquisition/countries) ne citent que des portails generaux, pas une
-// source par chiffre, et le taux de credit (source BCL) ne vaut que pour le
+// source par chiffre, et le taux de credit (statistiques BCE) ne vaut que pour le
 // Luxembourg : un bien a l'etranger affiche le message "pays non couvert".
 const SUPPORTED_CODES = ["LU"];
 
@@ -107,6 +111,7 @@ export function AcquisitionSimulator({
   country,
   city,
   variant = "default",
+  rates: ratesRow = null,
 }: Props) {
   const locale = useLocale();
   const t = useTranslations("acquisition_simulator");
@@ -157,6 +162,7 @@ export function AcquisitionSimulator({
       city={city ?? ""}
       isCompact={isCompact}
       locale={locale}
+      ratesRow={ratesRow}
     />
   );
 }
@@ -167,12 +173,14 @@ function SimulatorActive({
   city,
   isCompact,
   locale,
+  ratesRow,
 }: {
   price: number;
   country: string;
   city: string;
   isCompact: boolean;
   locale: string;
+  ratesRow: InterestRates | null;
 }) {
   const t = useTranslations("acquisition_simulator");
   const [downPct, setDownPct] = useState(20);
@@ -219,19 +227,18 @@ function SimulatorActive({
   );
 
   const downPayment = Math.round((price * downPct) / 100);
-  // 3,82% = interpolation courtiers LU 25 ans mai 2026 (source BCL).
-  const rate = 3.82;
+  // Nov. 2026 : taux BCE selon la duree (avant : 3,82 % code en dur).
+  const { rates: ecbRates, month: rateMonth } = effectiveRates(ratesRow);
+  const rate = getRateForDuration(duration, "fixed", { rates: ecbRates });
+  const basis = rateBasis(duration, "fixed");
 
-  const mortgage = useMemo(
-    () =>
-      computeMortgage({
-        price,
-        downPayment,
-        rateAnnual: rate,
-        durationYears: duration,
-      }),
-    [price, downPayment, rate, duration],
-  );
+  // Calcul direct (React Compiler memoise ; le taux vient de la base).
+  const mortgage = computeMortgage({
+    price,
+    downPayment,
+    rateAnnual: rate,
+    durationYears: duration,
+  });
 
   const incomeRequired = mortgage.monthlyPayment / 0.35;
   const debtRatio = computeDebtRatio(mortgage.monthlyPayment, incomeRequired);
@@ -482,6 +489,10 @@ function SimulatorActive({
           hint={t("debt_ratio_hint", { ratio: debtRatio.toFixed(0) })}
         />
       </dl>
+      <p className="mt-3 text-[11px] leading-snug text-ink-soft">
+        {basis === "fixed_over_10" || basis === "fixed_5_10" ? `${t(`rate_basis_${basis}`)}. ` : ""}
+        {t("source_label", { month: formatRateMonth(rateMonth, locale) })}
+      </p>
 
       {result.warnings.length > 0 && (
         <ul className="mt-5 space-y-2 rounded-md border border-yellow-400 bg-yellow-50 p-3 dark:bg-yellow-900/10">

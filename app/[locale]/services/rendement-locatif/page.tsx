@@ -2,8 +2,15 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { seoPageMetadata } from "@/lib/seo-page-meta";
+import { fetchLatestInterestRates } from "@/lib/data";
+import { effectiveRates, formatRateMonth } from "@/lib/rates";
 
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+// Taux BCE (nov. 2026) : page regeneree au plus une fois par jour, et tout
+// de suite quand la veille enregistre un nouveau mois (lib/pilotage/bce.ts).
+// Avant : page figee au deploiement (revalidate false).
+export const revalidate = 86400;
+
 export async function generateMetadata({
   params,
 }: {
@@ -23,6 +30,7 @@ export default async function RendementLocatifPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "rendement_locatif" });
+  const { month: rateMonth } = effectiveRates(await fetchLatestInterestRates());
 
   return (
     <>
@@ -61,7 +69,7 @@ export default async function RendementLocatifPage({
         </div>
 
         <p className="mt-10 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-          {t("source")}
+          {t("source", { month: formatRateMonth(rateMonth, locale) })}
         </p>
       </div>
     </article>

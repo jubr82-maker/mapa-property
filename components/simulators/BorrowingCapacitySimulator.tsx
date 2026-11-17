@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { track } from "@/lib/tracking/track";
+import { effectiveRates, formatOfficialRate, formatRateMonth } from "@/lib/rates";
+import type { InterestRates } from "@/lib/types";
 
 /**
  * Calcule la capacité d'emprunt à partir d'une mensualité max et d'un taux annuel.
@@ -38,8 +40,13 @@ function fmtEur(n: number) {
   );
 }
 
-export function BorrowingCapacitySimulator() {
+export function BorrowingCapacitySimulator({ rates: ratesRow = null }: { rates?: InterestRates | null }) {
   const t = useTranslations("borrowing_capacity");
+  const locale = useLocale();
+  // Repere affiche sous les champs : taux BCE des prets a taux fixe de plus
+  // de 10 ans (nov. 2026). Le taux du calcul reste celui saisi.
+  const { rates: ecbRates, month: rateMonth } = effectiveRates(ratesRow);
+  const referenceRate = ecbRates.fixed_over_10;
 
   const [income, setIncome] = useState<string>("");
   const [charges, setCharges] = useState<string>("");
@@ -174,6 +181,10 @@ export function BorrowingCapacitySimulator() {
             placeholder={t("rate_placeholder")}
           />
         </div>
+        <p className="mt-4 text-xs leading-relaxed text-ink-soft">
+          {typeof referenceRate === "number" ? `${t("rate_reference", { rate: formatOfficialRate(referenceRate, locale) })} ` : ""}
+          {t("source_label", { month: formatRateMonth(rateMonth, locale) })}
+        </p>
 
         <button
           type="submit"

@@ -1,13 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   computeMortgage,
   computeDebtRatio,
   fmtEur,
-  DEFAULT_RATES_BY_COUNTRY,
+  getRateForDuration,
 } from "@/lib/finance-sim";
+import { effectiveRates, formatRateMonth, rateBasis } from "@/lib/rates";
+import type { InterestRates } from "@/lib/types";
 import {
   LEGAL_FEES,
   computeAcquisitionCosts,
@@ -22,10 +24,14 @@ interface Props {
     down: number;
     duration: number;
   };
+  /** Derniere ligne BCE (null : valeurs de secours datees). */
+  rates?: InterestRates | null;
 }
 
-export function FinancingSimulator({ initial }: Props) {
+export function FinancingSimulator({ initial, rates: row = null }: Props) {
   const t = useTranslations("financing_simulator");
+  const locale = useLocale();
+  const { rates, month } = effectiveRates(row);
   const [price, setPrice] = useState(initial.price);
   const [country, setCountry] = useState<CountryCode>(initial.country);
   const [downPayment, setDownPayment] = useState(initial.down);
@@ -34,12 +40,12 @@ export function FinancingSimulator({ initial }: Props) {
   const [persons, setPersons] = useState(1);
 
   const fees = LEGAL_FEES[country] ?? LEGAL_FEES.LU;
-  const rate = DEFAULT_RATES_BY_COUNTRY[country] ?? 3.85;
+  // Luxembourg seul : taux BCE selon la duree (lib/finance-sim.ts).
+  const rate = getRateForDuration(duration, "fixed", { rates });
+  const basis = rateBasis(duration, "fixed");
 
-  const mortgage = useMemo(
-    () => computeMortgage({ price, downPayment, rateAnnual: rate, durationYears: duration }),
-    [price, downPayment, rate, duration],
-  );
+  // Calcul direct (React Compiler memoise ; le taux vient de la base).
+  const mortgage = computeMortgage({ price, downPayment, rateAnnual: rate, durationYears: duration });
   const acquisition = useMemo(() => computeAcquisitionCosts(price, country), [price, country]);
   const totalCash = downPayment + acquisition.total;
   const aidsTotal = computeMaxAidsDeduction(country, persons);
@@ -127,6 +133,10 @@ export function FinancingSimulator({ initial }: Props) {
         <dl className="mt-5 space-y-4">
           <Big label="Mensualité estimée" value={fmtEur(mortgage.monthlyPayment)} />
           <Row label={`Taux indicatif ${fees.name}`} value={`${rate.toFixed(2)} %`} />
+          <p className="text-[11px] leading-snug text-ink-soft">
+            {basis === "fixed_over_10" || basis === "fixed_5_10" ? `${t(`rate_basis_${basis}`)}. ` : ""}
+            {t("source_label", { month: formatRateMonth(month, locale) })}
+          </p>
           <Row label="Capital emprunté" value={fmtEur(mortgage.borrowedAmount)} />
           <Row label="Coût total intérêts" value={fmtEur(mortgage.totalInterest)} />
           <Row

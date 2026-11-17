@@ -90,6 +90,8 @@ export interface EstimateResult {
     suggestedDuration: number;
     rateUsed: number;
     notaryFees: number;
+    /** Mois BCE du taux (AAAA-MM), renseigne par app/api/estimate. */
+    rateMonth?: string;
   } | null;
   helps: { key: string; amount?: number; conditions: string[] }[];
 }

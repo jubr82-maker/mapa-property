@@ -1,3 +1,4 @@
+import type { RatesJson } from "./rates";
 export type Transaction = "sale" | "rent" | "offmarket";
 export type Locale = "fr" | "en" | "de";
 
@@ -162,15 +163,8 @@ export interface BlogPost {
 
 export interface InterestRates {
   id: string;
-  rates: {
-    fixed_5?: number;
-    fixed_10?: number;
-    fixed_15?: number;
-    fixed_20?: number;
-    fixed_25?: number;
-    fixed_30?: number;
-    variable?: number;
-  };
+  // Cles lues par le simulateur + 8 valeurs officielles BCE (lib/rates.ts).
+  rates: RatesJson | null;
   reference_month: string | null;
   source: string | null;
 }

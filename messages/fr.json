@@ -869,6 +869,8 @@
     "source": "Source : MAPA Property. © 2026. Tous droits réservés. Toute reproduction interdite."
   },
   "estimate_form": {
+    "rate_basis_fixed_over_10": "Taux moyen des prêts à taux fixe de plus de 10 ans.",
+    "rate_source": "Données marché Luxembourg, {month}. Source : statistiques BCE",
     "step1_label": "Le bien",
     "step2_label": "Localisation",
     "step3_label": "Coordonnées",
@@ -1063,15 +1065,33 @@
     }
   },
   "simulators_page": {
+    "rates_row_average_renegotiated": "Prêts renégociés",
+    "rates_row_average_new_only": "Nouveaux prêts seuls, hors renégociations",
+    "rates_row_average": "Moyenne toutes durées",
+    "rates_row_fixed_over_1": "Tous taux fixes à plus d'un an",
+    "rates_row_fixed_over_10": "Fixe à plus de 10 ans",
+    "rates_row_fixed_5_10": "Fixe de 5 à 10 ans",
+    "rates_row_fixed_1_5": "Fixe de 1 à 5 ans",
+    "rates_row_variable_1y": "Taux variable et fixe jusqu'à 1 an",
+    "rates_col_rate": "Taux annuel",
+    "rates_col_type": "Type de prêt",
+    "rates_note": "Moyennes des prêts signés, publiées avec environ deux mois de décalage. Le taux de votre banque peut être différent.",
+    "rates_source": "Données marché Luxembourg, {month}. Source : statistiques BCE",
+    "rates_title": "Taux moyens au Luxembourg",
     "eyebrow": "Outils financiers",
     "title": "Trois calculateurs immédiats.",
     "intro": "Mensualité, rendement locatif, capacité d'emprunt : pré-remplis avec les derniers taux du marché luxembourgeois.",
     "disclaimer_title": "Outils indicatifs uniquement, non contractuels.",
-    "disclaimer_p1": "Notre simulateur s'appuie sur les données publiques de l'Observatoire de l'Habitat (Ministère du Logement luxembourgeois) et les taux de référence de la Banque centrale du Luxembourg (BCL), adaptés en continu par notre agence aux tendances du marché.",
+    "disclaimer_p1": "Notre simulateur s'appuie sur les données publiques de l'Observatoire de l'Habitat (Ministère du Logement luxembourgeois) et les taux moyens publiés par la BCE (statistiques BCE), repris sans modification.",
     "disclaimer_p2": "Seuil prudentiel usuel d'endettement (35%). Plafond loyer luxembourgeois : 5% du capital investi par an. Frais de notaire ~7% du prix d'acquisition au Luxembourg. Bëllegen Akt : crédit d'impôt jusqu'à 45 000 € par acquéreur (90 000 € pour un couple acquérant ensemble), depuis le 16 juillet 2026, sur les droits d'enregistrement, sous conditions d'occupation effective comme résidence principale.",
     "source": "Source : MAPA Property. © 2026. Tous droits réservés. Toute reproduction interdite."
   },
   "simulators": {
+    "rate_basis_fixed_over_10": "taux moyen des prêts à taux fixe de plus de 10 ans",
+    "rate_basis_fixed_5_10": "taux moyen des prêts à taux fixe de 5 à 10 ans",
+    "rate_basis_interpolated": "interpolé entre les taux moyens à taux fixe de 1 à 5 ans et de 5 à 10 ans",
+    "rate_basis_fixed_1_5": "taux moyen des prêts à taux fixe de 1 à 5 ans",
+    "rate_basis_variable": "taux moyen des prêts à taux variable ou fixe jusqu'à 1 an",
     "tab_mortgage": "Mensualité de prêt",
     "tab_yield": "Rendement locatif",
     "tab_capacity": "Capacité d'emprunt",
@@ -1082,7 +1102,7 @@
     "monthly_label": "Mensualité",
     "total_paid": "Coût total",
     "total_interest": "Intérêts totaux",
-    "source_label": "Sources : BCL et courtiers Luxembourg agréés ({month})",
+    "source_label": "Données marché Luxembourg, {month}. Source : statistiques BCE",
     "purchase_price": "Prix d'achat",
     "rent_monthly": "Loyer mensuel",
     "charges_year": "Charges annuelles",
@@ -1239,9 +1259,11 @@
     "feature_3": "TRI projeté sur 10, 15 et 20 ans",
     "feature_4": "Comparaison avec l'obligation 10 ans Luxembourg pour benchmark",
     "cta": "Demander un calcul personnalisé",
-    "source": "Données BCL / Statec / ABBL"
+    "source": "Données marché Luxembourg, {month}. Source : statistiques BCE"
   },
   "borrowing_capacity": {
+    "source_label": "Données marché Luxembourg, {month}. Source : statistiques BCE",
+    "rate_reference": "Repère : {rate} %, taux moyen des prêts à taux fixe de plus de 10 ans.",
     "meta_title": "Capacité d'emprunt, MAPA Property",
     "meta_description": "Estimez votre capacité d'emprunt immobilier au Luxembourg. Outil indicatif, soumis à acceptation bancaire.",
     "eyebrow": "CAPACITÉ D'EMPRUNT",
@@ -1329,7 +1351,7 @@
     "short": "Estimation indicative établie à partir de données de marché et de l'algorithme MAPA Property : elle ne constitue pas un avis de valeur contractuel. Pour affiner cette estimation, MAPA Property réalise sur demande un Avis de Valeur détaillé. Les questions de financement et de formalités notariales relèvent de votre banque et de votre notaire.",
     "full": {
       "title": "Informations non contractuelles",
-      "p1": "Les estimations, simulations, analyses de marché et données présentées sur ce site sont fournies à titre informatif et indicatif. Elles s'appuient sur des sources publiques (STATEC, Observatoire de l'Habitat, ABBL, Banque centrale du Luxembourg) et sur les algorithmes propriétaires de MAPA Property.",
+      "p1": "Les estimations, simulations, analyses de marché et données présentées sur ce site sont fournies à titre informatif et indicatif. Elles s'appuient sur des sources publiques (STATEC, Observatoire de l'Habitat, ABBL, statistiques BCE) et sur les algorithmes propriétaires de MAPA Property.",
       "p2": "MAPA Property décline toute responsabilité quant à l'usage qui pourrait être fait de ces informations, aux décisions prises sur leur base, ou aux écarts éventuels avec la réalité du marché ou la situation individuelle de l'utilisateur.",
       "p3": "Ces données ne constituent pas un conseil financier, fiscal, juridique ou notarial. Pour toute opération concrète, consultez les professionnels compétents : notaire (acte authentique, succession, régime matrimonial), banque ou courtier en crédit agréé (financement), conseil fiscal (imposition, plus-values), avocat (conseil juridique)."
     }
@@ -1369,10 +1391,16 @@
     "properties_label": "Biens proposés"
   },
   "financing_simulator": {
+    "rate_basis_fixed_over_10": "taux moyen des prêts à taux fixe de plus de 10 ans",
+    "rate_basis_fixed_5_10": "taux moyen des prêts à taux fixe de 5 à 10 ans",
+    "source_label": "Données marché Luxembourg, {month}. Source : statistiques BCE",
     "disclaimer": "Disclaimer : simulation indicative à titre d'information. Les montants ne constituent pas une offre de prêt. Les taux pratiqués par les banques varient selon le profil emprunteur, l'apport, la garantie, le type de bien et la conjoncture. Pour une étude personnalisée, contactez MAPA Property pour un rendez-vous avec un partenaire bancaire qualifié.",
     "aids_title": "Aides applicables : {country}"
   },
   "acquisition_simulator": {
+    "rate_basis_fixed_over_10": "taux moyen des prêts à taux fixe de plus de 10 ans",
+    "rate_basis_fixed_5_10": "taux moyen des prêts à taux fixe de 5 à 10 ans",
+    "source_label": "Données marché Luxembourg, {month}. Source : statistiques BCE",
     "eyebrow": "Plan de financement",
     "country_not_covered_title": "Pays non couvert",
     "country_not_covered_body": "Le simulateur de coûts d'acquisition n'est pas encore disponible pour ce pays. MAPA Property vous propose une analyse personnalisée avec ses partenaires locaux.",
@@ -3630,6 +3658,10 @@
     "footer": "Détails dans l'administration, groupe Pilotage."
   },
   "admin_pilotage": {
+    "rates_fallback_hint": "Aucune donnée BCE en base : le site affiche les valeurs de secours de {month}.",
+    "rates_stale": "Taux d'intérêt non mis à jour depuis {month}",
+    "rates_ok_hint": "Statistiques BCE, vérifiées chaque jour par la tâche planifiée.",
+    "rates_label": "Taux d'intérêt des simulateurs",
     "eyebrow": "Pilotage",
     "open": "Ouvrir",
     "unavailable": "Données indisponibles pour le moment.",
@@ -4352,7 +4384,7 @@
     "annex_pages": "{count, plural, one {# page} other {# pages}}",
     "not_expertise_short": "Avis de valeur, et non une expertise immobilière.",
     "legal_title": "Informations non contractuelles",
-    "legal_p1": "Les estimations, analyses de marché et données présentées dans ce document sont fournies à titre informatif et indicatif. Elles s'appuient sur des sources publiques (STATEC, Observatoire de l'Habitat, ABBL, Banque centrale du Luxembourg) et sur les algorithmes propriétaires de MAPA Property.",
+    "legal_p1": "Les estimations, analyses de marché et données présentées dans ce document sont fournies à titre informatif et indicatif. Elles s'appuient sur des sources publiques (STATEC, Observatoire de l'Habitat, ABBL, statistiques BCE) et sur les algorithmes propriétaires de MAPA Property.",
     "legal_p2": "MAPA Property décline toute responsabilité quant à l'usage qui pourrait être fait de ce document, aux décisions prises sur sa base, ou aux écarts éventuels avec la réalité du marché ou la situation individuelle de son destinataire.",
     "legal_p3": "Ce document ne constitue pas un conseil financier, fiscal, juridique ou notarial. Pour toute opération concrète, consultez les professionnels compétents : notaire (acte authentique, succession, régime matrimonial), banque ou courtier en crédit agréé (financement), conseil fiscal (imposition, plus-values), avocat (conseil juridique)."
   },

@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { BorrowingCapacitySimulator } from "@/components/simulators/BorrowingCapacitySimulator";
+import { fetchLatestInterestRates } from "@/lib/data";
 import { pageAlternates } from "@/lib/seo";
 
 import { withSocial } from "@/lib/seo-page-meta";
@@ -27,6 +28,7 @@ async function CapaciteEmpruntPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "borrowing_capacity" });
+  const rates = await fetchLatestInterestRates();
 
   return (
     <>
@@ -45,7 +47,7 @@ async function CapaciteEmpruntPage({
           </p>
         </header>
 
-        <BorrowingCapacitySimulator />
+        <BorrowingCapacitySimulator rates={rates} />
       </div>
     </div>
     </>

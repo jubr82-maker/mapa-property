@@ -9,6 +9,8 @@ import { loadPsiHistory, psiConfigured, resolvePsiPaths, type PsiRow } from "@/l
 import { LCP_PHASE_ORDER, type LcpDiagnosis } from "@/lib/pilotage/lcp-diagnosis";
 import { loadCronRuns, loadEmailLog, loadFormHealth } from "@/lib/pilotage/health";
 import { deployInfo, domainStatus, loadBackupStatus } from "@/lib/pilotage/site-facts";
+import { fetchLatestInterestRates } from "@/lib/data";
+import { effectiveRates, formatRateMonth, isRateStale } from "@/lib/rates";
 import { CWV_THRESHOLDS, PSI_MANUAL_COOLDOWN_MINUTES, PSI_PATHS, PSI_STRATEGIES } from "@/lib/pilotage/config";
 import { LineChart } from "@/components/admin/analytics/LineChart";
 import { Card, Empty, PageHeader, Pill, Section, Stat, Table, Td, type Tone } from "@/components/admin/pilotage/ui";
@@ -31,13 +33,18 @@ const sec = (v: number | null) => (v === null ? "" : `${(v / 1000).toFixed(1)} s
 export default async function SantePage() {
   await requireAdminPage();
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_pilotage" });
-  const [psi, forms, emails, cron, backup] = await Promise.all([
+  const [psi, forms, emails, cron, backup, ratesRow] = await Promise.all([
     loadPsiHistory(90),
     loadFormHealth(14),
     loadEmailLog(100),
     loadCronRuns(30),
     loadBackupStatus(),
+    fetchLatestInterestRates(),
   ]);
+  // Taux BCE (nov. 2026) : alerte si le dernier mois enregistre a plus de 3 mois.
+  const ecb = effectiveRates(ratesRow);
+  const ratesMonth = formatRateMonth(ecb.month, ADMIN_LOCALE);
+  const ratesStale = isRateStale(ecb.month);
   const domain = domainStatus();
   const deploy = deployInfo();
 
@@ -84,6 +91,12 @@ export default async function SantePage() {
                 : undefined
             }
             tone={backup.status === "ok" ? "ok" : backup.status === "late" || backup.status === "error" ? "warning" : backup.status === "none" ? "critical" : "neutral"}
+          />
+          <Stat
+            label={t("rates_label")}
+            value={ratesStale ? t("rates_stale", { month: ratesMonth }) : ratesMonth}
+            hint={ecb.isFallback ? t("rates_fallback_hint", { month: ratesMonth }) : t("rates_ok_hint")}
+            tone={ratesStale ? "critical" : ecb.isFallback ? "warning" : "ok"}
           />
         </div>
         <p id="sauvegardes" className="text-xs text-ink-soft">{t("backup_note")}</p>

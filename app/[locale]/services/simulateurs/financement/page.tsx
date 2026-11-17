@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { withPageMessages } from "@/components/i18n/withPageMessages";
 import { setRequestLocale } from "next-intl/server";
 import { FinancingSimulator } from "@/components/simulators/FinancingSimulator";
+import { fetchLatestInterestRates } from "@/lib/data";
 
 import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
@@ -26,6 +27,7 @@ async function FinancingPage({
   const { locale } = await params;
   const sp = await searchParams;
   setRequestLocale(locale);
+  const rates = await fetchLatestInterestRates();
 
   const initial = {
     price: Number(sp.price) || 500000,
@@ -49,12 +51,11 @@ async function FinancingPage({
           </h1>
           <p className="mt-4 text-base leading-relaxed text-ink-mid">
             Simulation complète mensualité, frais d&apos;acquisition, capacité
-            empruntable et aides applicables selon le pays. Taux indicatifs
-            actualisés mensuellement (BCL / Banque de France / BNB / Bundesbank).
+            empruntable et aides applicables selon le pays.
           </p>
         </header>
 
-        <FinancingSimulator initial={initial} />
+        <FinancingSimulator initial={initial} rates={rates} />
       </div>
     </article>
     </>

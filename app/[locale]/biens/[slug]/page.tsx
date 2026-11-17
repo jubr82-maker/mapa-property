@@ -10,6 +10,7 @@ import {
   fetchPropertyByIdOrSlug,
   fetchPropertyImages,
   fetchPublishedProperties,
+  fetchLatestInterestRates,
 } from "@/lib/data";
 import { routing } from "@/i18n/routing";
 import { pickLang, type Locale } from "@/lib/types";
@@ -256,11 +257,13 @@ async function PropertyPage({
   type AnyProperty = typeof property & { property_type?: string | null };
   const propertyType =
     (property as AnyProperty).property_type ?? property.badge ?? null;
-  const [images, similar] = await Promise.all([
+  const [images, similar, interestRates] = await Promise.all([
     fetchPropertyImages(property.id),
     // Biens similaires (logique : lib/similar-properties.ts), cache par fiche
     // (oct. 2026, quotas Vercel).
     fetchSimilarFor({ id: property.id, transaction: property.transaction, country: property.country, property_type: propertyType, badge: property.badge, price: property.price, city: property.city }),
+    // Taux BCE du simulateur d'acquisition (nov. 2026).
+    fetchLatestInterestRates(),
   ]);
 
   const t = await getTranslations({ locale, namespace: "property" });
@@ -449,6 +452,7 @@ async function PropertyPage({
                 country={property.country ?? "LU"}
                 city={property.city ?? ""}
                 variant="compact"
+                rates={interestRates}
               />
             ) : null
           }

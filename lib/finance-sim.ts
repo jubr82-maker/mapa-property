@@ -1,5 +1,6 @@
-// Simulateur de financement immobilier — utilitaires pure JS,
+// Simulateur de financement immobilier, utilitaires pure JS,
 // utilisables côté client et serveur. Pas de dépendance externe.
+import { FALLBACK_RATES, type RatesJson } from "./rates";
 
 export interface MortgageParams {
   price: number;
@@ -75,89 +76,67 @@ export function fmtEur(n: number): string {
   }).format(Math.round(n)) + " €";
 }
 
-// Taux indicatifs par pays (mise à jour manuelle ou via le cron
-// refresh-rates documenté en blocker — dev pragmatique 2026-05).
-// LU mai 2026 : 3,82% = interpolation 25 ans entre les taux fixes
-// courtiers 10 ans (3,69%) et 30 ans (3,90%). Source BCL janvier 2026
-// + grille courtiers Luxembourg.
-// Oct. 2026 : taux etrangers (FR, BE, DE, PT, AE) retires, faute de source
-// verifiable. Seul le Luxembourg reste (3,82 %, interpolation courtiers
-// LU 25 ans mai 2026, source BCL, cf. AcquisitionSimulator).
-export const DEFAULT_RATES_BY_COUNTRY: Record<string, number> = {
-  LU: 3.82,
-};
-
-// Forme minimale acceptée par getRateForDuration — compatible avec
+// Forme minimale acceptée par getRateForDuration, compatible avec
 // InterestRates (lib/types.ts) sans creer de dependance circulaire.
-type RatesShape = {
-  rates?: {
-    fixed_5?: number;
-    fixed_10?: number;
-    fixed_15?: number;
-    fixed_20?: number;
-    fixed_25?: number;
-    fixed_30?: number;
-    variable?: number;
-  } | null;
-} | null;
+type RatesShape = { rates?: RatesJson | null } | null;
 
-// Paliers fixes Supabase (lus depuis la table interest_rates). Fallbacks
-// alignes sur la grille courtiers Luxembourg mai 2026 — utilises si la
-// DB est vide pour ce palier.
-const FIXED_PALIERS: ReadonlyArray<{ years: number; key: keyof NonNullable<NonNullable<RatesShape>["rates"]>; fallback: number }> = [
-  { years: 5,  key: "fixed_5",  fallback: 3.40 },
-  { years: 10, key: "fixed_10", fallback: 3.69 },
-  { years: 15, key: "fixed_15", fallback: 3.76 },
-  { years: 20, key: "fixed_20", fallback: 3.79 },
-  { years: 25, key: "fixed_25", fallback: 3.82 },
-  { years: 30, key: "fixed_30", fallback: 3.90 },
+// Paliers lus dans interest_rates.rates. Valeurs de secours (base sans ligne
+// BCE) : statistiques BCE, septembre 2026, verifiees le 17/11/2026
+// (fixe de 1 a 5 ans 3,85 ; de 5 a 10 ans 3,97 ; plus de 10 ans 4,03 ;
+// variable et fixe jusqu'a 1 an 3,13).
+const FIXED_PALIERS: ReadonlyArray<{ years: number; key: "fixed_5" | "fixed_10" | "fixed_15" | "fixed_20" | "fixed_25" | "fixed_30"; fallback: number }> = [
+  { years: 5,  key: "fixed_5",  fallback: FALLBACK_RATES.fixed_5 as number },
+  { years: 10, key: "fixed_10", fallback: FALLBACK_RATES.fixed_10 as number },
+  { years: 15, key: "fixed_15", fallback: FALLBACK_RATES.fixed_15 as number },
+  { years: 20, key: "fixed_20", fallback: FALLBACK_RATES.fixed_20 as number },
+  { years: 25, key: "fixed_25", fallback: FALLBACK_RATES.fixed_25 as number },
+  { years: 30, key: "fixed_30", fallback: FALLBACK_RATES.fixed_30 as number },
 ];
 
-const VARIABLE_FALLBACK = 2.85;
+const VARIABLE_FALLBACK = FALLBACK_RATES.variable as number;
 
 /**
  * Retourne le taux annuel a appliquer pour une duree donnee.
  *
- * - type='variable' : lit `rates.variable`, fallback 2.85%.
- * - type='fixed' : si la duree correspond a un palier (5/10/15/20/25/30),
- *   retourne la valeur exacte ; sinon interpole lineairement entre les
- *   deux paliers encadrants. Bornes : 3.40% (<=5 ans) / 3.90% (>=30 ans).
+ * - type='variable' : `rates.variable` (BCE : variable et fixe jusqu'a 1 an).
+ * - type='fixed' :
+ *   - jusqu'a 5 ans : fixed_5 (BCE : fixe de 1 a 5 ans) ;
+ *   - de 5 a 10 ans : interpolation lineaire entre fixed_5 et fixed_10 ;
+ *   - 10 ans : fixed_10 (BCE : fixe de 5 a 10 ans) ;
+ *   - plus de 10 ans : taux moyen des prets a taux fixe de plus de 10 ans
+ *     (fixed_over_10) s'il est enregistre, sinon paliers 15 a 30 ans.
  *
- * Toutes les valeurs sont arrondies a 2 decimales. Aucun throw : si la DB
- * est partiellement vide, les fallbacks codes prennent le relais palier
- * par palier.
+ * Valeurs de palier renvoyees telles quelles ; interpolation arrondie a
+ * 2 decimales. Aucun throw : palier absent = valeur de secours.
  */
 export function getRateForDuration(
   years: number,
   type: "fixed" | "variable",
   rates?: RatesShape,
 ): number {
+  const r = rates?.rates ?? null;
   if (type === "variable") {
-    return rates?.rates?.variable ?? VARIABLE_FALLBACK;
+    return r?.variable ?? VARIABLE_FALLBACK;
   }
+  const val = (p: (typeof FIXED_PALIERS)[number]) => r?.[p.key] ?? p.fallback;
 
-  // Borne basse
-  if (years <= FIXED_PALIERS[0].years) {
-    return rates?.rates?.[FIXED_PALIERS[0].key] ?? FIXED_PALIERS[0].fallback;
-  }
-  // Borne haute
+  if (years <= FIXED_PALIERS[0].years) return val(FIXED_PALIERS[0]);
+  if (years > 10 && typeof r?.fixed_over_10 === "number") return r.fixed_over_10;
+  const y = years > 10 ? Math.max(years, 15) : years;
   const last = FIXED_PALIERS[FIXED_PALIERS.length - 1];
-  if (years >= last.years) {
-    return rates?.rates?.[last.key] ?? last.fallback;
-  }
+  if (y >= last.years) return val(last);
 
-  // Interpolation lineaire entre les deux paliers encadrants
   for (let i = 0; i < FIXED_PALIERS.length - 1; i++) {
     const lo = FIXED_PALIERS[i];
     const hi = FIXED_PALIERS[i + 1];
-    if (years >= lo.years && years <= hi.years) {
-      const loRate = rates?.rates?.[lo.key] ?? lo.fallback;
-      const hiRate = rates?.rates?.[hi.key] ?? hi.fallback;
-      const ratio = (years - lo.years) / (hi.years - lo.years);
-      return Math.round((loRate + ratio * (hiRate - loRate)) * 100) / 100;
+    if (y === lo.years) return val(lo);
+    if (y === hi.years) return val(hi);
+    if (y > lo.years && y < hi.years) {
+      const ratio = (y - lo.years) / (hi.years - lo.years);
+      return Math.round((val(lo) + ratio * (val(hi) - val(lo))) * 100) / 100;
     }
   }
 
   // Defense : ne devrait jamais arriver
-  return rates?.rates?.fixed_25 ?? FIXED_PALIERS[4].fallback;
+  return val(last);
 }

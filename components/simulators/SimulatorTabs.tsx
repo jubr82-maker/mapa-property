@@ -4,26 +4,10 @@ import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { formatEuro, monthlyPayment } from "@/lib/finance";
 import { getRateForDuration } from "@/lib/finance-sim";
+import { effectiveRates, formatRateMonth, rateBasis, type RatesJson } from "@/lib/rates";
 import type { InterestRates } from "@/lib/types";
 
 type RateType = "fixed" | "variable";
-
-// Convertit "2026-05" → "mai 2026" (FR) / "May 2026" (EN) / "Mai 2026" (DE).
-// Renvoie la string brute si parsing impossible (defense + tolerance).
-function formatMonthLong(monthIso: string, locale: string): string {
-  const match = /^(\d{4})-(\d{2})$/.exec(monthIso);
-  if (!match) return monthIso;
-  const [, year, month] = match;
-  const date = new Date(Number(year), Number(month) - 1, 1);
-  try {
-    return new Intl.DateTimeFormat(locale, {
-      month: "long",
-      year: "numeric",
-    }).format(date);
-  } catch {
-    return monthIso;
-  }
-}
 
 interface Props {
   rates: InterestRates | null;
@@ -32,10 +16,13 @@ interface Props {
 const tabs = ["mortgage", "yield", "capacity"] as const;
 type Tab = (typeof tabs)[number];
 
-export function SimulatorTabs({ rates }: Props) {
+export function SimulatorTabs({ rates: row }: Props) {
   const [active, setActive] = useState<Tab>("mortgage");
   const t = useTranslations("simulators");
   const locale = useLocale();
+  // Derniere ligne BCE, ou valeurs de secours datees si la base est vide.
+  const { rates, month } = effectiveRates(row);
+  const sourceText = t("source_label", { month: formatRateMonth(month, locale) });
 
   return (
     <div>
@@ -56,15 +43,15 @@ export function SimulatorTabs({ rates }: Props) {
         ))}
       </nav>
 
-      {active === "mortgage" && <MortgageSim rates={rates} locale={locale} />}
+      {active === "mortgage" && <MortgageSim rates={rates} sourceText={sourceText} />}
       {active === "yield" && <YieldSim />}
-      {active === "capacity" && <CapacitySim rates={rates} locale={locale} />}
+      {active === "capacity" && <CapacitySim rates={rates} sourceText={sourceText} />}
     </div>
   );
 }
 
 /* --- Mortgage simulator --- */
-function MortgageSim({ rates, locale }: { rates: InterestRates | null; locale: string }) {
+function MortgageSim({ rates, sourceText }: { rates: RatesJson; sourceText: string }) {
   const t = useTranslations("simulators");
   const [capital, setCapital] = useState(500_000);
   const [years, setYears] = useState(25);
@@ -74,7 +61,7 @@ function MortgageSim({ rates, locale }: { rates: InterestRates | null; locale: s
 
   // Taux auto suit la duree via le helper. Si personnalisation activee,
   // on utilise customRateValue (snapshot pris au moment du toggle).
-  const autoRate = getRateForDuration(years, rateType, rates);
+  const autoRate = getRateForDuration(years, rateType, { rates });
   const displayRate =
     isCustomRate && customRateValue !== null ? customRateValue : autoRate;
   const sliderDisabled = !isCustomRate || rateType === "variable";
@@ -88,7 +75,7 @@ function MortgageSim({ rates, locale }: { rates: InterestRates | null; locale: s
 
   const handleTypeChange = (newType: RateType) => {
     setRateType(newType);
-    // Variable → personnalisation forcement off (taux unique 2.85%).
+    // Variable → personnalisation forcement off (taux unique publie par la BCE).
     if (newType === "variable") {
       setIsCustomRate(false);
       setCustomRateValue(null);
@@ -133,6 +120,11 @@ function MortgageSim({ rates, locale }: { rates: InterestRates | null; locale: s
               format={(v) => `${v.toFixed(2).replace(".", ",")} %`}
               disabled={sliderDisabled}
             />
+            {!isCustomRate && (
+              <p className="mt-1 text-[11px] leading-snug text-ink-soft">
+                {t(`rate_basis_${rateBasis(years, rateType)}`)}
+              </p>
+            )}
             <CustomRateToggle
               checked={isCustomRate}
               onChange={handleToggleCustom}
@@ -155,13 +147,8 @@ function MortgageSim({ rates, locale }: { rates: InterestRates | null; locale: s
               label={t("total_interest")}
               value={formatEuro(Math.round(interest))}
             />
-            {rates?.reference_month && (
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-                {t("source_label", {
-                  month: formatMonthLong(rates.reference_month, locale),
-                })}
-              </p>
-            )}
+            {/* Taux personnalise : ce n'est plus le chiffre BCE, pas de mention de source. */}
+            {!isCustomRate && <p className="text-[11px] leading-snug text-ink-soft">{sourceText}</p>}
           </dl>
         </div>
       </div>
@@ -261,7 +248,7 @@ function YieldSim() {
 }
 
 /* --- Capacity simulator --- */
-function CapacitySim({ rates, locale }: { rates: InterestRates | null; locale: string }) {
+function CapacitySim({ rates, sourceText }: { rates: RatesJson; sourceText: string }) {
   const t = useTranslations("simulators");
   const [income, setIncome] = useState(8_000);
   const [charges, setCharges] = useState(500);
@@ -272,7 +259,7 @@ function CapacitySim({ rates, locale }: { rates: InterestRates | null; locale: s
   const [customRateValue, setCustomRateValue] = useState<number | null>(null);
 
   // Meme logique que MortgageSim : auto par defaut, custom optionnel.
-  const autoRate = getRateForDuration(years, rateType, rates);
+  const autoRate = getRateForDuration(years, rateType, { rates });
   const displayRate =
     isCustomRate && customRateValue !== null ? customRateValue : autoRate;
   const sliderDisabled = !isCustomRate || rateType === "variable";
@@ -350,6 +337,11 @@ function CapacitySim({ rates, locale }: { rates: InterestRates | null; locale: s
               format={(v) => `${v.toFixed(2).replace(".", ",")} %`}
               disabled={sliderDisabled}
             />
+            {!isCustomRate && (
+              <p className="mt-1 text-[11px] leading-snug text-ink-soft">
+                {t(`rate_basis_${rateBasis(years, rateType)}`)}
+              </p>
+            )}
             <CustomRateToggle
               checked={isCustomRate}
               onChange={handleToggleCustom}
@@ -376,13 +368,8 @@ function CapacitySim({ rates, locale }: { rates: InterestRates | null; locale: s
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
               {t("limit_35pct")}
             </p>
-            {rates?.reference_month && (
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-                {t("source_label", {
-                  month: formatMonthLong(rates.reference_month, locale),
-                })}
-              </p>
-            )}
+            {/* Taux personnalise : ce n'est plus le chiffre BCE, pas de mention de source. */}
+            {!isCustomRate && <p className="text-[11px] leading-snug text-ink-soft">{sourceText}</p>}
           </dl>
         </div>
       </div>
@@ -433,8 +420,8 @@ function Slider({
   );
 }
 
-// Radio Fixe / Variable — au-dessus des sliders. Mode 'variable' verrouille
-// le taux a la valeur unique Supabase (2.85% mai 2026) et grise la
+// Radio Fixe / Variable, au-dessus des sliders. Mode 'variable' verrouille
+// le taux sur la valeur BCE "variable et fixe jusqu'a 1 an" et grise la
 // personnalisation.
 function RateTypeRadio({
   value,

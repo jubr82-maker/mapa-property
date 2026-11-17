@@ -11,6 +11,8 @@ import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { estimateProperty, type EstimateInput, type EstimateResult } from "@/lib/estimate";
 import { fetchLatestInterestRates } from "@/lib/data";
+import { getRateForDuration } from "@/lib/finance-sim";
+import { effectiveRates } from "@/lib/rates";
 import { shouldDropTestLead } from "@/lib/test-email";
 import { sendEstimationEmails } from "@/lib/email/estimation-emails";
 import {
@@ -827,14 +829,14 @@ async function handlePost(req: Request) {
   }
 
   // Fallback : moteur hédoniste legacy (multi-pays + immeuble/terrain).
-  const rates = await fetchLatestInterestRates();
-  const rate =
-    rates?.rates?.fixed_25 ??
-    rates?.rates?.fixed_20 ??
-    rates?.rates?.fixed_30 ??
-    3.6;
+  // Taux BCE (nov. 2026) : derniere ligne "Statistiques BCE", sinon valeurs
+  // de secours datees (lib/rates.ts). Durees proposees 20 a 30 ans : taux
+  // moyen des prets a taux fixe de plus de 10 ans.
+  const ecb = effectiveRates(await fetchLatestInterestRates());
+  const rate = getRateForDuration(25, "fixed", { rates: ecb.rates });
 
-  const result = estimateProperty(body as EstimateInput, Number(rate));
+  const result = estimateProperty(body as EstimateInput, rate);
+  if (result.financing) result.financing.rateMonth = ecb.month;
 
   const sanity = checkEstimateSanity({
     mid: result.range.mid,

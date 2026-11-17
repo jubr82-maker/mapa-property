@@ -4,9 +4,15 @@ import { seoPageMetadata } from "@/lib/seo-page-meta";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { fetchLatestInterestRates } from "@/lib/data";
 import { SimulatorTabs } from "@/components/simulators/SimulatorTabs";
+import { RatesTable } from "@/components/simulators/RatesTable";
 import { DisclaimerLegal } from "@/components/ui/DisclaimerLegal";
 
 import { PageBreadcrumb } from "@/components/seo/PageBreadcrumb";
+// Taux BCE (nov. 2026) : page regeneree au plus une fois par jour, et tout
+// de suite quand la veille enregistre un nouveau mois (lib/pilotage/bce.ts).
+// Avant : page figee au deploiement (revalidate false).
+export const revalidate = 86400;
+
 export async function generateMetadata({
   params,
 }: {
@@ -45,6 +51,8 @@ async function SimulatorsPage({
         </header>
 
         <SimulatorTabs rates={rates} />
+
+        <RatesTable row={rates} locale={locale} className="mt-14" />
 
         {/* Sprint juridique : disclaimer unifie sous les chiffres calcules
             (remplace l'ancienne mention custom simulators_page.disclaimer_*). */}

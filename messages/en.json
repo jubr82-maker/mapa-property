@@ -869,6 +869,8 @@
     "source": "Source: MAPA Property. © 2026. All rights reserved. Reproduction prohibited."
   },
   "estimate_form": {
+    "rate_basis_fixed_over_10": "Average rate of loans with a rate fixed for over 10 years.",
+    "rate_source": "Luxembourg market data, {month}. Source: ECB statistics",
     "step1_label": "The property",
     "step2_label": "Location",
     "step3_label": "Contact",
@@ -1063,15 +1065,33 @@
     }
   },
   "simulators_page": {
+    "rates_row_average_renegotiated": "Renegotiated loans",
+    "rates_row_average_new_only": "New loans only, excluding renegotiations",
+    "rates_row_average": "Average, all maturities",
+    "rates_row_fixed_over_1": "All rates fixed for over 1 year",
+    "rates_row_fixed_over_10": "Fixed for over 10 years",
+    "rates_row_fixed_5_10": "Fixed for 5 to 10 years",
+    "rates_row_fixed_1_5": "Fixed for 1 to 5 years",
+    "rates_row_variable_1y": "Variable rate and fixed up to 1 year",
+    "rates_col_rate": "Annual rate",
+    "rates_col_type": "Loan type",
+    "rates_note": "Averages of signed loans, published with a delay of about two months. Your bank's rate may differ.",
+    "rates_source": "Luxembourg market data, {month}. Source: ECB statistics",
+    "rates_title": "Average rates in Luxembourg",
     "eyebrow": "Financial tools",
     "title": "Three instant calculators.",
     "intro": "Monthly payment, rental yield, borrowing capacity: pre-filled with the latest Luxembourg market rates.",
     "disclaimer_title": "Indicative tools only, non-contractual.",
-    "disclaimer_p1": "Our simulator is based on public data from the Observatoire de l'Habitat (Luxembourg Ministry of Housing) and reference rates from the Banque centrale du Luxembourg (BCL), continuously adapted by our agency to market trends.",
+    "disclaimer_p1": "Our simulator is based on public data from the Observatoire de l'Habitat (Luxembourg Ministry of Housing) and average rates published by the ECB (ECB statistics), used without modification.",
     "disclaimer_p2": "Usual prudential debt threshold (35%). Luxembourg rent cap: 5% of invested capital per year. Notary fees ~7% of acquisition price in Luxembourg. Bëllegen Akt: tax credit of up to €45,000 per buyer (€90,000 for a couple buying together) since 16 July 2026 on registration duty, subject to effective occupation as primary residence.",
     "source": "Source: MAPA Property. © 2026. All rights reserved. Reproduction prohibited."
   },
   "simulators": {
+    "rate_basis_fixed_over_10": "average rate of loans with a rate fixed for over 10 years",
+    "rate_basis_fixed_5_10": "average rate of loans with a rate fixed for 5 to 10 years",
+    "rate_basis_interpolated": "interpolated between the average rates fixed for 1 to 5 years and for 5 to 10 years",
+    "rate_basis_fixed_1_5": "average rate of loans with a rate fixed for 1 to 5 years",
+    "rate_basis_variable": "average rate of variable-rate loans or loans fixed up to 1 year",
     "tab_mortgage": "Mortgage payment",
     "tab_yield": "Rental yield",
     "tab_capacity": "Borrowing capacity",
@@ -1082,7 +1102,7 @@
     "monthly_label": "Monthly",
     "total_paid": "Total cost",
     "total_interest": "Total interest",
-    "source_label": "Sources: BCL and accredited Luxembourg brokers ({month})",
+    "source_label": "Luxembourg market data, {month}. Source: ECB statistics",
     "purchase_price": "Purchase price",
     "rent_monthly": "Monthly rent",
     "charges_year": "Annual charges",
@@ -1239,9 +1259,11 @@
     "feature_3": "Projected IRR over 10, 15 and 20 years",
     "feature_4": "Comparison with the Luxembourg 10-year bond yield",
     "cta": "Request a personalised calculation",
-    "source": "Source: BCL / Statec / ABBL"
+    "source": "Luxembourg market data, {month}. Source: ECB statistics"
   },
   "borrowing_capacity": {
+    "source_label": "Luxembourg market data, {month}. Source: ECB statistics",
+    "rate_reference": "Benchmark: {rate} %, average rate of loans with a rate fixed for over 10 years.",
     "meta_title": "Borrowing Capacity, MAPA Property",
     "meta_description": "Estimate your real estate borrowing capacity in Luxembourg. Indicative tool, subject to bank approval.",
     "eyebrow": "BORROWING CAPACITY",
@@ -1329,7 +1351,7 @@
     "short": "Indicative estimate based on market data and the MAPA Property algorithm: it does not constitute a contractual valuation. To refine this estimate, MAPA Property provides a detailed Valuation Report on request. Financing and notarial matters fall to your bank and notary.",
     "full": {
       "title": "Non-contractual information",
-      "p1": "The estimates, simulations, market analyses and data presented on this site are provided for informational and indicative purposes. They rely on public sources (STATEC, Observatoire de l'Habitat, ABBL, Central Bank of Luxembourg) and on MAPA Property's proprietary algorithms.",
+      "p1": "The estimates, simulations, market analyses and data presented on this site are provided for informational and indicative purposes. They rely on public sources (STATEC, Observatoire de l'Habitat, ABBL, ECB statistics) and on MAPA Property's proprietary algorithms.",
       "p2": "MAPA Property accepts no liability for any use that may be made of this information, for decisions taken on its basis, or for any discrepancies with market reality or the user's individual situation.",
       "p3": "This data does not constitute financial, tax, legal or notarial advice. For any concrete transaction, consult the relevant professionals: notary (authentic deed, inheritance, matrimonial regime), bank or licensed credit broker (financing), tax adviser (taxation, capital gains), lawyer (legal advice)."
     }
@@ -1369,10 +1391,16 @@
     "properties_label": "Suggested properties"
   },
   "financing_simulator": {
+    "rate_basis_fixed_over_10": "average rate of loans with a rate fixed for over 10 years",
+    "rate_basis_fixed_5_10": "average rate of loans with a rate fixed for 5 to 10 years",
+    "source_label": "Luxembourg market data, {month}. Source: ECB statistics",
     "disclaimer": "Disclaimer: indicative simulation for information purposes only. The amounts shown do not constitute a loan offer. The rates applied by banks vary according to the borrower profile, down payment, collateral, property type and market conditions. For a personalised study, contact MAPA Property for an appointment with a qualified banking partner.",
     "aids_title": "Applicable aid: {country}"
   },
   "acquisition_simulator": {
+    "rate_basis_fixed_over_10": "average rate of loans with a rate fixed for over 10 years",
+    "rate_basis_fixed_5_10": "average rate of loans with a rate fixed for 5 to 10 years",
+    "source_label": "Luxembourg market data, {month}. Source: ECB statistics",
     "eyebrow": "Financing plan",
     "country_not_covered_title": "Country not covered",
     "country_not_covered_body": "The acquisition cost simulator is not yet available for this country. MAPA Property offers a tailored analysis through its local partners.",
@@ -3630,6 +3658,10 @@
     "footer": "Details in the admin, management menu."
   },
   "admin_pilotage": {
+    "rates_fallback_hint": "No ECB data in the database: the site shows the fallback values of {month}.",
+    "rates_stale": "Interest rates not updated since {month}",
+    "rates_ok_hint": "ECB statistics, checked every day by the scheduled task.",
+    "rates_label": "Simulator interest rates",
     "eyebrow": "Management",
     "open": "Open",
     "unavailable": "Data unavailable for now.",
@@ -4352,7 +4384,7 @@
     "annex_pages": "{count, plural, one {# page} other {# pages}}",
     "not_expertise_short": "A value opinion, not a real estate expert appraisal.",
     "legal_title": "Non-contractual information",
-    "legal_p1": "The estimates, market analyses and data presented in this document are provided for informational and indicative purposes. They rely on public sources (STATEC, Observatoire de l'Habitat, ABBL, Central Bank of Luxembourg) and on MAPA Property's proprietary algorithms.",
+    "legal_p1": "The estimates, market analyses and data presented in this document are provided for informational and indicative purposes. They rely on public sources (STATEC, Observatoire de l'Habitat, ABBL, ECB statistics) and on MAPA Property's proprietary algorithms.",
     "legal_p2": "MAPA Property accepts no liability for any use that may be made of this document, for decisions taken on its basis, or for any discrepancies with market reality or the individual situation of its recipient.",
     "legal_p3": "This document does not constitute financial, tax, legal or notarial advice. For any concrete transaction, consult the relevant professionals: notary (authentic deed, inheritance, matrimonial regime), bank or licensed credit broker (financing), tax adviser (taxation, capital gains), lawyer (legal advice)."
   },
