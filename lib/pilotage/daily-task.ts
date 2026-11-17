@@ -8,6 +8,7 @@
 //   le lundi         : resume hebdomadaire (une seule fois par semaine)
 //   tous les jours   : taux BCE (requete legere, ecriture seulement si un
 //                      nouveau mois est publie, cf. lib/pilotage/bce.ts)
+//   tous les jours   : rappels Claude par e-mail (cle API, credits)
 //   tous les jours   : purge des journaux et statistiques au-dela des
 //                      durees de conservation (RETENTION_RULES)
 import { runPsiMeasurements } from "@/lib/pilotage/psi";
@@ -15,6 +16,7 @@ import { purgeExpiredRows } from "@/lib/pilotage/retention";
 import { snapshotWeeklyPositions } from "@/lib/pilotage/seo";
 import { sendWeeklySummary } from "@/lib/pilotage/weekly-summary";
 import { refreshBceRate } from "@/lib/pilotage/bce";
+import { sendClaudeReminders } from "@/lib/claude/deadlines-store";
 import { loadCronRuns, recordCronRun } from "@/lib/pilotage/health";
 import { WEEKLY_SUMMARY_WEEKDAY } from "@/lib/pilotage/config";
 import { sendBackupReport } from "@/lib/backup/report-step";
@@ -54,6 +56,9 @@ export async function runDailyTask(now = new Date()): Promise<StepResult[]> {
     if (!alreadySent) results.push(await step("weekly_summary", () => sendWeeklySummary()));
   }
   results.push(await step("bce_rate", () => refreshBceRate()));
+  // Rappels Claude (nov. 2026) : e-mail a J-60, J-15 et le jour de
+  // l'echeance (cle API, credits), un seul par palier (claude_reminders).
+  results.push(await step("claude_reminders", () => sendClaudeReminders(now)));
   results.push(await step("retention", () => purgeExpiredRows(now)));
 
   const failed = results.filter((r) => !r.ok).map((r) => r.task);

@@ -8,7 +8,9 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { formatCost, usdToEur } from "@/lib/claude/pricing";
 import type { ClaudeUsageSummary } from "@/lib/claude/usage";
-import { saveClaudeCredit } from "@/app/admin/properties/claude-actions";
+import { saveClaudeCredit, saveClaudeKeyExpiry } from "@/app/admin/properties/claude-actions";
+import { addOneYear, isIsoDay, type ClaudeDeadlines } from "@/lib/claude/deadlines";
+import { formatDateOnly } from "@/lib/datetime";
 
 /** Console Claude (solde officiel : Settings, Billing). Racine seulement : adresse sure. */
 export const CLAUDE_CONSOLE_BILLING_URL = "https://platform.claude.com/";
@@ -45,7 +47,7 @@ export function ClaudeUsageLine({ usage }: { usage: ClaudeUsageSummary }) {
 }
 
 /** Encart "Consommation Claude" du tableau de bord. */
-export function ClaudeUsagePanel({ usage }: { usage: ClaudeUsageSummary }) {
+export function ClaudeUsagePanel({ usage, deadlines }: { usage: ClaudeUsageSummary; deadlines: ClaudeDeadlines }) {
   const t = useTranslations("admin_claude");
   const money = useMoney(usage.usdPerEur);
   const [amount, setAmount] = useState(usage.credit ? String(usage.credit.amountUsd) : "");
@@ -54,7 +56,13 @@ export function ClaudeUsagePanel({ usage }: { usage: ClaudeUsageSummary }) {
   const [busy, start] = useTransition();
 
   if (!usage.ready) {
-    return <p className="rounded-xl border border-dashed border-ink/20 p-4 text-sm text-ink-mid">{t("not_ready_long")}</p>;
+    return (
+      <div className="space-y-4">
+        <p className="rounded-xl border border-dashed border-ink/20 p-4 text-sm text-ink-mid">{t("not_ready_long")}</p>
+        <p className="text-sm text-ink-mid">{t("credit_not_set")}</p>
+        <KeyExpiryForm deadlines={deadlines} />
+      </div>
+    );
   }
   const stats: [string, string][] = [
     [t("stat_last"), usage.last ? money(usage.last.usd) : t("none")],
@@ -106,6 +114,48 @@ export function ClaudeUsagePanel({ usage }: { usage: ClaudeUsageSummary }) {
           </span>
         )}
       </form>
+      {/* Expiration calculee (date d'achat + 1 an), suit la saisie en cours. */}
+      <p className="mt-2 text-xs text-ink-soft" data-credit-expiry>
+        {isIsoDay(date) ? t("credit_expires", { date: formatDateOnly(addOneYear(date)) }) : t("credit_not_set")}
+      </p>
+      <KeyExpiryForm deadlines={deadlines} className="mt-4 border-t border-ink/10 pt-4" />
     </div>
+  );
+}
+
+/** Date d'expiration de la cle API (31/12/2027 par defaut), modifiable. */
+function KeyExpiryForm({ deadlines, className = "" }: { deadlines: ClaudeDeadlines; className?: string }) {
+  const t = useTranslations("admin_claude");
+  const [day, setDay] = useState(deadlines.apiKeyExpiresOn);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [busy, start] = useTransition();
+  function save(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    start(async () => {
+      const r = await saveClaudeKeyExpiry(day);
+      setMsg(r.ok ? { ok: true, text: t("key_saved") } : { ok: false, text: r.error });
+    });
+  }
+  return (
+    <form onSubmit={save} className={className} data-claude-key-expiry>
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="block">
+          <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">{t("key_date")}</span>
+          <input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="mt-1 rounded-md border border-ink/20 bg-bg px-3 py-2 text-sm text-ink" required />
+        </label>
+        <button type="submit" disabled={busy || !deadlines.remindersReady} className="rounded-full border border-ink/30 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink hover:border-gold disabled:opacity-50">
+          {t("key_save")}
+        </button>
+        {msg && (
+          <span role={msg.ok ? "status" : "alert"} className={`text-sm ${msg.ok ? "text-emerald-800" : "text-red-700"}`}>
+            {msg.text}
+          </span>
+        )}
+      </div>
+      <p className="mt-2 text-xs text-ink-soft">
+        {deadlines.remindersReady ? t("key_hint") : t("key_not_ready", { date: formatDateOnly(deadlines.apiKeyExpiresOn) })}
+      </p>
+    </form>
   );
 }

@@ -9,6 +9,9 @@ import { Card, GoLink, PageHeader, Pill, Section, type Tone } from "@/components
 import { ClaudeUsagePanel } from "@/components/admin/ClaudeUsage";
 import { loadClaudeUsage } from "@/lib/claude/usage";
 import { getUsdPerEur } from "@/lib/claude/usd-rate";
+import { ClaudeAlerts } from "@/components/admin/ClaudeAlerts";
+import { claudeAlerts } from "@/lib/claude/deadlines";
+import { loadClaudeDeadlines } from "@/lib/claude/deadlines-store";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +23,10 @@ export default async function AdminDashboardPage() {
   const tc = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_claude" });
   const { items, checked } = await loadDashboard();
   // Consommation Claude (SQL 40) : "base pas encore prete" tant qu'absent.
-  const claudeUsage = await loadClaudeUsage(supabase, await getUsdPerEur());
+  const usdPerEur = await getUsdPerEur();
+  const [claudeUsage, claudeDeadlines] = await Promise.all([loadClaudeUsage(supabase, usdPerEur), loadClaudeDeadlines(supabase)]);
+  // Echeances Claude (nov. 2026) : bandeaux en haut du tableau de bord.
+  const alerts = claudeAlerts(claudeDeadlines, claudeUsage.remainingUsd, new Date());
 
   const spaces = [
     { href: "/admin/activite", title: t("nav_activity"), text: t("dashboard_link_activity") },
@@ -31,6 +37,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-10">
+      <ClaudeAlerts alerts={alerts} usdPerEur={usdPerEur} />
       <PageHeader eyebrow={t("eyebrow")} title={t("dashboard_title")} intro={t("dashboard_intro", { date: formatDateTime(new Date()) })} />
 
       <Section title={t("dashboard_today")}>
@@ -57,7 +64,7 @@ export default async function AdminDashboardPage() {
       </Section>
 
       <Section title={tc("panel_title")} intro={tc("panel_intro")}>
-        <ClaudeUsagePanel usage={claudeUsage} />
+        <ClaudeUsagePanel usage={claudeUsage} deadlines={claudeDeadlines} />
       </Section>
 
       <Section title={t("dashboard_spaces")}>

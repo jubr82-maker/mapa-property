@@ -19,6 +19,9 @@ import { claudeCostUsd, usdToEur } from "@/lib/claude/pricing";
 import { translateListing, type ClaudeErrorCode, type ListingTranslation } from "@/lib/claude/translate-listing";
 import { loadClaudeUsage, missingTable, recordClaudeCall, type ClaudeUsageSummary } from "@/lib/claude/usage";
 import { getUsdPerEur } from "@/lib/claude/usd-rate";
+import { blockingExpiry, isIsoDay } from "@/lib/claude/deadlines";
+import { loadClaudeDeadlines, saveApiKeyExpiry } from "@/lib/claude/deadlines-store";
+import { formatDateOnly } from "@/lib/datetime";
 
 const LIMITS = { title: 300, description: 20000, short: 2000 };
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -32,7 +35,7 @@ export type ClaudeTranslateResult =
       saved: boolean;
       usage: ClaudeUsageSummary;
     }
-  | { ok: false; error: string; code?: ClaudeErrorCode | "empty" | "too_long" | "rate_local"; offerMistral: boolean; usage?: ClaudeUsageSummary; costUsd?: number };
+  | { ok: false; error: string; code?: ClaudeErrorCode | "empty" | "too_long" | "rate_local" | "key_expired" | "credit_expired"; offerMistral: boolean; usage?: ClaudeUsageSummary; costUsd?: number };
 
 export async function translateWithClaude(input: { title: string; description: string; short: string; propertyId?: string | null }): Promise<ClaudeTranslateResult> {
   const admin = await requireAdmin();
@@ -51,6 +54,13 @@ export async function translateWithClaude(input: { title: string; description: s
   // Cle absente : aucun appel, message clair et Mistral propose.
   const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
   if (!apiKey.trim()) return { ok: false, error: t("err_no_key"), code: "no_key", offerMistral: true };
+
+  // Cle ou credit expire (dates saisies dans le tableau de bord) : aucun
+  // appel, message clair au lieu de l'erreur technique de Claude.
+  const expired = blockingExpiry(await loadClaudeDeadlines(admin.supabase), new Date());
+  if (expired) {
+    return { ok: false, error: t(`err_${expired.kind}_expired`, { date: formatDateOnly(expired.date) }), code: `${expired.kind}_expired`, offerMistral: true };
+  }
 
   const limit = actionRateLimit(`claude-translate:${admin.user.id}`, 6, 10 * 60_000);
   if (!limit.ok) return { ok: false, error: t("err_rate_local", { seconds: limit.retryInSeconds }), code: "rate_local", offerMistral: true };
@@ -99,5 +109,19 @@ export async function saveClaudeCredit(amountUsd: number, loadedOn: string): Pro
     .upsert({ id: 1, amount_usd: Math.round(amount * 100) / 100, loaded_on: loadedOn, updated_at: new Date().toISOString() }, { onConflict: "id" });
   if (error) return { ok: false, error: missingTable(error) ? t("not_ready") : t("credit_err_save") };
   revalidatePath("/admin");
+  revalidatePath("/admin/sante");
+  return { ok: true };
+}
+
+/** Date d'expiration de la cle API (seule la date est gardee, jamais la cle). */
+export async function saveClaudeKeyExpiry(day: string): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_claude" });
+  if (!isIsoDay(day)) return { ok: false, error: t("key_err_date") };
+  const r = await saveApiKeyExpiry(admin.supabase, day);
+  if (!r.ok) return { ok: false, error: r.reason === "not_ready" ? t("key_not_ready", { date: formatDateOnly(day) }) : t("key_err_save") };
+  revalidatePath("/admin");
+  revalidatePath("/admin/sante");
   return { ok: true };
 }

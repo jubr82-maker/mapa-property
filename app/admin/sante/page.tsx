@@ -11,6 +11,11 @@ import { loadCronRuns, loadEmailLog, loadFormHealth } from "@/lib/pilotage/healt
 import { deployInfo, domainStatus, loadBackupStatus } from "@/lib/pilotage/site-facts";
 import { fetchLatestInterestRates } from "@/lib/data";
 import { effectiveRates, formatRateMonth, isRateStale } from "@/lib/rates";
+import { ClaudeAlerts } from "@/components/admin/ClaudeAlerts";
+import { claudeAlerts } from "@/lib/claude/deadlines";
+import { loadClaudeDeadlines } from "@/lib/claude/deadlines-store";
+import { loadClaudeUsage } from "@/lib/claude/usage";
+import { getUsdPerEur } from "@/lib/claude/usd-rate";
 import { CWV_THRESHOLDS, PSI_MANUAL_COOLDOWN_MINUTES, PSI_PATHS, PSI_STRATEGIES } from "@/lib/pilotage/config";
 import { LineChart } from "@/components/admin/analytics/LineChart";
 import { Card, Empty, PageHeader, Pill, Section, Stat, Table, Td, type Tone } from "@/components/admin/pilotage/ui";
@@ -31,8 +36,13 @@ const ms = (v: number | null) => (v === null ? "" : `${Math.round(v)} ms`);
 const sec = (v: number | null) => (v === null ? "" : `${(v / 1000).toFixed(1)} s`);
 
 export default async function SantePage() {
-  await requireAdminPage();
+  const { supabase } = await requireAdminPage();
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_pilotage" });
+  const tr = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_claude_reminders" });
+  // Echeances Claude (nov. 2026) : memes bandeaux que le tableau de bord.
+  const usdPerEur = await getUsdPerEur();
+  const [claudeUsage, claudeDeadlines] = await Promise.all([loadClaudeUsage(supabase, usdPerEur), loadClaudeDeadlines(supabase)]);
+  const claude = claudeAlerts(claudeDeadlines, claudeUsage.remainingUsd, new Date());
   const [psi, forms, emails, cron, backup, ratesRow] = await Promise.all([
     loadPsiHistory(90),
     loadFormHealth(14),
@@ -68,6 +78,20 @@ export default async function SantePage() {
   return (
     <div className="space-y-12">
       <PageHeader eyebrow={t("eyebrow")} title={t("health_title")} intro={t("health_intro")} />
+
+      <Section id="claude" title={tr("health_title")}>
+        {claude.length ? (
+          <ClaudeAlerts alerts={claude} usdPerEur={usdPerEur} />
+        ) : (
+          <p className="text-sm text-ink-mid">
+            {tr("health_ok", {
+              key: formatDateOnly(claudeDeadlines.apiKeyExpiresOn),
+              credit: claudeDeadlines.credit ? formatDateOnly(claudeDeadlines.credit.expiresOn) : tr("credit_not_set"),
+            })}
+          </p>
+        )}
+        {!claudeDeadlines.remindersReady ? <p className="text-xs text-ink-soft">{tr("not_ready", { date: formatDateOnly(claudeDeadlines.apiKeyExpiresOn) })}</p> : null}
+      </Section>
 
       <Section id="echeances" title={t("deadlines_title")}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

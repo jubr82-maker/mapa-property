@@ -151,6 +151,7 @@ export type EmailKind =
   | "weekly_summary"
   | "backup_report"
   | "controle_report"
+  | "claude_reminder"
   | "other";
 
 export interface SendMailResult {
