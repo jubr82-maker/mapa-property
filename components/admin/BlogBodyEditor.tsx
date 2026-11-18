@@ -13,8 +13,9 @@
 // (app/admin/blog/actions.ts, sanitizeArticleHtml) et a l'affichage.
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslations } from "next-intl";
-import { EditorContent, Node, mergeAttributes, useEditor, type Editor } from "@tiptap/react";
+import { EditorContent, Node, mergeAttributes, useEditor, useEditorState, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { NO_AUTO_FORMAT, OnlyBoldItalicShortcuts } from "@/components/admin/editor-safety";
 import { uploadBlogImage } from "@/app/admin/blog/actions";
 import { compressImageFile } from "@/lib/image-compress";
 
@@ -77,10 +78,15 @@ export function BlogBodyEditor({
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4] },
         codeBlock: false,
-        link: { openOnClick: false, autolink: true, protocols: ["https", "mailto"] },
+        // Nov. 2026 : aucune transformation automatique du texte (liens
+        // seulement par le bouton), pas de soulignement.
+        link: { openOnClick: false, autolink: false, linkOnPaste: false, protocols: ["https", "mailto"] },
+        underline: false,
       }),
       ArticleImage,
+      OnlyBoldItalicShortcuts,
     ],
+    ...NO_AUTO_FORMAT,
     content: mode === "visual" ? value : "",
     immediatelyRender: false,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
@@ -186,16 +192,32 @@ function Toolbar({
   busy: boolean;
 }) {
   const t = useTranslations("admin_blog");
+  // Etat des boutons recalcule a chaque changement de selection (nov. 2026) :
+  // allume seulement si la selection a deja cette mise en forme.
+  const on =
+    useEditorState({
+      editor,
+      selector: ({ editor: e }) => ({
+        h2: e?.isActive("heading", { level: 2 }) ?? false,
+        h3: e?.isActive("heading", { level: 3 }) ?? false,
+        bold: e?.isActive("bold") ?? false,
+        italic: e?.isActive("italic") ?? false,
+        bullet: e?.isActive("bulletList") ?? false,
+        ordered: e?.isActive("orderedList") ?? false,
+        quote: e?.isActive("blockquote") ?? false,
+        link: e?.isActive("link") ?? false,
+      }),
+    }) ?? null;
   const items: { key: string; label: string; active?: boolean; run: () => void }[] = editor
     ? [
-        { key: "h2", label: "H2", active: editor.isActive("heading", { level: 2 }), run: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
-        { key: "h3", label: "H3", active: editor.isActive("heading", { level: 3 }), run: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
-        { key: "bold", label: "B", active: editor.isActive("bold"), run: () => editor.chain().focus().toggleBold().run() },
-        { key: "italic", label: "I", active: editor.isActive("italic"), run: () => editor.chain().focus().toggleItalic().run() },
-        { key: "bullet", label: "•", active: editor.isActive("bulletList"), run: () => editor.chain().focus().toggleBulletList().run() },
-        { key: "ordered", label: "1.", active: editor.isActive("orderedList"), run: () => editor.chain().focus().toggleOrderedList().run() },
-        { key: "quote", label: "«", active: editor.isActive("blockquote"), run: () => editor.chain().focus().toggleBlockquote().run() },
-        { key: "link", label: "↗", active: editor.isActive("link"), run: onLink },
+        { key: "h2", label: "H2", active: on?.h2 ?? false, run: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
+        { key: "h3", label: "H3", active: on?.h3 ?? false, run: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
+        { key: "bold", label: "B", active: on?.bold ?? false, run: () => editor.chain().focus().toggleBold().run() },
+        { key: "italic", label: "I", active: on?.italic ?? false, run: () => editor.chain().focus().toggleItalic().run() },
+        { key: "bullet", label: "•", active: on?.bullet ?? false, run: () => editor.chain().focus().toggleBulletList().run() },
+        { key: "ordered", label: "1.", active: on?.ordered ?? false, run: () => editor.chain().focus().toggleOrderedList().run() },
+        { key: "quote", label: "«", active: on?.quote ?? false, run: () => editor.chain().focus().toggleBlockquote().run() },
+        { key: "link", label: "↗", active: on?.link ?? false, run: onLink },
         { key: "image", label: "▣", run: onImage },
         { key: "undo", label: "↶", run: () => editor.chain().focus().undo().run() },
         { key: "redo", label: "↷", run: () => editor.chain().focus().redo().run() },
@@ -207,6 +229,7 @@ function Toolbar({
         <button
           key={it.key}
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={it.run}
           disabled={busy && it.key === "image"}
           aria-label={t(`tb_${it.key}`)}

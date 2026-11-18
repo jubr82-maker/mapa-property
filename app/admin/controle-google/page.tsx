@@ -11,6 +11,8 @@ import { LineChart } from "@/components/admin/analytics/LineChart";
 import { PageHeader } from "@/components/admin/pilotage/ui";
 import { RunControleButton } from "@/components/admin/pilotage/RunControleButton";
 import { CopyOpenSearchConsole } from "@/components/admin/pilotage/CopyOpenSearchConsole";
+import { IndexRequestedCheckbox } from "@/components/admin/pilotage/IndexRequestedCheckbox";
+import { DAILY_REQUESTS_APPROX } from "@/lib/pilotage/index-requests";
 
 export const dynamic = "force-dynamic";
 // Un clic sur "Lancer le controle" avance le passage pendant 45 s au plus.
@@ -59,9 +61,9 @@ function Zone({ category, groups, count, t }: { category: Category; groups: Grou
 }
 
 export default async function ControleGooglePage() {
-  await requireAdminPage();
+  const { supabase } = await requireAdminPage();
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_controle" });
-  const v = await loadControleView();
+  const v = await loadControleView(supabase);
 
   if (!v.ready) {
     return (
@@ -104,21 +106,47 @@ export default async function ControleGooglePage() {
       <section id="soumettre" className="scroll-mt-6 border-t border-ink/15 pt-8">
         <h2 className="font-display text-2xl font-bold text-ink">{t("submit_title")}</h2>
         <p className="mt-1 max-w-3xl text-sm text-ink-mid">{t("submit_intro")}</p>
+        <p className="mt-3 text-sm text-ink" data-requested-today>
+          {t("requested_today", { count: v.requestedToday, limit: DAILY_REQUESTS_APPROX })}
+        </p>
+        {!v.requestsReady ? <p className="mt-1 text-xs text-ink-soft">{t("requested_not_ready")}</p> : null}
         {v.toSubmit.length === 0 ? (
           <p className="mt-4 text-sm text-ink-soft">{t("submit_empty")}</p>
         ) : (
-          <ol className="mt-4 divide-y divide-ink/10">
+          <ol className="mt-4 divide-y divide-ink/10" data-to-submit>
             {v.toSubmit.map((s) => (
               <li key={s.url} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="break-all font-mono text-xs text-ink">{s.url}</p>
-                  <p className="text-xs text-ink-soft">{t(`label_${s.key}`)}</p>
+                  <p className="text-xs text-ink-soft">
+                    {t(`label_${s.key}`)}
+                    {s.requestedOn ? <span className="text-ink-mid">{`, ${t("requested_again", { date: formatDateOnly(s.requestedOn) })}`}</span> : null}
+                  </p>
+                  <IndexRequestedCheckbox url={s.url} checked={false} disabled={!v.requestsReady} />
                 </div>
                 <CopyOpenSearchConsole url={s.url} />
               </li>
             ))}
           </ol>
         )}
+        {v.requested.length > 0 ? (
+          <details className="mt-6 border-t border-ink/10 pt-3" data-already-requested>
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4">
+              <span className="font-medium text-ink">{t("requested_title")}</span>
+              <span className="shrink-0 font-mono text-xs text-ink-soft">{v.requested.length}</span>
+            </summary>
+            <ul className="mt-2 divide-y divide-ink/10">
+              {v.requested.map((r) => (
+                <li key={r.url} className="min-w-0 py-3">
+                  <p className="break-all font-mono text-xs text-ink">{r.url}</p>
+                  <p className="text-xs text-ink-mid">{t("requested_pending", { date: formatDateOnly(r.requestedOn) })}</p>
+                  <p className="text-xs text-ink-soft">{t("requested_state", { state: r.key ? t(`label_${r.key}`) : t("requested_state_unknown") })}</p>
+                  <IndexRequestedCheckbox url={r.url} checked />
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
       </section>
 
       {/* Evolution */}

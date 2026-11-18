@@ -1685,7 +1685,7 @@
     "video_hint": "Collez l'adresse d'un fichier vidéo accessible publiquement, par exemple le lien direct d'un fichier hébergé sur Vimeo.",
     "photos_kicker": "Photos",
     "photos_title": "Galerie ({count})",
-    "photos_hint": "Glissez-déposez les photos pour les réordonner. La première sert de photo principale sur le site public. Chaque envoi, changement d'ordre ou de photo principale est enregistré automatiquement et publié sur la fiche.",
+    "photos_hint": "Glissez-déposez les photos pour les réordonner (au clavier : flèches gauche et droite sur la photo). La première sert de photo principale sur le site public. Chaque changement est enregistré automatiquement : l'écran montre exactement les photos de la fiche publique.",
     "public_preview": "Aperçu public",
     "view_listing": "Voir la fiche ↗",
     "unsaved_banner": "Modifications non enregistrées : touchez « Enregistrer » pour les conserver.",
@@ -1781,7 +1781,7 @@
     "confirm_delete_photo": "Supprimer cette photo ?",
     "err_photo_delete": "Le serveur n'a pas répondu pendant la suppression de la photo : vérifiez la connexion, puis recommencez.",
     "err_photo_save": "Le serveur n'a pas répondu pendant l'enregistrement des photos : vérifiez la connexion, puis recommencez.",
-    "photos_saved": "Ordre et photo principale enregistrés.",
+    "photos_saved": "Enregistré",
     "upload_progress": "Envoi {done}/{total}…",
     "upload_cta": "Ajouter des photos",
     "upload_hint": "Formats HEIC, HEIF, JPG, PNG, WebP et TIFF, convertis automatiquement, {max} Mo maximum par fichier. La première photo sert de photo principale sur le site public.",
@@ -2037,7 +2037,11 @@
     "import_need_choices": "Choisissez les informations manquantes pour continuer.",
     "import_choose_type": "Choisissez le type de bien pour continuer.",
     "import_choose_required": "Choisissez les informations manquantes pour continuer.",
-    "import_choose_then": "Puis appuyez à nouveau sur « Remplir l'annonce ». Rien n'a été enregistré."
+    "import_choose_then": "Puis appuyez à nouveau sur « Remplir l'annonce ». Rien n'a été enregistré.",
+    "photos_retry": "Réessayer l'enregistrement",
+    "photos_hidden_apimo": "{count, plural, one {# ancienne image Apimo n'est pas affichée sur le site : elle reste en base, rien n'est supprimé.} other {# anciennes images Apimo ne sont pas affichées sur le site : elles restent en base, rien n'est supprimé.}}",
+    "photo_move_hint": "Photo {n} sur {total}. Flèches gauche et droite pour la déplacer.",
+    "view_online": "Voir la fiche en ligne"
   },
   "property_gone": {
     "title": "Ce bien n'est plus disponible",
@@ -5605,7 +5609,17 @@
     "label_g_sitemap_errors": "Sitemaps en erreur",
     "check_g_sitemap_errors": "Google signale {errors} erreur(s) dans ce sitemap (lu le {date}). Les adresses concernées peuvent être ignorées.",
     "label_g_sitemap_missing": "Sitemap non déclaré à Google",
-    "check_g_sitemap_missing": "Le sitemap principal n'est pas déclaré dans la Search Console. À ajouter dans Search Console, rubrique Sitemaps."
+    "check_g_sitemap_missing": "Le sitemap principal n'est pas déclaré dans la Search Console. À ajouter dans Search Console, rubrique Sitemaps.",
+    "requested_label": "Indexation demandée",
+    "requested_saving": "Enregistrement…",
+    "requested_err": "La demande n'a pas pu être enregistrée. Réessayez.",
+    "requested_not_ready": "Mémoire des demandes pas encore prête : exécuter le fichier SQL 43.",
+    "requested_today": "{count, plural, =0 {0 demandée} one {# demandée} other {# demandées}} aujourd'hui sur environ {limit} possibles par jour",
+    "requested_again": "déjà demandée le {date}",
+    "requested_title": "Déjà demandées",
+    "requested_pending": "Demandée le {date}, pas encore indexée par Google",
+    "requested_state": "État Google actuel : {state}",
+    "requested_state_unknown": "pas encore contrôlée"
   },
   "admin_claude_reminders": {
     "not_ready": "Date de la clé : {date} par défaut. Pour la modifier et activer les e-mails de rappel, exécutez le fichier SQL 42.",
@@ -5689,6 +5703,23 @@
     "credit_err_amount": "Montant du crédit invalide.",
     "credit_err_date": "Date du chargement invalide.",
     "credit_err_save": "Le crédit n'a pas pu être enregistré.",
-    "cost_spent": "Coût déjà facturé : {cost}."
+    "cost_spent": "Coût déjà facturé : {cost}.",
+    "budget_label": "Budget mensuel ($)",
+    "budget_save": "Enregistrer le budget",
+    "budget_saved": "Budget enregistré.",
+    "budget_hint": "200 $ par défaut. Bandeau à 80 %, confirmation demandée avant chaque traduction à 100 %.",
+    "budget_not_ready": "Budget de 200 $ appliqué par défaut. Pour le modifier, exécuter d'abord le fichier SQL 43.",
+    "budget_err_amount": "Budget invalide : saisir un montant en dollars supérieur à 0.",
+    "budget_err_save": "Le budget n'a pas pu être enregistré. Réessayez dans un instant.",
+    "budget_month": "Ce mois-ci : {spent} sur {budget}{eur}",
+    "budget_eur": " ({spent} sur {budget})",
+    "budget_near": "Budget Claude du mois utilisé à {percent} % : {spent} sur {budget}.",
+    "budget_over": "Budget Claude du mois atteint : {spent} sur {budget}. Chaque traduction demande désormais une confirmation.",
+    "budget_confirm_question": "Le budget Claude du mois est atteint. Traduire quand même avec Claude (payant) ?",
+    "budget_confirm_yes": "Oui, traduire",
+    "budget_confirm_no": "Annuler",
+    "budget_confirm_needed": "Le budget Claude du mois est atteint : confirmez avant de traduire.",
+    "stat_average": "Coût moyen d'une traduction",
+    "average_note": "Coût moyen calculé sur {count, plural, one {# traduction réelle} other {# traductions réelles}}."
   }
 }

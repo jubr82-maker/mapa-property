@@ -4,6 +4,7 @@
 // prete") et la traduction continue de fonctionner.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CLAUDE_MODEL, claudeCostUsd, remainingCreditUsd, usdToEur } from "@/lib/claude/pricing";
+import { DEFAULT_MONTHLY_BUDGET_USD, averageTranslation } from "@/lib/claude/budget";
 
 export type ClaudeUsageSummary = {
   ready: boolean;
@@ -14,7 +15,14 @@ export type ClaudeUsageSummary = {
   monthCount: number;
   credit: { amountUsd: number; loadedOn: string } | null;
   remainingUsd: number | null;
+  /** Budget mensuel (SQL 43) ; 200 $ tant qu'il n'est pas enregistre. */
+  budget: { usd: number; ready: boolean };
+  /** Cout moyen d'une traduction (toutes les traductions enregistrees). */
+  avgTranslationUsd: number | null;
+  translationCount: number;
 };
+
+const DEFAULT_BUDGET = { usd: DEFAULT_MONTHLY_BUDGET_USD, ready: false };
 
 const TZ = "Europe/Luxembourg";
 const dayKey = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
@@ -57,6 +65,9 @@ export function summarize(rows: Row[], credit: { amountUsd: number; loadedOn: st
     monthCount: monthRequests.size,
     credit,
     remainingUsd: credit ? remainingCreditUsd(credit.amountUsd, sinceCredit) : null,
+    budget: DEFAULT_BUDGET,
+    avgTranslationUsd: null,
+    translationCount: 0,
   };
 }
 
@@ -69,7 +80,25 @@ export const EMPTY_SUMMARY = (usdPerEur: number | null): ClaudeUsageSummary => (
   monthCount: 0,
   credit: null,
   remainingUsd: null,
+  budget: DEFAULT_BUDGET,
+  avgTranslationUsd: null,
+  translationCount: 0,
 });
+
+/** Budget mensuel enregistre (SQL 43) ; table absente : 200 $ par defaut. */
+export async function loadClaudeBudget(supabase: SupabaseClient): Promise<{ usd: number; ready: boolean }> {
+  try {
+    const { data, error } = await supabase.from("claude_budget").select("monthly_usd").eq("id", 1).maybeSingle();
+    if (error) {
+      if (!missingTable(error)) console.error("[claude/usage] budget", { code: error.code });
+      return DEFAULT_BUDGET;
+    }
+    const v = Number((data as { monthly_usd?: number | string } | null)?.monthly_usd);
+    return { usd: Number.isFinite(v) && v > 0 ? v : DEFAULT_MONTHLY_BUDGET_USD, ready: true };
+  } catch {
+    return DEFAULT_BUDGET;
+  }
+}
 
 export async function loadClaudeUsage(supabase: SupabaseClient, usdPerEur: number | null, now = new Date()): Promise<ClaudeUsageSummary> {
   try {
@@ -87,7 +116,11 @@ export async function loadClaudeUsage(supabase: SupabaseClient, usdPerEur: numbe
       console.error("[claude/usage] lecture", { code: rowsRes.error.code });
       return EMPTY_SUMMARY(usdPerEur);
     }
-    return summarize((rowsRes.data ?? []) as Row[], credit, now, usdPerEur);
+    const summary = summarize((rowsRes.data ?? []) as Row[], credit, now, usdPerEur);
+    // Cout moyen sur toutes les traductions deja faites (pas seulement le mois).
+    const allRes = await supabase.from("claude_usage").select("cost_usd, request_id, created_at, usage").like("usage", "traduction%").order("created_at", { ascending: false }).limit(10000);
+    const avg = allRes.error ? { avgUsd: null, count: 0 } : averageTranslation((allRes.data ?? []) as Parameters<typeof averageTranslation>[0]);
+    return { ...summary, budget: await loadClaudeBudget(supabase), avgTranslationUsd: avg.avgUsd, translationCount: avg.count };
   } catch {
     return EMPTY_SUMMARY(usdPerEur);
   }

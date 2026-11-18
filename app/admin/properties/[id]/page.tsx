@@ -9,7 +9,9 @@ import { PropertyEditForm } from "@/components/admin/PropertyEditForm";
 import { cityPageOptions } from "@/lib/internal-links";
 import { loadListingModels } from "@/lib/listing/model-server";
 import { PhotoAltEditor } from "@/components/admin/PhotoAltEditor";
-import { seoContext } from "@/lib/listing/property-paths";
+import { propertyPathFor, seoContext } from "@/lib/listing/property-paths";
+import { selectPublicImages } from "@/lib/property-images";
+import { storagePathOf } from "@/lib/admin/property-photos-save";
 import { typeName } from "@/lib/listing/listing-seo";
 import { sanitizeListingData } from "@/lib/listing/listing-data";
 import { PropertyPhotosSection } from "@/components/admin/PropertyPhotosSection";
@@ -78,7 +80,8 @@ export default async function AdminPropertyEditPage({
   // apercu Google de la fiche.
   const altRes = await supabase.from("property_images").select("url, sort, alt_fr, alt_en, alt_de, room_id").eq("property_id", id).order("sort", { ascending: true });
   const altAvailable = !altRes.error;
-  const altRows = ((altRes.data as { url: string; alt_fr: string | null; alt_en: string | null; alt_de: string | null; room_id: string | null }[] | null) ?? []).map((r) => ({
+  // Memes photos que la fiche publique (anciennes images Apimo masquees exclues).
+  const altRows = selectPublicImages((altRes.data as { url: string; sort: number | null; alt_fr: string | null; alt_en: string | null; alt_de: string | null; room_id: string | null }[] | null) ?? []).map((r) => ({
     url: r.url,
     room_id: r.room_id,
     alt_fr: r.alt_fr ?? "",
@@ -103,16 +106,22 @@ export default async function AdminPropertyEditPage({
     .select("url, sort")
     .eq("property_id", id)
     .order("sort", { ascending: true });
-  const initialPhotos: PhotoData[] = (imgs ?? []).map((row, i) => {
-    const url = row.url ?? "";
-    const m = url.match(/\/property-images\/(.+)$/);
-    return {
-      url,
-      path: m ? m[1] : "",
-      isCover: i === 0,
-      order: i,
-    };
-  });
+  // Nov. 2026 : l'admin montre EXACTEMENT les photos de la fiche publique
+  // (meme regle, lib/property-images.ts). Avant, il montrait aussi les
+  // anciennes images Apimo, que la fiche masque des qu'une photo a ete
+  // envoyee depuis l'admin (ex. 19 photos dans l'admin, 12 sur la fiche).
+  // Les lignes masquees restent en base, jamais supprimees.
+  const imgRows = (imgs ?? []).map((r) => ({ url: r.url ?? "", sort: r.sort as number | null }));
+  const publicRows = selectPublicImages(imgRows);
+  const hiddenPhotos = imgRows.length - publicRows.length;
+  const initialPhotos: PhotoData[] = publicRows.map((row, i) => ({
+    url: row.url,
+    path: storagePathOf(row.url),
+    isCover: i === 0,
+    order: i,
+  }));
+  // Adresse publique a jour de la fiche (meme calcul que le site).
+  const publicPath = data.slug ? `/fr${propertyPathFor(data as Parameters<typeof propertyPathFor>[0], "fr")}` : null;
 
   // Import d'une annonce (nov. 2026) : champs a completer du brouillon.
   const importTodo = imported
@@ -295,7 +304,19 @@ export default async function AdminPropertyEditPage({
         <PropertyPhotosSection
           propertyId={data.id}
           initialPhotos={initialPhotos}
+          hiddenCount={hiddenPhotos}
         />
+        {publicPath && (
+          <a
+            href={publicPath}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-view-online
+            className="mt-4 inline-flex min-h-11 items-center text-sm text-ink-mid underline decoration-ink/30 underline-offset-4 hover:text-gold"
+          >
+            {t("view_online")}
+          </a>
+        )}
       </section>
 
       <section className="rounded-2xl border border-[#3D4F63]/15 bg-white p-6" data-admin-photo-alts>
@@ -332,7 +353,7 @@ export default async function AdminPropertyEditPage({
             de confort. */}
         {data.slug && (
           <div className="mt-4">
-            <RevalidateButton path={`/fr/biens/${data.slug}`} />
+            <RevalidateButton path={publicPath ?? `/fr/biens/${data.slug}`} />
           </div>
         )}
       </section>

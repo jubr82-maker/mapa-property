@@ -5,8 +5,9 @@
  *
  * Schema réel : table SÉPARÉE `property_images` (rows : id, property_id,
  * url, sort), PAS de colonne `images jsonb` sur `properties`. Cover =
- * `sort = 0`. Stratégie save : wipe-and-recreate l'ensemble des rows pour
- * ce property_id (simple, atomique en pratique grâce à transaction sup).
+ * `sort = 0`. Enregistrement (nov. 2026) : mise a jour sans effacement
+ * prealable (lib/admin/property-photos-save.ts) ; avant, toutes les lignes
+ * etaient effacees puis reinserees.
  *
  * Bucket Supabase : `property-images` (déjà créé et public côté dashboard
  * Julien). Path = `{propertyId}/{timestamp}-{random}.{ext}`.
@@ -29,7 +30,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr-server";
-import { readPropertyRevalRow, revalidatePropertyChange } from "@/lib/revalidate-property";
+import { persistPropertyPhotos } from "@/lib/admin/property-photos-save";
 import { processUploadedImage } from "@/lib/images/process-upload";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 import { assertAdminAction } from "@/lib/admin/require-admin";
@@ -252,81 +253,27 @@ export async function revertPhotoEnhancement(propertyId: string, path: string, c
   return { ok: true, url, path: original };
 }
 
+/**
+ * Enregistre la liste des photos (ordre, photo principale = premiere) sans
+ * effacement prealable : ajout des nouvelles, mise a jour de l'ordre,
+ * retrait des seules photos de `removed` (lib/admin/property-photos-save.ts).
+ * Utilise par l'import d'une annonce ; l'ecran des photos passe par la
+ * route /api/admin/properties/[id]/photos (meme fonction), pour ne pas
+ * faire recalculer toute la page de l'admin a chaque changement.
+ */
 export async function savePropertyPhotos(
   propertyId: string,
   photos: PhotoData[],
+  removed: string[] = [],
 ): Promise<ActionResult> {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
   await assertAdminAction();
-  try {
-    const supabase = await createSupabaseServerClient();
-    // Textes alternatifs et pieces (SQL 20, oct. 2026) conserves photo par
-    // photo a travers la reecriture des lignes ; colonnes absentes : rien.
-    const { data: prevAlts, error: altErr } = await supabase
-      .from("property_images")
-      .select("url, alt_fr, alt_en, alt_de, room_id")
-      .eq("property_id", propertyId);
-    const altByUrl = new Map(
-      altErr ? [] : ((prevAlts as { url: string; alt_fr: string | null; alt_en: string | null; alt_de: string | null; room_id: string | null }[] | null) ?? []).map((r) => [r.url, r] as const),
-    );
-    // Wipe existing rows pour ce property_id
-    const { error: delErr } = await supabase
-      .from("property_images")
-      .delete()
-      .eq("property_id", propertyId);
-    if (delErr) {
-      console.error("[admin/properties/photos] delete rows echoue", {
-        code: errorCode(delErr),
-      });
-      return { ok: false, error: (await tProps())("err_save_delete", { reason: (await dbFailure(delErr, "photos")).message }) };
-    }
-    // Re-insert avec sort = order ; cover = order 0
-    if (photos.length > 0) {
-      // Forcer ordre unique : cover (isCover true) en premier sort=0, sinon
-      // respecter `order` envoyé par le client.
-      const sorted = [...photos].sort((a, b) => {
-        if (a.isCover && !b.isCover) return -1;
-        if (!a.isCover && b.isCover) return 1;
-        return a.order - b.order;
-      });
-      const rows = sorted.map((p, idx) => {
-        const prev = altByUrl.get(p.url);
-        return {
-          property_id: propertyId,
-          url: p.url,
-          sort: idx,
-          ...(prev ? { alt_fr: prev.alt_fr, alt_en: prev.alt_en, alt_de: prev.alt_de, room_id: prev.room_id } : {}),
-        };
-      });
-      const { error: insErr } = await supabase.from("property_images").insert(rows);
-      if (insErr) {
-        console.error("[admin/properties/photos] insert rows echoue", {
-          code: errorCode(insErr),
-        });
-        return { ok: false, error: (await tProps())("err_save_insert", { reason: (await dbFailure(insErr, "photos")).message }) };
-      }
-    }
-    // La cover (fetchAllPropertiesWithCover) depend de property_images ,
-    // invalider le cache tag pour que la grille /biens et les biens
-    // similaires reflètent immédiatement la nouvelle cover/l'ordre photos.
-    // PAS de revalidatePath sur /admin/properties/{id} elle-même : cette
-    // page héberge aussi PropertyEditForm, dont la saisie en cours (non
-    // encore envoyée via son propre bouton Enregistrer) serait effacée à
-    // l'affichage par le refresh RSC immédiat que revalidatePath déclenche
-    // sur la page actuellement affichée. PhotoManager reflète déjà l'état
-    // des photos localement (state client), inutile de forcer un refresh
-    // serveur de cette page pour ça.
-    // Pages du bien seulement (oct. 2026, quotas Vercel) : fiche, ville,
-    // liste, sitemap, et biens similaires (la photo de couverture y figure).
-    await revalidatePropertyChange([await readPropertyRevalRow(supabase, propertyId)], { cards: true });
-    revalidatePath("/admin/properties");
-    return { ok: true };
-  } catch (e) {
-    console.error("[admin/properties/photos] save exception", {
-      code: errorCode(e),
-    });
-    return { ok: false, error: (await tProps())("err_save_unexpected", { reason: e instanceof Error ? e.message : String(e) }) };
-  }
+  const supabase = await createSupabaseServerClient();
+  const ordered = [...photos].sort((a, b) => Number(b.isCover) - Number(a.isCover) || a.order - b.order).map((p) => p.url);
+  const r = await persistPropertyPhotos(supabase, propertyId, ordered, Array.isArray(removed) ? removed.filter((u) => typeof u === "string") : []);
+  if (!r.ok) return r;
+  revalidatePath("/admin/properties");
+  return { ok: true };
 }
 
 export async function deletePropertyPhoto(
@@ -335,6 +282,8 @@ export async function deletePropertyPhoto(
 ): Promise<ActionResult> {
   // Garde serveur (oct. 2026) : admin de la liste en session aal2.
   await assertAdminAction();
+  // Image hebergee ailleurs (ancienne image Apimo) : aucun fichier du site.
+  if (!path) return { ok: true };
   try {
     const supabase = await createSupabaseServerClient();
     // Photo amelioree (nov. 2026) : l'original et la version amelioree

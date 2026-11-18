@@ -5,6 +5,9 @@ import { controleDbReady, googleQuotaUsed, loadResults, loadRuns, lockHeld, type
 import { googleConfigured, googleQuotaDay, type GoogleAnalytics } from "@/lib/pilotage/controle-google";
 import { loadDailyPositions, type DailyPositions } from "@/lib/pilotage/seo";
 import { luxDay } from "@/lib/pilotage/health";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { splitIndexRequests, type RequestedItem, type ToSubmitItem } from "@/lib/pilotage/index-requests";
+import { loadIndexRequests } from "@/lib/pilotage/index-requests-store";
 
 export type Group = { key: CheckKey; count: number; items: { url: string; explanation: string }[] };
 export type ControleView =
@@ -19,7 +22,12 @@ export type ControleView =
       lastCheckAt: string | null;
       zones: Record<Category, Group[]>;
       counts: Record<Category, number>;
-      toSubmit: { url: string; key: CheckKey }[];
+      toSubmit: ToSubmitItem[];
+      /** Adresses deja demandees a Google, pas encore indexees. */
+      requested: RequestedItem[];
+      requestedToday: number;
+      /** Table des demandes (SQL 43) presente. */
+      requestsReady: boolean;
       indexHistory: { date: string; value: number }[];
       clicksHistory: { date: string; value: number }[];
       impressionsHistory: { date: string; value: number }[];
@@ -50,7 +58,7 @@ export function groupResults(rows: ResultRow[]): { zones: Record<Category, Group
   return { zones, counts };
 }
 
-export async function loadControleView(): Promise<ControleView> {
+export async function loadControleView(supabase?: SupabaseClient): Promise<ControleView> {
   const keyConfigured = googleConfigured();
   if (!(await controleDbReady())) return { ready: false, keyConfigured };
   const [siteRuns, googleRuns, running, positions, quotaUsed] = await Promise.all([
@@ -65,7 +73,10 @@ export async function loadControleView(): Promise<ControleView> {
   const openRuns = [...siteRuns, ...googleRuns].filter((r) => r.state === "running" || r.state === "paused" || r.state === "quota");
   const rows = [...(lastSite ? await loadResults(lastSite.id) : []), ...(lastGoogle ? await loadResults(lastGoogle.id) : [])];
   const { zones, counts } = groupResults(rows);
-  const toSubmit = sortForSubmission(rows.filter((r) => SUBMIT_KEYS.has(r.check_key)).map((r) => ({ url: r.url, key: r.check_key })));
+  const pending = sortForSubmission(rows.filter((r) => SUBMIT_KEYS.has(r.check_key)).map((r) => ({ url: r.url, key: r.check_key })));
+  const googleState = new Map((lastGoogle ? rows.filter((r) => r.run_id === lastGoogle.id) : []).map((r) => [r.url, r.check_key] as const));
+  const memo = supabase ? await loadIndexRequests(supabase) : { ready: false, requests: [] };
+  const { toSubmit, requested, requestedToday } = splitIndexRequests(pending, googleState, memo.requests, luxDay(new Date()));
   const doneGoogle = googleRuns.filter((r) => r.state === "done").reverse();
   const perDay = <T,>(runs: RunRow[], pick: (r: RunRow) => T | null) => {
     const m = new Map<string, T>();
@@ -88,6 +99,9 @@ export async function loadControleView(): Promise<ControleView> {
     zones,
     counts,
     toSubmit,
+    requested,
+    requestedToday,
+    requestsReady: memo.ready,
     indexHistory: perDay(doneGoogle, (r) => (typeof r.summary?.indexed === "number" ? (r.summary.indexed as number) : null)),
     clicksHistory: perDay(doneGoogle, (r) => analyticsOf(r)?.totals.clicks ?? null),
     impressionsHistory: perDay(doneGoogle, (r) => analyticsOf(r)?.totals.impressions ?? null),

@@ -22,6 +22,7 @@ import { getUsdPerEur } from "@/lib/claude/usd-rate";
 import { blockingExpiry, isIsoDay } from "@/lib/claude/deadlines";
 import { loadClaudeDeadlines, saveApiKeyExpiry } from "@/lib/claude/deadlines-store";
 import { formatDateOnly } from "@/lib/datetime";
+import { MAX_MONTHLY_BUDGET_USD, budgetLevel } from "@/lib/claude/budget";
 
 const LIMITS = { title: 300, description: 20000, short: 2000 };
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -35,9 +36,9 @@ export type ClaudeTranslateResult =
       saved: boolean;
       usage: ClaudeUsageSummary;
     }
-  | { ok: false; error: string; code?: ClaudeErrorCode | "empty" | "too_long" | "rate_local" | "key_expired" | "credit_expired"; offerMistral: boolean; usage?: ClaudeUsageSummary; costUsd?: number };
+  | { ok: false; error: string; code?: ClaudeErrorCode | "empty" | "too_long" | "rate_local" | "key_expired" | "credit_expired" | "budget_confirm"; offerMistral: boolean; usage?: ClaudeUsageSummary; costUsd?: number };
 
-export async function translateWithClaude(input: { title: string; description: string; short: string; propertyId?: string | null }): Promise<ClaudeTranslateResult> {
+export async function translateWithClaude(input: { title: string; description: string; short: string; propertyId?: string | null; confirmOverBudget?: boolean }): Promise<ClaudeTranslateResult> {
   const admin = await requireAdmin();
   if (!admin.ok) return { ...(await sessionFailure()), offerMistral: false };
   const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_claude" });
@@ -60,6 +61,13 @@ export async function translateWithClaude(input: { title: string; description: s
   const expired = blockingExpiry(await loadClaudeDeadlines(admin.supabase), new Date());
   if (expired) {
     return { ok: false, error: t(`err_${expired.kind}_expired`, { date: formatDateOnly(expired.date) }), code: `${expired.kind}_expired`, offerMistral: true };
+  }
+
+  // Budget du mois atteint (nov. 2026) : aucun appel sans confirmation de
+  // Julien (le bouton la demande avant ; ce controle couvre un ecran perime).
+  const before = await loadClaudeUsage(admin.supabase, null);
+  if (before.ready && budgetLevel(before.monthUsd, before.budget.usd) === "over" && input?.confirmOverBudget !== true) {
+    return { ok: false, error: t("budget_confirm_needed"), code: "budget_confirm", offerMistral: false };
   }
 
   const limit = actionRateLimit(`claude-translate:${admin.user.id}`, 6, 10 * 60_000);
@@ -123,5 +131,20 @@ export async function saveClaudeKeyExpiry(day: string): Promise<ActionResult> {
   if (!r.ok) return { ok: false, error: r.reason === "not_ready" ? t("key_not_ready", { date: formatDateOnly(day) }) : t("key_err_save") };
   revalidatePath("/admin");
   revalidatePath("/admin/sante");
+  return { ok: true };
+}
+
+/** Budget mensuel Claude en dollars (200 $ par defaut). */
+export async function saveClaudeBudget(usd: number): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin.ok) return sessionFailure();
+  const t = await getTranslations({ locale: ADMIN_LOCALE, namespace: "admin_claude" });
+  const value = Number(usd);
+  if (!Number.isFinite(value) || value <= 0 || value > MAX_MONTHLY_BUDGET_USD) return { ok: false, error: t("budget_err_amount") };
+  const { error } = await admin.supabase
+    .from("claude_budget")
+    .upsert({ id: 1, monthly_usd: Math.round(value * 100) / 100, updated_at: new Date().toISOString() }, { onConflict: "id" });
+  if (error) return { ok: false, error: missingTable(error) ? t("budget_not_ready") : t("budget_err_save") };
+  revalidatePath("/admin");
   return { ok: true };
 }

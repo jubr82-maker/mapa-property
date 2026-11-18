@@ -14,7 +14,8 @@ import { estimateTranslationUsd } from "@/lib/claude/pricing";
 import type { ClaudeUsageSummary } from "@/lib/claude/usage";
 import type { ListingTranslation } from "@/lib/claude/translate-listing";
 import { translateWithClaude } from "@/app/admin/properties/claude-actions";
-import { ClaudeUsageLine, useMoney } from "@/components/admin/ClaudeUsage";
+import { ClaudeBudgetBanner, ClaudeUsageLine, useMoney } from "@/components/admin/ClaudeUsage";
+import { budgetLevel } from "@/lib/claude/budget";
 
 export const CLAUDE_TRANSLATE_EVENT = "mapa-claude-translate";
 
@@ -43,14 +44,21 @@ export function ClaudeTranslateButton({
   const estimate = estimateTranslationUsd([source.title, source.description, source.short]);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  async function run() {
+  // Budget du mois atteint (nov. 2026) : confirmation avant d'appeler Claude.
+  const [askBudget, setAskBudget] = useState(false);
+  const overBudget = usage.ready && budgetLevel(usage.monthUsd, usage.budget.usd) === "over";
+
+  async function run(confirmOverBudget = false) {
     if (busy || empty) return;
     setMsg(null);
+    if (overBudget && !confirmOverBudget) return setAskBudget(true);
+    setAskBudget(false);
     if (filledCount > 0 && !window.confirm(t("confirm_overwrite", { count: filledCount }))) return;
     setBusy(true);
     try {
-      const r = await translateWithClaude({ ...source, propertyId });
+      const r = await translateWithClaude({ ...source, propertyId, confirmOverBudget });
       if (r.usage) setUsage(r.usage);
+      if (!r.ok && r.code === "budget_confirm") return setAskBudget(true);
       if (!r.ok) return setMsg({ ok: false, text: r.costUsd ? `${r.error} ${t("cost_spent", { cost: money(r.costUsd) })}` : r.error, mistral: r.offerMistral });
       const applied = onTranslated(r.en, r.de);
       const cost = money(r.cost.usd);
@@ -89,6 +97,20 @@ export function ClaudeTranslateButton({
         {!empty && <span className="text-xs text-ink-mid">{t("estimate", { amount: money(estimate) })}</span>}
       </div>
       <p className="text-xs text-ink-soft">{t("hint")}</p>
+      <ClaudeBudgetBanner usage={usage} />
+      {askBudget && (
+        <div role="alert" className="border-l-4 border-red-600 py-1.5 pl-3 text-sm text-red-800" data-claude-budget-confirm>
+          <p>{t("budget_confirm_question")}</p>
+          <div className="mt-2 flex flex-wrap gap-3">
+            <button type="button" onClick={() => void run(true)} disabled={busy} className="min-h-11 rounded-full bg-ink px-4 font-mono text-[11px] uppercase tracking-[0.2em] text-bg disabled:opacity-50">
+              {t("budget_confirm_yes")}
+            </button>
+            <button type="button" onClick={() => setAskBudget(false)} className="min-h-11 rounded-full border border-ink/30 px-4 font-mono text-[11px] uppercase tracking-[0.2em] text-ink">
+              {t("budget_confirm_no")}
+            </button>
+          </div>
+        </div>
+      )}
       {msg && (
         <div role={msg.ok ? "status" : "alert"} className={`text-sm ${msg.ok ? "text-emerald-800" : "text-red-700"}`}>
           <span>{msg.text}</span>

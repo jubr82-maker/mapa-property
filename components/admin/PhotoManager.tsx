@@ -28,8 +28,10 @@
  */
 
 import { useState, useTransition, useRef } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Camera, GripVertical, ImagePlus, Trash2 } from "lucide-react";
+import { isOptimizedImageSrc } from "@/lib/image-hosts";
 import { compressImageFile } from "@/lib/image-compress";
 import { MAX_PHOTO_BYTES, MAX_PHOTO_MB } from "@/lib/images/limits";
 import { isEnhancedPath } from "@/lib/images/enhance-paths";
@@ -51,6 +53,12 @@ type UploadResult =
   | { ok: true; url: string; path: string }
   | { ok: false; error: string };
 type ActionResult = { ok: true } | { ok: false; error: string };
+/**
+ * Resultat d'un enregistrement (nov. 2026) : `photos` = ce que voit le
+ * visiteur apres l'enregistrement ; l'ecran s'aligne dessus.
+ */
+export type SaveResult = { ok: true; photos?: { url: string; path: string }[]; hiddenCount?: number } | { ok: false; error: string };
+type SaveState = "idle" | "saving" | "saved" | "error";
 
 /**
  * Amelioration des photos (nov. 2026), optionnelle : apercu sans rien
@@ -69,10 +77,15 @@ interface Props {
   enhance?: EnhanceHandlers;
   /** Upload un fichier vers Storage. Ne throw jamais : résultat structuré. */
   onUpload: (formData: FormData) => Promise<UploadResult>;
-  /** Persiste l'état complet (ordre + cover). Ne throw jamais. */
-  onSave: (photos: PhotoData[]) => Promise<ActionResult>;
-  /** Supprime un fichier du Storage. Ne throw jamais. */
+  /**
+   * Persiste l'etat complet (ordre + cover) ; `removed` : adresses des
+   * seules photos supprimees par Julien (jamais d'effacement global).
+   */
+  onSave: (photos: PhotoData[], removed: string[]) => Promise<SaveResult>;
+  /** Supprime un fichier du Storage, apres l'enregistrement. Ne throw jamais. */
   onDelete: (path: string) => Promise<ActionResult>;
+  /** Lignes en base masquees sur le site (anciennes images Apimo). */
+  initialHiddenCount?: number;
 }
 
 export function PhotoManager({
@@ -81,6 +94,7 @@ export function PhotoManager({
   onSave,
   onDelete,
   enhance,
+  initialHiddenCount = 0,
 }: Props) {
   const t = useTranslations("admin_properties");
   // On normalise toujours l'ordre à partir de l'index courant : order/isCover
@@ -100,30 +114,70 @@ export function PhotoManager({
 
   function commit(list: PhotoData[]) {
     photosRef.current = list;
+    version.current++;
     setPhotos(list);
   }
 
-  // Enregistrements en file, jamais en parallele : savePropertyPhotos
-  // remplace toutes les lignes du bien (suppression puis ajout), deux
-  // appels simultanes pourraient dupliquer des lignes. Chaque passage
-  // enregistre la liste la plus recente.
+  // Enregistrements en file, jamais en parallele : chaque passage
+  // enregistre la liste la plus recente (nov. 2026 : mise a jour sans
+  // effacement prealable, cote serveur). Indicateur « Enregistrement... »
+  // puis « Enregistre », ou le motif de l'echec.
   const saveChain = useRef<Promise<void>>(Promise.resolve());
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [hiddenCount, setHiddenCount] = useState(initialHiddenCount);
+  // Photos retirees par Julien, pas encore enregistrees (adresse -> fichier).
+  const pendingRemoved = useRef(new Map<string, string>());
+  // Numero du dernier changement : la reponse d'un enregistrement ne
+  // remplace l'ecran que si rien n'a change depuis.
+  const version = useRef(0);
 
   async function saveLatest(): Promise<void> {
+    const sentVersion = version.current;
+    const removed = [...pendingRemoved.current.entries()];
     try {
-      const result = await onSave(photosRef.current);
+      const result = await onSave(photosRef.current, removed.map(([url]) => url));
       if (!result.ok) {
         setError(result.error);
+        setSaveState("error");
         return;
       }
-      setFeedback(t("photos_autosaved"));
+      for (const [url, path] of removed) {
+        pendingRemoved.current.delete(url);
+        // Fichier retire du stockage seulement apres l'enregistrement : la
+        // fiche ne pointe jamais vers un fichier absent.
+        if (path && !photosRef.current.some((p) => p.path === path)) void onDelete(path).catch(() => undefined);
+      }
+      if (typeof result.hiddenCount === "number" && version.current === sentVersion) setHiddenCount(result.hiddenCount);
+      if (result.photos && version.current === sentVersion) {
+        const server = result.photos;
+        const same = server.length === photosRef.current.length && server.every((p, i) => p.url === photosRef.current[i].url);
+        if (!same) commit(renormalize(server.map((p, i) => ({ url: p.url, path: p.path, isCover: i === 0, order: i }))));
+      }
+      setError(null);
+      setFeedback(null);
+      // Un changement plus recent attend son tour : toujours « Enregistrement... ».
+      if (version.current === sentVersion) setSaveState("saved");
     } catch {
       setError(t("err_photo_save"));
+      setSaveState("error");
     }
   }
 
+  // Amelioration et retour a l'original changent l'adresse de la photo en
+  // base : ils passent dans la meme file que les enregistrements, pour
+  // qu'un enregistrement parti avec l'ancienne adresse ne la remette pas.
+  function exclusive<T>(fn: () => Promise<T>): Promise<T> {
+    const run = saveChain.current.then(fn);
+    saveChain.current = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return run;
+  }
+
   function persist(list: PhotoData[]) {
-    photosRef.current = list;
+    if (photosRef.current !== list) commit(list);
+    setSaveState("saving");
     const run = saveChain.current.then(saveLatest);
     saveChain.current = run;
     startTransition(() => run);
@@ -272,27 +326,44 @@ export function PhotoManager({
     persist(list);
   }
 
+  // Suppression (nov. 2026) : la photo quitte la liste, l'enregistrement
+  // retire SA ligne seulement, puis son fichier est retire du stockage.
   function removeAt(idx: number) {
-    const p = photos[idx];
-    if (!confirm(t("confirm_delete_photo"))) return;
+    const p = photosRef.current[idx];
+    if (!p || !confirm(t("confirm_delete_photo"))) return;
     setError(null);
     setFeedback(null);
-    startTransition(async () => {
-      try {
-        const result = await onDelete(p.path);
-        if (!result.ok) {
-          setError(result.error);
-          return;
-        }
-        const list = renormalize(photosRef.current.filter((x) => x.path !== p.path || x.url !== p.url));
-        commit(list);
-        // Enregistre aussi une liste vide : la fiche publique ne doit plus
-        // pointer vers un fichier retire.
-        persist(list);
-      } catch {
-        setError(t("err_photo_delete"));
-      }
+    pendingRemoved.current.set(p.url, p.path);
+    const list = renormalize(photosRef.current.filter((x) => x.url !== p.url));
+    commit(list);
+    // Enregistre aussi une liste vide : la fiche publique ne doit plus
+    // pointer vers une photo retiree.
+    persist(list);
+  }
+
+  // Clavier (nov. 2026) : fleches pour deplacer la photo qui a le focus.
+  function move(from: number, to: number) {
+    const cur = photosRef.current;
+    if (to < 0 || to >= cur.length || from === to) return;
+    const next = [...cur];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    const list = renormalize(next);
+    commit(list);
+    persist(list);
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(`[data-photo-url="${CSS.escape(moved.url)}"]`)?.focus();
     });
+  }
+
+  function onItemKeyDown(idx: number) {
+    return (e: React.KeyboardEvent<HTMLLIElement>) => {
+      if (e.target !== e.currentTarget) return;
+      const step = e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : 0;
+      if (!step) return;
+      e.preventDefault();
+      move(idx, idx + step);
+    };
   }
 
   function save() {
@@ -300,6 +371,9 @@ export function PhotoManager({
     setFeedback(null);
     persist(photosRef.current);
   }
+
+  // Miniatures chargees directement si l'optimiseur d'images echoue.
+  const [direct, setDirect] = useState<Set<string>>(() => new Set());
 
   // --- Amelioration (nov. 2026) ------------------------------------------
   // Rien n'est remplace avant validation de l'apercu ; l'original reste
@@ -350,11 +424,13 @@ export function PhotoManager({
     let done = 0;
     for (const item of review.filter((x) => x.keep && x.after)) {
       try {
-        const r = await enhance.apply(item.path, item.url);
-        if (r.ok) {
-          replacePhoto(item.path, item.url, r);
-          done++;
-        } else failures.push(r.error);
+        const r = await exclusive(async () => {
+          const res = await enhance.apply(item.path, item.url);
+          if (res.ok) replacePhoto(item.path, item.url, res);
+          return res;
+        });
+        if (r.ok) done++;
+        else failures.push(r.error);
       } catch {
         failures.push(t("enhance_err_failed"));
       }
@@ -375,12 +451,15 @@ export function PhotoManager({
     setFeedback(null);
     startTransition(async () => {
       try {
-        const r = await enhance.revert(p.path, p.url);
+        const r = await exclusive(async () => {
+          const res = await enhance.revert(p.path, p.url);
+          if (res.ok) replacePhoto(p.path, p.url, res);
+          return res;
+        });
         if (!r.ok) {
           setError(r.error);
           return;
         }
-        replacePhoto(p.path, p.url, r);
         persist(photosRef.current);
         setFeedback(t("enhance_reverted"));
       } catch {
@@ -463,8 +542,12 @@ export function PhotoManager({
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {photos.map((p, idx) => (
             <li
-              key={p.path}
+              key={p.url}
               data-photo-index={idx}
+              data-photo-url={p.url}
+              tabIndex={0}
+              aria-label={t("photo_move_hint", { n: idx + 1, total: photos.length })}
+              onKeyDown={onItemKeyDown(idx)}
               draggable
               onDragStart={onDragStart(idx)}
               onDragOver={onDragOver}
@@ -474,11 +557,17 @@ export function PhotoManager({
               }`}
             >
               <div className="relative aspect-square">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                {/* Miniature legere (nov. 2026) : version reduite servie par
+                    l'optimiseur d'images au lieu du fichier complet (jusqu'a
+                    2 400 px). Repli direct si l'optimiseur echoue. */}
+                <Image
                   src={p.url}
                   alt={t("photo_alt", { n: idx + 1 })}
-                  className="size-full object-cover"
+                  fill
+                  sizes="(min-width: 64rem) 200px, (min-width: 40rem) 30vw, 45vw"
+                  unoptimized={!isOptimizedImageSrc(p.url) || direct.has(p.url)}
+                  onError={() => setDirect((d) => (d.has(p.url) ? d : new Set(d).add(p.url)))}
+                  className="object-cover"
                   draggable={false}
                 />
                 {idx === 0 && (
@@ -561,14 +650,19 @@ export function PhotoManager({
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={save}
-          disabled={busy || uploadProgress != null || photos.length === 0}
-          className="rounded-full bg-[#3D4F63] px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
-        >
-          {busy ? t("saving") : t("save_order")}
-        </button>
+        <p role="status" aria-live="polite" data-photo-save-state={saveState} className={`text-sm ${saveState === "error" ? "text-red-700" : saveState === "saved" ? "text-emerald-700" : "text-ink-mid"}`}>
+          {saveState === "saving" ? t("saving") : saveState === "saved" ? t("photos_saved") : null}
+        </p>
+        {saveState === "error" && (
+          <button
+            type="button"
+            onClick={save}
+            disabled={busy || uploadProgress != null}
+            className="min-h-11 rounded-full bg-[#3D4F63] px-6 font-mono text-xs uppercase tracking-[0.2em] text-[#F5EFE1] transition-colors hover:bg-[#e0af6e] disabled:opacity-50"
+          >
+            {t("photos_retry")}
+          </button>
+        )}
         {enhance && photos.some(canEnhance) && (
           <button
             type="button"
@@ -590,6 +684,7 @@ export function PhotoManager({
         </span>
       </div>
       {external > 0 && <p className="text-xs text-ink-soft">{t("enhance_unavailable", { count: external })}</p>}
+      {hiddenCount > 0 && <p className="text-xs text-ink-soft" data-photos-hidden>{t("photos_hidden_apimo", { count: hiddenCount })}</p>}
 
       {review && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/70 sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label={t("enhance_title")}>

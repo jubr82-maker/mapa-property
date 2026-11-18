@@ -8,6 +8,10 @@
  * INTERDIT : titres (h1-h6), listes, citations, code, code-block, strike,
  *            séparateurs, images.
  *
+ * Nov. 2026 : selectionner du texte ne change jamais sa mise en forme ; gras
+ * et italique seulement au clic sur B ou I (ou Cmd+B, Cmd+I), aucune regle
+ * de saisie automatique (components/admin/editor-safety.ts).
+ *
  * Sortie HTML : `<p>`, `<strong>`, `<em>`, `<br>`, sanitizable strictement
  * côté rendu public (cf. AGENT MARC).
  *
@@ -21,6 +25,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { NO_AUTO_FORMAT, OnlyBoldItalicShortcuts, useMarkState } from "@/components/admin/editor-safety";
 
 interface Props {
   value: string;
@@ -43,12 +48,17 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
         horizontalRule: false,
         strike: false,
         code: false,
+        // StarterKit 3 ajoute aussi soulignement et liens automatiques.
+        underline: false,
+        link: false,
       }),
+      OnlyBoldItalicShortcuts,
       Placeholder.configure({
         placeholder: placeholder ?? "",
       }),
     ],
     content: value,
+    ...NO_AUTO_FORMAT,
     // SSR Next 16 : éviter hydration mismatch (ProseMirror DOM ≠ server render).
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
@@ -83,11 +93,14 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
 
 function Toolbar({ editor }: { editor: Editor | null }) {
   const t = useTranslations("admin_cms");
+  // Etat lu a chaque changement de selection : allume seulement si le texte
+  // selectionne est deja en gras ou en italique.
+  const marks = useMarkState(editor);
   return (
     <div className="flex gap-1 border-b border-[#3D4F63]/15 px-2 py-1.5">
       <ToolbarButton
         onClick={() => editor?.chain().focus().toggleBold().run()}
-        active={editor?.isActive("bold") ?? false}
+        active={marks.bold}
         disabled={!editor}
         ariaLabel={t("editor_bold")}
         title={t("editor_bold_title")}
@@ -96,7 +109,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor?.chain().focus().toggleItalic().run()}
-        active={editor?.isActive("italic") ?? false}
+        active={marks.italic}
         disabled={!editor}
         ariaLabel={t("editor_italic")}
         title={t("editor_italic_title")}
@@ -125,6 +138,8 @@ function ToolbarButton({
   return (
     <button
       type="button"
+      // La selection reste en place : seul le clic agit.
+      onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}

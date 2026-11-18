@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { derivePageContext } from "./chatbot-knowledge";
+import { inviteKeyFor, showInvite, visibleAfterRender } from "@/lib/chatbot/invite";
 import { useBubbleClearance } from "@/lib/ui/bubble-clearance";
 
 // Sprint ELENA-REFONTE point 1 — le panneau (messages, envoi, consentement)
@@ -38,13 +39,18 @@ export function ChatbotBubble() {
   const bubbleRef = useRef<HTMLButtonElement>(null);
   const clearForButton = useBubbleClearance(bubbleRef, !open);
 
-  const inviteKey: "invite_property" | "invite_offmarket" | null = pageContext.startsWith(
-    "property:",
-  )
-    ? "invite_property"
-    : pageContext.startsWith("offmarket:")
-      ? "invite_offmarket"
-      : null;
+  const inviteKey = inviteKeyFor(pageContext);
+
+  // Changement de page (nov. 2026) : l'invitation affichee disparait. Avant,
+  // inviteVisible restait vrai apres la navigation alors que inviteKey
+  // devenait vide : la bulle s'affichait vide avec sa seule croix. Mise a
+  // jour pendant le rendu (modele React « state from props »), sans effet.
+  // Deja montree : sessionStorage empeche qu'elle revienne.
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname);
+    if (inviteVisible) setInviteVisible(visibleAfterRender(inviteVisible, lastPathname, pathname));
+  }
 
   // Point 1 — une seule invitation retardee, uniquement fiches biens et
   // off-market, jamais sur les pages legales (derivePageContext isole deja
@@ -110,7 +116,7 @@ export function ChatbotBubble() {
 
   return (
     <>
-      {inviteVisible && !open && (
+      {showInvite(inviteVisible, inviteKey, open) && (
         <div
           role="status"
           data-chatbot-invite
@@ -127,7 +133,7 @@ export function ChatbotBubble() {
             </svg>
           </button>
           <button type="button" onClick={acceptInvite} className="text-left leading-snug hover:text-gold">
-            {inviteKey ? t(inviteKey) : ""}
+            {inviteKey ? t(inviteKey) : null}
           </button>
         </div>
       )}

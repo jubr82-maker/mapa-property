@@ -1685,7 +1685,7 @@
     "video_hint": "Paste the address of a publicly accessible video file, for example the direct link to a file hosted on Vimeo.",
     "photos_kicker": "Photos",
     "photos_title": "Gallery ({count})",
-    "photos_hint": "Drag and drop photos to reorder them. The first one is the main photo on the public site. Every upload, reorder or main photo change is saved automatically and published on the listing.",
+    "photos_hint": "Drag and drop photos to reorder them (keyboard: left and right arrows on the photo). The first one is the main photo on the public site. Every change is saved automatically: the screen shows exactly the photos of the public listing.",
     "public_preview": "Public preview",
     "view_listing": "View listing ↗",
     "unsaved_banner": "Unsaved changes: select “Save” to keep them.",
@@ -1781,7 +1781,7 @@
     "confirm_delete_photo": "Delete this photo?",
     "err_photo_delete": "The server did not respond while deleting the photo: check the connection, then retry.",
     "err_photo_save": "The server did not respond while saving the photos: check the connection, then retry.",
-    "photos_saved": "Order and main photo saved.",
+    "photos_saved": "Saved",
     "upload_progress": "Uploading {done}/{total}…",
     "upload_cta": "Add photos",
     "upload_hint": "HEIC, HEIF, JPG, PNG, WebP and TIFF formats, converted automatically, {max} MB maximum per file. The first photo is the main photo on the public website.",
@@ -2037,7 +2037,11 @@
     "import_need_choices": "Choose the missing information to continue.",
     "import_choose_type": "Choose the property type to continue.",
     "import_choose_required": "Choose the missing information to continue.",
-    "import_choose_then": "Then press \"Fill in the listing\" again. Nothing has been saved."
+    "import_choose_then": "Then press \"Fill in the listing\" again. Nothing has been saved.",
+    "photos_retry": "Retry saving",
+    "photos_hidden_apimo": "{count, plural, one {# old Apimo image is not shown on the site: it stays in the database, nothing is deleted.} other {# old Apimo images are not shown on the site: they stay in the database, nothing is deleted.}}",
+    "photo_move_hint": "Photo {n} of {total}. Left and right arrows to move it.",
+    "view_online": "View the live listing"
   },
   "property_gone": {
     "title": "This property is no longer available",
@@ -5612,7 +5616,17 @@
     "label_g_sitemap_errors": "Sitemaps with errors",
     "check_g_sitemap_errors": "Google reports {errors} error(s) in this sitemap (read on {date}). Affected addresses may be ignored.",
     "label_g_sitemap_missing": "Sitemap not submitted to Google",
-    "check_g_sitemap_missing": "The main sitemap is not submitted in Search Console. Add it in Search Console, Sitemaps section."
+    "check_g_sitemap_missing": "The main sitemap is not submitted in Search Console. Add it in Search Console, Sitemaps section.",
+    "requested_label": "Indexing requested",
+    "requested_saving": "Saving…",
+    "requested_err": "The request could not be saved. Please try again.",
+    "requested_not_ready": "Request memory not ready yet: run SQL file 43.",
+    "requested_today": "{count} requested today out of about {limit} possible per day",
+    "requested_again": "already requested on {date}",
+    "requested_title": "Already requested",
+    "requested_pending": "Requested on {date}, not yet indexed by Google",
+    "requested_state": "Current Google status: {state}",
+    "requested_state_unknown": "not checked yet"
   },
   "admin_claude_reminders": {
     "not_ready": "Key date: {date} by default. To change it and turn on reminder e-mails, run SQL file 42.",
@@ -5696,6 +5710,23 @@
     "credit_err_amount": "Invalid credit amount.",
     "credit_err_date": "Invalid loading date.",
     "credit_err_save": "The credit could not be saved.",
-    "cost_spent": "Cost already billed: {cost}."
+    "cost_spent": "Cost already billed: {cost}.",
+    "budget_label": "Monthly budget ($)",
+    "budget_save": "Save budget",
+    "budget_saved": "Budget saved.",
+    "budget_hint": "200 $ by default. Notice at 80%, confirmation asked before each translation at 100%.",
+    "budget_not_ready": "Default budget of 200 $ applied. To change it, first run SQL file 43.",
+    "budget_err_amount": "Invalid budget: enter an amount in dollars above 0.",
+    "budget_err_save": "The budget could not be saved. Try again in a moment.",
+    "budget_month": "This month: {spent} of {budget}{eur}",
+    "budget_eur": " ({spent} of {budget})",
+    "budget_near": "Claude budget for the month {percent}% used: {spent} of {budget}.",
+    "budget_over": "Claude budget for the month reached: {spent} of {budget}. Each translation now asks for confirmation.",
+    "budget_confirm_question": "The Claude budget for the month is reached. Translate with Claude anyway (paid)?",
+    "budget_confirm_yes": "Yes, translate",
+    "budget_confirm_no": "Cancel",
+    "budget_confirm_needed": "The Claude budget for the month is reached: confirm before translating.",
+    "stat_average": "Average cost per translation",
+    "average_note": "Average cost based on {count, plural, one {# real translation} other {# real translations}}."
   }
 }

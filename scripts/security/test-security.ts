@@ -673,7 +673,9 @@ section = "M. Fiche de bien et coordonnees";
   // langues et sa ville, jamais toutes les fiches ni toutes les villes.
   const rvp = read("lib/revalidate-property.ts");
   check("cache : fiche du bien dans les 3 langues, sans motif de route", /for \(const l of LOCALES\) fichePaths\.add\(`\/\$\{l\}\$\{paths\[l\]\}`\)/.test(rvp) && !/revalidatePath\("\/\[locale\]/.test(rvp));
-  for (const f of ["app/admin/properties/[id]/photos/actions.ts", "app/admin/properties/actions.ts"]) {
+  // Nov. 2026 : l'enregistrement des photos (action et route JSON) passe par
+  // lib/admin/property-photos-save.ts, qui porte l'invalidation.
+  for (const f of ["lib/admin/property-photos-save.ts", "app/admin/properties/actions.ts"]) {
     const src = read(f);
     check(`cache : ${f} regenere seulement les pages du bien`, /await revalidatePropertyChange\(/.test(src) && !/revalidatePath\(`\/fr\/biens\/\$\{/.test(src) && !/revalidatePath\("\/\[locale\]/.test(src));
   }

@@ -1685,7 +1685,7 @@
     "video_hint": "Fügen Sie die Adresse einer öffentlich zugänglichen Videodatei ein, zum Beispiel den direkten Link zu einer auf Vimeo gehosteten Datei.",
     "photos_kicker": "Fotos",
     "photos_title": "Galerie ({count})",
-    "photos_hint": "Fotos per Drag-and-drop neu anordnen. Das erste Foto ist das Hauptfoto der öffentlichen Website. Jeder Upload, jede Änderung der Reihenfolge oder des Hauptfotos wird automatisch gespeichert und in der Anzeige veröffentlicht.",
+    "photos_hint": "Fotos per Drag-and-drop umsortieren (Tastatur: Pfeiltasten links und rechts auf dem Foto). Das erste ist das Hauptfoto auf der öffentlichen Website. Jede Änderung wird automatisch gespeichert: Der Bildschirm zeigt genau die Fotos des öffentlichen Exposés.",
     "public_preview": "Öffentliche Vorschau",
     "view_listing": "Exposé ansehen ↗",
     "unsaved_banner": "Nicht gespeicherte Änderungen: Wählen Sie „Speichern“, um sie zu übernehmen.",
@@ -1781,7 +1781,7 @@
     "confirm_delete_photo": "Dieses Foto löschen?",
     "err_photo_delete": "Der Server hat beim Löschen des Fotos nicht geantwortet: Prüfen Sie die Verbindung und versuchen Sie es erneut.",
     "err_photo_save": "Der Server hat beim Speichern der Fotos nicht geantwortet: Prüfen Sie die Verbindung und versuchen Sie es erneut.",
-    "photos_saved": "Reihenfolge und Hauptfoto gespeichert.",
+    "photos_saved": "Gespeichert",
     "upload_progress": "Hochladen {done}/{total}…",
     "upload_cta": "Fotos hinzufügen",
     "upload_hint": "Formate HEIC, HEIF, JPG, PNG, WebP und TIFF, automatisch umgewandelt, maximal {max} MB pro Datei. Das erste Foto ist das Hauptfoto auf der öffentlichen Website.",
@@ -2037,7 +2037,11 @@
     "import_need_choices": "Wählen Sie die fehlenden Angaben, um fortzufahren.",
     "import_choose_type": "Wählen Sie die Immobilienart, um fortzufahren.",
     "import_choose_required": "Wählen Sie die fehlenden Angaben, um fortzufahren.",
-    "import_choose_then": "Wählen Sie dann erneut „Inserat ausfüllen“. Es wurde nichts gespeichert."
+    "import_choose_then": "Wählen Sie dann erneut „Inserat ausfüllen“. Es wurde nichts gespeichert.",
+    "photos_retry": "Speichern erneut versuchen",
+    "photos_hidden_apimo": "{count, plural, one {# altes Apimo-Bild wird auf der Website nicht angezeigt: Es bleibt in der Datenbank, nichts wird gelöscht.} other {# alte Apimo-Bilder werden auf der Website nicht angezeigt: Sie bleiben in der Datenbank, nichts wird gelöscht.}}",
+    "photo_move_hint": "Foto {n} von {total}. Pfeiltasten links und rechts zum Verschieben.",
+    "view_online": "Online-Exposé ansehen"
   },
   "property_gone": {
     "title": "Diese Immobilie ist nicht mehr verfügbar",
@@ -5610,7 +5614,17 @@
     "label_g_sitemap_errors": "Sitemaps mit Fehlern",
     "check_g_sitemap_errors": "Google meldet {errors} Fehler in dieser Sitemap (gelesen am {date}). Betroffene Adressen werden womöglich ignoriert.",
     "label_g_sitemap_missing": "Sitemap nicht bei Google eingereicht",
-    "check_g_sitemap_missing": "Die Haupt-Sitemap ist nicht in der Search Console eingereicht. In der Search Console unter Sitemaps hinzufügen."
+    "check_g_sitemap_missing": "Die Haupt-Sitemap ist nicht in der Search Console eingereicht. In der Search Console unter Sitemaps hinzufügen.",
+    "requested_label": "Indexierung beantragt",
+    "requested_saving": "Wird gespeichert…",
+    "requested_err": "Die Anfrage konnte nicht gespeichert werden. Bitte erneut versuchen.",
+    "requested_not_ready": "Speicher der Anfragen noch nicht bereit: SQL-Datei 43 ausführen.",
+    "requested_today": "{count} heute beantragt von etwa {limit} möglichen pro Tag",
+    "requested_again": "bereits beantragt am {date}",
+    "requested_title": "Bereits beantragt",
+    "requested_pending": "Beantragt am {date}, von Google noch nicht indexiert",
+    "requested_state": "Aktueller Google-Status: {state}",
+    "requested_state_unknown": "noch nicht geprüft"
   },
   "admin_claude_reminders": {
     "not_ready": "Schlüsseldatum: standardmäßig {date}. Um es zu ändern und die Erinnerungs-E-Mails zu aktivieren, SQL-Datei 42 ausführen.",
@@ -5694,6 +5708,23 @@
     "credit_err_amount": "Ungültiger Guthabenbetrag.",
     "credit_err_date": "Ungültiges Ladedatum.",
     "credit_err_save": "Das Guthaben konnte nicht gespeichert werden.",
-    "cost_spent": "Bereits berechnete Kosten: {cost}."
+    "cost_spent": "Bereits berechnete Kosten: {cost}.",
+    "budget_label": "Monatsbudget ($)",
+    "budget_save": "Budget speichern",
+    "budget_saved": "Budget gespeichert.",
+    "budget_hint": "Standardmäßig 200 $. Hinweis bei 80 %, Bestätigung vor jeder Übersetzung ab 100 %.",
+    "budget_not_ready": "Standardbudget von 200 $ angewendet. Zum Ändern zuerst die SQL-Datei 43 ausführen.",
+    "budget_err_amount": "Ungültiges Budget: einen Dollarbetrag über 0 eingeben.",
+    "budget_err_save": "Das Budget konnte nicht gespeichert werden. Bitte gleich erneut versuchen.",
+    "budget_month": "Diesen Monat: {spent} von {budget}{eur}",
+    "budget_eur": " ({spent} von {budget})",
+    "budget_near": "Claude-Monatsbudget zu {percent} % genutzt: {spent} von {budget}.",
+    "budget_over": "Claude-Monatsbudget erreicht: {spent} von {budget}. Jede Übersetzung erfordert jetzt eine Bestätigung.",
+    "budget_confirm_question": "Das Claude-Monatsbudget ist erreicht. Trotzdem mit Claude übersetzen (kostenpflichtig)?",
+    "budget_confirm_yes": "Ja, übersetzen",
+    "budget_confirm_no": "Abbrechen",
+    "budget_confirm_needed": "Das Claude-Monatsbudget ist erreicht: vor dem Übersetzen bestätigen.",
+    "stat_average": "Durchschnittskosten pro Übersetzung",
+    "average_note": "Durchschnittskosten aus {count, plural, one {# tatsächlichen Übersetzung} other {# tatsächlichen Übersetzungen}}."
   }
 }
